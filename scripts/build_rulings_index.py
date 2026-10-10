@@ -1253,6 +1253,188 @@ REGISTER: tuple = (
              "D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING; overridable. A page the "
              "allowlist refuses by its silence is admitted the same way.",
     ),
+    # THE LEDGER'S QUESTIONS, RULED 2026-10-10 (registered by lane K from the
+    # orchestrator's copy, byte-identical). Fifteen rulings; the document's
+    # sixth section points at lane NP's route and its thirteenth relays a
+    # question to the operator, so neither declares a ruling here.
+    Ruling(
+        id="CAPTURE-PRESS-UNDER-PROBE-RULE",
+        claim="A live-lane CAPTURE may press a disclosure control (a menu, a "
+              "folder, a filter panel, a list) or type into a SEARCH box, "
+              "never a composer or an editor, on a surface the press gate "
+              "refuses, when nothing is committed: no save, send, submit, "
+              "apply or confirm, and Escape closes what was opened. A shipped "
+              "tool still needs its own per-surface basis entry.",
+        binds="captures -- presses and typing on a surface the gate refuses",
+        document="_audit/2026-10-10-rulings-ledger-questions.md",
+        anchor="RULED: (orchestrator, 2026-10-10) CAPTURE-PRESS-UNDER-PROBE-RULE",
+        note="Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; "
+             "overridable. The capture is the evidence a tool's basis entry "
+             "is built from.",
+    ),
+    Ruling(
+        id="ARTICLE-COMPOSER-CAPTURE",
+        claim="One capture load of the article composer is permitted, with "
+              "nothing typed and nothing published; an empty draft it may "
+              "leave is his, private and deletable, and the capture records "
+              "whether one appeared.",
+        binds="captures -- the article composer",
+        document="_audit/2026-10-10-rulings-ledger-questions.md",
+        anchor="RULED: (orchestrator, 2026-10-10) ARTICLE-COMPOSER-CAPTURE",
+        note="Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; "
+             "overridable.",
+    ),
+    Ruling(
+        id="NO-INDEX-PINNED-JUDGEMENTS",
+        claim="A control is judged by its own accessible name and role, never "
+              "by its position; controls on his own profile go to capture "
+              "first, and label-based basis entries follow from it.",
+        binds="press gate -- how a control is judged",
+        document="_audit/2026-10-10-rulings-ledger-questions.md",
+        anchor="RULED: (orchestrator, 2026-10-10) NO-INDEX-PINNED-JUDGEMENTS",
+        note="Orchestrator's call; overridable. Session 7 saw LinkedIn move "
+             "structure under a recorded position.",
+    ),
+    Ruling(
+        id="CALLER-COMPOSITION-UNDER-D6",
+        claim="A row is discharged under D6-CAPABILITY-OVER-AFFORDANCE when "
+              "the caller can compose SHIPPED tools to deliver its payload, "
+              "with no server-side derived navigation; the row's cell names "
+              "the tools and their arguments, and its state is the weakest "
+              "of its parts.",
+        binds="census state -- rows a composition of shipped tools delivers",
+        document="_audit/2026-10-10-rulings-ledger-questions.md",
+        anchor="RULED: (orchestrator, 2026-10-10) CALLER-COMPOSITION-UNDER-D6",
+        note="Orchestrator's call applying D6-CAPABILITY-OVER-AFFORDANCE; "
+             "overridable.",
+    ),
+    Ruling(
+        id="CONTACT-IMPORT-STAYS-MANUAL",
+        claim="An address-book import or sync is not built: it uploads other "
+              "people's contact data and completes on another domain's "
+              "consent screen. EXCLUDED-RULED, reopened when he asks to "
+              "import or sync his address book.",
+        binds="writes -- importing or syncing his address book",
+        document="_audit/2026-10-10-rulings-ledger-questions.md",
+        anchor="RULED: (orchestrator, 2026-10-10) CONTACT-IMPORT-STAYS-MANUAL",
+        note="Orchestrator's call; overridable. Decides N 106, N 108 and "
+             "P N21.",
+    ),
+    Ruling(
+        id="SESSION-SURFACE",
+        claim="Reading the active-sessions list stays GAP, admissible only as "
+              "ONE named settings page after a capture proves the address is "
+              "the current settings page and that loading it changes nothing; "
+              "never through the legacy path. Signing out of sessions is "
+              "EXCLUDED-RULED, reopened when he names it.",
+        binds="reads and writes -- the active-sessions surface",
+        document="_audit/2026-10-10-rulings-ledger-questions.md",
+        anchor="RULED: (orchestrator, 2026-10-10) SESSION-SURFACE",
+        note="Orchestrator's call applying CREDENTIAL-SETTINGS-NEED-THE-OPERATOR; "
+             "overridable. Decides P N9 and P N10.",
+    ),
+    Ruling(
+        id="SIGN-IN-CHALLENGES-ARE-HIS",
+        claim="This server never answers a sign-in or account-recovery "
+              "challenge; password and second-factor entry are the operator's "
+              "own gate. EXCLUDED-RULED, reopened never by this server -- he "
+              "completes them himself.",
+        binds="reads and writes -- sign-in and recovery challenges",
+        document="_audit/2026-10-10-rulings-ledger-questions.md",
+        anchor="RULED: (orchestrator, 2026-10-10) SIGN-IN-CHALLENGES-ARE-HIS",
+        note="Orchestrator's call; overridable. Decides P N13 and P N14.",
+    ),
+    Ruling(
+        id="APPLY-FLOW-IS-THE-APPLICATION",
+        claim="Opening the Easy Apply flow is the first step of an "
+              "application, so its read stays refused; the daily-limit row "
+              "waits on the limit being reached.",
+        binds="read boundary -- the Easy Apply flow",
+        document="_audit/2026-10-10-rulings-ledger-questions.md",
+        anchor="RULED: (orchestrator, 2026-10-10) APPLY-FLOW-IS-THE-APPLICATION",
+        note="Orchestrator's call; overridable. Decides J 82.",
+    ),
+    Ruling(
+        id="THIRD-PARTY-TEXT-AT-RUNTIME",
+        claim="A post's own text and an organisation Page's prose are returned "
+              "at runtime as untrusted third-party text -- sanitised, bounded "
+              "in length, never stored -- under PEOPLE-DATA-MITIGATIONS; the "
+              "feed-content ruling still governs what is stored.",
+        binds="reads -- other people's text, returned at runtime",
+        document="_audit/2026-10-10-rulings-ledger-questions.md",
+        anchor="RULED: (orchestrator, 2026-10-10, applying the operator's "
+               "NAMES-AT-RUNTIME) THIRD-PARTY-TEXT-AT-RUNTIME",
+        note="Orchestrator's call applying NAMES-AT-RUNTIME; overridable. "
+             "Decides M C43 and J 110.",
+    ),
+    Ruling(
+        id="FIXED-UI-LABEL-MATCH",
+        claim="The people search's Actively-hiring filter is matched by its "
+              "exact LinkedIn UI label, a fixed product string, with a control "
+              "showing a near-miss label is refused.",
+        binds="reads -- one search filter matched by its product label",
+        document="_audit/2026-10-10-rulings-ledger-questions.md",
+        anchor="RULED: (orchestrator, 2026-10-10) FIXED-UI-LABEL-MATCH",
+        note="Orchestrator's call; overridable. Decides N 82.",
+    ),
+    Ruling(
+        id="GEOLOCATION-BY-D6",
+        claim="No browser geolocation permission is granted; searching jobs "
+              "near him moves under D6 on the shipped location-parameter "
+              "search, by the row's own bar.",
+        binds="census state -- searching from his current location",
+        document="_audit/2026-10-10-rulings-ledger-questions.md",
+        anchor="RULED: (orchestrator, 2026-10-10) GEOLOCATION-BY-D6",
+        note="Orchestrator's call applying D6-CAPABILITY-OVER-AFFORDANCE; "
+             "overridable. Decides J 17.",
+    ),
+    Ruling(
+        id="P-A9-CANNOT-DELIVER",
+        claim="The additional name's visibility is COVERED-CANNOT-DELIVER on "
+              "the P A2 / P A4 precedent: its two switches carry the same "
+              "label, so no route can aim one; reopened when LinkedIn draws a "
+              "distinguishing name.",
+        binds="census state -- P A9",
+        document="_audit/2026-10-10-rulings-ledger-questions.md",
+        anchor="RULED: (orchestrator, 2026-10-10) P-A9-CANNOT-DELIVER",
+        note="Orchestrator's call; overridable. Measured on session 7's "
+             "editor skeleton.",
+    ),
+    Ruling(
+        id="P-D29-BUILT-BEHIND-THE-GRANT",
+        claim="Adding a LinkedIn Learning certificate to his profile is built "
+              "behind the grant under EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS "
+              "and never live-proven unless he names a certificate to add.",
+        binds="writes -- P D29",
+        document="_audit/2026-10-10-rulings-ledger-questions.md",
+        anchor="RULED: (orchestrator, 2026-10-10) P-D29-BUILT-BEHIND-THE-GRANT",
+        note="Orchestrator's call; overridable.",
+    ),
+    Ruling(
+        id="SAFETY-REPORTS-STAY-MANUAL",
+        claim="A harassment or safety report, an accusation filed through an "
+              "off-product Help Center form, is not built: EXCLUDED-RULED, "
+              "reopened when an in-product structured report exists or he "
+              "names one.",
+        binds="writes -- safety reports",
+        document="_audit/2026-10-10-rulings-ledger-questions.md",
+        anchor="RULED: (orchestrator, 2026-10-10) SAFETY-REPORTS-STAY-MANUAL",
+        note="Orchestrator's call; overridable. Decides N 152.",
+    ),
+    Ruling(
+        id="OUTSIDE-THE-PRODUCT-PURPOSE",
+        claim="A row whose capability serves neither his job search nor his "
+              "professional presence is EXCLUDED-RULED, reopened when he asks "
+              "for it -- unless its own cell shows it tunes his job "
+              "recommendations or his search.",
+        binds="census state -- rows outside the product's purpose",
+        document="_audit/2026-10-10-rulings-ledger-questions.md",
+        anchor="RULED: (orchestrator, 2026-10-10, applying the operator's rule "
+               "that every feature must serve the product's core purpose) "
+               "OUTSIDE-THE-PRODUCT-PURPOSE",
+        note="Orchestrator's call applying the operator's rule that every "
+             "feature must serve the product's core purpose; overridable.",
+    ),
 
     # LANE NP, 2026-10-10: the orchestrator's APPLICATION of the ruling above
     # to that same profile's own detail pages -- one address shape, for the
@@ -1271,6 +1453,33 @@ REGISTER: tuple = (
         note="Orchestrator's application of NAMED-PROFILE-READ-BEHIND-A-GRANT; "
              "overridable. Admitted for the four detail sections measured on his "
              "own profile; N 178 and N 65 wait on the Interests page's capture.",
+    ),
+    # THE OPERATOR'S UPLOAD DECISION, REGISTERED 2026-10-10 BY LANE U. It was
+    # made 2026-09-04 and landed in 615a5c4, and until this entry the register
+    # had no line for it. NO COMMITTED SOURCE RECORDS HIS WORDS: the commit
+    # and the decides document both report the decision in their authors' own
+    # words, so it is registered on that record and on nothing more. Its
+    # anchor is the decides document's section 1 heading, which is why the
+    # date column prints 2026-09-20 -- the record's date, not the decision's.
+    Ruling(
+        id="FILE-UPLOAD-OPENED",
+        claim="This server may upload a file from this machine: the operator "
+              "opened file upload on 2026-09-04, in full -- profile photo, "
+              "post media and message attachments. The browser's upload verb "
+              "joined SANCTIONED_MUTATIONS in 615a5c4. "
+              "The FILE-UPLOAD-UNSANCTIONED blocker retires and its rows do "
+              "not: each still needs a performable verb and a captured file "
+              "input on its own surface. No extension allowlist -- one would "
+              "narrow his decision.",
+        binds="writes -- uploading a file from this machine",
+        document="_audit/2026-09-20-the-decides.md",
+        anchor="DECIDED, 2026-09-04, BY THE OPERATOR. THE BLOCKER RETIRES; "
+               "THE 15 ROWS DO NOT.",
+        aliases=("FILE-UPLOAD-UNSANCTIONED", "the upload sanction"),
+        note="THE OPERATOR'S decision, made 2026-09-04. No committed source "
+             "records his words: it is recorded by 615a5c4 and "
+             "_audit/2026-09-20-the-decides.md section 1, and registered on "
+             "that record. The date shown is the record's, 2026-09-20.",
     ),
 )
 

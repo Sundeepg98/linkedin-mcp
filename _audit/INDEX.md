@@ -27,8 +27,8 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 266 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 226 |
+| audit documents git tracks under `_audit` | 268 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 228 |
 | distinct dates | 19 |
 | documents with no level-1 heading | 2 |
 | `CORRECTS:` marker lines | 124 |
@@ -39,7 +39,7 @@ are listed as `(undated)`; no date is taken from git history, because
 | documents at either end of a cross-document edge | 101 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
-| documents no correction marker touches at all | 163 |
+| documents no correction marker touches at all | 165 |
 | blockquoted markers naming ANOTHER document | 0 |
 | edges missing one of their two markers | 0 |
 | edges declared a different number of times in each direction | 2 |
@@ -1815,12 +1815,14 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-27 | [2026-09-27-rulings-previews-and-receipts.md](2026-09-27-rulings-previews-and-receipts.md) | Ruling, 2026-09-27: a preview names whom the tool resolved |  |
 | 2026-09-27 | [2026-09-27-rulings-relation-removals-and-account-destruction.md](2026-09-27-rulings-relation-removals-and-account-destruction.md) | Rulings, 2026-09-27: removing a relation, and destroying the account |  |
 | 2026-09-28 | [2026-09-28-lane-k-ledger.md](2026-09-28-lane-k-ledger.md) | Lane K: the next-step ledger and the capture queue |  |
+| 2026-09-28 | [2026-09-28-lane-u-uploads.md](2026-09-28-lane-u-uploads.md) | Lane U: uploads -- the decision registered, the rows relabelled, the verb made performable |  |
 | 2026-09-28 | [2026-09-28-rulings-build-classes.md](2026-09-28-rulings-build-classes.md) | Rulings, 2026-09-28: the classes the census still leaves undecided |  |
 | 2026-09-28 | [2026-09-28-rulings-named-profile-read.md](2026-09-28-rulings-named-profile-read.md) | Ruling, 2026-09-28: reading a profile he names |  |
 | 2026-10-10 | [2026-10-10-lane-b3-messaging-build.md](2026-10-10-lane-b3-messaging-build.md) | Lane B3, 2026-10-10: messaging and content -- one item's words read, two session-1 pages read, and the rest held by what was measured |  |
 | 2026-10-10 | [2026-10-10-lane-ci-fastlane.md](2026-10-10-lane-ci-fastlane.md) | Lane CI fast lane (lci-fastlane-lead), 2026-10-10 |  |
 | 2026-10-10 | [2026-10-10-lane-g2-debts.md](2026-10-10-lane-g2-debts.md) | Lane G2 -- queued debts: a red instrument made green in its records, a reader guard that took a refusal tally for success, a post record |  |
 | 2026-10-10 | [2026-10-10-lane-np-named-profile.md](2026-10-10-lane-np-named-profile.md) | Lane NP, 2026-10-10: the named profile's handles, its detail pages, the reaction's inverse, and a restore that can clear |  |
+| 2026-10-10 | [2026-10-10-rulings-ledger-questions.md](2026-10-10-rulings-ledger-questions.md) | Rulings, 2026-10-10: the ledger's questions |  |
 | 2026-10-10 | [2026-10-10-rulings-named-profile-detail-pages.md](2026-10-10-rulings-named-profile-detail-pages.md) | Ruling, 2026-10-10: the detail pages of a profile he names |  |
 
 ## 6. What the scan rejected, could not join, or had to repair

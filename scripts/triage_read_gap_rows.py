@@ -136,9 +136,9 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
     "P H11": ("ADDRESS", "ABSENT", "the services detail address is unadmitted; "
                                    "the phrase is in an EXCLUSION set on the "
                                    "topcard path, discarded before parsing"),
-    "P J4": ("PRESS", "", "the hiring state is behind the Open-to menu; two "
-                          "independent measurements read the hiring control "
-                          "NAMED BUT INERT and the opener AMBIGUOUS"),
+    # `P J4` (the #Hiring state, PRESS) LEFT GAP 2026-10-10: EXCLUDED-RULED on
+    # OUTSIDE-THE-PRODUCT-PURPOSE (lane K, `_audit/2026-09-28-lane-k-ledger.md`
+    # s12), so its line goes, as a line whose row left GAP must.
     "P K8": ("SERVED", "", "measured live at allowlist +0 on an instrument "
                            "shown able to disagree with itself: no such badge "
                            "is drawn on this account"),
@@ -317,7 +317,8 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
     "P M4": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
     "P M5": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
     "P N9": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
-    "P N13": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
+    # `P N13` LEFT GAP 2026-10-10: EXCLUDED-RULED on SIGN-IN-CHALLENGES-ARE-HIS
+    # (lane K, `_audit/2026-09-28-lane-k-ledger.md` s12).
     "P N22": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
     "P O22": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
     "P D26": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),

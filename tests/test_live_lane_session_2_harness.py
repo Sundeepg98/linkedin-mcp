@@ -623,7 +623,14 @@ def test_a_non_ascii_word_survives_the_copy_as_a_reference() -> None:
 #: Each session's tracked copies, by directory: session 2's 27 skeletons and
 #: his settings page; session 3's 13 and the same page again; session 4's 4
 #: and session 5's 1 (no settings page was read raw in either).
-LIVE_FIXTURE_COUNTS = {"live2": 28, "live3": 14, "live4": 4, "live5": 1}
+#: `live8` (lane U, 2026-10-10): ONE copy, the messaging page's new-message
+#: composer from session 8's `lk_thread` load, written NOT by
+#: `--export-fixtures` but by `scripts/_build_live8_composer_fixture.py`
+#: through this harness's own `tracked_copy`, after putting back the two
+#: `accept` declarations recorded live on 2026-09-05 where the skeleton's
+#: shape of each matched exactly. The same checks below hold for it. A later
+#: `--export-fixtures` of session 8 lands beside it and moves this count.
+LIVE_FIXTURE_COUNTS = {"live2": 28, "live3": 14, "live4": 4, "live5": 1, "live8": 1}
 
 
 @pytest.mark.parametrize("session_dir", sorted(LIVE_FIXTURE_COUNTS))

@@ -749,6 +749,10 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         # on the lane's branch): the reply inside a conversation he names
         # (census M M10), sanctioned and performable in the same move.
         "send_reply",
+        # LANE U, 2026-10-10: one file into one conversation he names (census
+        # M M14 / M15 / M18), sanctioned and performable in the same move, on
+        # the reply's own address and a file input aimed on a real capture.
+        "send_attachment",
         # SEVENTEEN FROM LANE L8'S MERGE OF MASTER, 2026-09-27 (sixteen on the
         # lane's branch): leaving one group (census rows M C63 / N 64),
         # sanctioned and performable in the same move, under
@@ -879,6 +883,14 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         # the click are perform()'s own -- and the thread address was
         # already on the read allowlist.
         "send_reply",
+        # LANE U, 2026-10-10: the FIRST WRITE THAT HANDS A BROWSER A FILE --
+        # one file into one conversation he names, its bytes read once,
+        # compared with the preview's digest and handed over as a payload,
+        # Send pressed only when the form draws the file's name exactly once.
+        # NOTHING WAS PERMITTED TO LET IT CROSS: the hand-off is perform()'s
+        # one set_input_files, sanctioned 2026-09-04, and the press its one
+        # click; readonly.SANCTIONED_MUTATIONS is unchanged.
+        "send_attachment",
         # THE SIXTEENTH, 2026-09-27 (census rows M C63 / N 64, lane L8; the
         # fifteenth on its branch until its merge of master brought send_reply):
         # leaving one group he names by numeric id, on the /groups/ root. TWO
@@ -1394,6 +1406,10 @@ _UNMEASURED_REVERSIBILITY = {
     # BEHIND-GRANTS) and restated at lane L8's merge of master: no delete is
     # built, and a delivered reply is not recalled from an inbox either way.
     "send_reply",
+    # 2026-10-10 (lane U). Whether LinkedIn lets a sent attachment be
+    # recalled has never been observed; no delete is built, and a file the
+    # person downloaded is not recalled by anything.
+    "send_attachment",
     # 2026-09-27 (census rows M C63 / N 64). No rejoin has ever been observed
     # and nothing here joins a group; its spec treats it as irreversible.
     "withdraw_from_group",
@@ -1422,6 +1438,7 @@ REVERSIBILITY_CLASS = {
     "update_setting": "STILL-UNKNOWN",
     "send_invitation": "STILL-UNKNOWN",
     "send_reply": "STILL-UNKNOWN",
+    "send_attachment": "STILL-UNKNOWN",
     # THE ONE THAT IS NOT, and it is the whole reason this table is per-action
     # rather than a claim about the set. apply_job is STILL-UNKNOWN because the
     # surface that would settle it -- his applied list -- is empty, so there is
@@ -1471,6 +1488,7 @@ REVERSIBILITY_MEASURED = {
     "follow_company_page": True,
     "mark_company_interest": False,
     "send_reply": False,
+    "send_attachment": False,
     "withdraw_from_group": False,
     "connect_from_profile": False,
     "message_from_profile": False,

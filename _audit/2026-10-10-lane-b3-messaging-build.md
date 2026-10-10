@@ -30,14 +30,17 @@ THE BRIEF'S SIXTEEN ROWS, each `next=BUILD` in lane K's ledger:
 
 ## 1. Two things disk said that the brief did not
 
-1. THE 2026-10-10 LEDGER RULINGS ARE NOT ON MASTER. The standing rules say
-   every registered ruling, "the 2026-10-10 ledger rulings" included, is in
-   `_audit/RULINGS.md` on master. At 15:16 and again at 15:20 origin/master
-   was `f93104c`, and its register holds no `THIRD-PARTY-TEXT-AT-RUNTIME`.
-   The ruling is registered on lane K's branch (`865e57f`, "rulings: register
-   the orchestrator's rulings on lane K's ledger questions"), and its text is
-   in `_state/rulings/2026-10-10-rulings-ledger-questions.md`. `M C43` cites
-   it by id; lane K's branch must reach master before, or with, this one.
+1. THE 2026-10-10 LEDGER RULINGS WERE NOT ON MASTER WHEN THE LANE STARTED.
+   The standing rules say every registered ruling, "the 2026-10-10 ledger
+   rulings" included, is in `_audit/RULINGS.md` on master. At 15:16 and again
+   at 15:20 origin/master was `f93104c`, and its register held no
+   `THIRD-PARTY-TEXT-AT-RUNTIME`; the ruling was registered on lane K's branch
+   (`865e57f`) and its text was in
+   `_state/rulings/2026-10-10-rulings-ledger-questions.md`. By 16:30 master
+   had moved 35 commits (lane K's application of the rulings, lane U's
+   attachments, the CI lane's last items) and its register holds the ruling;
+   this lane merged that master (`0103810`), so the id `M C43` cites resolves
+   on this branch.
 2. THE SESSION-8 "THREAD" IS THE NEW-MESSAGE COMPOSER. Lane U measured it
    (its builder's docstring: "the NEW-MESSAGE composer in its detail pane --
    the heading 'New message', one recipient typeahead, no message list"), and
@@ -263,18 +266,28 @@ notification key. A target chosen by position is the page supplying it
 
 ## 5. Pins re-derived, on measured values
 
-`scripts/census_completion.py` after the move, measured, never summed:
+`scripts/census_completion.py` after the move, measured, never summed -- on
+the branch, and again on the tree merged with master `0103810` (lanes K and U
+had moved their own rows in between; C43 moves the same seven figures by one
+each on both):
 
-    adjudicated      186 -> 187        delivered_broad  130 -> 131
-    b1_no_ruling       9 -> 10         gap              585 -> 584
-    b3_admitted       43 -> 42         gap_read          98 -> 97
-    unfired           21 -> 22
+    figure           branch (base f93104c)   merged with 0103810
+    adjudicated      186 -> 187              213 -> 214
+    b1_no_ruling       9 -> 10                 9 -> 10
+    b3_admitted       43 -> 42                41 -> 40
+    delivered_broad  130 -> 131              135 -> 136
+    gap              585 -> 584              558 -> 557
+    gap_read          98 -> 97                92 -> 91
+    unfired           21 -> 22                24 -> 25
 
 and `PINNED_B1_ROWS` gains `M C43` under NO RULING. It ends "every headline
 figure matches its pin". `tests/test_triage_instrument.py` gains
-`AFTER_LANE_B3_ITEM_TEXT = (129, {"R": 15, ...})`; the 2026-09-20 report's
-own headline is left as the history it is. The tool-count sites moved
-together, measured off `mcp.list_tools()`: 62 tools, 45 reads, 17 writes.
+`AFTER_LANE_B3_ITEM_TEXT` -- (129, R 15) on the branch, (122, R 12) merged;
+the 2026-09-20 report's own headline is left as the history it is. The
+tool-count sites moved together, measured off `mcp.list_tools()`: 62 tools,
+45 reads, 17 writes on the branch; 63 tools, 45 reads, 18 writes merged (lane
+U's `linkedin_send_attachment` is a write); the surface pin 63 tools and 101
+parameters.
 `tests/reader_leak_baseline.json` gains `item_text:read_item_text:
 returns_records` and `tests/tool_envelope_baseline.json`
 `linkedin_read_item_text: not_driven:never read the page` -- each driven

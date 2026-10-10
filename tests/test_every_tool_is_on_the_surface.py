@@ -353,8 +353,13 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # linkedin_read_named_profile (ruling NAMED-PROFILE-READ-BEHIND-A-GRANT;
     # census N 178 stays GAP on its capture), measured off the registry and
     # moved with every other count site in the same commit.
-    # SIXTY-TWO ON LANE B3, 2026-10-10: one READ, linkedin_read_item_text
-    # (ruling THIRD-PARTY-TEXT-AT-RUNTIME; census M C43 COVERED-UNFIRED),
-    # measured off the registry and moved with every other count site in the
-    # same commit.
-    assert len(_tool_names()) == 62
+    # SIXTY-TWO ON LANE U'S BRANCH, 2026-10-10: one WRITE,
+    # linkedin_send_attachment (ruling FILE-UPLOAD-OPENED; census M M14, M15,
+    # M18 stayed GAP on two captures, then moved to COVERED-UNFIRED the same
+    # day on the session-8 capture), measured off the branch's registry and
+    # moved with every other count site in the same commit.
+    # SIXTY-THREE AT LANE B3'S MERGE OF MASTER 0103810, 2026-10-10: one READ,
+    # linkedin_read_item_text (ruling THIRD-PARTY-TEXT-AT-RUNTIME; census M C43
+    # COVERED-UNFIRED), on top of master's sixty-two -- measured off the merged
+    # registry, not summed, and moved with every other count site.
+    assert len(_tool_names()) == 63

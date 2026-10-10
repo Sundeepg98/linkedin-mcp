@@ -142,6 +142,8 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
         "limit", "location", "locations", "remote", "sort_by", "start",
         "under_ten_applicants",
     ),
+    # 2026-10-10, lane U: one file into one conversation he names.
+    "linkedin_send_attachment": ("confirm_token", "file", "thread_id"),
     # ``member`` -> ``profile`` on 2026-09-27 (lane L5, the orchestrator's
     # order of 23:36): aimed by the person's profile link, never a name.
     # Census N 1 keeps its state; its note records the new aim.
@@ -485,14 +487,36 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: The read's two new fields (`member_token`, `activity_items`) are not
 #: parameters; `N 30`, `N 85`, `N 172`, `N 31` and `M C32` move only when proven
 #: live.
-#: **RE-PINNED 2026-10-10 AT 62 TOOLS AND 98 PARAMETERS on lane B3 (ruling
-#: THIRD-PARTY-TEXT-AT-RUNTIME): one tool, one parameter --
-#: `linkedin_read_item_text(item)`, ONE item's own words off its permalink,
-#: inside one people_data.Post record.** THE CENSUS DECISION, in the same
-#: commit: `M C43` GAP -> COVERED-UNFIRED on it. Never fired. See
+#: **RE-PINNED 2026-10-10 AT 62 TOOLS AND 99 PARAMETERS on lane U's branch
+#: (ruling FILE-UPLOAD-OPENED): one WRITE,
+#: `linkedin_send_attachment(thread_id, file, confirm_token)` -- one file from
+#: the declared upload root into one conversation he names, behind the
+#: single-use grant.** THE CENSUS DECISION, in the same commit: `M M14`,
+#: `M M15` and `M M18` STAY GAP -- the file input is aimed on a real capture,
+#: but no capture shows a composer holding an attachment or a sent
+#: attachment message, so the read-back and the verification are aimed at
+#: the file's name rather than at markup; each row waits on its capture
+#: (U-REPLY-ATTACHMENT-SENT and -PENDING). No other row moves. See
+#: `_audit/2026-09-28-lane-u-uploads.md`, section 5.
+#: THE THREE ROWS MOVED LATER THE SAME DAY, with no change to the surface:
+#: GAP -> COVERED-UNFIRED on the live lane's session-8 capture of the
+#: composer's footer, each row aimed at its own input there; the read-back
+#: and the verification stay aimed at the file's name, and refuse otherwise.
+#: **RE-PINNED AT THE MERGE OF MASTER f8c7392 INTO LANE U, 2026-10-10: 62
+#: TOOLS AND 100 PARAMETERS.** The two re-pins above meet here: lane NP's one
+#: parameter (96 -> 97, no tool) and lane U's one tool with its three
+#: parameters (61 -> 62 tools, 96 -> 99). Neither moved the other's entry, so
+#: the sum holds: 61 + 1 tools, 96 + 1 + 3 parameters.
+#: **RE-PINNED AT LANE B3'S MERGE OF MASTER 0103810, 2026-10-10: 63 TOOLS
+#: AND 101 PARAMETERS (ruling THIRD-PARTY-TEXT-AT-RUNTIME).** Lane B3's
+#: branch had re-pinned 62 and 98: one READ, `linkedin_read_item_text(item)`,
+#: ONE item's own words off its permalink inside one people_data.Post record.
+#: THE CENSUS DECISION, in the commit that built it: `M C43` GAP ->
+#: COVERED-UNFIRED on it, never fired. Neither side moved the other's
+#: entry, so the sum holds: 62 + 1 tools, 100 + 1 parameters. See
 #: `_audit/2026-10-10-lane-b3-messaging-build.md`.
-PINNED_TOOL_COUNT = 62
-PINNED_PARAMETER_COUNT = 98
+PINNED_TOOL_COUNT = 63
+PINNED_PARAMETER_COUNT = 101
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:
