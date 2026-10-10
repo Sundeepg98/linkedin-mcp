@@ -3,8 +3,19 @@
 An MCP server that shows you your own LinkedIn account data as structured tool
 results instead of pages you have to click through.
 
-**Sixty-one tools ship. Forty-four read. Seventeen write. None is
+**Sixty-two tools ship. Forty-four read. Eighteen write. None is
 write-shaped and unable to act.**
+
+**THAT LINE READ "Sixty-one ... Forty-four read. Seventeen write" UNTIL LANE
+U'S BRANCH, 2026-10-10** (ruling FILE-UPLOAD-OPENED, the operator's decision
+of 2026-09-04). One write arrived: `linkedin_send_attachment` sends ONE file
+from your upload directory, as an attachment, into ONE conversation you name
+by thread id. Its first call attaches nothing: it names the file, its exact
+size, the type its bytes declare and who it would reach. On confirm the file
+is read once, compared with what you were shown, and those bytes are handed
+over; Send is pressed only if the conversation's form draws the file's name
+exactly once. Census rows `M M14`, `M M15` and `M M18` are COVERED-UNFIRED:
+built and never fired, held until you name the conversation and the file.
 
 **THAT LINE READ "Sixty ... Forty-three read. Seventeen write" UNTIL THE
 OPERATOR'S RULING OF 2026-09-28 08:01** (NAMED-PROFILE-READ-BEHIND-A-GRANT).
@@ -656,8 +667,8 @@ renumbering. A read that changes something has to say so:
    none of them opens a conversation LinkedIn chooses:**
    `linkedin_list_conversations` (the composer's list, which opens none),
    `linkedin_messaging_presence` (the empty composer's suggestions, which
-   opens none), `linkedin_open_thread` and `linkedin_send_reply` (only the
-   conversation you name by id). Whether any of those loads clears the
+   opens none), `linkedin_open_thread`, `linkedin_send_reply` and
+   `linkedin_send_attachment` (only the conversation you name by id). Whether any of those loads clears the
    messaging badge is
    unmeasured.
 4. **Three census surfaces may cost something merely by being opened**, and
@@ -984,7 +995,7 @@ linkedin_server/
   cdp_bridge.py              the recovery path: attach to a running Chrome
   dom.py                     the read-only harvesters and the control readers
   shape.py                   pure parsers and the result envelope
-  server.py                  the sixty-one tools
+  server.py                  the sixty-two tools
   errors.py
 tests/                       1393 tests, no network, no account
   fixtures/                  frozen LinkedIn markup, scrubbed

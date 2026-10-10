@@ -117,6 +117,13 @@ TARGET_CLASSES: dict[str, str] = {
         "a person's profile link or member id the caller supplies, and his "
         "own words"
     ),
+    # ADDED BY LANE U (2026-10-10), for send_attachment: an identifier the
+    # caller supplies and a FILE he put in the declared upload root -- not
+    # his words, and not a person.
+    "id_and_own_file": (
+        "an identifier the caller supplies, and a file of his own from the "
+        "declared upload root"
+    ),
     NAME_CLASS: "a word for a person, matched against what the page draws",
 }
 
@@ -157,6 +164,10 @@ TARGET_KIND_CLASS: dict[str, tuple[str, str]] = {
     "thread_and_text": (
         "id_and_own_text",
         "send_reply: a thread id the caller supplies, shape-checked, never read off a page",
+    ),
+    "thread_and_file": (
+        "id_and_own_file",
+        "send_attachment: the same thread id, and a file in the declared root, held root-relative",
     ),
     "group_id": (
         "id",

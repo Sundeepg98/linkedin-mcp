@@ -65,9 +65,11 @@ job, company, member or item on LinkedIn is addressed by any of them.
 
 from __future__ import annotations
 
+import pathlib
+import tempfile
 from typing import Any, Optional
 
-from linkedin_server import writes
+from linkedin_server import config, writes
 
 #: The raw target for each ``target_kind``, before the server normalises it.
 #:
@@ -126,7 +128,33 @@ SYNTHETIC_RAW_TARGETS: dict[str, Any] = {
         "profile": "https://www.linkedin.com/in/example-harness-person/",
         "text": "example-harness-message-text",
     },
+    # A CONVERSATION AND A FILE (``send_attachment``, lane U, 2026-10-10).
+    # The file half is checked against the DECLARED UPLOAD ROOT by every
+    # property of ``uploads`` and canonicalised root-relative, so the name
+    # must exist in a real root when ``_target_for`` runs: see
+    # :func:`synthetic_target`. Missing, this row would stop every writes
+    # reader being driven for ANY spec, as the rows above record.
+    "thread_and_file": {
+        "thread": "2-SYNTHETICHARNESSTHREAD==",
+        "file": "example-harness-file.png",
+    },
 }
+
+#: The harness's own upload root, made once per process on first use and
+#: holding the one file the ``thread_and_file`` row names. A TEMP directory,
+#: never the operator's: an offline harness has no declared root of its own.
+_HARNESS_ROOT: Optional[pathlib.Path] = None
+
+
+def _harness_upload_root() -> pathlib.Path:
+    global _HARNESS_ROOT
+    if _HARNESS_ROOT is None:
+        root = pathlib.Path(tempfile.mkdtemp(prefix="harness-uploads-"))
+        (root / "example-harness-file.png").write_bytes(
+            bytes([0x89]) + b"PNG-harness-example"
+        )
+        _HARNESS_ROOT = root
+    return _HARNESS_ROOT
 
 
 class RefusingGrant(writes.WriteGrant):
@@ -147,8 +175,25 @@ class RefusingGrant(writes.WriteGrant):
 
 
 def synthetic_target(spec: writes.WriteSpec) -> str:
-    """The canonical target for ``spec``, normalised by the server itself."""
-    return writes._target_for(spec, SYNTHETIC_RAW_TARGETS[spec.target_kind])
+    """The canonical target for ``spec``, normalised by the server itself.
+
+    A FILE KIND IS NORMALISED AGAINST THE HARNESS'S OWN ROOT (lane U): the
+    declared root is pointed at it for the one call and restored at once, so
+    the canonical form is the server's -- the thread id and the root-relative
+    name -- and nothing outside this call sees the change. A reader later
+    driven with that target resolves the file against whatever root is
+    declared THEN; where none holds it, that variant raises and is ranked
+    below any variant that ran (``_worst``), so it cannot pass for clean.
+    """
+    raw = SYNTHETIC_RAW_TARGETS[spec.target_kind]
+    if spec.target_kind == "thread_and_file":
+        declared = config.UPLOAD_ROOT
+        config.UPLOAD_ROOT = _harness_upload_root()
+        try:
+            return writes._target_for(spec, raw)
+        finally:
+            config.UPLOAD_ROOT = declared
+    return writes._target_for(spec, raw)
 
 
 def grant_for(spec: writes.WriteSpec) -> RefusingGrant:
