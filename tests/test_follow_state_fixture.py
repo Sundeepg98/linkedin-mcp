@@ -361,7 +361,10 @@ async def test_a_page_that_did_render_is_answered_following(which):
     verdict = shape.followed_page_state(name, parsed)
     assert verdict["state"] == "following"
     assert verdict["matched"]["name"] == name
-    assert repr(name) in verdict["why"]
+    # THE NAME IS NOT QUOTED (2026-10-10, the orchestrator's ruling): it is the
+    # string the Page's button carries, and it leaves only in the organisation
+    # record ``writes._read_followed_state`` builds from ``matched``.
+    assert name not in verdict["why"], verdict["why"]
 
 
 @pytest.mark.parametrize("which", BOTH_PAGE_RENDERS)

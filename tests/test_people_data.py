@@ -431,6 +431,69 @@ def test_the_page_string_guard_admits_a_posts_words_only_inside_the_record():
 
 
 # ---------------------------------------------------------------------------
+# An organisation (2026-10-10, lane G2): a followed Page's name and address
+# ---------------------------------------------------------------------------
+
+
+def test_an_organisation_is_its_name_and_its_numeric_page():
+    assert [f.name for f in dataclasses.fields(pd.Organisation)] == ["name", "link"]
+    organisation = pd.Organisation.from_page(name="  Synthetic\u200b  Works ", href="/company/12345/")
+    assert organisation == pd.Organisation(
+        name="Synthetic Works", link="https://www.linkedin.com/company/12345/"
+    )
+    with pytest.raises((AttributeError, TypeError)):
+        organisation.extra = "anything"  # type: ignore[attr-defined]
+    with pytest.raises(dataclasses.FrozenInstanceError):
+        organisation.name = "changed"  # type: ignore[misc]
+
+
+@pytest.mark.parametrize("href, expected", [
+    ("/company/12345/", "https://www.linkedin.com/company/12345/"),
+    ("https://www.linkedin.com/company/12345/life/?trk=x#top", "https://www.linkedin.com/company/12345/"),
+    ("https://linkedin.com/company/12345", "https://www.linkedin.com/company/12345/"),
+    ("https://www.linkedin.com/company/example-works/", None),
+    ("https://example.com/company/12345/", None),
+    ("/in/example-viewer-0a1b2c/", None),
+    ("javascript:alert(1)", None),
+    (None, None),
+])
+def test_an_organisation_link_is_its_numeric_page_or_nothing(href, expected):
+    assert pd.canonical_organisation_link(href) == expected
+
+
+@pytest.mark.parametrize("build", [
+    lambda: pd.Organisation(name=""),
+    lambda: pd.Organisation(name="Synthetic\u200bWorks"),
+    lambda: pd.Organisation(name="x" * 300),
+    lambda: pd.Organisation(name="Synthetic Works", link="https://www.linkedin.com/company/example-works/"),
+    lambda: pd.Organisation(name="Synthetic Works", link="/company/12345/"),
+])
+def test_an_unsanitised_organisation_cannot_be_built(build):
+    with pytest.raises(ValueError):
+        build()
+
+
+def test_an_organisation_with_no_visible_name_is_no_organisation():
+    assert pd.Organisation.from_page(name=None, href="/company/12345/") is None
+    assert pd.Organisation.from_page(name="\u200b\u202e \t") is None
+    assert len(pd.Organisation.from_page(name="x" * 4000).name) == pd.CAPS["title"]
+
+
+def test_an_organisation_envelope_round_trips_and_a_bent_one_is_not_a_record():
+    organisation = pd.Organisation.from_page(name="Synthetic Works", href="/company/12345/")
+    envelope = organisation.envelope()
+    assert set(envelope) == pd.ORGANISATION_SHAPE
+    assert pd.as_record(envelope) == organisation
+    # Its own key set: an organisation is never read as a group or an event.
+    assert type(pd.as_record(envelope)) is pd.Organisation
+    assert pd.Organisation in pd.RECORD_TYPES
+    assert pd.text_fields(envelope) == frozenset({"organisation"})
+    assert pd.as_record(dict(envelope, note="a page string riding along")) is None
+    assert pd.as_record({k: v for k, v in envelope.items() if k != pd.UNTRUSTED_KEY}) is None
+    assert pd.as_record(dict(envelope, organisation="Synthetic\u200bWorks")) is None
+
+
+# ---------------------------------------------------------------------------
 # Visible only
 # ---------------------------------------------------------------------------
 

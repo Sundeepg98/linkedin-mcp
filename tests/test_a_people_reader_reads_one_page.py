@@ -162,7 +162,7 @@ PACKAGE = ROOT / "linkedin_server"
 #: The record classes. A function whose body references one through
 #: ``people_data`` builds records. Held equal to ``people_data.RECORD_TYPES``
 #: by :func:`test_every_record_type_is_a_record_class_here`.
-RECORD_CLASSES = frozenset({"Person", "Group", "Event", "Post"})
+RECORD_CLASSES = frozenset({"Person", "Group", "Event", "Post", "Organisation"})
 
 
 def test_every_record_type_is_a_record_class_here():
@@ -254,11 +254,18 @@ WRITE_DOOR: "Key" = ("server", "_write_tool")
 #:   through ``threads.list_result``, and the stop does not hide it from that
 #:   path: the list tool is still derived a people reader
 #:   (``test_the_write_door_stops_only_itself`` holds the stop to itself).
+#: * ``("writes", "_read_followed_state")`` -- the unfollow's preview and its
+#:   verification read the Manage Pages row, and since 2026-10-10 (lane G2,
+#:   on the orchestrator's ruling) the followed Page's name leaves that read
+#:   only as an organisation record. Measured behind the door and only
+#:   there: the unfollow is a write tool, so no read tool is derived through
+#:   it.
 PREVIEW_BUILDERS: FrozenSet["Key"] = frozenset(
     {
         ("people_seam", "person"),
         ("threads", "name_the_reply_recipient"),
         ("threads", "conversation_with"),
+        ("writes", "_read_followed_state"),
     }
 )
 

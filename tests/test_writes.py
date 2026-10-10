@@ -4372,7 +4372,14 @@ async def test_an_unfollow_that_took_reports_true_and_names_both_totals(
     assert FOLLOWED_COMPANY in block["clicked"]["selector"]
 
     # The company he can CHECK is named; the id he cannot check is beside it.
-    assert block["target"]["company"] == FOLLOWED_COMPANY_NAME
+    # THE NAME TRAVELS AS A RECORD since 2026-10-10 (the orchestrator's
+    # ruling): the organisation record, marked as LinkedIn's text, its link
+    # the Page's canonical address.
+    from linkedin_server import people_data
+
+    company = people_data.as_record(block["target"]["company"])
+    assert isinstance(company, people_data.Organisation), block["target"]["company"]
+    assert company.name == FOLLOWED_COMPANY_NAME
     assert block["target"]["company_id"] == FOLLOWED_COMPANY
     assert "job_id" not in block["target"]
 
