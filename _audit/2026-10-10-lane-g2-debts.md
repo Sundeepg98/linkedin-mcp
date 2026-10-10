@@ -16,7 +16,7 @@ code, because several were queued before a lane that landed them.
 
 | item | verdict | section |
 |---|---|---|
-| 1. the asserted-names check, red on 8 sites | fixed in `912cc25`; red test shown; one new site from lane K's merge is the orchestrator's to repair | 1 |
+| 1. the asserted-names check, red on 8 sites | fixed in `912cc25`; red test shown; the one site lane K's merge brought repaired in `cda3b39` on its author's authorisation, and the pin is empty | 1 |
 | 2. earned-clean, the people-search readers | fixed in `f3b46fb`; 17 readers move, two driven since; red tests shown (this branch's hashes do not resolve on `master` until it merges) | 2 |
 | 3a. a post record in `people_data.py` | built in `d1529ff`; red tests shown | 3 |
 | 3b. the root-logger captures that could not fail | done before: `4daa38d`, `de8e95e` | 4.1 |
@@ -25,6 +25,8 @@ code, because several were queued before a lane that landed them.
 | 3e. `scripts/_check_jobs_gap_directions.py` | done before: deleted in `98e1937` | 4.4 |
 | 3f. a failed navigation's error and its address | done before: `3e6fb24` | 4.5 |
 | 4. five non-ASCII characters in `network.md` | left: nothing reads that slice as ASCII | 5 |
+| ruled 14:56: `dom.read_radio_label_binding` | converted in `5a2ecb2`: it returns the binding's verdict, never an id; red test shown | 10.1 |
+| ruled 14:56: `writes._read_followed_state` | converted in `73912f1`: the Page's name leaves only in an organisation record; red tests shown (these hashes do not resolve on `master` until this branch merges) | 10.2 |
 
 ## 1. The asserted-names check: green, and the checker untouched
 
@@ -97,6 +99,18 @@ it. At this branch's merge of master fe119de the pin holds that one site, the
 script exits 1 on it alone, and the eight stay repaired. The repair is two
 words in that document ("read under the ruling"), the orchestrator's; the
 ratchet then demands the pin narrow (section 6).
+
+REPAIRED ON ITS AUTHOR'S AUTHORISATION, 14:56 IST. The orchestrator, who
+wrote that document, authorised one edit to it, made by this lane in
+`cda3b39` (a hash which does not resolve on `master` until this branch
+merges): the line now introduces the id as "read under the ruling", and the
+document records the authorisation at its end; no other line of its ruling
+text changed. Red first: with the edit made, the ratchet went red naming the
+pinned site as gone, and `PINNED` was narrowed to the empty set, lane K's
+site kept in the comment beside the eight. The script now exits 0: 89
+candidate sites, 89 cleared by an author mark, "no asserted name is
+absent". Lanes holding a byte-identical copy of that document meet the edit
+at their next merge.
 
 ## 2. Earned-clean: a success path leaves something the page made
 
@@ -315,24 +329,21 @@ census instrument and derived-view check ran green over this slice here
 
 ## 6. Open, for other owners and for the orchestrator
 
-1. TWO READERS' SUCCESS PATHS RETURN PAGE TEXT OUTSIDE A RECORD, hidden until
-   now because the old rule called their early return clean (held in
-   `WHAT_WOULD_DRIVE_IT` under RULING). `dom.read_radio_label_binding`,
-   handed a role its selector builder admits ("radio", as
-   `writes._live_control` passes it), reaches its success path on the planted
-   page alone and returns the control's `id` attribute verbatim, in
-   `observed.input_id`, `observed.label_for` and inside its `why` sentence --
-   measured here, `returns_text` at `$.why`. `writes._read_followed_state`'s
-   success path returns the followed Page's name in its facts (`company`).
-   Each needs the orchestrator's call: admit to the text inventory, with a
-   reason, or convert (publish whether the binding holds; publish the Page
-   by its id).
+1. CLOSED ON THE ORCHESTRATOR'S RULING OF 14:56 (section 10). Two readers'
+   success paths returned page text outside a record, hidden until this
+   lane because the old rule called their early return clean, and were held
+   in `WHAT_WOULD_DRIVE_IT` under RULING: `dom.read_radio_label_binding`
+   returned the control's `id` verbatim, and `writes._read_followed_state`
+   the followed Page's name. Both were ruled converted, and are: the first
+   publishes whether the binding holds and never an id; the second
+   publishes the name only inside an organisation record.
 2. `writes._editor_value_of` WAS ADMITTED HERE, under the standing ruling
    of 2026-09-28 04:25 (his own text is admitted), as its sibling
    `writes:_editor_values_or_refusal` was: driven over the tracked intro
    editor, its success path returns his own field's value verbatim. It is an
    application of that ruling by this lane, and the orchestrator's to
-   reverse.
+   reverse. CONFIRMED by the orchestrator at 14:56: the 04:25 ruling
+   covers it.
 3. CLOSED HERE: the four script readers no test ran in any engine --
    `anchors.read_anchors`, `collections_page.read_collections`,
    `company_root.read_company_root`, `group_page.read_group_page` -- and both
@@ -347,13 +358,9 @@ census instrument and derived-view check ran green over this slice here
    (section 8); the run on the final head is in the lane's report.
 5. ROW `M C70`'s cell can name `people_data.Post` when its owner next edits
    it (section 3).
-6. THE ONE ASSERTED-NAME SITE LEFT IS THE ORCHESTRATOR'S (section 1): in
-   `_audit/2026-09-28-rulings-build-classes.md`, the line on a page that
-   lists other people names `NAMES-AT-RUNTIME` straight after "read under".
-   Two words -- "read under the ruling" -- clear it; the pin in
-   `tests/test_an_asserted_name_resolves.py` then goes red asking to be
-   narrowed, by design. Lanes holding a byte-identical copy of that document
-   would meet the edit at their next merge.
+6. CLOSED: the one asserted-name site left, in the orchestrator's
+   class-rulings document, was repaired on its author's authorisation and
+   the pin is empty (section 1).
 7. A CAVEAT FOR WHOEVER DRIVES `server._open_profile_views_filter_menus` TO
    ITS PRESS. `_worst` ranks a drive that read the page (this lane's verdict
    among them) above `navigates`, so a drive added to `TO_THE_PRESS` for it
@@ -411,6 +418,28 @@ the orchestrator's gate policy of 11:35 none is the full suite.
     sect. 9    engine, clean and planted                 3 passed (8.5 s); each
                                                           expectation bent by one turns
                                                           only its own path red
+
+    14:56    the last asserted-name site: the ratchet
+    rulings    red on the edit, then the module and
+               the correction scan                     27 passed; the script exit 0
+             the radio binding's verdict test, red
+               then green; its file                    9 passed
+             the reader guard's tests touching it      196 passed
+             the followed-name test, red then green    2 failed; 2 passed
+             the organisation record's tests           16 passed
+             the touched tests, record_typed's
+               importers, the record and page-string
+               guards, the reader guard and the text
+               guards, sharded                         1465 passed (185 s)
+             `tests/test_writes.py -k follow`          8 passed; the whole file, after the commit, 163 passed
+             the committed-identity sweep after the
+               conversion's commit                     2 failed, 1073 passed: 13
+                                                          company-id hits, the new
+                                                          tests' fresh five-digit ids;
+                                                          swapped for the sweep's own
+                                                          invented ids in the next
+                                                          commit (section 10.2); 126
+                                                          passed on the two files
 
 THE COERCION SCRIPT'S SAMPLE SHRANK, AND THE GUARD DID NOT LOSE THE LEAK. It
 samples only readers recorded clean, and lane G recorded 15 of 88 red there;
@@ -505,6 +534,21 @@ regenerated by its writer, moves it; on the merged tree, 184 readers: clean
 and drive tests: 61 passed; every census instrument and derived view green
 but the one pinned asserted-name site.
 
+Run 38039801550, on 389381d, this branch's merge of master f8c7392 (the CI
+lane's follow-ups: one-way UTF-8 decoding in the identity readers, the
+shards rebalanced; no conflict, nothing of this lane's touched): SUCCESS.
+Run 38040294783, on 8e23c78 (section 9's engine test): SUCCESS. Run
+38040883647, on 1027bf8, the merge of master 66eb699 (live session 8's
+record and its banked rows; one conflict, the derived blocker map,
+regenerated by its writer): SUCCESS. All three are on `master`, which took
+this branch at 1027bf8.
+
+MASTER MOVED ONCE MORE, to 16ee59a (lane CI's section 13: the impact gate's
+real-tree tests share one reading of the tree), and was merged in 5978c38
+(a hash which does not resolve on `master` until this branch merges) with
+no conflict; master touched nothing of this lane's, and the three derived
+views check clean on the merged tree.
+
 The lane CI run on this branch's final head cannot be written into the commit
 it certifies; its run id and verdict are in the lane's report.
 
@@ -546,3 +590,96 @@ same page is counted and moves the verdict off AMBIGUOUS. The network guard
 caught the first version, which let the browser fetch the skeleton's pixel
 addresses; every request is now refused in the page's own route first, as the
 named-profile skeleton's test does. 5 passed in 7.9 s.
+
+## 10. Two readers converted on the orchestrator's ruling of 14:56
+
+Section 6 put two readers to the orchestrator whose success paths returned
+page text outside a record. At 14:56 he ruled both CONVERTED, red first, and
+confirmed the third reader this lane had admitted (`writes._editor_value_of`,
+his own text) under the ruling of 04:25.
+
+### 10.1 `dom.read_radio_label_binding`: the verdict leaves, the ids stay
+
+It returned the control's `id` and its label's `for` verbatim, in `observed`
+and inside its `why` sentence: strings the page chose. It now compares the
+two on the page and returns the comparison -- `input_id_drawn`,
+`label_for_drawn` and `label_for_matches_input_id`, beside `controls_named`
+and `labels_matching` -- with sentences that quote neither id. The write
+path is unchanged: `writes._live_control` gates on `bound` and clicks the
+label by the caller's own word.
+
+RED FIRST. `test_the_binding_is_a_verdict_and_never_carries_an_id`, in
+`tests/test_radio_label_binding.py`, drives all three outcomes with ids the
+page chose; it failed on the id in `why` and in `observed`, and passes
+after. The reader guard drives the reader as shipped (role "radio"): that
+call returned page text at `$.why` before and earns clean now, so its RULING
+entry is gone and the baseline moves it from not driven to clean. Committed
+in `5a2ecb2` (a hash which does not resolve on `master` until this branch
+merges).
+
+### 10.2 `writes._read_followed_state`: the Page's name leaves only as a record
+
+LinkedIn writes the followed Page's name into the row's own button ("Click
+to stop following" and the name), so the name is a string the page chose,
+and the reader returned it bare in its facts (`company`) and quoted it in
+its `why`. Under the ruling (the name leaves through a declared record,
+untrusted-marked and bounded), `people_data` gains an `Organisation`
+record: the name, sanitised and capped at a title's room, and the Page's
+address, marked as untrusted third-party text, under its own key set
+(`organisation`, `link`, the marker) so that it is never read as a group or
+an event. `as_record`, `text_fields` and `RECORD_TYPES` know it, so every
+guard reading records through them does; the two guards that list record
+classes by name list it.
+
+THE LINK IS THE NUMERIC ADDRESS OR NOTHING. A first draft admitted a slug,
+and a slug can be a name -- a sole trader's, an eponymous firm's -- which is
+why the company-page read publishes its landing only as `redirected`. So
+`canonical_organisation_link` refuses a slug rather than reducing it, and
+the reader builds the address from the matched row's numeric id. Shown: the
+slug case returns an address under the first draft's pattern and nothing
+under the shipped one.
+
+THE NAME LEAVES ONLY IN THE RECORD. The facts carry the organisation record
+under `company` where they carried the bare name; the preview's `where`
+block and the receipt's `target` block copy that record as it is; and
+`shape.followed_page_state` says "the Page is in the rendered list" where
+it quoted the name. The unfollow tool's docstring now says the preview
+prints the name inside an organisation record.
+
+THE VERIFICATION AFTER THE CLICK BUILDS NO RECORD. `_verify_after` decides
+from the state and LinkedIn's totals and prints no name, but it called the
+same reader, so it reached a record builder and lost clean in the reader
+guard. It now calls `_read_followed_counts`, the same read and verdict
+without the name; both share one pure function, `_followed_verdict`.
+
+RED FIRST. `tests/test_the_followed_page_name_leaves_only_as_a_record.py`
+drives the reader over stand-ins for its two reads, a planted name in a
+row's button: before the conversion it failed at `$.facts.company` and at
+`$.why`; after, the name lies only inside an organisation record, and a
+page with no matching row builds none. The record's own tests are in
+`tests/test_people_data.py`. The reader guard's baseline, regenerated by
+its writer, moves two readers and no other: `_read_followed_state` from
+"returned nothing the page made" to "reaches a people-record builder and
+built no record" -- the planted page parses no row, so none is built; its
+success path runs in `tests/test_writes.py` over the tracked Manage Pages
+capture, where the receipt's company is now an `Organisation` -- and
+`_read_followed_counts`, new, "returned nothing the page made". Both are
+WORDS entries in `WHAT_WOULD_DRIVE_IT`. Committed in `73912f1` (a hash
+which does not resolve on `master` until this branch merges).
+
+THE IDENTITY SWEEP CAUGHT THE NEW TESTS' IDS. Run after that commit, the
+committed-identity sweep found 13 company-id hits in the two new test
+files: fresh five-digit ids, and its company-id shape starts at three
+digits. `912f352` (a hash which does not resolve on `master` until this
+branch merges) swapped them for members of the sweep's own invented ids,
+the 530000xx series, rather than widening its allowance table, and calls
+the record's address numeric where a comment had said canonical -- the
+word this package uses for the slug.
+
+NOT CHANGED, AND NOT THIS RULING'S: `linkedin_followed_companies` publishes
+the Manage Pages rows -- his own followed list -- as it did, and its
+`follow_state` loses only the name from its `why` sentence.
+
+Two scratch scripts did the mechanical edits and the local gate here; both
+are DISPOSABLE and are not in the register. The two new tests are
+regression tests, each shown failing first, not instruments.
