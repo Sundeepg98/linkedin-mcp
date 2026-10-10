@@ -344,6 +344,13 @@ holds.
 | M5 a second or disabled Save is pressed | `test_the_select_reader_the_choice_and_the_save_gate` |
 | M6 a page name admitted case-folded | `test_a_page_and_a_control_are_admitted_by_their_exact_names` |
 | M7 a refused kind accepted | `test_a_kind_that_is_not_a_switch_radio_group_or_select_is_refused_by_name` |
+| W1 (`writes.py`) Save asked for without the only-that-control-moved check | `test_the_three_patterns_through_the_shipped_doors` (a select that moved a second select was saved) |
+| W2 (`writes.py`) the write door ignores `exempt_substrings` | `test_the_write_door_admits_the_admitted_page_and_exempts_only_its_own_two_substrings` |
+| W3 (`writes.py`) the select path skips its wait and its check | `test_the_three_patterns_through_the_shipped_doors` |
+| W4 (`writes.py`) a landing elsewhere is pressed on | `test_a_landing_elsewhere_is_refused_before_any_press` |
+
+The four `writes.py` mutations ran the same way, on the integration's own
+hooks, after it landed: all four caught, the file restored byte-identical.
 
 ### 3.3 What the shipped guards caught in the integration, and what changed
 
