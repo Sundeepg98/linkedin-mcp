@@ -11638,13 +11638,24 @@ not hold it, so a reader building posts would have had no bound on its pages.
 `test_every_record_type_is_a_record_class_here` holds the set equal to
 `people_data.RECORD_TYPES`; SHOWN FAILING on `Post` before the name was added.
 
+### 86.4 THE CONTROL FIXTURES RUN IN AN ENGINE, NOT ONLY ATTACHED TO HIS CHROME
+
+`tests/test_control_paths_run_in_an_engine.py` runs the five control paths
+of `scripts/_probe_control_paths_live.py` -- each module's own fixture and
+written expectation, through the shipped reader -- in a local headless
+Chromium, through the probe's own `_classify`, so nothing is copied. Until
+now nothing in the suite had executed the one line that makes a fixture a
+control (`DOMParser` inside the shipped script). SHOWN FAILING: each path's
+planted defect turns it red, and an expectation bent by one turns exactly
+its own path red.
+
 ### 86.9 DECLARED DISPOSABLE
 
 Scratch probes of this lane, kept in its scratch area and not committed:
 the census ASCII count, the comment-coupling measurement of item 3c, the
 search readers' planted drive, the success-evidence measurement whose rule
-became 86.2 (the committed form is the guard's own), the baseline diff, and
-the instrument runner.
+became 86.2 (the committed form is the guard's own), the baseline diff, the
+bent-expectation control behind 86.4, and the instrument runner.
 
 ## 87. A REF NAME IS NOT A PERMISSION; ANCESTRY PLUS THE SHIPPED SWEEP IS (lci-fastlane-lead, 2026-10-10)
 

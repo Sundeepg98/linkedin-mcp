@@ -333,15 +333,13 @@ census instrument and derived-view check ran green over this slice here
    editor, its success path returns his own field's value verbatim. It is an
    application of that ruling by this lane, and the orchestrator's to
    reverse.
-3. FOUR SCRIPT READERS ARE RUN BY NO TEST IN ANY ENGINE: `anchors.read_anchors`,
-   `collections_page.read_collections`, `company_root.read_company_root`
-   (its script runs under node in a test, its reader does not) and
-   `group_page.read_group_page`. Their success paths run only in
-   attach-only live probes. The cheapest next step needs no capture and no
-   LinkedIn: a headless page with each module's own `control_fixture()`
-   passed as `html=` runs the reader as `scripts/_probe_control_paths_live.py`
-   does, with each module's written expectation to assert against (the
-   child's finding; derived, not run here).
+3. CLOSED HERE IN PART: three script readers no test ran in any engine --
+   `anchors.read_anchors`, `collections_page.read_collections`,
+   `company_root.read_company_root` -- and both search readers' control
+   paths now run in the suite (section 9). `group_page.read_group_page`
+   reads through `anchors.read_anchors`, whose script now runs, but the
+   group reader itself still runs in no engine; a headless drive over the
+   live lane's tracked `group_home` skeleton is its next step.
 4. THE FULL SUITE runs on CI for this branch before it merges, because
    `linkedin_server/people_data.py` is imported by the server module and so
    by most of the suite, and the local gates here were scoped by policy: lane
@@ -410,6 +408,10 @@ the orchestrator's gate policy of 11:35 none is the full suite.
                verdict, its admission, its premise
                break, the coverage and holding tests,
                serial (the live flag back up)            44 passed
+    item 2,  the five control paths in a headless
+    sect. 9    engine, clean and planted                 3 passed (8.5 s); each
+                                                          expectation bent by one turns
+                                                          only its own path red
 
 THE COERCION SCRIPT'S SAMPLE SHRANK, AND THE GUARD DID NOT LOSE THE LEAK. It
 samples only readers recorded clean, and lane G recorded 15 of 88 red there;
@@ -506,3 +508,26 @@ but the one pinned asserted-name site.
 
 The lane CI run on this branch's final head cannot be written into the commit
 it certifies; its run id and verdict are in the lane's report.
+
+## 9. Five control paths run in an engine, in the suite
+
+Four modules ship a `control_fixture()` and a written expectation beside it
+(`anchors`, `search_results` twice, `collections_page`, `company_root`), so
+that their in-page classifier can be shown working at no page load. Nothing
+in the suite ever ran them: node has no `DOMParser`, and the only engine run
+was `scripts/_probe_control_paths_live.py`, attach-only, against the live
+Chrome, by hand. Item 2 found the cost: the readers behind them never reach
+their success path on the planted page either.
+
+`tests/test_control_paths_run_in_an_engine.py` runs that probe's five paths
+in a local headless Chromium on a blank page, through the probe's own
+`_classify` -- each shipped reader called `reader(page, html=fixture())`,
+each module's own expectation -- so the probe and the test cannot drift. It
+navigates nowhere. Three tests: the five paths still declared; the clean run
+reproducing every expectation, key by key; and each path's planted one-edit
+defect (hrefs removed, controls or headings demoted, the screen-reader class
+renamed) changing its fixture and turning its comparison red.
+
+SHOWN FAILING: the planted run turns all five red; and with one expectation
+bent by one, path by path (a scratch control, disposable), exactly that path
+reads FAIL and the other four PASS. 3 passed in 8.5 s.
