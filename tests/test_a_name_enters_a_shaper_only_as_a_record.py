@@ -116,7 +116,9 @@ def test_a_class_that_only_compares_equal_to_a_record_is_not_one():
 
 def test_the_record_types_are_the_people_data_ones():
     # people_data.Post joined 2026-10-10 (lane G2): a post's author is a
-    # person record, and its words are the record's declared text.
+    # person record, and its words are the record's declared text. And
+    # people_data.Organisation the same day: a followed Page's name.
     assert set(RECORD_TYPES) == {
         people_data.Person, people_data.Group, people_data.Event, people_data.Post,
+        people_data.Organisation,
     }
