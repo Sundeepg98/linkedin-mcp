@@ -4,14 +4,25 @@ into one conversation he names, built behind the grant and unfired (lane U).
 WHAT IS AIMED AT A REAL CAPTURE AND WHAT IS NOT, said once so every test below
 can be read against it:
 
-* THE TWO FILE INPUTS: real. ``tests/fixtures/live3/presence.html`` (the live
-  lane's session 3) draws a conversation's reply form whose two
-  ``input[type=file]`` each share a ``div.msg-form__upload-attachment`` with ONE
-  labelled button. ``test_the_aim_resolves_on_the_real_capture`` runs the
-  shipped selectors over that capture itself. Its skeleton keeps no attribute
-  values, so the ``accept`` declarations -- the aim's cross-check -- come from
-  the 2026-09-05 live reading, as the synthetic thread fixture already
-  carries them.
+* THE TWO FILE INPUTS: real, on the NEW-MESSAGE COMPOSER, twice.
+  ``tests/fixtures/live3/presence.html`` (the live lane's session 3) and
+  ``tests/fixtures/live8/messaging_composer.html`` (session 8, written by
+  ``scripts/_build_live8_composer_fixture.py``) each draw the messaging page's
+  composer -- a "New message" heading, one recipient box, no message list --
+  whose two ``input[type=file]`` each share a ``div.msg-form__upload-attachment``
+  with ONE labelled button. CORRECTED 2026-10-10: this docstring called the
+  session-3 capture a conversation's reply form; measured, it is the composer
+  (one recipient box, no event, no title), and so is session 8's. The session-3
+  skeleton blanks every attribute value; the session-8 fixture carries the two
+  ``accept`` declarations recorded live on 2026-09-05, put back only where the
+  skeleton's shape of each (letters, digits, length) matched exactly.
+* AN OPENED CONVERSATION'S REPLY FORM: read live, never captured. The live
+  lane's sessions 5 and 6 previewed a reply in an opened conversation and
+  read, as counts and closed tokens: one form, no recipient box, two file
+  inputs declaring ``images`` and ``images_and_documents``. That the
+  conversation labels the two buttons as the composer does is DERIVED, and
+  the aim refuses at the preview, before anything is handed over, if it
+  does not hold.
 * WHAT THE FORM DRAWS ONCE A FILE IS ATTACHED, and how a sent attachment
   draws: NOT captured. The worlds below draw the file's NAME by a script of
   their own -- SYNTHETIC, and declared so -- which is exactly why these rows
@@ -27,6 +38,7 @@ from __future__ import annotations
 
 import json
 import pathlib
+import re
 
 import pytest
 
@@ -44,6 +56,16 @@ PNG = b"\x89PNG\r\n\x1a\n" + b"benign-test-pixels|" * 30
 PDF = b"%PDF-1.7\n" + b"benign test document\n" * 20
 
 _REAL_CAPTURE = pathlib.Path(__file__).parent / "fixtures" / "live3" / "presence.html"
+_SESSION_8_CAPTURE = pathlib.Path(__file__).parent / "fixtures" / "live8" / "messaging_composer.html"
+
+#: ONE SAMPLE OF BYTES PER ROW, each read by ``attachments.sniff`` the way the
+#: verb reads a real file: a photo (``M M14``), a video (``M M15``), a document
+#: (``M M18``). The MP4 is a bare ``ftyp`` box -- a header and nothing playable.
+_ROW_BYTES = {
+    "M M14": b"\x89PNG\r\n\x1a\n" + b"benign-test-pixels|" * 30,
+    "M M15": b"\x00\x00\x00\x18ftypmp42\x00\x00\x00\x00mp42isom" + b"\x00" * 64,
+    "M M18": b"%PDF-1.7\n" + b"benign test document\n" * 20,
+}
 
 #: THE SYNTHETIC FIXTURE'S TWO BARE INPUTS, exactly as it draws them: each a
 #: direct child of the form, beside its button.
@@ -260,6 +282,98 @@ async def test_swapped_declarations_refuse_the_aim(browser_page):
         await attachments.read_reply_inputs(browser_page, "image")
     )
     assert aimed is False and "disagree" in why
+
+
+async def _load_capture(page, path: pathlib.Path) -> None:
+    """A tracked capture, served with every request refused first: a capture
+    keeps its stylesheet and image addresses' shapes, and nothing may leave."""
+
+    async def _refused(route):
+        await route.abort()
+
+    await page.route("**/*", _refused)
+    await page.set_content(
+        path.read_text(encoding="utf-8"), wait_until="domcontentloaded", timeout=60_000
+    )
+
+
+def test_the_session_8_fixture_holds_shapes_only():
+    """What the builder promised, read back off the tracked file: strict
+    ASCII, no keyed shape left (no hash of anybody's words), and exactly the
+    two declarations it put back, once each."""
+    raw = _SESSION_8_CAPTURE.read_bytes()
+    text = raw.decode("ascii")
+    assert re.search(r"\{L\d+D\d+n\d+:[0-9a-f]{8}\}", text) is None
+    assert text.count(f'accept="{_IMAGE_ACCEPT}"') == 1
+    assert text.count(f'accept="{_FILE_ACCEPT}"') == 1
+
+
+async def test_the_session_8_capture_is_the_composer_as_measured(browser_page):
+    """THE COUNTS THE LANE RECORD QUOTES, pinned on the tracked copy: one
+    reply form, one editor, one Send drawn disabled, two file inputs with no
+    ``multiple``, two wrappers -- and ONE recipient box with no message list,
+    because this is the new-message composer, not an opened conversation."""
+    await _load_capture(browser_page, _SESSION_8_CAPTURE)
+    count = lambda selector: browser_page.locator(selector).count()  # noqa: E731
+    assert await count(threads.REPLY_FORM_SELECTOR) == 1
+    assert await count(threads.REPLY_EDITOR_SELECTOR) == 1
+    assert await count(threads.REPLY_SEND_SELECTOR) == 1
+    assert await count(threads.REPLY_SEND_SELECTOR + ":not([disabled])") == 0
+    assert await count(threads.FILE_INPUT_SELECTOR) == 2
+    assert await count('input[type="file"][multiple]') == 0
+    assert await count(f"{threads.REPLY_FORM_SELECTOR} {attachments.UPLOAD_WRAPPER}") == 2
+    assert await count(threads.RECIPIENT_BOX_SELECTOR) == 1
+    assert await count(threads.EVENT_SELECTOR) == 0
+
+
+@pytest.mark.parametrize(
+    ("row", "label", "declaration"),
+    [
+        ("M M14", attachments.ATTACH_IMAGE_LABEL, "images"),
+        ("M M15", attachments.ATTACH_FILE_LABEL, "images_and_documents"),
+        ("M M18", attachments.ATTACH_FILE_LABEL, "images_and_documents"),
+    ],
+)
+async def test_each_row_is_aimed_at_its_own_input_on_the_session_8_capture(
+    browser_page, row, label, declaration
+):
+    """PER ROW, FROM BYTES TO INPUT. The row's sample is read by ``sniff`` as
+    the verb reads a file; its family picks the input; the shipped selectors
+    find exactly one input beside that label, declaring what was measured.
+    A photo goes to the images input (``image/*`` and nothing else); a video
+    and a document go to the documents input, whose declaration lists them."""
+    family = attachments.sniff(_ROW_BYTES[row])[2]
+    await _load_capture(browser_page, _SESSION_8_CAPTURE)
+    reading = await attachments.read_reply_inputs(browser_page, family)
+    aimed, why = attachments.aim_verdict(reading)
+    assert aimed is True, why
+    assert reading["input_label"] == label
+    assert reading["declaration"] == declaration
+    assert (reading["forms"], reading["wrappers"], reading["labelled_wrappers"],
+            reading["inputs"]) == (1, 2, 1, 1)
+    accept = await browser_page.locator(attachments.input_selector(label)).get_attribute("accept")
+    listed = accept.split(",")
+    if row == "M M14":
+        assert listed == ["image/*"]
+    else:
+        assert {"M M15": ".mp4", "M M18": ".pdf"}[row] in listed
+
+
+async def test_the_preview_refuses_the_composer_it_is_not_a_conversation(
+    writes_on, browser_page, photo
+):
+    """THE SAME CAPTURE, BEHIND THE CONVERSATION'S ADDRESS: refused before a
+    token, because a recipient box is drawn. A file is never handed to a
+    composer where somebody could still be chosen -- only to a conversation he
+    named, where nobody can."""
+    async def _refused(route):
+        await route.abort()
+
+    await browser_page.route("**/*", _refused)
+    html = _SESSION_8_CAPTURE.read_text(encoding="utf-8")
+    with pytest.raises(WriteAttemptError) as caught:
+        await _preview(browser_page, {"thread": THREAD_ID, "file": "test-image.png"}, html)
+    assert "recipient box" in str(caught.value)
 
 
 # ---------------------------------------------------------------------------
