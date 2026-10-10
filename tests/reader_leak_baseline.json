@@ -76,6 +76,7 @@
     "dom:wait_for_save_control": "clean",
     "dom:wait_for_tracker_list": "clean",
     "events:read_events_home": "clean",
+    "followers_list:read_followers_list": "clean",
     "group_leave:_count": "clean",
     "group_leave:menu_item_gate": "clean",
     "group_leave:read_after_press": "clean",

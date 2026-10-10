@@ -2118,6 +2118,13 @@ FIXTURE_BREAKS: dict[str, dict[str, str]] = {
         "fixture": "synthetic/messaging_thread.html",
         "needle": 'id="reply-editor"', "into": 'id="reply-other"',
     },
+    # 2026-10-10 (lane B1, child lb1-followers): the Following tab drawn
+    # SELECTED, the one premise the follower-list drive's double answers.
+    "followers_list:read_followers_list": {
+        "fixture": "live2/followers.html",
+        "needle": 'aria-selected="false" id="ka0515091"',
+        "into": 'aria-selected="true" id="ka0515091"',
+    },
 }
 
 ALL_DRIVES = {**shipped_drives.DRIVES, **shipped_drives.TO_THE_PRESS}

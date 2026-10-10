@@ -1628,6 +1628,82 @@ async def read_recruiter_views_as_shipped(page: Any) -> Any:
 
 
 # ---------------------------------------------------------------------------
+# followers_list:read_followers_list -- his own follower list (P L2b)
+# ---------------------------------------------------------------------------
+
+#: A tab of the strip on the follower list's skeleton: its selected state and
+#: its text (LinkedIn's ``Following``, or the skeleton's ``x``).
+_FOLLOWER_LIST_TAB = re.compile(
+    r'<button [^>]*aria-selected="(true|false)"[^>]*role="tab">\s*(Following|x)\s*</button>'
+)
+
+
+class _TheFollowerListMain(_Over):
+    """``main`` on the follower list: the Following tab is drawn NOT selected.
+
+    The one count answered here: a tab named ``Following`` that is selected,
+    0. Every other read, the tab strip's other counts included, is the planted
+    page's own -- whose 1 is what the skeleton draws for each of them."""
+
+    def get_by_role(self, role: Any, *args: Any, **kwargs: Any) -> Any:
+        from linkedin_server import followers_list
+
+        located = self._wrapped.get_by_role(role, *args, **kwargs)  # the read, counted
+        if (
+            role == "tab"
+            and kwargs.get("name") == followers_list.FOLLOWING_TAB_WORD
+            and kwargs.get("selected") is True
+        ):
+            return _CountsAs(located, 0)
+        return located
+
+
+class _TheFollowerListPage(_Over):
+    def locator(self, selector: Any, *args: Any, **kwargs: Any) -> Any:
+        located = self._wrapped.locator(selector, *args, **kwargs)  # the read, counted
+        return _TheFollowerListMain(located) if selector == "main" else located
+
+
+async def read_followers_list_as_shipped(page: Any) -> Any:
+    """``read_followers_list`` as ``linkedin_my_followers_list`` calls it -- the
+    page and nothing else -- on the list ``tests/fixtures/live2/followers.html``
+    captures (the live lane's session 2, a skeleton).
+
+    THE SIGNATURE DRIVE: every planted count is 1, so the planted page draws
+    the tab LinkedIn labels ``Following`` as the SELECTED one, and the reader
+    refuses as not the followers side before any row is read -- a read, and a
+    refusal.
+
+    THE FIXTURE draws one tab strip of two tabs, the ``Following`` tab
+    ``aria-selected="false"`` and the other selected; ten rows by their
+    ``data-view-name``; and each row's one button with its word in the
+    ``artdeco-button__text`` slot -- checked here at every drive.
+    ``tests/test_followers_list.py`` reads the same skeleton in an engine and
+    asserts nine rows followed back and one not.
+
+    THE DOUBLE answers ONE count: the Following tab selected, 0. Every row
+    count and every word is the planted page's, so the one row's word is the
+    plant -- another word, counted ``unknown`` -- and the reader's success
+    path runs to its counts with nothing of the page in them.
+    """
+    from linkedin_server import followers_list
+
+    markup = _drawn(
+        "live2/followers.html",
+        'role="tablist"',
+        followers_list.ROW_SELECTOR[1:-1],
+        'class="artdeco-button__text"',
+    )
+    tabs = sorted(_FOLLOWER_LIST_TAB.findall(markup))
+    if tabs != [("false", "Following"), ("true", "x")]:
+        raise AssertionError(
+            "live2/followers.html no longer draws the Following tab unselected "
+            f"beside one selected tab: {tabs}"
+        )
+    return await followers_list.read_followers_list(_TheFollowerListPage(page))
+
+
+# ---------------------------------------------------------------------------
 # The tables the guard reads
 # ---------------------------------------------------------------------------
 
@@ -1668,6 +1744,10 @@ DRIVES: dict[str, Callable[..., Any]] = {
     "view_switch:_apply_positions": apply_positions_over_the_skeleton,
     "reveal:reveal": reveal_over_the_skeletons,
     "server:_profile_views_more_analytics": profile_views_more_analytics_over_the_skeletons,
+    # 2026-10-10 (lane B1, child lb1-followers): his own follower list,
+    # census P L2b, over the live lane's session-2 skeleton. Driven to its
+    # counts once the double draws the Following tab unselected.
+    "followers_list:read_followers_list": read_followers_list_as_shipped,
 }
 
 #: As far as a press. Run by the guard, so the reads before the press are
