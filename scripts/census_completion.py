@@ -1178,7 +1178,9 @@ PINNED = {
     #: 186 ON LANE K's PURCHASES-STAY-MANUAL EXCLUSIONS (2026-10-10), MEASURED:
     #: `P S9` and `M C71` GAP -> EXCLUDED-RULED -- adjudicated, delivered by
     #: neither line.
-    "adjudicated": 186,
+    #: RE-PINNED 2026-10-10, lane B3, MEASURED: 186 -> 187. `M C43` GAP -> COVERED-UNFIRED
+    #: on THIRD-PARTY-TEXT-AT-RUNTIME (`linkedin_read_item_text`), the only row moved.
+    "adjudicated": 187,
     #: THE LIVE LANE'S FOUR ROWS, RE-DERIVED AT EACH OF ITS MERGES OF MASTER
     #: (2026-09-24; last over lane S): four rows fired live and banked
     #: (`_audit/2026-09-23-live-lane-session-1.md`). `P G6` COVERED-UNFIRED ->
@@ -1243,7 +1245,9 @@ PINNED = {
     #: merged tree: master's figure with this branch's `P A11`, `P A13` and `P A17`
     #: COVERED-UNFIRED -> GAP (session 4: autocomplete inputs the one tool can only
     #: type into, now refused by it).
-    "delivered_broad": 130,
+    #: RE-PINNED 2026-10-10, lane B3, MEASURED: 130 -> 131. `M C43` GAP -> COVERED-UNFIRED
+    #: on THIRD-PARTY-TEXT-AT-RUNTIME (`linkedin_read_item_text`), the only row moved.
+    "delivered_broad": 131,
     #: 79 since the live lane's merge (see `adjudicated`): P G6, N 134, P O3
     #: and M C72 COVERED-PROVEN.
     #: 75 and 21 since the bucket-1 merge: `M C41` fired live and moved from
@@ -1325,7 +1329,9 @@ PINNED = {
     #: type into, now refused by it).
     #: 585 ON LANE K's PURCHASES-STAY-MANUAL EXCLUSIONS (2026-10-10), MEASURED:
     #: `P S9` and `M C71` left GAP (see `adjudicated`).
-    "gap": 585,
+    #: RE-PINNED 2026-10-10, lane B3, MEASURED: 585 -> 584. `M C43` GAP -> COVERED-UNFIRED
+    #: on THIRD-PARTY-TEXT-AT-RUNTIME (`linkedin_read_item_text`), the only row moved.
+    "gap": 584,
     #: 18 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: `M M1` built (`linkedin_message_from_profile`).
     #: 16 ON LANE L5'S ORDER OF 2026-09-27 23:36, MEASURED:
     #: `linkedin_send_message` RETIRED (aimed by a name): `M M2` to GAP and `N
@@ -1393,7 +1399,9 @@ PINNED = {
     #: (the unfollow through LinkedIn's confirmation, the row gone and a posting
     #: reading not-following) and `N 46` and `J 103` (the follow from a posting
     #: that restored it, verified on Manage Pages) fired live and banked.
-    "unfired": 21,
+    #: RE-PINNED 2026-10-10, lane B3, MEASURED: 21 -> 22. `M C43` GAP -> COVERED-UNFIRED
+    #: on THIRD-PARTY-TEXT-AT-RUNTIME (`linkedin_read_item_text`), the only row moved.
+    "unfired": 22,
     #: 104 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     #: 101 AT LANE S'S NAMES ADOPTION (2026-09-27), MEASURED: `N 79`, `N 172`
@@ -1421,7 +1429,9 @@ PINNED = {
     #: 98 ON THE ORCHESTRATOR'S CALL OF 2026-09-28 17:46 (lane S), MEASURED:
     #: `N 25` and `N 26` left GAP and bucket 3, and `N 26b`, an R row, entered
     #: both (see `adjudicated`).
-    "gap_read": 98,
+    #: RE-PINNED 2026-10-10, lane B3, MEASURED: 98 -> 97. `M C43` GAP -> COVERED-UNFIRED
+    #: on THIRD-PARTY-TEXT-AT-RUNTIME (`linkedin_read_item_text`), the only row moved.
+    "gap_read": 97,
     #: 151, not the 152 published by `_audit/2026-09-21-the-write-ceiling.md`.
     #: That document scoped itself to `profile.md`, `network.md` and
     #: `messaging-and-content.md`; measured at HEAD those three carry W 151 and
@@ -1572,7 +1582,9 @@ PINNED = {
     #: `N 26b` entered ADMITTED -- the people search filtered to his first
     #: degree -- gated MEASURE: the school and industry facets' spelling needs
     #: a capture first.
-    "b3_admitted": 43,
+    #: RE-PINNED 2026-10-10, lane B3, MEASURED: 43 -> 42. `M C43` GAP -> COVERED-UNFIRED
+    #: on THIRD-PARTY-TEXT-AT-RUNTIME (`linkedin_read_item_text`), the only row moved.
+    "b3_admitted": 42,
     #: 38 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     #: 40 ON LANE L5'S ORDER OF 2026-09-28 12:32, MEASURED: `N 30`, `N 31`, `N 65`
@@ -1808,7 +1820,9 @@ PINNED = {
     #: the results) and `N 26` (his connections filtered by place) fired live and
     #: banked; `N 155` moved on the orchestrator's call of that day, by D6 on
     #: `M M1`'s session-5 send.
-    "b1_no_ruling": 9,
+    #: RE-PINNED 2026-10-10, lane B3, MEASURED: 9 -> 10. `M C43` GAP -> COVERED-UNFIRED
+    #: on THIRD-PARTY-TEXT-AT-RUNTIME (`linkedin_read_item_text`), the only row moved.
+    "b1_no_ruling": 10,
     #: 7 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
     #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
     #: 4 AT THE LIVE LANE'S MERGE OF MASTER c2825a4 (2026-09-28), MEASURED on the
@@ -2017,6 +2031,12 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
         #: live and banked, the two edits tested and restored exactly.
         #: `N 25`, `N 81` and `N 26` LEFT at session 7 (2026-10-10), fired live and
         #: banked: the name search, the degree facet, the place filter.
+        #: `M C43` entered on lane B3, 2026-10-10: an item's own words off its
+        #: permalink (`linkedin_read_item_text`), built offline over the real
+        #: capture `tests/fixtures/live2/own_post.html` and never fired.
+        #: THIRD-PARTY-TEXT-AT-RUNTIME permits and shapes it (untrusted,
+        #: sanitised, bounded, never stored); no ruling holds it.
+        "M C43",
     ),
 }
 

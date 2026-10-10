@@ -86,6 +86,7 @@
     "groups_page:read_group_memberships": "clean",
     "item_addresses:read_item_addresses": "clean",
     "item_author:read_item_author": "returns_records",
+    "item_text:read_item_text": "returns_records",
     "job_collections:read_job_collection": "clean",
     "job_home:read_recent_searches": "clean",
     "named_details:load_the_confirmed_details": "not_driven:raises WriteAttemptError",

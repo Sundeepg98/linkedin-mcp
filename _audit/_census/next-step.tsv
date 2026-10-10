@@ -144,7 +144,6 @@ M C37	M	W	R1	ADMIT:https://www.linkedin.com/my-items/saved-posts/	NAMED	_audit/_
 M C38	M	R	-	BUILD:tests/fixtures/live1/post_summary.html	NAMED	_audit/2026-09-23-live-lane-session-1.md::lane L1's five NEEDS-CAPTURE pages, captured ; _audit/_census/read-addresses.tsv::https://www.linkedin.com/analytics/post-summary/urn:li:activity:12345/
 M C39	M	R	-	ADMIT:https://www.linkedin.com/analytics/creator/content/?metricType=x	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/analytics/creator/content/?metricType=x ; RULING:READ-PAST-AN-ACT-SUBSTRING
 M C42	M	R	-	TARGET:another member's post he names, by link	NAMED	_audit/_census/read-addresses.tsv::THE ROW HOLDS FOR OTHER PEOPLE'S POSTS ONLY
-M C43	M	R	-	RULING:Q-POST-TEXT	NAMED	RULING:FEED-CONTENT-READ-RULING
 M C44	M	W	R3	RULING:Q-ARTICLE-AUTOSAVE	NAMED	linkedin_server/press.py::opening it may autosave a draft **no surface here can detect** ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
 M C45	M	W	R3	SIBLING:lane-U	NAMED	_audit/2026-09-28-rulings-build-classes.md::`FILE-UPLOAD-UNSANCTIONED` is therefore a stale label.
 M C46	M	W	R3	RULING:Q-ARTICLE-AUTOSAVE	NAMED	linkedin_server/press.py::opening it may autosave a draft **no surface here can detect** ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS

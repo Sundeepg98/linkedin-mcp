@@ -485,8 +485,14 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: The read's two new fields (`member_token`, `activity_items`) are not
 #: parameters; `N 30`, `N 85`, `N 172`, `N 31` and `M C32` move only when proven
 #: live.
-PINNED_TOOL_COUNT = 61
-PINNED_PARAMETER_COUNT = 97
+#: **RE-PINNED 2026-10-10 AT 62 TOOLS AND 98 PARAMETERS on lane B3 (ruling
+#: THIRD-PARTY-TEXT-AT-RUNTIME): one tool, one parameter --
+#: `linkedin_read_item_text(item)`, ONE item's own words off its permalink,
+#: inside one people_data.Post record.** THE CENSUS DECISION, in the same
+#: commit: `M C43` GAP -> COVERED-UNFIRED on it. Never fired. See
+#: `_audit/2026-10-10-lane-b3-messaging-build.md`.
+PINNED_TOOL_COUNT = 62
+PINNED_PARAMETER_COUNT = 98
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:

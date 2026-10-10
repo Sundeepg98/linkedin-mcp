@@ -1,4 +1,11 @@
-"""The tool surface: sixty-one tools, seventeen of which write to LinkedIn.
+"""The tool surface: sixty-two tools, seventeen of which write to LinkedIn.
+
+THE SIXTY-SECOND IS A READ, 2026-10-10, on lane B3 and the orchestrator's
+ruling ``THIRD-PARTY-TEXT-AT-RUNTIME``: ``linkedin_read_item_text``, ONE
+item's own words off the permalink its caller's key names, returned inside one
+``people_data.Post`` record -- sanitised, cut at 3,000 characters, marked as
+another member's words, kept nowhere. Census ``M C43``. The headline read
+"sixty-one tools, seventeen of which write" until then.
 
 THE SIXTY-FIRST IS A READ, 2026-09-28, on lane L5's order of 08:06 and the
 operator's ruling of 08:01 (``NAMED-PROFILE-READ-BEHIND-A-GRANT``):
@@ -227,9 +234,9 @@ POINTER to it was dangling, so a reader who followed it found nothing and
 would reasonably conclude these numbers are unchecked. A citation is a claim
 like any other.
 The surface splits three ways and the split is the part a reader actually
-needs: FORTY-FOUR read, SEVENTEEN write, and ZERO are write-shaped,
-registered, gated and unable to act. Forty-four plus seventeen plus zero is
-sixty-one. (Thirty-eight, thirteen and fifty-one until 2026-09-24; thirty-nine,
+needs: FORTY-FIVE read, SEVENTEEN write, and ZERO are write-shaped,
+registered, gated and unable to act. Forty-five plus seventeen plus zero is
+sixty-two. (Thirty-eight, thirteen and fifty-one until 2026-09-24; thirty-nine,
 thirteen and fifty-two at the live lane's merge the same day; thirty-nine,
 fourteen and fifty-three at lane L7's; forty-one, fifteen and fifty-six at
 lane L5's; forty-one, sixteen and fifty-seven at lane L8's merge on
@@ -238,7 +245,8 @@ eighteen and fifty-nine from that merge until lane L5 RETIRED
 ``linkedin_send_message`` later the same day -- aimed by a name; forty-one,
 seventeen and fifty-eight until lane S's two reads arrived at its merge of
 master 0867bda, 2026-09-28; forty-three, seventeen and sixty until lane L5's
-read of a named profile the same day.)
+read of a named profile the same day; forty-four, seventeen and sixty-one
+until lane B3's read of an item's words, 2026-10-10.)
 
 THE FIFTY-THIRD IS ONE WRITE, 2026-09-24 (lane L7, census row ``P I14``).
 ``linkedin_mark_company_interest`` presses "I'm interested" in the

@@ -411,7 +411,14 @@ AFTER_LANE_S_FRONTIER = (131, {"R": 16, "W": 111, "R+W": 4})
 #: 131 - 1 = 130, writes 111 - 1.
 AFTER_LANE_K_PURCHASES = (130, {"R": 16, "W": 110, "R+W": 4})
 
-EXPECTED_NOW = AFTER_LANE_K_PURCHASES
+#: AT LANE B3'S READ OF AN ITEM'S WORDS (2026-10-10), MEASURED with this
+#: tree's guard: `C43` -- a READ -- left GAP, COVERED-UNFIRED on
+#: THIRD-PARTY-TEXT-AT-RUNTIME (`linkedin_read_item_text`;
+#: `_audit/2026-10-10-lane-b3-messaging-build.md`). One R row: 130 - 1 = 129,
+#: reads 16 - 1.
+AFTER_LANE_B3_ITEM_TEXT = (129, {"R": 15, "W": 110, "R+W": 4})
+
+EXPECTED_NOW = AFTER_LANE_B3_ITEM_TEXT
 
 
 def test_the_headline_split_is_the_one_the_report_quotes():

@@ -177,9 +177,10 @@ def landed_on_the_item(landed: Any, requested: Any) -> bool:
     return bool(requested) and path_of(landed) == path_of(requested)
 
 
-async def _count(page: Any, selector: str) -> Optional[int]:
+async def _count(locator: Any) -> Optional[int]:
+    """A locator's count, or ``None`` when it did not read -- never a zero."""
     try:
-        return coerce.as_int(await page.locator(selector).count())
+        return coerce.as_int(await locator.count())
     except Exception as exc:  # noqa: BLE001 - an unread count stays None
         logger.debug("item words: a count did not read (%s)", type(exc).__name__)
         return None
@@ -200,11 +201,11 @@ async def read_item_text(page: Any, *, link: Optional[str] = None) -> dict[str, 
     """
     out: dict[str, Any] = {key: None for key in READING_KEYS}
     out["readable"] = False
-    out["descriptions_drawn"] = await _count(page, DESCRIPTION)
-    out["words_drawn"] = await _count(page, WORDS)
-    out["words_in_main"] = await _count(page, WORDS_IN_MAIN)
-    expanded = await _count(page, EXPANDED)
-    controls = await _count(page, CONTROLS_IN_DESCRIPTION)
+    out["descriptions_drawn"] = await _count(page.locator(DESCRIPTION))
+    out["words_drawn"] = await _count(page.locator(WORDS))
+    out["words_in_main"] = await _count(page.locator(WORDS_IN_MAIN))
+    expanded = await _count(page.locator(EXPANDED))
+    controls = await _count(page.locator(CONTROLS_IN_DESCRIPTION))
     if expanded is not None and controls is not None:
         out["expanded"] = expanded == 1 and controls == 0
 
