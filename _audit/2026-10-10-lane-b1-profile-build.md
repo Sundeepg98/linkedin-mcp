@@ -209,10 +209,14 @@ DELIVERED by a reader that publishes only counts") and `NAMES-AT-RUNTIME`,
 both later than this row's cell, counts do not deliver an "own follower
 LIST". The name-returning half -- people records under
 `PEOPLE-DATA-MITIGATIONS` over a fixture of declared synthetic people -- was
-ordered at about 16:55 and was unfinished at the coordinator's wrap-up
-(19:02), when the child was stood down. NOTHING of the branch is merged: a
-tool that does not deliver its row is a surface change with no row behind it.
-The branch is the next lane's starting point.
+ordered at about 16:55 and COMMITTED on the branch at 17:11 (`2442258`: each
+follower as a people record beside its relation). It was neither reviewed nor
+merged here: the box's clock stood still from about 17:13 to 19:00 (both the
+lead and the child measured the jump), and the coordinator's wrap-up order of
+19:02 stopped new merges. This section first said the half was unfinished; at
+19:16 the branch's own log showed the commit, and the text was rewritten.
+NOTHING of the branch is merged. Both halves are the next lane's to review
+and merge, and with them this row's move.
 
 Its live-proof spec, for when it lands: 3 loads -- his feed, the list, his
 feed -- because the allowlist line brackets the invitation badge around this
@@ -511,7 +515,8 @@ probes are declared disposable there.
    exactly one capitalised word survive, so an employer under "Company" can
    come back verbatim at runtime. A stricter rule for demographics labels is
    a ruling, not a reader change.
-5. `L2b` (C): the counts reader is built and unmerged; the people-record half
-   is the next lane's. Merge only with it.
+5. `L2b` (C): both halves -- counts and people records -- are committed on
+   the child's branch (`2442258`), unreviewed and unmerged. The next lane
+   reviews and merges them, then moves the row.
 6. Children ran as general-purpose agents, per the standing rules, not
    `implementer` (the operator's model pin).
