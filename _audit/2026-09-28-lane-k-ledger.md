@@ -884,32 +884,33 @@ rulings and after live session 8 (12.7):
     ADMIT          152   the address lane A must admit
     SIBLING        151   lane-S 105, lane-U 20, lane-NP 2, another row 24
     TARGET         100   what he must name
-    BUILD           69   the tracked fixture (or planned skeleton) to build on
     PRECONDITION    58   what he lacks
-    CAPTURE         30   a surface id in the capture queue
+    BUILD           66   the tracked fixture (or planned skeleton) to build on
+    CAPTURE         33   a surface id in the capture queue
     RULING           1   Q-AWAY-MESSAGE, the operator's
     PURPOSE          0   ruled
     total          561
 
     basis: NAMED 275, INFERRED 208, MEASURED 78
 
-`_audit/_census/capture-queue.tsv`: 93 lines -- 10 that need nothing (12
-loads, 2 searches, 30 rows), 11 on a target he names (100 rows), 72 on lane
+`_audit/_census/capture-queue.tsv`: 94 lines -- 11 that need nothing (13
+loads, 2 searches, 33 rows), 11 on a target he names (100 rows), 72 on lane
 A's admission (152 rows), and none gated on a question.
 
-SESSION 9 (session 8 has run), the first 40 loads: the ten open lines first,
+SESSION 9 (session 8 has run), the first 40 loads: the eleven open lines first,
 by rows per load -- the article composer (6 rows), the people search's
 All-filters panel and its fixed labels (5), his own profile's three controls
 opened by name and role (4), the composer's scheduled-posts list (4), his
 post's reactions control found by name (2), the guarded messaging loads with
 the folder and the search box (3 loads, 5 rows), the feed's search box, the
 jobs home's alert manager, the first-degree search's Industry and School
-pills, and the settings index for the sessions page (1 row each) -- 12 loads,
-2 searches, 30 rows. Then the target lines as he names each target: his named
+pills, and the settings index for the sessions page (1 row each), and a
+named thread that reads READ, for its footer (3 rows) -- 13 loads, 2
+searches, 33 rows. Then the target lines as he names each target: his named
 connections (4 loads, 13 rows), a school (1, 3), an event (4, 11), a
 non-connection (3, 8), jobs and alerts (9, 16), a member to block or unblock
-(2, 3), Pages (3, 4), a connection to remove (1, 1). Session 9: 39 loads, 2
-searches, 89 rows.
+(2, 3), Pages (3, 4), a connection to remove (1, 1). Session 9: 40 loads, 2
+searches, 92 rows.
 
 SESSION 10: his posts and comments (18 loads, 22 rows) and a group (5, 6),
 then seventeen admission lines in rank order (17 loads, 90 rows). Session 10:
@@ -986,6 +987,13 @@ jobs, 5m53s. The ledger was then brought up to session 8's captures (12.7):
 `check_next_step` GREEN at 561; the ledger test, the prose guards, the index
 and the map, 97 passed in 1m45s.
 
+At 15:32 the live lane re-read its session-8 thread capture and found the
+composer page (12.7). After a merge of master `16ee59a` (the register at its
+fixed point), `M M20`, `M M40` and `M M51` went back to CAPTURE on the thread
+footer, and the queue gained that line again. No census state moved, so no
+pin did: `census_completion --check` matches every pin, and
+`check_next_step` is GREEN at 561.
+
 ### 12.7 Live session 8 took the twelve open loads
 
 The live lane's session 8 (re-issued 2026-10-10, merged to master `66eb699`)
@@ -1003,8 +1011,10 @@ it changes the next step:
     job-posting-panels           one posting, raw and skeleton        J 115, J 124 -> BUILD
     jobs-recommended-feedback    kept                                 J 163 -> BUILD (if the pair is drawn)
     premium-key-skills           kept                                 P S8 -> BUILD (if the chooser is drawn)
-    msg-thread-footer            no video-meeting control in the      M M20, M M40, M M51 -> BUILD: the
-                                 footer                               offline verdict on what is drawn
+    msg-thread-footer            not taken: the receipt guard         M M20, M M40, M M51 stay; the
+                                 refused (one conversation read       capture opens a named thread
+                                 unread); its lk_thread capture is    that reads READ
+                                 the new-message composer page
     own-post-reactions           not pressed: no [aria-expanded]      M C33, M C35 stay, the control now
                                  control named for the menu           found by name (rulings 1 and 3)
     messaging-guarded            the receipt guard refused on the     M M7, M M8, M M9 stay, with
@@ -1013,7 +1023,7 @@ it changes the next step:
     search-people-first-degree   no Industry or School term drawn     N 26b stays, the pills opened
                                                                       under ruling 1
 
-Twenty-two rows move to BUILD on seven skeletons in the live lane's
+Nineteen rows move to BUILD on six skeletons in the live lane's
 gitignored `_state/live8/`. Each is a PLANNED tracked skeleton; the live lane
 names the real paths when it commits them:
 
@@ -1023,8 +1033,17 @@ names the real paths when it commits them:
     PLANNED tests/fixtures/live8/posting.html <- live-lane _state/live8/lk_posting.skeleton.html (J 115; J 124 reads the raw page)
     PLANNED tests/fixtures/live8/recommended.html <- live-lane _state/live8/lk_recommended.skeleton.html (J 163)
     PLANNED tests/fixtures/live8/keyskills.html <- live-lane _state/live8/lk_keyskills.skeleton.html (P S8)
-    PLANNED tests/fixtures/live8/thread.html <- live-lane _state/live8/lk_thread.skeleton.html (M M20, M M40, M M51)
 
-The ten lines session 8 could not finish stay CAPTURE, now with the presses
+The eleven lines session 8 did not finish stay CAPTURE, now with the presses
 rulings 1 and 3 permit a capture to make, and the queue is renumbered to start
 at session 9.
+
+THE THREAD FOOTER, as the live lane re-read it at 15:32. Its session-8
+capture `lk_thread` is the NEW-MESSAGE COMPOSER page, not a named thread's
+footer: the receipt guard refused to open the thread, because one
+conversation read unread -- its row carries LinkedIn's unread markers, the
+first capture of that markup. So the composer's footer controls it recorded
+(attach image, attach file, the GIF and emoji keyboards) are the composer's,
+and say nothing of a thread's footer. `M M20`, `M M40` and `M M51` stay
+CAPTURE on the thread footer, behind the receipt guard at 0 unread, on a
+named thread that reads READ.
