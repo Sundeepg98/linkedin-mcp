@@ -63,7 +63,9 @@ QUEUE_COLUMNS = ("rank", "surface-id", "session", "needs", "address",
 KINDS = ("CAPTURE", "ADMIT", "BUILD", "RULING", "PRECONDITION", "PURPOSE",
          "SIBLING", "TARGET")
 BASES = ("MEASURED", "NAMED", "INFERRED")
-LANES = ("lane-U", "lane-S")
+#: The sibling lanes a row may be handed to. lane-NP since 2026-10-10: the
+#: orchestrator's ruling 6 hands N 65 and N 178 to its details-page route.
+LANES = ("lane-U", "lane-S", "lane-NP")
 DIRECTIONS = ("R", "W", "R+W")
 
 #: A census row id as this table cites one: the slice letter, a space, the id.
