@@ -85,7 +85,6 @@ read PASS," not "must not read FAIL") without misdirecting the remedy.
 
 from __future__ import annotations
 
-import io
 import subprocess
 import sys
 import tempfile
@@ -94,7 +93,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO / "scripts"))
 
-from sweep_tracked_for_identity import load_wordlist, redact  # noqa: E402
+from sweep_tracked_for_identity import decode_text, load_wordlist, redact  # noqa: E402
 
 #: Blob paths worth sweeping. The key itself and the denylists legitimately
 #: hold real values; the shipped sweep exempts them by exact path and so does
@@ -131,15 +130,17 @@ def _git(*args: str, check: bool = True) -> str:
 
 
 def _as_text(data: bytes) -> str:
-    """A blob's bytes as the text ``_git("cat-file", "-p", sha)`` handed over.
+    """A blob's bytes as the text the wordlist is matched against.
 
-    ``subprocess.run(text=True, errors="replace")`` wraps the pipe in exactly
-    this ``io.TextIOWrapper``: the locale's encoding, replacement on bytes it
-    cannot decode, and universal newlines (``\\r\\n`` and a lone ``\\r`` both
-    read as ``\\n``). Matching runs on this text, so reproducing it exactly is
-    what keeps every verdict and every line number the same.
+    THE SHARED RULE, ``sweep_tracked_for_identity.decode_text``: UTF-8 when
+    valid, else cp1252. CHANGED DELIBERATELY 2026-10-10. Until then this was
+    the text ``subprocess.run(text=True, errors="replace")`` produced -- the
+    LOCALE's encoding, cp1252 on the operator's box -- so the 9 needles with
+    non-ASCII letters could never match a UTF-8 blob there. The batch reader
+    that landed the same day reproduced that text byte for byte on purpose;
+    this is the separate, ruled change of what the text is.
     """
-    return io.TextIOWrapper(io.BytesIO(data), errors="replace").read()
+    return decode_text(data)
 
 
 class _BlobReader:
@@ -151,9 +152,12 @@ class _BlobReader:
     a 3-commit range of 1002 blobs on a busy box. The pre-push gate runs this
     sweep on every ``ci/`` push, so the launch cost was most of a lane's push.
 
-    WHAT DID NOT CHANGE: which blobs are read, in what order, and the TEXT
-    each one is matched as (``_as_text``). Started on the first read, so a
-    sweep that refuses before its blob loop never launches it.
+    WHAT THE BATCHING DID NOT CHANGE: which blobs are read, in what order,
+    and (at the time) the text each was matched as -- its stdout was byte-
+    identical to the per-blob version's on two real ranges. The text itself
+    then changed deliberately, in ``_as_text``, as a separate ruled step.
+    Started on the first read, so a sweep that refuses before its blob loop
+    never launches it.
 
     A blob git cannot produce -- ``<sha> missing``, a short read, a process
     that died -- raises ``GitError`` (exit 128, what ``cat-file -p`` exited
