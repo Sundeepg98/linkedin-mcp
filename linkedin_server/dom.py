@@ -1360,14 +1360,22 @@ async def read_radio_label_binding(
     markup as a pure function of its argument, which is the property that
     file exists to hold.
     """
+    # THE IDS STAY ON THE PAGE (2026-10-10, the orchestrator's order to lane
+    # G2: a page string leaves only through a declared record). The control's
+    # id and its label's ``for`` are values the page chose; they are read and
+    # COMPARED here, and what leaves is the verdict -- whether each is drawn,
+    # and whether they match -- never either attribute, in ``observed`` or in
+    # a sentence. The aim needs nothing more: ``writes._live_control`` gates
+    # on ``bound`` and clicks the label by the caller's own word.
     out: dict[str, Any] = {
         "bound": False,
         "why": "",
         "observed": {
             "controls_named": None,
-            "input_id": None,
+            "input_id_drawn": None,
             "labels_matching": None,
-            "label_for": None,
+            "label_for_drawn": None,
+            "label_for_matches_input_id": None,
         },
     }
     try:
@@ -1388,7 +1396,7 @@ async def read_radio_label_binding(
         return out
 
     input_id = await control.get_attribute("id")
-    out["observed"]["input_id"] = input_id
+    out["observed"]["input_id_drawn"] = bool(input_id)
     if not input_id:
         out["why"] = (
             "the control has no id, so no label can be bound to it by 'for' "
@@ -1440,21 +1448,27 @@ async def read_radio_label_binding(
         return out
 
     bound_to = await labels.get_attribute("for")
-    out["observed"]["label_for"] = bound_to
-    if bound_to != input_id:
+    matches = bool(bound_to) and bound_to == input_id
+    out["observed"]["label_for_drawn"] = bool(bound_to)
+    out["observed"]["label_for_matches_input_id"] = matches
+    if not matches:
         out["why"] = (
-            f"the label carrying that text is bound to {bound_to!r} and this "
-            f"control's id is {input_id!r}. A label that NAMES a control and "
-            "does not ACTIVATE it clicks cleanly and sets nothing; one bound "
-            "elsewhere sets somebody else's radio."
+            (
+                "the label carrying that text is bound by 'for' to a control "
+                "other than this one (the two ids differ)."
+                if bound_to
+                else "the label carrying that text draws no 'for'."
+            )
+            + " A label that NAMES a control and does not ACTIVATE it clicks "
+            "cleanly and sets nothing; one bound elsewhere sets somebody else's "
+            "radio."
         )
         return out
 
     out["bound"] = True
     out["why"] = (
-        f"the label carrying that text is bound by 'for' to {bound_to!r}, "
-        "which is this control's own id -- an ACTIVATION relation, read off "
-        "the page rather than assumed."
+        "the label carrying that text is bound by 'for' to this control's own "
+        "id -- an ACTIVATION relation, read off the page rather than assumed."
     )
     return out
 
