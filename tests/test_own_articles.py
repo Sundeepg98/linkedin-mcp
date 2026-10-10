@@ -141,7 +141,7 @@ def test_link_of_keeps_only_a_pulse_path_on_linkedin():
 
 
 def test_title_of_is_sanitised_and_bounded():
-    assert own_articles.title_of("  A​  title\n") == "A title"
+    assert own_articles.title_of("  A" + chr(0x200B) + "  title\n") == "A title"
     assert own_articles.title_of(None) is None
     assert own_articles.title_of("   ") is None
     assert len(own_articles.title_of("w" * 500)) == own_articles.MAX_TITLE_CHARS
