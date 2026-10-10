@@ -15,14 +15,17 @@ below is an EXACT set, and it fails in both directions on purpose:
 GREEN HERE DOES NOT MEAN THE CORPUS IS CLEAN. It means the corpus holds exactly
 the four defects that were measured on 2026-09-20 and no others.
 
-THE PIN IS EMPTY SINCE 2026-10-10 (lane G2), AND THAT IS THE STRONGER STATE.
+THE EIGHT WERE REPAIRED ON 2026-10-10 (lane G2), AND ONE SITE IS PINNED NOW.
 The script exited 1 on eight pinned sites for three weeks, and an instrument
 that is always red hides the next red behind the ones everybody already knows.
-Every pinned site was repaired in its record, none by touching the guard: the
-five ruling ids and the one state word wrapped after "under" now name their
-kind ("under the ruling", "in the state"), and the two never-minted blocker
-names carry a disclosure beside each proposal. So `PINNED` below is the empty
-set, the script exits 0, and ANY asserted-and-absent name is a red here.
+Every one of the eight was repaired in its record, none by touching the guard:
+the five ruling ids and the one state word wrapped after "under" now name
+their kind ("under the ruling", "in the state"), and the two never-minted
+blocker names carry a disclosure beside each proposal. The same day lane K's
+registration of the orchestrator's class rulings brought the same shape back
+once, in a document no lane may reword, so `PINNED` holds that one site until
+its owner repairs it, and the script exits 1 on it alone. Any OTHER
+asserted-and-absent name is a red here.
 
 THE CONTROLS ARE NOT DECORATION, and this repository has an expensive reason
 for saying so: a sibling wave measured that 56 of 88 probe files carry a control
@@ -60,13 +63,24 @@ sys.path.insert(0, str(REPO / "scripts"))
 import check_asserted_names_resolve as guard  # noqa: E402
 
 
-#: (kind, name, document, occurrences). EMPTY since 2026-10-10: every site
-#: below was repaired in its record and removed by the ratchet's own
-#: instruction (`_audit/2026-10-10-lane-g2-debts.md`, item 1).
-PINNED: set[tuple[str, str, str, int]] = set()
+#: (kind, name, document, occurrences). ONE SITE since 2026-10-10: the eight
+#: below the set were repaired in their records and removed by the
+#: ratchet's own instruction (`_audit/2026-10-10-lane-g2-debts.md`, item 1);
+#: the one inside it arrived the same day and only its owner can repair it.
+PINNED: set[tuple[str, str, str, int]] = {
+    # SURFACED 2026-10-10 BY LANE K's registration of the class rulings of
+    # 2026-09-28, the same shape as five of the eight below: "is read under
+    # `NAMES-AT-RUNTIME`", a slot phrase before a registered RULING id, not a
+    # blocker. Pinned rather than repaired because the document is the
+    # orchestrator's, copied byte-identical by four lanes; a lane may not
+    # reword it. The repair is the owner's ("read by the ruling"), and the
+    # ratchet then demands this pin narrow.
+    ("BLOCKER", "NAMES-AT-RUNTIME",
+     "_audit/2026-09-28-rulings-build-classes.md", 1),
+}
 
-#: REPAIRED 2026-10-10 (lane G2), the eight sites this pin carried, kept so a
-#: reader can see what the empty set replaced and how each went:
+#: REPAIRED 2026-10-10 (lane G2), the eight sites this pin carried until then,
+#: kept so a reader can see what left the set and how each went:
 #:
 #:     ("BLOCKER", "ALERTS-PAGE-UNREAD",
 #:      "_audit/2026-09-20-the-contingent-writeoffs.md", 1)
@@ -96,7 +110,6 @@ PINNED: set[tuple[str, str, str, int]] = set()
 #: the phrase no longer ends the line and the name is no longer in a blocker
 #: slot. THE GUARD WAS NOT TOUCHED: the planted controls below still convict
 #: the same shapes, and a ruling id wrapped after a bare "under" is still red.
-
 #: REPAIRED 2026-09-20, and removed from PINNED by the ratchet's own instruction.
 #:
 #: ("TOOL", "linkedin_applied_jobs",

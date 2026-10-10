@@ -156,6 +156,19 @@ DECLARED: dict[str, dict[str, str]] = {
             "rather than rediscovered."
         ),
     },
+    "_check_next_step_can_fail.py": {
+        "check": (
+            "A FALSE POSITIVE, declared as one rather than suppressed. The "
+            "line is `cns.check(table, queue)` -- the next-step ledger's own "
+            "checker (`scripts/check_next_step.check`), run over COPIES of "
+            "two census tables in a temporary directory to show it failing on "
+            "planted defects. The scanner's check pattern is Playwright's "
+            "`Locator.check` (tick a checkbox), and it matches the VERB, not "
+            "the receiver. No page, no browser and no network: the module "
+            "reads and writes text files and nothing else. Found by its first "
+            "CI run (lane K, run 38035568464, 2026-10-10)."
+        ),
+    },
 }
 
 

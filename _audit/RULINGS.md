@@ -8,9 +8,9 @@
 
 **THIS REGISTER IS NOT THE CORPUS AND DOES NOT CLAIM TO BE COMPLETE.** Read section 4 before concluding a question is unruled: the scan that keeps it honest reads ONE marker, and the ruling that caused this file to be written does not carry it.
 
-    rulings registered       68
-    documents scanned        260
-    RULED: declarations      55 claimed, 7 triaged, 0 unclaimed
+    rulings registered       73
+    documents scanned        262
+    RULED: declarations      60 claimed, 7 triaged, 0 unclaimed
 
 ---
 
@@ -119,6 +119,7 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | `MEMBER-ROSTERS-AS-BOUNDED-READS` | A roster the operator can open himself (a group's members, an event's attendees, a company's or school's People tab) is admitted as a bounded read: one page per call, the id from tool arguments only, no automatic pagination, no member name or id in a tracked file, inside the live budget. | member rosters | 2026-09-24 | [2026-09-24-rulings-search-verticals-rosters-passive-costs.md](2026-09-24-rulings-search-verticals-rosters-passive-costs.md)<br>*Rosters he can open himself* |
 | `THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET` | A third party's profile (/in/<slug>/) may be loaded only inside an outward act whose target the operator names in that call: slug from tool arguments only, never for a measurement, the shaper name-free. Search-admission condition 5 stands. | third-party profiles inside outward acts | 2026-09-24 | [2026-09-24-rulings-notify-veto-and-who-which.md](2026-09-24-rulings-notify-veto-and-who-which.md)<br>*A third party's profile, inside his own outward act* |
 | `NAMED-PROFILE-READ-BEHIND-A-GRANT` | A read of a member's profile he names in the call -- by link or member id, never a name read off a page -- is built behind the single-use grant, its preview stating that LinkedIn may show the member the view; declared fields leave as people records; never for a measurement. | a third-party profile he names | 2026-09-28 | [2026-09-28-rulings-named-profile-read.md](2026-09-28-rulings-named-profile-read.md)<br>*His answer* |
+| `READ-PAST-AN-ACT-SUBSTRING` | A refused substring whose recorded ground is an ACT -- sending, following, applying -- does not bar the READ of his own page that carries it: one exact anchored pattern, a control shown failing, the press gate still refusing every control. Not for a GET that changes state, a credential, recovery, session or security surface, a sign-in challenge, or a refusal grounded in an operator's ruling. | substrings written to stop an act | 2026-09-28 | [2026-09-28-rulings-build-classes.md](2026-09-28-rulings-build-classes.md)<br>*5. Reading past a substring written to stop an act* |
 
 ### read results
 
@@ -155,6 +156,10 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | `ACCOUNT-DESTRUCTION-STAYS-MANUAL` | Merging or closing his account, and deleting the data LinkedIn holds about him, are NOT built: EXCLUDED-RULED, reopened only when he asks for one by name in the call that would make it. | his account and its data | 2026-09-27 | [2026-09-27-rulings-relation-removals-and-account-destruction.md](2026-09-27-rulings-relation-removals-and-account-destruction.md)<br>*Destroying the account or its data* |
 | `PREVIEW-NAMES-THE-RESOLVED-TARGET` | A preview names whom the tool resolved -- the page-read name and headline, sanitised, marked untrusted, inside a people record -- and is returned at runtime, never written; a receipt (anything persisted after a write fires) carries only the caller-supplied target. | previews and receipts | 2026-09-27 | [2026-09-27-rulings-previews-and-receipts.md](2026-09-27-rulings-previews-and-receipts.md)<br>*A preview is the identity check, not a receipt* |
 | `RELATION-REMOVALS-BUILT-BEHIND-GRANTS` | Removing a relation with a member he names -- removing a 1st-degree connection, blocking a member, removing an attendee from an event he organises -- is BUILT behind the single-use grant, off by default, fired only at the one member he names in the call, with the resolved identity reported before the act. | his relations with another member | 2026-09-27 | [2026-09-27-rulings-relation-removals-and-account-destruction.md](2026-09-27-rulings-relation-removals-and-account-destruction.md)<br>*Removing a relation with a person he names* |
+| `EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS` | Every act toward other people -- publishing his own content and its modes, invitations that are not connection requests, RSVPs and group membership requests, reports about another member's content and their undo -- is BUILT behind the single-use grant, off by default, fired only at a target he names. It does not reach measured permanent refusals, the destruction rulings or purchases. | every act toward other people | 2026-09-28 | [2026-09-28-rulings-build-classes.md](2026-09-28-rulings-build-classes.md)<br>*1. Every outward class is built behind the grant* |
+| `HIS-OWN-CURATION-NOT-OUTWARD` | Curating his own feed and items -- mute, hide, not interested, follow or unfollow from a feed item, save, a post's notification switch, the per-post controls on his own items -- is not an outward act: built behind the grant and proven with its inverse in the same session, read back. | curation of his own feed and items | 2026-09-28 | [2026-09-28-rulings-build-classes.md](2026-09-28-rulings-build-classes.md)<br>*3. Curating his own feed and items is not outward* |
+| `HIS-OWN-SETTINGS-NOT-OUTWARD` | A setting of his own account is not an outward act: built behind the grant, live-proven one setting at a time by read, benign write, read back, exact restore, read back; a failed restore is STOP-ALL. Credential settings, settings that cannot be put back exactly and sensitive self-identification are built and never live-proven unless he names them. | settings of his own account | 2026-09-28 | [2026-09-28-rulings-build-classes.md](2026-09-28-rulings-build-classes.md)<br>*2. His own settings are not outward* |
+| `PURCHASES-STAY-MANUAL` | A purchase -- Premium, InMail credits, ads, boosts, any paid upgrade -- is NOT built: its row is EXCLUDED-RULED, reopened when he names a purchase to automate. | purchases | 2026-09-28 | [2026-09-28-rulings-build-classes.md](2026-09-28-rulings-build-classes.md)<br>*4. Purchases stay manual* |
 
 ---
 
@@ -289,11 +294,17 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 **`ERROR-URL-ASKED-FOR-OR-NOTHING`** -- THE FAILURE-PATH COUNTERPART OF THE `source_url` SPLIT RULING in `tests/test_the_source_url_split_was_never_ruled.py`, which is NOT registered here because it lives as a test rather than as an audit passage. Same kind of value -- the address a read landed on -- in several of the SAME functions, and the two were ruled by different files that did not know about each other: `linkedin_my_profile` was declared SHAPED on its success path and published its landing raw on its failure path, in one function, for weeks. That ruling supplied the METHOD used here (a per-site declaration with a written reason, a count per site, a relay pinned as a relay, and drift failing in BOTH directions) and its prohibition is what stopped this wave wrapping all twenty: *wrapping a deliberate publication is as much a defect as leaking an accidental one.* The count each way is 12 withheld, 7 published, 1 relay.
 
+**`EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS`** -- Orchestrator's call applying WRITE-CLASS-B and the operator's 08:11 principle; overridable. Extends OUTWARD-CLASSES-BUILT-BEHIND-GRANTS to every outward class.
+
 **`EXCLUDED-RULED-ADMISSION`** -- Written twice, once per slice, in near-identical words; `_audit/_census/profile.md` carries the twin. This is the ORIGIN of the forbidden-substring question and it already answers it: a substring entry counts only when it is one of the four WRITTEN grounds, i.e. when it was aimed at the capability.
 
 **`FEED-CONTENT-READ-RULING`** -- The ground `M C85`'s read half would rest on if that row were ever split -- see OPEN-QUESTIONS.
 
 **`GROUPS-ADDRESS-BUYS-NO-WRITE`** -- Stated in `readonly.py`'s own comment and quoted here. The companion rule that a widening is reported by what it BANKS rather than by what it UNBLOCKS sits in the same section.
+
+**`HIS-OWN-CURATION-NOT-OUTWARD`** -- Orchestrator's call applying OUTWARD-ACTS-NEED-THE-OPERATOR; overridable. An undo drawn only once proves the act only through that undo.
+
+**`HIS-OWN-SETTINGS-NOT-OUTWARD`** -- Orchestrator's call applying OUTWARD-ACTS-NEED-THE-OPERATOR; overridable. Settings pages are still admitted one by name.
 
 **`IN-ME-NO-BLANKET-BAR`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable.
 
@@ -325,6 +336,10 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 **`PREVIEW-NAMES-THE-RESOLVED-TARGET`** -- Orchestrator's call applying NAMES-AT-RUNTIME and PEOPLE-DATA-MITIGATIONS; overridable. Answers lane G's preview question.
 
+**`PURCHASES-STAY-MANUAL`** -- Orchestrator's call applying the operator's COST-AWARE STAKES-GATING rule; overridable.
+
+**`READ-PAST-AN-ACT-SUBSTRING`** -- Orchestrator's call applying OUTWARD-ACTS-NEED-THE-OPERATOR and D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING; overridable. A page the allowlist refuses by its silence is admitted the same way.
+
 **`RELATION-REMOVALS-BUILT-BEHIND-GRANTS`** -- Orchestrator's call applying the operator's 08:11 principle and OUTWARD-ACTS-NEED-THE-OPERATOR; overridable. Decides N 29, N 141 and N A14, which lane L8 left outside the three classes.
 
 **`REVEAL-BUTTON-IS-A-DISCLOSURE`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable.
@@ -353,12 +368,12 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 | signal NOT scanned | files | lines |
 |---|---|---|
-| a heading naming a ruling | 124 | 273 |
+| a heading naming a ruling | 125 | 274 |
 | a bold line opening on RULING/RULED | 63 | 144 |
 | the phrase THE RULING | 38 | 63 |
-| a named -RULING id | 36 | 94 |
+| a named -RULING id | 38 | 96 |
 | the phrase standing ruling | 17 | 40 |
-| a lead or operator ruling in prose | 38 | 104 |
+| a lead or operator ruling in prose | 40 | 106 |
 
 **The ruling that caused this register to be written is in the first row and not in the scan.** `BOUNDARY-IS-NOT-A-REASON` is phrased as a quoted ledger rule under a heading that carries no marker at all. It is registered because a person read it, and nothing here would have found it.
 
@@ -424,6 +439,11 @@ Every `RULED:` line in the corpus, and what became of it. An UNCLAIMED row fails
 | [2026-09-27-rulings-previews-and-receipts.md](2026-09-27-rulings-previews-and-receipts.md) | RULED: (orchestrator, 2026-09-27, applying NAMES-AT-RUNTIME) A PREVIEW NAMES WHOM | `PREVIEW-NAMES-THE-RESOLVED-TARGET` |
 | [2026-09-27-rulings-relation-removals-and-account-destruction.md](2026-09-27-rulings-relation-removals-and-account-destruction.md) | RULED: (orchestrator, 2026-09-27, applying the operator's 08:11 principle) REMOVING A RELA | `RELATION-REMOVALS-BUILT-BEHIND-GRANTS` |
 | [2026-09-27-rulings-relation-removals-and-account-destruction.md](2026-09-27-rulings-relation-removals-and-account-destruction.md) | RULED: (orchestrator, 2026-09-27, applying the operator's 08:11 principle) ACCOUNT-LEVEL | `ACCOUNT-DESTRUCTION-STAYS-MANUAL` |
+| [2026-09-28-rulings-build-classes.md](2026-09-28-rulings-build-classes.md) | RULED: (orchestrator, 2026-09-28, applying WRITE-CLASS-B and the operator's 08:11 principl | `EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS` |
+| [2026-09-28-rulings-build-classes.md](2026-09-28-rulings-build-classes.md) | RULED: (orchestrator, 2026-09-28, applying OUTWARD-ACTS-NEED-THE-OPERATOR) HIS-OWN-SETTING | `HIS-OWN-SETTINGS-NOT-OUTWARD` |
+| [2026-09-28-rulings-build-classes.md](2026-09-28-rulings-build-classes.md) | RULED: (orchestrator, 2026-09-28, applying OUTWARD-ACTS-NEED-THE-OPERATOR) HIS-OWN-CURATIO | `HIS-OWN-CURATION-NOT-OUTWARD` |
+| [2026-09-28-rulings-build-classes.md](2026-09-28-rulings-build-classes.md) | RULED: (orchestrator, 2026-09-28, applying COST-AWARE STAKES-GATING) PURCHASES-STAY-MANUAL | `PURCHASES-STAY-MANUAL` |
+| [2026-09-28-rulings-build-classes.md](2026-09-28-rulings-build-classes.md) | RULED: (orchestrator, 2026-09-28, applying OUTWARD-ACTS-NEED-THE-OPERATOR and D3-UNREGISTE | `READ-PAST-AN-ACT-SUBSTRING` |
 | [2026-09-28-rulings-named-profile-read.md](2026-09-28-rulings-named-profile-read.md) | RULED: (operator, 2026-09-28 08:01, verbatim) "Yes, I'm giving you permission." | `NAMED-PROFILE-READ-BEHIND-A-GRANT` |
 
 ### 5.1 Triaged -- a declaration hit that is not a ruling made here
