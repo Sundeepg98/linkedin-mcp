@@ -46,6 +46,7 @@ it discriminating:
 """
 from __future__ import annotations
 
+import copy
 import pathlib
 import subprocess
 import sys
@@ -85,7 +86,7 @@ def _skip_if_moved(*paths: str) -> None:
 # THE POSITIVE ARM.
 # --------------------------------------------------------------------------
 
-def test_the_census_ledger_selects_the_test_that_caught_it():
+def test_the_census_ledger_selects_the_test_that_caught_it(shared_reading):
     """The whole point, stated as an assertion."""
     _skip_if_moved(LEDGER, THE_TEST, THE_SCRIPT)
     impact = G.impact_set([LEDGER])
@@ -96,7 +97,7 @@ def test_the_census_ledger_selects_the_test_that_caught_it():
     )
 
 
-def test_the_census_evidence_table_selects_it_too():
+def test_the_census_evidence_table_selects_it_too(shared_reading):
     """The second data shape: a TSV the same script reads.
 
     Included because the ledger is a `.md` and a rule that happened to work
@@ -111,7 +112,8 @@ def test_the_census_evidence_table_selects_it_too():
     )
 
 
-def test_the_selection_travels_the_two_hop_chain_and_not_a_coincidence():
+def test_the_selection_travels_the_two_hop_chain_and_not_a_coincidence(
+        shared_reading):
     """Provenance, not just membership.
 
     A selector can return the right answer for the wrong reason -- a stray
@@ -138,7 +140,7 @@ def test_the_selection_travels_the_two_hop_chain_and_not_a_coincidence():
 # THE NEGATIVE ARM -- the coupling rule REVERTED, and the selection gone.
 # --------------------------------------------------------------------------
 
-def test_reverting_the_data_rule_loses_the_test_again():
+def test_reverting_the_data_rule_loses_the_test_again(shared_reading):
     """THE CONTROL. Turn the rule off; the census case must go dark.
 
     Without this, every assertion above is satisfiable by a selector that
@@ -225,7 +227,8 @@ def test_a_docstring_that_cites_the_ledger_is_not_coupled_to_it():
 # AN EMPTY SET IS A LOUD EVENT.
 # --------------------------------------------------------------------------
 
-def test_an_unreachable_path_widens_instead_of_passing_quietly(capsys):
+def test_an_unreachable_path_widens_instead_of_passing_quietly(
+        shared_reading, capsys):
     """An empty selection must never read as a pass.
 
     From outside, a selector that found nothing and a selector that is BROKEN
@@ -252,7 +255,7 @@ def test_an_unreachable_path_widens_instead_of_passing_quietly(capsys):
     assert "EMPTY impact set" in said
 
 
-def test_a_runner_wide_change_refuses_to_scope(capsys):
+def test_a_runner_wide_change_refuses_to_scope(shared_reading, capsys):
     """`tests/conftest.py` holds AUTOUSE fixtures: loaded by all, named by none.
 
     It is the sharpest member of the class the analyser has no model of, and
@@ -269,7 +272,7 @@ def test_a_runner_wide_change_refuses_to_scope(capsys):
 # THE GATE MAY NOT CLAIM MORE THAN IT CHECKED.
 # --------------------------------------------------------------------------
 
-def test_a_scoped_plan_names_what_it_did_not_run(capsys):
+def test_a_scoped_plan_names_what_it_did_not_run(shared_reading, capsys):
     """The honesty requirement, asserted on the gate's real output.
 
     A gate that prints PASS after running a handful of 6081 tests has told a
@@ -305,7 +308,8 @@ PROVEN_CORPUS_WIDE = (
 )
 
 
-def test_the_floor_is_derived_and_still_finds_the_two_proven_guards():
+def test_the_floor_is_derived_and_still_finds_the_two_proven_guards(
+        shared_reading):
     """The derivation is CHECKED, not believed.
 
     `always_run_files` detects corpus-wide sweeps by looking for an
@@ -330,7 +334,7 @@ def test_the_floor_is_derived_and_still_finds_the_two_proven_guards():
         )
 
 
-def test_the_declared_floor_members_run_and_are_not_derivable():
+def test_the_declared_floor_members_run_and_are_not_derivable(shared_reading):
     """THE TWO DECLARED MEMBERS, held so the declaration cannot rot.
 
     Each is in the floor on every run, with its reason; each file exists; and
@@ -355,7 +359,7 @@ def test_the_declared_floor_members_run_and_are_not_derivable():
         assert rel not in derived, rel
 
 
-def test_the_floor_runs_even_when_the_diff_couples_to_nothing():
+def test_the_floor_runs_even_when_the_diff_couples_to_nothing(shared_reading):
     """A diff with an empty selection still gets the corpus-wide guards.
 
     This is the whole point of the category: `test_no_committed_identity.py`
@@ -372,7 +376,7 @@ def test_the_floor_runs_even_when_the_diff_couples_to_nothing():
         )
 
 
-def test_the_floor_does_not_mask_an_empty_selection(capsys):
+def test_the_floor_does_not_mask_an_empty_selection(shared_reading, capsys):
     """THE TRAP, asserted so it cannot be reintroduced.
 
     The floor is never empty. If the gate's "empty impact set" alarm were
@@ -396,7 +400,7 @@ def test_the_floor_does_not_mask_an_empty_selection(capsys):
     )
 
 
-def test_turning_the_floor_off_removes_exactly_the_floor():
+def test_turning_the_floor_off_removes_exactly_the_floor(shared_reading):
     """The floor shown ABSENT, so its presence elsewhere means something.
 
     A category that is always on is indistinguishable from one hard-coded
@@ -447,7 +451,7 @@ LOADED_BY_PATH_SCRIPT = "scripts/drawn_route_corpus.py"
 LOADED_BY_PATH_READER = "tests/test_premium_four_boundary.py"
 
 
-def test_a_composed_stem_reaches_the_file_that_composes_it():
+def test_a_composed_stem_reaches_the_file_that_composes_it(shared_reading):
     """The positive arm of the rule that made this wave necessary."""
     _skip_if_moved(COMPOSED_FIXTURE, COMPOSED_READER)
     impact = G.impact_set([COMPOSED_FIXTURE])
@@ -458,7 +462,7 @@ def test_a_composed_stem_reaches_the_file_that_composes_it():
     )
 
 
-def test_a_twice_composed_stem_reaches_it_too():
+def test_a_twice_composed_stem_reaches_it_too(shared_reading):
     """The harder shape: a literal prefix plus a hole, extension added later."""
     _skip_if_moved(TWICE_COMPOSED_FIXTURE, TWICE_COMPOSED_READER)
     impact = G.impact_set([TWICE_COMPOSED_FIXTURE])
@@ -468,7 +472,7 @@ def test_a_twice_composed_stem_reaches_it_too():
     )
 
 
-def test_reverting_the_composed_rule_loses_those_readers_again():
+def test_reverting_the_composed_rule_loses_those_readers_again(shared_reading):
     """THE CONTROL. Both specimens must go dark when the rule is disarmed.
 
     ``observed_coupling`` is disarmed with it, because the recorded read map
@@ -489,7 +493,8 @@ def test_reverting_the_composed_rule_loses_those_readers_again():
         )
 
 
-def test_the_composed_rule_refuses_a_shape_the_reader_enumerates():
+def test_the_composed_rule_refuses_a_shape_the_reader_enumerates(
+        shared_reading):
     """The NARROWING arm, which is what stops the rule being a floor.
 
     ``f"{x}.html"`` fullmatches every html basename in the tree. A rule that
@@ -510,7 +515,8 @@ def test_the_composed_rule_refuses_a_shape_the_reader_enumerates():
     )
 
 
-def test_a_script_loaded_by_path_carries_its_data_to_the_loader():
+def test_a_script_loaded_by_path_carries_its_data_to_the_loader(
+        shared_reading):
     """``spec_from_file_location`` is an import no import parser can read."""
     _skip_if_moved(LOADED_BY_PATH, LOADED_BY_PATH_SCRIPT, LOADED_BY_PATH_READER)
     impact = G.impact_set([LOADED_BY_PATH], observed_coupling=False)
@@ -520,7 +526,7 @@ def test_a_script_loaded_by_path_carries_its_data_to_the_loader():
     )
 
 
-def test_reverting_the_import_walk_loses_the_path_loader():
+def test_reverting_the_import_walk_loses_the_path_loader(shared_reading):
     """THE CONTROL for the hop above."""
     _skip_if_moved(LOADED_BY_PATH, LOADED_BY_PATH_READER)
     reverted = G.impact_set([LOADED_BY_PATH], import_coupling=False,
@@ -537,7 +543,7 @@ def test_reverting_the_import_walk_loses_the_path_loader():
 # an empty recording.
 # --------------------------------------------------------------------------
 
-def test_the_observed_map_only_ever_adds_to_a_plan():
+def test_the_observed_map_only_ever_adds_to_a_plan(shared_reading):
     """A recording may widen a plan. It may never trim one.
 
     A test written since the recording is absent from it, and absence read as
@@ -562,7 +568,8 @@ def test_the_observed_map_only_ever_adds_to_a_plan():
     )
 
 
-def test_an_absent_read_map_is_reported_and_never_read_as_empty(monkeypatch):
+def test_an_absent_read_map_is_reported_and_never_read_as_empty(
+        shared_reading, monkeypatch):
     """No map on disk is an UNKNOWN, and the gate has to say so.
 
     ``{}`` and None are the same value to a careless caller and completely
@@ -799,13 +806,40 @@ def test_a_package_module_that_cannot_be_separated_is_read_whole(
 
 @pytest.fixture(scope="module")
 def _one_reading():
-    """ONE reading of the real tree for every real-tree control below.
+    """ONE reading of the real tree for EVERY real-tree test in this file.
 
     Sound to share: a ``Corpus`` holds only per-file readings and the floor,
     and none of them takes input from the diff or from a switch. Cheap
     because the first reading is most of the cost.
+
+    EXTENDED 2026-10-10 FROM THE CONTROLS BELOW TO THE WHOLE FILE, measured:
+    one ``impact_set`` call costs 12.8s on a fresh reading and 3.5s on one
+    already taken, and this file made about 27 calls on fresh readings -- 410s
+    serial on the operator's box, 189-199s on an ubuntu runner, the slowest
+    file in the suite and the floor of the fast CI lane's slowest shard.
     """
     return G.Corpus()
+
+
+def _view(reading):
+    """A ``Corpus`` that shares ``reading``'s per-file readings and derives
+    its OWN floor -- what a fresh ``G.Corpus()`` holds, without re-reading the
+    tree.
+
+    The floor is the one thing a ``Corpus`` memoises from module state a test
+    may change: ``test_the_declared_floor_members_run_and_are_not_derivable``
+    clears ``ALWAYS_RUN_DECLARED`` and derives the floor again. Shared, a floor
+    derived inside one test would answer for every test after it; a view
+    starts with none, so every ``always_run_files`` call derives its own, from
+    the module state of the test it runs in.
+
+    ``unseparated`` stays shared: it only grows with readings, and on the real
+    tree it is empty -- which ``test_no_package_module_names_a_tracked_data_
+    file_outside_a_sentence`` asserts.
+    """
+    view = copy.copy(reading)
+    view.floor = None
+    return view
 
 
 @pytest.fixture
@@ -814,9 +848,10 @@ def shared_reading(_one_reading, monkeypatch):
 
     By patching the constructor rather than adding an argument, so the calls
     below are the gate's own calls, unchanged -- which is what lets them run,
-    and go RED, against the analyser as it was before the rule.
+    and go RED, against the analyser as it was before the rule. Each call gets
+    a :func:`_view`, never the shared object itself.
     """
-    monkeypatch.setattr(G, "Corpus", lambda: _one_reading)
+    monkeypatch.setattr(G, "Corpus", lambda: _view(_one_reading))
     return _one_reading
 
 
