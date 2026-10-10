@@ -360,14 +360,24 @@ the merge of master `53908ea`.
 - `M C32` (messaging-and-content): the cell names the new route -- the item
   key from `activity_items`, passed back as `item`; nothing checks whose post
   it is; the preview names the author and its kind -- and says the inverse is
-  NOT built and that the live proof waits on it.
+  NOT built and that the live proof waits on it. AFTER THE RULINGS OF 14:14
+  the paragraph was rewritten in place: `author_kind` reads `unknown`, and the
+  inverse is built.
 - `P A8` (profile): the cell names the clear-restore -- the record a write over
   an empty original leaves, the one admission of the empty value as a CLEAR,
   the click's "only what this server wrote", the read-back that must read "".
 - NOT EDITED, and why: `N 178` and `N 65` keep their cells -- their blocker is
   still a capture (C-NP1 now, on the detail page the new door admits), which D.2
   specifies; `M C35` ("Remove or change a reaction") is a candidate for the next
-  session's un-react and is left to its own cell's bar.
+  session's un-react and is left to its own cell's bar. AFTER THE RULINGS OF
+  14:14 ITS CELL WAS EDITED AFTER ALL, IN PLACE AND DATED, because its blocker
+  had become false: it said the ON label had never been observed and that no
+  selector existed for the inverse. Two ON names were measured on 2026-09-04
+  and 2026-09-23/24, and the remove half is now built. The note says so, says
+  CHANGE is not built (no 'React <kind>' name measured), and moves NO state:
+  the row stays GAP and no pin moved (`census_completion.py --check`, the
+  blocker map's `--check`, both clean). Whether half a row's capability built
+  moves it is the census owner's call, asked in the final report.
 
 ---
 
