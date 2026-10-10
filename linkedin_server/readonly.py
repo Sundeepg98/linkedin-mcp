@@ -3755,6 +3755,20 @@ SANCTIONED_MUTATIONS: tuple[tuple[str, str, str], ...] = (
     ("linkedin_server/cdp_download.py", "_send", "cdp_send"),
     ("linkedin_server/cdp_download.py", "capture_download", "cdp_session"),
     ("linkedin_server/cdp_download.py", "reset_download_behaviour", "cdp_session"),
+    # THE SIXTEENTH, 2026-10-10 (lane B4, census J 161; the coordinator's
+    # order of 19:30): ``job_alert_switch.trial_press``, A READ DECLARED HERE.
+    # Playwright's ``click(trial=True)`` runs the actionability checks only --
+    # visible, stable, enabled, receives events -- and DISPATCHES NOTHING; the
+    # scanner sees ``.click(`` and cannot know the flag, and the trailing
+    # waiver is dom.py's alone (``test_only_dom_module_waives_evaluate``), so
+    # the call is declared on this list rather than the scanner taught to
+    # skip it. ITS BUDGET: one call per reading, on the ONE toggle container
+    # the reader counted in its block (``job_alert_switch.TOGGLE``, a count
+    # of exactly one required first), bounded by ``TRIAL_TIMEOUT_MS`` (2.5 s),
+    # at preview and at click time -- it measures whether the press
+    # ``writes.perform`` would make can reach the switch at all, the finding
+    # of live session 8 on the same LinkedIn toggle (P B9).
+    ("linkedin_server/job_alert_switch.py", "trial_press", "click"),
 )
 
 

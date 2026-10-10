@@ -1,4 +1,4 @@
-"""The tool surface: sixty-two tools, eighteen of which write to LinkedIn.
+"""The tool surface: sixty-four tools, twenty of which write to LinkedIn.
 
 THE SIXTY-SECOND IS A WRITE, 2026-10-10, on lane U's branch, on ruling
 ``FILE-UPLOAD-OPENED`` (the operator's decision of 2026-09-04):
@@ -226,7 +226,7 @@ assigned to anybody -- it waits for whoever next runs the suite, and in the
 meantime the pin goes on asserting the old number with full confidence.
 
 THE NUMBERS ABOVE ARE DERIVED NOW, and that is a statement about a test rather
-than about an intention. Sixty-two is ``len(await mcp.list_tools())``,
+than about an intention. Sixty-four is ``len(await mcp.list_tools())``,
 pinned in ``test_server_surface.py`` by
 ``test_the_surface_is_exactly_the_sixty_two_tools``; the split is pinned by
 ``tests/test_prose_that_makes_a_claim.py::test_the_server_docstring_numbers_are_derived``,
@@ -241,9 +241,10 @@ POINTER to it was dangling, so a reader who followed it found nothing and
 would reasonably conclude these numbers are unchecked. A citation is a claim
 like any other.
 The surface splits three ways and the split is the part a reader actually
-needs: FORTY-FOUR read, EIGHTEEN write, and ZERO are write-shaped,
-registered, gated and unable to act. Forty-four plus eighteen plus zero is
-sixty-two. (Thirty-eight, thirteen and fifty-one until 2026-09-24; thirty-nine,
+needs: FORTY-FOUR read, TWENTY write, and ZERO are write-shaped,
+registered, gated and unable to act. Forty-four plus twenty plus zero is
+sixty-four. (Forty-four, eighteen and sixty-two until lane B4, 2026-10-10;
+Thirty-eight, thirteen and fifty-one until 2026-09-24; thirty-nine,
 thirteen and fifty-two at the live lane's merge the same day; thirty-nine,
 fourteen and fifty-three at lane L7's; forty-one, fifteen and fifty-six at
 lane L5's; forty-one, sixteen and fifty-seven at lane L8's merge on
@@ -382,10 +383,10 @@ the moment ``update_profile_field`` was given an address while still refusing.
 always meant: an address is not a permission.
 
 NOTE THE ACTION THAT HAS NO TOOL. ``writes.SANCTIONED_WRITES`` holds
-NINETEEN actions where this surface registers EIGHTEEN write-shaped tools, and
+TWENTY-ONE actions where this surface registers TWENTY write-shaped tools, and
 the missing one is ``set_open_to_work``: it is sanctioned, it is refused by
-``_refuse_unperformable``, and no tool was ever registered for it. So eighteen
-counts TOOLS and nineteen counts ACTIONS, and a reader comparing the two
+``_refuse_unperformable``, and no tool was ever registered for it. So twenty
+counts TOOLS and twenty-one counts ACTIONS, and a reader comparing the two
 numbers is not looking at a discrepancy. (EIGHTEEN and SEVENTEEN until lane U's
 ``send_attachment``, 2026-10-10, adding one to each; NINETEEN and EIGHTEEN from lane L5's
 merge of master 52b55b6 until lane L5 retired ``send_message`` the same day,

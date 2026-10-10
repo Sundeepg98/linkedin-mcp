@@ -1064,116 +1064,6 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "on this surface at all."
         ),
     ),
-    # THE SIMILAR-JOBS ALERT, ON AND OFF, 2026-10-10 (lane B4, census row
-    # ``J 161``), each the other's inverse and built in ONE change, under
-    # ``HIS-OWN-CURATION-NOT-OUTWARD``: a job alert is his own saved query,
-    # sent to nobody. The switch, its readings and its verdicts live in
-    # ``job_alert_switch``; these entries and the arms below delegate. MEASURED
-    # on live session 8's posting (tests/fixtures/live8/posting.html): one block
-    # headed "Set alert for similar jobs", one ``input[role=switch]`` in it
-    # labelled with ``dom.JOB_ALERT_HEADING_PREFIX``, the word "Off" beside it.
-    # The ON shape is DERIVED, and so is whether a click on the toggle reaches
-    # it -- the preview measures that with a trial press. Named on ``set``,
-    # LinkedIn's own verb here ("Set alert"), which the naming law admits, and
-    # its inverse on ``unset`` (un + an original verb).
-    "linkedin_set_similar_jobs_alert": WriteSpec(
-        action="set_similar_jobs_alert",
-        tool_name="linkedin_set_similar_jobs_alert",
-        url_template="https://www.linkedin.com/jobs/view/{target}/",
-        url_pattern=re.compile(r"^https://www\.linkedin\.com/jobs/view/(\d{6,})/$"),
-        exempt_substring=None,
-        summary=(
-            "Turn on LinkedIn's alert for jobs similar to one posting, from the "
-            "posting's own switch."
-        ),
-        from_state="alert_off",
-        to_state="alert_on",
-        target_kind="job_id",
-        state_from="posting_alert_switch",
-        direction_source=(
-            "the posting's own 'Set alert for similar jobs' switch, read off the "
-            "page this action clicks on, at no extra page load: exactly one "
-            "block with that heading, exactly one input switch in it and on the "
-            "page wearing LinkedIn's label prefix, and the word beside it (Off) "
-            "agreeing with the switch's checked property. MEASURED on live "
-            "session 8's posting, 2026-10-10."
-        ),
-        wrong_state_note=(
-            "This acts only from the OFF reading. A switch already reading On is "
-            "refused, not pressed: pressing it would turn the alert OFF, which "
-            "is linkedin_unset_similar_jobs_alert's act, not this one's."
-        ),
-        reversibility="STILL-UNKNOWN whether the same switch turns it off again: the inverse is built, the On shape is not measured",
-        reversibility_measured=False,
-        reversibility_class="STILL-UNKNOWN",
-        reversibility_evidence=(
-            "DERIVED, NOT MEASURED. One control carries both states -- an input "
-            "switch, its state its checked property and the word beside it -- "
-            "and linkedin_unset_similar_jobs_alert presses the same control "
-            "from On. The On shape has never been captured."
-        ),
-        reversible_by=(
-            "this server: linkedin_unset_similar_jobs_alert, built in the same "
-            "change, presses the same switch from On."
-        ),
-        residue=(
-            "WHETHER ONE PRESS COMPLETES THE ACT is unmeasured -- LinkedIn may "
-            "draw a further step -- and whether a click on the toggle reaches "
-            "the switch at all: the same LinkedIn toggle in his profile editor "
-            "drew an input no click could reach (P B9, session 8). The preview "
-            "runs a trial press, and the fresh render after the press says "
-            "whether the alert landed."
-        ),
-        reversibility_procedure=(
-            "One supervised round trip on a posting HE names: set (preview, "
-            "press, fresh render reading On), then unset (preview, press, fresh "
-            "render reading Off) in the same session; a failed unset is STOP-ALL."
-        ),
-    ),
-    "linkedin_unset_similar_jobs_alert": WriteSpec(
-        action="unset_similar_jobs_alert",
-        tool_name="linkedin_unset_similar_jobs_alert",
-        url_template="https://www.linkedin.com/jobs/view/{target}/",
-        url_pattern=re.compile(r"^https://www\.linkedin\.com/jobs/view/(\d{6,})/$"),
-        exempt_substring=None,
-        summary=(
-            "Turn off LinkedIn's alert for jobs similar to one posting, from the "
-            "posting's own switch."
-        ),
-        from_state="alert_on",
-        to_state="alert_off",
-        target_kind="job_id",
-        state_from="posting_alert_switch",
-        direction_source=(
-            "the same switch as linkedin_set_similar_jobs_alert, read the same "
-            "way; this acts only from the On reading, which is DERIVED (no "
-            "capture holds the switch on)."
-        ),
-        wrong_state_note=(
-            "This acts only from the On reading. A switch reading Off is "
-            "refused, not pressed: pressing it would turn the alert ON, which "
-            "is linkedin_set_similar_jobs_alert's act."
-        ),
-        reversibility="STILL-UNKNOWN whether the same switch turns it on again: the inverse is built, the On shape is not measured",
-        reversibility_measured=False,
-        reversibility_class="STILL-UNKNOWN",
-        reversibility_evidence=(
-            "DERIVED, NOT MEASURED: the same control, the other direction."
-        ),
-        reversible_by=(
-            "this server: linkedin_set_similar_jobs_alert presses the same "
-            "switch from Off."
-        ),
-        residue=(
-            "the same as linkedin_set_similar_jobs_alert's: one press, and "
-            "whether the toggle can be reached, are measured on the first "
-            "supervised round trip."
-        ),
-        reversibility_procedure=(
-            "the same round trip as linkedin_set_similar_jobs_alert, this half "
-            "second."
-        ),
-    ),
     # LEAVING ONE GROUP, 2026-09-27 (census rows ``M C63`` and ``N 64``, one
     # capability counted twice; lane L8, whose child wrote it on 2026-09-24
     # and whose lead landed it three days later). Specified field by field on
@@ -2679,6 +2569,118 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "2026-09-24 (OUTWARD-CLASSES-BUILT-BEHIND-GRANTS). No delete is "
             "built here, and building one would not recall a message already "
             "read."
+        ),
+    ),
+    # LAST IN THE TABLE ON PURPOSE: ``tests/test_leave_group.py`` pins the
+    # leave directly after "I'm interested", the order its lane landed in.
+    # THE SIMILAR-JOBS ALERT, ON AND OFF, 2026-10-10 (lane B4, census row
+    # ``J 161``), each the other's inverse and built in ONE change, under
+    # ``HIS-OWN-CURATION-NOT-OUTWARD``: a job alert is his own saved query,
+    # sent to nobody. The switch, its readings and its verdicts live in
+    # ``job_alert_switch``; these entries and the arms below delegate. MEASURED
+    # on live session 8's posting (tests/fixtures/live8/posting.html): one block
+    # headed "Set alert for similar jobs", one ``input[role=switch]`` in it
+    # labelled with ``dom.JOB_ALERT_HEADING_PREFIX``, the word "Off" beside it.
+    # The ON shape is DERIVED, and so is whether a click on the toggle reaches
+    # it -- the preview measures that with a trial press. Named on ``set``,
+    # LinkedIn's own verb here ("Set alert"), which the naming law admits, and
+    # its inverse on ``unset`` (un + an original verb).
+    "linkedin_set_similar_jobs_alert": WriteSpec(
+        action="set_similar_jobs_alert",
+        tool_name="linkedin_set_similar_jobs_alert",
+        url_template="https://www.linkedin.com/jobs/view/{target}/",
+        url_pattern=re.compile(r"^https://www\.linkedin\.com/jobs/view/(\d{6,})/$"),
+        exempt_substring=None,
+        summary=(
+            "Turn on LinkedIn's alert for jobs similar to one posting, from the "
+            "posting's own switch."
+        ),
+        from_state="alert_off",
+        to_state="alert_on",
+        target_kind="job_id",
+        state_from="posting_alert_switch",
+        direction_source=(
+            "the posting's own 'Set alert for similar jobs' switch, read off the "
+            "page this action clicks on, at no extra page load: exactly one "
+            "block with that heading, exactly one input switch in it and on the "
+            "page wearing LinkedIn's label prefix, and the word beside it (Off) "
+            "agreeing with the switch's checked property. MEASURED on live "
+            "session 8's posting, 2026-10-10."
+        ),
+        wrong_state_note=(
+            "This acts only from the OFF reading. A switch already reading On is "
+            "refused, not pressed: pressing it would turn the alert OFF, which "
+            "is linkedin_unset_similar_jobs_alert's act, not this one's."
+        ),
+        reversibility="STILL-UNKNOWN whether the same switch turns it off again: the inverse is built, the On shape is not measured",
+        reversibility_measured=False,
+        reversibility_class="STILL-UNKNOWN",
+        reversibility_evidence=(
+            "DERIVED, NOT MEASURED. One control carries both states -- an input "
+            "switch, its state its checked property and the word beside it -- "
+            "and linkedin_unset_similar_jobs_alert presses the same control "
+            "from On. The On shape has never been captured."
+        ),
+        reversible_by=(
+            "this server: linkedin_unset_similar_jobs_alert, built in the same "
+            "change, presses the same switch from On."
+        ),
+        residue=(
+            "WHETHER ONE PRESS COMPLETES THE ACT is unmeasured -- LinkedIn may "
+            "draw a further step -- and whether a click on the toggle reaches "
+            "the switch at all: the same LinkedIn toggle in his profile editor "
+            "drew an input no click could reach (P B9, session 8). The preview "
+            "runs a trial press, and the fresh render after the press says "
+            "whether the alert landed."
+        ),
+        reversibility_procedure=(
+            "One supervised round trip on a posting HE names: set (preview, "
+            "press, fresh render reading On), then unset (preview, press, fresh "
+            "render reading Off) in the same session; a failed unset is STOP-ALL."
+        ),
+    ),
+    "linkedin_unset_similar_jobs_alert": WriteSpec(
+        action="unset_similar_jobs_alert",
+        tool_name="linkedin_unset_similar_jobs_alert",
+        url_template="https://www.linkedin.com/jobs/view/{target}/",
+        url_pattern=re.compile(r"^https://www\.linkedin\.com/jobs/view/(\d{6,})/$"),
+        exempt_substring=None,
+        summary=(
+            "Turn off LinkedIn's alert for jobs similar to one posting, from the "
+            "posting's own switch."
+        ),
+        from_state="alert_on",
+        to_state="alert_off",
+        target_kind="job_id",
+        state_from="posting_alert_switch",
+        direction_source=(
+            "the same switch as linkedin_set_similar_jobs_alert, read the same "
+            "way; this acts only from the On reading, which is DERIVED (no "
+            "capture holds the switch on)."
+        ),
+        wrong_state_note=(
+            "This acts only from the On reading. A switch reading Off is "
+            "refused, not pressed: pressing it would turn the alert ON, which "
+            "is linkedin_set_similar_jobs_alert's act."
+        ),
+        reversibility="STILL-UNKNOWN whether the same switch turns it on again: the inverse is built, the On shape is not measured",
+        reversibility_measured=False,
+        reversibility_class="STILL-UNKNOWN",
+        reversibility_evidence=(
+            "DERIVED, NOT MEASURED: the same control, the other direction."
+        ),
+        reversible_by=(
+            "this server: linkedin_set_similar_jobs_alert presses the same "
+            "switch from Off."
+        ),
+        residue=(
+            "the same as linkedin_set_similar_jobs_alert's: one press, and "
+            "whether the toggle can be reached, are measured on the first "
+            "supervised round trip."
+        ),
+        reversibility_procedure=(
+            "the same round trip as linkedin_set_similar_jobs_alert, this half "
+            "second."
         ),
     ),
 }

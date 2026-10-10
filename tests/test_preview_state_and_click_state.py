@@ -444,8 +444,38 @@ async def _live(over, action, *, spec=None, anchor=None):
     # A STAR, because one arm returns a fourth element naming its mutation
     # kind. Unpacking three positionally would break the day a second arm has
     # something to say.
+    if action in _WORLDS_THAT_REACH_OUT:
+        state, why, selector, *_rest = await _over_refusing_every_request(html, work)
+        return state, why, selector
     state, why, selector, *_rest = await over(html, work)
     return state, why, selector
+
+
+#: THE WORLDS THAT ARE LIVE SKELETONS, 2026-10-10 (lane B4). A tracked copy of a
+#: live capture keeps the page's stylesheet, image and frame addresses (reduced
+#: to ``https://x/...``), and a page given one by ``set_content`` starts nine
+#: requests the network guard refuses -- MEASURED: CI run 38057068066 failed
+#: both alert cases on exactly that report and on nothing else. Served here
+#: the way ``tests/test_similar_jobs_alert.py`` serves them: every request the
+#: page starts is aborted by the page's own route, before the guard has to.
+_WORLDS_THAT_REACH_OUT = frozenset({"set_similar_jobs_alert", "unset_similar_jobs_alert"})
+
+
+async def _over_refusing_every_request(html: str, work):
+    playwright = pytest.importorskip("playwright.async_api")
+    async with playwright.async_playwright() as pw:
+        browser = await pw.chromium.launch(headless=True)
+        try:
+            page = await browser.new_page(viewport=dict(VIEWPORT))
+
+            async def _refuse(route):
+                await route.abort()
+
+            await page.route("**/*", _refuse)
+            await page.set_content(html, wait_until="domcontentloaded", timeout=60_000)
+            return await work(page)
+        finally:
+            await browser.close()
 
 
 def _assert_the_two_ends_agree(spec, state: str, selector: str, why: str) -> None:

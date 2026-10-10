@@ -167,6 +167,7 @@ def test_the_sanctioned_list_is_exactly_these_calls():
         ("linkedin_server/cdp_download.py", "_send", "cdp_send"),
         ("linkedin_server/cdp_download.py", "capture_download", "cdp_session"),
         ("linkedin_server/cdp_download.py", "reset_download_behaviour", "cdp_session"),
+        ("linkedin_server/job_alert_switch.py", "trial_press", "click"),
     )
     # EIGHT FROM 2026-09-23: ``reveal.reveal``'s one click, the first press
     # admitted BY NAME -- per control, in reveal.DECIDED_REVEALS, on a recorded
@@ -183,7 +184,10 @@ def test_the_sanctioned_list_is_exactly_these_calls():
     # the two browser-level sessions it goes over -- which the scanner lane G
     # had widened (lane D's 5.3) saw for the first time in that merge. Not new
     # capability: declared on D4-NO-OWN-BROWSER-CONTEXT. Argument beside them.
-    assert len(readonly.SANCTIONED_MUTATIONS) == 15
+    # SIXTEEN, 2026-10-10 (lane B4): ``job_alert_switch.trial_press``'s one
+    # trial click, a READ declared on the list (its argument and its budget
+    # are beside the entry in readonly.py).
+    assert len(readonly.SANCTIONED_MUTATIONS) == 16
     # THE KINDS ARE ASSERTED SEPARATELY, because the count alone would let a
     # click be swapped for a fill without moving the number, and those are
     # different capabilities: a click presses what is already there, a fill
@@ -213,6 +217,7 @@ def test_the_sanctioned_list_is_exactly_these_calls():
         "cdp_send",
         "cdp_session",
         "cdp_session",
+        "click",
         "click",
         "click",
         "click",
@@ -314,7 +319,8 @@ def test_the_package_contains_exactly_as_many_mutating_calls_as_are_listed():
     # download transport -- cdp_download's one DevTools send and its two
     # sessions -- met the scanner lane G had widened to see them, and was
     # declared on D4-NO-OWN-BROWSER-CONTEXT (see the entries' argument).
-    assert total == len(readonly.SANCTIONED_MUTATIONS) == 15, total
+    # SIXTEEN, 2026-10-10 (lane B4): the trial click, a read declared.
+    assert total == len(readonly.SANCTIONED_MUTATIONS) == 16, total
 
 
 def test_the_partition_conserves_every_hit():

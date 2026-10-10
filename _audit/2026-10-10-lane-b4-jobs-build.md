@@ -123,7 +123,7 @@ above is the one that survives on a faithful fixture.
 
 ## 2. `J 161` -- the similar-jobs alert, set and unset
 
-**BUILT, READY TO FIRE, NOT FIRED** (`9f77e03`), under
+**BUILT, READY TO FIRE, NOT FIRED** (`9f77e03`), by ruling
 `HIS-OWN-CURATION-NOT-OUTWARD`: `linkedin_set_similar_jobs_alert(job_id)` and
 its inverse `linkedin_unset_similar_jobs_alert(job_id)`, in one change, in
 server.py's block headed `lane B4`. Both behind `writes_enabled()` and the
@@ -245,7 +245,7 @@ nothing new", so neither branch was reviewed into this one and neither row
 moves here. Each child's REPORT is its record:
 
 - `J 110` (child `b4-j110`): branch `worktree-agent-a69391a2d135a71c6`, head
-  `becc3a7`. Tool `linkedin_company_page_home(organisation_id)`: the Page's
+  `becc3a7`. There, a tool named `linkedin_company_page_home(organisation_id)`:
   description as an untrusted, sanitised record capped at 2,000 characters,
   feed items counted, never read. ITS FINDING: the brief's "fresh Home tab"
   capture (session 9's) draws the POSTS view as current (`aria-current` on the
@@ -256,7 +256,7 @@ moves here. Each child's REPORT is its record:
   keeps drawing Posts (readonly refuses it today); move J 110 whole or wait for
   the Posts half.
 - `J 108` (child `b4-j108`): branch `worktree-agent-a761b8fae261b301c`, head
-  `1935c25`. Tool `linkedin_company_people_insights(organisation_id)` over
+  `1935c25`. There, a tool named `linkedin_company_people_insights(organisation_id)` over
   `member_rosters.compose` (its first importer), reader
   `linkedin_server/company_people_insights.py`, a new record
   `people_data.Category`. ITS MEASUREMENT (session 2's keyed skeleton, its own
