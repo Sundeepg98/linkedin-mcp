@@ -884,7 +884,7 @@ document cannot quote the gate that checks its own last edit.
 
 **THE ORDER, CHECKED AGAINST DISK FIRST.** The orchestrator's second order,
 the evening of 2026-09-23: IF master is still 4a57b75 and this branch 6fae42c,
-merge master; release the six self-profile-edit holds under
+merge master; release the six self-profile-edit holds under the ruling
 `SELF-PROFILE-EDITS-NOT-OUTWARD`; re-gate the bucket-3 rows whose notes still
 describe decisions as unmade; re-derive and re-pin; regenerate; gate; commit;
 do not push. Both SHAs held when measured, before any edit. `git merge master`

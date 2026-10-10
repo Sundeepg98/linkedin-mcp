@@ -27,8 +27,8 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 264 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 224 |
+| audit documents git tracks under `_audit` | 265 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 225 |
 | distinct dates | 19 |
 | documents with no level-1 heading | 2 |
 | `CORRECTS:` marker lines | 125 |
@@ -39,7 +39,7 @@ are listed as `(undated)`; no date is taken from git history, because
 | documents at either end of a cross-document edge | 101 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
-| documents no correction marker touches at all | 161 |
+| documents no correction marker touches at all | 162 |
 | blockquoted markers naming ANOTHER document | 0 |
 | edges missing one of their two markers | 0 |
 | edges declared a different number of times in each direction | 2 |
@@ -1822,6 +1822,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-28 | [2026-09-28-rulings-build-classes.md](2026-09-28-rulings-build-classes.md) | Rulings, 2026-09-28: the classes the census still leaves undecided |  |
 | 2026-09-28 | [2026-09-28-rulings-named-profile-read.md](2026-09-28-rulings-named-profile-read.md) | Ruling, 2026-09-28: reading a profile he names |  |
 | 2026-10-10 | [2026-10-10-lane-ci-fastlane.md](2026-10-10-lane-ci-fastlane.md) | Lane CI fast lane (lci-fastlane-lead), 2026-10-10 |  |
+| 2026-10-10 | [2026-10-10-lane-g2-debts.md](2026-10-10-lane-g2-debts.md) | Lane G2 -- queued debts: a red instrument made green in its records, a reader guard that took a refusal tally for success, a post record |  |
 | 2026-10-10 | [2026-10-10-lane-np-named-profile.md](2026-10-10-lane-np-named-profile.md) | Lane NP, 2026-10-10: the named profile's handles, its detail pages, the reaction's inverse, and a restore that can clear |  |
 | 2026-10-10 | [2026-10-10-rulings-named-profile-detail-pages.md](2026-10-10-rulings-named-profile-detail-pages.md) | Ruling, 2026-10-10: the detail pages of a profile he names |  |
 

@@ -137,7 +137,7 @@ this slice and is still the only defensible state.
 
 **KNOCK-ON, REPORTED AND NOT WRITTEN:** the sibling row `M4`
 (`messaging-and-content.md:335`) carries the identical unbacked claim -- *"admits
-`/premium/my-premium/` for exactly this and it carries no balance"* -- under
+`/premium/my-premium/` for exactly this and it carries no balance"* -- in the state
 `EXCLUDED-RULED`. Same defect, different slice. The J 127 cell already flagged
 the pair as "reported rather than changed"; this adds the reason the shared claim
 fails. Whoever owns the messaging slice should take it.
