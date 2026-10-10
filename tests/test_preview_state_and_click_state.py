@@ -88,7 +88,7 @@ from pathlib import Path
 
 import pytest
 
-from linkedin_server import dom, writes
+from linkedin_server import config, dom, writes
 from linkedin_server.writes import (
     PERFORMABLE,
     SANCTIONED_WRITES,
@@ -108,6 +108,7 @@ from tests.test_follow_company_page import (
 )
 from tests.test_messaging_threads import THREAD as MESSAGING_THREAD
 from tests.test_messaging_threads import THREAD_ID as MESSAGING_THREAD_ID
+from tests.test_send_attachment import CAPTURED as ATTACHMENT_THREAD
 from tests.test_leave_group import GROUPS_LEAVE_ID, GROUPS_LEAVE_MARKUP
 from tests.test_named_profile_route import LINK as NAMED_PROFILE_LINK
 from tests.test_named_profile_route import PROFILE as NAMED_PROFILE
@@ -290,6 +291,21 @@ REACHED: dict[str, tuple[str, str, str]] = {
     # preview and the click read it through ONE verdict,
     # ``group_leave.read_state``, and the click-time selector is the row's
     # disclosure, the first of the action's two presses.
+    # THE NINETEENTH, 2026-10-10 (census rows ``M M14`` / ``M15`` / ``M18``,
+    # lane U). The synthetic conversation with its two file inputs in the
+    # wrappers a REAL capture draws (live3/presence.html), each beside its
+    # labelled button; its source module says which parts are which. The
+    # preview and the click read the box through ``threads.reply_state`` and
+    # the inputs through ``attachments.read_reply_inputs``. THE TARGET IS
+    # WRITTEN, NOT COMPUTED, because it is a file in the declared root and
+    # this table is built at import: its canonical form is the thread id
+    # and the ROOT-RELATIVE name, and the autouse fixture below provides
+    # the root and the file when a test runs.
+    "send_attachment": (
+        "tests/test_send_attachment.py",
+        ATTACHMENT_THREAD,
+        MESSAGING_THREAD_ID + writes.TARGET_JOIN + "reach-example.png",
+    ),
     "withdraw_from_group": (
         "tests/test_leave_group.py",
         GROUPS_LEAVE_MARKUP,
@@ -505,6 +521,17 @@ def _assert_the_two_ends_agree(spec, state: str, selector: str, why: str) -> Non
     )
 
 
+@pytest.fixture(autouse=True)
+def _the_attachment_rows_file_in_a_declared_root(tmp_path, monkeypatch):
+    """``send_attachment``'s target names a FILE in the declared upload root
+    (lane U): a temp root holding ``reach-example.png``, for every test here.
+    No other action reads it."""
+    root = tmp_path / "uploads"
+    root.mkdir()
+    (root / "reach-example.png").write_bytes(bytes([0x89]) + b"PNG-reach-example")
+    monkeypatch.setattr(config, "UPLOAD_ROOT", root)
+
+
 # ---------------------------------------------------------------------------
 # Part 0. The instrument declares its own reach before it claims anything
 # ---------------------------------------------------------------------------
@@ -565,10 +592,14 @@ def test_every_performable_action_is_either_reached_or_declared_unreachable():
     # 18 -> 17 later the same day (lane L5, the orchestrator's order of 23:36):
     # ``send_message`` RETIRED -- it was aimed by a name -- and its row left
     # ``REACHED`` with it. MEASURED.
-    # 17 -> 19 on 2026-10-10 (lane B4): the similar-jobs alert pair shipped,
-    # reached over session 8's tracked posting and its derived On world.
-    assert len(PERFORMABLE) == 19, sorted(PERFORMABLE)
-    assert len(REACHED) == 19, sorted(REACHED)
+    # 17 -> 18 on 2026-10-10 (lane U's branch): ``send_attachment`` shipped,
+    # reached over the conversation its own tests read, its file in a
+    # temp upload root. MEASURED on the branch.
+    # 18 -> 20 at lane B4's merge of master 2b165fd (17 -> 19 on its branch):
+    # the similar-jobs alert pair, reached over session 8's tracked posting
+    # and its derived On world. MEASURED on the merged tree.
+    assert len(PERFORMABLE) == 20, sorted(PERFORMABLE)
+    assert len(REACHED) == 20, sorted(REACHED)
     assert len(CANNOT_REACH) == 0, sorted(CANNOT_REACH)
 
 

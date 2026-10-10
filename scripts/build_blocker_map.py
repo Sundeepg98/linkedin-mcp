@@ -106,6 +106,17 @@ RE_FILED: dict[str, dict[str, str]] = {
         "N 179": "SEARCH-RESULTS-SURFACE -- conceded by the events wave. "
                  "Short one READ with 11/11 writes full; the conceded row is R.",
     },
+    "FILE-UPLOAD-UNSANCTIONED": {
+        "M C45": "ARTICLE-SURFACE -- applied 2026-10-10 by lane U on the "
+                 "decides document's successor table (s1.3): rich media in an "
+                 "article depends on C44, the article composer, and with "
+                 "uploads opened by the operator on 2026-09-04 that composer "
+                 "is its earliest binding constraint. ARTICLE-SURFACE held 5 "
+                 "of its published 6, and its sixth is a W; this row is a W. "
+                 "The other 14 rows stay here as membership only: every "
+                 "destination that fits them is full at its published count "
+                 "or is not one of the 97 (see the lane record, s2).",
+    },
 }
 
 FROZEN_REF = "1c08e5f"

@@ -261,7 +261,13 @@ _WHERE_TO_LOOK_OWNERS: dict[str, frozenset[str]] = {
     # ``message_from_profile`` VERIFIES in the conversation its press opened,
     # read in place with a before-count, so the conversation in his LinkedIn
     # messages is the surface it read.
-    "LinkedIn messages": frozenset({"send_reply", "message_from_profile"}),
+    # A FOURTH OWNER FROM 2026-10-10 (lane U), entitled for the reply's
+    # reason: ``send_attachment`` VERIFIES in the conversation itself, by a
+    # fresh load of the conversation he named and the count of messages
+    # drawing the file's name.
+    "LinkedIn messages": frozenset(
+        {"send_reply", "message_from_profile", "send_attachment"}
+    ),
     # ADDED 2026-09-27 FOR ``withdraw_from_group`` (lane L8): his Groups page is where
     # his memberships are listed and where the leave is verified, and no other
     # row sends him there. Measured to occur in exactly one row.
@@ -285,6 +291,10 @@ _LEGITIMATE_SHARED_PLACES: frozenset[frozenset[str]] = frozenset(
         # profile -- settling in the one list LinkedIn keeps of every
         # invitation sent. The argument is on the "My Network" owner entry.
         frozenset({"send_invitation", "connect_from_profile"}),
+        # THE CONVERSATION PAIR, 2026-10-10 (lane U), by the same equality
+        # edit: a reply and an attachment go into the one conversation he
+        # names, and both are read back there.
+        frozenset({"send_reply", "send_attachment"}),
         # THE ALERT PAIR, 2026-10-10 (lane B4, J 161), by the same equality
         # edit: one switch, both directions, settled on the same posting.
         frozenset({"set_similar_jobs_alert", "unset_similar_jobs_alert"}),
@@ -651,13 +661,20 @@ def test_the_action_set_is_the_one_this_file_was_measured_against():
     # SEVENTEEN SINCE LANE L5'S ORDER OF 2026-09-27 23:36: ``send_message``
     # RETIRED (aimed by a name). No row was re-derived for it -- an action
     # leaving takes its rows with it -- and its two owner entries above went.
-    # NINETEEN FROM LANE B4, 2026-10-10: ``set_similar_jobs_alert`` and its
+    # EIGHTEEN FROM LANE U'S BRANCH, 2026-10-10: ``send_attachment``'s rows
+    # were read against every owned phrase, and the file went red on exactly
+    # the two it shares with the reply -- "LinkedIn messages", and the
+    # identical place to look. Each was decided on the surface it MEASURES: it
+    # verifies in the conversation itself, so it is a fourth owner of
+    # "LinkedIn messages", and the reply pair is a fourth sanctioned shared
+    # place. No row was reworded to dodge a phrase.
+    # TWENTY AT LANE B4'S MERGE OF MASTER 2b165fd (nineteen on its branch): ``set_similar_jobs_alert`` and its
     # inverse ``unset_similar_jobs_alert``. Their four rows were read: the
     # two ``_WHERE_TO_LOOK`` values are one place (the switch on the posting,
     # or his job alerts), a third sanctioned shared pair above; the two
     # ``_VERIFIED_FROM`` rows are one row (a fresh render of the posting).
-    assert len(writes.PERFORMABLE) == 19, (
-        "writes.PERFORMABLE holds %d actions, not the 19 this file was "
+    assert len(writes.PERFORMABLE) == 20, (
+        "writes.PERFORMABLE holds %d actions, not the 20 this file was "
         "measured against: %s. Re-derive the phrase owners in this file for "
         "the new action, then update this count."
         % (len(writes.PERFORMABLE), sorted(writes.PERFORMABLE))

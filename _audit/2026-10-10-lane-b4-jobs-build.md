@@ -234,4 +234,164 @@ gate examined every commit's staged files against 226 spellings, 0 hits.
 presses, opens or reads the Easy Apply flow; the posting fixture keeps the
 words `Easy Apply` only as drawn text.
 
-(Sections 4, 6 to 9 follow.)
+---
+
+## 4. The two children's rows: built on their branches, NOT merged, NOT moved
+
+A box-wide stall stopped every agent from about 17:11 to 19:00 (the lead's own
+clock read 17:08 and next 19:01; both children report the same gap inside a
+`git commit`). The coordinator's wrap-up order of 19:02 then said "start
+nothing new", so neither branch was reviewed into this one and neither row
+moves here. Each child's REPORT is its record:
+
+- `J 110` (child `b4-j110`): branch `worktree-agent-a69391a2d135a71c6`, head
+  `becc3a7`. Tool `linkedin_company_page_home(organisation_id)`: the Page's
+  description as an untrusted, sanitised record capped at 2,000 characters,
+  feed items counted, never read. ITS FINDING: the brief's "fresh Home tab"
+  capture (session 9's) draws the POSTS view as current (`aria-current` on the
+  Posts tab, twice; `Overview` 0 occurrences by keyed shape), so the Home
+  fixture is built from the 2026-09-23 raw capture and session 9's became a
+  second, Posts-view fixture; the root address drew Home on all three
+  September captures. Its questions: admit `/company/<id>/home/` if the root
+  keeps drawing Posts (readonly refuses it today); move J 110 whole or wait for
+  the Posts half.
+- `J 108` (child `b4-j108`): branch `worktree-agent-a761b8fae261b301c`, head
+  `1935c25`. Tool `linkedin_company_people_insights(organisation_id)` over
+  `member_rosters.compose` (its first importer), reader
+  `linkedin_server/company_people_insights.py`, a new record
+  `people_data.Category`. ITS MEASUREMENT (session 2's keyed skeleton, its own
+  key, LinkedIn UI candidates only, four controls shown matching first): one
+  carousel of SIX cards, all in the DOM on one load -- `Where they live`,
+  `Where they studied`, `What they do`, `What they are skilled at`,
+  `What they studied`, `How you are connected` -- rows of five, five, five,
+  five, five and two. 28 tests plus 6 for the record type; its guards listed
+  in its report.
+
+Both branches were built from master `16ee59a`; each moved the tool-surface
+pins on its own, so a merge must re-derive them off the merged registry.
+
+---
+
+## 6. The live-proof specs for the two rows moved
+
+Each fires only through its own tool, inside the live budget
+(`LIVE-BUDGET-40-LOADS`), 20 s or more between loads, the window fronted.
+
+**`J 161`** -- his own curation (`HIS-OWN-CURATION-NOT-OUTWARD`), proven with
+its inverse in the same session, read back. THE POSTING: one from his own
+saved jobs (as session 7's j121 load took one); no person is targeted.
+
+    n    step                                                      loads
+    1    linkedin_set_similar_jobs_alert(job_id): the preview.         1
+         MUST read alert_off, the switch counted once, AND the
+         toggle's trial press actionable -- the first measurement of
+         reachability on a posting. If not actionable: STOP, record
+         it, nothing pressed (the P B9 finding again).
+    2-3  confirm: the press and the fresh render; verified alert_on.   2
+         RECORD the On shape the fresh render draws (the word, the
+         checked property) -- the first capture of it.
+    4    linkedin_unset_similar_jobs_alert(job_id): the preview.       1
+         MUST read alert_on.
+    5-6  confirm: the press and the fresh render; verified alert_off   2
+         -- the posting back as it was.
+    STOP-ALL if step 5-6 is not verified alert_off: the alert is left
+    on, which he can turn off by hand on the posting or on his job
+    alerts page; the session stops and the orchestrator is told.
+    Budget: 6 loads, 0 searches.
+
+**`J 124`** -- a read, no write, so no inverse. ONE call of
+`linkedin_job_detail(job_id)` on a posting from his saved jobs (1 load): the
+bar is `insights.company_insights` carrying `Company focus areas` with a focus
+item, `Hiring & headcount` with its summary, and `Total employees`, every line
+marked untrusted, `truncated` read. The same load serves step 1 of `J 161`
+only if it is the same tool, which it is not -- budget 1 load, 0 searches.
+
+---
+
+## 7. The census, and the pins -- measured on the merged tree
+
+**THE ROWS:**
+
+    row    from  ->  to                bar, and the evidence
+    J 124  GAP   ->  COVERED-UNFIRED   code aimed at real captured markup (session 8's
+                                       posting, tracked skeleton) returns the three payloads,
+                                       marked as third-party text; never fired since
+    J 161  GAP   ->  COVERED-UNFIRED   a write and its inverse built behind the grant on real
+                                       captured markup (session 8's posting); never fired
+
+Their lines left `_audit/_census/jobs-directions.tsv` and
+`_audit/_census/next-step.tsv` (rows that left GAP); master's capture queue
+(regenerated by lane K for session 9) names neither.
+
+**THE PINS, from `scripts/census_completion.py --check` on the tree merged with
+master `2b165fd`, re-pinned to what it measured, never summed:**
+
+    adjudicated          213 -> 215     gap_unknown          104 -> 102
+    delivered_broad      135 -> 137     jobs_gap             104 -> 102
+    gap                  558 -> 556     jobs_dir_r            38 -> 37
+    unfired               24 -> 26      jobs_dir_w            58 -> 57
+    b1_no_ruling           9 -> 11      jobs_needs_session     2 -> 1
+    PINNED_B1_ROWS       NO_RULING gains J 124 and J 161
+
+(On the branch before the merge the same moves read from master `f93104c`'s
+pins: 186 -> 188, 130 -> 132, 585 -> 583, 21 -> 23 and so on.) After the
+re-pin: "every headline figure matches its pin"; `check_jobs_directions.py`
+GREEN 102 of 102; `check_next_step.py` GREEN, 556 = the gap; 
+`check_write_classes.py` GREEN.
+
+---
+
+## 8. Gates run
+
+LOCAL, targeted, serial (`-p no:randomly`, never `-n`); the live-session flag
+was absent at every check. The full suite runs on CI only.
+
+    file(s)                                                       result
+    tests/test_job_company_insights_session8.py                    red first (2 failed), then 6 passed
+      + tests/test_free_read_panels.py                             22 passed (the August panels unchanged)
+    tests/test_similar_jobs_alert.py                               red first (collection error), then 25 passed
+    the identity pair (no_committed_identity, fixtures_hold_       1148 passed (after the fixture's first commit)
+      only_synthetic_people)
+    the surface, strict-press, receipt, preview-and-click,         221 passed, 8 failed -> each fixed in
+      name-aim and tool-pin guards + J 124's file                    221b76a (instructions, headline, typed
+                                                                     lists, a docstring verb, a source path)
+    tests/reader_leak_baseline.json regenerated                    187 readers; 3 new, none moved
+    census_completion --check, check_jobs_directions,              all green, before and after the merge
+      check_next_step, check_write_classes
+    build_audit_index / build_rulings_index / build_blocker_map    --write after the merge, then --check clean
+
+The CI run that certifies the branch is named in the lane's final message.
+
+---
+
+## 9. Instruments (INSTRUMENTS.md section 92 is not written; declared here)
+
+- `linkedin_server/job_alert_switch.py` with `tests/test_similar_jobs_alert.py`
+  and `linkedin_server/company_panel_text.py` with
+  `tests/test_job_company_insights_session8.py` are CODE and their tests, each
+  shown red first (sections 1 and 2).
+- `scripts/_build_live8_posting_skeleton.py` is the fixture's PROVENANCE. Its
+  refusal on an EXTRA_KEEP word counted zero has not been shown failing, so it
+  is not registered as an instrument.
+- DECLARED DISPOSABLE: the lane's scratch probes (text and tag dumpers, the
+  phrase counter, the keyed-shape candidate tester, the raw-capture panel
+  probe, the posting-reader probe, the switch probe, the verb checker, the pin
+  and census patchers, the merge resolver). Each answered one question once;
+  the answers are in this record.
+
+---
+
+## 10. Questions for the orchestrator
+
+1. THE POSTING READER WAITS TEN SECONDS ON TODAY'S MARKUP. Session 8's raw
+   posting carries no `data-sdui-component` attribute at all, so
+   `dom.JOB_DESCRIPTION_SLOT` never attaches and every posting read (job
+   detail and every posting write's gate) spends the readiness bound before
+   reading the page, which it then reads in full. A readiness anchor measured
+   on today's markup (`About the job`'s heading is drawn) is a small offline fix.
+2. LANE K'S INVENTORY COUNTED "Archive" FROM A TAB LABEL (section 0.1) and
+   "dismiss" from filter close buttons (0.5). `J 53` and `J 84`'s BUILD steps
+   rest on those counts; both are CAPTURE steps.
+3. THE CHILDREN'S BRANCHES (section 4) are ready for review and carry their own
+   questions: the Home tab address for `J 110`, whether `J 110` moves whole,
+   and `people_data.Category` for `J 108`.

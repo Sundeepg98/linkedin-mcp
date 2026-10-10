@@ -1340,7 +1340,9 @@ async def name_the_reply_recipient(
     says which it is. A header drawing more than one line under the title is
     not the measured shape, and names nobody.
     """
-    if getattr(spec, "action", None) != "send_reply":
+    # AND FOR AN ATTACHMENT (lane U, 2026-10-10): the same conversation, the
+    # same header, the same question -- who the file would reach.
+    if getattr(spec, "action", None) not in ("send_reply", "send_attachment"):
         return block
     facts = dict(getattr(observation, "facts", None) or {})
     if facts.get("landed_on_the_named_thread") is not True:

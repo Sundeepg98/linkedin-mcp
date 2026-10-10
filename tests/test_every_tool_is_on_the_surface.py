@@ -353,8 +353,14 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # linkedin_read_named_profile (ruling NAMED-PROFILE-READ-BEHIND-A-GRANT;
     # census N 178 stays GAP on its capture), measured off the registry and
     # moved with every other count site in the same commit.
-    # SIXTY-THREE ON LANE B4, 2026-10-10: two WRITES, the similar-jobs alert
-    # pair (census J 161), linkedin_set_similar_jobs_alert and its inverse
-    # linkedin_unset_similar_jobs_alert, in server.py's lane B4 block --
-    # measured off the registry and moved with every other count site.
-    assert len(_tool_names()) == 63
+    # SIXTY-TWO ON LANE U'S BRANCH, 2026-10-10: one WRITE,
+    # linkedin_send_attachment (ruling FILE-UPLOAD-OPENED; census M M14, M15,
+    # M18 stayed GAP on two captures, then moved to COVERED-UNFIRED the same
+    # day on the session-8 capture), measured off the branch's registry and
+    # moved with every other count site in the same commit.
+    assert len(_tool_names()) == 62
+    # SIXTY-FOUR AT LANE B4'S MERGE OF MASTER 2b165fd, 2026-10-10: lane B4's
+    # two WRITES (linkedin_set_similar_jobs_alert and its inverse, census
+    # J 161) on top of master's sixty-two -- measured off the merged registry,
+    # not summed, and moved with every other count site in the merge commit.
+    assert len(_tool_names()) == 64
