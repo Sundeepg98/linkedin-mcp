@@ -2337,6 +2337,25 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # one. Every resume delete, upload and answer edit on it stays refused by
     # the press gate and is a write with its own spec.
     re.compile(r"^https://www\.linkedin\.com/jobs/application-settings/?$"),
+    # TWO MORE NAMED SETTINGS PAGES, each by its exact address and each paired
+    # with an exemption excusing the one substring it trips; a commit of their
+    # own, because how many named pages ONE-NAMED-SETTINGS-PAGE-AT-A-TIME
+    # allows at once is the orchestrator's reading (the record, section 7).
+    #
+    # The people and Pages he unfollowed (census N 39). MEASURED: the census
+    # cell records the address "found live and written down". It trips
+    # "/unfollow", the first commit's fence against UNFOLLOWING; the page
+    # unfollows nobody. Re-following from it is curation of his own feed
+    # (HIS-OWN-CURATION-NOT-OUTWARD), a write with its own spec; the press
+    # gate refuses it here. The page lists other people: NAMES-AT-RUNTIME.
+    re.compile(r"^https://www\.linkedin\.com/mypreferences/d/unfollowed/?$"),
+    # His advertising-data settings page (census P P15). MEASURED: drawn on
+    # the settings index as its "Advertising data" link (the live lane's
+    # capture, 2026-09-23). It trips "/mypreferences/d/categories/", whose
+    # recorded ground (42e90e3, 2026-08-30) is that "the category pages carry
+    # the toggles" -- a write. Reading the page presses none of them, and
+    # every other category page stays refused on that substring.
+    re.compile(r"^https://www\.linkedin\.com/mypreferences/d/categories/ads/?$"),
     # ======================================================================
     # REVIEW (lane L1, 2026-09-23) -- N 184, ONE EVENT BY ITS NUMERIC ID.
     # Census row N 184: "reach an event through its URL after it has been
@@ -2910,6 +2929,14 @@ _FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS: tuple[
     (
         re.compile(r"^https://www\.linkedin\.com/jobs/application-settings/?$"),
         frozenset({"/jobs/application", "settings"}),
+    ),
+    (
+        re.compile(r"^https://www\.linkedin\.com/mypreferences/d/unfollowed/?$"),
+        frozenset({"/unfollow"}),
+    ),
+    (
+        re.compile(r"^https://www\.linkedin\.com/mypreferences/d/categories/ads/?$"),
+        frozenset({"/mypreferences/d/categories/"}),
     ),
     # "SHARING PROFILE EDITS", READ ONLY -- the second gate of the pair whose
     # first gate is the matching allowlist line beside dark-mode. 2026-09-27,

@@ -1874,7 +1874,12 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # application settings page, one line, paired with one exemption below;
     # the tree minus that line and that entry hashes to c0249a5bfde871da and
     # 6f99bceb4d139db3, and the other eleven keys are byte-identical.
-    "_ALLOWED_URL_PATTERNS": "94bf0916c1be3824",
+    #
+    # 94bf0916c1be3824 until lane A's third: two named settings pages (the
+    # people and Pages he unfollowed, his advertising-data page), one line
+    # each, each paired with one exemption below; the tree minus those two
+    # lines and two entries hashes to the prior pins on all thirteen keys.
+    "_ALLOWED_URL_PATTERNS": "fc6839c2e877c011",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     # 419e64a3cd92ec7e until the same REVIEW: commit: a third entry, excusing
     # exactly {"/follow"} for exactly the anchored follower-list address.
@@ -1888,7 +1893,10 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # 6f99bceb4d139db3 until the second: one more, excusing exactly
     # {"/jobs/application", "settings"} -- the two substrings that address
     # trips, measured -- for exactly /jobs/application-settings/.
-    "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "ffebed391e628195",
+    # ffebed391e628195 until the third: two more, excusing exactly
+    # {"/unfollow"} for /mypreferences/d/unfollowed and exactly
+    # {"/mypreferences/d/categories/"} for /mypreferences/d/categories/ads.
+    "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "28643e7ca768b7df",
     "_FORBIDDEN_URL_SUBSTRINGS": "b0291a66ec9bd51e",
     # 23aece1483afdee9 until 2026-09-19. See the re-freeze note above: eleven
     # detector classes added, zero removed, and the direction is pinned by

@@ -1547,7 +1547,9 @@ PINNED = {
     #: 54 ON LANE A'S SECOND ADMISSION THE SAME DAY, MEASURED: `P M2`, `P M4`,
     #: `P M5`, `P M6` and `P M12` REFUSED -> ADMITTED (gate MEASURE), his job
     #: application settings page.
-    "b3_admitted": 54,
+    #: 56 ON LANE A'S THIRD, MEASURED: `N 39` and `P P15` REFUSED -> ADMITTED
+    #: (gate MEASURE), two settings pages of his admitted by name.
+    "b3_admitted": 56,
     #: 38 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     #: 40 ON LANE L5'S ORDER OF 2026-09-28 12:32, MEASURED: `N 30`, `N 31`, `N 65`
@@ -1560,7 +1562,8 @@ PINNED = {
     #: 32 ON LANE A'S ADMISSIONS OF 2026-10-10, MEASURED: the same six rows
     #: left REFUSED (see `b3_admitted`).
     #: 27 ON LANE A'S SECOND ADMISSION, MEASURED: the same five rows left.
-    "b3_refused": 27,
+    #: 25 ON LANE A'S THIRD, MEASURED: `N 39` and `P P15` left.
+    "b3_refused": 25,
     "b3_no_address": 1,
     "b3_needs_session": 14,
     "b3_undetermined": 2,

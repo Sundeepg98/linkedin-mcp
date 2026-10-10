@@ -411,3 +411,56 @@ line added (`job-application-settings`).
 to this address by inference from M1; the live lane captured a job posting for
 the same row on 2026-09-28. Both captures record whether they carry it, and
 the reader is whichever page does.
+
+**THE GATE AFTER THIS COMMIT (`435a133`) WENT RED TWICE, AND ONE OF THE TWO WAS
+REAL.** 1764 passed, 2 failed:
+
+* `test_the_read_only_boundary_is_where_it_was_re_frozen` -- NOT this commit's
+  defect. The background run read `readonly.py` while the next commit's two
+  lines were being written into it; the live digest it reported is that next
+  state's. Re-run after the next commit (3.3).
+* `test_gap_rows_on_refused_addresses_is_pinned`, expected 78, measured 76 --
+  REAL, and missed here: a GAP row whose cell backticks an address the gate
+  refuses on a substring stops counting when that address is admitted. Run
+  against the lane's base boundary and against the tree and diffed, the rows
+  that left are exactly `P M1` (its cell backticks `/jobs/application-settings/`;
+  it left in THIS commit, so this commit's true count was 77 and its pin
+  stayed 78 for one commit) and `P P15` (the next commit). Fixed forward in
+  3.3, with both named.
+
+### 3.3 Two named settings pages: what he unfollowed, and his advertising data
+
+A commit of their own, for the reason 2.4 gives: how many named pages
+ONE-NAMED-SETTINGS-PAGE-AT-A-TIME allows at once is the orchestrator's reading.
+
+    /mypreferences/d/unfollowed         excuses {"/unfollow"}                       N 39
+    /mypreferences/d/categories/ads     excuses {"/mypreferences/d/categories/"}    P P15
+
+`N 39`'s address is MEASURED (its cell: "found live and written down");
+`P P15`'s is drawn on the settings index (the live lane's capture,
+2026-09-23). Every other category page, the category root, a query, a
+sub-path and a longer leaf stay refused on the category substring; a Page's
+unfollow, the people list's query and an act-shaped sub-path stay refused on
+`/unfollow`; `/mypreferences/d/demographic-info-copy` stays refused by the
+allowlist alone (a sensitive-attribute page HIS-OWN-SETTINGS-NOT-OUTWARD
+names).
+
+**RED FIRST:** the two new entries against the previous `readonly.py`, 12
+failed, 2 passed (the two sibling tests); with the pairs, 44 passed.
+
+**NOT ADMITTED, AND WHY, FOR THE THIRD SETTINGS-FAMILY PAGE ON THE LIST:**
+`/mypreferences/d/job-application-accounts` (`P M9`, `J 77`). Its census cell
+calls it "Stored job applicant accounts" / "View / delete stored third-party
+applicant accounts". Read as written, these are accounts LinkedIn holds on his
+behalf for signing into employers' application systems -- a credential-adjacent
+surface, which the ruling excludes. That reading is THIS LANE'S, not a recorded
+measurement; the page has never been loaded. Section 7 asks it.
+
+**PINS:** digests `94bf0916c1be3824` -> `fc6839c2e877c011` and
+`ffebed391e628195` -> `28643e7ca768b7df` (the base hashing to the prior pins on
+all thirteen keys); census count cell 59 -> 61;
+`tests/test_the_settings_index_addresses_are_pinned.py` moves both addresses
+to "allowlist match" and its named-refusal count 16 -> 14;
+`tests/test_gap_rows_on_refused_addresses.py` 78 -> 76 with both rows named;
+`census_completion.py` `b3_admitted` 54 -> 56, `b3_refused` 27 -> 25. Two
+capture lines.

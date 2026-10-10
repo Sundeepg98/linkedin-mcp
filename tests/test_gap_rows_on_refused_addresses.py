@@ -134,7 +134,17 @@ SCRIPT = ROOT / "scripts" / "check_gap_rows_on_refused_addresses.py"
 #: moved out of GAP, ``P N27`` and ``P P2``, were not in the count. Found by
 #: running the shipped walk on master `2eb90ad`'s census (73) and on the lane's
 #: final tree (78): five added, none removed.
-EXPECTED_GAP_ROWS = 78
+#:
+#: 76 SINCE LANE A, 2026-10-10, TWO REMOVED AND NONE ADDED, each because the
+#: address its cell backticks is now ADMITTED on READ-PAST-AN-ACT-SUBSTRING:
+#: ``P M1`` (upload a resume, its cell backticking ``/jobs/application-settings/``,
+#: admitted at lane A's application-settings commit, which left this pin at 78
+#: for one commit -- the measured value there was 77) and ``P P15`` (his
+#: advertising-data page). Both stay GAP on their own blockers: P M1 is a
+#: WRITE whose upload verb is unbuilt; P P15 waits on a capture. Measured by
+#: running the shipped walk against the lane's base boundary and against this
+#: one and diffing the two row lists: exactly those two, nothing else moved.
+EXPECTED_GAP_ROWS = 76
 
 
 def _run(*args: str) -> subprocess.CompletedProcess:
