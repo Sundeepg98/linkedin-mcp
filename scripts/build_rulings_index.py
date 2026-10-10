@@ -1170,6 +1170,87 @@ REGISTER: tuple = (
         note="The operator's ruling, verbatim in its document; mitigations as "
              "the question put them.",
     ),
+    Ruling(
+        id="EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS",
+        claim="Every act toward other people is BUILT behind the single-use "
+              "grant, off by default, and fired only at a target he names: "
+              "publishing his own content in every form, invitations that are "
+              "not connection requests, RSVPs and group membership requests, "
+              "and reports about another member's content and their undo. "
+              "Purchases and the measured permanent refusals stay outside it.",
+        binds="writes -- every act toward other people",
+        document="_audit/2026-09-28-rulings-build-classes.md",
+        anchor="RULED: (orchestrator, 2026-09-28, applying WRITE-CLASS-B and "
+               "the operator's 08:11 principle) "
+               "EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS:",
+        note="Orchestrator's call applying WRITE-CLASS-B and the operator's "
+             "08:11 principle; overridable. Extends "
+             "OUTWARD-CLASSES-BUILT-BEHIND-GRANTS from three classes to every "
+             "outward act.",
+    ),
+    Ruling(
+        id="HIS-OWN-SETTINGS-NOT-OUTWARD",
+        claim="A setting of his own account is not an outward act: it is built "
+              "behind the grant and live-proven one setting at a time -- read, "
+              "write a benign value, read back, restore the exact original, "
+              "read again; a failed restore is STOP-ALL. Credential settings, "
+              "settings that cannot be put back exactly and settings recording "
+              "a sensitive personal attribute are built and never live-proven "
+              "unless he names them.",
+        binds="live proofs -- settings of his own account",
+        document="_audit/2026-09-28-rulings-build-classes.md",
+        anchor="RULED: (orchestrator, 2026-09-28, applying "
+               "OUTWARD-ACTS-NEED-THE-OPERATOR) HIS-OWN-SETTINGS-NOT-OUTWARD:",
+        note="Orchestrator's call applying OUTWARD-ACTS-NEED-THE-OPERATOR; "
+             "overridable. Settings pages are still admitted one by name.",
+    ),
+    Ruling(
+        id="HIS-OWN-CURATION-NOT-OUTWARD",
+        claim="Curating his own feed and his own items -- mute, hide, not "
+              "interested, follow and unfollow from a feed item, save, a "
+              "post's notification switch, and the per-post controls on his "
+              "own items -- is not an outward act: each is built behind the "
+              "grant and proven with its inverse in the same session, read "
+              "back.",
+        binds="live proofs -- curating his own feed and items",
+        document="_audit/2026-09-28-rulings-build-classes.md",
+        anchor="RULED: (orchestrator, 2026-09-28, applying "
+               "OUTWARD-ACTS-NEED-THE-OPERATOR) HIS-OWN-CURATION-NOT-OUTWARD:",
+        note="Orchestrator's call applying OUTWARD-ACTS-NEED-THE-OPERATOR; "
+             "overridable. Where LinkedIn draws the undo only once, the act is "
+             "proven only through that undo.",
+    ),
+    Ruling(
+        id="PURCHASES-STAY-MANUAL",
+        claim="A purchase -- Premium, InMail credits, ads, boosts, any paid "
+              "upgrade -- is not built; its row is EXCLUDED-RULED with the "
+              "reopener 'he names a purchase to automate'.",
+        binds="writes -- purchases and paid upgrades",
+        document="_audit/2026-09-28-rulings-build-classes.md",
+        anchor="RULED: (orchestrator, 2026-09-28, applying COST-AWARE "
+               "STAKES-GATING) PURCHASES-STAY-MANUAL:",
+        note="Orchestrator's call applying cost-aware stakes-gating; "
+             "overridable.",
+    ),
+    Ruling(
+        id="READ-PAST-AN-ACT-SUBSTRING",
+        claim="A forbidden substring whose recorded ground is an ACT does not "
+              "bar READING a page of his own that carries it: the page is "
+              "admitted by ONE exact anchored pattern, with a control shown "
+              "failing and the press gate still refusing. It does not reach a "
+              "substring whose ground is the read itself, nor a refusal "
+              "grounded in an operator ruling.",
+        binds="read boundary -- forbidden substrings written to stop an act",
+        document="_audit/2026-09-28-rulings-build-classes.md",
+        anchor="RULED: (orchestrator, 2026-09-28, applying "
+               "OUTWARD-ACTS-NEED-THE-OPERATOR and "
+               "D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING) "
+               "READ-PAST-AN-ACT-SUBSTRING:",
+        note="Orchestrator's call applying OUTWARD-ACTS-NEED-THE-OPERATOR and "
+             "D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING; overridable. A page "
+             "the allowlist refuses by silence, with no substring, is admitted "
+             "the same way.",
+    ),
 )
 
 
