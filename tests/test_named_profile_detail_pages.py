@@ -98,7 +98,7 @@ REFUSED = (
     ("https://linkedin.com/in/" + SEGMENT + "/details/interests/", SEGMENT),
     # Whitespace, and a segment carrying a word the boundary refuses anywhere.
     (INTERESTS + " ", SEGMENT),
-    ("https://www.linkedin.com/in/my-settings-page/details/interests/", "my-settings-page"),
+    ("https://www.linkedin.com/in/settings-example-1/details/interests/", "settings-example-1"),
     # No segment named at all.
     (INTERESTS, ""),
 )

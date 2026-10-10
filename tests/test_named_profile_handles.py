@@ -383,8 +383,9 @@ async def test_control_each_check_weakened_lets_its_plant_through(browser_page, 
 
 
 def test_the_fixture_holds_only_declared_synthetic_values():
+    declared = (OWNER_MEMBER, ANOTHER_MEMBER, OWNER_MEMBER[:-1] + "1", OWNER_MEMBER[:-1] + "4")
     for found in re.findall(r"ACoAA[A-Za-z0-9_-]+", ACTIVITY):
-        assert found.startswith("ACoAASYNTHETICSYNTHETICSYNTHETIC000000"), found
+        assert found in declared, found
     for found in re.findall(r"urn:li:activity:([0-9]+)", ACTIVITY):
         assert found.startswith("74000000000000000"), found
     slugs = set(re.findall(r"/in/([A-Za-z0-9%_-]+)/", ACTIVITY))
