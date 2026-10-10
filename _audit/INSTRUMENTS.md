@@ -11836,3 +11836,39 @@ The lane's scratch tools: the skeleton peekers (structure tree, topcard shapes,
 fixture grep), the targeted page-string driver for the new readers, the freeze
 attribution script, the ASCII checker, the census cell appender and the planted
 builder run. Each answered one question once; the answers are in the record.
+
+## 93. A LIVE SKELETON FILLED AT TEST TIME, WITH A NEEDLE IN EVERY PLACE THE READER MUST NOT READ (lb5-groups-build, 2026-10-10)
+
+**Registered 2026-10-10.** Full record: `_audit/2026-10-10-lane-b5-groups-build.md`.
+Numbered 93 by the orchestrator's allocation, appended at the end; renumber at
+the merge if another lane took it.
+
+### 93.1 THE TRACKED SKELETON IS THE FIXTURE; THE PEOPLE ARE WRITTEN IN ONLY FOR THE RUN
+
+The live lane's skeletons keep LinkedIn's markup and reduce every member's text
+to `x`. A reader built over one needs people in it to say anything, and a new
+committed fixture would be a second copy of the capture that can drift from it
+and a new place a name can be stored. So the test loads the TRACKED skeleton
+itself into a headless browser with every request aborted, writes synthetic
+people into the person slots for the run, and plants a needle in every slot the
+reader must never read -- the screen-reader copy, a button's label that names
+the member, the presence text, the photo's alt, a badge's label, the page's own
+title. The reader passes only if every person comes back and no needle does.
+
+    A SKELETON IS ALREADY THE CAPTURE. FILL IT AT RUN TIME, AND PLANT A
+    NEEDLE WHERE THE READER MUST NOT LOOK -- A LEAK CHECK THAT PLANTS
+    NOTHING CAN ONLY PASS.
+
+### 93.2 THE ENTRY
+
+| path | shown failing by |
+|---|---|
+| `tests/test_group_members.py` (`FILL`, `NEEDLES`, `readings()`); the reader `linkedin_server/group_roster.py` | the headline aimed at the badge (`group_roster.HEADLINE` patched) carries the screen-reader needle out (`test_THIS_CONTROL_CAN_FAIL_a_reader_aimed_at_the_badge_carries_the_screen_reader_copy`); the laced name really reached the page (`test_THIS_CONTROL_CAN_FAIL_the_lace_really_reached_the_page`); a click, a wheel and a scroll plant each caught by the read-only allowlist; a write tool reaching the reader through a helper found; and, on the base tree `f93104c`, the file fails at collection (`ImportError: group_roster`) |
+
+### 93.3 DECLARED DISPOSABLE
+
+The lane's scratch tools: the stdlib skeleton inspector (buttons, anchors,
+roles, texts), the per-row roster structure dump and the group-home control
+census by region. Each answered one question once; the answers (20 rows, 16
+degrees, 5 rail-only Join buttons, one invite control, one closed share box)
+are in the record.
