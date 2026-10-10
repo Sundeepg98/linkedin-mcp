@@ -403,6 +403,25 @@ def page_url_for_target(canonical: str, join: str) -> str:
     return page.url
 
 
+#: The host every admitted page lives on; the write spec's template is this
+#: plus ``{target}``, filled by :func:`page_path_for_target`.
+HOST_PREFIX = "https://www.linkedin.com/"
+
+
+def page_path_for_target(canonical: str, join: str) -> str:
+    """The admitted page's address AFTER :data:`HOST_PREFIX`, for the write
+    spec's template. NEVER RAISES, as ``writes.url_target_of`` may not: a
+    target that does not resolve comes back unchanged, and the anchored
+    pattern refuses the address it builds."""
+    try:
+        url = page_url_for_target(canonical, join)
+    except WriteAttemptError:
+        return str(canonical)
+    if not url.startswith(HOST_PREFIX):
+        return str(canonical)
+    return url[len(HOST_PREFIX):]
+
+
 def _role_selector(role: str, name: str) -> str:
     """``role=<role>[name="<name>"s]`` -- the form ``dom.named_role_selector``
     builds -- for a role that module does not map (switch, combobox). Refuses

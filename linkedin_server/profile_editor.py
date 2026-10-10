@@ -1286,8 +1286,10 @@ async def read_account_share_updates(page: Any) -> dict[str, Any]:
     disagreement, no state, a failure.
 
     IT PRESSES NOTHING. The setting is his; condition 1 asks for OFF to be
-    READ, never made so -- and turning it off would be a settings write
-    nothing here is granted.
+    READ, never made so. Turning it off is a settings write, and since
+    2026-10-10 one exists -- ``linkedin_set_admitted_setting`` (lane S,
+    HIS-OWN-SETTINGS-NOT-OUTWARD), behind its own single-use grant, never
+    called from here and never by an editor write.
     """
     out: dict[str, Any] = {
         "reading": "unknown",

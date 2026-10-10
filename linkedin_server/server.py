@@ -227,9 +227,10 @@ POINTER to it was dangling, so a reader who followed it found nothing and
 would reasonably conclude these numbers are unchecked. A citation is a claim
 like any other.
 The surface splits three ways and the split is the part a reader actually
-needs: FORTY-FOUR read, SEVENTEEN write, and ZERO are write-shaped,
-registered, gated and unable to act. Forty-four plus seventeen plus zero is
-sixty-one. (Thirty-eight, thirteen and fifty-one until 2026-09-24; thirty-nine,
+needs: FORTY-FOUR read, EIGHTEEN write, and ZERO are write-shaped,
+registered, gated and unable to act. Forty-four plus eighteen plus zero is
+sixty-two. (Forty-four, seventeen and sixty-one until lane S's settings writer,
+``linkedin_set_admitted_setting``, 2026-10-10. Thirty-eight, thirteen and fifty-one until 2026-09-24; thirty-nine,
 thirteen and fifty-two at the live lane's merge the same day; thirty-nine,
 fourteen and fifty-three at lane L7's; forty-one, fifteen and fifty-six at
 lane L5's; forty-one, sixteen and fifty-seven at lane L8's merge on
@@ -367,11 +368,12 @@ the moment ``update_profile_field`` was given an address while still refusing.
 always meant: an address is not a permission.
 
 NOTE THE ACTION THAT HAS NO TOOL. ``writes.SANCTIONED_WRITES`` holds
-EIGHTEEN actions where this surface registers SEVENTEEN write-shaped tools, and
+NINETEEN actions where this surface registers EIGHTEEN write-shaped tools, and
 the missing one is ``set_open_to_work``: it is sanctioned, it is refused by
-``_refuse_unperformable``, and no tool was ever registered for it. So seventeen
-counts TOOLS and eighteen counts ACTIONS, and a reader comparing the two
-numbers is not looking at a discrepancy. (NINETEEN and EIGHTEEN from lane L5's
+``_refuse_unperformable``, and no tool was ever registered for it. So eighteen
+counts TOOLS and nineteen counts ACTIONS, and a reader comparing the two
+numbers is not looking at a discrepancy. (EIGHTEEN and SEVENTEEN until lane S's
+``set_admitted_setting``, 2026-10-10, added one to each. NINETEEN and EIGHTEEN from lane L5's
 merge of master 52b55b6 until lane L5 retired ``send_message`` the same day,
 which took one from each; SEVENTEEN and SIXTEEN until lane
 L5's merge of master 52b55b6, 2026-09-27, ``connect_from_profile`` and
@@ -951,7 +953,7 @@ mcp = FastMCP(
     instructions=(
         "A window onto the operator's OWN LinkedIn account, driven by his own "
         "signed-in browser on his own machine. Most tools read and change "
-        "nothing. SEVENTEEN WRITE: linkedin_save_job, "
+        "nothing. EIGHTEEN WRITE: linkedin_save_job, "
         "linkedin_unsave_job, linkedin_unfollow_company, "
         "linkedin_follow_company, linkedin_apply_job, "
         "linkedin_update_setting, linkedin_react_to_item, "
@@ -959,8 +961,14 @@ mcp = FastMCP(
         "linkedin_comment_on_item, linkedin_update_profile_field, "
         "linkedin_follow_company_page, "
         "linkedin_mark_company_interest, linkedin_send_reply, "
-        "linkedin_withdraw_from_group, linkedin_connect_from_profile and "
-        "linkedin_message_from_profile. "
+        "linkedin_withdraw_from_group, linkedin_connect_from_profile, "
+        "linkedin_message_from_profile and linkedin_set_admitted_setting. "
+        "THE EIGHTEENTH, linkedin_set_admitted_setting, changes ONE control "
+        "on ONE settings page of his own account that is admitted by name, "
+        "one page at a time; one is admitted, Share profile updates, whose "
+        "switch governs whether LATER profile edits are shared with his "
+        "network. Like the eleventh, it returns the value it overwrote and "
+        "the exact call that puts it back, and never runs that call itself. "
         "THE ELEVENTH is the only one here that can verify its own outcome "
         "by reading the field back; it also returns the PREVIOUS value "
         "verbatim and the exact call that puts it back, which this server "
@@ -10027,6 +10035,76 @@ async def linkedin_update_setting(
         )
     except Exception as exc:
         return _error(exc)
+
+
+# ===========================================================================
+# lane S (settings), 2026-10-10 -- HIS-OWN-SETTINGS-NOT-OUTWARD
+# ONE contiguous block: the generic settings writer's one tool.
+# ===========================================================================
+
+
+@mcp.tool()
+async def linkedin_set_admitted_setting(
+    page: str, control: str, value: str, confirm_token: str = ""
+) -> dict[str, Any]:
+    """Change ONE control on ONE admitted settings page of his own account.
+
+    Two calls, and the first is free. CALL IT WITHOUT ``confirm_token``
+    FIRST: the page is loaded and read live, and you get back a block naming
+    the PAGE, the CONTROL, its CURRENT value and the REQUESTED one, what each
+    value means, whether anybody else sees the change, how the page stores it,
+    and which live-proof class holds it -- plus a token that works ONCE, for
+    exactly this page, control and value, within two minutes.
+
+    ADMITTED BY NAME, ONE PAGE AT A TIME (ONE-NAMED-SETTINGS-PAGE-AT-A-TIME).
+    A page is admitted by the heading LinkedIn draws on it, and only from a
+    real capture of it; a control by the exact label LinkedIn draws. One page
+    is admitted today: "Share profile updates", whose one control is the
+    switch "Share key profile updates" (values "on" and "off"). Anything else
+    is refused BEFORE a page is loaded, with the admitted pairs listed.
+
+    ONLY A SWITCH, A RADIO GROUP OR A SELECT. A typed field, an autocomplete,
+    a button, a link or a file input is refused by name.
+
+    WHAT THE PRESS DOES. The control is re-read on the page, pressed (a
+    select is chosen from, by its option's label), given up to 5 s to read
+    the requested value, and then EVERY other switch, checkbox, radio and
+    select on the page must read exactly what it read before. Save is pressed
+    only if that holds and the page draws one; a page that draws no Save --
+    the admitted one -- stores on the press, and the receipt says STOP if
+    another control moved. The verification is a fresh load of the page and a
+    re-read of the control; ``performed`` is ``true``, ``false`` or
+    ``"unknown"`` -- on ``"unknown"`` do not retry, open the page and look.
+
+    WHAT IT COSTS YOU. Nothing anyone else sees, for the admitted switch: it
+    governs whether LATER profile edits are shared with your network. The
+    receipt's ``restore`` block holds the exact call that puts the value back.
+
+    Args:
+        page: the admitted page's name, exactly as LinkedIn draws its heading.
+        control: the control's label, exactly as LinkedIn draws it.
+        value: the value to set -- "on" or "off" for a switch, the option or
+            choice's own label otherwise. Part of the target, so the token
+            binds to it.
+        confirm_token: leave empty to preview; pass the preview's token to act.
+    """
+    try:
+        return await _write_tool(
+            "set_admitted_setting",
+            {
+                "setting": f"{page}{writes.settings_writer.SETTING_JOIN}{control}",
+                "value": value,
+            },
+            confirm_token,
+            to_state=value,
+        )
+    except Exception as exc:
+        return _error(exc)
+
+
+# ===========================================================================
+# end of lane S's block
+# ===========================================================================
 
 
 @mcp.tool()

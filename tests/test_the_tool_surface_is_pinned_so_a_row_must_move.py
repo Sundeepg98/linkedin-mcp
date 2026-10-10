@@ -151,6 +151,9 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_send_reply": ("confirm_token", "text", "thread_id"),
     "linkedin_server_info": ("verbose",),
     "linkedin_session_info": ("verify_live",),
+    # 2026-10-10, lane S (settings): ONE control on ONE admitted settings
+    # page, behind the single-use grant. Census P O17 moves; see the pin note.
+    "linkedin_set_admitted_setting": ("confirm_token", "control", "page", "value"),
     "linkedin_surface_census": ("item", "surface"),
     "linkedin_unfollow_company": ("company_id", "confirm_token"),
     "linkedin_unsave_job": ("confirm_token", "job_id"),
@@ -474,8 +477,17 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: connections) GAP -> COVERED-UNFIRED by D6 on the orchestrator's ruling, on
 #: `connections_of`, which shipped earlier. Never fired. See
 #: `_audit/2026-09-24-lane-s-people-search.md`, "Four people-search items".
-PINNED_TOOL_COUNT = 61
-PINNED_PARAMETER_COUNT = 96
+#: **RE-PINNED 2026-10-10 AT 62 TOOLS AND 100 PARAMETERS (lane S, settings,
+#: HIS-OWN-SETTINGS-NOT-OUTWARD): one WRITE,
+#: `linkedin_set_admitted_setting(page, control, value, confirm_token)` -- ONE
+#: control on ONE admitted settings page, by its exact label.** THE CENSUS
+#: DECISION, in the same commit: `P O17` ("share profile updates with your
+#: network") is SPLIT from `P O6-O20` under COMPOUND-ROW-SPLITS-ONLY-ON-STATE
+#: and goes GAP -> COVERED-UNFIRED, its switch built on the real capture of
+#: its page; the other fourteen toggles stay GAP on their pages' captures.
+#: Never fired. See `_audit/2026-09-28-lane-s-settings.md`.
+PINNED_TOOL_COUNT = 62
+PINNED_PARAMETER_COUNT = 100
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:

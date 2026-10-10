@@ -11519,3 +11519,56 @@ the class:
     A RETIREMENT IS NOT DONE WHEN ITS BRANCH IS GREEN. A LANE THAT FORKED
     BEFORE IT CAN STILL LEAN ON THE RETIRED THING, AND A CLEAN MERGE SAYS
     NOTHING ABOUT THAT. READ THE OTHER SIDE'S ADDED LINES FOR IT.
+
+## 85. ONE CONTROL ON ONE ADMITTED SETTINGS PAGE, AND THE PAGE MAY MOVE ONLY WHAT ONE PRESS MOVES (lane-s-settings, 2026-10-10)
+
+**Registered 2026-10-10.** Full record: `_audit/2026-09-28-lane-s-settings.md`.
+Numbered 85 on the orchestrator's allocation in the brief.
+
+### 85.1 A PRESS IS JUDGED BY WHAT THE WHOLE PAGE DID, NOT BY THE CONTROL
+
+The generic settings writer reads every switch, checkbox, radio and select on
+the page before its press and after it, position by position, and accepts the
+press only if the page moved EXACTLY what one press of that control's kind
+moves -- one checkable for a switch, two radios for a group, one select -- and
+the control reads the requested value. A control that redrew correctly while a
+second one flipped beside it is refused; on a page that stores on the press,
+the receipt says STOP. Counts and booleans only: a select's value is compared
+in the process and never put on a receipt.
+
+    A WRITE THAT CHECKS ONLY THE CONTROL IT PRESSED CANNOT SEE THE CONTROL IT
+    MOVED BY ACCIDENT. COMPARE THE PAGE, AND ALLOW EXACTLY THE PRESS'S OWN MOVE.
+
+### 85.2 A GUARD SHOWN FAILING MUST FAIL FOR ITS OWN REASON
+
+Seven guards were broken one at a time in a copy-restored module. Six were
+caught at once. The name-count guard on the switch reader was NOT: loosened to
+"at least one", the world with two switches of one name still read unknown --
+through a later step that found no state -- so the test passed and said
+nothing about the guard. The world that guard exists for is a switch and a
+checkbox sharing one name, where the loosened reader returns a state while a
+second control answers to the same name. With that world added and the test
+requiring the count's own refusal, the mutation is caught.
+
+    A TEST THAT PASSES BECAUSE ANOTHER GUARD CAUGHT THE CASE IS NOT EVIDENCE
+    FOR THE GUARD UNDER TEST. ASSERT THE REFUSAL'S OWN REASON.
+
+### 85.3 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `linkedin_server/settings_writer.py` -- `read_control` (exact-one name in either spelling, declared choices only, one checked), `only_that_control_moved` with `_EXPECTED_MOVES`, `save_gate`, `check_kind`, `resolve` / `canonical_target`, `state_of` / `served_at` | seven mutations, each caught: `tests/test_settings_writer.py` (the record's table names the test for each) |
+| `tests/test_set_admitted_setting.py` -- the end-to-end harness: real preview, real token door, real `writes.perform`, over the real capture and three synthetic patterns registered at the admitted address, with the page's own press and Save witness read before each load | written before the integration and run against it: 5 failed, 1 passed; 6 passed after |
+| `tests/fixtures/synthetic/settings_switch_aria.html`, `settings_radio_group.html`, `settings_select.html` -- the three kinds, each able to land late, ignore the press, or move a second control | the scenarios above; the switch page gained a switch-and-checkbox world when 85.2 found the gap |
+| `scripts/ruling_holds.py` -- the release `HIS-OWN-SETTINGS-NOT-OUTWARD` | `scripts/census_completion.py` derived `P O17`'s hold as OPERATOR-NAMES-THE-TARGET until its cell cited the release, then as no ruling |
+
+### 85.4 DECLARED DISPOSABLE
+
+The lane's scratch scripts -- the enumeration over the four sources, the
+classification and its table generator, the census-cell and disposition
+writer, the reader of the settings index's links, the copy-restore mutation
+runner, the targeted test runner and the re-pin helper -- are declared
+disposable. What each measured is in the record with its numbers. The mutation
+runner is worth keeping as a METHOD: write the mutated module, run only the
+test meant to catch it, restore the original bytes in a finally block, and
+check the restore by digest after every mutation.

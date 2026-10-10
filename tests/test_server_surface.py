@@ -1,4 +1,4 @@
-"""The tool surface: sixty-one tools, forty-four of which do not write.
+"""The tool surface: sixty-two tools, forty-four of which do not write.
 
 **AND THIS LINE IS NOW DERIVED, NOT MAINTAINED, 2026-09-20.** It had gone stale
 a THIRD time -- "forty-four tools, thirty-two of which do not write" against a
@@ -156,6 +156,12 @@ SANCTIONED_WRITE_TOOLS = frozenset(SANCTIONED_WRITES) & {
     # Keys in writes.SANCTIONED_WRITES.
     "linkedin_connect_from_profile",
     "linkedin_message_from_profile",
+    # THE EIGHTEENTH, 2026-10-10 (lane S, HIS-OWN-SETTINGS-NOT-OUTWARD; census
+    # P O17, split from P O6-O20): ONE control on ONE admitted settings page.
+    # Its NAME announces the write ("set") and its docstring must describe
+    # one, so it is on both exemptions -- which are one set. A key in
+    # writes.SANCTIONED_WRITES.
+    "linkedin_set_admitted_setting",
 }
 
 #: THE DOCSTRING EXEMPTION IS THE SAME SET AS THE NAME EXEMPTION, and it took
@@ -514,6 +520,9 @@ EXPECTED_TOOLS = {
     # its merge of master 52b55b6), two WRITES: see SANCTIONED_WRITE_TOOLS.
     "linkedin_connect_from_profile",
     "linkedin_message_from_profile",
+    # THE SIXTY-SECOND, 2026-10-10 (lane S, settings), a WRITE: see
+    # SANCTIONED_WRITE_TOOLS.
+    "linkedin_set_admitted_setting",
 }
 
 #: Names a reader must never grow. Listed explicitly so that adding one is a
@@ -598,8 +607,13 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_sixty_one_tools(tools):
-    """RENAMED AGAIN ON LANE L5'S ORDER OF 2026-09-28 08:06, to
+async def test_the_surface_is_exactly_the_sixty_two_tools(tools):
+    """RENAMED AGAIN ON 2026-10-10 (lane S, settings), to
+    ``..._sixty_two_tools``: one WRITE, ``linkedin_set_admitted_setting``
+    (HIS-OWN-SETTINGS-NOT-OUTWARD), ONE control on ONE admitted settings page.
+    MEASURED off the registry; the name moved with the pin.
+
+    RENAMED AGAIN ON LANE L5'S ORDER OF 2026-09-28 08:06, to
     ``..._sixty_one_tools``: one READ, ``linkedin_read_named_profile`` (ruling
     NAMED-PROFILE-READ-BEHIND-A-GRANT), the profile of a member he names,
     loaded once behind the single-use grant. MEASURED off the registry;
@@ -904,7 +918,10 @@ async def test_the_surface_is_exactly_the_sixty_one_tools(tools):
     # SIXTY-ONE ON LANE L5'S ORDER OF 2026-09-28 08:06: linkedin_read_named_profile,
     # a READ, so the split moves on its read side and the write set holds.
     # MEASURED off mcp.list_tools().
-    assert len(tools) == 61
+    # SIXTY-TWO ON 2026-10-10 (lane S, settings): linkedin_set_admitted_setting,
+    # a WRITE, so the split moves on its write side and the non-write count
+    # holds. MEASURED off mcp.list_tools().
+    assert len(tools) == 62
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -936,6 +953,8 @@ async def test_the_surface_is_exactly_the_sixty_one_tools(tools):
         "linkedin_withdraw_from_group",
         "linkedin_connect_from_profile",
         "linkedin_message_from_profile",
+        # 2026-10-10, lane S: one control on one admitted settings page.
+        "linkedin_set_admitted_setting",
     }
     # THE NON-WRITE COUNT MOVES TO SIXTEEN, and the reason is NOT the reason
     # it moved last time. The comment here said: "THE READ COUNT MOVES OFF
@@ -1181,6 +1200,8 @@ async def test_the_exemption_covers_only_the_names_on_it(tools):
         "linkedin_withdraw_from_group",
         "linkedin_connect_from_profile",
         "linkedin_message_from_profile",
+        # 2026-10-10, lane S: one control on one admitted settings page.
+        "linkedin_set_admitted_setting",
     }
     # The probe has to be genuinely sanctioned for this to test the thing it
     # claims to. A name nobody ever specced would only show that made-up names
@@ -1645,6 +1666,10 @@ async def test_server_info_stops_claiming_read_only_once_writes_are_on(monkeypat
         # fourteen siblings: a reply inside a conversation he names by thread
         # id, which reports SENT only off a fresh load of that conversation.
         "send_reply",
+        # THE EIGHTEENTH, 2026-10-10 (census P O17, lane S), typed here by
+        # hand like its seventeen siblings: ONE control on ONE admitted
+        # settings page, by its exact label, behind the single-use grant.
+        "set_admitted_setting",
         "unfollow_company",
         "unsave_job",
         # SIXTH, 2026-08-31. The first write here that acts on neither a job
@@ -1717,6 +1742,9 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
         # branch). Typed by hand, as this list requires, by the lane that
         # built it.
         "send_reply",
+        # THE EIGHTEENTH, 2026-10-10 (census P O17). Typed by hand, as this
+        # list requires, by the lane that built it (lane S).
+        "set_admitted_setting",
         "unfollow_company",
         "unsave_job",
         # THE TWELFTH, 2026-09-02, on his ruling "I want all capabilities".

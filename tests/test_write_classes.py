@@ -170,10 +170,16 @@ def test_the_split_is_the_one_the_lane_report_quotes():
     `P A11`, `P A13` and `P A17` returned to GAP on the orchestrator's ruling --
     each an input carrying aria-autocomplete, which the one tool can only type
     into; classed R3 by their act (profile-edit), queued on picking an entry.
-    386 + 3 = 389 = 16 R1 + 37 R2 + 336 R3."""
+    386 + 3 = 389 = 16 R1 + 37 R2 + 336 R3.
+
+    390 ON 2026-10-10, LANE S (SETTINGS), MEASURED
+    (`_audit/2026-09-28-lane-s-settings.md`, section 4): `P O17` split from
+    `P O6-O20` and BUILT -- `built:set_admitted_setting`, COVERED-UNFIRED --
+    so it keeps a line as a built row; classed R3 by its act (profile-setting).
+    `P O6-O20` stays a GAP line. 389 + 1 = 390 = 16 R1 + 37 R2 + 337 R3."""
     rows, _ = cwc.load()
     split = cwc.split(rows)
-    assert (split["R1"], split["R2"], split["R3"]) == (16, 37, 336)
+    assert (split["R1"], split["R2"], split["R3"]) == (16, 37, 337)
     assert split["R1:built"] + split["R1:queued"] == split["R1"]
 
 

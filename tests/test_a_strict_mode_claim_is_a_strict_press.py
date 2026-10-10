@@ -66,6 +66,9 @@ PINNED_STRICT_PRESS_ACTIONS = frozenset(
         "update_profile_field",
         "withdraw_from_group",
         "follow_company",
+        # 2026-10-10, lane S: the generic settings writer's press is aimed by
+        # the control's exact name, which its gate required drawn once.
+        "set_admitted_setting",
     }
 )
 

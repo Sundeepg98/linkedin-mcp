@@ -104,14 +104,20 @@ import pin_census_rows as P  # noqa: E402
 #: COMPOUND-ROW-SPLITS-ONLY-ON-STATE -- school and industry stay GAP where
 #: location and company went COVERED-UNFIRED by D6 -- see
 #: `_audit/2026-09-24-lane-s-people-search.md`, "N 25 and N 26". No row left.
-PINNED_ROW_TOTAL = 771
+#: 771 -> 772 ON 2026-10-10 (lane S, settings), MEASURED by
+#: `scripts/pin_census_rows.py`: `P O17` entered, split from `P O6-O20` under
+#: COMPOUND-ROW-SPLITS-ONLY-ON-STATE -- "share profile updates with your
+#: network" went COVERED-UNFIRED on the generic settings writer, built on its
+#: page's real capture, while the other fourteen toggles stay GAP -- see
+#: `_audit/2026-09-28-lane-s-settings.md`, section 4. No row left.
+PINNED_ROW_TOTAL = 772
 
 #: Per slice, because a delta of zero across four slices is reachable by two
 #: errors cancelling -- one row added to `jobs.md` and one dropped from
 #: `network.md` sum to the same total and are not the same census.
 PINNED_SLICE_ROWS = {
     "J": 166,   # jobs.md                    (150 + 16)
-    "P": 236,   # profile.md                 (203 + 10 + 22 + 1, P A23b)
+    "P": 237,   # profile.md                 (203 + 10 + 22 + 1 + 1, P A23b, P O17)
     "M": 153,   # messaging-and-content.md   (142 + 11)
     "N": 216,   # network.md                 (209 + 6 + 1, N 26b)
 }
