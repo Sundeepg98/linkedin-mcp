@@ -78,6 +78,13 @@ PINNED: set[tuple[str, str, str, int]] = {
      "_audit/2026-09-23-census-cleanup.md", 1),
     ("BLOCKER", "ONE-NAMED-SETTINGS-PAGE-AT-A-TIME",
      "_audit/2026-09-23-lane-l1-refused-reads.md", 1),
+    # PINNED 2026-10-10 BY LANE A, AND IT CANNOT BE REWORDED: the document is
+    # the orchestrator's rulings text, copied byte-identical by order by four
+    # lanes. Its line "A page that lists other people is read under
+    # `NAMES-AT-RUNTIME` and" puts a REGISTERED RULING ID in the "under"
+    # slot -- the same shape as the four ruling ids above. None is a blocker.
+    ("BLOCKER", "NAMES-AT-RUNTIME",
+     "_audit/2026-09-28-rulings-build-classes.md", 1),
 }
 
 #: REPAIRED 2026-09-20, and removed from PINNED by the ratchet's own instruction.

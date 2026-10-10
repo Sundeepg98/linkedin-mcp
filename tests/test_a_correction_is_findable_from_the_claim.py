@@ -185,6 +185,22 @@ CORRECTION_VOCABULARY = (
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
 
+    # 2026-10-10, lane A. THE ORCHESTRATOR'S RULINGS DOCUMENT, COPIED
+    # BYTE-IDENTICAL BY ORDER (four lanes copy it; no lane may edit it). Read,
+    # not inferred from the filenames.
+    ("2026-09-28-rulings-build-classes.md", "2026-09-05-upload-sanction.md"): (
+        "A POINTER TO WHERE A TERM IS DEFINED, NOT A CORRECTION OF THAT "
+        "DOCUMENT. The section 'Not ruled here: uploads' calls the blocker "
+        "label `FILE-UPLOAD-UNSANCTIONED` stale -- the operator's 2026-09-04 "
+        "decision retired it -- and then cites the upload-sanction record for "
+        "what the rows still lack, an AIM. The matched word belongs to the "
+        "LABEL, which lives in the blocker map, not to the cited record, whose "
+        "AIM definition the ruling relies on. **WHAT WOULD MAKE THIS ENTRY "
+        "WRONG:** the rulings document asserting that something the "
+        "upload-sanction record says does not hold, which would need its own "
+        "CORRECTS: / CORRECTED BY: pair."
+    ),
+
     # 2026-09-28, the live lane's session 2. A CENSUS ROW CITES THE LANE'S
     # RECORD AS THE EVIDENCE FOR ITS OWN FIRE -- read, not inferred from the
     # filenames. The lane's real corrections run the other way and are
