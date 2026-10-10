@@ -54,8 +54,8 @@ P I8	P I4	4	US-BOUNDARY|US-RULING	GAP	profile.md	same **RETURNED TO GAP 2026-09-
 P I9	P I4	5	US-BOUNDARY|US-RULING	GAP	profile.md	same **RETURNED TO GAP 2026-09-23 BY LANE R (202
 P I10	P I4	6	US-BOUNDARY|US-RULING	GAP	profile.md	same **RETURNED TO GAP 2026-09-23 BY LANE R (202
 P I11	P I4	7	US-BOUNDARY|US-RULING	GAP	profile.md	same, plus `delete_or_withdraw_anything` **KEPT 
-P J2	P J1	1	-	GAP	profile.md	same **LANE L7, 2026-09-24 -- VISIBLE-TO-OTHERS,
-P J3	P J1	2	-	GAP	profile.md	same **LANE L7, 2026-09-24 -- VISIBLE-TO-OTHERS,
+P J2	P J1	1	UNCLEAR	EXCLUDED-RULED	profile.md	same **LANE L7, 2026-09-24 -- VISIBLE-TO-OTHERS,
+P J3	P J1	2	UNCLEAR	EXCLUDED-RULED	profile.md	same **LANE L7, 2026-09-24 -- VISIBLE-TO-OTHERS,
 P M2	P M1	1	US-BOUNDARY|US-RULING	GAP	profile.md	same address, same entry **RETURNED TO GAP 2026-
 P M3	P M1	2	US-BOUNDARY|US-RULING	GAP	profile.md	same address, plus `delete_or_withdraw_anything`
 P M4	P M1	3	US-BOUNDARY|US-RULING	GAP	profile.md	same address **RETURNED TO GAP 2026-09-23 BY LAN

@@ -179,14 +179,25 @@ def test_the_split_is_the_one_the_lane_report_quotes():
     purchase leaves the closed vocabulary with its one line. Both R3.
     389 - 2 = 387 = 16 R1 + 37 R2 + 334 R3.
 
+    373 AT LANE K'S APPLICATION OF THE RULINGS OF 2026-10-10, MEASURED
+    (`_audit/2026-09-28-lane-k-ledger.md` s12): fourteen W rows left GAP --
+    `N 106`, `N 108`, `P N21` (CONTACT-IMPORT-STAYS-MANUAL), `P N10`
+    (SESSION-SURFACE), `P N14` (SIGN-IN-CHALLENGES-ARE-HIS), `N 152`
+    (SAFETY-REPORTS-STAY-MANUAL), `P S10`, `P B7`, `P J1`, `P J2`, `P J3`,
+    `P L6`, `N 198` (OUTSIDE-THE-PRODUCT-PURPOSE), and `P A9`
+    (COVERED-CANNOT-DELIVER, P-A9-CANNOT-DELIVER) -- so their lines go. All R3.
+    387 - 14 = 373 = 16 R1 + 37 R2 + 320 R3.
     384 AT LANE U'S MOVE (2026-10-10), MEASURED
     (`_audit/2026-09-28-lane-u-uploads.md` s5): `M M14`, `M M15` and `M M18`
     GAP -> COVERED-UNFIRED on `linkedin_send_attachment`, so their three lines
     leave the table. All three R2 (queued on the conversation's attachments).
-    387 - 3 = 384 = 16 R1 + 34 R2 + 334 R3."""
+    387 - 3 = 384 = 16 R1 + 34 R2 + 334 R3.
+    370 AT LANE U'S MERGE OF ORIGIN/MASTER 71d83ca, MEASURED: lane K's
+    fourteen R3 lines and lane U's three R2 lines, disjoint, all gone.
+    373 - 3 = 370 = 16 R1 + 34 R2 + 320 R3."""
     rows, _ = cwc.load()
     split = cwc.split(rows)
-    assert (split["R1"], split["R2"], split["R3"]) == (16, 34, 334)
+    assert (split["R1"], split["R2"], split["R3"]) == (16, 34, 320)
     assert split["R1:built"] + split["R1:queued"] == split["R1"]
 
 
