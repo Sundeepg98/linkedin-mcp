@@ -93,14 +93,13 @@ DENOMINATORS: tuple[str, ...] = (
     "entries_unpaired",
 )
 
-#: Why a follower count is absent. Closed.
-TOTAL_WHY = ("absent", "ambiguous", "not-an-integer", "unreadable")
+#: Why a follower count is absent. Closed: a failed read counts as nothing
+#: seen, so it reads ``absent`` rather than naming a failure it cannot tell
+#: apart from an empty page.
+TOTAL_WHY = ("absent", "ambiguous", "not-an-integer")
 
 #: Why the view is absent. Closed.
-VIEW_WHY = (
-    "no-demographics-nav", "ambiguous-nav", "no-current-tab",
-    "several-current-tabs", "unreadable",
-)
+VIEW_WHY = ("no-demographics-nav", "ambiguous-nav", "no-current-tab", "several-current-tabs")
 
 ROUTE = (
     "The follower count beside LinkedIn's 'Total followers' label; the "

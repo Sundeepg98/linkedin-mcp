@@ -244,6 +244,14 @@ def test_a_page_that_draws_none_of_it_reads_empty_and_says_where():
     assert set(out["denominators"].values()) == {0}
 
 
+def test_every_why_returned_is_in_its_closed_vocabulary():
+    for name, out in readings().items():
+        assert out["total_followers_why"] in (None,) + aa.TOTAL_WHY, name
+        assert out["view_why"] in (None,) + aa.VIEW_WHY, name
+        assert set(out["dimensions"]) <= set(aa.DIMENSIONS), name
+        assert out["view"] in (None,) + aa.TAB_WORDS, name
+
+
 def test_the_view_is_the_tab_aria_current_marks_never_the_first():
     got = readings()
     assert got["as_tracked"]["view"] == "All"
