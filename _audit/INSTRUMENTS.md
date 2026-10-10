@@ -11520,7 +11520,7 @@ the class:
     BEFORE IT CAN STILL LEAN ON THE RETIRED THING, AND A CLEAN MERGE SAYS
     NOTHING ABOUT THAT. READ THE OTHER SIDE'S ADDED LINES FOR IT.
 
-## 86. AN INSTRUMENT RED FOR THREE WEEKS, MADE GREEN IN ITS RECORDS AND NOT IN ITSELF (lane-g2-debts, 2026-10-10)
+## 86. A RED INSTRUMENT MADE GREEN IN ITS RECORDS, A CLEAN THAT MUST SHOW WHAT THE PAGE MADE, AND A RECORD TYPE THE BOUND COULD NOT NAME (lane-g2-debts, 2026-10-10)
 
 Record: `_audit/2026-10-10-lane-g2-debts.md`.
 
@@ -11543,8 +11543,51 @@ naming all eight) against the records as they were.
     A PIN THAT HOLDS A KNOWN RED IS A DEBT WITH NO DUE DATE. REPAIR THE
     RECORDS AND EMPTY THE PIN; NEVER WIDEN THE CHECKER TO MEET THEM.
 
+### 86.2 CLEAN NEEDS SOMETHING THE PAGE MADE, MEASURED AGAINST A PAGE THAT DRAWS NOTHING
+
+The reader-leak guard's earned-clean rule ("a read, and a result that is
+neither empty, a refusal nor an error") was met by readers that hand back the
+same thing whatever the page draws. Measured over the 97 readers it recorded
+clean: 17 were clean on a refusal tally, a poll budget, their own sentence or
+a failure's name -- the guard's own control reader among them, and the three
+readers behind the people search. The instrument: the same call over
+`tests/plantedpage.py`'s `BlankPage`, and a value counts only if it differs
+from that drive and sits under no refusal or failure key
+(`tests/test_readers_emit_no_page_string.py`, `page_evidence`).
+
+SHOWN FAILING: two stubs that read the page and then return before their
+success path were clean under the old rule and are not under the new one; the
+pure rule's table has 13 rows; and the coverage comparison named the 17 when
+the rule met the old baseline.
+
+WHAT IT FOUND BEYOND THE COUNT: two of the 17 had success paths that return
+page text outside a record -- a control's id attribute, a followed Page's
+name -- which no drive had reached; they are held for a ruling. The triage
+added two kinds to `WHAT_WOULD_DRIVE_IT`: `SCRIPT` (a script the planted page
+can only answer with strings) and `WORDS` (LinkedIn's own words in the page's
+text, which it can only answer with the plant).
+
+THE NULL HAD TO BE FAITHFUL BEFORE IT WAS USEFUL. Its first version let every
+wait return at once, so seven wait readers read "attached" on both pages and
+would have been convicted for the double's fault; a fidelity test now holds
+that every wait on the blank page times out and no read answers the plant.
+
+    A VALUE BOTH PAGES GIVE IS THE READER'S OWN. ASK WHAT A PAGE THAT DRAWS
+    NOTHING RETURNS BEFORE CALLING A DRIVE A READING -- AND MAKE THE NULL TIME
+    OUT WHERE THE REAL PAGE WOULD.
+
+### 86.3 A RECORD TYPE THE BOUNDED-READER GUARD CANNOT NAME
+
+`tests/test_a_people_reader_reads_one_page.py` finds record readers by a
+hand-kept set of class names. When `people_data.Post` was declared, the set did
+not hold it, so a reader building posts would have had no bound on its pages.
+`test_every_record_type_is_a_record_class_here` holds the set equal to
+`people_data.RECORD_TYPES`; SHOWN FAILING on `Post` before the name was added.
+
 ### 86.9 DECLARED DISPOSABLE
 
 Scratch probes of this lane, kept in its scratch area and not committed:
 the census ASCII count, the comment-coupling measurement of item 3c, the
-search readers' planted drive, and the instrument runner.
+search readers' planted drive, the success-evidence measurement whose rule
+became 86.2 (the committed form is the guard's own), the baseline diff, and
+the instrument runner.
