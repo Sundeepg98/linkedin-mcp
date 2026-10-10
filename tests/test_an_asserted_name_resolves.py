@@ -78,6 +78,13 @@ PINNED: set[tuple[str, str, str, int]] = {
      "_audit/2026-09-23-census-cleanup.md", 1),
     ("BLOCKER", "ONE-NAMED-SETTINGS-PAGE-AT-A-TIME",
      "_audit/2026-09-23-lane-l1-refused-reads.md", 1),
+    # 2026-10-10, lane S (settings): the orchestrator's rulings of
+    # 2026-09-28, which four lanes copy BYTE-IDENTICAL and none may reword,
+    # say a page "is read under `NAMES-AT-RUNTIME`" -- a registered ruling id
+    # after the slot word "under", not a blocker. Pinned, as the sites above
+    # are, because the text is not the copying lane's to change.
+    ("BLOCKER", "NAMES-AT-RUNTIME",
+     "_audit/2026-09-28-rulings-build-classes.md", 1),
 }
 
 #: REPAIRED 2026-09-20, and removed from PINNED by the ratchet's own instruction.

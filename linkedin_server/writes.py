@@ -2034,7 +2034,7 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
         # supplies an address and a page never does either. The pattern admits
         # the admitted addresses and nothing beside them.
         url_template=settings_writer.HOST_PREFIX + "{target}",
-        url_pattern=settings_writer.url_pattern(),
+        url_pattern=settings_writer.admitted_address_pattern(),
         exempt_substring=None,
         # The admitted address lives under ``/mypreferences/d/settings/``,
         # which trips two forbidden entries; both are excused by equality, as
@@ -5216,11 +5216,19 @@ async def observe(
         # (``settings_writer.read_control``). A landing that did not keep the
         # admitted address reads ``unknown`` whatever it drew.
         admitted, control, _destination = settings_writer.resolve_target(target, TARGET_JOIN)
-        url = admitted.url
+        # THE ADDRESS THROUGH THE SPEC'S OWN TEMPLATE, the derivation the write
+        # door rebuilds with -- never an attribute read off a record, which the
+        # navigation guard (rightly) cannot tell from one read off a page.
+        url = str(spec.url_template or "").format(target=url_target_of(spec, target))
         landed = await _load(navigator, page, url, surface="settings")
         reading = await settings_writer.read_control(page, control)
+        # A COMPARISON, NOT A CALL ON THE LANDING: see
+        # ``settings_writer.landed_path`` for why the navigation guard needs
+        # the landing compared rather than handed to a function.
         state, why = settings_writer.state_of(
-            reading, control, served=settings_writer.served_at(admitted, landed)
+            reading,
+            control,
+            served=settings_writer.landed_path(landed) == settings_writer.landed_path(url),
         )
         return _record(
             spec,
@@ -6629,8 +6637,14 @@ def valid_from(spec: WriteSpec, state: str, target: str) -> tuple[bool, str]:
             _admitted, control, destination = settings_writer.resolve_target(
                 target, TARGET_JOIN
             )
-        except WriteAttemptError as exc:
-            return False, str(exc)
+        except WriteAttemptError:
+            # A REASON THIS PACKAGE COMPOSES, never the exception's text (the
+            # receipt rule ``tests/test_a_write_receipt_carries_no_library_
+            # message.py`` holds for every return of this module).
+            return False, (
+                "this grant's target no longer names an admitted settings page, "
+                "control and value, so there is nothing to move from."
+            )
         if state not in control.values:
             return False, (
                 f"the control on the page reads {state!r}, which is not one of "
@@ -9017,13 +9031,16 @@ async def _verify_after(
         # page that sets it, so this is a new render rather than an
         # independent witness. A landing elsewhere, a control drawn twice or a
         # value outside its closed set answers unknown.
-        admitted, control, _destination = settings_writer.resolve_target(
+        _admitted, control, _destination = settings_writer.resolve_target(
             grant.target, TARGET_JOIN
         )
-        landed = await _load(navigator, page, admitted.url, surface="settings")
+        url = str(spec.url_template or "").format(target=url_target_of(spec, grant.target))
+        landed = await _load(navigator, page, url, surface="settings")
         reading = await settings_writer.read_control(page, control)
         state, why = settings_writer.state_of(
-            reading, control, served=settings_writer.served_at(admitted, landed)
+            reading,
+            control,
+            served=settings_writer.landed_path(landed) == settings_writer.landed_path(url),
         )
         return state, why, landed
 

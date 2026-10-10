@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import dataclasses
 import json
+import re
 from pathlib import Path
 
 import pytest
@@ -106,8 +107,12 @@ THE_CONTROL = THE_PAGE.controls[0]
 def test_one_page_is_admitted_and_it_is_the_captured_one():
     assert [p.name for p in sw.ADMITTED_PAGES] == ["Share profile updates"]
     assert THE_PAGE.url == profile_editor.ACCOUNT_SETTING_URL
-    assert THE_PAGE.capture == "tests/fixtures/live2/setting.html"
-    assert (Path(__file__).resolve().parents[1] / THE_PAGE.capture).is_file()
+    # The record names its capture in a SENTENCE (the package's rule for
+    # naming a tracked file); the skeleton it names exists and is this file's.
+    named = re.findall(r"tests/fixtures/\S+?\.html", THE_PAGE.capture)
+    assert named == ["tests/fixtures/live2/setting.html"], THE_PAGE.capture
+    assert (Path(__file__).resolve().parents[1] / named[0]).is_file()
+    assert Path(__file__).resolve().parent / "fixtures" / "live2" / "setting.html" == REAL_CAPTURE
     assert [c.label for c in THE_PAGE.controls] == [profile_editor.ACCOUNT_SETTING_NAME]
     assert THE_CONTROL.kind == sw.SWITCH
     assert THE_CONTROL.live_proof in sw.LIVE_PROOF_CLASSES
@@ -126,7 +131,7 @@ def test_every_admitted_control_is_a_settable_kind_with_meanings_for_each_value(
 
 
 def test_the_write_pattern_admits_the_admitted_address_and_nothing_beside_it():
-    pattern = sw.url_pattern()
+    pattern = sw.admitted_address_pattern()
     assert pattern.match(THE_PAGE.url)
     assert pattern.match(THE_PAGE.url + "/")
     for other in (

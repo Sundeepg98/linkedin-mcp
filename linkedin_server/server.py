@@ -1,4 +1,10 @@
-"""The tool surface: sixty-one tools, seventeen of which write to LinkedIn.
+"""The tool surface: sixty-two tools, eighteen of which write to LinkedIn.
+
+THE SIXTY-SECOND IS A WRITE, 2026-10-10 (lane S, settings, under
+``HIS-OWN-SETTINGS-NOT-OUTWARD``): ``linkedin_set_admitted_setting`` changes
+ONE control on ONE settings page of his own account, a page admitted by name
+from a real capture of it (``settings_writer.ADMITTED_PAGES``). Its press is
+``perform``'s own; nothing was added to ``readonly.SANCTIONED_MUTATIONS``.
 
 THE SIXTY-FIRST IS A READ, 2026-09-28, on lane L5's order of 08:06 and the
 operator's ruling of 08:01 (``NAMED-PROFILE-READ-BEHIND-A-GRANT``):
@@ -212,9 +218,9 @@ assigned to anybody -- it waits for whoever next runs the suite, and in the
 meantime the pin goes on asserting the old number with full confidence.
 
 THE NUMBERS ABOVE ARE DERIVED NOW, and that is a statement about a test rather
-than about an intention. Sixty-one is ``len(await mcp.list_tools())``,
+than about an intention. Sixty-two is ``len(await mcp.list_tools())``,
 pinned in ``test_server_surface.py`` by
-``test_the_surface_is_exactly_the_sixty_one_tools``; the split is pinned by
+``test_the_surface_is_exactly_the_sixty_two_tools``; the split is pinned by
 ``tests/test_prose_that_makes_a_claim.py::test_the_server_docstring_numbers_are_derived``,
 which reads THESE WORDS and fails if any of the three disagrees with the
 registry.

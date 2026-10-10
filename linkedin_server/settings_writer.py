@@ -177,7 +177,10 @@ class AdmittedPage:
     #: the capture, never assumed.
     save_label: Optional[str]
     controls: tuple[AdmittedControl, ...]
-    #: The tracked skeleton the record was measured on.
+    #: A SENTENCE naming the capture the record was measured on and its
+    #: tracked skeleton -- a sentence, because a package module names a tracked
+    #: data file only inside one (the impact gate's sentence rule rests on it;
+    #: ``tests/test_impact_gate_selects_data_dependencies.py``).
     capture: str
     #: Which ruling's application admitted it, and when.
     admitted_by: str
@@ -233,7 +236,10 @@ SHARE_PROFILE_UPDATES = AdmittedPage(
             ),
         ),
     ),
-    capture="tests/fixtures/live2/setting.html",
+    capture=(
+        "the live lane's capture of 2026-09-28 (session 2), tracked as the "
+        "skeleton tests/fixtures/live2/setting.html"
+    ),
     admitted_by=(
         "ONE-NAMED-SETTINGS-PAGE-AT-A-TIME, the orchestrator's application of "
         "2026-09-27 (read); the write to its one control, lane S, 2026-10-10, "
@@ -372,22 +378,31 @@ def meaning_of(control: AdmittedControl, value: str) -> str:
     return ""
 
 
+def landed_path(address: Optional[str]) -> tuple[str, str, str]:
+    """``(scheme, host, path without its trailing slash)`` of an address, or
+    three empty strings for none. PURE, never raises. The query is dropped: a
+    tracking parameter on a served page is the same page.
+
+    ``writes`` COMPARES two of these rather than passing a landing into a
+    call: the navigation guard treats a call's result as derived from any
+    address handed to it, and a comparison's result as a boolean, which is
+    what this question is."""
+    if not address:
+        return ("", "", "")
+    parts = urlsplit(str(address).strip())
+    return (parts.scheme, parts.netloc, parts.path.rstrip("/"))
+
+
 def served_at(page: AdmittedPage, landed: Optional[str]) -> bool:
     """Did the page keep its own address? PURE. The path is compared, host
     fixed, trailing slash and query ignored -- the rule
     ``profile_editor.served_at_account_setting`` set for the same page."""
     if not landed:
         return False
-    got = urlsplit(str(landed).strip())
-    want = urlsplit(page.url)
-    return (
-        got.scheme == want.scheme
-        and got.netloc == want.netloc
-        and got.path.rstrip("/") == want.path.rstrip("/")
-    )
+    return landed_path(landed) == landed_path(page.url)
 
 
-def url_pattern() -> "re.Pattern[str]":
+def admitted_address_pattern() -> "re.Pattern[str]":
     """The write door's pattern: the admitted pages' addresses, anchored, and
     nothing else."""
     return re.compile(
