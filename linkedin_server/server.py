@@ -1,4 +1,18 @@
-"""The tool surface: sixty-one tools, seventeen of which write to LinkedIn.
+"""The tool surface: sixty-two tools, eighteen of which write to LinkedIn.
+
+THE SIXTY-SECOND IS A WRITE, 2026-10-10, on lane U's branch, on ruling
+``FILE-UPLOAD-OPENED`` (the operator's decision of 2026-09-04):
+``linkedin_send_attachment``, ONE file from the declared upload root into ONE
+conversation he names by thread id, behind the single-use grant. Its file
+input is aimed on two real captures of the message composer's footer (the
+live lane's sessions 3 and 8) and cross-checked against the declarations an
+opened conversation drew live; the bytes handed over are the bytes read and
+compared; Send is pressed only if the form draws the file's name exactly
+once. Census rows ``M M14``, ``M M15``, ``M M18`` are COVERED-UNFIRED since
+2026-10-10, held until he names the conversation and the file; the composer
+holding an attachment and a sent attachment message are not captured, so the
+read-back and the verification are aimed at the file's name. The headline
+read "sixty-one tools, seventeen of which write" until then.
 
 THE SIXTY-FIRST IS A READ, 2026-09-28, on lane L5's order of 08:06 and the
 operator's ruling of 08:01 (``NAMED-PROFILE-READ-BEHIND-A-GRANT``):
@@ -212,9 +226,9 @@ assigned to anybody -- it waits for whoever next runs the suite, and in the
 meantime the pin goes on asserting the old number with full confidence.
 
 THE NUMBERS ABOVE ARE DERIVED NOW, and that is a statement about a test rather
-than about an intention. Sixty-one is ``len(await mcp.list_tools())``,
+than about an intention. Sixty-two is ``len(await mcp.list_tools())``,
 pinned in ``test_server_surface.py`` by
-``test_the_surface_is_exactly_the_sixty_one_tools``; the split is pinned by
+``test_the_surface_is_exactly_the_sixty_two_tools``; the split is pinned by
 ``tests/test_prose_that_makes_a_claim.py::test_the_server_docstring_numbers_are_derived``,
 which reads THESE WORDS and fails if any of the three disagrees with the
 registry.
@@ -227,9 +241,9 @@ POINTER to it was dangling, so a reader who followed it found nothing and
 would reasonably conclude these numbers are unchecked. A citation is a claim
 like any other.
 The surface splits three ways and the split is the part a reader actually
-needs: FORTY-FOUR read, SEVENTEEN write, and ZERO are write-shaped,
-registered, gated and unable to act. Forty-four plus seventeen plus zero is
-sixty-one. (Thirty-eight, thirteen and fifty-one until 2026-09-24; thirty-nine,
+needs: FORTY-FOUR read, EIGHTEEN write, and ZERO are write-shaped,
+registered, gated and unable to act. Forty-four plus eighteen plus zero is
+sixty-two. (Thirty-eight, thirteen and fifty-one until 2026-09-24; thirty-nine,
 thirteen and fifty-two at the live lane's merge the same day; thirty-nine,
 fourteen and fifty-three at lane L7's; forty-one, fifteen and fifty-six at
 lane L5's; forty-one, sixteen and fifty-seven at lane L8's merge on
@@ -238,7 +252,8 @@ eighteen and fifty-nine from that merge until lane L5 RETIRED
 ``linkedin_send_message`` later the same day -- aimed by a name; forty-one,
 seventeen and fifty-eight until lane S's two reads arrived at its merge of
 master 0867bda, 2026-09-28; forty-three, seventeen and sixty until lane L5's
-read of a named profile the same day.)
+read of a named profile the same day; forty-four, seventeen and sixty-one
+until lane U's ``linkedin_send_attachment``, 2026-10-10.)
 
 THE FIFTY-THIRD IS ONE WRITE, 2026-09-24 (lane L7, census row ``P I14``).
 ``linkedin_mark_company_interest`` presses "I'm interested" in the
@@ -367,11 +382,12 @@ the moment ``update_profile_field`` was given an address while still refusing.
 always meant: an address is not a permission.
 
 NOTE THE ACTION THAT HAS NO TOOL. ``writes.SANCTIONED_WRITES`` holds
-EIGHTEEN actions where this surface registers SEVENTEEN write-shaped tools, and
+NINETEEN actions where this surface registers EIGHTEEN write-shaped tools, and
 the missing one is ``set_open_to_work``: it is sanctioned, it is refused by
-``_refuse_unperformable``, and no tool was ever registered for it. So seventeen
-counts TOOLS and eighteen counts ACTIONS, and a reader comparing the two
-numbers is not looking at a discrepancy. (NINETEEN and EIGHTEEN from lane L5's
+``_refuse_unperformable``, and no tool was ever registered for it. So eighteen
+counts TOOLS and nineteen counts ACTIONS, and a reader comparing the two
+numbers is not looking at a discrepancy. (EIGHTEEN and SEVENTEEN until lane U's
+``send_attachment``, 2026-10-10, adding one to each; NINETEEN and EIGHTEEN from lane L5's
 merge of master 52b55b6 until lane L5 retired ``send_message`` the same day,
 which took one from each; SEVENTEEN and SIXTEEN until lane
 L5's merge of master 52b55b6, 2026-09-27, ``connect_from_profile`` and
@@ -952,7 +968,7 @@ mcp = FastMCP(
     instructions=(
         "A window onto the operator's OWN LinkedIn account, driven by his own "
         "signed-in browser on his own machine. Most tools read and change "
-        "nothing. SEVENTEEN WRITE: linkedin_save_job, "
+        "nothing. EIGHTEEN WRITE: linkedin_save_job, "
         "linkedin_unsave_job, linkedin_unfollow_company, "
         "linkedin_follow_company, linkedin_apply_job, "
         "linkedin_update_setting, linkedin_react_to_item, "
@@ -960,8 +976,8 @@ mcp = FastMCP(
         "linkedin_comment_on_item, linkedin_update_profile_field, "
         "linkedin_follow_company_page, "
         "linkedin_mark_company_interest, linkedin_send_reply, "
-        "linkedin_withdraw_from_group, linkedin_connect_from_profile and "
-        "linkedin_message_from_profile. "
+        "linkedin_withdraw_from_group, linkedin_connect_from_profile, "
+        "linkedin_message_from_profile and linkedin_send_attachment. "
         "THE ELEVENTH is the only one here that can verify its own outcome "
         "by reading the field back; it also returns the PREVIOUS value "
         "verbatim and the exact call that puts it back, which this server "
@@ -10296,6 +10312,78 @@ async def linkedin_send_reply(
         return _error(exc)
 
 
+# ------------------------------------------------------------------- lane U
+# ONE FILE INTO ONE CONVERSATION HE NAMES -- lane U, 2026-10-10, on ruling
+# FILE-UPLOAD-OPENED (the operator's decision of 2026-09-04). Census rows
+# M M14, M M15 and M M18. The record: _audit/2026-09-28-lane-u-uploads.md.
+
+
+@mcp.tool()
+async def linkedin_send_attachment(
+    thread_id: str, file: str, confirm_token: str = ""
+) -> dict[str, Any]:
+    """Send ONE file as an attachment inside ONE conversation you name. SENDS.
+
+    A FILE FROM THIS MACHINE, TO A REAL PERSON, UNDER YOUR NAME, THAT NOTHING
+    HERE CAN TAKE BACK. LinkedIn receives the bytes as soon as they are handed
+    to the composer -- before Send -- and the person receives them when it is
+    sent. No delete is built here.
+
+    THE FILE MUST BE IN YOUR UPLOAD DIRECTORY. Pass its name (or a path inside
+    that directory); a path outside it, a link anywhere on the way, a
+    directory, an empty file or one over this server's 25 MB cap is refused by
+    name before any token exists. NOTHING IS REFUSED FOR ITS TYPE: the type is
+    read from the file's own bytes and reported, never used as a gate.
+
+    CALL IT WITHOUT ``confirm_token`` FIRST. Nothing is attached. The
+    conversation is loaded -- which, if it holds a message you have not read,
+    can show its sender a "seen" -- and you get back a block naming the file,
+    its exact size, the type its bytes declare beside the extension its name
+    claims, a digest of its bytes, the conversation's title (who the file
+    would reach, read off its header for you to check and kept nowhere), and
+    which of the form's two file inputs it would go to. Read it, then call
+    again with the token it hands you, within two minutes, once.
+
+    ON CONFIRM: the reply box must be EMPTY with Send drawn disabled -- so
+    nothing else is waiting to go with the file -- and exactly one file input
+    must sit beside the button LinkedIn labels for this file's kind. The file
+    is read ONCE, its digest compared with the preview's, and THOSE BYTES are
+    handed over -- a file changed after the preview is refused, not sent.
+    Then, up to 20 s, the form must draw the file's name EXACTLY ONCE, hold no
+    words and turn Send on; only then is Send pressed. THEN IT CONFIRMS
+    ITSELF: the conversation is loaded fresh and ``performed`` is true only if
+    the number of messages drawing the file's name rose by exactly one and the
+    last one is yours. False means NOT SENT -- Send was never pressed, or the
+    form still held the file with Send enabled -- and the file may still sit
+    in the composer. ``"unknown"`` means Send WAS pressed and neither could be
+    shown (a sent attachment may be drawn without its name; none has been
+    captured): open the conversation and look, and do NOT retry.
+
+    NO WORDS GO WITH THE FILE. Send them first with ``linkedin_send_reply``.
+
+    Args:
+        thread_id: the part of the conversation's address after
+            /messaging/thread/, copied from your own browser. Never read off a
+            page by this server.
+        file: the file's name inside your upload directory, or a path inside
+            it. Part of the target, so a token binds to it; held as its path
+            relative to that directory.
+        confirm_token: leave empty to preview. The token from that preview,
+            used once within two minutes, sends the file.
+    """
+    try:
+        if writes.writes_enabled():
+            threads.thread_url(thread_id)
+        return await _write_tool(
+            "send_attachment", {"thread": thread_id, "file": file}, confirm_token
+        )
+    except Exception as exc:
+        return _error(exc)
+
+
+# --------------------------------------------------------------- end lane U
+
+
 @mcp.tool()
 async def linkedin_connect_from_profile(
     profile: str, confirm_token: str = ""
@@ -11184,9 +11272,10 @@ async def linkedin_server_info(verbose: bool = False) -> dict[str, Any]:
                 "chooses: linkedin_list_conversations (the composer's list, "
                 "which opens none), linkedin_messaging_presence (the empty "
                 "composer's suggestions, which opens none), "
-                "linkedin_open_thread and linkedin_send_reply (only the "
-                "conversation you name by id). Whether any of those loads "
-                "clears the messaging badge is unmeasured.",
+                "linkedin_open_thread, linkedin_send_reply and "
+                "linkedin_send_attachment (only the conversation you name by "
+                "id). Whether any of those loads clears the messaging badge "
+                "is unmeasured.",
                 "loading /mynetwork/ ITSELF would consume the pending-"
                 "invitation badge, and no tool here loads that root. TWO "
                 "tools DO load addresses UNDER it -- linkedin_connections "

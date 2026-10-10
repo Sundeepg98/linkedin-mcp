@@ -1093,7 +1093,9 @@ PINNED = {
     #: `N 26b` entered, in scope (see `stated_rows`).
     #: 745 ON LANE K's PURCHASES-STAY-MANUAL EXCLUSIONS (2026-10-10), MEASURED:
     #: `P S9` and `M C71` GAP -> EXCLUDED-RULED; `O6-O20`'s 14 unchanged.
-    "capabilities_achievable": 745,
+    #: 724 ON LANE K's APPLICATION OF THE RULINGS OF 2026-10-10, MEASURED: the
+    #: same 21 rows; `O6-O20`'s 14 unchanged.
+    "capabilities_achievable": 724,
     #: 43 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: 29 rows returned
     #: to GAP when OUTWARD-CLASSES-BUILT-BEHIND-GRANTS retired their key, and
     #: `P P2` at the merge (-30); `P N27` and `P P2` then EXCLUDED-RULED on
@@ -1106,7 +1108,11 @@ PINNED = {
     #: 40 ON LANE K's PURCHASES-STAY-MANUAL EXCLUSIONS (2026-10-10), MEASURED:
     #: `P S9` (the Premium plan) and `M C71` (a paid boost) GAP ->
     #: EXCLUDED-RULED on the orchestrator's ruling of 2026-09-28.
-    "out_of_scope": 40,
+    #: 61 ON LANE K's APPLICATION OF THE RULINGS OF 2026-10-10, MEASURED: 21
+    #: rows EXCLUDED-RULED -- CONTACT-IMPORT-STAYS-MANUAL 3, SESSION-SURFACE 1,
+    #: SIGN-IN-CHALLENGES-ARE-HIS 2, SAFETY-REPORTS-STAY-MANUAL 1,
+    #: OUTSIDE-THE-PRODUCT-PURPOSE 14.
+    "out_of_scope": 61,
     #: 727 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: stated rows 770
     #: less out_of_scope 43: the returns, `P A23b`, and the two re-exclusions.
     #: 728 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: stated rows 770 less out_of_scope 42 (`N 2`).
@@ -1118,7 +1124,9 @@ PINNED = {
     #: stated rows 771 less out_of_scope 38 -- `N 26b` entered, in scope.
     #: 731 ON LANE K's PURCHASES-STAY-MANUAL EXCLUSIONS (2026-10-10), MEASURED:
     #: stated rows 771 less out_of_scope 40 (`P S9`, `M C71`).
-    "achievable": 731,
+    #: 710 ON LANE K's APPLICATION OF THE RULINGS OF 2026-10-10, MEASURED:
+    #: stated rows 771 less out_of_scope 61.
+    "achievable": 710,
     #: 205 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
     #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
     #: 179 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: the 30 returned
@@ -1178,7 +1186,15 @@ PINNED = {
     #: 186 ON LANE K's PURCHASES-STAY-MANUAL EXCLUSIONS (2026-10-10), MEASURED:
     #: `P S9` and `M C71` GAP -> EXCLUDED-RULED -- adjudicated, delivered by
     #: neither line.
-    "adjudicated": 186,
+    #: 210 ON LANE K's APPLICATION OF THE RULINGS OF 2026-10-10, MEASURED: the
+    #: 21 exclusions, `P A9` COVERED-CANNOT-DELIVER (P-A9-CANNOT-DELIVER), and
+    #: `J 17` and `J 57` COVERED-PROVEN by D6 (GEOLOCATION-BY-D6,
+    #: CALLER-COMPOSITION-UNDER-D6).
+    #: 189 ON LANE U'S MOVE OF 2026-10-10, MEASURED:
+    #: `M M14`, `M M15` and `M M18` GAP -> COVERED-UNFIRED -- adjudicated now.
+    #: 213 AT LANE U'S MERGE OF ORIGIN/MASTER 71d83ca, MEASURED: lane K's
+    #: 210 with lane U's three rows (+3).
+    "adjudicated": 213,
     #: THE LIVE LANE'S FOUR ROWS, RE-DERIVED AT EACH OF ITS MERGES OF MASTER
     #: (2026-09-24; last over lane S): four rows fired live and banked
     #: (`_audit/2026-09-23-live-lane-session-1.md`). `P G6` COVERED-UNFIRED ->
@@ -1243,7 +1259,13 @@ PINNED = {
     #: merged tree: master's figure with this branch's `P A11`, `P A13` and `P A17`
     #: COVERED-UNFIRED -> GAP (session 4: autocomplete inputs the one tool can only
     #: type into, now refused by it).
-    "delivered_broad": 130,
+    #: 132 ON LANE K's APPLICATION OF THE RULINGS OF 2026-10-10, MEASURED: `J
+    #: 17` and `J 57` COVERED-PROVEN by D6, every part proven.
+    #: 133 ON LANE U'S MOVE OF 2026-10-10, MEASURED:
+    #: `M M14`, `M M15` and `M M18` GAP -> COVERED-UNFIRED on `linkedin_send_attachment`.
+    #: 135 AT LANE U'S MERGE OF ORIGIN/MASTER 71d83ca, MEASURED: lane K's
+    #: 132 with lane U's three rows (+3).
+    "delivered_broad": 135,
     #: 79 since the live lane's merge (see `adjudicated`): P G6, N 134, P O3
     #: and M C72 COVERED-PROVEN.
     #: 75 and 21 since the bucket-1 merge: `M C41` fired live and moved from
@@ -1272,11 +1294,18 @@ PINNED = {
     #: (the unfollow through LinkedIn's confirmation, the row gone and a posting
     #: reading not-following) and `N 46` and `J 103` (the follow from a posting
     #: that restored it, verified on Manage Pages) fired live and banked.
+    #: 107 ON LANE K's APPLICATION OF THE RULINGS OF 2026-10-10, MEASURED on its
+    #: branch: `J 17` and `J 57` COVERED-PROVEN by D6, every part proven.
+    #: 111 AT LANE K's MERGE OF MASTER 66eb699 (2026-10-10), MEASURED on the
+    #: merged tree, not summed: session 8's four rows and lane K's two.
     #: 113 AT THE LIVE LANE'S SESSION 9 (2026-10-10), MEASURED: `N 30`, `N 85`
     #: and `N 172` (a named member's connections, as people, by the
     #: Connections-of filter) and `N 31` (the connections he and that member
     #: share) fired live, read-only, and banked.
-    "delivered_strict": 113,
+    #: 115 AT THE LIVE LANE'S MERGE OF MASTER 0103810 (2026-10-10), MEASURED on the
+    #: merged tree, not summed: the live lane's session 9 and the lanes
+    #: master carried (K's rulings, U's attachments).
+    "delivered_strict": 115,
     #: The live lane's merge: N 134, P O3 and M C72 left GAP.
     #: Lane D's merge: N 132 left GAP, for COVERED-UNFIRED under D6.
     #: 544 AT THE ORCHESTRATOR'S MERGE OF LANE D (2026-09-27), MEASURED: lane D
@@ -1329,7 +1358,13 @@ PINNED = {
     #: type into, now refused by it).
     #: 585 ON LANE K's PURCHASES-STAY-MANUAL EXCLUSIONS (2026-10-10), MEASURED:
     #: `P S9` and `M C71` left GAP (see `adjudicated`).
-    "gap": 585,
+    #: 561 ON LANE K's APPLICATION OF THE RULINGS OF 2026-10-10, MEASURED: 24
+    #: rows left GAP (see `adjudicated`).
+    #: 582 ON LANE U'S MOVE OF 2026-10-10, MEASURED:
+    #: `M M14`, `M M15` and `M M18` left GAP (see `adjudicated`).
+    #: 558 AT LANE U'S MERGE OF ORIGIN/MASTER 71d83ca, MEASURED: lane K's
+    #: 561 with lane U's three rows (-3).
+    "gap": 558,
     #: 18 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: `M M1` built (`linkedin_message_from_profile`).
     #: 16 ON LANE L5'S ORDER OF 2026-09-27 23:36, MEASURED:
     #: `linkedin_send_message` RETIRED (aimed by a name): `M M2` to GAP and `N
@@ -1337,7 +1372,9 @@ PINNED = {
     #: 16 AT LANE L5'S MERGE OF MASTER 64afa6c (2026-09-27), MEASURED on the merged tree: master moved none of these.
     #: 16 AT LANE S'S MERGE OF MASTER 0867bda (2026-09-28), MEASURED on the
     #: merged tree: lane S moved none of these.
-    "cannot_deliver": 16,
+    #: 17 ON LANE K's APPLICATION OF THE RULINGS OF 2026-10-10, MEASURED: `P
+    #: A9`, on the P A2 / P A4 precedent.
+    "cannot_deliver": 17,
     #: 36 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
     #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
     #: 38 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: `M C63` and
@@ -1397,11 +1434,18 @@ PINNED = {
     #: (the unfollow through LinkedIn's confirmation, the row gone and a posting
     #: reading not-following) and `N 46` and `J 103` (the follow from a posting
     #: that restored it, verified on Manage Pages) fired live and banked.
+    #: 28 ON LANE U'S MOVE OF 2026-10-10, MEASURED:
+    #: `M M14`, `M M15` and `M M18` entered COVERED-UNFIRED, never fired.
+    #: 24 AT LANE U'S MERGE OF ORIGIN/MASTER 1027bf8, MEASURED: session 8's
+    #: four banked out (25 - 4) and lane U's three in (+ 3).
     #: 17 AT THE LIVE LANE'S SESSION 9 (2026-10-10), MEASURED: `N 30`, `N 85`
     #: and `N 172` (a named member's connections, as people, by the
     #: Connections-of filter) and `N 31` (the connections he and that member
     #: share) fired live, read-only, and banked.
-    "unfired": 17,
+    #: 20 AT THE LIVE LANE'S MERGE OF MASTER 0103810 (2026-10-10), MEASURED on the
+    #: merged tree, not summed: the live lane's session 9 and the lanes
+    #: master carried (K's rulings, U's attachments).
+    "unfired": 20,
     #: 104 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     #: 101 AT LANE S'S NAMES ADOPTION (2026-09-27), MEASURED: `N 79`, `N 172`
@@ -1429,7 +1473,9 @@ PINNED = {
     #: 98 ON THE ORCHESTRATOR'S CALL OF 2026-09-28 17:46 (lane S), MEASURED:
     #: `N 25` and `N 26` left GAP and bucket 3, and `N 26b`, an R row, entered
     #: both (see `adjudicated`).
-    "gap_read": 98,
+    #: 92 ON LANE K's APPLICATION OF THE RULINGS OF 2026-10-10, MEASURED: `P
+    #: N13`, `M C95`, `M C96`, `M C98`, `M C99` (R+W) and `P J4` left GAP.
+    "gap_read": 92,
     #: 151, not the 152 published by `_audit/2026-09-21-the-write-ceiling.md`.
     #: That document scoped itself to `profile.md`, `network.md` and
     #: `messaging-and-content.md`; measured at HEAD those three carry W 151 and
@@ -1473,7 +1519,13 @@ PINNED = {
     #: type into, now refused by it).
     #: 379 ON LANE K's PURCHASES-STAY-MANUAL EXCLUSIONS (2026-10-10), MEASURED:
     #: `P S9` and `M C71`, two W rows, left GAP; their write-classes lines go.
-    "gap_write": 379,
+    #: 365 ON LANE K's APPLICATION OF THE RULINGS OF 2026-10-10, MEASURED: 14 W
+    #: rows left GAP; their write-classes lines go.
+    #: 376 ON LANE U'S MOVE OF 2026-10-10, MEASURED:
+    #: `M M14`, `M M15` and `M M18`, three W rows, left GAP; their write-classes lines go.
+    #: 362 AT LANE U'S MERGE OF ORIGIN/MASTER 71d83ca, MEASURED: lane K's
+    #: 365 with lane U's three rows (-3).
+    "gap_write": 362,
     #: All 54 are `jobs.md`, which has no per-row R/W column (56 until the
     #: lane-L3 merge built J 18 and J 39). Not a coincidence
     #: and not a defect in the finder: it is the whole of that slice's still-GAP
@@ -1487,7 +1539,9 @@ PINNED = {
     #: shipped page and never fired, so they leave buckets 3 and 1-by-side and
     #: enter bucket 1 held by no ruling. `P K1` stays GAP and is re-gated
     #: READER -> MEASURE: no capture draws its section.
-    "gap_unknown": 108,
+    #: 104 ON LANE K's APPLICATION OF THE RULINGS OF 2026-10-10, MEASURED: `J
+    #: 17`, `J 57`, `J 162` and `J 164` left GAP.
+    "gap_unknown": 104,
     "gap_ambiguous": 0,
     #: BUCKET 3, MEASURED 2026-09-23 (`_audit/2026-09-23-bucket3-addresses.md`),
     #: counted off `_audit/_census/read-addresses.tsv`, whose every verdict
@@ -1580,7 +1634,9 @@ PINNED = {
     #: `N 26b` entered ADMITTED -- the people search filtered to his first
     #: degree -- gated MEASURE: the school and industry facets' spelling needs
     #: a capture first.
-    "b3_admitted": 43,
+    #: 41 ON LANE K's APPLICATION OF THE RULINGS OF 2026-10-10, MEASURED: `P
+    #: J4` and `M C96` left GAP.
+    "b3_admitted": 41,
     #: 38 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     #: 40 ON LANE L5'S ORDER OF 2026-09-28 12:32, MEASURED: `N 30`, `N 31`, `N 65`
@@ -1590,7 +1646,9 @@ PINNED = {
     #: 38 ON THE ORCHESTRATOR'S CALL OF 2026-09-28 17:46 (lane S), MEASURED:
     #: `N 25` and `N 26`, REFUSED on the connections page's query variants,
     #: left the table for COVERED-UNFIRED by D6 (see `adjudicated`).
-    "b3_refused": 38,
+    #: 34 ON LANE K's APPLICATION OF THE RULINGS OF 2026-10-10, MEASURED: `P
+    #: N13`, `M C95`, `M C98` and `M C99` left GAP.
+    "b3_refused": 34,
     "b3_no_address": 1,
     "b3_needs_session": 14,
     "b3_undetermined": 2,
@@ -1765,7 +1823,11 @@ PINNED = {
     #: (the unfollow through LinkedIn's confirmation, the row gone and a posting
     #: reading not-following) and `N 46` and `J 103` (the follow from a posting
     #: that restored it, verified on Manage Pages) fired live and banked.
-    "b1_standing": 12,
+    #: 19 ON LANE U'S MOVE OF 2026-10-10, MEASURED:
+    #: `M M14`, `M M15` and `M M18` entered, held by OPERATOR-NAMES-THE-TARGET.
+    #: 15 AT LANE U'S MERGE OF ORIGIN/MASTER 1027bf8, MEASURED: session 8's
+    #: four banked out (16 - 4) and lane U's three in (+ 3).
+    "b1_standing": 15,
     "b1_relayed": 0,
     "b1_pending": 0,
     #: 22 AT THE ORCHESTRATOR'S MERGE OF LANE D (2026-09-27), MEASURED: lane D
@@ -1873,7 +1935,9 @@ PINNED = {
     #: shipped page and never fired, so they leave buckets 3 and 1-by-side and
     #: enter bucket 1 held by no ruling. `P K1` stays GAP and is re-gated
     #: READER -> MEASURE: no capture draws its section.
-    "jobs_gap": 108,
+    #: 104 ON LANE K's APPLICATION OF THE RULINGS OF 2026-10-10, MEASURED: `J
+    #: 17`, `J 57`, `J 162` and `J 164` left GAP.
+    "jobs_gap": 104,
     #: 40 AT LANE S'S OFFLINE FRONTIER (2026-09-28), MEASURED: the five rows
     #: bucket 3 called blocked on nothing, taken one by one. `M M53`, `N 195`
     #: and `P S5` (three R rows ADMITTED and gated READER) and `J 107` (the one
@@ -1881,10 +1945,14 @@ PINNED = {
     #: shipped page and never fired, so they leave buckets 3 and 1-by-side and
     #: enter bucket 1 held by no ruling. `P K1` stays GAP and is re-gated
     #: READER -> MEASURE: no capture draws its section.
-    "jobs_dir_r": 40,
+    #: 38 ON LANE K's APPLICATION OF THE RULINGS OF 2026-10-10, MEASURED: `J
+    #: 17` and `J 57`.
+    "jobs_dir_r": 38,
     #: 60 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: `J 69` and
     #: `J 87`, both W.
-    "jobs_dir_w": 60,
+    #: 58 ON LANE K's APPLICATION OF THE RULINGS OF 2026-10-10, MEASURED: `J
+    #: 162` and `J 164`.
+    "jobs_dir_w": 58,
     "jobs_dir_rw": 8,
     #: 12 AT LANE S'S OFFLINE FRONTIER (2026-09-28), MEASURED: the five rows
     #: bucket 3 called blocked on nothing, taken one by one. `M M53`, `N 195`
@@ -1893,7 +1961,9 @@ PINNED = {
     #: shipped page and never fired, so they leave buckets 3 and 1-by-side and
     #: enter bucket 1 held by no ruling. `P K1` stays GAP and is re-gated
     #: READER -> MEASURE: no capture draws its section.
-    "jobs_admitted": 12,
+    #: 10 ON LANE K's APPLICATION OF THE RULINGS OF 2026-10-10, MEASURED: `J
+    #: 17` and `J 57`, both on admitted pages.
+    "jobs_admitted": 10,
     "jobs_refused": 34,
     "jobs_no_address": 0,
     "jobs_needs_session": 2,
@@ -1955,9 +2025,16 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
     #: `N 48`, `J 104`, `N 46` and `J 103` LEFT AT SESSION 8 (2026-10-10): the
     #: first-by-rule Page unfollowed through LinkedIn's confirmation and followed
     #: again from one of its postings, each verified -- COVERED-PROVEN.
+    #: `M M14`, `M M15` and `M M18` entered ON LANE U'S MOVE OF 2026-10-10,
+    #: MEASURED: one file from the declared upload root into one conversation
+    #: he names (`linkedin_send_attachment`), built offline under the
+    #: operator's upload decision (FILE-UPLOAD-OPENED) and never fired; a
+    #: photo, a video and a document each aimed at its own input on the live
+    #: lane's session-8 composer capture. Held until he names the conversation
+    #: and the file.
     "OPERATOR-NAMES-THE-TARGET": (
         "J 128",
-        "M C1", "M C25", "M C32", "M C63", "M M10",
+        "M C1", "M C25", "M C32", "M C63", "M M10", "M M14", "M M15", "M M18",
         "N 1", "N 2", "N 4", "N 47", "N 64",
         "P I14",
     ),
