@@ -56,7 +56,7 @@
     "dom:read_profile_editor_surface": "clean",
     "dom:read_profile_fields": "returns_text",
     "dom:read_profile_views_insights": "returns_text",
-    "dom:read_radio_label_binding": "not_driven:read the page and returned nothing the page made",
+    "dom:read_radio_label_binding": "clean",
     "dom:read_reaction_surface": "returns_text",
     "dom:read_recipient_ids": "returns_text",
     "dom:read_save_candidates": "clean",
