@@ -132,7 +132,42 @@ PENDING CHILD B'S REPORT -- filled at its merge.
 
 ## C. A fill path that can restore an empty original (child C)
 
-PENDING CHILD C'S REPORT -- filled at its merge.
+Built by child C in its own worktree (two commits, `cdcc06e` and `2ba23c1`),
+reviewed and merged here; its report is the source of the reds below.
+
+- `linkedin_server/field_restore.py` (new): a PROCESS-LOCAL restore record per
+  canonical field -- the field, what the write typed (kept out of the repr),
+  when, used -- with ONE writer, single use, thirty minutes of life
+  (`RESTORE_TTL_SECONDS`), never on disk and never logged.
+- `writes._clear_target` is the ONE admission of an empty value:
+  `update_profile_field` asking for exactly "" for a field a live, unused record
+  names. Its canonical target is `<field> :: ` -- the one unambiguous spelling
+  of an empty second half -- and the token binds it like any other. Refused as
+  before, now with the reason: no record, another field's, a used or expired
+  one, the Premium badge switch, `None`, every other action and composite kind.
+- `writes.perform` WRITES the record only on the fill path, only for a write
+  VERIFIED stored, only when the value it overwrote was read as EXACTLY "" (a
+  string; `None` records nothing). At the click (`_live_control`) a clear
+  proceeds only if its control is a typed field, its record is live, and the
+  field holds EXACTLY what this server's write typed -- THIS SERVER ONLY CLEARS
+  WHAT IT WROTE. The fill types the empty slice of the canonical target, the
+  fill path's wait waits for "", Save is pressed only if no other field moved,
+  and the verdict is verified only when the fresh render reads "". Then the
+  record is spent. The first write's receipt names the clear call and its terms
+  (once, thirty minutes, this process), and no longer offers `value=''` where
+  no record was made. The receipt's target block asks the KIND whether a target
+  has two parts, where it asked the VALUE (a clear printed subject "" before).
+
+RED FIRST (child C's runs): with nothing wired, 18 failed and 19 passed, among
+them `WriteAttemptError: 'update_profile_field' needs 'value' and got ''` at
+`_clean_target_part` with a recorded empty prior -- the red the order asked for;
+with the admission wired and perform not, 9 failed. THREE GUARDS SHOWN FAILING by
+one-line mutations, each reverted: the click-time check skipped (a field changed
+since is cleared -- `DID NOT RAISE`), a `None` prior recorded, the old
+target-block split restored. GREEN: `tests/test_an_empty_value_is_admitted_only_as_a_clear.py`
+(29) and `tests/test_an_empty_original_is_restored_by_a_clear.py` (13), over the
+intro-editor fixtures and the tracked live4 skeleton of his editor -- whose one
+optional field holding "" the shipped readers find.
 
 ---
 
