@@ -110,6 +110,9 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_message_from_profile": ("confirm_token", "profile", "text"),
     "linkedin_my_activity_items": (),
     "linkedin_my_applications": ("limit",),
+    # 2026-10-10, lane B1 (child lb1-followers): his own follower list, counts
+    # and relations only. Census P L2b, banked by the lane B1 lead at merge.
+    "linkedin_my_followers_list": (),
     "linkedin_my_profile": ("details", "include_skills"),
     "linkedin_new_messages": (),
     "linkedin_newsletter_subscriptions": (),
@@ -484,7 +487,15 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: The read's two new fields (`member_token`, `activity_items`) are not
 #: parameters; `N 30`, `N 85`, `N 172`, `N 31` and `M C32` move only when proven
 #: live.
-PINNED_TOOL_COUNT = 61
+#: **RE-PINNED 2026-10-10 AT 62 TOOLS AND 97 PARAMETERS on lane B1's branch
+#: (child lb1-followers): one READ and no parameter --
+#: `linkedin_my_followers_list()`, his own follower list loaded once at the
+#: address `readonly.py` admits for census `P L2b`, read as counts and
+#: relations only (how many of the rows he follows back) over the live lane's
+#: session-2 skeleton.** THE CENSUS DECISION is the lane lead's: the census
+#: row `P L2b` is banked by the lane B1 lead at merge, not in this commit. Never
+#: fired live.
+PINNED_TOOL_COUNT = 62
 PINNED_PARAMETER_COUNT = 97
 
 

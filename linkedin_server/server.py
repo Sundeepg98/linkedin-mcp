@@ -1,4 +1,10 @@
-"""The tool surface: sixty-one tools, seventeen of which write to LinkedIn.
+"""The tool surface: sixty-two tools, seventeen of which write to LinkedIn.
+
+THE SIXTY-SECOND IS A READ, 2026-10-10, lane B1 (census ``P L2b``):
+``linkedin_my_followers_list``, his own follower list loaded once at the
+address ``readonly.py`` admits for it, and read as counts and relations only --
+how many of the rows he follows back. It returns no member's name, id or link.
+The headline read "sixty-one tools, seventeen of which write" until then.
 
 THE SIXTY-FIRST IS A READ, 2026-09-28, on lane L5's order of 08:06 and the
 operator's ruling of 08:01 (``NAMED-PROFILE-READ-BEHIND-A-GRANT``):
@@ -212,9 +218,9 @@ assigned to anybody -- it waits for whoever next runs the suite, and in the
 meantime the pin goes on asserting the old number with full confidence.
 
 THE NUMBERS ABOVE ARE DERIVED NOW, and that is a statement about a test rather
-than about an intention. Sixty-one is ``len(await mcp.list_tools())``,
+than about an intention. Sixty-two is ``len(await mcp.list_tools())``,
 pinned in ``test_server_surface.py`` by
-``test_the_surface_is_exactly_the_sixty_one_tools``; the split is pinned by
+``test_the_surface_is_exactly_the_sixty_two_tools``; the split is pinned by
 ``tests/test_prose_that_makes_a_claim.py::test_the_server_docstring_numbers_are_derived``,
 which reads THESE WORDS and fails if any of the three disagrees with the
 registry.
@@ -227,9 +233,9 @@ POINTER to it was dangling, so a reader who followed it found nothing and
 would reasonably conclude these numbers are unchecked. A citation is a claim
 like any other.
 The surface splits three ways and the split is the part a reader actually
-needs: FORTY-FOUR read, SEVENTEEN write, and ZERO are write-shaped,
-registered, gated and unable to act. Forty-four plus seventeen plus zero is
-sixty-one. (Thirty-eight, thirteen and fifty-one until 2026-09-24; thirty-nine,
+needs: FORTY-FIVE read, SEVENTEEN write, and ZERO are write-shaped,
+registered, gated and unable to act. Forty-five plus seventeen plus zero is
+sixty-two. (Thirty-eight, thirteen and fifty-one until 2026-09-24; thirty-nine,
 thirteen and fifty-two at the live lane's merge the same day; thirty-nine,
 fourteen and fifty-three at lane L7's; forty-one, fifteen and fifty-six at
 lane L5's; forty-one, sixteen and fifty-seven at lane L8's merge on
@@ -238,7 +244,8 @@ eighteen and fifty-nine from that merge until lane L5 RETIRED
 ``linkedin_send_message`` later the same day -- aimed by a name; forty-one,
 seventeen and fifty-eight until lane S's two reads arrived at its merge of
 master 0867bda, 2026-09-28; forty-three, seventeen and sixty until lane L5's
-read of a named profile the same day.)
+read of a named profile the same day; forty-four, seventeen and sixty-one
+until lane B1's follower list, 2026-10-10.)
 
 THE FIFTY-THIRD IS ONE WRITE, 2026-09-24 (lane L7, census row ``P I14``).
 ``linkedin_mark_company_interest`` presses "I'm interested" in the
@@ -11420,6 +11427,47 @@ async def linkedin_page_plugin_snippet(page_id: str) -> dict[str, Any]:
     """
     try:
         return {"ok": True, **page_plugin.follow_plugin_snippet(page_id)}
+    except Exception as exc:
+        return _error(exc)
+
+
+# ---- lane B1 (lb1-followers): P L2b ----
+# His own follower list, counts and relations only. The import sits in the
+# block so the lane's edit to this file stays one contiguous block.
+from linkedin_server import followers_list  # noqa: E402
+
+
+@mcp.tool()
+async def linkedin_my_followers_list() -> dict[str, Any]:
+    """Your followers, as COUNTS: on how many rows you are already following them. NO NAME.
+
+    ONE LOAD of one admitted page -- your own follower list -- and a read of
+    its FIRST RENDER only. Nothing is scrolled or pressed, so rows LinkedIn
+    draws only after a scroll are not read, and ``rows_seen`` is NOT your
+    follower count.
+
+    WHAT COMES BACK is integers, booleans and closed words: ``rows_seen`` and
+    ``lists_seen`` (the denominators); ``he_follows_back``, the rows whose one
+    button reads ``Following``; ``he_does_not_follow_back``, the rows whose one
+    button reads LinkedIn's offer instead -- this tool never presses it, nor
+    anything else; and ``unknown`` with ``unknown_why`` (no button, several
+    buttons, another word, or a read that failed). No member's name, id, link,
+    headline or label is returned -- each row's button label holds the
+    member's name, and it is never read.
+
+    IT REFUSES RATHER THAN GUESS. ``refused`` is ``not_the_followers_side`` when
+    the selected tab is the Following list (the members on your own following
+    list), ``side_unreadable`` when the tab strip cannot say which list is open,
+    and ``landed_elsewhere`` when the load did not land on the list itself. Read
+    ``readable`` before believing a zero.
+    """
+    try:
+        async with BROWSER.session() as page:
+            landed = await BROWSER.goto(page, followers_list.FOLLOWERS_URL)
+            assert_not_authwall(landed, surface="followers-list")
+            if not followers_list.landed_on_the_list(landed):
+                return followers_list.landed_elsewhere()
+            return await followers_list.read_followers_list(page)
     except Exception as exc:
         return _error(exc)
 

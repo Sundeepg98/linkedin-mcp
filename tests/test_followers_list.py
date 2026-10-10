@@ -347,15 +347,32 @@ _FORBIDDEN_CALLS = frozenset(
 )
 
 
+def _method_calls(source: str) -> set[str]:
+    """Every ``<x>.<method>(...)`` name called in ``source``. Docstrings and
+    comments cannot vote: only ``ast.Call`` nodes count."""
+    return {
+        node.func.attr
+        for node in ast.walk(ast.parse(source))
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+    }
+
+
 def test_the_module_presses_scrolls_loads_and_evaluates_nothing() -> None:
     """ONE PAGE, FIRST RENDER, NO ACT: no call that presses, types, scrolls,
     navigates or runs a script, and no ``get_attribute`` at all -- so the
     button's ``aria-label``, which live is the member's name, cannot be read."""
-    tree = ast.parse(MODULE.read_text(encoding="utf-8"))
-    called = {
-        node.func.attr
-        for node in ast.walk(tree)
-        if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
-    }
+    called = _method_calls(MODULE.read_text(encoding="utf-8"))
     assert not called & _FORBIDDEN_CALLS, sorted(called & _FORBIDDEN_CALLS)
     assert {"count", "inner_text", "get_by_role", "locator"} <= called
+
+
+def test_control_the_act_check_finds_a_label_read_and_a_press() -> None:
+    """The check above, shown failing: a label read and a press are found,
+    and the same words in a docstring are not."""
+    planted = (
+        "async def read(row):\n"
+        "    '''row.click() and row.get_attribute() in prose do not count'''\n"
+        "    await row.get_attribute('aria-label')\n"
+        "    await row.locator('button').click()\n"
+    )
+    assert _method_calls(planted) & _FORBIDDEN_CALLS == {"get_attribute", "click"}
