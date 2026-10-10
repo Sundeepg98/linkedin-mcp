@@ -11568,3 +11568,67 @@ jobs json, the ASCII checker, the old-versus-new plan-step byte comparison,
 the red-run copies of the two test files aimed at the 3c8edc2 gate and
 workflow, and the mutation plugin for `tests/test_lane_ci.py`. Each answered
 one question once; the answers are in the full record.
+
+
+## 83. ONE TABLE OF ADMISSIONS, EACH ROW PROVEN NARROW THE SAME SIX WAYS (lane-a-admissions, 2026-10-10)
+
+Record: `_audit/2026-09-28-lane-a-admissions.md`.
+
+### 83.1 `tests/test_lane_a_admissions.py` -- the admission harness
+
+WHAT IT IS. A data table, `ADMISSIONS`, one entry per admitted address: the
+census rows it serves, the substrings it crosses (empty for an
+allowlist-silence page), and its SIBLINGS, each naming the gate that must
+still refuse it. Six parametrized tests run every entry the same way:
+
+1. every own spelling is admitted through the shipped `assert_read_url`;
+2. exactly ONE allowlist line matches, anchored at both ends, with no `.*`,
+   `.+`, `\w`, `\S`, `\d` or `[^` (a search-shaped line may carry exactly the
+   classic query group and nothing else);
+3. the exemption excuses EXACTLY the substrings the address trips, measured
+   against the shipped tuple rather than copied from the table;
+4. every sibling is refused, and on the gate it names -- the refusal's own
+   sentence is checked -- and the exemption reaches none of them;
+5. EITHER GATE ALONE ADMITS NOTHING: drop the exemption and the substring
+   refuses saying a pattern would admit it; drop the line and the allowlist
+   refuses;
+6. the BLAST RADIUS of each entry, `is_read_url` before and after over
+   `blast_radius.corpus()` plus every address in the file: it newly admits
+   exactly its own spellings and refuses nothing new.
+
+SHOWN FAILING, four times, each against the `readonly.py` before its
+admission (the file restored from `HEAD`, run, then put back and compared
+byte-for-byte): 18 failed / 5 passed for the first three entries, 6 / 1 for the
+application-settings entry, 12 / 2 for the two settings pages, 96 / 92 for the
+twenty-four allowlist-silence pages. In each run the passes were exactly the
+sibling and table checks that must hold before AND after. And test 6 caught a
+real thing on its first run over a search line: `blast_radius.corpus()`
+already carried `/search/results/all/?keywords=x`, which that line admitted --
+the instrument named a spelling the author had not listed. (That line was later
+withdrawn on other grounds: a fifth search vertical is D2's to grant.)
+
+WHAT IT DOES NOT CHECK, said here so nobody reads it as more: it drives only
+the addresses in its table and the shipped corpus. A pinned refusal elsewhere
+in the suite -- a size, a needle, a coupling corpus -- is not in its view; this
+lane met five of those only when every boundary-driving test file ran
+(`tests/test_job_alerts_read_boundary.py`'s exemption count among them).
+
+WHY ONE TABLE. The precedent carve-outs (`test_l1_follower_list_carve_out.py`,
+`test_notify_setting_admission.py`) are one file per address, each re-deriving
+the same six checks by hand. Twenty-nine admissions in one lane would have been
+twenty-nine files whose checks drift apart; a table makes a missing check a
+missing COLUMN, visible to anyone adding a row.
+
+### 83.2 Declared DISPOSABLE
+
+Scratch helpers that touched no tracked file except through their output, each
+used and discarded: a digest-attribution driver (this register's own
+`ast_digest`, run against a base copy of `readonly.py`), a side-table row
+updater, a census-cell appender, a column restorer, a block inserter and a
+non-ASCII escaper (the last one exists because the file-writing tool decodes a
+backslash-u escape into the character it names -- lane L1's entry 7 recorded
+the same trap; a byte scan is the measurement).
+
+    AN ADMISSION IS NARROW ONLY IF ITS NEIGHBOURS ARE NAMED, AND A NEIGHBOUR
+    LIST WRITTEN BY HAND IS A LOWER BOUND. RUN THE BLAST RADIUS OVER THE
+    CORPUS TOO: IT KNOWS SPELLINGS THE AUTHOR DOES NOT.
