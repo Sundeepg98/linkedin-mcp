@@ -1946,6 +1946,10 @@ DRIVEN_TO.update({key: RETURNS_TEXT for key in ADMITTED_TEXT})
 # the plant comes back inside a record, where the rule says it may.
 DRIVEN_TO["presence:read_suggested_presence"] = RETURNS_RECORDS
 DRIVEN_TO["recruiter_views:read_recruiter_views"] = RETURNS_RECORDS
+# LANE B4'S AGGREGATE READER (2026-10-10, census J 108): the People tab's
+# insight cards. A category's label is third-party text, so it leaves as a
+# people_data.Category record -- the declared channel, not the text inventory.
+DRIVEN_TO["company_people_insights:read_people_insights"] = RETURNS_RECORDS
 
 
 @pytest.mark.parametrize("key", sorted(shipped_drives.DRIVES))
@@ -2056,6 +2060,11 @@ FIXTURE_BREAKS: dict[str, dict[str, str]] = {
     "recruiter_views:read_recruiter_views": {
         "fixture": "synthetic/recruiter_views.html",
         "needle": "<p>Viewed 2w ago</p>", "into": "<p>Seen 2w ago</p>",
+    },
+    # 2026-10-10 (lane B4): a measured card heading of the People tab capture.
+    "company_people_insights:read_people_insights": {
+        "fixture": "live2/company_people_insights.html",
+        "needle": "\nWhere they live\n", "into": "\nWhere they lived\n",
     },
     "press:disclose": {
         "fixture": "profile_views_analytics.html",

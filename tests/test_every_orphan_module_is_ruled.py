@@ -136,21 +136,29 @@ DELIBERATELY_UNWIRED: dict[str, str] = {
         "at all. So the first tool that imports this module brings its reader "
         "with it, and this entry is deleted in that commit. NOT PERMANENT."
     ),
-    "member_rosters": (
-        "A CAPABILITY HELD ON A WRITTEN CONDITION, ruled by its author "
-        "2026-09-24 (lane S follow-up, item 2). It composes ONE page of a "
-        "group's members, an event's attendees or a company's or school's "
-        "People tab from a caller-supplied numeric id -- the four rosters "
-        "MEMBER-ROSTERS-AS-BOUNDED-READS admitted -- and it is unwired because "
-        "readers here are built against captures only and no roster page has "
-        "been captured (specs in _audit/2026-09-24-lane-s-people-search.md, "
-        "section F). A roster is a list of people, so the reader that wires "
-        "it returns names held to PEOPLE-DATA-MITIGATIONS -- NAMES-AT-RUNTIME "
-        "amended the name-free doctrine for what a read returns, 2026-09-24 "
-        "-- and lands in the same commit, and this entry is deleted then. "
-        "NOT PERMANENT."
-    ),
 }
+
+# THE member_rosters ENTRY WAS DELETED 2026-10-10, ON ITS OWN INSTRUCTION.
+#
+# It read "the reader that wires it ... lands in the same commit, and this entry
+# is deleted then", and it did (lane B4, census row J 108): server.py's lane B4
+# block imports the module, and its one caller, linkedin_company_people_insights,
+# composes ONE roster address -- member_rosters.compose("company_people", <the
+# caller's id>) -- and reads it with company_people_insights.read_people_insights,
+# built against the live lane's session-2 capture of a People tab
+# (tests/fixtures/live2/company_people_insights.html). The module now has an
+# importer, so test_every_ruling_is_still_about_a_real_orphan would fail on a
+# kept entry.
+#
+# **WHAT THE CONDITION HELD, AND WHAT IT DID NOT BECOME.** The entry said the
+# wiring reader "returns names held to PEOPLE-DATA-MITIGATIONS". The reader that
+# landed returns NO name: it reads the tab's insight cards -- an aggregate
+# under the WHO/WHICH rule -- and their labels leave as people_data.Category
+# records under those mitigations; the people listed below the cards (census
+# row N 102) are not read. The other three rosters compose() knows -- group
+# members, event attendees, a school's People tab -- are still reachable from
+# NO tool: nothing calls compose with their names, and each still needs a
+# capture and a reader of its own (tests/test_member_rosters.py, section 6).
 
 # THE cdp_download ENTRY WAS DELETED 2026-09-24, AND NOT ON ITS OWN INSTRUCTION.
 #

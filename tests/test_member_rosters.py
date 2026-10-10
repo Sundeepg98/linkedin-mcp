@@ -540,7 +540,8 @@ def test_a_roster_read_costs_one_load_and_the_budget_is_the_ruled_one():
 
 
 # ---------------------------------------------------------------------------
-# 6. Nothing opens a roster yet -- the rows stay GAP until a reader lands
+# 6. One roster opened (the company People tab's insight cards, J 108, since
+#    2026-10-10); the other three stay unopened until a reader lands
 # ---------------------------------------------------------------------------
 
 def _orphan_walk():
@@ -555,7 +556,18 @@ def _orphan_walk():
     return module._imported_submodules
 
 
-def test_no_package_module_or_entry_point_imports_the_composer():
+def test_one_importer_opens_one_roster_and_the_other_three_stay_unopened():
+    """WAS ``test_no_package_module_or_entry_point_imports_the_composer``, and
+    asserted ``importers == []`` until 2026-10-10. The orphan ruling it backed
+    said the first tool to import this module lands with its reader, built
+    against a capture, in the same commit -- and lane B4's did (census J 108):
+    ``server.linkedin_company_people_insights`` composes the company People tab
+    and reads its insight cards over the session-2 capture.
+
+    SO THE ASSERTION MOVES BY EXACTLY THAT MUCH AND NO FURTHER: one importer,
+    ``server.py``, and every ``compose`` call in it names ``company_people`` as
+    a literal. Group members, event attendees and a school's People tab are
+    still opened by nothing -- each still needs a capture and a reader."""
     imported_by = _orphan_walk()
     importers = [
         path.name
@@ -563,7 +575,18 @@ def test_no_package_module_or_entry_point_imports_the_composer():
         if path.name != "member_rosters.py"
         and "member_rosters" in imported_by(path)
     ]
-    assert importers == [], importers
+    assert importers == ["server.py"], importers
+    tree = ast.parse((PKG / "server.py").read_text(encoding="utf-8"))
+    rosters = [
+        node.args[0].value if node.args and isinstance(node.args[0], ast.Constant) else None
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Attribute)
+        and node.func.attr == "compose"
+        and isinstance(node.func.value, ast.Name)
+        and node.func.value.id == "member_rosters"
+    ]
+    assert rosters == ["company_people"], rosters
 
 
 @pytest.mark.parametrize("line", [

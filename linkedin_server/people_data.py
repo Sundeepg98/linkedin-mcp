@@ -12,8 +12,10 @@ anchored:
 
 1. DECLARED FIELDS ONLY. A person is a :class:`Person` -- name, headline,
    profile link or member id, connection degree -- a group or an event is
-   a :class:`Group` or an :class:`Event` -- title and link -- and a post is a
-   :class:`Post` -- its author as a person record, its permalink, its words.
+   a :class:`Group` or an :class:`Event` -- title and link -- a post is a
+   :class:`Post` -- its author as a person record, its permalink, its words --
+   and one category of an aggregate (a place, a school, a skill an insight
+   card counts members by) is a :class:`Category` -- its label, nothing else.
    The classes are closed (frozen, slotted): nothing else can ride on a
    record, and a people reader returns records rather than page text.
 2. SANITISED AND MARKED. Every string field goes through :func:`sanitise` --
@@ -69,8 +71,11 @@ UNTRUSTED_NOTE = (
 #: last name at most 50 each; a group or event title is given the headline's
 #: room; a post's words are at most 3,000 characters there. A string over its
 #: cap is cut, never refused: the reader's row is real, only its excess is
-#: dropped.
-CAPS: dict[str, int] = {"name": 120, "headline": 220, "title": 220, "text": 3000}
+#: dropped. A category's label (2026-10-10, lane B4) is the NAME of a thing --
+#: a place, a school, a job function, a skill, a field of study -- and is
+#: given a name's room; the longest the People tab capture of 2026-09-28 drew
+#: was 58 characters.
+CAPS: dict[str, int] = {"name": 120, "headline": 220, "title": 220, "text": 3000, "label": 120}
 
 #: Unicode categories removed outright: controls (Cc), format characters (Cf:
 #: zero-width space and joiners, the bidirectional embeddings, overrides and
@@ -466,6 +471,40 @@ class Post:
         }
 
 
+@dataclass(frozen=True, slots=True)
+class Category:
+    """One category of an aggregate, as LinkedIn showed it: its label.
+
+    DECLARED 2026-10-10 (lane B4, census row ``J 108``) for the organisation
+    People tab's insight cards, which count members by place, school, job
+    function, skill and field of study. The label is third-party text -- a
+    field of study is typed by members, a school's name by its admins -- so it
+    leaves this server under the same mitigations as a name: sanitised,
+    capped at ``CAPS["label"]``, and marked. IT IS NEVER A PERSON AND CARRIES
+    NOTHING THAT POINTS AT ONE: one field, no link, no id. A reader that
+    cannot tell a category from a person -- a card whose rows might be
+    people -- does not build one (``company_people_insights`` returns the
+    connection card's rows as closed degree words and withholds anything
+    else there).
+    """
+
+    label: str
+
+    def __post_init__(self) -> None:
+        _require(isinstance(self.label, str) and self.label != "", "a category has a label")
+        _require(self.label == sanitise(self.label, cap=CAPS["label"]), "label is not sanitised")
+
+    @classmethod
+    def from_page(cls, *, label: Any) -> Optional["Category"]:
+        """A record from what a reader read, or ``None`` if no label survives."""
+        clean = sanitise(label, cap=CAPS["label"])
+        return cls(label=clean) if clean else None
+
+    def envelope(self) -> dict[str, Any]:
+        """The record as a tool returns it: the label and the marker."""
+        return {"label": self.label, UNTRUSTED_KEY: UNTRUSTED_NOTE}
+
+
 #: THE TOOLS THAT RETURN PEOPLE RECORDS, by name. Declared, and held equal to
 #: the tools whose code builds one by ``tests/test_a_people_reader_reads_one_page.py``,
 #: so a tool that starts returning records joins this set in the same change,
@@ -489,6 +528,10 @@ PEOPLE_TOOLS: frozenset[str] = frozenset(
         "linkedin_recruiter_insights",
         "linkedin_messaging_presence",
         "linkedin_read_named_profile",
+        # 2026-10-10 (lane B4, census J 108): no person -- the People tab's
+        # insight cards, each category's label a Category record. It builds
+        # records, so every rule for a people reader binds it: one page.
+        "linkedin_company_people_insights",
     }
 )
 
@@ -496,18 +539,21 @@ PEOPLE_TOOLS: frozenset[str] = frozenset(
 #: an event share a shape (title, link, marker). The page-string guards read
 #: these to know which strings are ALLOWED to be page text: a string in a
 #: text field of one of these shapes, and nowhere else.
-RECORD_TYPES = (Person, Group, Event, Post)
+RECORD_TYPES = (Person, Group, Event, Post, Category)
 PERSON_SHAPE = frozenset({"name", "headline", "link", "degree", UNTRUSTED_KEY})
 TITLE_SHAPE = frozenset({"title", "link", UNTRUSTED_KEY})
 #: A post's envelope: its ``author`` is a whole PERSON_SHAPE envelope, so the
 #: author's words are a person record's, and the post's own are ``text``.
 POST_SHAPE = frozenset({"author", "link", "text", UNTRUSTED_KEY})
+#: A category's envelope: its label and the marker, nothing else.
+CATEGORY_SHAPE = frozenset({"label", UNTRUSTED_KEY})
 #: The fields that carry a third party's words, by shape; the rest are a
 #: canonical link, a closed degree vocabulary, a nested record, or the marker.
 TEXT_FIELDS: dict[frozenset[str], frozenset[str]] = {
     PERSON_SHAPE: frozenset({"name", "headline"}),
     TITLE_SHAPE: frozenset({"title"}),
     POST_SHAPE: frozenset({"text"}),
+    CATEGORY_SHAPE: frozenset({"label"}),
 }
 
 
@@ -546,6 +592,8 @@ def as_record(value: Any) -> Optional[Any]:
             if not isinstance(author, dict) or type(as_record(author)) is not Person:
                 return None
             return Post(author=as_record(author), link=value["link"], text=value["text"])
+        if keys == CATEGORY_SHAPE:
+            return Category(label=value["label"])
     except (ValueError, TypeError):
         return None
     return None
@@ -560,4 +608,6 @@ def text_fields(value: Any) -> frozenset[str]:
         return TEXT_FIELDS[PERSON_SHAPE]
     if isinstance(record, Post):
         return TEXT_FIELDS[POST_SHAPE]
+    if isinstance(record, Category):
+        return TEXT_FIELDS[CATEGORY_SHAPE]
     return TEXT_FIELDS[TITLE_SHAPE]

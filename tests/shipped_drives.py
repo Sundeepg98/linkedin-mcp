@@ -1628,6 +1628,61 @@ async def read_recruiter_views_as_shipped(page: Any) -> Any:
 
 
 # ---------------------------------------------------------------------------
+# company_people_insights:read_people_insights -- the People tab's insight cards
+# ---------------------------------------------------------------------------
+
+#: The fixture, and the shapes this drive rests on: a measured heading, a
+#: facet row's address, a synthetic label and a degree word, as drawn.
+PEOPLE_INSIGHTS = "live2/company_people_insights.html"
+PEOPLE_INSIGHTS_DRAWN = (
+    "\nWhere they live\n",
+    'href="https://www.linkedin.com/company/x/people/?facetSkills=x"',
+    "\nExample place 1\n",
+    "\n3rd+\n",
+)
+
+#: A row label the builder wrote: the text this drive answers as the plant.
+_SYNTHETIC_CATEGORY = re.compile(r"^Example (?:place|school|title|skill|field) [0-9]+$")
+
+
+async def read_people_insights_as_shipped(page: Any) -> Any:
+    """``read_people_insights`` as ``linkedin_company_people_insights`` calls
+    it -- on the page it was handed, no argument but the page -- over the
+    planted page drawn as the People tab the live lane captured.
+
+    THE SIGNATURE DRIVE reads every part and keeps nothing: the planted page
+    answers an address for every part, so no heading opens a card and no
+    category comes back -- NO_RECORD.
+
+    THE SKELETON: ``tests/fixtures/live2/company_people_insights.html``
+    (``scripts/_build_company_people_insights_skeleton.py``): the session-2
+    capture, its carousel's headings, toggles and degree words measured
+    against the session key, its row labels and counts synthetic.
+    ``tests/test_company_people_insights.py`` runs this reader over it and
+    asserts six cards, 25 category rows and two degree rows.
+
+    THE DOUBLE is ``tests/skeleton_page.SkeletonPage`` over that document:
+    every locator is answered from the markup LinkedIn drew, and every row
+    LABEL the builder made synthetic is answered as the plant. So each
+    category record that comes back carries the plant, inside the record --
+    and the connection card's degree words, which are LinkedIn's, are not
+    planted, so its rows come back as degrees and counts.
+    """
+    from linkedin_server import company_people_insights
+    from tests.skeleton_page import SkeletonPage, parse
+
+    markup = _drawn(PEOPLE_INSIGHTS, *PEOPLE_INSIGHTS_DRAWN)
+
+    def answer(text: str) -> str:
+        return PLANT if _SYNTHETIC_CATEGORY.match(text.strip()) else text
+
+    skeleton = SkeletonPage(
+        page, parse(markup), url="https://www.linkedin.com/company/x/people/", answer_text=answer,
+    )
+    return await company_people_insights.read_people_insights(skeleton)
+
+
+# ---------------------------------------------------------------------------
 # The tables the guard reads
 # ---------------------------------------------------------------------------
 
@@ -1640,6 +1695,9 @@ DRIVES: dict[str, Callable[..., Any]] = {
     "presence:read_suggested_presence": read_suggested_presence_as_shipped,
     "profile_editor:read_premium_badge": read_premium_badge_as_shipped,
     "recruiter_views:read_recruiter_views": read_recruiter_views_as_shipped,
+    # 2026-10-10 (lane B4, census J 108): the People tab's insight cards over
+    # the session-2 capture; its success path is category records.
+    "company_people_insights:read_people_insights": read_people_insights_as_shipped,
     "server:_attach_recipient_ids": attach_recipient_ids_as_shipped,
     "server:_profile_views_press_counters": profile_views_press_counters_as_shipped,
     "threads:composer_holds": threads_composer_holds_as_shipped,
