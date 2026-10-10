@@ -956,3 +956,23 @@ files) 48 passed in 6 s; the document guards (4 files) 56 passed in 31 s; the
 derived views (2 files) 52 passed in 44 s. The register's commit (`865e57f`)
 ran the same document and derived-view guards: 99 passed and 1 red, the
 asserted-name site pinned there, then 12 passed. The full suite runs on CI.
+
+Master moved to `f8c7392` (lane NP, the CI lane's follow-ups) before the
+certification, and was merged: `profile.md` kept master's `P A8` and this
+branch's `P A9`; the register kept this branch's fifteen entries and lane NP's
+NAMED-PROFILE-DETAIL-PAGES (89 rulings); the derived views were regenerated.
+Every pin matched on the merged tree, measured; the guards and the ledger
+test, 110 passed; the committed-blob identity test, 1073 passed.
+
+CI run 38040288947 on that merge found two reds of this lane's, in files the
+local selection had left out:
+- `tests/test_triage_read_gap_rows.py`: its TRIAGE table still listed `P J4`
+  and `P N13`, two read rows that left GAP. Their lines are removed, each with
+  a comment naming its ruling.
+- `tests/test_banked_evidence_is_reachable.py`: `J 57`, banked now, keeps a
+  prior reading that cites the linkedin-jobs skill's script by file name, a
+  file no clone holds. The citation is reworded in that kept text to say the
+  script lives in the skill, outside this repository, and cannot be re-checked
+  from a clone -- the repair `P O3` took. The promotion's own evidence (rows
+  45-49, 10, `N 84`, `N 81`, `N 25`) is all in the census.
+Both files then passed locally: 42 passed. The other four jobs were green.
