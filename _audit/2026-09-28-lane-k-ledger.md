@@ -779,4 +779,271 @@ CI ran the rest. Nothing here touched a live page.
              session 7's record
     4d66e1c  census: the next-step ledger after a cold review and live
              session 7
-    then     this section's last gates
+    4f28cd3  record: lane K's last gates
+    fe119de  merge master b10bde8 (the CI lane's fixes); merged to master
+             by the orchestrator, CI run 38037275277 success
+    865e57f  rulings: register the orchestrator's rulings on lane K's
+             ledger questions
+    then     census: the rulings applied (section 12)
+
+## 12. The orchestrator's rulings of 2026-10-10, applied
+
+The orchestrator answered section 7's questions and section 8's purpose list
+in `_audit/2026-10-10-rulings-ledger-questions.md`, copied byte-identical
+and registered in `865e57f`: fifteen rulings, one route already answered by
+lane NP, and one question relayed to the operator. This section applies them.
+Sections 3 to 8 describe the ledger as it stood at `4d66e1c`; the tables now
+read as below.
+
+### 12.1 The rows moved
+
+    row                                   from  ->  to                       ruling
+    N 106, N 108, P N21                   GAP   ->  EXCLUDED-RULED           CONTACT-IMPORT-STAYS-MANUAL
+    P N10                                 GAP   ->  EXCLUDED-RULED           SESSION-SURFACE
+    P N13, P N14                          GAP   ->  EXCLUDED-RULED           SIGN-IN-CHALLENGES-ARE-HIS
+    N 152                                 GAP   ->  EXCLUDED-RULED           SAFETY-REPORTS-STAY-MANUAL
+    M C95, M C96, M C98, M C99, J 162,    GAP   ->  EXCLUDED-RULED           OUTSIDE-THE-PRODUCT-PURPOSE
+      J 164, N 198, P S10, P B7, P J1,
+      P J2, P J3, P J4, P L6
+    P A9                                  GAP   ->  COVERED-CANNOT-DELIVER   P-A9-CANNOT-DELIVER
+    J 17                                  GAP   ->  COVERED-PROVEN           GEOLOCATION-BY-D6
+    J 57                                  GAP   ->  COVERED-PROVEN           CALLER-COMPOSITION-UNDER-D6
+
+Twenty-four rows. Each excluded cell keeps its text and gains the ruling, its
+document and the reopener; `_audit/_census/exclusion-basis.tsv` files the 21
+under five new families made by the ORCHESTRATOR, op=NO, registered in
+`scripts/check_exclusion_basis.py` on each ruling's two anchors: 61 of 61.
+
+THE PURPOSE EXCEPTION, read before moving. Ruling 17 keeps a row whose own
+cell shows it tunes his job recommendations or his search. All fourteen cells
+were read in full; none shows it. The closest is `N 198`, a verdict to
+LinkedIn on people-search results: its cell names the same kind of verdict as
+row 163, but where row 163's cell quotes "Your feedback helps us improve job
+recommendations", `N 198`'s names no tuning of what he is shown. Row 163 stays
+GAP, on the capture of its pair.
+
+### 12.2 The D6 rows, each on its own bar
+
+The order allows a D6 move only where the bar is met today; otherwise the
+row's next step becomes the proof.
+
+- `J 17` -- MET. Its one part is the shipped location parameter,
+  `linkedin_search_jobs(location=...)`, row 3, COVERED-PROVEN; its cell
+  already records that the parameter reaches every documented result set.
+  COVERED-PROVEN.
+- `J 57` -- MET. The cell's own composition (the tracker's ids into
+  `linkedin_job_detail`'s proximity) yields a BOOLEAN, which is whether, not
+  who. The composition that delivers WHO uses only proven parts, every target
+  supplied by the caller: the tracker tools return the job ids (rows 45-49);
+  `linkedin_job_detail` returns the posting's `company_id` (resolved live,
+  row 10); `linkedin_people_search_shape(network="F",
+  current_company_ids=[...], include_names=True)` returns his 1st-degree
+  connections there as people records (`N 84`, `N 81`, `N 25`). The weakest
+  part is proven. COVERED-PROVEN; the cell names the composition.
+- `J 131` -- NOT MET. WHO is composable, but whether a message costs a credit
+  is not readable today: the balance is MEASURED-ABSENT (row 127), and a
+  non-connection's Open Profile status is read by no tool. Its next step is
+  the proof: the C-P5 capture on a non-connection he names, which records
+  whether the composer names a credit. It rides that TARGET line.
+- `N 197` -- NOT MET. `linkedin_group_memberships` returns numeric ids and
+  `linkedin_group_page(group_id)` verifies that `/groups/<id>/` lands on that
+  group (fired on three groups 2026-09-21) -- but the tool deliberately
+  publishes no address ("The LANDING is not published"), so no shipped tool
+  delivers the row's payload, a link. Its next step is a BUILD (the tool
+  returns the address it verified, the caller's own id in the package's own
+  template), and then one fire is the proof.
+
+### 12.3 The next steps the rulings set
+
+- Rulings 1 to 3 turn every capture question into a capture: `J 37`,
+  `M C14` to `M C17`, `M M28`, `M M34`, `N 86`, `N 90` to `N 92` under
+  CAPTURE-PRESS-UNDER-PROBE-RULE; the six article rows under
+  ARTICLE-COMPOSER-CAPTURE; `N 76`, `P C8`, `P B3` and `P S4` under
+  NO-INDEX-PINNED-JUDGEMENTS. Each joins a capture line in the queue.
+- Ruling 6: `N 65` and `N 178` go to lane NP (`SIBLING:lane-NP`), whose
+  details-page route needs no scroll.
+- Ruling 7: `P N9` takes a capture of the settings index, which shows the
+  sessions page's current address before that page's one named admission.
+- Ruling 9: `J 82` is a PRECONDITION row: the daily limit, observable only
+  when it is reached.
+- Ruling 10: `M C43` builds on his post's permalink capture, and `J 110` on
+  the Page root's, each returning the text at runtime under the mitigations.
+- Ruling 11: `N 82` joins the people-search capture, whose skeleton keeps the
+  fixed product label the match needs; no tracked fixture keeps it today.
+- Ruling 13: `M M39` stays a question -- the operator's, relayed. It is the
+  ledger's one RULING row.
+- Ruling 15: `P D29` waits on the certifications editor's admission, with
+  `P D13`.
+
+### 12.4 The ledger and the queue now
+
+`_audit/_census/next-step.tsv` holds 561 rows, the counter's gap, after the
+rulings and after live session 8 (12.7):
+
+    kind          rows   payload
+    ADMIT          152   the address lane A must admit
+    SIBLING        151   lane-S 105, lane-U 20, lane-NP 2, another row 24
+    TARGET         100   what he must name
+    PRECONDITION    58   what he lacks
+    BUILD           66   the tracked fixture (or planned skeleton) to build on
+    CAPTURE         33   a surface id in the capture queue
+    RULING           1   Q-AWAY-MESSAGE, the operator's
+    PURPOSE          0   ruled
+    total          561
+
+    basis: NAMED 275, INFERRED 208, MEASURED 78
+
+`_audit/_census/capture-queue.tsv`: 94 lines -- 11 that need nothing (13
+loads, 2 searches, 33 rows), 11 on a target he names (100 rows), 72 on lane
+A's admission (152 rows), and none gated on a question.
+
+SESSION 9 (session 8 has run), the first 40 loads: the eleven open lines first,
+by rows per load -- the article composer (6 rows), the people search's
+All-filters panel and its fixed labels (5), his own profile's three controls
+opened by name and role (4), the composer's scheduled-posts list (4), his
+post's reactions control found by name (2), the guarded messaging loads with
+the folder and the search box (3 loads, 5 rows), the feed's search box, the
+jobs home's alert manager, the first-degree search's Industry and School
+pills, and the settings index for the sessions page (1 row each), and a
+named thread that reads READ, for its footer (3 rows) -- 13 loads, 2
+searches, 33 rows. Then the target lines as he names each target: his named
+connections (4 loads, 13 rows), a school (1, 3), an event (4, 11), a
+non-connection (3, 8), jobs and alerts (9, 16), a member to block or unblock
+(2, 3), Pages (3, 4), a connection to remove (1, 1). Session 9: 40 loads, 2
+searches, 92 rows.
+
+SESSION 10: his posts and comments (18 loads, 22 rows) and a group (5, 6),
+then seventeen admission lines in rank order (17 loads, 90 rows). Session 10:
+40 loads, 118 rows. Sessions 11 and 12 take the named threads and the
+remaining admissions.
+
+### 12.5 The pins, each measured on this tree
+
+    census_completion.PINNED   out_of_scope 40 -> 61, achievable 731 -> 710,
+                               capabilities_achievable 745 -> 724,
+                               adjudicated 186 -> 210, gap 585 -> 561,
+                               gap_read 98 -> 92, gap_write 379 -> 365,
+                               gap_unknown 108 -> 104, cannot_deliver
+                               16 -> 17, delivered_broad 130 -> 132,
+                               delivered_strict 105 -> 107, b3_admitted
+                               43 -> 41, b3_refused 38 -> 34, jobs_gap
+                               108 -> 104, jobs_dir_r 40 -> 38, jobs_dir_w
+                               60 -> 58, jobs_admitted 12 -> 10
+    write-class split          (16, 37, 334) -> (16, 37, 320), 373 lines
+    messaging triage headline  130 {R 16, W 110, R+W 4} -> 126 {R 13,
+                               W 110, R+W 3}
+    the pointer graph          re-pinned: `P J2` and `P J3` point at `P J1`
+                               ("same"), whose verdict moved with its
+                               exclusion; both were excluded in the same
+                               edit with their own ruling text. 64 pointers,
+                               unchanged.
+    refused-address GAP rows   78, unchanged (measured)
+    side tables                jobs-directions 108 -> 104, read-addresses
+                               98 -> 92, write-classes 387 -> 373 lines
+
+### 12.6 Gates
+
+Instruments, on the final tree: `census_completion --check` matches every
+pin; `check_next_step` GREEN, 561 = the counter's gap;
+`check_exclusion_basis` 61 of 61; `check_write_classes` GREEN, 373 lines;
+`check_jobs_directions` GREEN, 104; `check_read_addresses` GREEN, 92;
+`measure_pointer_graph --check` passes after the re-pin; the refused-address
+check PASS at 78; `build_blocker_map --check`, the register and the index
+regenerated and matching.
+
+Tests, serial: the census tables and pins (10 files) 227 passed, in 4m22s --
+over the orchestrator's 2-minute local budget; the live session's flag stood
+when it started and was gone when it ended; the census-reading guards (4
+files) 48 passed in 6 s; the document guards (4 files) 56 passed in 31 s; the
+derived views (2 files) 52 passed in 44 s. The register's commit (`865e57f`)
+ran the same document and derived-view guards: 99 passed and 1 red, the
+asserted-name site pinned there, then 12 passed. The full suite runs on CI.
+
+Master moved to `f8c7392` (lane NP, the CI lane's follow-ups) before the
+certification, and was merged: `profile.md` kept master's `P A8` and this
+branch's `P A9`; the register kept this branch's fifteen entries and lane NP's
+NAMED-PROFILE-DETAIL-PAGES (89 rulings); the derived views were regenerated.
+Every pin matched on the merged tree, measured; the guards and the ledger
+test, 110 passed; the committed-blob identity test, 1073 passed.
+
+CI run 38040288947 on that merge found two reds of this lane's, in files the
+local selection had left out:
+- `tests/test_triage_read_gap_rows.py`: its TRIAGE table still listed `P J4`
+  and `P N13`, two read rows that left GAP. Their lines are removed, each with
+  a comment naming its ruling.
+- `tests/test_banked_evidence_is_reachable.py`: `J 57`, banked now, keeps a
+  prior reading that cites the linkedin-jobs skill's script by file name, a
+  file no clone holds. The citation is reworded in that kept text to say the
+  script lives in the skill, outside this repository, and cannot be re-checked
+  from a clone -- the repair `P O3` took. The promotion's own evidence (rows
+  45-49, 10, `N 84`, `N 81`, `N 25`) is all in the census.
+Both files then passed locally: 42 passed. The other four jobs were green.
+
+Master moved again, to `66eb699` (live session 8), and was merged: both sides
+had re-pinned `delivered_strict` from 105, and the merged tree MEASURES 111
+(session 8's four rows and this lane's two), pinned so; every other pin
+matched as merged. CI run 38041159605 on that merge (`824d6b4`): success, 6
+jobs, 5m53s. The ledger was then brought up to session 8's captures (12.7):
+`check_next_step` GREEN at 561; the ledger test, the prose guards, the index
+and the map, 97 passed in 1m45s.
+
+At 15:32 the live lane re-read its session-8 thread capture and found the
+composer page (12.7). After a merge of master `16ee59a` (the register at its
+fixed point), `M M20`, `M M40` and `M M51` went back to CAPTURE on the thread
+footer, and the queue gained that line again. No census state moved, so no
+pin did: `census_completion --check` matches every pin, and
+`check_next_step` is GREEN at 561.
+
+### 12.7 Live session 8 took the twelve open loads
+
+The live lane's session 8 (re-issued 2026-10-10, merged to master `66eb699`)
+ran this ledger's first twelve open loads, as the plan at `4d66e1c` drew them,
+and recorded each in its section "3: lane K's block". A capture moves no row;
+it changes the next step:
+
+    surface                      session 8 found                      rows -> next
+    feed-menus                   an item's menu pressed and kept;     N 37, N 43, N 51, N 153, N 154,
+                                 the search box not pressed           N 200 -> BUILD; N 95 stays
+    in-me-profile                his profile, raw and skeleton        P D25, P D26, P F1, P K8 -> BUILD;
+                                                                      N 76, P C8, P B3, P S4 stay
+    search-people-labels         the label reading fired              N 80, N 88, N 89, N 93 -> BUILD;
+                                                                      N 82, N 86, N 90-92 stay
+    job-posting-panels           one posting, raw and skeleton        J 115, J 124 -> BUILD
+    jobs-recommended-feedback    kept                                 J 163 -> BUILD (if the pair is drawn)
+    premium-key-skills           kept                                 P S8 -> BUILD (if the chooser is drawn)
+    msg-thread-footer            not taken: the receipt guard         M M20, M M40, M M51 stay; the
+                                 refused (one conversation read       capture opens a named thread
+                                 unread); its lk_thread capture is    that reads READ
+                                 the new-message composer page
+    own-post-reactions           not pressed: no [aria-expanded]      M C33, M C35 stay, the control now
+                                 control named for the menu           found by name (rulings 1 and 3)
+    messaging-guarded            the receipt guard refused on the     M M7, M M8, M M9 stay, with
+                                 composer's list; /messaging/ not     M M28, M M34
+                                 opened
+    search-people-first-degree   no Industry or School term drawn     N 26b stays, the pills opened
+                                                                      under ruling 1
+
+Nineteen rows move to BUILD on six skeletons in the live lane's
+gitignored `_state/live8/`. Each is a PLANNED tracked skeleton; the live lane
+names the real paths when it commits them:
+
+    PLANNED tests/fixtures/live8/feed_item_menu_open.html <- live-lane _state/live8/lk_feed-item-menu-open.skeleton.html (N 37, N 43, N 51, N 153, N 154, N 200)
+    PLANNED tests/fixtures/live8/in_me.html <- live-lane _state/live8/lk_inme.skeleton.html (P D25, P D26, P F1, P K8; P D25 reads the raw page's anchors)
+    PLANNED tests/fixtures/live8/search_labels.html <- live-lane _state/live8/lk_search_labels.skeleton.html (N 80, N 88, N 89, N 93)
+    PLANNED tests/fixtures/live8/posting.html <- live-lane _state/live8/lk_posting.skeleton.html (J 115; J 124 reads the raw page)
+    PLANNED tests/fixtures/live8/recommended.html <- live-lane _state/live8/lk_recommended.skeleton.html (J 163)
+    PLANNED tests/fixtures/live8/keyskills.html <- live-lane _state/live8/lk_keyskills.skeleton.html (P S8)
+
+The eleven lines session 8 did not finish stay CAPTURE, now with the presses
+rulings 1 and 3 permit a capture to make, and the queue is renumbered to start
+at session 9.
+
+THE THREAD FOOTER, as the live lane re-read it at 15:32. Its session-8
+capture `lk_thread` is the NEW-MESSAGE COMPOSER page, not a named thread's
+footer: the receipt guard refused to open the thread, because one
+conversation read unread -- its row carries LinkedIn's unread markers, the
+first capture of that markup. So the composer's footer controls it recorded
+(attach image, attach file, the GIF and emoji keyboards) are the composer's,
+and say nothing of a thread's footer. `M M20`, `M M40` and `M M51` stay
+CAPTURE on the thread footer, behind the receipt guard at 0 unread, on a
+named thread that reads READ.

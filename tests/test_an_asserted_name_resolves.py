@@ -77,6 +77,13 @@ PINNED: set[tuple[str, str, str, int]] = {
     # ratchet then demands this pin narrow.
     ("BLOCKER", "NAMES-AT-RUNTIME",
      "_audit/2026-09-28-rulings-build-classes.md", 1),
+    # SURFACED 2026-10-10 BY LANE K's registration of the rulings on its
+    # ledger's questions, the same shape: "answered by the orchestrator under"
+    # ending a line, the registered RULING id `OUTWARD-ACTS-NEED-THE-OPERATOR`
+    # opening the next. Pinned, not repaired: the document is the
+    # orchestrator's, copied byte-identical.
+    ("BLOCKER", "OUTWARD-ACTS-NEED-THE-OPERATOR",
+     "_audit/2026-10-10-rulings-ledger-questions.md", 1),
 }
 
 #: REPAIRED 2026-10-10 (lane G2), the eight sites this pin carried until then,
