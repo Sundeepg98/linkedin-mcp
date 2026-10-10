@@ -3,7 +3,7 @@
 An MCP server that shows you your own LinkedIn account data as structured tool
 results instead of pages you have to click through.
 
-**Sixty-two tools ship. Forty-four read. Eighteen write. None is
+**Sixty-three tools ship. Forty-five read. Eighteen write. None is
 write-shaped and unable to act.**
 
 **THAT LINE READ "Sixty-one ... Forty-four read. Seventeen write" UNTIL LANE
@@ -995,7 +995,7 @@ linkedin_server/
   cdp_bridge.py              the recovery path: attach to a running Chrome
   dom.py                     the read-only harvesters and the control readers
   shape.py                   pure parsers and the result envelope
-  server.py                  the sixty-two tools
+  server.py                  the sixty-three tools
   errors.py
 tests/                       1393 tests, no network, no account
   fixtures/                  frozen LinkedIn markup, scrubbed

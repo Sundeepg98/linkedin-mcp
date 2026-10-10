@@ -84,6 +84,7 @@ from linkedin_server import server as server_module
 #: ``test_every_tool_is_on_the_surface.py`` exists for. This reads the same
 #: registry a client does.
 PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
+    "linkedin_analytics_hub": (),
     "linkedin_apply_job": ("confirm_token", "job_id"),
     "linkedin_auth_status": (),
     "linkedin_cdp_status": (),
@@ -506,7 +507,12 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: parameter (96 -> 97, no tool) and lane U's one tool with its three
 #: parameters (61 -> 62 tools, 96 -> 99). Neither moved the other's entry, so
 #: the sum holds: 61 + 1 tools, 96 + 1 + 3 parameters.
-PINNED_TOOL_COUNT = 62
+#: **RE-PINNED AT LANE B1'S MERGE OF ITS CHILD lb1-dashboard, 2026-10-10: 63
+#: TOOLS AND 100 PARAMETERS.** One READ with no parameter,
+#: `linkedin_analytics_hub()`, his analytics hub `/dashboard/` loaded once.
+#: THE CENSUS DECISION: the census row `P L8` moves GAP -> COVERED-UNFIRED in
+#: lane B1's census commit (`_audit/2026-10-10-lane-b1-profile-build.md`).
+PINNED_TOOL_COUNT = 63
 PINNED_PARAMETER_COUNT = 100
 
 

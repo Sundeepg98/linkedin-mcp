@@ -635,7 +635,10 @@ def test_a_non_ascii_word_survives_the_copy_as_a_reference() -> None:
 #: harness's own `tracked_copy`, after putting back LinkedIn's labels and option
 #: words where the skeleton's shape of each matched exactly under the session's
 #: key, and inventing the organization and school options.
-LIVE_FIXTURE_COUNTS = {"live2": 28, "live3": 14, "live4": 4, "live5": 1, "live7": 1, "live8": 1}
+#: `live1` (lane B1, 2026-10-10): session 1's analytics pages, each written by
+#: its own builder through this harness's own `skeleton_of` and `tracked_copy`:
+#: the hub (`scripts/_build_dashboard_fixture.py`).
+LIVE_FIXTURE_COUNTS = {"live1": 1, "live2": 28, "live3": 14, "live4": 4, "live5": 1, "live7": 1, "live8": 1}
 
 
 @pytest.mark.parametrize("session_dir", sorted(LIVE_FIXTURE_COUNTS))
