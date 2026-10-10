@@ -1253,7 +1253,12 @@ PINNED = {
     #: with its emoji, sent and verified), `M M33` (the starred pill applied), `M M49`
     #: (the read indicator read) and `P A21`, `P A19` (tested and restored exactly)
     #: fired live and banked.
-    "delivered_strict": 101,
+    #: 105 AT THE LIVE LANE'S SESSION 7 (2026-10-10), MEASURED: `N 25` (a
+    #: 1st-degree connection found by name), `N 81` (the degree facet applied to
+    #: the results) and `N 26` (his connections filtered by place) fired live and
+    #: banked; `N 155` moved on the orchestrator's call of that day, by D6 on
+    #: `M M1`'s session-5 send.
+    "delivered_strict": 105,
     #: The live lane's merge: N 134, P O3 and M C72 left GAP.
     #: Lane D's merge: N 132 left GAP, for COVERED-UNFIRED under D6.
     #: 544 AT THE ORCHESTRATOR'S MERGE OF LANE D (2026-09-27), MEASURED: lane D
@@ -1363,7 +1368,12 @@ PINNED = {
     #: with its emoji, sent and verified), `M M33` (the starred pill applied), `M M49`
     #: (the read indicator read) and `P A21`, `P A19` (tested and restored exactly)
     #: fired live and banked.
-    "unfired": 29,
+    #: 25 AT THE LIVE LANE'S SESSION 7 (2026-10-10), MEASURED: `N 25` (a
+    #: 1st-degree connection found by name), `N 81` (the degree facet applied to
+    #: the results) and `N 26` (his connections filtered by place) fired live and
+    #: banked; `N 155` moved on the orchestrator's call of that day, by D6 on
+    #: `M M1`'s session-5 send.
+    "unfired": 25,
     #: 104 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     #: 101 AT LANE S'S NAMES ADOPTION (2026-09-27), MEASURED: `N 79`, `N 172`
@@ -1716,7 +1726,12 @@ PINNED = {
     #: with its emoji, sent and verified), `M M33` (the starred pill applied), `M M49`
     #: (the read indicator read) and `P A21`, `P A19` (tested and restored exactly)
     #: fired live and banked.
-    "b1_standing": 17,
+    #: 16 AT THE LIVE LANE'S SESSION 7 (2026-10-10), MEASURED: `N 25` (a
+    #: 1st-degree connection found by name), `N 81` (the degree facet applied to
+    #: the results) and `N 26` (his connections filtered by place) fired live and
+    #: banked; `N 155` moved on the orchestrator's call of that day, by D6 on
+    #: `M M1`'s session-5 send.
+    "b1_standing": 16,
     "b1_relayed": 0,
     "b1_pending": 0,
     #: 22 AT THE ORCHESTRATOR'S MERGE OF LANE D (2026-09-27), MEASURED: lane D
@@ -1762,7 +1777,12 @@ PINNED = {
     #: with its emoji, sent and verified), `M M33` (the starred pill applied), `M M49`
     #: (the read indicator read) and `P A21`, `P A19` (tested and restored exactly)
     #: fired live and banked.
-    "b1_no_ruling": 12,
+    #: 9 AT THE LIVE LANE'S SESSION 7 (2026-10-10), MEASURED: `N 25` (a
+    #: 1st-degree connection found by name), `N 81` (the degree facet applied to
+    #: the results) and `N 26` (his connections filtered by place) fired live and
+    #: banked; `N 155` moved on the orchestrator's call of that day, by D6 on
+    #: `M M1`'s session-5 send.
+    "b1_no_ruling": 9,
     #: 7 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
     #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
     #: 4 AT THE LIVE LANE'S MERGE OF MASTER c2825a4 (2026-09-28), MEASURED on the
@@ -1892,10 +1912,12 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
     #: he named, on the first-contact path, and verified -- COVERED-PROVEN.
     #: `M M17` LEFT AT SESSION 6 (2026-09-28): the reply in that conversation,
     #: its emoji among his words, sent and verified -- COVERED-PROVEN.
+    #: `N 155` LEFT ON THE ORCHESTRATOR'S CALL OF 2026-10-10, by D6 on `M M1`'s
+    #: session-5 send to a first-degree connection -- COVERED-PROVEN.
     "OPERATOR-NAMES-THE-TARGET": (
         "J 103", "J 104", "J 128",
         "M C1", "M C25", "M C32", "M C63", "M M10",
-        "N 1", "N 2", "N 4", "N 46", "N 47", "N 48", "N 64", "N 155",
+        "N 1", "N 2", "N 4", "N 46", "N 47", "N 48", "N 64",
         "P I14",
     ),
     #: `J 18` and `J 39` entered with the lane-L3 merge, 2026-09-23: reads
@@ -1953,8 +1975,8 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
     #: filtered by place or employer; never fired. Reads no ruling holds.
     NO_RULING: (
         "J 121", "J 122",
-        "N 20", "N 25", "N 26", "N 30", "N 31",
-        "N 45", "N 81", "N 85", "N 172",
+        "N 20", "N 30", "N 31",
+        "N 45", "N 85", "N 172",
         "P A8",
         #: `J 107` and `M M53` entered with lane S's offline frontier,
         #: 2026-09-28, fired at session 2 without banking, and LEFT at
@@ -1964,6 +1986,8 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
         #: `P B9` LEFT at session 5 (2026-09-28): both directions measured live.
         #: `M M33`, `M M49`, `P A21` and `P A19` LEFT at session 6 (2026-09-28), fired
         #: live and banked, the two edits tested and restored exactly.
+        #: `N 25`, `N 81` and `N 26` LEFT at session 7 (2026-10-10), fired live and
+        #: banked: the name search, the degree facet, the place filter.
     ),
 }
 
