@@ -678,14 +678,17 @@ def test_the_upload_hands_over_the_verified_bytes_and_never_a_callers_string():
     assert ast.unparse(source) == "_file_component_of(spec, grant.target)"
 
 
-def test_no_action_uploads_yet_and_that_is_the_declared_state():
-    """The ruling landed; the surfaces did not.
+def test_the_uploading_actions_are_exactly_the_declared_ones():
+    """The ruling landed in 2026-09-04; ONE surface joined on 2026-10-10.
 
-    Pinned so that the first action to join arrives in a diff a reviewer reads
-    beside the paragraph explaining what it costs -- rather than as a side
-    effect of some other change to ``perform``.
+    Pinned EMPTY until lane U wired ``send_attachment`` -- one file into one
+    conversation he names, its file input aimed on a real capture -- and kept
+    pinned, so the NEXT action to join arrives in a diff a reviewer reads
+    beside the paragraph explaining what it costs, rather than as a side
+    effect of some other change to ``perform``. Post media and the profile
+    photo stay out: neither surface has a captured file input.
     """
-    assert writes.UPLOAD_ACTIONS == frozenset()
+    assert writes.UPLOAD_ACTIONS == frozenset({"send_attachment"})
 
 
 def test_the_file_extractor_refuses_a_target_it_cannot_split():

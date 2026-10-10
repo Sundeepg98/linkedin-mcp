@@ -179,34 +179,278 @@ same read's.
 
 ## 4. The verb, performable: an attachment into a conversation he names
 
-(written as it lands)
+**`linkedin_send_attachment(thread_id, file, confirm_token)`** -- spec
+`send_attachment` in `writes.SANCTIONED_WRITES`, in `PERFORMABLE`, and the
+first and only member of `writes.UPLOAD_ACTIONS`. Off by default, two calls
+behind the single-use grant, one file, one conversation. The readers and
+gates are in `linkedin_server/attachments.py` (new). In `writes.py` the spec
+is one contiguous lane U block; its arms (`anchor_label_for`,
+`_live_control`, the preview's thread reader, `_verify_after`) and its rows
+in the per-action tables sit beside their siblings, each marked lane U. The
+tool is one contiguous lane U block in `server.py`. Tests in
+`tests/test_send_attachment.py`.
+
+**WHY THIS SURFACE AND NO OTHER.** It is the only one of the three the
+operator opened -- profile photo, post media, message attachments -- whose
+file input is in a real capture. The live lane's session 3 drew a
+conversation's reply form (`tests/fixtures/live3/presence.html`, and the
+same footer in `compose_c5-open.html`): two `input[type=file]`, each in its
+own `div.msg-form__upload-attachment` beside ONE button, one labelled
+"Attach an image for your draft conversation", the other "Attach a file for
+your draft conversation". The post composer draws no file input at all, and
+no profile-photo surface has been captured.
+
+**THE AIM.** By the label of the button the input shares its wrapper with --
+never by position, never by an id -- and cross-checked by the input's own
+`accept` declaration read live as `threads`' closed token: `images` for the
+image input, `images_and_documents` for the file input (the declarations
+measured live on 2026-09-05; the skeleton keeps no attribute values). An
+image, by the type read from its bytes, goes to the image input; everything
+else to the file input. A disagreement between label and declaration refuses.
+`test_the_aim_resolves_on_the_real_capture` runs the shipped selectors over
+the capture itself: one form, one wrapper per label, one input in each -- and
+the aim refusing there, by its cross-check, because the skeleton blanked the
+declarations.
+
+**THE ACT, step by step.**
+
+1. Preview: one load of the conversation, held to the thread id. The reply
+   box must read EMPTY with Send DISABLED -- so nothing, words or an earlier
+   attachment, waits to go with the file -- and exactly one input must be
+   aimable. The block names the file, its exact size, the extension its name
+   claims and the type its bytes declare (and whether they agree), a digest,
+   which input it goes to, and who the file would reach: the conversation's
+   title and headline as a people record, read by the reply's own namer
+   (`threads.name_the_reply_recipient`, PREVIEW-NAMES-THE-RESOLVED-TARGET).
+   The target holds the file as its path RELATIVE to the upload root, so no
+   absolute path -- which carries a username -- is bound, printed or kept.
+2. Confirm: the landing is re-checked; the box and the aim are re-read; the
+   file is read ONCE, its digest compared, and those bytes handed over
+   (section 3).
+3. The read-back before Send: a bounded wait (20 s, a liveness bound, deciding
+   nothing), then the gate. Send is appended to the one click queue ONLY if
+   the form draws the file's name EXACTLY ONCE, the box holds no words, no
+   recipient box is drawn, and Send is enabled. The press is strict.
+4. The verification: in place first -- does the form still draw the file
+   with Send on? -- then a FRESH LOAD of the conversation: SENT only if the
+   count of messages drawing the file's name rose by exactly one and the
+   last message is his. A sent attachment drawn without its name reads
+   UNKNOWN: never SENT, never NOT SENT.
+
+**WHAT IS AIMED AT A CAPTURE AND WHAT IS NOT, stated plainly.** The inputs
+and their wrappers: a real capture. The read-back and the verification: a
+PROPERTY (the file's name drawn), because no capture shows a composer
+holding an attachment or a sent attachment message (lane L5's C3 part b was
+never taken). If LinkedIn draws an image attachment as a thumbnail without
+its name, the gate refuses and nothing is sent -- the first live run is the
+measurement (section 7).
+
+**NO WORDS GO WITH THE FILE.** A message carrying both needs a three-part
+target, which `_file_component_of`'s docstring names as the shape this
+vocabulary does not express and leaves to "the wave that first needs it";
+and a composer holding both has never been captured. Lane U chose the
+attachment alone; the proof sends its words first through the proven
+`linkedin_send_reply` (section 9, Q3).
+
+**RED FIRST, AND SHOWN FAILING.** Every new guard has a test that fails
+without it -- the mutation runs are recorded in section 8 with the INSTRUMENTS
+entry (section 84).
 
 ---
 
 ## 5. The surfaces, row by row
 
-(written as it lands)
+| row | state | why, measured |
+|---|---|---|
+| M M14 photo | GAP | the input is aimed at a real capture and the act is built; the composer holding an attachment and the sent attachment message are not captured, and lane L5's cell names both as its bar. Capture U-REPLY-ATTACHMENT-SENT and -PENDING |
+| M M15 video | GAP | as M M14; a video goes to the file input, whose 2026-09-05 declaration lists `.mov` and `.mp4` |
+| M M18 files | GAP | as M M14. The cell's "max 5, 20 MB total" stays unsourced: `multiple` is absent on both inputs, and this server's 25 MB cap is its own |
+| M C3, C4, C5 | GAP | `/preload/sharebox/` draws no file input (live 2026-09-04, offline 2026-09-20); the media control builds one behind a press nobody has captured, and `press._COMPOSER_MARKERS` refuses composer presses for a read. Capture U-POST-MEDIA |
+| M C6, M C7 | GAP | C5 and C3 first |
+| M C27 | GAP | the comment box's picker, never captured; the same press question. Capture U-COMMENT-MEDIA |
+| M C45 | GAP | the article composer (C44) first; re-filed to ARTICLE-SURFACE. Capture U-ARTICLE-MEDIA |
+| J 70 | GAP | `/jobs/application-settings/` is refused by the `/jobs/application` substring, whose recorded ground is the apply act. Capture U-RESUME-MANAGER |
+| J 146-149 | GAP | see below. Capture U-RESUME-TAILOR |
+
+**J 146-J 149: DOES LINKEDIN STILL OFFER IT? YES, AS FAR AS ANY COMMITTED
+READING GOES.** The entry point is drawn on a posting in the committed job
+capture `tests/fixtures/job_detail_hydrated.html` -- an anchor to
+`/job-apply-resources/?jobPostingId=<id>` on an "entrypoint" button -- and
+J 146's own cell records it drawn again by lane Y2 on 2026-09-24, keyed by
+the posting. What has never been opened is the surface BEHIND it: the read
+gate refuses that address by allowlist silence (measured 2026-10-10). So
+nothing was designed. THE MEASUREMENT is capture U-RESUME-TAILOR: admit that
+one address as a read (READ-PAST-AN-ACT-SUBSTRING's last paragraph covers a
+page refused by silence alone), load it once for a posting he names, and
+record whether it serves, redirects -- a redirect away is the MEASURED-ABSENT
+reading -- or offers an upload, a stored-resume picker and the controls that
+generate text. J 147 and J 148 carry no file of their own; they are
+LinkedIn's generation over a resume J 146 would upload.
 
 ---
 
 ## 6. Capture queue
 
-(written as it lands)
+`_audit/_census/capture-queue-uploads.tsv`, columns `surface-id, address,
+presses, save, loads, searches, rows`. Seven lines; every row this lane
+leaves GAP is on at least one.
+
+| surface-id | loads | rows | the gate it needs first |
+|---|---:|---|---|
+| U-REPLY-ATTACHMENT-SENT | 1 | M M14 M15 M18 | none: a read of a conversation he names |
+| U-REPLY-ATTACHMENT-PENDING | 0 | M M14 M15 M18 | none: taken inside the live proof |
+| U-POST-MEDIA | 1 | M C3 C4 C5 C6 C7 | a call on the composer press (Q4) |
+| U-COMMENT-MEDIA | 1 | M C27 | the same call |
+| U-ARTICLE-MEDIA | 1 | M C45 | ARTICLE-SURFACE's article-editor capture, then the same call |
+| U-RESUME-MANAGER | 1 | J 70 | one anchored read admission under READ-PAST-AN-ACT-SUBSTRING |
+| U-RESUME-TAILOR | 1 | J 146-149 | one anchored read admission under the same ruling |
+
+Each press line intercepts the page's file chooser BEFORE the press (a
+Playwright `filechooser` listener, never answered), so no native dialog can
+open on his screen and no file can be chosen.
 
 ---
 
-## 7. The live-proof spec
+## 7. The live-proof spec (the live lane runs it; this lane loaded nothing)
 
-(written as it lands)
+**THE TARGET (OPERATOR-NAMES-THE-TARGET).** The first-degree member the
+operator named for `M M1` and `M M17` -- the conversation `M M1` made and
+`M M17` replied in, by its thread id from the lane's own state. Named here
+by role only.
+
+**THE FILE.** `linkedin-tool-test.png`, generated for the test by
+`python scripts/make_benign_upload_image.py` into the declared upload root
+(`config.UPLOAD_ROOT`: `uploads/` under the server's state directory, or
+`LINKEDIN_UPLOAD_DIR`). A 96 x 32 flat light-grey PNG, no text, no metadata,
+the same bytes on every run: **122 bytes, sha256 prefix `5d03126f1fd64701`,
+`image/png`**. Never one of his files. The script refuses a missing root
+(creating it is the operator's act) and refuses to overwrite other bytes.
+
+**THE WORDS.** "Testing a LinkedIn tool I'm building. Please ignore this
+message." -- sent FIRST, through `linkedin_send_reply`, in the same
+conversation. The attachment follows as its own message (section 4: no
+words go with the file).
+
+**THE STEPS AND THE READINGS EXPECTED.**
+
+1. *(1 load)* Resolve the conversation as session 6 did for `M M17`.
+2. *(3 loads)* `linkedin_send_reply(thread_id, <the words>)`: preview,
+   confirm, fresh load. Expected exactly as session 6: `reply_box_empty`,
+   Send on within the 5 s wait, `reply_sent` on the fresh load.
+3. *(1 load)* `linkedin_send_attachment(thread_id, "linkedin-tool-test.png")`,
+   PREVIEW. Expected block: `file.file_name` `linkedin-tool-test.png`;
+   `file.size` "122 bytes (122 bytes exactly)"; `file.extension` `.png`;
+   `file.type_from_bytes` "image/png -- PNG image";
+   `file.the_name_and_the_bytes` "they agree"; `file.sha256_prefix`
+   `5d03126f1fd64701`; `where.file` `linkedin-tool-test.png`;
+   `who_this_would_reach` a person record whose name is the member he named
+   (CHECK IT before confirming); `the_input_this_file_goes_to`: label "Attach
+   an image for your draft conversation", `labelled_wrappers` 1, `inputs` 1,
+   `declaration` `images`; state `reply_box_empty`; one token.
+   **STOP HERE if** the declaration reads anything but `images`, or either
+   count is not 1: no token is minted, nothing was attached, and that closed
+   reading is the measurement -- LinkedIn's inputs moved.
+4. *(1 load)* CONFIRM with the token. Expected receipt: `uploaded` with
+   `sha256_prefix` `5d03126f1fd64701` (the preview's), `handed_over` "the
+   verified bytes, not the path", `type_handed_over` `image/png`,
+   `bytes_handed_over` 122, `files_handed_to_the_browser` 1. Then
+   `send_gate`:
+   * **PROCEEDED** -- `observed`: `forms` 1, `names_drawn` 1, `editors` 1,
+     `editor_empty` true, `recipient_boxes` 0, `send_controls` 1,
+     `send_enabled` true; `clicked.clicks_made` 1.
+   * **OR REFUSED, the likelier first outcome, and still the measurement:**
+     `refused_condition` `2_one_attachment_naming_the_file` with
+     `names_drawn` 0 -- LinkedIn drew the image without its name. Send is NOT
+     pressed; `performed` is false (`attachment_held_in_composer`). THE FILE
+     HAS STILL REACHED LINKEDIN (it is uploaded at the hand-off) and sits in
+     his composer: save capture U-REPLY-ATTACHMENT-PENDING now, then the
+     operator removes the pending attachment by hand -- no remove control is
+     captured or built. Do not retry: the next preview of this conversation
+     refuses while Send is enabled.
+5. *(1 load, inside step 4)* The verification's fresh load. Expected
+   `verification.observed_state` `attachment_sent` -- `events_with_the_name`
+   one more than the preview's, the last message his -- or `unknown`, which
+   means Send was pressed and the sent message does not draw the name: open
+   the conversation, look, and DO NOT RETRY. Save capture
+   U-REPLY-ATTACHMENT-SENT from this load either way.
+
+**THE COST.** 7 loads (1 + 3 + 1 + 1 + 1), inside LIVE-BUDGET-40-LOADS,
+serial and 20 s apart; 0 searches; nothing metered (a message inside an
+existing conversation is not an InMail). **WHAT CANNOT BE UNDONE:** the
+words and the file reach the member; the file reaches LinkedIn at the
+hand-off even if Send is never pressed.
 
 ---
 
 ## 8. Gates
 
-(written as it lands)
+Local gates were targeted, never the suite: serial while the live lane's
+flag stood (it was removed during session 7's close, about 13:00), a few
+workers after. The suite is certified on lane CI (below).
+
+| commit | what ran | result |
+|---|---|---|
+| `d295e6e` rulings | the register, asserted names, audit index, blocker map, pointer graph, ruling holds | 142 passed, 2 failed, fixed before commit (section 1.1); then 33 passed. The correction guard was NOT in this set, and was red at this commit |
+| `3e6b7b7` relabel | blocker map, register, ruling holds, unassigned reason, reason locator, state cells, corrections; five corpus guards | 190 passed; 77 passed; committed identity 1044 passed |
+| `e4c6cca` hand-off | the two upload files; readonly and boundary pins; doc guards, derived views, writes_nine, typed bytes, model-id, page-text, ignored-path | 67 passed 3 skipped; 647 passed; 308 passed. The receipt-message pin was NOT in this set, and was red at this commit |
+| `18dd736` wording | the receipt-message pin and the hand-off tests | 21 passed |
+| commit 4, the verb | every test file that fans out over the write registries (39), the new tests, the surface and count pins, the reader-leak guard with its refreshed baseline (five new readers, all `clean`, nothing else moved) | see the commit message; the census instruments: `census_completion` "every headline figure matches its pin", `check_write_classes`, `check_read_addresses`, `check_jobs_directions`, `ruling_holds` all GREEN |
+
+**THE TWO REDS I LEFT AND THEN CLOSED, said plainly.** `d295e6e` was red on
+the correction guard and `e4c6cca` on the receipt-message pin, each because
+the targeted set I chose did not include the guard the change met. Both were
+closed in the next commit. The lesson is the repository's own: a scoped gate
+may not claim more than it ran, and the next scope widened to every file
+that fans out over what I touched.
 
 ---
 
 ## 9. Questions for the orchestrator
 
-(written as it lands)
+**Q1. THE 14 ROWS' BLOCKER: A LEDGER ACT, OR AN ADJUDICATED OVER-COUNT?**
+Every destination that fits them is full or outside the 97. Grounds, quoted:
+`scripts/build_blocker_map.py` -- *"Creating a blocker is a LEDGER act: it
+needs an entry in one of the two published tables AND a re-total"*; and
+`test_no_blocker_recounts_higher_than_the_ledger_published` -- *"It is a
+finding for a person to adjudicate, not a number to absorb -- do not widen
+the published count to clear it."* Either (a) open successor blockers in the
+ledger's tables and re-total (97 blockers and 409 rows are pinned), or (b)
+rule the over-counts on JOBS-APPLICATION-FORBIDDEN (4 of 3), RESUME-TOOLS-
+SURFACE (6 of 2), THREAD-REPLY-BOX (5 of 2) and PICKER-SURFACES (8 of 2).
+Until then the notes carry what blocks each row.
+
+**Q2. HIS WORDS ON UPLOADS ARE NOT ON RECORD.** FILE-UPLOAD-OPENED is
+registered on `615a5c4` and the decides record, which report the decision in
+their authors' words. If the register should quote him, his words have to be
+asked for; nothing committed holds them.
+
+**Q3. WORDS AND A FILE IN ONE MESSAGE?** Built attachment-only.
+`_file_component_of`'s docstring: *"an action carrying BOTH text and a file
+... needs a THREE-part target ... the wave that wires the first such
+composer owns that decision and will have a live surface to take it
+against."* No composer holding both has been captured. The proof therefore
+sends the words first through `linkedin_send_reply`, then the image. If one
+message is wanted, that is a three-part target kind and a capture.
+
+**Q4. A CALL ON THE COMPOSER PRESS FOR THREE CAPTURES.** U-POST-MEDIA,
+U-COMMENT-MEDIA and U-ARTICLE-MEDIA each need one press of a media control
+inside a composer, with the file chooser intercepted and never answered.
+`press._COMPOSER_MARKERS` refuses it, `terminal=True`: *"composers and
+editors are refused for pressing even when admitted for reading"*. Press-gate
+defaults are the orchestrator's (OUTWARD-ACTS-NEED-THE-OPERATOR).
+
+**Q5. TWO READ ADMISSIONS UNDER READ-PAST-AN-ACT-SUBSTRING.** U-RESUME-MANAGER
+(`/jobs/application-settings/`, refused by the `/jobs/application` substring,
+whose ground is the apply act) and U-RESUME-TAILOR
+(`/job-apply-resources/?jobPostingId=<id>`, refused by allowlist silence
+alone). Each is one exact anchored pattern with a control shown failing; this
+lane built neither, because each is a boundary change and the brief asked
+for the specs.
+
+**Q6. THE COPIED RULINGS TRIP TWO GUARDS IN EVERY LANE THAT COPIES THEM.**
+Pinned and triaged here (section 1.1). A one-word rewording of section 5's
+"is read under" would let the asserted-names pin narrow.
+
+**Q7. THE FULL SUITE.** `writes.py`, `server.py`, `threads.py` and
+`uploads`' hand-off changed; the local gate ran only targeted files. The lane
+CI run is reported in section 8.
