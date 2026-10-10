@@ -415,6 +415,66 @@ this server cannot take back is not fired -- and the session spends 14 loads,
 
 ---
 
-## Gates run (local, targeted, serial)
+## Gates run
 
-PENDING -- listed at the close.
+LOCAL, targeted, serial (`-p no:randomly`, never `-n`); the full suite only on
+CI. Every red below was this lane's own and is fixed in the commit named.
+
+    file(s)                                                     result
+    tests/test_named_profile_handles.py                         red first (KeyError), then 12 passed
+    tests/test_readonly.py, test_named_profile_read.py,         415 passed (5 min: over the cap, run
+      test_named_profile_live_skeleton.py                         once before the cap was measured)
+    tests/test_readers_emit_no_page_string.py,                  716 passed, 2 failed: the new reader had
+      test_reader_reachability.py                                 no baseline verdict -> recorded
+    the page-string harness on the three new readers            clean / clean / not_driven:raises (as
+                                                                  load_the_confirmed_profile's own)
+    test_no_committed_identity.py, test_named_profile_          1163 passed, 3 failed: two test literals
+      detail_pages.py, test_readonly_boundary_invariant.py,       and the freeze -> fixed and re-frozen;
+      test_the_tool_surface_is_pinned_so_a_row_must_move.py       re-run 1069 passed, 1 failed -> fixed
+    test_probe_navigation_budget.py,                            27 passed, 1 failed (the details load's
+      test_every_tool_is_on_the_surface.py                        guard) -> fixed; 46 passed with the
+                                                                  detail-page file
+    test_server_surface.py, test_prose_that_makes_a_claim.py    2 docstring reds -> reworded; 68 passed
+    test_a_person_name_is_never_a_literal.py, the shape pass's  23 passed (the three pin copies CI found)
+      waiver copy, test_api_call_sites' function count
+    test_the_register_numbers_are_unique.py                     6 passed
+    after both children's merges: the reader and module         13 + 132 passed
+      inventory guards
+    census_completion.py; build_rulings_index, build_audit_     every headline figure matches its pin;
+      index, build_blocker_map --check                            all three derived views clean
+
+ON CI (`scripts/lane_ci.py`): run `38035128406` on `678c4d8` FAILED -- this
+lane's two docstring words and three pin copies (fixed in `49ac33b` and
+`15d4675`), and the cited-SHA family's "cannot resolve master" on every `ci/`
+run, which the coordinator confirmed is infrastructure (KNOWN-INFRA, its fix
+merging to master). The certifying run is the one named in the lane's final
+message.
+
+The children's own runs are in their reports: child C 42 new tests and 842
+existing targeted tests green; child B 16 new tests and its react-touching
+guards green.
+
+---
+
+## Questions for the orchestrator
+
+1. THE INVERSE'S NAME (B3). `tests/test_writes.py`'s verb conservation law
+   refuses `unreact` by name
+   (`test_the_ruling_carve_out_admits_exactly_two_verbs_and_no_derivative`).
+   Admit it in `_VERBS_ADMITTED_BY_RULING` -- LinkedIn's own word, "Unreact
+   Like" -- or name the tool by an original verb (`linkedin_withdraw_reaction`).
+   The build is ready (B); M C32's live proof waits on it (F).
+2. P A8'S TEST VALUE. The orchestrator's ruling of 2026-09-28 17:48 (the cell:
+   "any value would be a statement he has not made, so no benign test value
+   exists") stands until a value is named; the clear now bounds the exposure to
+   the eight loads of F's steps 12-19.
+3. THE DETAIL PAGES' VOCABULARY. The ruling reads "<section>"; this lane admits
+   the four sections measured on his own profile (experience, education,
+   skills, interests). A wider list is a one-line edit with the freeze re-pinned.
+4. THE INTERESTS PAGE'S TABS. The door admits no query. If C-NP1 shows that
+   Groups is not the default tab, reading it needs a ruling on a tab address
+   (its query shape, measured then) or on a tab press.
+5. `author_kind` IS DERIVED (B2). Keep it, labelled so, or demote it to
+   `unknown` until a capture of another member's post page exists -- one edit.
+6. N 65'S RECORD TYPES (D.3). Companies, newsletters and schools have no
+   people_data record type; whoever owns people_data decides one.
