@@ -5005,3 +5005,128 @@ suite. CI certifies the merged tree.
 The red and fix editors for each item, the offline diagnoses over the kept skeletons
 (`diag_messaging.py`, `diag_unread_tokens.py`, `diag_n47.py`) and the fixture copier, in
 the lane's scratch folder.
+
+## Live session 10, 2026-10-10
+
+The orchestrator's order of 16:12 IST, queued behind the offline items, and its GO of 19:03
+(the operator approved the targets at 16:03; the session to close by 19:45). One rule for
+every round trip: its inverse proven, or verifiably available, on that target before the
+forward press; any doubt a skip; a failed restore a STOP-ALL. The session ran from 19:03:19
+to 19:20:22. **32 of the 40 loads; 2 people searches and 1 jobs search. Every round trip
+ended where it began, each end state verified. `P B9` RE-PROVEN on the visible toggle;
+the Page round trip done, its re-follow through a posting after the Page root refused at
+its preview; his saved job unsaved and saved again. The father was not resolved, so
+nothing was sent.** No row moves.
+
+**THE OPERATOR'S NAMED LIVE-PROOF TARGETS, his Pages and his employers appear nowhere in
+this repository.** Every step below names them by role.
+
+### The go, measured before obeying it
+
+Port 9224 was held by the same one Chrome process (started 11:15:16). **THE ATTACH CHECK:
+PASS `[0, 1, 0]`** (19:03), and he was signed in (load 1: no wall, 0 challenge terms, the
+messaging badge 0). Master carried this branch's `6c65815` from 19:05:16, by the
+orchestrator's fast-forward; the sign-in and `P B9`'s two read-only loads ran just before,
+on the identical tree, and no write ran before it. The live-session flag was raised at the
+first load and deleted at the close, by this lane.
+
+### The session, load by load
+
+    n   time      key (the ledger's)          surface        what it read
+    1   19:04:43  signin                      feed           signed in; the badge 0
+    2   19:05:27  badge_check                 in             P B9: aimable; the toggle reachable
+    3   19:05:56  badge_check                 in             the same
+    4-7 19:06:51  B9_test                     in, prefs      the test: hidden, verified
+    8-11 19:08:44 B9_restore                  in, prefs      the restore: shown, verified
+    12  19:10:27  follow_read                 mynetwork      the first Page by rule
+    13  19:10:58  posting_check               jobs           1 open posting of that company
+    14-16 19:11:38 unfollow                   mynetwork      through the confirmation
+    17  19:13:02  refollow_root_preview       company        the Page root: refused, no press
+    18-19 19:13:31 refollow_posting           jobs           not_following; one press
+    20  19:14:27  follow_check                mynetwork      row 1, following: RESTORED
+    21  19:15:09  father_search_0             search         0 records read
+    22  19:15:38  father_search_1             search         0 records read
+    23  19:16:08  saved_read                  jobs-tracker   his saved jobs, the first
+    24-27 19:16:36 job_unsave                 jobs, tracker  not_saved, verified
+    28-31 19:18:28 job_save                   jobs, tracker  saved, verified
+    32  19:20:22  notifications               notifications  N 20, N 45
+
+By surface: in 8, jobs 7, mynetwork 5, jobs-tracker 5, mypreferences 2, search 2, feed 1,
+company 1, notifications 1. The closest two loads stood 22.1 s apart. The window was
+brought to the front before every block that could press.
+
+### 1: `P B9` -- re-proven on the visible toggle
+
+Two read-only loads: aimable, `named_input`, the badge at position 2, both switches on --
+and the press target, the toggle holding the named input (`20fc073`), counted 1, visible,
+drawn and trial-actionable, where session 8's aim at the input could not land. Then the
+(b) pattern through `linkedin_update_profile_field`, each write judged in the runner:
+
+* **The test (off):** his sharing setting read off, condition 1 established before the
+  press, the press wait reached at its first poll, only the badge moved (Open Profile still
+  on), Save pressed, `field_changed` on a fresh render.
+* **The restore (on):** the same, the original read back exactly on a fresh render.
+
+**TESTED AND RESTORED.** `P B9` was already COVERED-PROVEN (session 5); it carries a dated
+note.
+
+### 2: the Page round trip -- the posting first, the Page root refused, the posting restored
+
+* **The target, by rule:** the first Page in Manage Pages, the one sessions 7 to 9 fixed.
+  **Before any press, its re-follow route verified:** one jobs search for its id drew 1
+  open posting of that company, matched in the process by a keyed shape of its name.
+* **The unfollow:** the confirmation gate drew one dialog and pressed its one `Unfollow`;
+  the receipt read `unknown`, LinkedIn's total unreadable, as in session 8.
+* **`N 47`, the Page root:** `linkedin_follow_company_page` on the bound aim (`b46736d`)
+  **refused at its preview; nothing was pressed.** The envelope kept only the error code
+  -- `write_attempt_blocked`, matched to its keyed shape in the process -- so which of the verdict's conditions
+  refused is not on disk.
+* **The restore, `N 46`'s route:** the posting's preview read `not_following` -- the
+  unfollow's landing, on a second surface -- and one press followed it.
+* **Manage Pages:** the Page's row at position 1, following -- the start state.
+
+`N 47` stays COVERED-UNFIRED, with a dated note. `N 46`, `J 103`, `N 48` and `J 104`
+fired again on their routes, already COVERED-PROVEN.
+
+### 3: his saved job -- unsaved and saved again
+
+The first row of his saved jobs. As the orchestrator accepted at 19:03, the round trip
+ran in the order that keeps the end state equal to the start: `linkedin_unsave_job`,
+performed and verified `not_saved`; then `linkedin_save_job`, performed and verified
+`saved`. Both rows (`J 43`, `J 44`) were already COVERED-PROVEN. **The tracker stage was
+skipped: no tracker-stage tool is on master.**
+
+### 4: the brother's endorsement -- skipped
+
+No endorse or withdraw tool is on master, so neither half could be proven; skipped, as
+ordered.
+
+### 5: the message to the father -- not resolved, nothing sent
+
+Two people searches, network F, one with each of the father's two spellings in the key:
+each landed, kept both values verbatim, and drew 3 person-result links -- but **0 result
+cards were read, so 0 people records came back**, and exactly one 1st-degree record could
+not be established. By the rule, skipped; nothing was typed or sent. The tool surface
+offers no Premium-only messaging path (no InMail, template or away-message tool), so
+`linkedin_message_from_profile` was the route had he resolved. That the people reader read
+no card on a three-result page is an offline item; the tool keeps no skeleton of it.
+
+### 6: `N 20` and `N 45` -- fired again, not shown
+
+`linkedin_notifications` (load 32): 2 unread when read, 0 rows of the invitation kind and
+0 of the follow kind.
+
+### Chrome's end
+
+At 19:20 port 9224 was held by the same process, and its DevTools target list held 1 page,
+a blank tab, and 0 LinkedIn tabs. Every run closed its own tab.
+
+### The census, and the pins
+
+**NO ROW MOVED.** Dated notes: profile `B9`, network `47`, `20` and `45`.
+`scripts/census_completion.py --check`: every headline figure matches its pin.
+
+### Scratch, declared disposable
+
+The session-10 runner (it imports session 9's and adds the round trips, the father's
+resolution and the flag), and the census editor, in the lane's scratch folder.
