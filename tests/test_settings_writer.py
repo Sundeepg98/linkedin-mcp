@@ -29,7 +29,7 @@ from pathlib import Path
 
 import pytest
 
-from linkedin_server import profile_editor, settings_writer as sw
+from linkedin_server import dom, profile_editor, settings_writer as sw
 from linkedin_server.errors import WriteAttemptError
 from tests.test_writes import browser_page  # noqa: F401 -- fixture
 
@@ -88,7 +88,7 @@ SYN_SELECT = sw.AdmittedControl(
 )
 SYN_SELECT_PAGE = sw.AdmittedPage(
     name="Synthetic select",
-    url="https://www.linkedin.com/mypreferences/d/settings/synthetic-select",
+    address="https://www.linkedin.com/mypreferences/d/settings/synthetic-select",
     save_label="Save",
     controls=(SYN_SELECT,),
     capture="tests/fixtures/synthetic/settings_select.html",
@@ -106,7 +106,7 @@ THE_CONTROL = THE_PAGE.controls[0]
 
 def test_one_page_is_admitted_and_it_is_the_captured_one():
     assert [p.name for p in sw.ADMITTED_PAGES] == ["Share profile updates"]
-    assert THE_PAGE.url == profile_editor.ACCOUNT_SETTING_URL
+    assert THE_PAGE.address == profile_editor.ACCOUNT_SETTING_URL
     # The record names its capture in a SENTENCE (the package's rule for
     # naming a tracked file); the skeleton it names exists and is this file's.
     named = re.findall(r"tests/fixtures/\S+?\.html", THE_PAGE.capture)
@@ -116,7 +116,9 @@ def test_one_page_is_admitted_and_it_is_the_captured_one():
     assert [c.label for c in THE_PAGE.controls] == [profile_editor.ACCOUNT_SETTING_NAME]
     assert THE_CONTROL.kind == sw.SWITCH
     assert THE_CONTROL.live_proof in sw.LIVE_PROOF_CLASSES
-    assert THE_CONTROL.rows == ("P O6-O20",)
+    # ``P O17`` since the split; it printed the parent row until a cold
+    # review read a preview.
+    assert THE_CONTROL.rows == ("P O17",)
 
 
 def test_every_admitted_control_is_a_settable_kind_with_meanings_for_each_value():
@@ -132,8 +134,8 @@ def test_every_admitted_control_is_a_settable_kind_with_meanings_for_each_value(
 
 def test_the_write_pattern_admits_the_admitted_address_and_nothing_beside_it():
     pattern = sw.admitted_address_pattern()
-    assert pattern.match(THE_PAGE.url)
-    assert pattern.match(THE_PAGE.url + "/")
+    assert pattern.match(THE_PAGE.address)
+    assert pattern.match(THE_PAGE.address + "/")
     for other in (
         "https://www.linkedin.com/mypreferences/d/settings/language",
         "https://www.linkedin.com/mypreferences/d/settings/notify-network-for-updates-x",
@@ -196,7 +198,7 @@ def test_the_target_is_respelled_in_the_admitted_words_or_refused_before_a_token
     assert sw.canonical_target(asked, _JOIN) == want
     assert sw.canonical_target(want, _JOIN) == want  # idempotent
     assert sw.resolve_target(want, _JOIN) == (THE_PAGE, THE_CONTROL, "off")
-    assert sw.page_url_for_target(want, _JOIN) == THE_PAGE.url
+    assert sw.page_url_for_target(want, _JOIN) == THE_PAGE.address
     for bad in (
         "Share profile updates / Share key profile updates",
         "Share profile updates :: on",
@@ -231,12 +233,90 @@ def _shot(**lists):
         ("before unreadable", SYN_SWITCH, _shot(error="TimeoutError"), _shot(switch=[True]), True, "unreadable"),
         ("after too many", SYN_SWITCH, _shot(switch=[False]), _shot(too_many=True), True, "unreadable"),
         ("no snapshot", SYN_SWITCH, None, _shot(), True, "unreadable"),
+        # THE SAME COUNT, NOT THE SAME CONTROLS (a cold review's finding): the
+        # second switch was replaced by another that reads on. By count and
+        # state alone this passed; by identity it is a redraw.
+        ("same count, a control replaced", SYN_SWITCH,
+         _shot(switch=[False, True], ids={"switch": ["id-a", "id-b"]}),
+         _shot(switch=[True, True], ids={"switch": ["id-a", "id-c"]}), True, "page_redrew"),
+        ("same controls, one moved", SYN_SWITCH,
+         _shot(switch=[False, True], ids={"switch": ["id-a", "id-b"]}),
+         _shot(switch=[True, True], ids={"switch": ["id-a", "id-b"]}), True, None),
     ],
 )
 def test_only_that_control_moved(label, control, before, after, reached, code):
     verdict = sw.only_that_control_moved(before, after, control, reached=reached)
     assert verdict["proceed"] is (code is None), (label, verdict)
     assert verdict["code"] == code, (label, verdict)
+
+
+def test_THIS_CONTROL_CAN_FAIL_without_identities_a_replaced_control_passes():
+    """The identity comparison is what refuses a same-count redraw: the same
+    two snapshots with their identities stripped PASS, which is exactly what
+    this writer's first form did."""
+    before = _shot(switch=[False, True], ids={"switch": ["id-a", "id-b"]})
+    after = _shot(switch=[True, True], ids={"switch": ["id-a", "id-c"]})
+    assert sw.only_that_control_moved(before, after, SYN_SWITCH, reached=True)["code"] == "page_redrew"
+    bare = {k: v for k, v in before.items() if k != "ids"}, {k: v for k, v in after.items() if k != "ids"}
+    assert sw.only_that_control_moved(*bare, SYN_SWITCH, reached=True)["proceed"] is True
+
+
+def test_a_pass_names_the_four_kinds_it_read_and_nothing_more():
+    verdict = sw.only_that_control_moved(
+        _shot(switch=[False]), _shot(switch=[True]), SYN_SWITCH, reached=True)
+    assert verdict["proceed"] is True
+    assert "switch, checkbox, radio or native select" in verdict["why"]
+    assert "nothing else on the page is read" in verdict["why"]
+
+
+_STORES = THE_PAGE                  # no Save: the press is the store
+_SAVES = SYN_SELECT_PAGE            # a Save, pressed only on a passing check
+
+
+@pytest.mark.parametrize(
+    "label,page,check,attempted,stops",
+    [
+        ("a pass", _STORES, {"proceed": True, "code": None}, True, False),
+        ("another moved", _STORES, {"proceed": False, "code": "another_control_moved"}, True, True),
+        ("did not move", _STORES, {"proceed": False, "code": "the_control_did_not_move"}, True, True),
+        ("redrew", _STORES, {"proceed": False, "code": "page_redrew"}, True, True),
+        ("unreadable after", _STORES, {"proceed": False, "code": "unreadable"}, True, True),
+        ("press raised, check never ran", _STORES, None, True, True),
+        ("refused before any press", _STORES, None, False, False),
+        ("a page with a Save stored nothing", _SAVES, {"proceed": False, "code": "another_control_moved"}, True, False),
+        ("no page", None, {"proceed": False, "code": "unreadable"}, True, False),
+    ],
+)
+def test_STOP_is_every_unpassed_press_on_a_page_that_stores_on_the_press(label, page, check, attempted, stops):
+    """A cold review's HIGH finding: the STOP fired for one shape of five."""
+    sentence = sw.press_stop(page, check, attempted=attempted)
+    assert (sentence is not None) is stops, (label, sentence)
+    if stops:
+        assert sentence.startswith("STOP. This page stores on the press"), label
+        assert "put each one back by hand" in sentence, label
+
+
+def test_a_snapshot_is_readable_only_whole():
+    assert sw.snapshot_readable(_shot(switch=[True]))
+    for bad in (None, _shot(error="TimeoutError"), _shot(too_many=True), "x"):
+        assert not sw.snapshot_readable(bad), bad
+
+
+def test_the_audiences_are_every_value_with_its_control_and_a_collision_is_refused(monkeypatch):
+    assert sw.audiences() == {
+        "on": "Share profile updates / Share key profile updates: "
+              + sw.meaning_of(THE_CONTROL, "on"),
+        "off": "Share profile updates / Share key profile updates: "
+               + sw.meaning_of(THE_CONTROL, "off"),
+    }
+    # A SECOND SWITCH WITH ITS OWN MEANING FOR "on" would overwrite the first
+    # in a dict keyed by the bare value; the builder raises instead.
+    other = dataclasses.replace(
+        SYN_SWITCH, meanings=(("on", "something else entirely"), ("off", "x")))
+    second = dataclasses.replace(THE_PAGE, name="Another page", controls=(other,))
+    monkeypatch.setattr(sw, "ADMITTED_PAGES", (THE_PAGE, second))
+    with pytest.raises(ValueError):
+        sw.audiences()
 
 
 def test_THIS_CONTROL_CAN_FAIL_a_lax_expectation_lets_another_switch_through(monkeypatch):
@@ -275,7 +355,7 @@ def test_a_landing_elsewhere_reads_unknown_whatever_the_page_drew():
     assert sw.state_of(good, THE_CONTROL, served=True) == ("off", "w")
     assert sw.state_of(good, THE_CONTROL, served=False)[0] == sw.UNKNOWN
     assert sw.state_of({"reading": "unknown", "why": "x"}, THE_CONTROL, served=True)[0] == sw.UNKNOWN
-    assert sw.served_at(THE_PAGE, THE_PAGE.url + "/?trk=x")
+    assert sw.served_at(THE_PAGE, THE_PAGE.address + "/?trk=x")
     assert not sw.served_at(THE_PAGE, "https://www.linkedin.com/mypreferences/d/categories/account")
     assert not sw.served_at(THE_PAGE, "")
 
@@ -293,7 +373,10 @@ def test_the_preview_facts_name_the_page_the_control_and_the_live_proof_class():
 def test_a_selector_is_built_for_the_read_role_and_never_from_an_unsafe_name():
     assert sw.press_for(THE_CONTROL, "on", {"role": "switch"}) == (
         'role=switch[name="Share key profile updates"s]', "click")
-    assert sw.press_for(SYN_RADIO, "Always", {"role": "radio"}) == ('role=radio[name="Always"s]', "click")
+    # THE LABEL, never the input (a cold review's finding; the input is
+    # covered on LinkedIn's settings radios).
+    assert sw.press_for(SYN_RADIO, "Always", {"role": "radio"}) == (
+        'xpath=//label[normalize-space(.)="Always"]', "click")
     assert sw.press_for(SYN_SELECT, "Gamma", {"role": "combobox"}) == (
         'role=combobox[name="Synthetic language"s]', "select_option")
     with pytest.raises(WriteAttemptError):
@@ -334,6 +417,10 @@ async def test_the_switch_reader_and_a_press_on_div_switches(browser_page):
         ("late", {"lateMs": 600}, True, None),
         ("inert", {"inert": True}, False, "the_control_did_not_move"),
         ("also flips the other", {"alsoFlip": True}, True, "another_control_moved"),
+        # THE SHAPES THE FIRST STOP MISSED, each drawn by a page:
+        ("moves the other and not its own", {"flipOtherOnly": True}, False, "the_control_did_not_move"),
+        ("draws a new switch", {"addOnPress": True}, True, "page_redrew"),
+        ("replaces the other switch, same count", {"replaceOther": True}, True, "page_redrew"),
     ):
         await _set(page, world(SWITCH_MARKUP, **config))
         before = await sw.snapshot(page)
@@ -363,6 +450,20 @@ async def test_the_radio_group_reader_and_a_press_on_the_destination(browser_pag
                           ("nothing checked", {"noneChecked": True})):
         await _set(page, world(RADIO_MARKUP, **config))
         assert (await sw.read_control(page, SYN_RADIO))["reading"] == sw.UNKNOWN, label
+
+    # RED FIRST, ON THE PAGE: the input is covered, so a press aimed at it --
+    # this writer's first form -- times out having set nothing.
+    await _set(page, world(RADIO_MARKUP))
+    with pytest.raises(Exception) as covered:
+        await page.click('role=radio[name="Always"s]', timeout=1500)
+    assert type(covered.value).__name__ == "TimeoutError"
+    assert await page.evaluate("() => window.__presses") == 0
+    assert (await sw.read_control(page, SYN_RADIO))["reading"] == "Never"
+    # The label is bound, and reading the binding is what the gate asks.
+    bound = await dom.read_radio_label_binding(page, "radio", "Always")
+    assert bound["bound"] is True, bound
+    await _set(page, world(RADIO_MARKUP, unbound=True))
+    assert (await dom.read_radio_label_binding(page, "radio", "Always"))["bound"] is False
 
     for label, config, reached, code in (
         ("clean", {}, True, None),
@@ -396,6 +497,13 @@ async def test_the_select_reader_the_choice_and_the_save_gate(browser_page):
 
     await _set(page, world(SELECT_MARKUP, extraOption=True))
     assert (await sw.read_control(page, SYN_SELECT))["reading"] == sw.UNKNOWN
+
+    # A SECOND COMBOBOX WEARING THE NAME, drawn as a div: the press's role
+    # selector would match two, so the reader refuses (a cold review's
+    # finding: it counted native selects only).
+    await _set(page, world(SELECT_MARKUP, ariaCombobox=True))
+    twice = await sw.read_control(page, SYN_SELECT)
+    assert twice["reading"] == sw.UNKNOWN and twice["named"] == 2, twice
 
     for label, config, reached, code, save in (
         ("clean", {}, True, None, True),

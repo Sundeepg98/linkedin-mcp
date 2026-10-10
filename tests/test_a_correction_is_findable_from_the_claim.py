@@ -212,6 +212,20 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "WOULD MAKE THIS ENTRY WRONG:** a network row saying the lane S record "
         "does not hold, while leaving the record unmarked."
     ),
+    # 2026-10-10, lane S, after a cold review: seven jobs rows the first
+    # enumeration missed (lane K's ledger named them) carry the lane's sentence
+    # now, and the jobs slice produced one pair. The hits were READ: both sit on
+    # the neighbours of `41`, about their own measurements.
+    ("jobs.md", "2026-09-28-lane-s-settings.md"): (
+        "NEIGHBOURING ROWS' OWN HISTORY, NOT A CORRECTION OF THE RECORD. The "
+        "lane's sentence on `41` sits between `40` -- *'THIS PROBE'S OWN "
+        "CORRECTED DEFECT'* and *'a clean, discriminating count that was "
+        "wrong by one'*, both about that row's own probe -- and `42`, whose "
+        "*'staleness diagnostic'* is the name of a field its call returned. "
+        "None of them is about the lane S record. **WHAT WOULD MAKE THIS "
+        "ENTRY WRONG:** a jobs row saying the lane S record does not hold, "
+        "while leaving the record unmarked."
+    ),
     ("messaging-and-content.md", "2026-09-28-lane-s-settings.md"): (
         "A BOOLEAN AND OTHER ROWS' OWN HISTORY, NOT A CORRECTION OF THE "
         "RECORD. The hit on `M24` itself is the boolean `is_read_url=False` "

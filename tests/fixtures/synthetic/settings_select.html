@@ -12,7 +12,9 @@
      window.__fixtureConfig: lateMs (the choice is re-applied this many ms
      later after being held back), alsoChange (choosing also changes the other
      select), extraOption (a fourth option is drawn), twoSaves (a second Save
-     is drawn), disabledSave (Save is disabled), noSave (no Save is drawn). -->
+     is drawn), disabledSave (Save is disabled), noSave (no Save is drawn),
+     ariaCombobox (a div of role combobox wears the select's name, so the
+     press's role selector would match two). -->
 <main>
 <h1>Synthetic select</h1>
 <form onsubmit="return false;">
@@ -28,6 +30,7 @@
 <option value="r-2">South</option>
 </select>
 <span id="save-slot"><button type="button" id="save">Save</button></span>
+<span id="combo-slot"></span>
 </form>
 </main>
 <script>
@@ -45,6 +48,10 @@
   if (config.noSave) { slot.innerHTML = ""; }
   if (config.twoSaves) { slot.innerHTML += '<button type="button">Save</button>'; }
   if (config.disabledSave) { document.getElementById("save").disabled = true; }
+  if (config.ariaCombobox) {
+    document.getElementById("combo-slot").innerHTML =
+      '<div role="combobox" aria-label="Synthetic language" aria-expanded="false" tabindex="0"></div>';
+  }
   window.__saves = 0;
   slot.addEventListener("click", function () { window.__saves += 1; });
   var held = lang.value;

@@ -54,7 +54,7 @@ from typing import Any, Optional
 from urllib.parse import urlsplit
 
 from linkedin_server import coerce, profile_editor
-from linkedin_server.dom import _SELECTOR_UNSAFE
+from linkedin_server.dom import _SELECTOR_UNSAFE, settings_radio_label_selector
 from linkedin_server.errors import WriteAttemptError
 
 #: The action this module serves, its tool, and the ruling it rests on.
@@ -171,7 +171,12 @@ class AdmittedPage:
 
     #: The page's heading as LinkedIn draws it -- the name it is admitted by.
     name: str
-    url: str
+    #: The page's ADDRESS: the read boundary's admitted constant for it.
+    #: Named ``address`` and never ``url``: the navigation guard reads
+    #: every ``.url`` attribute as an address the BROWSER chose
+    #: (``tests/test_navigation_is_never_derived.py``), and a registry
+    #: constant read under that name is indistinguishable from one.
+    address: str
     #: The accessible name of the page's Save control, or ``None`` when the
     #: page draws none and the press itself stores the value -- MEASURED on
     #: the capture, never assumed.
@@ -198,7 +203,7 @@ class AdmittedPage:
 #: to that one control and nothing else on the page.
 SHARE_PROFILE_UPDATES = AdmittedPage(
     name="Share profile updates",
-    url=profile_editor.ACCOUNT_SETTING_URL,
+    address=profile_editor.ACCOUNT_SETTING_URL,
     save_label=None,
     controls=(
         AdmittedControl(
@@ -227,7 +232,11 @@ SHARE_PROFILE_UPDATES = AdmittedPage(
                 "one of two values and is put back exactly by pressing it "
                 "again, and records no personal attribute"
             ),
-            rows=("P O6-O20",),
+            # ``P O17``, split from ``P O6-O20`` on 2026-10-10 because this
+            # switch's state moved and the fourteen toggles beside it did not
+            # (COMPOUND-ROW-SPLITS-ONLY-ON-STATE). It named the parent row
+            # until a cold review read the preview print the stale one.
+            rows=("P O17",),
             while_changed=(
                 "while it reads on, a profile edit could be shared with his "
                 "network, so no profile edit runs until it is restored, and "
@@ -370,6 +379,40 @@ def resolve_target(canonical: str, join: str) -> tuple[AdmittedPage, AdmittedCon
     return page, control, value
 
 
+def audiences() -> dict[str, str]:
+    """The write spec's ``audiences``: every admitted control's values, keyed
+    by the value as the generic branches expect, each with its page, control
+    and meaning. PURE.
+
+    REFUSES A COLLISION. Keyed by the bare value, two admitted controls that
+    both hold "on" would overwrite one another in a dict with no error, and a
+    generic branch would print the wrong control's meaning (a cold review's
+    finding, latent while one control is admitted). So a second control whose
+    value spells the same word with a different meaning raises here, at
+    import, and the registry has to be keyed some other way before it can be
+    admitted.
+    """
+    out: dict[str, str] = {}
+    for admitted in ADMITTED_PAGES:
+        for control in admitted.controls:
+            for value, sentence in control.meanings:
+                key = value.casefold()
+                text_for = (
+                    f"{admitted.name}{SETTING_JOIN}{control.label}: "
+                    + (sentence or "his own setting")
+                )
+                if key in out and out[key] != text_for:
+                    raise ValueError(
+                        f"two admitted controls hold the value {value!r} with "
+                        "different meanings; the write spec's audiences are "
+                        "keyed by the bare value and would overwrite one "
+                        "another. Key them some other way before admitting "
+                        "the second."
+                    )
+                out[key] = text_for
+    return out
+
+
 def meaning_of(control: AdmittedControl, value: str) -> str:
     """The one sentence the preview prints for ``value``. PURE."""
     for known, sentence in control.meanings:
@@ -393,13 +436,13 @@ def landed_path(address: Optional[str]) -> tuple[str, str, str]:
     return (parts.scheme, parts.netloc, parts.path.rstrip("/"))
 
 
-def served_at(page: AdmittedPage, landed: Optional[str]) -> bool:
+def served_at(admitted: AdmittedPage, landed: Optional[str]) -> bool:
     """Did the page keep its own address? PURE. The path is compared, host
     fixed, trailing slash and query ignored -- the rule
     ``profile_editor.served_at_account_setting`` set for the same page."""
     if not landed:
         return False
-    return landed_path(landed) == landed_path(page.url)
+    return landed_path(landed) == landed_path(admitted.address)
 
 
 def admitted_address_pattern() -> "re.Pattern[str]":
@@ -407,7 +450,7 @@ def admitted_address_pattern() -> "re.Pattern[str]":
     nothing else."""
     return re.compile(
         "^(?:"
-        + "|".join(re.escape(page.url.rstrip("/")) for page in ADMITTED_PAGES)
+        + "|".join(re.escape(admitted.address.rstrip("/")) for admitted in ADMITTED_PAGES)
         + ")/?$"
     )
 
@@ -415,8 +458,8 @@ def admitted_address_pattern() -> "re.Pattern[str]":
 def page_url_for_target(canonical: str, join: str) -> str:
     """The address a target acts on: the admitted page's CONSTANT, chosen by
     the page's name. A page may veto an act; it never supplies its address."""
-    page, _control, _value = resolve_target(canonical, join)
-    return page.url
+    admitted, _control, _value = resolve_target(canonical, join)
+    return admitted.address
 
 
 #: The host every admitted page lives on; the write spec's template is this
@@ -456,10 +499,17 @@ def press_for(control: AdmittedControl, destination: str, reading: dict[str, Any
     """The selector ``perform`` presses and the press KIND, or refuse. PURE.
 
     A switch is pressed by its own name in the role its reading found (switch
-    or checkbox). A radio group is pressed on the radio NAMED FOR THE
-    DESTINATION -- page-wide unique, which the reader required. A select is
-    chosen from: ``perform``'s one ``select_option`` site, by the option's
-    label, which is the grant's value half.
+    or checkbox). A radio group is pressed on the ``<label for>`` OF the radio
+    named for the destination -- the radio is page-wide unique, which the
+    reader required, and ``writes._live_control`` reads that the label is
+    BOUND to it (``dom.read_radio_label_binding``) before this selector is
+    used. Never the input: LinkedIn covers a settings radio's input with a
+    decorative element that takes the pointer, measured on the dark-mode page
+    (``dom.settings_radio_label_selector``), so a press on the input times out
+    having set nothing -- a cold review's finding against this writer's first
+    form, which aimed at the input. A select is chosen from: ``perform``'s one
+    ``select_option`` site, by the option's label, which is the grant's value
+    half.
     """
     if control.kind == SWITCH:
         role = str(reading.get("role") or "")
@@ -467,7 +517,12 @@ def press_for(control: AdmittedControl, destination: str, reading: dict[str, Any
             raise WriteAttemptError("the switch's role was not read; nothing is pressed")
         return _role_selector(role, control.label), "click"
     if control.kind == RADIO_GROUP:
-        return _role_selector("radio", destination), "click"
+        if not destination or any(bad in destination for bad in _SELECTOR_UNSAFE):
+            raise WriteAttemptError(
+                "refusing to build a selector from this name: it is empty or "
+                "carries a character that would end the selector's own quoting."
+            )
+        return settings_radio_label_selector(destination), "click"
     if control.kind == SELECT:
         return _role_selector("combobox", control.label), "select_option"
     check_kind(control.kind)
@@ -593,14 +648,24 @@ async def read_control(page: Any, control: AdmittedControl) -> dict[str, Any]:
             return out
 
         if control.kind == SELECT:
-            select = page.get_by_role(
+            # PAGE-WIDE FIRST, THEN THE NATIVE ONE: the press is
+            # ``role=combobox[name=...]``, which matches ANY element of that
+            # role and name, so the reader counts what the press would match
+            # -- a second combobox wearing the name, drawn as a div, is a
+            # second match, not something to step past (a cold review's
+            # finding: this reader counted only native selects).
+            any_combobox = page.get_by_role(
                 "combobox", name=control.label, exact=True, include_hidden=True
-            ).and_(page.locator("select"))
-            out["named"] = coerce.as_count(await select.count())
-            if out["named"] != 1:
+            )
+            select = any_combobox.and_(page.locator("select"))
+            n_any = coerce.as_count(await any_combobox.count())
+            n_native = coerce.as_count(await select.count())
+            out["named"] = n_any
+            if n_any != 1 or n_native != 1:
                 out["why"] = (
-                    f"{out['named']} selects are named exactly {control.label!r}, "
-                    "where exactly one is required."
+                    f"{n_any} controls of role combobox are named exactly "
+                    f"{control.label!r}, {n_native} of them a native select, "
+                    "where exactly one, and that one a select, is required."
                 )
                 return out
             out["role"] = "combobox"
@@ -665,17 +730,45 @@ def _digest(value: Any) -> str:
     return hashlib.sha256(str(value).encode("utf-8", "replace")).hexdigest()[:16]
 
 
+#: An aria snapshot's head line, ``- <role> "<name>"`` and whatever follows
+#: (a state such as ``[checked]``, a select's options). MEASURED 2026-10-10 on
+#: Playwright 1.63 over a local page: ``- switch "Alpha switch"``, ``- switch
+#: "Foxtrot" [checked]``, ``- checkbox`` for a nameless one, ``''`` for a
+#: hidden one (display none, visibility hidden, aria-hidden) -- never a raise --
+#: and ``- combobox "Hotel select":`` before its options.
+_ARIA_HEAD = re.compile(r'^\s*-\s*([A-Za-z]+)(?:\s+"((?:[^"\\]|\\.)*)")?')
+
+
+async def _identity(locator: Any) -> str:
+    """WHICH control sits at a position: a DIGEST of its role and accessible
+    name as the browser's accessibility snapshot spells them, its state and
+    anything after the name dropped -- so one control reads one identity in
+    either state, and a control drawn in its place reads another. The name is
+    text the page wrote and never leaves this function."""
+    head = _ARIA_HEAD.match(str(await locator.aria_snapshot() or ""))
+    return _digest(f"{head.group(1)}|{head.group(2) or ''}" if head else "")
+
+
 async def snapshot(page: Any) -> dict[str, Any]:
-    """EVERY checkable or choosable control's state, position by position.
+    """EVERY switch, checkbox, radio and native select, position by position.
 
     For ``only_that_control_moved``: each switch, checkbox and radio on the
     page by role, in document order, as ``is_checked()``; each ``select`` as
     a DIGEST of its ``input_value()`` -- the value itself never leaves this
-    function, because a select's value is text the page chose. READ ONLY;
-    never raises; a failure is its exception type.
+    function, because a select's value is text the page chose -- and, under
+    ``ids``, each position's IDENTITY (:func:`_identity`), so a control
+    replaced by another of the same role is seen as a redraw rather than
+    compared as if it were the same one (a cold review's finding: the counts
+    alone let a same-count redraw through).
+
+    WHAT IT DOES NOT READ, said rather than implied: a button's pressed state,
+    a menu item's checked state, a custom listbox, a typed value. A press that
+    moved one of those is not seen here. READ ONLY; never raises; a failure is
+    its exception type.
     """
     out: dict[str, Any] = {role: [] for role in _CHECKABLE_ROLES}
     out["select"] = []
+    out["ids"] = {role: [] for role in _CHECKABLE_ROLES + ("select",)}
     out["error"] = None
     out["too_many"] = False
     try:
@@ -686,17 +779,30 @@ async def snapshot(page: Any) -> dict[str, Any]:
                 out["too_many"] = True
                 return out
             for index in range(drawn):
-                out[role].append(bool(await locator.nth(index).is_checked()))
+                one = locator.nth(index)
+                out[role].append(bool(await one.is_checked()))
+                out["ids"][role].append(await _identity(one))
         selects = page.locator("select")
         drawn = coerce.as_count(await selects.count())
         if drawn > SNAPSHOT_MAX_PER_ROLE:
             out["too_many"] = True
             return out
         for index in range(drawn):
-            out["select"].append(_digest(await selects.nth(index).input_value()))
+            one = selects.nth(index)
+            out["select"].append(_digest(await one.input_value()))
+            out["ids"]["select"].append(await _identity(one))
     except Exception as exc:  # noqa: BLE001 - the TYPE is the whole report
         out["error"] = type(exc).__name__
     return out
+
+
+def snapshot_readable(shot: Optional[dict[str, Any]]) -> bool:
+    """Whether a snapshot can be compared at all: read, without error, and
+    within :data:`SNAPSHOT_MAX_PER_ROLE`. PURE. ``writes.perform`` presses
+    nothing when the BEFORE snapshot is not -- the check after the press could
+    never pass, and on a page that stores on the press an unchecked press is
+    one nobody can say anything about (a cold review's finding)."""
+    return isinstance(shot, dict) and not shot.get("error") and not shot.get("too_many")
 
 
 def snapshot_counts(shot: Optional[dict[str, Any]]) -> dict[str, Any]:
@@ -734,16 +840,21 @@ def only_that_control_moved(
     moved``.
 
     ``reached`` is whether the control reads the requested value after the
-    bounded wait. The snapshots are compared POSITION BY POSITION, so a page
-    that redrew a different set of controls is refused rather than matched.
-    Since the gate required the control to read something OTHER than the
-    destination before the press, a control that now reads the destination
-    has moved -- so when it reached it and the page moved EXACTLY as many
-    positions as one press of its kind moves, the moved positions are its own.
+    bounded wait. The snapshots are compared POSITION BY POSITION, and by each
+    position's IDENTITY where both snapshots carry one, so a page that redrew
+    a different set of controls -- fewer, more, or as many but not the same --
+    is refused rather than matched. Since the gate required the control to
+    read something OTHER than the destination before the press, a control
+    that now reads the destination has moved -- so when it reached it and the
+    page moved EXACTLY as many positions as one press of its kind moves, the
+    moved positions are its own.
+
+    WHAT "NOTHING ELSE MOVED" COVERS: the switches, checkboxes, radios and
+    native selects :func:`snapshot` reads, and nothing else on the page.
     """
     out: dict[str, Any] = {"proceed": False, "code": None, "why": "", "moved": None}
     for shot in (before, after):
-        if not isinstance(shot, dict) or shot.get("error") or shot.get("too_many"):
+        if not snapshot_readable(shot):
             out["code"] = "unreadable"
             out["why"] = (
                 "the page's controls could not be read before and after the "
@@ -757,6 +868,17 @@ def only_that_control_moved(
                 f"the page drew {len(before.get(role) or [])} {role} control(s) "
                 f"before the press and {len(after.get(role) or [])} after it: "
                 "a different set of controls, so no position can be compared."
+            )
+            return out
+    ids_before = before.get("ids") or {}
+    ids_after = after.get("ids") or {}
+    for role in _CHECKABLE_ROLES + ("select",):
+        if (ids_before.get(role) or []) != (ids_after.get(role) or []):
+            out["code"] = "page_redrew"
+            out["why"] = (
+                f"the page drew as many {role} controls after the press as "
+                "before, but not the same ones -- a control was replaced -- "
+                "so no position can be compared."
             )
             return out
 
@@ -782,8 +904,70 @@ def only_that_control_moved(
         )
         return out
     out["proceed"] = True
-    out["why"] = "the control reads the requested value and no other control on the page moved."
+    out["why"] = (
+        "the control reads the requested value, and no other switch, checkbox, "
+        "radio or native select on the page moved -- the four kinds this check "
+        "reads; nothing else on the page is read."
+    )
     return out
+
+
+#: Why a page that stores on the press must STOP, by the check's code. Read by
+#: :func:`press_stop`; every code the check can return except a pass, and the
+#: code ``not_run`` for a press whose check never ran.
+_STOP_WHY: dict[str, str] = {
+    "another_control_moved": (
+        "another control on it moved beside the one asked for, so both changes "
+        "are already stored"
+    ),
+    "the_control_did_not_move": (
+        "the control did not read the value asked for after the press, and a "
+        "press on a switch of his has been measured landing minutes late, so "
+        "what the page stores now is not known"
+    ),
+    "page_redrew": (
+        "the page drew a different set of controls after the press, so nothing "
+        "can say what the press changed"
+    ),
+    "unreadable": (
+        "its controls could not be read after the press, so nothing can say "
+        "what the press changed"
+    ),
+    "not_run": (
+        "the press raised before its outcome could be read, and it may have "
+        "landed"
+    ),
+}
+
+
+def press_stop(
+    admitted: Optional[AdmittedPage],
+    check: Optional[dict[str, Any]],
+    *,
+    attempted: bool,
+) -> Optional[str]:
+    """The receipt's STOP sentence, or ``None``. PURE.
+
+    A page that STORES ON THE PRESS (its capture drew no Save) has nothing to
+    discard: whatever the press did is already stored. So every press there
+    whose check did not pass -- whatever the reason, including a press that
+    raised before its check ran -- is a STOP. Not one shape of the five, which
+    is what this writer first shipped (a cold review's HIGH finding: only
+    ``another_control_moved`` set it, and no test read it). A page with a Save
+    presses Save only on a passing check, so a failed one stored nothing; and
+    a press never attempted -- refused before it -- stored nothing either.
+    """
+    if admitted is None or admitted.save_label is not None or not attempted:
+        return None
+    if check is not None and check.get("proceed") is True:
+        return None
+    code = str((check or {}).get("code") or "not_run")
+    why = _STOP_WHY.get(code, "the check after the press did not pass")
+    return (
+        f"STOP. This page stores on the press, and {why}. Open the page, read "
+        "every control on it, and put each one back by hand before anything "
+        "else runs."
+    )
 
 
 async def save_gate(page: Any, admitted: AdmittedPage) -> dict[str, Any]:
@@ -832,7 +1016,7 @@ def preview_facts(
     reading = reading or {}
     return {
         "page": admitted.name,
-        "address": admitted.url,
+        "address": admitted.address,
         "control": control.label,
         "kind": control.kind,
         "values": list(control.values),
@@ -879,6 +1063,13 @@ def direction_block(
         "what_it_will_mean": meaning_of(control, destination),
         "who_can_see_the_change": (
             "other members can see it: the live proof restores it inside the same minute"
+            if control.visible_to_others
+            else "nobody else sees this setting itself"
+        ),
+        # THE KEY ``writes.preview`` prints as ``who_can_see_it`` for any spec
+        # that carries audiences; without it that field printed null.
+        "who_will_see_it_after": (
+            "other members can see it"
             if control.visible_to_others
             else "nobody else sees this setting itself"
         ),

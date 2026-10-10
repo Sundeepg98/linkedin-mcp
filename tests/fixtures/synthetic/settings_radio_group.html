@@ -14,17 +14,27 @@
      invented. A switch beside the group lets a test see another control
      move. Behaviour by window.__fixtureConfig: lateMs, inert, alsoFlip (the
      press also flips the switch), extraChoice (a fourth radio is drawn),
-     noneChecked (the group draws with nothing checked). -->
+     noneChecked (the group draws with nothing checked), unbound (the
+     labels carry no for). EVERY INPUT IS COVERED by a decorative span
+     that takes the pointer, as LinkedIn covers its settings radios
+     (measured on the dark-mode page, linkedin_server/dom.py
+     settings_radio_label_selector): a press on the input times out, and
+     a press on its bound label sets it. -->
+<style>
+.host { position: relative; display: inline-block; width: 20px; height: 20px; }
+.host input { margin: 0; width: 20px; height: 20px; }
+.cover { position: absolute; left: 0; top: 0; width: 20px; height: 20px; }
+</style>
 <main>
 <h1>Synthetic radio group</h1>
 <div role="radiogroup" aria-labelledby="grp-label" id="grp">
 <span id="grp-label">Synthetic display</span>
-<input type="radio" name="display" id="r-never" aria-labelledby="l-never" checked>
-<span id="l-never">Never</span>
-<input type="radio" name="display" id="r-always" aria-labelledby="l-always">
-<span id="l-always">Always</span>
-<input type="radio" name="display" id="r-device" aria-labelledby="l-device">
-<span id="l-device">Follow the device</span>
+<span class="host"><input type="radio" name="display" id="r-never" aria-labelledby="l-never" checked><span class="cover"></span></span>
+<label id="l-never" for="r-never">Never</label>
+<span class="host"><input type="radio" name="display" id="r-always" aria-labelledby="l-always"><span class="cover"></span></span>
+<label id="l-always" for="r-always">Always</label>
+<span class="host"><input type="radio" name="display" id="r-device" aria-labelledby="l-device"><span class="cover"></span></span>
+<label id="l-device" for="r-device">Follow the device</label>
 <span id="extra-slot"></span>
 </div>
 <span id="lbl-side">Synthetic side switch</span>
@@ -39,6 +49,9 @@
   }
   if (config.noneChecked) {
     document.getElementById("r-never").checked = false;
+  }
+  if (config.unbound) {
+    document.querySelectorAll("label[for]").forEach(function (label) { label.removeAttribute("for"); });
   }
   window.__presses = 0;
   var side = document.getElementById("sw-side");
