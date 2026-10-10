@@ -4218,3 +4218,243 @@ No skeleton was taken, so there is no tracked copy.
 
 The session-6 runner, the census, delta and pin editors, in the lane's scratch
 folder. Nothing loaded uncounted.
+
+## Live session 7, 2026-10-10
+
+The orchestrator's GO of 11:17 IST, LIVE SESSION 7, on the operator's words of
+10:56 ("keep going on and on... Try to finish the existing pending items,
+everything... go aggressively"), which the orchestrator took as YES to the two
+questions of 2026-09-28 23:48: (a) unfollow, then re-follow, a company Page he
+already follows; (b) react to one of the brother's posts, then remove the
+reaction. It replaced the spend brake of 2026-09-28. The session ran from 11:38
+to 11:49. **17 of the 40 loads, 2 of the 5 searches. `N 25`, `N 81` and `N 26`
+FIRED AND BANKED; `N 155` moved on the orchestrator's call of the day. The
+unfollow did NOT land and the Page stayed followed; the father's thread was not
+in the list; the react's route is the blocker; `P A8` was not fired. Chrome was
+still up at the end.**
+
+**THE OPERATOR'S NAMED LIVE-PROOF TARGETS appear nowhere in this repository.**
+Every step below names them by role. No company, Page or member is named, and
+a key POSITION, where one is given, is 0-based.
+
+### The go, measured before obeying it
+
+Between 11:18 and 11:36 every fact of the order was re-read and held: port 9224
+was listened on by one process, Chrome 155, started 11:15:16, the old process of
+sessions 3 to 6 gone, and the machine booted at 10:51:30; master and this
+worktree were both `3c8edc2` and the tree clean, CI-green by its sha; the
+repository was public; the main checkout's live-session flag stood.
+
+**THE LANE'S SCRATCH FOLDER HAD BEEN EMPTIED** by the operating system's temp
+cleanup in the twelve days: every runner and helper was gone. The runner was
+rebuilt by replaying the lane's own recorded tool calls in order -- the Write of
+session 4's runner, twelve Edits across the three runners, two copies, four
+transforms and one helper script -- with every call that had failed at the time
+skipped, and lines 560-899
+were checked against a read of the file recorded on 2026-09-28: 340 of 340
+equal. The window-front script and the page-target counter were recovered
+verbatim from the same record. A copy of the rebuilt runner is kept in the
+gitignored `_state/live7/`, on the D drive. **THE ATTACH CHECK: PASS
+`[0, 1, 0]`** (11:38).
+
+### The session, load by load
+
+    n   time      key (the ledger's)    surface        what it read
+    1   11:38:34  signin                feed           signed in; no wall; badge 0
+    2   11:39:00  s1_name               search         search 1: degree F and a name
+    3   11:39:22  connections           feed           the invitation badge, before: 0
+    4   11:39:44  connections           mynetwork      his connections list: 9 rows
+    5   11:40:06  s2_geo                search         search 2: degree F and a place
+    6   11:41:15  named                 in             the named read; the C-P7 capture
+    7   11:41:53  edit_read             in             his intro editor: A8 empty
+    8   11:42:29  follow_read           mynetwork      Manage Pages: the first Page
+    9   11:43:27  unfollow_preview      mynetwork      the unfollow's preview
+    10  11:43:55  unfollow_confirm      mynetwork      the confirm: one click
+    11  11:44:25  unfollow_confirm      mynetwork      the reload: still following
+    12  11:45:56  refollow_preview      company        the Page root: refused, no press
+    13  11:46:41  follow_check          mynetwork      the end state: following
+    14  11:47:33  m10_resolve           messaging      the list: no row is his
+    15  11:48:07  notifications         notifications  N 20, N 45: neither kind
+    16  11:48:48  j121                  jobs           one posting: the gated control
+    17  11:49:31  editor_capture        in             his editor's skeleton, for B9
+
+By surface: mynetwork 6, in 3, feed 2, search 2, company 1, messaging 1,
+notifications 1, jobs 1. The closest two loads stood 21.6 s apart. Every load
+was made by the lane's outward runner or the harness, each taking the ledger,
+counter and driver lock by import; the Chrome window was brought to the front
+before each block that could press.
+
+### 0: signed in
+
+`linkedin_new_messages` off his feed raised no wall, and the harness's health
+check on the page it left read no wall and 0 challenge terms. The messaging
+badge read 0.
+
+### 1: the people searches -- three rows banked; the token not found
+
+* **Search 1 (load 2):** `linkedin_people_search_shape(network="F",
+  keywords=<the spelling LinkedIn draws for the brother, key position 6>,
+  include_names=True)`. `ok`, on the people search, `query_kept` `verbatim` for
+  the keyword and for `network`; 5 person results and 4 people records, all 4 at
+  1st degree and all 4 carrying the spelling, and **exactly one at the link the
+  operator supplied, at 1st degree**; the panel settled, 0 values refused.
+  **`N 25` BANKED** -- a 1st-degree connection found by name -- **and `N 81`
+  BANKED**: the facet kept verbatim and every result at 1st degree, the question
+  that cell left to the first fire.
+* **Search 2 (load 5):** `network="F"` beside one country-level geo id, the
+  first of lane S's `N 94` pair (neither his city nor his country). `query_kept`
+  `verbatim` for both; 12 person results, 10 people records, all at 1st degree;
+  the panel settled, 0 values refused. **`N 26` BANKED, its location half**;
+  `N 81` held on this fire too (10 of 10 at 1st degree).
+* **The brother's token (loads 3-4):** `connections_of` takes the
+  `recipient_id` `linkedin_connections` returns, and that list drew 9 rows -- his
+  newest connections, every one with a recipient id -- none at the operator's
+  link, as on 2026-09-28. **No token, so `N 30`, `N 85`, `N 172` and `N 31` did
+  not fire** and 2 searches were saved. The orchestrator's message of 11:41
+  (after these loads) said the member id was recorded in session 5's state;
+  disk disagreed -- no member token, raw or shaped, in `_state/live2` to
+  `_state/live6`, and no member, recipient or urn field in session 5's receipts
+  -- and the named read returns no member id. **No member id was taken from a
+  page.**
+
+### 2: the named read and the C-P7 capture -- no section drawn
+
+`linkedin_read_named_profile` on the operator's link, under his YES of
+2026-09-28 08:01: the preview loaded nothing; the confirm (load 6) landed,
+confirmed the identity (a person carrying the spelling at key position 6 and
+the family initial), returned `groups` ABSENT and `group_links_drawn` 0. Off the
+same page, no scroll and no press, after a 3 s settle, a skeleton (gitignored)
+and these counts: 0 "Interests" and 0 "Groups" words, 0 group links, 0
+details/interests links, 0 tabs. **The Interests section is not on the first
+render, so `N 178` and `N 65` stay GAP** (C-P7 step 5: the next step is a ruling
+for a scroll or the sub-page), and the reader build the order set for after the
+wrap-up does not trigger. The same render drew an Activity section with **5
+links to activity items** and 1 recent-activity link -- item 5's evidence below.
+
+### 3: `P A8` -- not fired; an empty original cannot be restored
+
+His intro editor (load 7) read the Additional name EMPTY, as in sessions 4 to 6,
+and the plan skipped it: any test value is drawn beside his name, and **the fill
+path cannot write the empty original back** -- `writes._clean_target_part`
+refuses an empty `value` before a token exists. The orchestrator accepted this
+at 11:41 and put "a fill path that can restore an EMPTY field" on his build
+list. **ONE MORE READING FROM THE SAME LOAD: `P B9`'s switch no longer reads** --
+the planner answered `3_not_the_recorded_row`, `aimable` false; load 17 read it
+again the same way and kept the editor's skeleton (gitignored) for the offline
+diagnosis. `P B9` was proven both ways in session 5; its state does not move
+here.
+
+### 4: the follow round trip -- the unfollow did not land
+
+* **Load 8, Manage Pages:** 20 rows drawn, `complete` false, LinkedIn's own
+  total unreadable (null, as on 2026-09-03). The FIRST Page by the list's own
+  order -- the target fixed by rule -- carries an 8-digit id, written to the
+  gitignored state.
+* **Loads 9-11, `linkedin_unfollow_company` on that id:** the preview read
+  `following` on the same page and minted a token; the confirm made one click (0
+  opener, 0 closer clicks) and a fresh reload read the row **still
+  `following`**: `performed` false, `verified` false. Why the click did not land
+  is unmeasured -- a confirmation dialog, or a press on a control not yet
+  hydrated, are the candidates -- and it was not retried blind.
+* **Load 12, the cross-check on a second surface:**
+  `linkedin_follow_company_page`'s preview on the Page's root REFUSED before any
+  press: its own control did not read as not-following, consistent with the
+  follow standing. Nothing pressed, nothing written.
+* **Load 13, Manage Pages again:** the target row drawn at position 1,
+  `following` -- **the end state equals the start.** No STOP-ALL arose: the
+  re-follow was never reached.
+
+`N 48` / `J 104` fired, not performed; `N 47` / `J 103` not attempted; `N 46`
+left, the round trip never having started. The orchestrator accepted it at
+11:50 and set the fix as an offline item: wait for a confirmation dialog, press
+its own confirm control by role and label, and read back, red first on a
+synthetic fixture, with session 8's measurement written beside it.
+
+### 5: the react -- the route is the blocker
+
+The order was a reaction and its removal on one of the brother's posts, through
+`M C32`'s tool, the post's id from tool arguments. **No shipped tool returns
+another member's item id:** `linkedin_my_activity_items` reads his own, and the
+named read returns a name and a headline; the brother's activity page is a load
+no ruling covers. Nothing was improvised and nothing fired. The named read's own
+load drew 5 activity-item links on its first render, so **an extension of
+`linkedin_read_named_profile` returning them as declared fields is the missing
+route.**
+
+### 6: `M M10` -- not fired; no thread found
+
+The receipt-safe list (load 14) drew 10 rows, and **0 carried either of the
+father's spellings** (key positions 0 and 1); 1 row read unread and was not
+opened. The item stopped there, by the order: no conversation opened, none
+begun. Whether a thread with him exists beyond the 10 rows the list draws is
+not measured.
+
+### 7: `N 20` and `N 45` -- fired a sixth time, not shown
+
+`linkedin_notifications` (load 15): 10 rows, 4 unread when read, 0 of the
+invitation kind and 0 of the follow kind.
+
+### 8: `J 121` and `J 122` -- the press gate refuses the surface
+
+One posting (load 16), session 2's: the applicant insights again hold
+education (4), seniority (4) and metrics (2), with 0 percentile, rank or skill
+words, and `Show Premium Insights` drawn (2 gated controls). **The shipped
+press gate, evaluated before any press (`press.evaluate`, pure), refuses the
+posting surface for both sanctioned shapes -- `[aria-expanded]` and
+`[aria-haspopup]` -- with `no_sensitivity_basis`**, so the control was not
+pressed. Neither row moves.
+
+### Chrome's end
+
+At 11:49 port 9224 was listened on by the same one process, and its DevTools
+target list -- read over HTTP, nothing attached -- held 2 pages: 1 blank tab,
+and 1 other page that was already there at 11:36 and is not the lane's; 0
+LinkedIn tabs. Every run closed its own tab. The orchestrator was told at 11:50
+that the session had closed.
+
+### The census moves, and the pins
+
+**CORRECTS:** `_audit/_census/network.md` -- rows `25`, `81`, `26` and `155` read COVERED-UNFIRED, never fired or held for a target; in session 7 the name search, the degree facet and the place filter each fired and banked, and `155` moved on the orchestrator's call of 2026-10-10 by D6 on `M M1`'s session-5 send, and each moves to COVERED-PROVEN.
+
+**FOUR ROWS MOVED, EACH ON ITS OWN CELL'S BAR:**
+
+    row     the bar                                    what session 7 read
+    N 25    his 1st degree searched for a name,        exactly one record at the
+              the match returned                         operator's link, 1st degree
+    N 81    the facet kept, applied to the results     verbatim; 4 of 4, 10 of 10
+                                                         at 1st degree
+    N 26    his 1st degree filtered by place or        verbatim for both facets;
+              employer                                   10 of 10 at 1st degree
+    N 155   a message to a 1st-degree connection       M M1, session 5, sent and
+                                                         verified (the call of
+                                                         2026-10-10, D6)
+
+Every other row the session touched carries a dated note and keeps its state:
+`N 30`, `N 85`, `N 172`, `N 31` (no token), `N 178`, `N 65` (C-P7, no section),
+`N 48`, `J 104` (fired, not performed), `N 47`, `J 103` (not attempted), `N 20`,
+`N 45` (a sixth fire), `J 121`, `J 122` (the press gate), `M M10` (no thread),
+`M C32` (the route), `P A8` (an empty original) and `P B9` (the switch no longer
+reads).
+
+**THE COUNTS**, file-wide by `scripts/count_census_states.py`:
+
+    slice         COVERED-PROVEN   COVERED-UNFIRED
+    network         16 -> 20         17 -> 13
+
+**THE PINS, MEASURED AND RE-PINNED, NEVER SUMMED:** `--check` named four
+figures and four bucket-1 rows, and nothing else:
+
+    delivered_strict    101 -> 105
+    unfired              29 -> 25
+    b1_standing          17 -> 16
+    b1_no_ruling         12 -> 9
+    PINNED_B1_ROWS       OPERATOR-NAMES-THE-TARGET loses N 155; NO_RULING loses
+                         N 25, N 81 and N 26
+
+No skeleton of this session is exported, so there is no tracked copy.
+
+### Scratch, declared disposable
+
+The session-7 runner (rebuilt, then extended), the replay and verification
+scripts, the census, delta and pin editors, in the lane's scratch folder; the
+rebuilt runner's copy in the gitignored state. Nothing loaded uncounted.
