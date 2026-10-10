@@ -354,7 +354,6 @@ N 160	N	W	R2	SIBLING:M M6	NAMED	N 160 ; M M6
 N 161	N	R	-	BUILD:tests/fixtures/live2/n161.html	MEASURED	tests/fixtures/live2/n161.html ; _audit/_census/read-addresses.tsv::https://www.linkedin.com/search/results/groups/
 N 163	N	W	R3	BUILD:tests/fixtures/live2/group_home.html	INFERRED	tests/fixtures/live2/group_home.html ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
 N 164	N	W	R3	PRECONDITION:a pending invitation to a group	INFERRED	N 164
-N 165	N	R	-	BUILD:tests/fixtures/live2/group_members.html	MEASURED	tests/fixtures/live2/group_members.html ; RULING:MEMBER-ROSTERS-AS-BOUNDED-READS
 N 166	N	W	R2	TARGET:a fellow group member he names	NAMED	_audit/_census/write-classes.tsv::queued:BLOCKED-GROUP-MEMBERS-ADDRESS ; RULING:OPERATOR-NAMES-THE-TARGET
 N 167	N	W	R2	TARGET:a fellow group member he names	NAMED	_audit/_census/write-classes.tsv::queued:BLOCKED-GROUP-MEMBERS-ADDRESS ; RULING:OPERATOR-NAMES-THE-TARGET
 N 168	N	W	R3	BUILD:tests/fixtures/live2/group_home.html	INFERRED	tests/fixtures/live2/group_home.html ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
@@ -362,7 +361,6 @@ N 169	N	W	R3	SIBLING:N 168	INFERRED	N 168
 N 170	N	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 N 174	N	R	-	TARGET:a group he names to request to join (the pending list is observable only then)	NAMED	_audit/_census/read-addresses.tsv::Observable only once a pending request exists ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
 N 176	N	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
-N 177	N	R	-	BUILD:tests/fixtures/live2/group_members.html	MEASURED	tests/fixtures/live2/group_members.html ; RULING:MEMBER-ROSTERS-AS-BOUNDED-READS
 N 178	N	R	-	RULING:Q-PROFILE-SCROLL	NAMED	_audit/_census/network.md::so this row waits on a ruling for a scroll or the sub-page (C-P7 step 5)
 N 179	N	R	-	BUILD:tests/fixtures/live3/n179.html	MEASURED	tests/fixtures/live3/n179.html ; _audit/_census/read-addresses.tsv::https://www.linkedin.com/search/results/events/
 N 182	N	W	R3	PRECONDITION:a pending invitation to an event	INFERRED	N 182
@@ -378,7 +376,6 @@ N 191	N	W	R2	TARGET:an event he names	NAMED	_audit/_census/read-addresses.tsv::A
 N 192	N	W	R2	TARGET:an event he names	NAMED	_audit/_census/read-addresses.tsv::ADMITTED 2026-09-23 BY A REVIEW: COMMIT (lane L1): one event by its NUMERIC id ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
 N 193	N	W	R3	TARGET:an event he names	NAMED	_audit/_census/read-addresses.tsv::ADMITTED 2026-09-23 BY A REVIEW: COMMIT (lane L1): one event by its NUMERIC id ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
 N 196	N	W	R3	TARGET:an organisation Page he names to report	NAMED	_audit/2026-09-28-rulings-build-classes.md::a report is never fired for a proof unless he names a real item to report
-N 197	N	R	-	RULING:Q-CALLER-COMPOSES	NAMED	RULING:D6-CAPABILITY-OVER-AFFORDANCE ; J 57
 N 198	N	W	R3	PURPOSE:feedback to LinkedIn about its own product	INFERRED	J 162 ; N 198
 N 199	N	R	-	ADMIT:https://www.linkedin.com/premium/matches/	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/premium/matches/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
 N 200	N	W	R3	CAPTURE:feed-menus	INFERRED	RULING:HIS-OWN-CURATION-NOT-OUTWARD ; linkedin_server/press.py::"/feed/",

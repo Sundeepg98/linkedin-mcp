@@ -1,4 +1,4 @@
-"""The tool surface: sixty-one tools, forty-four of which do not write.
+"""The tool surface: sixty-two tools, forty-five of which do not write.
 
 **AND THIS LINE IS NOW DERIVED, NOT MAINTAINED, 2026-09-20.** It had gone stale
 a THIRD time -- "forty-four tools, thirty-two of which do not write" against a
