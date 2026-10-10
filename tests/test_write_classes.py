@@ -177,10 +177,19 @@ def test_the_split_is_the_one_the_lane_report_quotes():
     `P S9` (the Premium plan, act purchase) and `M C71` (a paid boost, act
     publish) EXCLUDED-RULED, so both lines leave the table, and the act
     purchase leaves the closed vocabulary with its one line. Both R3.
-    389 - 2 = 387 = 16 R1 + 37 R2 + 334 R3."""
+    389 - 2 = 387 = 16 R1 + 37 R2 + 334 R3.
+
+    373 AT LANE K'S APPLICATION OF THE RULINGS OF 2026-10-10, MEASURED
+    (`_audit/2026-09-28-lane-k-ledger.md` s12): fourteen W rows left GAP --
+    `N 106`, `N 108`, `P N21` (CONTACT-IMPORT-STAYS-MANUAL), `P N10`
+    (SESSION-SURFACE), `P N14` (SIGN-IN-CHALLENGES-ARE-HIS), `N 152`
+    (SAFETY-REPORTS-STAY-MANUAL), `P S10`, `P B7`, `P J1`, `P J2`, `P J3`,
+    `P L6`, `N 198` (OUTSIDE-THE-PRODUCT-PURPOSE), and `P A9`
+    (COVERED-CANNOT-DELIVER, P-A9-CANNOT-DELIVER) -- so their lines go. All R3.
+    387 - 14 = 373 = 16 R1 + 37 R2 + 320 R3."""
     rows, _ = cwc.load()
     split = cwc.split(rows)
-    assert (split["R1"], split["R2"], split["R3"]) == (16, 37, 334)
+    assert (split["R1"], split["R2"], split["R3"]) == (16, 37, 320)
     assert split["R1:built"] + split["R1:queued"] == split["R1"]
 
 
