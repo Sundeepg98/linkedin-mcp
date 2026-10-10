@@ -225,9 +225,75 @@ PENDING -- written at the census commit.
 
 ---
 
-## F. The next live session's spec
+## F. The next live session's spec (session 8): 40 loads and 5 searches assumed
 
-PENDING -- written at the census commit.
+PRECONDITIONS, ZERO LOADS. Master carries lane NP (A to D) and is CI-green by
+its sha; the live lane merges it and its harness tests pass; the live-session
+flag is up; the attach check passes. The targets are the operator's, by role:
+the first-degree member he named for sessions 2 to 7 (his link from the
+gitignored identity key), and his own profile. THE OUTWARD ACTS ARE COVERED by
+the orchestrator's reading of 2026-10-10 (session 7's go): his YES of 10:56 to
+"react to one of the brother's posts, then remove the reaction". No value any
+step returns -- a token, a key, a name -- is written to a tracked file; the
+ledger keeps key POSITIONS only.
+
+THE ORDER, AND EACH STEP'S LOADS (20 s or more apart, as always):
+
+    n      step                                                        rows
+    1      signin check off his feed (as session 7's load 1)           --
+    2      linkedin_read_named_profile(<his link>): preview (0 loads),  A
+             confirm (1). RECORD: member_token present or not, and
+             member_token_why; the chain's counts; activity_items'
+             count and each item's author kind by position.
+             IF NO TOKEN: record why, skip 3 and 4 (2 searches saved).
+    3      search 1: linkedin_people_search_shape(                     N 30, N 85, N 172
+             connections_of=<the token>, include_names=True)
+    4      search 2: the same with network="F"                         N 31
+    5      linkedin_read_named_profile(<his link>, section="interests"): N 178, N 65
+             preview (0), confirm (1). The capture C-NP1 of D.2. A        (capture only)
+             landing elsewhere is recorded (path depth) and NOT retried.
+    6      linkedin_react_to_item(item=<the FIRST item whose author    M C32
+             is "owner">): preview (1). It must read no_reaction and
+             name the member's own post. IF IT READS REACTED -- his own
+             earlier reaction -- take the next owner item; if none,
+             STOP: a reaction that predates the session is never taken
+             back.
+    7-8    confirm: the press (1) and the verification's fresh render  M C32
+             (1); verified "reacted".
+    9      linkedin_unreact_to_item(item=<the same key>): preview (1);  M C35 (candidate)
+             it must read reacted.
+    10-11  confirm: the press and the fresh render; verified          M C32's inverse
+             "no_reaction" -- the post back as it was.
+    12-15  linkedin_update_profile_field(field="Additional name",     P A8
+             value=<the value the orchestrator names>): his sharing
+             setting read OFF, the editor, Save, the fresh render --
+             session 6 measured four loads per edit. The prior must read
+             EXACTLY "" (else STOP: no restore record is made).
+    16-19  linkedin_update_profile_field(field="Additional name",     P A8
+             value=""): the preview says CLEAR and that the record is
+             live; four loads; the fresh render reads "".
+    20     optional: a read-only re-read of his editor.
+
+BUDGET: 20 loads of 40 (19 without the re-read), 2 searches of 5. Spare: 20
+loads and 3 searches, spent on nothing unless ordered.
+
+THE BARS, each row on its own cell's:
+
+    N 30    search 1 returns people records -- the member's own connections -- and
+            query_kept reads connections_of verbatim or same_values
+    N 172   the same fire: the payload is WHO, as people records
+    N 85    the same fire: the facet kept (query_kept), the filter applied
+    N 31    search 2: both facets kept, every record at 1st degree
+    M C32   a reaction performed and verified on a post of the member he named
+    M C35   the inverse performed and verified -- a candidate; its cell decides
+    P A8    the test and the clear both SAVED and verified, the field reading its
+            empty original on a fresh render
+    N 178,  no move on a capture: the reader of D.3 is built offline over the
+    N 65    tracked skeleton, then fired
+
+STOP RULES, as every session: any wall, challenge or unexpected landing stops
+the session; a refused step is recorded and the next INDEPENDENT step runs
+(2-4 hang on 2's token; 6-11 on 2's items; 16-19 on 12-15).
 
 ---
 
