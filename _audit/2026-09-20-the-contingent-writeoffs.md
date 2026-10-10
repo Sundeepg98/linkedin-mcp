@@ -145,6 +145,12 @@ pair as coverage.
   its six siblings `J 31`-`J 36` already sit. Blocked by this repo's own
   `_FORBIDDEN_URL_SUBSTRINGS`, measured above -- a CODE fact, not a world fact.
 
+> **NAMED 2026-10-10 (lane G2): WHAT BECAME OF THIS PROPOSAL.** The blocker
+> name `ALERTS-PAGE-UNREAD` was proposed here and never minted:
+> it does not exist in the blocker ledger, and `J 37` was never split. The row
+> stands whole and GAP, and the blocker map files it under
+> `SERVED-BY-GMAIL-SKILL`.
+
 ---
 
 #### `J 38` -- "Read the jobs an alert delivered" -- **SOUND. Confirmed on evidence.**
@@ -235,6 +241,13 @@ job.
 BUILD, boundary cost 0 (address already admitted), cost = 1 parser. The skill
 keeps serving it in the meantime; the row is no longer NOT-OURS.
 
+> **NAMED 2026-10-10 (lane G2): WHAT BECAME OF THIS PROPOSAL.** The blocker
+> name `PROXIMITY-NOT-PARSED` was proposed here and never minted:
+> it does not exist in the blocker ledger, because the re-file stayed
+> deferred, as this document's header records. `J 40` was built and fired
+> live on 2026-09-21 and is COVERED-PROVEN; the blocker map files it under
+> `SERVED-BY-GMAIL-SKILL`.
+
 **Guard shipped:** `tests/test_proximity_is_on_a_read_surface.py`, s5 below.
 
 ---
@@ -287,6 +300,11 @@ and nobody owns it because the row was filed as served.
 behind `J 40`), queue BLOCKED. Note on the row: *the skill performs an adjacent
 and more valuable join -- applied-on-the-other-platform AND has-network-here --
 which is not this capability and should not be deleted when this one is built.*
+
+> **NAMED 2026-10-10 (lane G2):** the blocker name here is the same unminted
+> proposal as in `J 40` above, so it does not exist in the blocker ledger
+> either. `J 57` is GAP, and the blocker map files it under
+> `SERVED-BY-GMAIL-SKILL`.
 
 ---
 

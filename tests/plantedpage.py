@@ -486,6 +486,201 @@ class _PlantedKeyboard:
 
 
 # ---------------------------------------------------------------------------
+# THE BLANK PAGE -- the same calls, over a page that draws nothing.
+#
+# Added 2026-10-10 (lane G2). "A read and something back" let a reader be
+# recorded clean on what it hands back whatever the page drew: a refusal tally
+# with every count zero, a poll budget, its own sentence. Measured that day, 17
+# readers were clean on exactly that, the guard's own control reader
+# (``anchors.read_anchors``) among them. A success path leaves something the
+# PAGE made, and the measure of that is what the same call returns over a page
+# that draws nothing: a value the planted page changed is the page's; a value
+# both pages give is the reader's own.
+#
+# FAITHFUL TO A REAL EMPTY PAGE, because an unfaithful null manufactures
+# agreement: every locator counts 0 and is not visible, every page-controlled
+# read answers empty (``None`` where Playwright answers ``None``), and every
+# WAIT TIMES OUT -- raising ``TimeoutError``, the name this package's readers
+# classify a wait's expiry by -- because on a page that never draws the thing,
+# that is what Playwright does. A first version whose waits returned at once
+# read seven wait readers as "attached" on both pages and convicted them for
+# the double's fault. Actions are refused as on the planted page.
+#
+# ITS ONE KNOWN DEPARTURE, named so nobody mistakes it for a finding: a
+# script answers ``None`` here, where a real engine returns whatever the
+# script returns over an empty document (a dict of zeros, usually). A reader
+# that reads that answer outside its own ``try`` raises over this page --
+# ``dom.read_sdui_actions`` does -- and the guard then calls the drive not
+# driven, because nothing shows which of its values the page made. That
+# departure can only ever withhold a clean verdict; it can never grant one.
+# ---------------------------------------------------------------------------
+
+
+class BlankLocator:
+    """Playwright's locator over a page that draws nothing."""
+
+    def locator(self, *args: Any, **kwargs: Any) -> "BlankLocator":
+        return BlankLocator()
+
+    def get_by_role(self, *args: Any, **kwargs: Any) -> "BlankLocator":
+        return BlankLocator()
+
+    def get_by_text(self, *args: Any, **kwargs: Any) -> "BlankLocator":
+        return BlankLocator()
+
+    def nth(self, index: int) -> "BlankLocator":
+        return BlankLocator()
+
+    @property
+    def first(self) -> "BlankLocator":
+        return BlankLocator()
+
+    @property
+    def last(self) -> "BlankLocator":
+        return BlankLocator()
+
+    def and_(self, *args: Any, **kwargs: Any) -> "BlankLocator":
+        return BlankLocator()
+
+    def or_(self, *args: Any, **kwargs: Any) -> "BlankLocator":
+        return BlankLocator()
+
+    def filter(self, *args: Any, **kwargs: Any) -> "BlankLocator":
+        return BlankLocator()
+
+    async def count(self) -> int:
+        return 0
+
+    async def is_visible(self, **kwargs: Any) -> bool:
+        return False
+
+    async def is_enabled(self, **kwargs: Any) -> bool:
+        return False
+
+    async def is_disabled(self, **kwargs: Any) -> bool:
+        return False
+
+    async def is_checked(self, **kwargs: Any) -> bool:
+        return False
+
+    async def is_editable(self, **kwargs: Any) -> bool:
+        return False
+
+    async def is_hidden(self, **kwargs: Any) -> bool:
+        return True
+
+    async def bounding_box(self, **kwargs: Any) -> None:
+        return None
+
+    async def wait_for(self, **kwargs: Any) -> None:
+        raise TimeoutError("the blank page draws nothing to wait for")
+
+    async def evaluate(self, script: Any, arg: Any = None, **kwargs: Any) -> None:
+        return None
+
+    async def evaluate_all(self, script: Any, arg: Any = None) -> list[Any]:
+        return []
+
+    async def inner_text(self, **kwargs: Any) -> str:
+        return ""
+
+    async def text_content(self, **kwargs: Any) -> str:
+        return ""
+
+    async def inner_html(self, **kwargs: Any) -> str:
+        return ""
+
+    async def input_value(self, **kwargs: Any) -> str:
+        return ""
+
+    async def get_attribute(self, name: str, **kwargs: Any) -> None:
+        return None
+
+    async def all_text_contents(self) -> list[str]:
+        return []
+
+    async def all_inner_texts(self) -> list[str]:
+        return []
+
+    async def all(self) -> list["BlankLocator"]:
+        return []
+
+    async def element_handle(self, **kwargs: Any) -> None:
+        return None
+
+    async def element_handles(self) -> list["BlankLocator"]:
+        return []
+
+    async def click(self, **kwargs: Any) -> None:
+        raise NavigationAttempted("locator.click")
+
+    async def fill(self, *args: Any, **kwargs: Any) -> None:
+        raise NavigationAttempted("locator.fill")
+
+    async def set_input_files(self, *args: Any, **kwargs: Any) -> None:
+        raise NavigationAttempted("locator.set_input_files")
+
+    async def select_option(self, *args: Any, **kwargs: Any) -> None:
+        raise NavigationAttempted("locator.select_option")
+
+
+class BlankPage(PlantedPage):
+    """Playwright's page over a document that draws nothing.
+
+    A :class:`PlantedPage` subclass so the harness finds it, counts its reads
+    and resolves a paired Observation against it exactly as against the
+    planted page; every read the planted page answers is overridden here --
+    ``tests/test_readers_emit_no_page_string.py`` holds that no read of this
+    page answers the plant.
+    """
+
+    def locator(self, *args: Any, **kwargs: Any) -> BlankLocator:  # type: ignore[override]
+        return BlankLocator()
+
+    def get_by_role(self, *args: Any, **kwargs: Any) -> BlankLocator:  # type: ignore[override]
+        return BlankLocator()
+
+    def get_by_text(self, *args: Any, **kwargs: Any) -> BlankLocator:  # type: ignore[override]
+        return BlankLocator()
+
+    def frame_locator(self, *args: Any, **kwargs: Any) -> BlankLocator:  # type: ignore[override]
+        return BlankLocator()
+
+    async def evaluate(self, script: Any, arg: Any = None, **kwargs: Any) -> None:  # type: ignore[override]
+        return None
+
+    async def evaluate_handle(self, script: Any, arg: Any = None) -> None:  # type: ignore[override]
+        return None
+
+    async def eval_on_selector(self, *args: Any, **kwargs: Any) -> None:  # type: ignore[override]
+        return None
+
+    async def eval_on_selector_all(self, *args: Any, **kwargs: Any) -> list[Any]:  # type: ignore[override]
+        return []
+
+    async def content(self) -> str:  # type: ignore[override]
+        return "<html><head></head><body></body></html>"
+
+    async def title(self) -> str:  # type: ignore[override]
+        return ""
+
+    async def inner_text(self, *args: Any, **kwargs: Any) -> str:  # type: ignore[override]
+        return ""
+
+    async def text_content(self, *args: Any, **kwargs: Any) -> str:  # type: ignore[override]
+        return ""
+
+    async def query_selector(self, *args: Any, **kwargs: Any) -> None:  # type: ignore[override]
+        return None
+
+    async def query_selector_all(self, *args: Any, **kwargs: Any) -> list[Any]:  # type: ignore[override]
+        return []
+
+    async def wait_for_selector(self, *args: Any, **kwargs: Any) -> None:  # type: ignore[override]
+        raise TimeoutError("the blank page draws nothing to wait for")
+
+
+# ---------------------------------------------------------------------------
 # THE FAILING PAGE -- what a library SAID while failing, as the only channel.
 #
 # Added 2026-09-24 (lane G). The page above answers in strings so a reader's

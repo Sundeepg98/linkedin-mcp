@@ -11571,6 +11571,97 @@ children's inventory and session-extraction scripts. Each one's output is a
 committed table or a section of the lane record; the tables are the record,
 and `check_next_step` is what keeps them true.
 
+## 86. A RED INSTRUMENT MADE GREEN IN ITS RECORDS, A CLEAN THAT MUST SHOW WHAT THE PAGE MADE, AND A RECORD TYPE THE BOUND COULD NOT NAME (lane-g2-debts, 2026-10-10)
+
+Record: `_audit/2026-10-10-lane-g2-debts.md`.
+
+### 86.1 THE ASSERTED-NAMES CHECK: A PIN THAT KEPT CI GREEN OVER A RED SCRIPT
+
+`scripts/check_asserted_names_resolve.py` exited 1 on eight sites from
+2026-09-23, while its test pinned exactly those eight, so the suite stayed
+green. A pinned red is a quiet red: the ninth finding would have been one
+more line under eight that nobody acted on. All eight were repaired in the
+records that made them -- five ruling ids and one state word reworded to name
+their kind, two never-minted blocker names disclosed beside the proposals
+that minted them -- and the pin was emptied. No line of the checker changed.
+
+SHOWN FAILING AFTER THE REPAIR, which is what keeps it in this register: a
+fabricated name in the `blocker` slot, and a real ruling id wrapped after a
+bare "under", appended to a tracked record and removed before any commit --
+exit 1, both named; without them, exit 0. The emptied pin was red (1 failed,
+naming all eight) against the records as they were.
+
+    A PIN THAT HOLDS A KNOWN RED IS A DEBT WITH NO DUE DATE. REPAIR THE
+    RECORDS AND EMPTY THE PIN; NEVER WIDEN THE CHECKER TO MEET THEM.
+
+### 86.2 CLEAN NEEDS SOMETHING THE PAGE MADE, MEASURED AGAINST A PAGE THAT DRAWS NOTHING
+
+The reader-leak guard's earned-clean rule ("a read, and a result that is
+neither empty, a refusal nor an error") was met by readers that hand back the
+same thing whatever the page draws. Measured over the 97 readers it recorded
+clean: 17 were clean on a refusal tally, a poll budget, their own sentence or
+a failure's name -- the guard's own control reader among them, and the three
+readers behind the people search. The instrument: the same call over
+`tests/plantedpage.py`'s `BlankPage`, and a value counts only if it differs
+from that drive and sits under no refusal or failure key
+(`tests/test_readers_emit_no_page_string.py`, `page_evidence`).
+
+SHOWN FAILING: two stubs that read the page and then return before their
+success path were clean under the old rule and are not under the new one; the
+pure rule's table has 13 rows; and the coverage comparison named the 17 when
+the rule met the old baseline.
+
+WHAT IT FOUND BEYOND THE COUNT: two of the 17 had success paths that return
+page text outside a record -- a control's id attribute, a followed Page's
+name -- which no drive had reached; they are held for a ruling. Two of the
+17 got curated drives over the tracked intro editor the same day: the Save
+gate, back to an earned clean, and the editor value reader, whose success
+path returns his own field's value, admitted as `HIS_OWN`. The triage
+added two kinds to `WHAT_WOULD_DRIVE_IT`: `SCRIPT` (a script the planted page
+can only answer with strings) and `WORDS` (LinkedIn's own words in the page's
+text, which it can only answer with the plant).
+
+THE NULL HAD TO BE FAITHFUL BEFORE IT WAS USEFUL. Its first version let every
+wait return at once, so seven wait readers read "attached" on both pages and
+would have been convicted for the double's fault; a fidelity test now holds
+that every wait on the blank page times out and no read answers the plant.
+
+    A VALUE BOTH PAGES GIVE IS THE READER'S OWN. ASK WHAT A PAGE THAT DRAWS
+    NOTHING RETURNS BEFORE CALLING A DRIVE A READING -- AND MAKE THE NULL TIME
+    OUT WHERE THE REAL PAGE WOULD.
+
+### 86.3 A RECORD TYPE THE BOUNDED-READER GUARD CANNOT NAME
+
+`tests/test_a_people_reader_reads_one_page.py` finds record readers by a
+hand-kept set of class names. When `people_data.Post` was declared, the set did
+not hold it, so a reader building posts would have had no bound on its pages.
+`test_every_record_type_is_a_record_class_here` holds the set equal to
+`people_data.RECORD_TYPES`; SHOWN FAILING on `Post` before the name was added.
+
+### 86.4 THE CONTROL FIXTURES RUN IN AN ENGINE, NOT ONLY ATTACHED TO HIS CHROME
+
+`tests/test_control_paths_run_in_an_engine.py` runs the five control paths
+of `scripts/_probe_control_paths_live.py` -- each module's own fixture and
+written expectation, through the shipped reader -- in a local headless
+Chromium, through the probe's own `_classify`, so nothing is copied. Until
+now nothing in the suite had executed the one line that makes a fixture a
+control (`DOMParser` inside the shipped script). SHOWN FAILING: each path's
+planted defect turns it red, and an expectation bent by one turns exactly
+its own path red. The same file runs the group reader over the live lane's
+tracked group-page skeleton against the live load's own verdict, with a
+planted post permalink as its control.
+
+    A SERIALISED PAGE IS NOT THE PAGE: NESTED ANCHORS DO NOT SURVIVE A
+    RE-PARSE, SO A SKELETON'S COUNT CAN DIFFER FROM THE LIVE COUNT FOR THE
+    PARSER'S REASONS. COMPARE A READER WITH THE ENGINE IT RAN IN.
+
+### 86.9 DECLARED DISPOSABLE
+
+Scratch probes of this lane, kept in its scratch area and not committed:
+the census ASCII count, the comment-coupling measurement of item 3c, the
+search readers' planted drive, the success-evidence measurement whose rule
+became 86.2 (the committed form is the guard's own), the baseline diff, the
+bent-expectation control behind 86.4, and the instrument runner.
 
 ## 87. A REF NAME IS NOT A PERMISSION; ANCESTRY PLUS THE SHIPPED SWEEP IS (lci-fastlane-lead, 2026-10-10)
 
