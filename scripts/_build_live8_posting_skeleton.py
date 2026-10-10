@@ -36,6 +36,9 @@ a label still finds its control). Four additions, made HERE only:
    same format (each digit replaced, in order, by 1..9 cycling), so no figure
    of the real employer survives, while "9,999"-shaped and "99%"-shaped values
    keep their shape for a reader.
+5. HEADINGS -- a heading's own keyed text becomes ``SYNTHETIC_HEADING``
+   rather than ``x``, so headings stay distinct from body lines as they are
+   live (see the constant for the measurement that forced it).
 
 THE KEY is a FIXED public one. ``tracked_copy`` drops every text hash; the only
 hashes left are id references, which name controls and never people, and a
@@ -141,19 +144,46 @@ def _rewrite_labels(raw: str) -> tuple[str, dict[str, int]]:
     return out, counts
 
 
+#: What a heading's own member- or employer-written text becomes. ``tracked_copy``
+#: turns every keyed text into ONE ``x``, which makes every such heading EQUAL
+#: every such body line -- and a reader bounded by "the next heading" then stops
+#: at the first ``x`` line, which no live page does (measured 2026-10-10: on the
+#: raw capture the company panel's positional read runs to its tenure line; on
+#: an all-``x`` copy it stopped five lines in). One declared synthetic heading
+#: text keeps headings distinct from body lines, as they are live.
+SYNTHETIC_HEADING = "Example heading"
+_HEADINGS = frozenset({"h1", "h2", "h3", "h4", "h5", "h6"})
+
+
 class PostingSkeleton(s2._Skeleton):
-    """The session-2 skeleton parser, with the numbers and the anchored prose."""
+    """The session-2 skeleton parser, with the numbers, the anchored prose and
+    distinct headings."""
 
     def __init__(self, key: bytes) -> None:
         super().__init__(key)
         self.queue: list[str] = []
-        self.counts = {"numbers": 0, "anchored prose": 0}
+        self.in_heading = 0
+        self.counts = {"numbers": 0, "anchored prose": 0, "headings made synthetic": 0}
+
+    def handle_starttag(self, tag, attrs) -> None:
+        super().handle_starttag(tag, attrs)
+        if tag in _HEADINGS and not self.dropping:
+            self.in_heading += 1
+
+    def handle_endtag(self, tag) -> None:
+        super().handle_endtag(tag)
+        if tag in _HEADINGS and not self.dropping:
+            self.in_heading = max(0, self.in_heading - 1)
 
     def handle_data(self, data: str) -> None:
         if self.dropping:
             return
         text = " ".join(data.split())
         if not text:
+            return
+        if self.in_heading and not self.queue and text not in s2.FURNITURE and not _NUMBER.match(text):
+            self.counts["headings made synthetic"] += 1
+            self.out.append(html_escape.escape(SYNTHETIC_HEADING, quote=False))
             return
         if self.queue:
             shown = self.queue.pop(0)
