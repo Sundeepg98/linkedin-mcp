@@ -1,4 +1,4 @@
-"""The tool surface: sixty-four tools, forty-five of which do not write.
+"""The tool surface: sixty-five tools, forty-five of which do not write.
 
 **AND THIS LINE IS NOW DERIVED, NOT MAINTAINED, 2026-09-20.** It had gone stale
 a THIRD time -- "forty-four tools, thirty-two of which do not write" against a
@@ -168,6 +168,13 @@ SANCTIONED_WRITE_TOOLS = frozenset(SANCTIONED_WRITES) & {
     # one, so it is on both exemptions -- which are one set. A key in
     # writes.SANCTIONED_WRITES.
     "linkedin_set_admitted_setting",
+    # THE TWENTY-FIRST AT THE INTEGRATION MERGE (the twentieth on lane NP's
+    # branch), 2026-10-10 (lane NP, the orchestrator's ruling of
+    # 14:14): the reaction's inverse, named on "withdraw", a verb the
+    # conservation law already admits. Its NAME announces the write and its
+    # docstring must describe one, so it is on both exemptions -- which are
+    # one set. A key in writes.SANCTIONED_WRITES.
+    "linkedin_withdraw_reaction",
 }
 
 #: THE DOCSTRING EXEMPTION IS THE SAME SET AS THE NAME EXEMPTION, and it took
@@ -537,6 +544,10 @@ EXPECTED_TOOLS = {
     # THE SIXTY-THIRD, 2026-10-10 (lane S, settings, merged after lane U's), a WRITE: see
     # SANCTIONED_WRITE_TOOLS.
     "linkedin_set_admitted_setting",
+    # THE SIXTY-FIFTH AT THE INTEGRATION MERGE, 2026-10-10 (lane NP; the
+    # sixty-second on its branch),
+    # a WRITE: see SANCTIONED_WRITE_TOOLS.
+    "linkedin_withdraw_reaction",
 }
 
 #: Names a reader must never grow. Listed explicitly so that adding one is a
@@ -621,8 +632,13 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_sixty_four_tools(tools):
-    """RENAMED AGAIN AT THE INTEGRATION MERGE OF LANE B5 ONTO MASTER a457819,
+async def test_the_surface_is_exactly_the_sixty_five_tools(tools):
+    """RENAMED AGAIN AT THE INTEGRATION MERGE OF LANE NP ONTO LANES S AND B5 (2026-10-10), to
+    ``..._sixty_five_tools``: lane NP's ``linkedin_withdraw_reaction`` beside
+    lane S's write and lane B5's read. MEASURED off the merged registry, not
+    summed; the name moved with the pin.
+
+    RENAMED AGAIN AT THE INTEGRATION MERGE OF LANE B5 ONTO MASTER a457819,
     2026-10-10, to ``..._sixty_four_tools``: lane S's write and lane B5's read
     were each the sixty-third on their own trees; the merged registry holds
     both. MEASURED off the merged registry, not summed; the name moved with
@@ -640,11 +656,22 @@ async def test_the_surface_is_exactly_the_sixty_four_tools(tools):
     records (MEMBER-ROSTERS-AS-BOUNDED-READS) -- on top of master's sixty-two.
     MEASURED off the merged registry; the name moved with the pin.
 
+    RENAMED AGAIN AT LANE NP'S MERGE OF MASTER 0103810, 2026-10-10, to
+    ``..._sixty_three_tools``: lane NP's ``linkedin_withdraw_reaction`` beside
+    lane U's ``linkedin_send_attachment``, each renamed this test to
+    ``..._sixty_two_tools`` on its own branch from master's sixty-one.
+    MEASURED off the merged registry; the name moved with the pin.
+
     RENAMED AGAIN ON LANE U'S BRANCH, 2026-10-10, to ``..._sixty_two_tools``:
     one WRITE, ``linkedin_send_attachment`` (ruling FILE-UPLOAD-OPENED), one
     file into one conversation he names. MEASURED off the registry on the
     lane's branch, counting from master's sixty-one; a merge beside other
     lanes' tools re-derives it.
+
+    RENAMED AGAIN ON LANE NP, 2026-10-10, to ``..._sixty_two_tools``: one
+    WRITE, ``linkedin_withdraw_reaction``, the reaction's inverse (the
+    orchestrator's ruling of 14:14). MEASURED off the registry; the name
+    moved with the pin.
 
     RENAMED AGAIN ON LANE L5'S ORDER OF 2026-09-28 08:06, to
     ``..._sixty_one_tools``: one READ, ``linkedin_read_named_profile`` (ruling
@@ -964,7 +991,15 @@ async def test_the_surface_is_exactly_the_sixty_four_tools(tools):
     # SIXTY-FOUR AT THE INTEGRATION MERGE OF LANE B5 ONTO MASTER a457819,
     # 2026-10-10: lane S's write and lane B5's read together. MEASURED off
     # mcp.list_tools() on the merged tree; the NAME moved with the pin.
-    assert len(tools) == 64
+    # SIXTY-TWO ON LANE NP, 2026-10-10: linkedin_withdraw_reaction, a WRITE,
+    # so the split moves on its write side and the non-write count holds.
+    # SIXTY-THREE AT LANE NP'S MERGE OF MASTER 0103810, 2026-10-10: both
+    # writes, so the split moves on its write side and the non-write count
+    # holds. MEASURED off mcp.list_tools() on the merged tree.
+    # SIXTY-FIVE AT THE INTEGRATION MERGE OF LANE NP ONTO LANES S AND B5 (2026-10-10): linkedin_withdraw_reaction,
+    # a WRITE, so the split moves on its write side and the non-write count
+    # holds at forty-five. MEASURED off mcp.list_tools() on the merged tree.
+    assert len(tools) == 65
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -999,6 +1034,8 @@ async def test_the_surface_is_exactly_the_sixty_four_tools(tools):
         "linkedin_send_attachment",
         # 2026-10-10, lane S: one control on one admitted settings page.
         "linkedin_set_admitted_setting",
+        # 2026-10-10 (lane NP): the reaction's inverse.
+        "linkedin_withdraw_reaction",
     }
     # THE NON-WRITE COUNT MOVES TO SIXTEEN, and the reason is NOT the reason
     # it moved last time. The comment here said: "THE READ COUNT MOVES OFF
@@ -1250,6 +1287,8 @@ async def test_the_exemption_covers_only_the_names_on_it(tools):
         "linkedin_send_attachment",
         # 2026-10-10, lane S: one control on one admitted settings page.
         "linkedin_set_admitted_setting",
+        # 2026-10-10 (lane NP): the reaction's inverse.
+        "linkedin_withdraw_reaction",
     }
     # The probe has to be genuinely sanctioned for this to test the thing it
     # claims to. A name nobody ever specced would only show that made-up names
@@ -1739,6 +1778,11 @@ async def test_server_info_stops_claiming_read_only_once_writes_are_on(monkeypat
         # numeric id, two presses through the one click site, verified off a
         # fresh render of his Groups page.
         "withdraw_from_group",
+        # THE TWENTIETH, 2026-10-10 (lane NP, the orchestrator's ruling of
+        # 14:14; it reached master beside lane U's, at the lane's merge of
+        # 0103810), typed here by hand: the reaction's inverse, aimed only at
+        # a measured ON name, verified off the measured OFF name.
+        "withdraw_reaction",
     ]
 
 
@@ -1812,6 +1856,11 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
         # THE SIXTEENTH, 2026-09-27 (census M C63 / N 64). Typed by hand, as
         # this list requires, at the merge of the lane that built it.
         "withdraw_from_group",
+        # THE TWENTIETH, 2026-10-10 (lane NP, the orchestrator's ruling of
+        # 14:14; it reached master beside lane U's, at the lane's merge of
+        # 0103810), typed here by hand: the reaction's inverse, aimed only at
+        # a measured ON name, verified off the measured OFF name.
+        "withdraw_reaction",
     ]
     assert "OFF" in info["writes_note"]
     assert "unsave_job" in info["writes_note"]
@@ -2176,7 +2225,14 @@ async def test_the_server_instructions_name_every_write_that_ships():
         # send_attachment and lane S's set_admitted_setting each made eighteen
         # on its own branch, and the merged tree holds both. The KeyError this
         # map raises named the count on the merge's first gate.
+        # NINETEEN FROM LANE NP'S MERGE OF MASTER 0103810, 2026-10-10:
+        # withdraw_reaction beside lane U's send_attachment. Each branch had
+        # reached eighteen alone; the KeyError on the merged tree's first gate
+        # is what named the missing word, as it did at lane L8's merge.
         19: "nineteen",
+        # TWENTY AT THE INTEGRATION MERGE OF LANE NP ONTO LANES S AND B5 (2026-10-10): set_admitted_setting
+        # and withdraw_reaction each made nineteen on its own tree.
+        20: "twenty",
     }
     assert f"{words[len(writes.PERFORMABLE)]} write" in text
     for action in writes.PERFORMABLE:

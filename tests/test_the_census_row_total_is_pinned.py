@@ -110,7 +110,14 @@ import pin_census_rows as P  # noqa: E402
 #: network" went COVERED-UNFIRED on the generic settings writer, built on its
 #: page's real capture, while the other fourteen toggles stay GAP -- see
 #: `_audit/2026-09-28-lane-s-settings.md`, section 4. No row left.
-PINNED_ROW_TOTAL = 772
+#: 771 -> 772 ON THE ORCHESTRATOR'S CALL OF 2026-10-10 15:45 (lane NP),
+#: MEASURED by `scripts/pin_census_rows.py`: `M C35b` entered, split from
+#: `M C35` under COMPOUND-ROW-SPLITS-ONLY-ON-STATE -- the change half stays GAP
+#: where the remove half went COVERED-UNFIRED on `linkedin_withdraw_reaction`
+#: -- see `_audit/2026-10-10-lane-np-named-profile.md`, E. No row left.
+#: 772 -> 773 AT THE INTEGRATION MERGE OF LANE NP ONTO LANES S AND B5 (2026-10-10), MEASURED: `P O17`
+#: and `M C35b`, one row each, two rows on the merged census.
+PINNED_ROW_TOTAL = 773
 
 #: Per slice, because a delta of zero across four slices is reachable by two
 #: errors cancelling -- one row added to `jobs.md` and one dropped from
@@ -118,7 +125,7 @@ PINNED_ROW_TOTAL = 772
 PINNED_SLICE_ROWS = {
     "J": 166,   # jobs.md                    (150 + 16)
     "P": 237,   # profile.md                 (203 + 10 + 22 + 1 + 1, P A23b, P O17)
-    "M": 153,   # messaging-and-content.md   (142 + 11)
+    "M": 154,   # messaging-and-content.md   (142 + 11 + 1, M C35b)
     "N": 216,   # network.md                 (209 + 6 + 1, N 26b)
 }
 

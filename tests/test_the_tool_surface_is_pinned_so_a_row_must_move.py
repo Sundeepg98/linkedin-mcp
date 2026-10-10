@@ -131,6 +131,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_publish_post": ("confirm_token", "text"),
     "linkedin_react_to_item": ("confirm_token", "item"),
     "linkedin_read_named_profile": ("confirm_token", "profile", "section"),
+    "linkedin_withdraw_reaction": ("confirm_token", "item"),
     "linkedin_recent_job_searches": (),
     "linkedin_recruiter_insights": (),
     "linkedin_save_job": ("confirm_token", "job_id"),
@@ -490,6 +491,16 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: The read's two new fields (`member_token`, `activity_items`) are not
 #: parameters; `N 30`, `N 85`, `N 172`, `N 31` and `M C32` move only when proven
 #: live.
+#: **RE-PINNED 2026-10-10 AT 62 TOOLS AND 99 PARAMETERS on lane NP (the
+#: orchestrator's ruling of 14:14): one tool, two parameters --
+#: `linkedin_withdraw_reaction(item, confirm_token)`, the reaction's inverse.**
+#: THE CENSUS DECISION, in the same commit: NO ROW MOVES. `M C32` waits on its
+#: live proof (react, then withdraw, on a post of the member he named); `M C35`
+#: ("Remove or change a reaction") is compound and keeps its cell. Never fired.
+#: **A ROW MOVED THE SAME DAY, ON THE ORCHESTRATOR'S CALL OF 15:45:** `M C35`
+#: was split under COMPOUND-ROW-SPLITS-ONLY-ON-STATE -- `M C35` ("Remove a
+#: reaction") COVERED-UNFIRED on this tool, `M C35b` ("Change a reaction to
+#: another kind") GAP. The counts above did not move with it.
 #: **RE-PINNED 2026-10-10 AT 62 TOOLS AND 99 PARAMETERS on lane U's branch
 #: (ruling FILE-UPLOAD-OPENED): one WRITE,
 #: `linkedin_send_attachment(thread_id, file, confirm_token)` -- one file from
@@ -544,8 +555,17 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: 64 TOOLS AND 105 PARAMETERS** -- lane S's tool and four parameters
 #: and lane B5's tool and one parameter, both over 62 and 100, counted on
 #: the merged registry, never summed.
-PINNED_TOOL_COUNT = 64
-PINNED_PARAMETER_COUNT = 105
+#: **RE-PINNED AT LANE NP'S MERGE OF MASTER 0103810, 2026-10-10: 63 TOOLS
+#: AND 102 PARAMETERS.** Lane NP's tool with its two parameters
+#: (`linkedin_withdraw_reaction(item, confirm_token)`) meets lane U's with its
+#: three: 61 + 1 + 1 tools, 97 + 3 + 2 parameters. Neither moved the other's
+#: entry, and the census moves are each lane's own (`M C35` and `M C35b`;
+#: `M M14`, `M M15`, `M M18`).
+#: **AT THE INTEGRATION MERGE OF LANE NP ONTO LANES S AND B5 (2026-10-10): 65 TOOLS AND
+#: 107 PARAMETERS** -- lane NP's tool and two parameters beside lanes S's
+#: and B5's, counted on the merged registry, never summed.
+PINNED_TOOL_COUNT = 65
+PINNED_PARAMETER_COUNT = 107
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:

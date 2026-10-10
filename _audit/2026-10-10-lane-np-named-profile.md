@@ -154,9 +154,43 @@ reviewed and merged here; its report is the source of the reds below.
   the actor's profile link with his own identity card's (the sidebar card beside
   his private analytics widget). That returns `you` on his own post; that it
   returns `another_member` on another member's is DERIVED (every name in the
-  captures is sanitised, and none shows another member's post page), and the
-  block says so.
-- B3, THE INVERSE, IS NOT BUILT. Under the lane's time box child B committed
+  captures is sanitised, and none shows another member's post page). THE
+  ORCHESTRATOR'S RULING OF 14:14: "make it 'unknown' until a capture of
+  ANOTHER member's post shows the rule. The surface may not print a claim it
+  cannot derive." So `author_kind` reads `unknown`
+  (`item_author.AUTHOR_KIND_SHOWN_ON_ANOTHER_MEMBERS_POST = False`); the
+  comparison is kept and tested with that switched on. RED FIRST: with the old
+  behaviour the new test failed `assert 'another_member' == 'unknown'`.
+- B3, THE INVERSE -- BUILT AFTER THE MERGE, BY THE LEAD, ON THE ORCHESTRATOR'S
+  RULING OF 14:14: "name it on the verb the law ALREADY admits. Withdrawing
+  his OWN reaction is 'delete or withdraw one of his own items'
+  (OUTWARD-CLASSES-BUILT-BEHIND-GRANTS). Do NOT widen
+  _VERBS_ADMITTED_BY_RULING." `linkedin_withdraw_reaction(item, confirm_token)`,
+  action `withdraw_reaction`, in the lane NP block of `server.py`: the
+  reaction's own address, pattern and permalink reader; from `reacted` to
+  `no_reaction`; the preview and the click each require the ONE toggle to wear
+  one of the two MEASURED ON names (`dom.REACTION_MEASURED_ON_LABELS`,
+  `dom.measured_on_label`, a locator count per constant name), and the press
+  is that exact name; the verification is a fresh render reading the MEASURED
+  OFF name, an unmeasured OFF name being UNKNOWN; the preview names the author
+  as the reaction's does. Registered in PERFORMABLE (18 actions; 19
+  sanctioned), `_TOGGLE_ACTIONS`,
+  `_WHERE_TO_LOOK`, `_VERIFIED_FROM`, `item_author.REACTION_ACTIONS` and
+  `outward_classes` (`delete_or_withdraw_own`, BUILT); the react spec's
+  `wrong_state_note`, `reversible_by` and `reversibility_procedure` name it.
+  RED FIRST: 8 of 10 tests failed before the wiring (the tool unregistered,
+  'no measured anchor', the reaction spec naming no inverse); 10 passed
+  after. Pins moved, each with its note: 62 tools and 99 parameters, 18 write
+  tools, the sanctioned and performable sets, the reversibility tables, the
+  urn-probe set, the preview-state REACHED table, the two driven-set
+  baselines; `tests/test_receipt_names_its_own_action.py` (18 actions: the
+  new action a third owner of "the post", which it presses and verifies on,
+  and the reaction pair a fourth sanctioned shared place, an act and its
+  inverse like the save pair -- no row reworded to dodge a phrase); and the
+  three count-prose sites the guards read (`server.py`'s docstring,
+  `README.md`, the package docstring: 62 tools, 44 read, 18 write, the
+  mutating-call count unmoved at 15 because the press is `perform`'s own
+  click). THE ORIGINAL TIME-BOX NOTE, KEPT: under the lane's time box child B committed
   only what was green; the un-react moves a dozen pinned tables across about
   fifteen test files. ITS DESIGN IS BUILD-READY in child B's report and is
   summarised here: action `unreact_to_item`, the react spec's address and
@@ -326,18 +360,71 @@ the merge of master `53908ea`.
 - `M C32` (messaging-and-content): the cell names the new route -- the item
   key from `activity_items`, passed back as `item`; nothing checks whose post
   it is; the preview names the author and its kind -- and says the inverse is
-  NOT built and that the live proof waits on it.
+  NOT built and that the live proof waits on it. AFTER THE RULINGS OF 14:14
+  the paragraph was rewritten in place: `author_kind` reads `unknown`, and the
+  inverse is built.
 - `P A8` (profile): the cell names the clear-restore -- the record a write over
   an empty original leaves, the one admission of the empty value as a CLEAR,
   the click's "only what this server wrote", the read-back that must read "".
 - NOT EDITED, and why: `N 178` and `N 65` keep their cells -- their blocker is
   still a capture (C-NP1 now, on the detail page the new door admits), which D.2
   specifies; `M C35` ("Remove or change a reaction") is a candidate for the next
-  session's un-react and is left to its own cell's bar.
+  session's un-react and is left to its own cell's bar. AFTER THE RULINGS OF
+  14:14 ITS CELL WAS EDITED AFTER ALL, IN PLACE AND DATED, because its blocker
+  had become false: it said the ON label had never been observed and that no
+  selector existed for the inverse. Two ON names were measured on 2026-09-04
+  and 2026-09-23/24, and the remove half is now built. The note says so, says
+  CHANGE is not built (no 'React <kind>' name measured), and moves NO state:
+  the row stays GAP and no pin moved (`census_completion.py --check`, the
+  blocker map's `--check`, both clean). Whether half a row's capability built
+  moves it is the census owner's call, asked in the final report.
+- `M C35` SPLIT, ON THE ORCHESTRATOR'S CALL OF 15:45: "an existing ruling
+  answers it. COMPOUND-ROW-SPLITS-ONLY-ON-STATE splits a row when its halves
+  need different states, as P L2 -> L2b and N 26 -> 26b did: M C35, the
+  REMOVE half: COVERED-UNFIRED on linkedin_withdraw_reaction, by its bar;
+  M C35b, the CHANGE half: GAP, with the blocker 'no 'React <kind>' label
+  measured: capture the reactions menu'." Applied over master `71d83ca`:
+  - the slice: `C35` renamed to its half, "Remove a reaction",
+    COVERED-UNFIRED, its cell opening on the tool, its tests and its live
+    proof (F, step 9) and keeping the pre-split cell after it; `C35b`,
+    "Change a reaction to another kind", GAP, its blocker as the call words
+    it and the capture named (the queue's `own-post-reactions` line). Both
+    keep the compound row's REV cell, inherited.
+  - the side tables: `write-classes.tsv` -- `M C35` to
+    `built:withdraw_reaction` under the act `delete-or-withdraw-own` (R3),
+    and a new `M C35b` line, `react`, R3, classify-only; `next-step.tsv` --
+    the `M C35` line becomes `M C35b`, the same CAPTURE step, basis NAMED;
+    `capture-queue.tsv` -- the `own-post-reactions` line now unblocks
+    `M C33, M C35b`.
+  - the pins, re-derived from what `census_completion.py` measured, never
+    summed: stated_rows 772, capabilities 786, capabilities_achievable 725,
+    achievable 711, adjudicated 211, delivered_broad 133, unfired 22,
+    b1_standing 13; `gap` (561) and `gap_write` unmoved, one row leaving and
+    one entering. `M C35` pinned in bucket 1 under the write hold
+    (OPERATOR-NAMES-THE-TARGET). The row pin 771 -> 772 (messaging 153 ->
+    154) by `scripts/pin_census_rows.py --write`, with its two literals.
+  - green after it: `census_completion.py --check`, `check_next_step.py`
+    (every GAP row once, 561), `check_write_classes.py` (374 lines),
+    `check_census_locators_resolve.py`, the exclusion, refused-address,
+    read-address and write-off checkers, `pin_census_rows.py --check`, and
+    the blocker map, rulings register and audit index `--check`s.
+  - AT THE LANE'S MERGE OF MASTER 0103810 (lane U's attachment tool, merged to
+    master over 71d83ca without this lane's withdraw tool): both branches had
+    moved the same pins by one tool from one base, so every count was
+    re-derived on the merged tree, never taken from either side -- 63 tools
+    and 102 parameters, 44 read and 19 write, 19 performable actions of 20
+    sanctioned, the receipt file at 19 with the conversation pair and the
+    reaction pair both sanctioned, the preview-state REACHED table at 19, the
+    write classes at 371 (16 R1, 34 R2, 321 R3), and the census at
+    adjudicated 214, delivered_broad 136, unfired 25, b1_standing 16, gap 558.
 
 ---
 
-## F. The next live session's spec (session 8): 40 loads and 5 searches assumed
+## F. The next live session's spec (session 9): 40 loads and 5 searches assumed
+
+SESSION 8 HAS RUN (the live lane's record, merged to master at `91ed87c`) and
+fired none of this lane's rows, so this is session 9's spec -- the session the
+orchestrator's ruling 3 names for C-NP1.
 
 PRECONDITIONS, ZERO LOADS. Master carries lane NP (A to D) and is CI-green by
 its sha; the live lane merges it and its harness tests pass; the live-session
@@ -365,14 +452,17 @@ THE ORDER, AND EACH STEP'S LOADS (20 s or more apart, as always):
              preview (0), confirm (1). The capture C-NP1 of D.2. A        (capture only)
              landing elsewhere is recorded (path depth) and NOT retried.
     6      linkedin_react_to_item(item=<the FIRST item whose author    M C32
-             is "owner">): preview (1). It must read no_reaction and
-             name the member's own post. IF IT READS REACTED -- his own
+             is "owner">): preview (1). It must read no_reaction; the
+             post's ownership is activity_items' (step 2), the
+             preview's author_kind reading `unknown` by ruling 4.
+             IF IT READS REACTED -- his own
              earlier reaction -- take the next owner item; if none,
              STOP: a reaction that predates the session is never taken
              back.
     7-8    confirm: the press (1) and the verification's fresh render  M C32
              (1); verified "reacted".
-    9      the un-react tool on the same key: preview (1);    M C35 (candidate)
+    9      linkedin_withdraw_reaction(item=<the same key>):            M C35
+             preview (1);
              it must read reacted.
     10-11  confirm: the press and the fresh render; verified          M C32's inverse
              "no_reaction" -- the post back as it was.
@@ -397,7 +487,9 @@ THE BARS, each row on its own cell's:
     N 85    the same fire: the facet kept (query_kept), the filter applied
     N 31    search 2: both facets kept, every record at 1st degree
     M C32   a reaction performed and verified on a post of the member he named
-    M C35   the inverse performed and verified -- a candidate; its cell decides
+    M C35   the inverse performed and verified: COVERED-UNFIRED -> COVERED-PROVEN
+            (`M C35b`, changing a reaction's kind, waits on the reactions-menu
+            capture and is not fired here)
     P A8    the test and the clear both SAVED and verified, the field reading its
             empty original on a fresh render
     N 178,  no move on a capture: the reader of D.3 is built offline over the
@@ -407,11 +499,21 @@ STOP RULES, as every session: any wall, challenge or unexpected landing stops
 the session; a refused step is recorded and the next INDEPENDENT step runs
 (2-4 hang on 2's token; 6-11 on 2's items; 16-19 on 12-15).
 
-STEPS 6-11 WAIT ON THE INVERSE. His YES was to react AND take the reaction
-back; the un-react tool (its name is the first question below) is not built
-(B3). Until it is on master and green, steps 6-11 are NOT RUN -- a reaction
-this server cannot take back is not fired -- and the session spends 14 loads,
-2 searches.
+STEPS 6-11 RUN ONLY WITH THE INVERSE ON MASTER. His YES was to react AND take
+the reaction back; the inverse is `linkedin_withdraw_reaction` (B3), so step 9
+reads `linkedin_withdraw_reaction(item=<the same key>)`. Until it is on master
+and green, steps 6-11 are NOT RUN -- a reaction this server cannot take back is
+not fired.
+
+STEPS 12-19 (P A8) ARE NOT RUN: the orchestrator's ruling of 14:14 -- "my
+earlier call stands. Any value is a statement he has not made. The clear-restore
+makes the edit safe to undo, and that is all it does." P A8 stays
+COVERED-UNFIRED with no live proof unless he names a value; the session then
+spends 12 loads (11 without the re-read), 2 searches.
+
+STEP 5 (C-NP1) IS SESSION 9'S CAPTURE, on the same ruling: the four measured
+sections stay; no tab address and no press until that capture shows what the
+page does.
 
 ---
 
@@ -443,11 +545,34 @@ CI. Every red below was this lane's own and is fixed in the commit named.
     census_completion.py; build_rulings_index, build_audit_     every headline figure matches its pin;
       index, build_blocker_map --check                            all three derived views clean
 
+AFTER THE RULINGS OF 14:14 (the inverse, author_kind), with `-n 6` and the
+file kept on one worker, each batch on the committed tree:
+
+    file(s)                                                     result
+    tests/test_a_reaction_can_be_withdrawn.py                   red first: 8 of 10 failed; then 10 passed
+    test_a_reaction_takes_any_item_and_names_its_author.py      red first ('another_member' == 'unknown')
+    tests/test_receipt_names_its_own_action.py                  4 red (the count, "the post", the shared
+                                                                  place) -> owners and the pair; 17 passed
+    test_prose_that_makes_a_claim.py, test_the_other_two_       4 red (the three count-prose sites) ->
+      count_claims_are_pinned_too.py                              re-derived
+    batch 1: the twelve directly touched files                  300 passed (100 s)
+    batch 2: test_writes.py, test_writes_nine.py (spread)       303 passed (104 s)
+    batch 2b: the nine write-class files                        210 passed (70 s)
+    batch 3: the page-string harness and corpus guards          811 passed (126 s)
+    batch 4: the ten other write-tool files                     419 passed, 3 skipped (554 s: a browser
+                                                                  file on a loaded box -- CI's from now on)
+    test_no_committed_identity.py, after the commit             1072 passed
+    the merge of master `1027bf8`: build_audit_index,           all clean; every headline figure
+      build_blocker_map, build_rulings_index, census_             matches its pin
+      completion --check
+
 ON CI (`scripts/lane_ci.py`): run `38035128406` on `678c4d8` FAILED -- this
 lane's two docstring words and three pin copies (fixed in `49ac33b` and
 `15d4675`), and the cited-SHA family's "cannot resolve master" on every `ci/`
 run, which the coordinator confirmed is infrastructure (KNOWN-INFRA, its fix
-merging to master). Run `38036699018` on `6222f1b` (both children merged) FAILED on two more of this lane's own -- a document naming the unbuilt inverse by a tool name, and child B's DEBUG capture leaving the package logger at INFO (fixed in `de0a4ae`) -- beside the same KNOWN-INFRA family. Run `38037374698` on `4230f00` (master `b10bde8` merged, its local-master fix in) FAILED on ONE test: `test_every_candidate_pair_is_declared_or_triaged`, a table-row-proximity pair (row 33's own vocabulary two lines below row 31's citation of this record), triaged on `NOT_A_CORRECTION` after reading the line. The certifying run is the one named in the lane's final message.
+merging to master). Run `38036699018` on `6222f1b` (both children merged) FAILED on two more of this lane's own -- a document naming the unbuilt inverse by a tool name, and child B's DEBUG capture leaving the package logger at INFO (fixed in `de0a4ae`) -- beside the same KNOWN-INFRA family. Run `38037374698` on `4230f00` (master `b10bde8` merged, its local-master fix in) FAILED on ONE test: `test_every_candidate_pair_is_declared_or_triaged`, a table-row-proximity pair (row 33's own vocabulary two lines below row 31's citation of this record), triaged on `NOT_A_CORRECTION` after reading the line. Run `38038413611` on `0b41978` (master `fe119de` merged; A to F) SUCCEEDED,
+and master fast-forwarded to that head. The runs after the rulings of 14:14
+are named in the lane's final message.
 
 The children's own runs are in their reports: child C 42 new tests and 842
 existing targeted tests green; child B 16 new tests and its react-touching
@@ -455,7 +580,14 @@ guards green.
 
 ---
 
-## Questions for the orchestrator
+## Questions for the orchestrator -- ANSWERED 14:14 (kept as asked)
+
+Rulings: (1) the inverse is `linkedin_withdraw_reaction`, the law unwidened --
+BUILT (B3); (2) P A8's value: the earlier call stands, no live proof unless he
+names one; (3) the four sections stay, the tab and redirect are session 9's
+capture; (4) `author_kind` reads `unknown` until a capture of another member's
+post shows the rule -- DONE (B2). Questions 5 and 6 below are folded into (4)
+and D.3.
 
 1. THE INVERSE'S NAME (B3). `tests/test_writes.py`'s verb conservation law
    refuses `unreact` by name

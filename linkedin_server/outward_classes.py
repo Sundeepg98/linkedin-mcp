@@ -756,6 +756,39 @@ OUTWARD_CLASS_SPECS: dict[str, OutwardClassSpec] = {
             "preview, the perform and the fresh-render verification."
         ),
     ),
+    # LANE NP, 2026-10-10 -- the orchestrator's ruling of 14:14: "Withdrawing
+    # his OWN reaction is 'delete or withdraw one of his own items'
+    # (OUTWARD-CLASSES-BUILT-BEHIND-GRANTS)."
+    "withdraw_reaction": OutwardClassSpec(
+        action="withdraw_reaction",
+        outward_class="delete_or_withdraw_own",
+        status="BUILT",
+        target_kind="item_urn",
+        target=(
+            "the item's urn, from the tool's arguments; the page may veto (no "
+            "single toggle wearing a measured ON name), never supply"
+        ),
+        census_rows=(),
+        summary="Withdraw his own reaction from one feed item.",
+        carried_facts=(
+            "MEASURED: the two ON names it aims at -- 'Reaction button state: "
+            "Like' on his profile rail (2026-09-04) and 'Unreact Like' on his "
+            "own liked post's permalink (2026-09-23 and 2026-09-24) -- and the "
+            "OFF name its verification reads, 'Reaction button state: no "
+            "reaction' (2026-08-30 and 2026-08-31). What pressing an ON name "
+            "does has never been observed."
+        ),
+        reversible_by=(
+            "linkedin_react_to_item re-applies LinkedIn's DEFAULT reaction, not "
+            "necessarily the kind withdrawn."
+        ),
+        live_proof=(
+            "React to a post of the member HE NAMES (its key from "
+            "linkedin_read_named_profile's activity_items), then withdraw it: "
+            "each a preview and a confirm on the item's permalink, each "
+            "verified on a fresh render (lane NP's record, F)."
+        ),
+    ),
 }
 
 

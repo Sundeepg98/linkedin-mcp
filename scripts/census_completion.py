@@ -1058,7 +1058,13 @@ PINNED = {
     #: COVERED-UNFIRED by D6.
     #: 772 AT LANE S'S MERGE OF MASTER 71d83ca (2026-10-10), MEASURED on the
     #: merged tree: master's figure after lane K's rulings, plus `P O17` (a stated row).
-    "stated_rows": 772,
+    #: 772 ON THE ORCHESTRATOR'S CALL OF 2026-10-10 15:45 (lane NP), MEASURED:
+    #: `M C35b` entered, split from `M C35` (COMPOUND-ROW-SPLITS-ONLY-ON-STATE):
+    #: changing a reaction's kind, GAP, where removing one went COVERED-UNFIRED
+    #: on `linkedin_withdraw_reaction`.
+    #: 773 AT THE INTEGRATION MERGE OF LANE NP ONTO LANES S AND B5 (2026-10-10), MEASURED on the merged tree: lane S's `P O17` and
+    #: lane NP's `M C35b` are two rows, never summed.
+    "stated_rows": 773,
     #: 762 = 704 stated rows + 58 declared collapses, computed at HEAD. NOT the
     #: published 761 and NOT the counter docstring's 760: those two differ only
     #: by a `- 2 stateless` term whose two rows are already outside the 704.
@@ -1090,7 +1096,9 @@ PINNED = {
     #: entered; no collapse moved.
     #: 785 ON THE ORCHESTRATOR'S CALL OF 2026-09-28 17:46 (lane S), MEASURED:
     #: `N 26b` entered (see `stated_rows`); no collapse moved.
-    "capabilities": 785,
+    #: 786 ON THE ORCHESTRATOR'S CALL OF 2026-10-10 15:45 (lane NP), MEASURED:
+    #: `M C35b` entered (see `stated_rows`); no collapse moved.
+    "capabilities": 786,
     #: 741 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: the achievable
     #: move, with `O6-O20`'s 14 unchanged.
     #: 742 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: `N 2` left the exclusions.
@@ -1103,7 +1111,9 @@ PINNED = {
     #: `P S9` and `M C71` GAP -> EXCLUDED-RULED; `O6-O20`'s 14 unchanged.
     #: 724 ON LANE K's APPLICATION OF THE RULINGS OF 2026-10-10, MEASURED: the
     #: same 21 rows; `O6-O20`'s 14 unchanged.
-    "capabilities_achievable": 724,
+    #: 725 ON THE ORCHESTRATOR'S CALL OF 2026-10-10 15:45 (lane NP), MEASURED:
+    #: `M C35b` entered, in scope (see `stated_rows`); `O6-O20`'s 14 unchanged.
+    "capabilities_achievable": 725,
     #: 43 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: 29 rows returned
     #: to GAP when OUTWARD-CLASSES-BUILT-BEHIND-GRANTS retired their key, and
     #: `P P2` at the merge (-30); `P N27` and `P P2` then EXCLUDED-RULED on
@@ -1136,7 +1146,10 @@ PINNED = {
     #: stated rows 771 less out_of_scope 61.
     #: 711 AT LANE S'S MERGE OF MASTER 71d83ca (2026-10-10), MEASURED on the
     #: merged tree: master's figure after lane K's rulings, plus `P O17` (a stated row in scope).
-    "achievable": 711,
+    #: 711 ON THE ORCHESTRATOR'S CALL OF 2026-10-10 15:45 (lane NP), MEASURED:
+    #: stated rows 772 less out_of_scope 61 -- `M C35b` entered, in scope.
+    #: 712 AT THE INTEGRATION MERGE OF LANE NP ONTO LANES S AND B5 (2026-10-10), MEASURED: stated rows 773 less out_of_scope 61.
+    "achievable": 712,
     #: 205 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
     #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
     #: 179 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: the 30 returned
@@ -1215,7 +1228,16 @@ PINNED = {
     #: by no ruling (189 on the lane's branch, over master f93104c).
     #: MEASURED AT THE INTEGRATION MERGE OF LANE B5 ONTO MASTER a457819 (2026-10-10) on the
     #: merged tree, never summed (lane S's and lane B5's figures above).
-    "adjudicated": 217,
+    #: 211 ON THE ORCHESTRATOR'S CALL OF 2026-10-10 15:45 (lane NP), MEASURED:
+    #: `M C35` (removing his own reaction) GAP -> COVERED-UNFIRED on
+    #: `linkedin_withdraw_reaction`, built offline and never fired. A W row, so
+    #: it enters bucket 1 held by the write hold (OPERATOR-NAMES-THE-TARGET);
+    #: `M C35b`, split from it, enters GAP, so `gap` and `gap_write` do not move.
+    #: 214 AT LANE NP'S MERGE OF MASTER 0103810 (2026-10-10), MEASURED: lane U's 213
+    #: with `M C35` GAP -> COVERED-UNFIRED (+1); `M C35b` entered GAP.
+    #: MEASURED AT THE INTEGRATION MERGE OF LANE NP ONTO LANES S AND B5 (2026-10-10) on the merged tree,
+    #: never summed (the figures above are each lane's own).
+    "adjudicated": 218,
     #: THE LIVE LANE'S FOUR ROWS, RE-DERIVED AT EACH OF ITS MERGES OF MASTER
     #: (2026-09-24; last over lane S): four rows fired live and banked
     #: (`_audit/2026-09-23-live-lane-session-1.md`). `P G6` COVERED-UNFIRED ->
@@ -1293,7 +1315,13 @@ PINNED = {
     #: `adjudicated`).
     #: MEASURED AT THE INTEGRATION MERGE OF LANE B5 ONTO MASTER a457819 (2026-10-10) on the
     #: merged tree, never summed (lane S's and lane B5's figures above).
-    "delivered_broad": 139,
+    #: 133 ON THE ORCHESTRATOR'S CALL OF 2026-10-10 15:45 (lane NP), MEASURED:
+    #: `M C35` GAP -> COVERED-UNFIRED (see `adjudicated`).
+    #: 136 AT LANE NP'S MERGE OF MASTER 0103810 (2026-10-10), MEASURED: lane U's 135
+    #: with `M C35` (+1).
+    #: MEASURED AT THE INTEGRATION MERGE OF LANE NP ONTO LANES S AND B5 (2026-10-10) on the merged tree,
+    #: never summed (the figures above are each lane's own).
+    "delivered_broad": 140,
     #: 79 since the live lane's merge (see `adjudicated`): P G6, N 134, P O3
     #: and M C72 COVERED-PROVEN.
     #: 75 and 21 since the bucket-1 merge: `M C41` fired live and moved from
@@ -1483,7 +1511,15 @@ PINNED = {
     #: never fired).
     #: MEASURED AT THE INTEGRATION MERGE OF LANE B5 ONTO MASTER a457819 (2026-10-10) on the
     #: merged tree, never summed (lane S's and lane B5's figures above).
-    "unfired": 24,
+    #: 22 ON THE ORCHESTRATOR'S CALL OF 2026-10-10 15:45 (lane NP), MEASURED:
+    #: `M C35` COVERED-UNFIRED, never fired (see `adjudicated`).
+    #: 25 AT LANE NP'S MERGE OF MASTER 0103810 (2026-10-10), MEASURED: lane U's 24
+    #: with `M C35` (+1).
+    #: 21 AT LANE NP'S MERGE OF MASTER 6c65815 (2026-10-10), MEASURED: the live
+    #: lane's 20 with `M C35` (+1).
+    #: MEASURED AT THE INTEGRATION MERGE OF LANE NP ONTO LANES S AND B5 (2026-10-10) on the merged tree,
+    #: never summed (the figures above are each lane's own).
+    "unfired": 25,
     #: 104 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     #: 101 AT LANE S'S NAMES ADOPTION (2026-09-27), MEASURED: `N 79`, `N 172`
@@ -1871,7 +1907,12 @@ PINNED = {
     #: `M M14`, `M M15` and `M M18` entered, held by OPERATOR-NAMES-THE-TARGET.
     #: 15 AT LANE U'S MERGE OF ORIGIN/MASTER 1027bf8, MEASURED: session 8's
     #: four banked out (16 - 4) and lane U's three in (+ 3).
-    "b1_standing": 15,
+    #: 13 ON THE ORCHESTRATOR'S CALL OF 2026-10-10 15:45 (lane NP), MEASURED:
+    #: `M C35` entered bucket 1, a W row the write hold binds with no marker
+    #: (OPERATOR-NAMES-THE-TARGET).
+    #: 16 AT LANE NP'S MERGE OF MASTER 0103810 (2026-10-10), MEASURED: lane U's 15
+    #: with `M C35` (+1), held by OPERATOR-NAMES-THE-TARGET.
+    "b1_standing": 16,
     "b1_relayed": 0,
     "b1_pending": 0,
     #: 22 AT THE ORCHESTRATOR'S MERGE OF LANE D (2026-09-27), MEASURED: lane D
@@ -2084,9 +2125,13 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
     #: photo, a video and a document each aimed at its own input on the live
     #: lane's session-8 composer capture. Held until he names the conversation
     #: and the file.
+    #: `M C35` entered ON THE ORCHESTRATOR'S CALL OF 2026-10-10 15:45 (lane NP),
+    #: MEASURED: withdrawing his own reaction (`linkedin_withdraw_reaction`),
+    #: built offline on the ruling of 14:14 and never fired. Held until he
+    #: names the item -- his live proof is a reaction the same session placed.
     "OPERATOR-NAMES-THE-TARGET": (
         "J 128",
-        "M C1", "M C25", "M C32", "M C63", "M M10", "M M14", "M M15", "M M18",
+        "M C1", "M C25", "M C32", "M C35", "M C63", "M M10", "M M14", "M M15", "M M18",
         "N 1", "N 2", "N 4", "N 47", "N 64",
         "P I14",
     ),

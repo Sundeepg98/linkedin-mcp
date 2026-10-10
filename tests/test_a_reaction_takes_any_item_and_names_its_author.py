@@ -263,10 +263,44 @@ def _person(block: dict[str, Any]) -> Any:
     return record
 
 
-async def test_the_preview_names_another_members_post_author(writes_on, browser_page):
+@pytest.fixture
+def rule_shown(monkeypatch):
+    """THE COMPARISON AS IT WILL READ ONCE A CAPTURE OF ANOTHER MEMBER'S POST
+    SHOWS IT (the orchestrator's ruling of 2026-10-10 14:14 keeps it switched
+    off until then). Tests of the rule's own logic switch it on."""
+    from linkedin_server import item_author
+
+    monkeypatch.setattr(item_author, "AUTHOR_KIND_SHOWN_ON_ANOTHER_MEMBERS_POST", True)
+
+
+async def test_author_kind_is_unknown_until_a_capture_shows_the_rule(writes_on, browser_page):
+    """THE RULING (orchestrator, 2026-10-10 14:14): "make it 'unknown' until a
+    capture of ANOTHER member's post shows the rule. The surface may not print
+    a claim it cannot derive." On another member's post AND on his own, the
+    block says ``unknown`` and why -- while still naming the author it read."""
+    for page in (
+        _permalink(),
+        _permalink(actor_href=_member_href(_VIEWER_SLUG), actor_name=_VIEWER_NAME),
+    ):
+        block = await _react_preview(browser_page, page)
+        assert block.get("author_kind") == "unknown", block.get("author_kind")
+        assert "may not print a claim it cannot derive" in block["who_this_would_reach_check"]
+        assert _person(block).name in (_AUTHOR_NAME, _VIEWER_NAME)
+
+
+async def test_control_with_the_rule_switched_on_the_kind_is_printed(
+    writes_on, browser_page, rule_shown
+):
+    """THE CONTROL: the default above is the switch, not a comparison that
+    cannot answer -- switched on, the same page reads ``another_member``."""
+    block = await _react_preview(browser_page, _permalink())
+    assert block.get("author_kind") == "another_member"
+
+
+async def test_the_preview_names_another_members_post_author(writes_on, browser_page, rule_shown):
     """THE CASE THE LIVE PROOF IS FOR: a post by a member he names. The block
-    names its author in a people record -- sanitised, marked untrusted -- and
-    calls the post another member's."""
+    names its author in a people record -- sanitised, marked untrusted -- and,
+    with the rule shown, calls the post another member's."""
     block = await _react_preview(browser_page, _permalink())
     assert block.get("author_kind") == "another_member", block.get("author_kind")
     record = _person(block)
@@ -284,7 +318,7 @@ async def test_the_preview_names_another_members_post_author(writes_on, browser_
     assert "who_this_would_reach_check" in block
 
 
-async def test_his_own_post_reads_you(writes_on, browser_page):
+async def test_his_own_post_reads_you(writes_on, browser_page, rule_shown):
     """The actor's link and his own identity card name the same member."""
     block = await _react_preview(
         browser_page,
@@ -294,7 +328,7 @@ async def test_his_own_post_reads_you(writes_on, browser_page):
     assert _person(block).name == _VIEWER_NAME
 
 
-async def test_the_comparison_folds_case_and_percent_encoding(writes_on, browser_page):
+async def test_the_comparison_folds_case_and_percent_encoding(writes_on, browser_page, rule_shown):
     """A vanity segment is case-insensitive on LinkedIn; the comparison is the
     house's own (``named_profile.same_segment``)."""
     shouted = _VIEWER_SLUG.upper().replace("-", "%2D")
@@ -435,7 +469,7 @@ async def test_a_failed_read_names_nobody_and_never_raises():
     assert block["who_this_would_reach"] is None
 
 
-def test_a_reading_of_a_different_render_names_nobody():
+def test_a_reading_of_a_different_render_names_nobody(rule_shown):
     """THE PAGE IS CHECKED, NOT ASSUMED: the namer's own re-read of the toggle
     must agree with the observation the grant was minted from, or the author
     it read may be some other render's."""

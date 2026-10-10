@@ -99,6 +99,7 @@ from linkedin_server.writes import (
 # THE HARNESS, from the file that already owns it. ``over`` gives one browser
 # per test and a fresh isolated context per READING, with innerWidth asserted
 # on each -- which is the standard this package holds every measurement to.
+from tests.test_a_reaction_can_be_withdrawn import WITHDRAW_MARKUP
 from tests.test_apply_modal_fixture import VIEWPORT, over  # noqa: F401
 from tests.test_editor_fields import TWO_DIALOG_HTML
 from tests.test_follow_company_page import (
@@ -117,6 +118,7 @@ from tests.test_set_admitted_setting import SETTINGS_PAGE_MARKUP, SETTINGS_RAW_T
 from tests.test_writes import (  # noqa: F401 -- two of these are fixtures
     FOLLOWED_COMPANY,
     JOB,
+    REACTED_ITEM,
     SAVED_JOB,
     SAVED_POSTING,
     _bare_grant,
@@ -330,6 +332,17 @@ REACHED: dict[str, tuple[str, str, str]] = {
                 {"profile": NAMED_PROFILE_LINK, "text": "Thursday works."},
             )
         ),
+    ),
+    # THE NINETEENTH, 2026-10-10 (lane NP, the orchestrator's ruling of 14:14):
+    # the reaction's inverse. A SYNTHETIC permalink built by the reaction
+    # tests' own builder over his own post's measured structure, its one
+    # toggle wearing the ON name measured on an item's own permalink. The
+    # preview and the click read it through ONE reader and ONE measured-name
+    # check, ``dom.measured_on_label``.
+    "withdraw_reaction": (
+        "tests/test_a_reaction_can_be_withdrawn.py",
+        WITHDRAW_MARKUP,
+        str(writes._target_for(spec_for_action("withdraw_reaction"), REACTED_ITEM)),
     ),
 }
 
@@ -593,8 +606,15 @@ def test_every_performable_action_is_either_reached_or_declared_unreachable():
     # temp upload root. MEASURED on the branch.
     # 18 -> 19 at lane S's merge of master 0103810 (2026-10-10): ``set_admitted_setting``
     # shipped, reached over the real capture of the one admitted page.
-    assert len(PERFORMABLE) == 19, sorted(PERFORMABLE)
-    assert len(REACHED) == 19, sorted(REACHED)
+    # 18 -> 19 AT LANE NP'S MERGE OF MASTER 0103810, 2026-10-10:
+    # ``withdraw_reaction`` (the orchestrator's ruling of 14:14) beside lane
+    # U's ``send_attachment``, reached over the synthetic permalink its own
+    # tests read, not declared unreachable; lane NP's branch had counted it
+    # 17 -> 18. MEASURED on the merged tree.
+    # 19 -> 20 AT THE INTEGRATION MERGE OF LANE NP ONTO LANES S AND B5 (2026-10-10): both
+    # writes, each reached over its own tests' surface. MEASURED.
+    assert len(PERFORMABLE) == 20, sorted(PERFORMABLE)
+    assert len(REACHED) == 20, sorted(REACHED)
     assert len(CANNOT_REACH) == 0, sorted(CANNOT_REACH)
 
 

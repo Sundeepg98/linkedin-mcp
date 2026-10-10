@@ -277,6 +277,24 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "CORRECTED BY: pair."
     ),
 
+    # 2026-10-10, lane NP, after the orchestrator's rulings of 14:14. TABLE-ROW
+    # PROXIMITY again, read and not inferred from the filenames: found by the
+    # lane's local run of this file before its ci/ push.
+    ("messaging-and-content.md", "2026-10-10-lane-np-named-profile.md"): (
+        "A ROW CITING THE LANE'S RECORD AS THE EVIDENCE FOR ITS OWN NOTE, NOT "
+        "A CORRECTION OF THAT RECORD. Row `C35` (remove a reaction; `C35b` "
+        "was split from it on 2026-10-10) cites lane NP's record (B3) for the "
+        "measured ON names and the built inverse, and its kept pre-split note "
+        "says its own ON-label blocker no longer held for REMOVE; row `C32` "
+        "cites it for the same tool. Neither says anything in the record is "
+        "wrong. The matched word ('corrected') is on row `C36`, two lines "
+        "below `C35` with `C35b` between them, about that row's own content. "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** a "
+        "messaging row saying something in lane NP's record does not hold "
+        "while leaving the record unmarked, which would need its own "
+        "CORRECTS: / CORRECTED BY: pair."
+    ),
+
     # 2026-10-10, lane NP. TABLE-ROW PROXIMITY, read and not inferred from the
     # filenames: found by the lane's CI run 38037374698.
     ("network.md", "2026-10-10-lane-np-named-profile.md"): (

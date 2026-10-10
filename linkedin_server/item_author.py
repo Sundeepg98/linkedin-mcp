@@ -95,11 +95,24 @@ from typing import Any, Mapping, Optional
 from linkedin_server import coerce, dom, named_profile, people_data, people_seam
 from linkedin_server.config import logger
 
-#: The actions whose preview names the post's author.
-REACTION_ACTIONS: frozenset[str] = frozenset({"react_to_item"})
+#: The actions whose preview names the post's author: the reaction and, since
+#: 2026-10-10 (lane NP, the orchestrator's ruling of 14:14), its inverse.
+REACTION_ACTIONS: frozenset[str] = frozenset({"react_to_item", "withdraw_reaction"})
 
 #: The closed vocabulary of ``author_kind``.
 AUTHOR_KINDS: tuple[str, ...] = ("you", "another_member", "unknown")
+
+#: WHETHER THE RULE THAT TELLS HIS POST FROM ANOTHER MEMBER'S HAS BEEN SHOWN ON
+#: A CAPTURE OF ANOTHER MEMBER'S POST. It has not. THE ORCHESTRATOR'S RULING,
+#: 2026-10-10 14:14 (lane NP): "author_kind: make it 'unknown' until a capture
+#: of ANOTHER member's post shows the rule. The surface may not print a claim it
+#: cannot derive." So :func:`author_kind` answers ``unknown`` while this is
+#: False, whatever the comparison reads; the comparison is kept, and tested
+#: with this switched on, so that the capture which shows it working is one
+#: edit and one test away. The TARGET's ownership comes from where its key was
+#: read -- ``linkedin_read_named_profile``'s ``activity_items``, on the named
+#: profile itself -- not from this preview.
+AUTHOR_KIND_SHOWN_ON_ANOTHER_MEMBERS_POST = False
 
 #: The post's actor link, inside ``main``. MEASURED: exactly 1 on his own
 #: post's permalink capture; 4 on a group feed of other members' posts.
@@ -253,8 +266,12 @@ def author_kind(state: Any, reading: Mapping[str, Any]) -> str:
     two links differ, on a page whose reaction toggle WAS read and settled.
     Anything else -- the page read differently from the preview, two actors, an
     organisation, his card not drawn exactly once, a link that did not read --
-    is ``unknown``. The split is DERIVED; see the module docstring.
+    is ``unknown``. The split is DERIVED; see the module docstring -- and
+    until :data:`AUTHOR_KIND_SHOWN_ON_ANOTHER_MEMBERS_POST` it is not
+    printed at all: the answer is ``unknown``.
     """
+    if not AUTHOR_KIND_SHOWN_ON_ANOTHER_MEMBERS_POST:
+        return "unknown"
     if not _same_render(state, reading) or not _one_member(reading):
         return "unknown"
     if not _exactly_one(reading.get("viewer_cards")):
@@ -268,6 +285,8 @@ def author_kind(state: Any, reading: Mapping[str, Any]) -> str:
 
 
 _KIND_SENTENCES: dict[str, str] = {
+    # THE TWO BELOW ARE PRINTED ONLY ONCE THE RULE IS SHOWN ON A CAPTURE OF
+    # ANOTHER MEMBER'S POST (AUTHOR_KIND_SHOWN_ON_ANOTHER_MEMBERS_POST).
     "you": (
         "'you': the actor's profile link names the same member as your own "
         "identity card on this page, so this is YOUR OWN post."
@@ -278,9 +297,13 @@ _KIND_SENTENCES: dict[str, str] = {
         "post, and the act notifies them."
     ),
     "unknown": (
-        "'unknown': this page did not settle whether the post is yours -- "
-        "your identity card, or the private analytics widget that makes it "
-        "yours, was not drawn exactly once, or a link did not read."
+        "'unknown': this server does not say whose post this is. No capture "
+        "of ANOTHER member's post has yet shown the rule that would tell it "
+        "from yours, and a surface may not print a claim it cannot derive (the "
+        "orchestrator's ruling of 2026-10-10). Whose post a key is comes from "
+        "where you read it: linkedin_read_named_profile's activity_items marks "
+        "each item owner, another_member or unknown, read on the named profile "
+        "itself."
     ),
 }
 
@@ -316,12 +339,9 @@ def name_the_item_author(
         "who_this_would_reach is the AUTHOR of the post this act lands on -- "
         "the name and headline its one actor block draws, read off the "
         "permalink already on your screen; a reaction notifies its author. "
-        "author_kind is " + _KIND_SENTENCES[kind] + " AUTHOR_KIND IS DERIVED: it "
-        "compares the actor's profile link with your own identity card's, and "
-        "no capture has yet shown that comparison telling another member's "
-        "post apart -- every name in the tracked captures is sanitised. The "
-        "record's link is null by design: this server loaded the post, not "
-        "the author's profile. This server keeps no copy: it is in no grant, "
-        "no log and no file. CHECK IT before confirming."
+        "author_kind is " + _KIND_SENTENCES[kind] + " The record's link is "
+        "null by design: this server loaded the post, not the author's "
+        "profile. This server keeps no copy: it is in no grant, no log and no "
+        "file. CHECK IT before confirming."
     )
     return out

@@ -7531,6 +7531,54 @@ def reaction_toggle_state(reading: Any) -> tuple[str, Optional[int]]:
     return "unmeasured_off", drawn
 
 
+#: THE TWO ON NAMES A WITHDRAWAL MAY AIM AT -- and the only two (lane NP,
+#: 2026-10-10, ``writes`` action ``withdraw_reaction``). Each MEASURED, as the
+#: table above records: "Reaction button state: Like" on his profile rail
+#: (2026-09-04), "Unreact Like" on his own liked post's permalink (2026-09-23
+#: and 2026-09-24). An ON name of another KIND -- "Unreact Celebrate", say --
+#: is in a measured family and of an unmeasured kind, and is never aimed at.
+REACTION_MEASURED_ON_LABELS: tuple[str, ...] = (
+    REACTION_STATE_PREFIX + " Like",
+    REACTION_UNREACT_PREFIX + "Like",
+)
+
+
+async def read_measured_on_labels(page: Any) -> dict[str, Optional[int]]:
+    """How many controls wear EACH measured ON name, exactly. COUNTS ONLY -- a
+    locator count per constant name, no script, no string read back. A count
+    that did not read is None, never a zero standing in for one."""
+    counts: dict[str, Optional[int]] = {}
+    for measured_label in REACTION_MEASURED_ON_LABELS:
+        try:
+            counts[measured_label] = as_count(
+                await page.locator('button[aria-label="' + measured_label + '"]').count()
+            )
+        except Exception as exc:  # noqa: BLE001 - an unread count stays None
+            logger.debug("measured ON label unreadable: %s", type(exc).__name__)
+            counts[measured_label] = None
+    return counts
+
+
+def measured_on_label(reading: Any, counts: Any) -> Optional[str]:
+    """The ONE measured ON name the page's one toggle wears, or None. PURE.
+
+    Needs the toggle to read ``reacted`` off exactly one control
+    (:func:`reaction_toggle_state`) AND exactly one control, across the two
+    measured names together, to wear one of them -- so a toggle ON in a KIND
+    nobody measured answers None, as does any count that did not read.
+    """
+    state, drawn = reaction_toggle_state(reading)
+    if state != "reacted" or drawn != 1 or not isinstance(counts, dict):
+        return None
+    worn = []
+    for measured_label in REACTION_MEASURED_ON_LABELS:
+        count = counts.get(measured_label)
+        if isinstance(count, bool) or not isinstance(count, int):
+            return None
+        worn.extend([measured_label] * count)
+    return worn[0] if len(worn) == 1 else None
+
+
 async def read_reaction_surface(page: Any) -> dict[str, Any]:
     """The reaction and comment controls on this page, and the states worn.
 

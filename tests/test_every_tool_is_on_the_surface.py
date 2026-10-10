@@ -373,4 +373,10 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # SIXTY-FOUR AT THE INTEGRATION MERGE OF LANE B5 ONTO MASTER a457819,
     # 2026-10-10: lane S's write and lane B5's read, both counted from
     # sixty-two, are two tools -- measured off the merged registry, not summed.
-    assert len(_tool_names()) == 64
+    # SIXTY-THREE AT LANE NP'S MERGE OF MASTER 0103810, 2026-10-10: one WRITE,
+    # linkedin_withdraw_reaction (the orchestrator's ruling of 14:14), counted
+    # the sixty-second on lane NP's branch before lane U's tool arrived beside
+    # it; measured off the merged registry.
+    # SIXTY-FIVE AT THE INTEGRATION MERGE OF LANE NP ONTO LANES S AND B5 (2026-10-10): lane NP's write
+    # beside lanes S's and B5's, measured off the merged registry, not summed.
+    assert len(_tool_names()) == 65

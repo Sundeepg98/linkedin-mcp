@@ -3,10 +3,25 @@
 An MCP server that shows you your own LinkedIn account data as structured tool
 results instead of pages you have to click through.
 
-**Sixty-four tools ship. Forty-five read. Nineteen write. None is
+**Sixty-five tools ship. Forty-five read. Twenty write. None is
 write-shaped and unable to act.**
 
-**THAT LINE READ "Sixty-three ... Forty-four read. Nineteen write" UNTIL LANE B5,
+**THAT LINE READ "Sixty-four ... Forty-five read. Nineteen write" UNTIL LANE
+NP, 2026-10-10, merged after lanes S and B5** (the orchestrator's ruling of
+14:14; the lane's branch had read "Sixty-three ... Forty-four read. Nineteen
+write" at its merge of master 0103810). One write arrived: `linkedin_withdraw_reaction` takes back YOUR
+OWN reaction on one item you name by key -- the inverse of
+`linkedin_react_to_item`, on a verb the outward-class law already admits
+(withdrawing one of your own items). Its first call loads the post and hands
+you a token only if the post's one reaction toggle wears a name that was
+measured as ON; the confirmed call presses that exact control and verifies off
+the measured OFF name on a fresh render. Census row `M C35`, the remove half of
+a split row, COVERED-UNFIRED; changing a reaction's kind, `M C35b`, stays GAP.
+The same lane made `linkedin_read_named_profile` return the member's token and
+recent activity keys, and admitted that profile's own detail pages behind the
+same grant (ruling NAMED-PROFILE-DETAIL-PAGES).
+
+**AND "Sixty-three ... Forty-four read. Nineteen write" UNTIL LANE B5,
 2026-10-10, merged after lane S** (the groups slice, ruling MEMBER-ROSTERS-AS-BOUNDED-READS). One
 read arrived: `linkedin_group_members` returns ONE page of a group's member
 list -- a group you belong to, named by its numeric id -- each member as a
@@ -39,7 +54,7 @@ over; Send is pressed only if the conversation's form draws the file's name
 exactly once. Census rows `M M14`, `M M15` and `M M18` are COVERED-UNFIRED:
 built and never fired, held until you name the conversation and the file.
 
-**THAT LINE READ "Sixty ... Forty-three read. Seventeen write" UNTIL THE
+**AND "Sixty ... Forty-three read. Seventeen write" UNTIL THE
 OPERATOR'S RULING OF 2026-09-28 08:01** (NAMED-PROFILE-READ-BEHIND-A-GRANT).
 One read arrived: `linkedin_read_named_profile` reads the profile of ONE member
 you name, by profile link or member id -- never a name. Its first call loads
@@ -1017,7 +1032,7 @@ linkedin_server/
   cdp_bridge.py              the recovery path: attach to a running Chrome
   dom.py                     the read-only harvesters and the control readers
   shape.py                   pure parsers and the result envelope
-  server.py                  the sixty-four tools
+  server.py                  the sixty-five tools
   errors.py
 tests/                       1393 tests, no network, no account
   fixtures/                  frozen LinkedIn markup, scrubbed

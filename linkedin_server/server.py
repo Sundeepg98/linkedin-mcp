@@ -1,4 +1,20 @@
-"""The tool surface: sixty-four tools, nineteen of which write to LinkedIn.
+"""The tool surface: sixty-five tools, twenty of which write to LinkedIn.
+
+THE SIXTY-FIFTH IS A WRITE, 2026-10-10, on the orchestrator's ruling of 14:14
+(lane NP): ``linkedin_withdraw_reaction``, the inverse of
+``linkedin_react_to_item``. It takes back HIS OWN reaction on one item he
+names by key, and it is named on a verb the conservation law already admits
+("delete or withdraw one of his own items",
+OUTWARD-CLASSES-BUILT-BEHIND-GRANTS), behind the flag and the single-use
+grant. Its preview and its press require the post's one toggle to wear a
+MEASURED ON name, and it verifies off the MEASURED OFF name on a fresh render
+of the same post. Census row ``M C35`` -- the remove half of a row split on
+the orchestrator's call of 15:45 -- COVERED-UNFIRED. It was built on lane
+NP's branch as that branch's sixty-second, while master gained
+``linkedin_send_attachment`` as its sixty-second; the lane's merge of master
+0103810 made it the sixty-third, and the integration merge after lanes S
+and B5 the sixty-fifth, measured off the merged registry. The headline read
+"sixty-four tools, nineteen of which write" until then.
 
 THE SIXTY-FOURTH IS A READ, 2026-10-10, lane B5 (the groups slice), on
 ``MEMBER-ROSTERS-AS-BOUNDED-READS``: ``linkedin_group_members``, ONE page of a
@@ -247,9 +263,9 @@ assigned to anybody -- it waits for whoever next runs the suite, and in the
 meantime the pin goes on asserting the old number with full confidence.
 
 THE NUMBERS ABOVE ARE DERIVED NOW, and that is a statement about a test rather
-than about an intention. Sixty-four is ``len(await mcp.list_tools())``,
+than about an intention. Sixty-five is ``len(await mcp.list_tools())``,
 pinned in ``test_server_surface.py`` by
-``test_the_surface_is_exactly_the_sixty_four_tools``; the split is pinned by
+``test_the_surface_is_exactly_the_sixty_five_tools``; the split is pinned by
 ``tests/test_prose_that_makes_a_claim.py::test_the_server_docstring_numbers_are_derived``,
 which reads THESE WORDS and fails if any of the three disagrees with the
 registry.
@@ -262,9 +278,9 @@ POINTER to it was dangling, so a reader who followed it found nothing and
 would reasonably conclude these numbers are unchecked. A citation is a claim
 like any other.
 The surface splits three ways and the split is the part a reader actually
-needs: FORTY-FIVE read, NINETEEN write, and ZERO are write-shaped,
-registered, gated and unable to act. Forty-five plus nineteen plus zero is
-sixty-four. (Thirty-eight, thirteen and fifty-one until 2026-09-24; thirty-nine,
+needs: FORTY-FIVE read, TWENTY write, and ZERO are write-shaped,
+registered, gated and unable to act. Forty-five plus twenty plus zero is
+sixty-five. (Thirty-eight, thirteen and fifty-one until 2026-09-24; thirty-nine,
 thirteen and fifty-two at the live lane's merge the same day; thirty-nine,
 fourteen and fifty-three at lane L7's; forty-one, fifteen and fifty-six at
 lane L5's; forty-one, sixteen and fifty-seven at lane L8's merge on
@@ -277,7 +293,9 @@ read of a named profile the same day; forty-four, seventeen and sixty-one
 until lane U's ``linkedin_send_attachment``, 2026-10-10; forty-four,
 eighteen and sixty-two until lane S's ``linkedin_set_admitted_setting``,
 merged after it the same day; forty-four, nineteen and sixty-three until
-lane B5's ``linkedin_group_members``, merged after lane S's the same day.)
+lane B5's ``linkedin_group_members``, merged after lane S's the same day;
+forty-five, nineteen and sixty-four until lane NP's
+``linkedin_withdraw_reaction``, merged after lane B5's the same day.)
 
 THE FIFTY-THIRD IS ONE WRITE, 2026-09-24 (lane L7, census row ``P I14``).
 ``linkedin_mark_company_interest`` presses "I'm interested" in the
@@ -406,11 +424,13 @@ the moment ``update_profile_field`` was given an address while still refusing.
 always meant: an address is not a permission.
 
 NOTE THE ACTION THAT HAS NO TOOL. ``writes.SANCTIONED_WRITES`` holds
-TWENTY actions where this surface registers NINETEEN write-shaped tools, and
+TWENTY-ONE actions where this surface registers TWENTY write-shaped tools, and
 the missing one is ``set_open_to_work``: it is sanctioned, it is refused by
-``_refuse_unperformable``, and no tool was ever registered for it. So nineteen
-counts TOOLS and twenty counts ACTIONS, and a reader comparing the two
-numbers is not looking at a discrepancy. (NINETEEN and EIGHTEEN until lane S's
+``_refuse_unperformable``, and no tool was ever registered for it. So twenty
+counts TOOLS and twenty-one counts ACTIONS, and a reader comparing the two
+numbers is not looking at a discrepancy. (TWENTY-ONE and TWENTY until lane
+NP's ``withdraw_reaction``, merged after lane S's, 2026-10-10, added one to
+each; TWENTY and NINETEEN until lane S's
 ``set_admitted_setting``, 2026-10-10, merged after lane U's, added one to each;
 EIGHTEEN and SEVENTEEN until lane U's
 ``send_attachment``, 2026-10-10, adding one to each; NINETEEN and EIGHTEEN from lane L5's
@@ -996,7 +1016,7 @@ mcp = FastMCP(
     instructions=(
         "A window onto the operator's OWN LinkedIn account, driven by his own "
         "signed-in browser on his own machine. Most tools read and change "
-        "nothing. NINETEEN WRITE: linkedin_save_job, "
+        "nothing. TWENTY WRITE: linkedin_save_job, "
         "linkedin_unsave_job, linkedin_unfollow_company, "
         "linkedin_follow_company, linkedin_apply_job, "
         "linkedin_update_setting, linkedin_react_to_item, "
@@ -1005,8 +1025,8 @@ mcp = FastMCP(
         "linkedin_follow_company_page, "
         "linkedin_mark_company_interest, linkedin_send_reply, "
         "linkedin_withdraw_from_group, linkedin_connect_from_profile, "
-        "linkedin_message_from_profile, linkedin_send_attachment and "
-        "linkedin_set_admitted_setting. "
+        "linkedin_message_from_profile, linkedin_send_attachment, "
+        "linkedin_set_admitted_setting and linkedin_withdraw_reaction. "
         "THE NINETEENTH, linkedin_set_admitted_setting, changes ONE control "
         "on ONE settings page of his own account that is admitted by name, "
         "one page at a time; one is admitted, Share profile updates, whose "
@@ -10895,6 +10915,55 @@ async def linkedin_read_named_profile(
     except Exception as exc:
         return _error(exc)
 
+
+# ---------------------------------------------------------------------------
+# lane NP, 2026-10-10 -- the tools this lane registers, in ONE block
+# ---------------------------------------------------------------------------
+#
+# ``linkedin_withdraw_reaction``: the reaction's inverse, on the orchestrator's
+# ruling of 14:14 -- named on the verb the conservation law already admits
+# (withdrawing HIS OWN reaction is "delete or withdraw one of his own items",
+# OUTWARD-CLASSES-BUILT-BEHIND-GRANTS), with the reaction's own address, reader
+# and preview, aimed only at a MEASURED ON name.
+
+
+@mcp.tool()
+async def linkedin_withdraw_reaction(
+    item: str, confirm_token: str = ""
+) -> dict[str, Any]:
+    """Withdraw your reaction from one feed item. PERFORMS, behind the gate.
+
+    THE INVERSE OF linkedin_react_to_item, on the same page: the item's own
+    permalink, its ONE reaction toggle, read live. It is valid only while that
+    toggle is ON and wears one of the two MEASURED ON names -- "Reaction button
+    state: Like" or "Unreact Like" -- and it presses exactly that control. An
+    OFF toggle is the wrong state: pressing it would REACT under your name and
+    notify the author, so it is refused. An ON name of a kind nobody has
+    measured is refused too.
+
+    THE PREVIEW NAMES THE ITEM AND ITS AUTHOR: the post's author as a people
+    record read off the permalink, and ``author_kind``, which reads
+    ``unknown`` until a capture of another member's post shows the rule that
+    tells his post from theirs. Whose post a key is comes from where you read
+    it: linkedin_read_named_profile's ``activity_items`` marks each item.
+
+    THE VERIFICATION is a fresh render of the permalink reading the MEASURED
+    OFF name ("Reaction button state: no reaction"); anything else is not a
+    success. WHAT IT COSTS: the author was notified of the reaction when it
+    was made, and taking it back does not recall that.
+
+    Args:
+        item: which feed item, as ``urn:li:activity:<digits>`` -- one of his
+            own items (linkedin_my_activity_items) or an item on a profile he
+            names (linkedin_read_named_profile's activity_items).
+        confirm_token: leave empty to read the gate. NEVER confirm on his
+            behalf: a token from that block, used once within two minutes, is
+            the only thing that acts.
+    """
+    try:
+        return await _write_tool("withdraw_reaction", item, confirm_token)
+    except Exception as exc:
+        return _error(exc)
 
 
 #: Fields that answer "what is running and what can it do". Everything else in

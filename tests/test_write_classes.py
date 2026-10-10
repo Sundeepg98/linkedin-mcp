@@ -200,10 +200,24 @@ def test_the_split_is_the_one_the_lane_report_quotes():
     (`_audit/2026-09-28-lane-s-settings.md`, section 4): `P O17` split from
     `P O6-O20` and BUILT -- `built:set_admitted_setting`, COVERED-UNFIRED --
     so it keeps a line as a built row; classed R3 by its act (profile-setting).
-    `P O6-O20` stays a GAP line. 370 + 1 = 371 = 16 R1 + 34 R2 + 321 R3."""
+    `P O6-O20` stays a GAP line. 370 + 1 = 371 = 16 R1 + 34 R2 + 321 R3.
+
+    374 ON THE ORCHESTRATOR'S CALL OF 2026-10-10 15:45, MEASURED
+    (`_audit/2026-10-10-lane-np-named-profile.md`, E): `M C35` split under
+    COMPOUND-ROW-SPLITS-ONLY-ON-STATE. Its line stays as a BUILT line --
+    `built:withdraw_reaction`, its act now delete-or-withdraw-own, still R3 --
+    and `M C35b`, the change half, enters GAP with a line of its own, act
+    react, R3. 373 + 1 = 374 = 16 R1 + 37 R2 + 321 R3.
+
+    371 AT LANE NP'S MERGE OF MASTER 0103810 (2026-10-10), MEASURED: lane U's
+    370 with lane NP's `M C35b` line (+1 R3); `M C35`'s line stays as a built
+    line. 370 + 1 = 371 = 16 R1 + 34 R2 + 321 R3.
+
+    372 AT THE INTEGRATION MERGE OF LANE NP ONTO LANES S AND B5 (2026-10-10), MEASURED: lane S's
+    `P O17` built line and lane NP's `M C35b` line, each +1 R3 on its own tree."""
     rows, _ = cwc.load()
     split = cwc.split(rows)
-    assert (split["R1"], split["R2"], split["R3"]) == (16, 34, 321)
+    assert (split["R1"], split["R2"], split["R3"]) == (16, 34, 322)
     assert split["R1:built"] + split["R1:queued"] == split["R1"]
 
 
