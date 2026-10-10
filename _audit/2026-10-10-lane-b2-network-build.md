@@ -289,7 +289,7 @@ carousel's `Next`, a press, never pressed. The roster sits in another list:
 75 cards, 225 member links, in no heading's container.
 
 THE ROW STAYS GAP, AND WHY. The build below is on child B's branch,
-`worktree-agent-a72ddaf792b6d7610` at `3e70900`, and is NOT merged into this
+`worktree-agent-a72ddaf792b6d7610` (the commit subject "N 102: People-tab employee insights, read as aggregate records", then one count fix), and is NOT merged into this
 lane: the orchestrator's wrap-up order of 19:02 arrived before the merge,
 which is ten union conflicts against master and child A (the child's report
 lists them), and the child's own gates are incomplete -- four of its
@@ -386,7 +386,12 @@ files this lane's own changes broke and its local gate had not selected --
 the banked-evidence guard (`N 133`'s cell keeps two gitignored prior
 readings; pinned as `N 134`'s were) and the read-row triage (`N 80` and
 `N 133` still listed after leaving GAP). Repaired in `d653ac9`, 42 passed
-locally. THE MERGE NOTE: `a5e7343`'s message names master as `0103810`;
+locally. Run 38048587717 on `d653ac9`: FAILURE in one test, the asserted-name
+guard -- the record named child A's tools before their merge; resolved by
+the merge. Run 38056601895 on the merge of master `6c65815`: FAILURE in one
+test, the cited-SHA guard -- the record cited child B's unpushed head, which
+no clone can reach; reworded to its branch and commit subject. THE MERGE
+NOTE: `a5e7343`'s message names master as `0103810`;
 another lane's fetch had moved the shared ref, and the merge took
 `2b165fd`, which descends from it -- the pins were measured on the tree the
 merge produced, so no figure depends on the name.
@@ -446,7 +451,7 @@ prose, people-data, D2 and orphan files 255, the fixture and one-page files
 116, the page-string guards 49.
 
 CHILD B, the People-tab insights: branch `worktree-agent-a72ddaf792b6d7610`,
-head `3e70900`. Measured, built and committed; NOT merged (section 7). Its
+three commits, unpushed, its build in the commit "N 102: People-tab employee insights, read as aggregate records". Measured, built and committed; NOT merged (section 7). Its
 report names four red-first runs not shown and the final tree's guards not
 re-run, and lists the ten union conflicts a merge must resolve.
 
@@ -472,7 +477,7 @@ re-run, and lists the ten union conflicts a merge must resolve.
    COVERED-UNFIRED the brief named: `N 80` rests on the people search's live
    proofs and `N 133` on `N 134`'s view-switch fire. D6 says PROVEN where the
    route is live-proven; both are the orchestrator's to override.
-4. `N 102`'s build waits on a merge: child B's branch at `3e70900`, ten
+4. `N 102`'s build waits on a merge: child B's branch, unpushed, ten
    union conflicts and its unfinished gates (section 12). The same tool would
    also serve the jobs slice's People-tab row, `J 108`, which names titles,
    study areas and skills -- three of its five categories.
