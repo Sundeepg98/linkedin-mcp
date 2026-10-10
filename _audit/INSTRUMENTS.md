@@ -11951,3 +11951,62 @@ The key is never used: the shape is the evidence, and it is printed.
 DECLARED DISPOSABLE: the two probes that counted the skeletons with the
 verb's selectors, and the mutation runner. Each answered one question once;
 the answers are in the lane record, section 5.
+
+## 89. A SKELETON'S LINE BREAKS ARE ITS WRITER'S, AND A WORD IS PUT BACK ONLY WHERE THE SESSION'S OWN KEY SAYS IT STANDS (lb1-profile-build, 2026-10-10)
+
+**Registered 2026-10-10.** Full record: `_audit/2026-10-10-lane-b1-profile-build.md`.
+Numbered 89 by the orchestrator's allocation, appended at the end; renumber
+at the merge if another lane took it.
+
+### 89.1 A TRACKED COPY THAT DRIVES A WRITE MUST DRAW THE TEXT THE READER COMPARES
+
+The live lane's skeletons write every node on its own line. Inside an
+`option` those line breaks become part of the option's `textContent`, which the
+shipped value reader returns UNTRIMMED by design -- a value is read to be put
+back. The first drive of P A22 over session 7's tracked copy withheld Save
+(`the_field_did_not_move`): the choice never read equal to the requested text.
+The harness told the truth about a FIXTURE defect, and the fix went into the
+builder (each option's text written inline), never into the test or the
+package. LinkedIn's live options carry no such whitespace -- P A21's live proof
+read the chosen option equal at the first poll.
+
+    A SKELETON IS A FORMAT, NOT THE PAGE. WHERE A READER COMPARES TEXT
+    EXACTLY, THE COPY MUST DRAW THAT TEXT EXACTLY -- OR THE FIRST RED IS
+    ABOUT THE COPY.
+
+### 89.2 RESTORE A WORD ONLY WHERE ITS KEYED SHAPE STANDS, AND ONLY IN THE ROLE IT PLAYS THERE
+
+A tracked copy reduces every text to `x`, so a reader that aims by accessible
+name has nothing to aim at. The builders of this lane put back a CLOSED list of
+LinkedIn's words, each only where the skeleton's shape equals the word's shape
+under the session's OWN key -- equal letters, digits, length and HMAC -- so
+nothing is restored on a guess. And by role: the pronoun words are restored as
+an option's text only; the same word stands once on his top card and stays `x`
+there.
+
+    A WORD THE KEY CONFIRMS IS STILL ONLY A UI WORD IN THE PLACE IT WAS
+    CONFIRMED FOR.
+
+### 89.3 A ROW THAT NEEDS NO NEW CODE STILL NEEDS A TEST THAT CAN FAIL
+
+P A22 moved on a control the shipped write already aims at. Its test drives the
+real calls over session 7's copy AND over session 4's, where the select is not
+drawn and the same write is refused: the pass is the control's presence, not
+the harness's.
+
+### 89.4 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `scripts/_build_intro_editor_live7_fixture.py` `--check` | a one-word plant in the committed copy ("Example Organisatioz"): `the committed fixture is STALE`, exit 1; restored: current, exit 0 |
+| `tests/test_the_intro_editor_draws_his_organization_select.py` | the first drive RED on the newline-wrapped option text (`the_field_did_not_move`, Save withheld, 1 failed 4 passed); the control: the same write over session 4's editor raises `0 controls in this editor are named 'Organization'` and stores nothing |
+| `scripts/_build_dashboard_fixture.py` `--check`; `linkedin_server/analytics_hub.py`, `tests/test_analytics_hub.py` (child lb1-dashboard) | `--check` on a copy with one value changed: DIFFERS, exit 1; RED first (`ImportError`); seven mutations each turning tests red -- any href a card (8 failed), a label naming another metric (1), an unrecognised label kept (3), the card texts carried out (3), a worded value parsed (5), no icon read as increase (1), the scope reaching the aside (3); a plain `1234` value red under the first pattern (1 failed, 33 passed) |
+| `scripts/_build_audience_fixture.py` `--verify` and `--check`; `linkedin_server/audience_analytics.py`, `tests/test_audience_analytics.py` (child lb1-audience) | `--verify` REFUSED the child's first build, whose restores had all landed one line early (`HTMLParser.getpos()` in `handle_data` reports the preceding tag's line -- a round-trip `--check` cannot see it, re-deriving by the same rule); `--check` on a one-letter plant: DIFFERS, exit 1; four weakenings each turning tests red -- redaction off (5 of 11: a planted name left the reader), any drawn word accepted (2), entries read page-wide (1: the aside read), the view from the first tab (2) |
+
+### 89.5 DECLARED DISPOSABLE
+
+The lead's and the children's scratch probes: the counts-only word counter over raw captures, the
+editor-control lister, the keyed-shape matcher and locator, the scratch
+skeletoniser, the census-cell appender, the pin re-deriver, the DELTA inserter
+and the conflict resolver. Each answered one question once; the answers are in
+the record.

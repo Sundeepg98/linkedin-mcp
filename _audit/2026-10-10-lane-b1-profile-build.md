@@ -193,9 +193,31 @@ preview's target, the write, its inverse, the control), 43 s.
 
 ---
 
-## C. P L2b -- child lb1-followers
+## C. P L2b -- child lb1-followers: built, NOT merged, the row left GAP
 
-(filled at merge)
+Child `lb1-followers` built in its own worktree (its branch's head at the
+stop: `2442258`): commit `f2eebf9`, the reader, and `6243de5`, the tool
+`linkedin_my_followers_list`, over the tracked session-2 skeleton -- rows,
+relations and denominators only, never a name, the button's aria-label never
+read (no `get_attribute`, no evaluate, held by an AST test). Red first
+(`ImportError`), then 33 passed; every plant shown changing the verdict and
+three weakened checks shown letting their plants through.
+
+ITS FIRST QUESTION DECIDED THE ROW, and the lead ruled it: by
+`WHO-WHICH-COUNTS-ARE-NOT-DELIVERY` ("A ROW WHOSE PAYLOAD IS WHO ... IS NOT
+DELIVERED by a reader that publishes only counts") and `NAMES-AT-RUNTIME`,
+both later than this row's cell, counts do not deliver an "own follower
+LIST". The name-returning half -- people records under
+`PEOPLE-DATA-MITIGATIONS` over a fixture of declared synthetic people -- was
+ordered at about 16:55 and was unfinished at the coordinator's wrap-up
+(19:02), when the child was stood down. NOTHING of the branch is merged: a
+tool that does not deliver its row is a surface change with no row behind it.
+The branch is the next lane's starting point.
+
+Its live-proof spec, for when it lands: 3 loads -- his feed, the list, his
+feed -- because the allowlist line brackets the invitation badge around this
+address's first load; a read, no inverse; STOP-ALL on a landing elsewhere, a
+wall or a challenge, or the "Following" tab selected.
 
 ## D. P L8 -> COVERED-UNFIRED -- child lb1-dashboard
 
@@ -344,7 +366,28 @@ shipped tool does.
 
 ## G. The census moves and the pins
 
-(filled with the census edit)
+THREE ROWS MOVED, each on its own cell's bar:
+
+    row     from -> to                   the evidence
+    P A22   GAP -> COVERED-UNFIRED       section B: the control named by session 7's capture;
+                                         the shipped write driven over its tracked copy
+    P L8    GAP -> COVERED-UNFIRED       section D: a reader and a tool over the tracked
+                                         skeleton of session 1's capture
+    P L1    GAP -> COVERED-UNFIRED       section E: the same, the audience page
+
+TWELVE STAYED GAP with their reasons: section F, and `L2b` in section C.
+
+THE PINS, re-derived each time from `scripts/census_completion.py`'s measured
+figures, never added by hand: at A22 (adjudicated 187, delivered_broad 131,
+gap 584, unfired 22, gap_write 378, b1_no_ruling 10, b1_released 2); again on
+the tree merged with master `0103810` (214, 136, 557, 25, 361); then at L8 and
+L1 (adjudicated 216, b1_no_ruling 12, b3_admitted 39, delivered_broad 138,
+gap 555, gap_read 90, unfired 27). `PINNED_B1_ROWS` gains `P A22`, `P L1` and
+`P L8` under no ruling (A22 cites RELEASED BY SELF-PROFILE-EDITS-NOT-OUTWARD,
+as A8 does). The ledger loses the three (`check_next_step` GREEN at 555); A22's
+write-class line reads `built:update_profile_field`; L8 and L1 leave bucket 3
+(`check_read_addresses` 90 of 90). The DELTA block in `profile.md` section 1
+is re-derived on the merged tree. Every checker and derived view is green.
 
 ---
 
@@ -377,6 +420,29 @@ tracked file.
 - THE BAR: both writes SAVED and verified on a fresh render, the select back
   at its original, no other field moved -- COVERED-PROVEN.
 
+### H.2 P L8 -- the analytics hub
+
+- 1 load: `linkedin_analytics_hub()`, one navigation to `/dashboard/`.
+- A read: no inverse, no press.
+- STOP-ALL: a landing at any other address; a wall or a challenge;
+  `cards_seen` 0 (the page changed shape: stop and capture).
+- THE BAR: `readable` true and `cards_parsed` at least 1, each metric's value
+  an integer -- COVERED-PROVEN. Record integers and closed words only.
+
+### H.3 P L1 -- the audience page
+
+- 1 load: `linkedin_audience_analytics()`, one navigation to
+  `/analytics/creator/audience/`.
+- A read: no inverse, no press, no scroll.
+- STOP-ALL: a landing at any other address; a wall or a challenge; zero
+  dimensions drawn (`navs_matched` not 1).
+- THE BAR: `readable` true, `total_followers` an integer, the dimensions
+  within LinkedIn's six -- COVERED-PROVEN. Record integers, closed words and,
+  for labels, only how many came back redacted or opaque and their lengths --
+  never a label: they are other people's attributes.
+
+SESSION TOTAL for the three moved rows: 11 loads (9 + 1 + 1), 0 searches.
+
 ---
 
 ## I. Gates run
@@ -401,15 +467,51 @@ flag was absent at every run; the full suite only on CI.
     build_audit_index, build_blocker_map, build_rulings_index   regenerated; --check clean
     pre-commit identity gate                                    ARMED: 226 spellings, 0 hits,
                                                                 every commit
+    surface guards after the hub's merge (server_surface,       343 passed (7 min 25 s: over the
+      every_tool, tool_surface_pinned, other_two_count_claims,    cap; these files read the whole
+      prose_that_makes_a_claim, analytics_hub, the harness)       registry)
+    the same after the audience's merge, with audience_analytics GREEN (exit 0)
+    census checkers after L8 and L1                             all GREEN; every figure matches
+                                                                its pin
+
+ON CI (`scripts/lane_ci.py`): run `38047037803` on `1d4c483` FAILED on two of
+this lane's own -- the new `live7` directory uncounted, and the census
+paragraphs' citation beside older correction words -- each fixed in `dbb18b0`
+(2 failed, 5341 passed). Run `38048024843` on `d67d6c3` (A22, the census
+step, master `2b165fd` merged): SUCCESS, 6 jobs, 5 min 56 s. The certifying
+run over the merged children is the one named in the lane's final message.
 
 ---
 
 ## J. Instruments
 
-(INSTRUMENTS.md section 89, filled at the end)
+Registered in `_audit/INSTRUMENTS.md`, section 89: the live7 builder's
+`--check`, the A22 drive and its control, the dashboard builder's `--check`
+and the reader's seven mutations, the audience builder's `--verify` and
+`--check` and its four weakenings -- each shown failing. The lead's scratch
+probes are declared disposable there.
 
 ---
 
 ## K. Questions for the orchestrator
 
-(filled at the end)
+1. MEASURED-ABSENT FOR `A14`, `A15` AND `K8`? Ground: A14's own cell, "if C1
+   finds none, this row's candidate state is MEASURED-ABSENT for this
+   account"; K8's, "the next holder of the signed-in profile can settle it in
+   one re-read"; the state's definition, "no tool, and a LIVE READING of the
+   surface says LinkedIn does not draw the thing". Session 7's editor and
+   session 8's profile are live readings, and both read zero (A.1, A.2). This
+   lane's brief moves rows only to COVERED-UNFIRED, so it did not move them.
+2. CAPTURE C-B1a (F.1): typing into his own editor field WITHOUT Save, to
+   capture the entry list, is an act no shipped tool makes. It is the one
+   measurement behind `A11`, `A13`, `A17` and `S8`'s add half. Sanction it?
+3. `F1`: admit `/in/me/details/recommendations/` (the `/in/me/` form only)?
+   The first render never draws the section (A.2).
+4. `L1`'s residual (E): `census_redact_rare`'s contract lets a label that is
+   exactly one capitalised word survive, so an employer under "Company" can
+   come back verbatim at runtime. A stricter rule for demographics labels is
+   a ruling, not a reader change.
+5. `L2b` (C): the counts reader is built and unmerged; the people-record half
+   is the next lane's. Merge only with it.
+6. Children ran as general-purpose agents, per the standing rules, not
+   `implementer` (the operator's model pin).
