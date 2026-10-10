@@ -9084,6 +9084,14 @@ async def linkedin_unfollow_company(
     LinkedIn's own stated total dropping by one, not on the row having
     vanished. On a partial list an absent row is not evidence.
 
+    THE PRESS IS READ BEFORE THE RELOAD, SINCE 2026-10-10. Live, one press
+    left the row following on the reload. So what the press drew is read in
+    place first (``unfollow_confirm_gate`` on the receipt): a confirmation
+    with exactly one control named ``Unfollow`` has that control pressed,
+    through the same single click call site; any other dialog, or a control
+    under another name, is reported by its shape and nothing more is pressed;
+    and a press that drew nothing at all is said so, for the reload to decide.
+
     THIS DOCSTRING SAID THE PAIR WAS ASYMMETRIC ON PURPOSE, AND THAT IS
     FALSE AT HEAD. It read: "THE PAIR IS ASYMMETRIC ON PURPOSE: this server
     can stop a follow and cannot start one," and went on to describe
