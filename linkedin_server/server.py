@@ -9741,7 +9741,32 @@ async def linkedin_react_to_item(
         feed and your profile draw eight, so choosing one is no longer
         choosing by position.
       * THE TARGET. ``linkedin_my_activity_items`` returns keys for items
-        measured to be yours.
+        measured to be yours. (That is where a key CAME FROM on that day; it
+        never was a gate -- see WHOSE ITEM below.)
+
+    WHOSE ITEM -- NOTHING IN THIS GATE CHECKS WHOSE ITEM IT IS. The key is this
+    tool's ARGUMENT. The gate checks its SHAPE -- an anchored
+    ``urn:li:<type>:<digits>``, in ``writes._target_for`` and again at the
+    write door -- and never its owner. The argument's sentence below read "Get
+    it from linkedin_my_activity_items, which returns keys only for items
+    established to be yours" until 2026-10-10: true of where keys came from
+    while that was the only reader handing one out, and read as a gate it never
+    was. A key may be one of his own posts (``linkedin_my_activity_items``) or
+    a post on a profile he names (``linkedin_read_named_profile``'s
+    ``activity_items``, each carrying its author kind), and REACTING TO ANOTHER
+    MEMBER'S POST NOTIFIES THAT MEMBER.
+
+    SO THE PREVIEW NAMES WHOSE POST IT IS (2026-10-10, ruling
+    PREVIEW-NAMES-THE-RESOLVED-TARGET). ``who_this_would_reach`` is the post's
+    AUTHOR as a people record -- the name and headline its one actor block
+    draws, read off the permalink the preview loaded, sanitised and marked as
+    another member's words; its link is null, because the page's link is
+    never handed back. ``author_kind`` is ``you``, ``another_member`` or
+    ``unknown``, and it is DERIVED: it compares the actor's profile link with
+    your own identity card's on the same page, and no capture has yet shown
+    that comparison telling another member's post apart
+    (``linkedin_server/item_author.py``). The name is in the block you read
+    and nowhere this server keeps -- not the grant, not a log, not a receipt.
 
     WHAT DID NOT CLOSE, AND SHIPS ANYWAY BECAUSE HE RULED IT SO: **pressing
     this control applies whatever LinkedIn's default reaction is, and nobody
@@ -9788,9 +9813,12 @@ async def linkedin_react_to_item(
     whatever was shown to whoever saw it.
 
     Args:
-        item: which feed item, as ``urn:li:activity:<digits>``. Get it from
-            ``linkedin_my_activity_items``, which returns keys only for items
-            established to be yours.
+        item: which feed item, as ``urn:li:activity:<digits>`` -- this tool's
+            argument, and nothing here checks whose item it is. One of his own
+            posts comes from ``linkedin_my_activity_items``; a post on a
+            profile he names comes from ``linkedin_read_named_profile``'s
+            ``activity_items``, each with its author kind. Reacting to another
+            member's post notifies that member.
         confirm_token: leave empty to read the gate. NEVER confirm on his
             behalf: a token from that block, used once within two minutes, is
             the only thing that acts.

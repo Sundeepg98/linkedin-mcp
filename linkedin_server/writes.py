@@ -215,6 +215,7 @@ from linkedin_server import (
     dom,
     field_restore,
     group_leave,
+    item_author,
     landing,
     named_profile,
     people_seam,
@@ -6005,6 +6006,18 @@ async def preview(
                 observation,
                 block,
                 segment=url_target_of(spec, observation.target),
+            )
+        # AND FOR A REACTION (lane NP, 2026-10-10): WHOSE POST the act lands
+        # on -- its author, read off the permalink this preview loaded, as a
+        # people record and an ``author_kind`` -- in a NEW dict after
+        # ``grant.preview`` was assigned, so the retained block never held it.
+        # The reader is called HERE rather than inside the namer, so it is
+        # wired from another module where the reader inventory can see it;
+        # the namer is pure. See ``linkedin_server/item_author.py`` for what
+        # is measured and what is derived.
+        if spec.action in item_author.REACTION_ACTIONS:
+            block = item_author.name_the_item_author(
+                observation, await item_author.read_item_author(page), block
             )
         return block
     finally:
