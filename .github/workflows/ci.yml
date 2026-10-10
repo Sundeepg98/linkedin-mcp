@@ -232,6 +232,11 @@ jobs:
       count: ${{ steps.plan.outputs.count }}
     steps:
       - id: plan
+        # Read through env, never spliced into the script text: a ref name is
+        # input, and `${{ }}` inside `run:` would paste it into bash verbatim.
+        env:
+          EVENT: ${{ github.event_name }}
+          REF: ${{ github.ref }}
         run: |
           SHARDS=6
           CELLS='[{"os":"ubuntu-latest","python-version":"3.10"},
@@ -271,6 +276,58 @@ jobs:
           # more platform, while a shard makes every cell finish sooner, and
           # the concurrency ceiling means the two compete for the same 20
           # jobs.
+          #
+          # -----------------------------------------------------------------
+          # THE LANE FAST PATH, ADDED 2026-10-10: a PUSH to refs/heads/ci/*
+          # gets ONE cell (ubuntu, 3.13) in FOUR shards. Everything else --
+          # master, pull_request, workflow_dispatch, and any other push --
+          # takes the literals above untouched, so the full matrix's outputs
+          # are byte-for-byte what they were: compared once against 3c8edc2's
+          # script (195 bytes, four event shapes, recorded in
+          # _audit/2026-10-10-lane-ci-fastlane.md), and pinned per event shape
+          # by tests/test_ci_fast_lane.py, which runs this script.
+          #
+          # WHY IT EXISTS. Lanes ran their suites on the one shared 8-core box
+          # because the push gate let nothing but master out; a lane took
+          # 30-60 minutes. scripts/pre_push_ref_gate.py now admits a lone
+          # ci/<name> that descends from origin/master and sweeps clean, and
+          # scripts/lane_ci.py pushes it and waits on the run by head sha.
+          #
+          # WHY THIS SHAPE, MEASURED on master's run 36460989178 (3c8edc2),
+          # its six ubuntu/3.13 shards: a fixed floor of ~67s a job
+          # (checkout, setup-python, pip, chromium from cache, two
+          # collections) and 845s of "Run this shard" in all, 98s to 222s a
+          # shard. Four shards -> ~211s each if balanced, so ~5 minutes a run
+          # with the plan and totals jobs; three shards -> ~7 minutes. FOUR
+          # is the count that meets a 6-minute target. That is a PREDICTION
+          # from one run, not a measurement of this lane; the first ci/ run
+          # is the measurement.
+          #
+          # THE JOB COUNT, said exactly because the 20-job ceiling is the
+          # point: a fast-lane run is SIX jobs (plan, four shards, totals) but
+          # never more than FOUR at once -- the plan job finishes before the
+          # shards start and the totals job starts after they end. So five
+          # lanes' shard phases together are 20 jobs, the Free ceiling, where
+          # one full run alone is 18.
+          #
+          # ONE PYTHON, AND WHICH: 3.13, what the operator's box runs, so a
+          # lane's local result and its CI result come from one interpreter.
+          # The 3.10 floor and the Windows cell are still certified, by the
+          # full matrix on master after the merge -- the fast lane is a lane's
+          # early signal, never a receipt.
+          #
+          # NOT keyed on the branch name alone: a workflow_dispatch on a ci/
+          # ref is someone ASKING for the full matrix, and gets it.
+          # -----------------------------------------------------------------
+          if [ "$EVENT" = "push" ]; then
+            case "$REF" in
+              refs/heads/ci/*)
+                SHARDS=4
+                CELLS='[{"os":"ubuntu-latest","python-version":"3.13"}]'
+                echo "lane fast path: $REF gets one cell in $SHARDS shards"
+                ;;
+            esac
+          fi
           echo "count=$SHARDS" >> "$GITHUB_OUTPUT"
           echo "shards=$(python3 -c 'import json,sys; print(json.dumps(list(range(int(sys.argv[1])))))' "$SHARDS")" >> "$GITHUB_OUTPUT"
           echo "cells=$(python3 -c 'import json,sys; print(json.dumps(json.loads(sys.argv[1])))' "$CELLS")" >> "$GITHUB_OUTPUT"

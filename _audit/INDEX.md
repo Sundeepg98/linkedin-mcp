@@ -27,19 +27,19 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 261 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 221 |
-| distinct dates | 18 |
+| audit documents git tracks under `_audit` | 262 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 222 |
+| distinct dates | 19 |
 | documents with no level-1 heading | 2 |
-| `CORRECTS:` marker lines | 121 |
-| `CORRECTED BY:` marker lines | 121 |
+| `CORRECTS:` marker lines | 122 |
+| `CORRECTED BY:` marker lines | 122 |
 | distinct declared correction edges | 110 |
 | documents something later corrects | 52 |
 | documents that correct something | 73 |
 | documents at either end of a cross-document edge | 101 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
-| documents no correction marker touches at all | 158 |
+| documents no correction marker touches at all | 159 |
 | blockquoted markers naming ANOTHER document | 0 |
 | edges missing one of their two markers | 0 |
 | edges declared a different number of times in each direction | 2 |
@@ -692,6 +692,8 @@ document is dead; it says one thing in it was overtaken and names what.
   > rows `23`, `79`, `84`, `87`, `94`, `132` and `195` moved COVERED-UNFIRED to COVERED-PROVEN, each on a live fire of its own tool in the live lane's session 2 and on the bar its own cell set; rows `20` and `45` fired again and were not shown.
 
   > row `194` moved COVERED-UNFIRED to COVERED-PROVEN in the live lane's session 3, on lane S's whole bank rule; rows `20` and `45` fired a third time and were not shown.
+
+  > rows `25`, `81`, `26` and `155` moved COVERED-UNFIRED to COVERED-PROVEN in the live lane's session 7 -- a 1st-degree connection found by name, the degree facet applied to the results, his connections filtered by place, and `155` on the orchestrator's call of 2026-10-10 by D6 on `M M1`'s session-5 send -- each on its own cell's bar.
 
 - CORRECTED BY [2026-09-23-readers-four-rows.md](2026-09-23-readers-four-rows.md)
 
@@ -1487,6 +1489,8 @@ reach is visible. The quoted reason here is the CORRECTOR's own
 
   > row `194` read COVERED-UNFIRED, never fired; it fired live in session 3 on lane S's whole bank rule and moves to COVERED-PROVEN.
 
+  > rows `25`, `81`, `26` and `155` read COVERED-UNFIRED, never fired or held for a target; in session 7 the name search, the degree facet and the place filter each fired and banked, and `155` moved on the orchestrator's call of 2026-10-10 by D6 on `M M1`'s session-5 send, and each moves to COVERED-PROVEN.
+
 - CORRECTS [_census/profile.md](_census/profile.md)
 
   > row `S5` read COVERED-UNFIRED, never fired; it fired live on `N 132`'s load in session 2 and moves to COVERED-PROVEN.
@@ -1805,6 +1809,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-28 | [2026-09-28-lane-s-settings.md](2026-09-28-lane-s-settings.md) | Lane S (settings): the settings of his own account, built behind the grant |  |
 | 2026-09-28 | [2026-09-28-rulings-build-classes.md](2026-09-28-rulings-build-classes.md) | Rulings, 2026-09-28: the classes the census still leaves undecided |  |
 | 2026-09-28 | [2026-09-28-rulings-named-profile-read.md](2026-09-28-rulings-named-profile-read.md) | Ruling, 2026-09-28: reading a profile he names |  |
+| 2026-10-10 | [2026-10-10-lane-ci-fastlane.md](2026-10-10-lane-ci-fastlane.md) | Lane CI fast lane (lci-fastlane-lead), 2026-10-10 |  |
 
 ## 6. What the scan rejected, could not join, or had to repair
 
