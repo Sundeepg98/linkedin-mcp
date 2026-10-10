@@ -4538,3 +4538,26 @@ the press wait, the dialog wait) green; `tests/test_writes.py`'s unfollow tests 
 the receipt and readonly guards green. The new gate's verdict is one line of
 `tests/reader_leak_baseline.json`, its success path triaged in `WHAT_WOULD_DRIVE_IT`
 until session 8 captures LinkedIn's own confirmation.
+
+## Live session 8, 2026-10-10 -- stopped before its first load
+
+The orchestrator's GO of 13:54 IST, a short session 8: the attach and signed-in checks, then
+`P B9`'s re-proof by the plan in "After session 7, offline", then the follow round trip
+through the new confirmation gate. About 14:00 the orchestrator's SAFETY STOP arrived: the
+operator's usage limit was reached, and no new item or press block was to start. **Session 8
+made NO page load, NO search and NO press: 0 of 40.** Nothing was in flight, so there was
+nothing to restore.
+
+Measured before the stop, as the GO's facts: port 9224 was held by the same one Chrome
+process, started 11:15:16; master was `b10bde8`, CI-green by its sha, and this branch was
+fast-forwarded to it; the main checkout's live-session flag stood. The session-8 runner was
+prepared in the lane's scratch folder, and its badge readings were run offline over the
+synthetic second-shape world in a local headless Chromium -- the reader aimable in
+`named_input`, the save gate read without Save naming 0 unnamed switches, and a trial click
+on the badge's switch actionable -- nothing of which reached LinkedIn.
+
+**HIS ACCOUNT IS EXACTLY AS SESSION 7 LEFT IT**: the first Page in Manage Pages still
+followed (read at row 1 at 11:46), the Premium badge switch untouched since session 5's
+restore, and no message sent in session 7 or 8. Session 8's items -- the badge's two
+read-only loads and its test and restore, and the follow round trip -- wait for a new GO,
+unchanged. The note of this is `_state/live8/session_note.json` (gitignored).
