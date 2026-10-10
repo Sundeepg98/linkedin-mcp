@@ -1170,86 +1170,88 @@ REGISTER: tuple = (
         note="The operator's ruling, verbatim in its document; mitigations as "
              "the question put them.",
     ),
+    # THE FIVE CLASS RULINGS OF 2026-09-28 (registered by lane K, 2026-10-10,
+    # from the orchestrator's paused-lanes copy, byte-identical). Lanes A, U
+    # and S copy the same document; these five entries are the register's
+    # half of it.
     Ruling(
         id="EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS",
         claim="Every act toward other people -- publishing his own content and "
               "its modes, invitations that are not connection requests, RSVPs "
               "and group membership requests, reports about another member's "
               "content and their undo -- is BUILT behind the single-use grant, "
-              "off by default, fired only at a target he names.",
-        binds="writes -- every outward class",
+              "off by default, fired only at a target he names. It does not "
+              "reach measured permanent refusals, the destruction rulings or "
+              "purchases.",
+        binds="writes -- every act toward other people",
         document="_audit/2026-09-28-rulings-build-classes.md",
-        anchor="RULED: (orchestrator, 2026-09-28, applying WRITE-CLASS-B and the "
-               "operator's 08:11 principle) EVERY-OUTWARD-CLASS-BUILT-BEHIND-"
-               "GRANTS",
+        anchor="RULED: (orchestrator, 2026-09-28, applying WRITE-CLASS-B and "
+               "the operator's 08:11 principle) "
+               "EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS",
         note="Orchestrator's call applying WRITE-CLASS-B and the operator's "
              "08:11 principle; overridable. Extends "
-             "OUTWARD-CLASSES-BUILT-BEHIND-GRANTS to every outward class. Its "
-             "document names what it does not reach: the permanent refusals "
-             "whose grounds are measured, the 2026-09-27 manual-only "
-             "destruction ruling, and purchases.",
+             "OUTWARD-CLASSES-BUILT-BEHIND-GRANTS to every outward class.",
     ),
     Ruling(
         id="HIS-OWN-SETTINGS-NOT-OUTWARD",
-        claim="A setting of his own account is not an outward act: it is built "
-              "behind the grant and live-proven read, benign value, read back, "
-              "restore the exact original, read back; any failed restore is "
+        claim="A setting of his own account is not an outward act: built behind "
+              "the grant, live-proven one setting at a time by read, benign "
+              "write, read back, exact restore, read back; a failed restore is "
               "STOP-ALL. Credential settings, settings that cannot be put back "
-              "exactly, and sensitive personal attributes are built and never "
+              "exactly and sensitive self-identification are built and never "
               "live-proven unless he names them.",
         binds="writes -- settings of his own account",
         document="_audit/2026-09-28-rulings-build-classes.md",
-        anchor="RULED: (orchestrator, 2026-09-28, applying OUTWARD-ACTS-NEED-THE-"
-               "OPERATOR) HIS-OWN-SETTINGS-NOT-OUTWARD",
+        anchor="RULED: (orchestrator, 2026-09-28, applying "
+               "OUTWARD-ACTS-NEED-THE-OPERATOR) HIS-OWN-SETTINGS-NOT-OUTWARD",
         note="Orchestrator's call applying OUTWARD-ACTS-NEED-THE-OPERATOR; "
-             "overridable. Settings pages are still admitted one by name "
-             "(ONE-NAMED-SETTINGS-PAGE-AT-A-TIME, "
-             "MESSAGING-SETTINGS-CAPABILITY-LEVEL).",
+             "overridable. Settings pages are still admitted one by name.",
     ),
     Ruling(
         id="HIS-OWN-CURATION-NOT-OUTWARD",
-        claim="Curating his own feed and his own items -- mute, hide, not "
-              "interested, follow and unfollow from a feed item, save, a "
-              "post's notification switch, comments off and pin on his own "
-              "items -- is not outward: each is built behind the grant and "
-              "proven with its inverse in the same session.",
-        binds="writes -- his own feed and items",
+        claim="Curating his own feed and items -- mute, hide, not interested, "
+              "follow or unfollow from a feed item, save, a post's "
+              "notification switch, the per-post controls on his own items -- "
+              "is not an outward act: built behind the grant and proven with "
+              "its inverse in the same session, read back.",
+        binds="writes -- curation of his own feed and items",
         document="_audit/2026-09-28-rulings-build-classes.md",
-        anchor="RULED: (orchestrator, 2026-09-28, applying OUTWARD-ACTS-NEED-THE-"
-               "OPERATOR) HIS-OWN-CURATION-NOT-OUTWARD",
+        anchor="RULED: (orchestrator, 2026-09-28, applying "
+               "OUTWARD-ACTS-NEED-THE-OPERATOR) HIS-OWN-CURATION-NOT-OUTWARD",
         note="Orchestrator's call applying OUTWARD-ACTS-NEED-THE-OPERATOR; "
-             "overridable. An undo LinkedIn draws only once proves the act "
-             "only through that undo.",
+             "overridable. An undo drawn only once proves the act only "
+             "through that undo.",
     ),
     Ruling(
         id="PURCHASES-STAY-MANUAL",
         claim="A purchase -- Premium, InMail credits, ads, boosts, any paid "
-              "upgrade -- is not built; its row is EXCLUDED-RULED with the "
-              "reopener \"he names a purchase to automate\".",
+              "upgrade -- is NOT built: its row is EXCLUDED-RULED, reopened "
+              "when he names a purchase to automate.",
         binds="writes -- purchases",
         document="_audit/2026-09-28-rulings-build-classes.md",
         anchor="RULED: (orchestrator, 2026-09-28, applying COST-AWARE "
                "STAKES-GATING) PURCHASES-STAY-MANUAL",
-        note="Orchestrator's call applying cost-aware stakes-gating; "
-             "overridable.",
+        note="Orchestrator's call applying the operator's COST-AWARE "
+             "STAKES-GATING rule; overridable.",
     ),
     Ruling(
         id="READ-PAST-AN-ACT-SUBSTRING",
-        claim="A forbidden substring whose recorded ground is an ACT -- "
-              "sending, following, applying -- does not bar the READ of his "
-              "own page that carries it; such a page is admitted by ONE exact "
-              "anchored pattern with a control shown failing, and the press "
-              "gate still refuses its controls. It does not reach a substring "
-              "whose ground is the read itself.",
-        binds="read boundary -- his own pages behind an act substring",
+        claim="A refused substring whose recorded ground is an ACT -- sending, "
+              "following, applying -- does not bar the READ of his own page "
+              "that carries it: one exact anchored pattern, a control shown "
+              "failing, the press gate still refusing every control. Not for "
+              "a GET that changes state, a credential, recovery, session or "
+              "security surface, a sign-in challenge, or a refusal grounded "
+              "in an operator's ruling.",
+        binds="read boundary -- substrings written to stop an act",
         document="_audit/2026-09-28-rulings-build-classes.md",
-        anchor="RULED: (orchestrator, 2026-09-28, applying OUTWARD-ACTS-NEED-THE-"
-               "OPERATOR and D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING) "
+        anchor="RULED: (orchestrator, 2026-09-28, applying "
+               "OUTWARD-ACTS-NEED-THE-OPERATOR and "
+               "D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING) "
                "READ-PAST-AN-ACT-SUBSTRING",
         note="Orchestrator's call applying OUTWARD-ACTS-NEED-THE-OPERATOR and "
-             "D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING; overridable. Rows resting "
-             "on a GET that changes state, a credential surface or a sign-in "
-             "challenge are named to the orchestrator.",
+             "D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING; overridable. A page the "
+             "allowlist refuses by its silence is admitted the same way.",
     ),
 )
 

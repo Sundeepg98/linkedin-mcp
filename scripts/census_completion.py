@@ -142,8 +142,14 @@ DELIVERED_STRICT = ("COVERED-PROVEN",)
 #: already elsewhere, 5 are choices inside a row, 1 is named twice, and 7
 #: are named nowhere or disputed. The collapse left with the count it
 #: rested on.
+#:
+#: `O6-O20` STOOD FOR 15 UNTIL 2026-10-10, and stands for 14 since: lane S
+#: split the switch that shares profile updates with his network out as
+#: `P O17` (`_audit/2026-09-28-lane-s-settings.md`, section 4). A split
+#: moves a capability between rows; it does not add one, so the row that
+#: left takes one with it (a cold review caught the first pin, 15 kept).
 COLLAPSED = {
-    ("P", "O6-O20"): (15, "GAP"),
+    ("P", "O6-O20"): (14, "GAP"),
 }
 
 #: ENUMERATED, not inferred. Rows the corpus names as waiting on a decision no
@@ -1083,8 +1089,11 @@ PINNED = {
     #: entered; no collapse moved.
     #: 785 ON THE ORCHESTRATOR'S CALL OF 2026-09-28 17:46 (lane S), MEASURED:
     #: `N 26b` entered (see `stated_rows`); no collapse moved.
-    #: 786 ON 2026-10-10 (lane S, settings), MEASURED: `P O17` entered; `O6-O20`'s collapse still counts its other 14.
-    "capabilities": 786,
+    #: 785 ON 2026-10-10 (lane S, settings), MEASURED: `P O17` split from
+    #: `O6-O20` -- one stated row more and one collapsed capability fewer
+    #: (COLLAPSED 14), so the count holds. The lane's first pin, 786,
+    #: counted the split capability twice.
+    "capabilities": 785,
     #: 741 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: the achievable
     #: move, with `O6-O20`'s 14 unchanged.
     #: 742 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: `N 2` left the exclusions.
@@ -1093,8 +1102,13 @@ PINNED = {
     #: NAMED-PROFILE-READ-BEHIND-A-GRANT (the orchestrator's call).
     #: 747 ON THE ORCHESTRATOR'S CALL OF 2026-09-28 17:46 (lane S), MEASURED:
     #: `N 26b` entered, in scope (see `stated_rows`).
-    #: 748 ON 2026-10-10 (lane S, settings), MEASURED: `P O17` entered, in scope.
-    "capabilities_achievable": 748,
+    #: 745 ON LANE K's PURCHASES-STAY-MANUAL EXCLUSIONS (2026-10-10), MEASURED:
+    #: `P S9` and `M C71` GAP -> EXCLUDED-RULED; `O6-O20`'s 14 unchanged.
+    #: 745 AT LANE S'S MERGE OF MASTER fe119de (2026-10-10), MEASURED: `P O17`
+    #: split from `O6-O20` adds no capability -- one stated row more, one
+    #: collapsed capability fewer (COLLAPSED 14) -- so master's figure holds.
+    #: This lane's first pin, 748, counted the split capability twice.
+    "capabilities_achievable": 745,
     #: 43 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: 29 rows returned
     #: to GAP when OUTWARD-CLASSES-BUILT-BEHIND-GRANTS retired their key, and
     #: `P P2` at the merge (-30); `P N27` and `P P2` then EXCLUDED-RULED on
@@ -1104,7 +1118,10 @@ PINNED = {
     #: 38 ON LANE L5'S ORDER OF 2026-09-28 12:32, MEASURED: `N 30`, `N 31`, `N 65`
     #: and `N 103` EXCLUDED-RULED -> GAP, their R4 ground narrowed by
     #: NAMED-PROFILE-READ-BEHIND-A-GRANT (the orchestrator's call).
-    "out_of_scope": 38,
+    #: 40 ON LANE K's PURCHASES-STAY-MANUAL EXCLUSIONS (2026-10-10), MEASURED:
+    #: `P S9` (the Premium plan) and `M C71` (a paid boost) GAP ->
+    #: EXCLUDED-RULED on the orchestrator's ruling of 2026-09-28.
+    "out_of_scope": 40,
     #: 727 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: stated rows 770
     #: less out_of_scope 43: the returns, `P A23b`, and the two re-exclusions.
     #: 728 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: stated rows 770 less out_of_scope 42 (`N 2`).
@@ -1114,8 +1131,11 @@ PINNED = {
     #: less out_of_scope 38.
     #: 733 ON THE ORCHESTRATOR'S CALL OF 2026-09-28 17:46 (lane S), MEASURED:
     #: stated rows 771 less out_of_scope 38 -- `N 26b` entered, in scope.
-    #: 734 ON 2026-10-10 (lane S, settings), MEASURED: `P O17` entered, in scope.
-    "achievable": 734,
+    #: 731 ON LANE K's PURCHASES-STAY-MANUAL EXCLUSIONS (2026-10-10), MEASURED:
+    #: stated rows 771 less out_of_scope 40 (`P S9`, `M C71`).
+    #: 732 AT LANE S'S MERGE OF MASTER fe119de (2026-10-10), MEASURED: stated
+    #: rows 772 less out_of_scope 40 -- `P O17` entered, in scope.
+    "achievable": 732,
     #: 205 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
     #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
     #: 179 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: the 30 returned
@@ -1172,8 +1192,12 @@ PINNED = {
     #: merged tree: master's figure with this branch's `P A11`, `P A13` and `P A17`
     #: COVERED-UNFIRED -> GAP (session 4: autocomplete inputs the one tool can only
     #: type into, now refused by it).
-    #: 185 ON 2026-10-10 (lane S, settings), MEASURED: `P O17` entered COVERED-UNFIRED.
-    "adjudicated": 185,
+    #: 186 ON LANE K's PURCHASES-STAY-MANUAL EXCLUSIONS (2026-10-10), MEASURED:
+    #: `P S9` and `M C71` GAP -> EXCLUDED-RULED -- adjudicated, delivered by
+    #: neither line.
+    #: 187 AT LANE S'S MERGE OF MASTER fe119de (2026-10-10), MEASURED: master's
+    #: figure with `P O17` COVERED-UNFIRED (HIS-OWN-SETTINGS-NOT-OUTWARD).
+    "adjudicated": 187,
     #: THE LIVE LANE'S FOUR ROWS, RE-DERIVED AT EACH OF ITS MERGES OF MASTER
     #: (2026-09-24; last over lane S): four rows fired live and banked
     #: (`_audit/2026-09-23-live-lane-session-1.md`). `P G6` COVERED-UNFIRED ->
@@ -1315,7 +1339,9 @@ PINNED = {
     #: merged tree: master's figure with this branch's `P A11`, `P A13` and `P A17`
     #: COVERED-UNFIRED -> GAP (session 4: autocomplete inputs the one tool can only
     #: type into, now refused by it).
-    "gap": 587,
+    #: 585 ON LANE K's PURCHASES-STAY-MANUAL EXCLUSIONS (2026-10-10), MEASURED:
+    #: `P S9` and `M C71` left GAP (see `adjudicated`).
+    "gap": 585,
     #: 18 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: `M M1` built (`linkedin_message_from_profile`).
     #: 16 ON LANE L5'S ORDER OF 2026-09-27 23:36, MEASURED:
     #: `linkedin_send_message` RETIRED (aimed by a name): `M M2` to GAP and `N
@@ -1452,7 +1478,9 @@ PINNED = {
     #: merged tree: master's figure with this branch's `P A11`, `P A13` and `P A17`
     #: COVERED-UNFIRED -> GAP (session 4: autocomplete inputs the one tool can only
     #: type into, now refused by it).
-    "gap_write": 381,
+    #: 379 ON LANE K's PURCHASES-STAY-MANUAL EXCLUSIONS (2026-10-10), MEASURED:
+    #: `P S9` and `M C71`, two W rows, left GAP; their write-classes lines go.
+    "gap_write": 379,
     #: All 54 are `jobs.md`, which has no per-row R/W column (56 until the
     #: lane-L3 merge built J 18 and J 39). Not a coincidence
     #: and not a defect in the finder: it is the whole of that slice's still-GAP

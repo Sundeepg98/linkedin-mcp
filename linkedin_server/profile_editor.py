@@ -523,6 +523,32 @@ async def _read_switch_block(
     return (True, (on == 1) if (on == 1) == (wrapper_on == 1) else None)
 
 
+async def _read_named_switch_block(
+    dialog: Any, block: str, unnamed_switch: Any
+) -> tuple[bool, Optional[bool]]:
+    """One setting block's switch in the SECOND recorded shape (2026-10-10).
+
+    In that shape means: the block holds exactly one checkbox and exactly one
+    ``role=switch`` element, and they are the same control -- the input on
+    :data:`_NAMED_SWITCH_PATH`, carrying its own ``aria-label`` -- nothing in
+    the block carries ``aria-checked``, and Playwright computes a NON-empty
+    name for the switch. The state is the checkbox's own; there is no second
+    witness to agree with in this shape. Counts only; the caller catches.
+    """
+    switch = block + _NAMED_SWITCH_PATH
+    held = await dialog.locator("css=" + block + ' input[type="checkbox"]').count()
+    roles = await dialog.locator("css=" + block + ' [role="switch"]').count()
+    shaped = await dialog.locator("css=" + switch).count()
+    marked = await dialog.locator("css=" + block + " [aria-checked]").count()
+    unnamed = await dialog.locator("css=" + switch).and_(unnamed_switch).count()
+    if any(coerce.as_count(n) != 1 for n in (held, roles, shaped)):
+        return (False, None)
+    if coerce.as_count(marked) != 0 or coerce.as_count(unnamed) != 0:
+        return (False, None)
+    on = coerce.as_count(await dialog.locator("css=" + switch + ":checked").count())
+    return (True, on == 1)
+
+
 async def recognise_intro_editor_switches(page: Any) -> dict[str, Any]:
     """Recognise the intro editor's two capture-identified switches. Never raises.
 
@@ -644,6 +670,53 @@ PREMIUM_BADGE_ROW_BLOCKS: tuple[str, ...] = tuple(
 #: A block whose text part carries the title.
 _BADGE_TITLED: str = ":has(> div:first-child " + _BADGE_TITLE_P + ")"
 
+#: THE SECOND RECORDED SWITCH SHAPE, MEASURED 2026-10-10 (the live lane's
+#: session 7: two loads of his intro editor, the second kept as a skeleton in
+#: the gitignored state and diffed by structure against session 4's). The
+#: setting block's wrapper no longer carries ``role=switch``,
+#: ``aria-checked``, ``aria-label`` or ``tabindex``; the checkbox input now
+#: carries an ``aria-label`` of its own -- one 21-character label, the SAME
+#: on both switches, so it names neither -- beside the ``role=switch`` it
+#: always had, and the empty ``label`` still precedes it. The row's leading
+#: paragraph and its two blocks are unchanged. Against the first shape alone
+#: the reader answered ``3_not_the_recorded_row`` on both loads.
+#:
+#: THE TWO SHAPES ARE TOLD APART BY ATTRIBUTE PRESENCE, NEVER BY A LABEL'S
+#: WORDS: a wrapper carrying ``aria-checked`` in the first, an input carrying
+#: ``aria-label`` in the second. A row is read in exactly ONE of them -- both
+#: blocks in that shape and nothing of the other anywhere in the row -- or it
+#: is refused. The badge's block is still found by its title, compared in the
+#: page; the press is aimed at the switch's own control, by its role.
+SWITCH_SHAPES: tuple[str, ...] = ("wrapper", "named_input")
+
+#: From a setting block down to the second shape's switch: the block's second
+#: part, an empty label, then the checkbox carrying ``role=switch`` and its own
+#: ``aria-label`` (never ``aria-labelledby``), inside no label.
+_NAMED_SWITCH_PATH: str = (
+    ' > div:last-child label:empty + input[type="checkbox"][role="switch"][aria-label]'
+    ":not([aria-labelledby]):not(label *)"
+)
+
+#: The settings row in the second shape: a leading paragraph and exactly two
+#: blocks, each holding the named switch, and no ``aria-checked`` and no
+#: ``div[role=switch]`` anywhere in the row.
+INTRO_SWITCH_ROW_NAMED: str = (
+    INTRO_SWITCH_COLUMN
+    + " > div:has(> p:first-child + div + div:last-child)"
+    + ":has(> div:nth-child(2)" + _NAMED_SWITCH_PATH + ")"
+    + ":has(> div:nth-child(3)" + _NAMED_SWITCH_PATH + ")"
+    + ':not(:has([aria-checked], div[role="switch"]))'
+)
+
+#: The second-shape row carrying the title, and its two blocks by position.
+PREMIUM_BADGE_ROW_NAMED: str = (
+    INTRO_SWITCH_ROW_NAMED + ":has(> div > div:first-child " + _BADGE_TITLE_P + ")"
+)
+PREMIUM_BADGE_ROW_BLOCKS_NAMED: tuple[str, ...] = tuple(
+    PREMIUM_BADGE_ROW_NAMED + " > div:nth-child(" + str(position) + ")" + _INTRO_BLOCK_SHAPE
+    for position in (2, 3)
+)
+
 #: Why the badge cannot be aimed, by code. Built from constants only.
 PREMIUM_BADGE_REFUSALS: dict[str, str] = {
     "0_editor_not_found": (
@@ -662,15 +735,19 @@ PREMIUM_BADGE_REFUSALS: dict[str, str] = {
         + ", and pressing one of several would be choosing by position."
     ),
     "3_not_the_recorded_row": (
-        "the row carrying the title is not the recorded settings row -- a "
-        "leading paragraph and exactly two setting blocks."
+        "the row carrying the title is in neither recorded settings-row shape "
+        "-- a leading paragraph and exactly two setting blocks, both switches "
+        "in their aria-checked wrapper (the first shape) or both named on "
+        "their own input (the second, measured 2026-10-10), never a mix."
     ),
     "4_title_not_on_exactly_one_block": (
         "the title is not on exactly one of the row's two setting blocks."
     ),
     "5_switch_not_the_recorded_shape": (
-        "a switch in the row is not in the recorded shape: one unnamed "
-        "checkbox switch, in a wrapper carrying role=switch and aria-checked."
+        "a switch in the row is not in a recorded shape: one unnamed checkbox "
+        "switch in a wrapper carrying role=switch and aria-checked, or one "
+        "checkbox switch named on its own input, with no aria-checked in its "
+        "block."
     ),
     "6_state_unreadable": (
         "a switch's checkbox and its aria-checked wrapper disagree, so its "
@@ -702,7 +779,9 @@ async def read_premium_badge(page: Any) -> dict[str, Any]:
                            sentence -- constants and counts, never page text
         containers         dialogs holding the one Save control (1 required)
         rows_titled        column rows carrying the title anywhere (1 required)
-        recorded_rows_titled  recorded-shape rows carrying it (1 required)
+        recorded_rows_titled  recorded-shape rows carrying it, both shapes
+                           counted (1 required, in exactly one shape)
+        switch_shape       which of :data:`SWITCH_SHAPES` that row is in
         badge_position     1 or 2: the badge block's order in its row
         badge_checked / other_checked   the two switches' states
         selector           the press, when aimable: the wrapper of the titled
@@ -721,6 +800,7 @@ async def read_premium_badge(page: Any) -> dict[str, Any]:
         "containers": 0,
         "rows_titled": 0,
         "recorded_rows_titled": 0,
+        "switch_shape": None,
         "badge_position": None,
         "badge_checked": None,
         "other_checked": None,
@@ -739,14 +819,25 @@ async def read_premium_badge(page: Any) -> dict[str, Any]:
             return _badge_refusal(out, "1_title_not_drawn")
         if out["rows_titled"] > 1:
             return _badge_refusal(out, "2_title_in_more_than_one_row")
-        out["recorded_rows_titled"] = coerce.as_count(
+        wrapper_rows = coerce.as_count(
             await dialog.locator("css=" + PREMIUM_BADGE_ROW).count()
         )
-        if out["recorded_rows_titled"] != 1:
+        named_rows = coerce.as_count(
+            await dialog.locator("css=" + PREMIUM_BADGE_ROW_NAMED).count()
+        )
+        out["recorded_rows_titled"] = wrapper_rows + named_rows
+        # EXACTLY ONE ROW, IN EXACTLY ONE SHAPE. A row both shapes claimed, or
+        # one in each, would leave the press to a choice between them.
+        if (wrapper_rows, named_rows) == (1, 0):
+            shape, blocks, path = "wrapper", PREMIUM_BADGE_ROW_BLOCKS, _INTRO_WRAPPER_PATH
+        elif (wrapper_rows, named_rows) == (0, 1):
+            shape, blocks, path = "named_input", PREMIUM_BADGE_ROW_BLOCKS_NAMED, _NAMED_SWITCH_PATH
+        else:
             return _badge_refusal(out, "3_not_the_recorded_row")
+        out["switch_shape"] = shape
         titled = [
             coerce.as_count(await dialog.locator("css=" + block + _BADGE_TITLED).count())
-            for block in PREMIUM_BADGE_ROW_BLOCKS
+            for block in blocks
         ]
         if sorted(titled) != [0, 1]:
             return _badge_refusal(out, "4_title_not_on_exactly_one_block")
@@ -754,12 +845,9 @@ async def read_premium_badge(page: Any) -> dict[str, Any]:
         unnamed_switch = dialog.get_by_role(
             "switch", name="", exact=True, include_hidden=True
         )
-        badge_ok, badge_checked = await _read_switch_block(
-            dialog, PREMIUM_BADGE_ROW_BLOCKS[badge], unnamed_switch
-        )
-        other_ok, other_checked = await _read_switch_block(
-            dialog, PREMIUM_BADGE_ROW_BLOCKS[1 - badge], unnamed_switch
-        )
+        read_block = _read_switch_block if shape == "wrapper" else _read_named_switch_block
+        badge_ok, badge_checked = await read_block(dialog, blocks[badge], unnamed_switch)
+        other_ok, other_checked = await read_block(dialog, blocks[1 - badge], unnamed_switch)
         if not (badge_ok and other_ok):
             return _badge_refusal(out, "5_switch_not_the_recorded_shape")
         out["badge_position"] = badge + 1
@@ -771,20 +859,19 @@ async def read_premium_badge(page: Any) -> dict[str, Any]:
         out["error"] = type(exc).__name__
         return _badge_refusal(out, "7_reading_failed")
     out["aimable"] = True
-    out["selector"] = (
-        _EDITOR_DIALOG
-        + " >> css="
-        + PREMIUM_BADGE_ROW_BLOCKS[badge]
-        + _BADGE_TITLED
-        + _INTRO_WRAPPER_PATH
-    )
+    # THE PRESS LANDS ON THE SWITCH'S OWN CONTROL: the wrapper carrying the
+    # role in the first shape, the named input carrying it in the second --
+    # inside the titled block, so the click itself re-checks the title.
+    out["selector"] = _EDITOR_DIALOG + " >> css=" + blocks[badge] + _BADGE_TITLED + path
     out["why"] = (
         "exactly one settings row in the editor's column carries the title "
         + repr(PREMIUM_BADGE_TITLE)
-        + ", compared in the page; it is the recorded row, the title is on its "
+        + ", compared in the page; it is a recorded row ("
+        + shape
+        + " shape), the title is on its "
         + ("first" if badge == 0 else "second")
-        + " setting block, and both of the row's switches are in the recorded "
-        "shape with readable states."
+        + " setting block, and both of the row's switches are in that shape "
+        "with readable states."
     )
     return out
 
@@ -854,9 +941,14 @@ def badge_moved_alone(
         out["code"] = "unreadable"
         out["why"] = "the switches could not be read before and after the press."
         return out
-    if after.get("badge_position") != before.get("badge_position"):
+    if after.get("badge_position") != before.get("badge_position") or after.get(
+        "switch_shape"
+    ) != before.get("switch_shape"):
         out["code"] = "the_row_changed"
-        out["why"] = "the badge's block moved within its row between the two readings."
+        out["why"] = (
+            "the badge's block moved within its row, or the row changed shape, "
+            "between the two readings."
+        )
         return out
     if after.get("other_checked") is not before.get("other_checked"):
         out["code"] = "the_other_switch_moved"

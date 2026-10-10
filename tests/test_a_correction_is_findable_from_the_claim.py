@@ -222,19 +222,22 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "while leaving the record unmarked."
     ),
 
-    # 2026-10-10, lane S (settings), registering the build-class rulings of
-    # 2026-09-28. THE RULING CALLS A BLOCKER LABEL STALE AND CITES THE UPLOAD
-    # DOCUMENT FOR ONE OF ITS WORDS -- read, not inferred from the filenames.
+    # 2026-10-10, lane K. THE CLASS RULINGS OF 2026-09-28 CITE THE UPLOAD
+    # SANCTION FOR WHAT THE UPLOAD ROWS STILL LACK -- read, not inferred from
+    # the filenames. The document is a byte-identical copy of the
+    # orchestrator's and its words may not change.
     ("2026-09-28-rulings-build-classes.md", "2026-09-05-upload-sanction.md"): (
-        "A BLOCKER LABEL CALLED STALE, NOT THE CITED DOCUMENT CORRECTED. The "
-        "ruling's section on uploads says the label `FILE-UPLOAD-UNSANCTIONED` "
-        "is stale -- the operator's upload decision of 2026-09-04 retired the "
-        "blocker -- and on the next line cites `2026-09-05-upload-sanction.md` "
-        "as the source of the word AIM, what those rows still lack. The matched "
-        "word is about the label, and the cited document is quoted for its own "
-        "concept; nothing in the ruling says it is wrong. **WHAT WOULD MAKE "
-        "THIS ENTRY WRONG:** the ruling asserting that something in the upload "
-        "sanction document does not hold while leaving that document unmarked."
+        "A CITATION OF THE AIM, NOT A CORRECTION OF IT. The section 'Not ruled "
+        "here: uploads' calls the census BLOCKER LABEL "
+        "`FILE-UPLOAD-UNSANCTIONED` stale -- the operator decided uploads on "
+        "2026-09-04 -- and cites `_audit/2026-09-05-upload-sanction.md` for "
+        "what those rows lack: an AIM, a performable upload verb and a capture "
+        "of each surface's file input. The matched word is about the label, "
+        "and the line relies on the cited document rather than overturning "
+        "it. **WHAT WOULD MAKE THIS ENTRY WRONG:** the rulings document "
+        "asserting something the upload-sanction document says does not hold "
+        "while leaving it unmarked, which would need its own CORRECTS: / "
+        "CORRECTED BY: pair."
     ),
 
     # 2026-09-28, the live lane's session 2. A CENSUS ROW CITES THE LANE'S

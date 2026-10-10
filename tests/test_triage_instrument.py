@@ -404,7 +404,14 @@ AFTER_LANE_L5_DEBTS = (132, {"R": 17, "W": 111, "R+W": 4})
 #: writes and read-and-writes lane L5's.
 AFTER_LANE_S_FRONTIER = (131, {"R": 16, "W": 111, "R+W": 4})
 
-EXPECTED_NOW = AFTER_LANE_S_FRONTIER
+#: AT LANE K'S PURCHASE EXCLUSIONS (2026-10-10), MEASURED with this tree's
+#: `scripts/triage_messaging_gap_rows.py`: `C71` (boost a post, a paid
+#: promotion) left GAP, EXCLUDED-RULED on the orchestrator's ruling
+#: PURCHASES-STAY-MANUAL (`_audit/2026-09-28-lane-k-ledger.md` s2). One W row:
+#: 131 - 1 = 130, writes 111 - 1.
+AFTER_LANE_K_PURCHASES = (130, {"R": 16, "W": 110, "R+W": 4})
+
+EXPECTED_NOW = AFTER_LANE_K_PURCHASES
 
 
 def test_the_headline_split_is_the_one_the_report_quotes():
