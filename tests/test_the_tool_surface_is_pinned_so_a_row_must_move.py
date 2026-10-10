@@ -85,6 +85,7 @@ from linkedin_server import server as server_module
 #: registry a client does.
 PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_apply_job": ("confirm_token", "job_id"),
+    "linkedin_audience_analytics": (),
     "linkedin_auth_status": (),
     "linkedin_cdp_status": (),
     "linkedin_comment_on_item": ("confirm_token", "item", "text"),
@@ -484,7 +485,14 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: The read's two new fields (`member_token`, `activity_items`) are not
 #: parameters; `N 30`, `N 85`, `N 172`, `N 31` and `M C32` move only when proven
 #: live.
-PINNED_TOOL_COUNT = 61
+#: **RE-PINNED 2026-10-10 AT 62 TOOLS AND 97 PARAMETERS on lane B1 (child
+#: lb1-audience): one tool, no parameter -- `linkedin_audience_analytics()`,
+#: his follower count and follower demographics off ONE admitted page
+#: (`/analytics/creator/audience/`), read as the first render draws it.**
+#: THE CENSUS DECISION: the census row `P L1` is banked by the lane B1 lead at
+#: merge -- this child edits no census file. Built over the tracked skeleton
+#: of a real capture (`tests/fixtures/live1/audience.html`); never fired.
+PINNED_TOOL_COUNT = 62
 PINNED_PARAMETER_COUNT = 97
 
 

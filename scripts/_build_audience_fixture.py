@@ -157,7 +157,14 @@ class _LineTree(HTMLParser):
     def handle_data(self, data):
         text = " ".join(data.split())
         if text:
-            self.cur.texts.append((self.getpos()[0], text))
+            # THE DATA STARTS ON THE LINE OF THE TAG BEFORE IT: the newline
+            # that ends that tag's line is the data's first character. So the
+            # token's own line is the start line plus the newlines before it.
+            # Measured 2026-10-10: without this every restore landed on the
+            # start tag above its text, and the round-trip check could not see
+            # it -- it re-derives with the same rule. :func:`verify` can.
+            lead = len(data) - len(data.lstrip())
+            self.cur.texts.append((self.getpos()[0] + data[:lead].count("\n"), text))
 
 
 def _walk(node: _Node):
@@ -306,17 +313,77 @@ def build(capture_text: str, key: bytes) -> tuple[str, dict[str, int]]:
     head, _, body = tracked.partition("\n")
     html = head + "\n" + HEADER + "\n" + body + "\n"
     html.encode("ascii")  # strict ASCII, or this raises before anything is written
+    verify(html)
     counts["bytes"] = len(html)
     return html, counts
 
 
+def verify(html: str) -> None:
+    """THE OUTPUT, READ BACK BY STRUCTURE: every restored word and planted value
+    is the WHOLE text of the element it was meant for, and the asides are empty.
+
+    The round-trip ``--check`` cannot see a misplaced restore -- it re-derives
+    with the same rule -- so this reads the written file the way the reader
+    will. Shown failing: on the first build of 2026-10-10 every restore had
+    landed on the start tag above its text, and this refuses that file.
+    """
+    tree = _LineTree()
+    tree.feed(html)
+    tree.close()
+    nodes = list(_walk(tree.root))
+
+    def only_text(node: _Node) -> Optional[str]:
+        texts = _texts_under(node)
+        return texts[0][1] if len(texts) == 1 else None
+
+    navs = [n for n in nodes if n.tag == "nav"
+            and any(only_text(b) in DIMENSIONS for b in _walk(n) if b.tag == "button")]
+    if len(navs) != 1:
+        raise Refused("verify: the written file does not draw exactly one dimension nav")
+    words = sorted(only_text(b) or "" for b in _walk(navs[0]) if b.tag == "button")
+    if words != sorted((VIEW_ALL,) + DIMENSIONS):
+        raise Refused("verify: the nav's buttons are not each exactly one restored word")
+    bars = [n for n in nodes if n.attrs.get("role") == "progressbar"]
+    drawn = set()
+    for bar in bars:
+        entry = _entry_of(bar)
+        heads = [k for k in entry.kids if k.tag == "p"] if entry else []
+        word = only_text(heads[0]) if len(heads) == 1 else None
+        pair = sorted(only_text(p) or "" for k in entry.kids if k.tag == "div"
+                      for p in k.kids if p.tag == "p") if entry else []
+        if word not in SYNTHETIC_ENTRIES or pair != sorted(SYNTHETIC_ENTRIES[word]):
+            raise Refused("verify: an entry is not its dimension word over its synthetic pair")
+        drawn.add(word)
+    if drawn != set(DIMENSIONS) or len(bars) != len(DIMENSIONS):
+        raise Refused("verify: the entries do not draw each dimension once")
+    labels = [n for n in nodes if any(t == TOTAL_LABEL for _, t in n.texts)]
+    if len(labels) != 1 or only_text(labels[0]) != TOTAL_LABEL:
+        raise Refused("verify: the follower label is not one element's whole text")
+    beside = [t for _, t in _texts_under(labels[0].parent) if t != TOTAL_LABEL]
+    if beside != [SYNTHETIC_TOTAL]:
+        raise Refused("verify: the follower count is not the synthetic one beside its label")
+    if any(n.kids or n.texts for n in nodes if n.tag == "aside"):
+        raise Refused("verify: an aside still holds something")
+
+
 def main(argv: Optional[list[str]] = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("--capture", type=Path, required=True, help="the raw audience capture")
-    ap.add_argument("--key", type=Path, required=True, help="the SECRET hex key file")
+    ap.add_argument("--capture", type=Path, help="the raw audience capture")
+    ap.add_argument("--key", type=Path, help="the SECRET hex key file")
     ap.add_argument("--out", type=Path, default=DEFAULT_OUT)
     ap.add_argument("--check", action="store_true", help="re-derive and compare, write nothing")
+    ap.add_argument("--verify", type=Path, help="read a written file back by structure; no capture needed")
     args = ap.parse_args(argv)
+    if args.verify is not None:
+        try:
+            verify(args.verify.read_text(encoding="ascii").replace("\r\n", "\n"))
+        except Refused as why:
+            print(f"{args.verify.name}: REFUSED: {why}")
+            return 1
+        print(f"{args.verify.name}: every restored word and planted value is its element's whole text")
+        return 0
+    if args.capture is None or args.key is None:
+        ap.error("--capture and --key are required to build or --check")
     key = bytes.fromhex(args.key.read_text(encoding="utf-8").strip())
     try:
         html, counts = build(args.capture.read_text(encoding="utf-8", errors="replace"), key)
@@ -325,7 +392,8 @@ def main(argv: Optional[list[str]] = None) -> int:
         return 1
     print("counts:", counts)
     if args.check:
-        same = args.out.exists() and args.out.read_bytes() == html.encode("ascii")
+        # A checkout may write the file with CRLF; the committed blob is LF.
+        same = args.out.exists() and args.out.read_bytes().replace(b"\r\n", b"\n") == html.encode("ascii")
         print(f"{args.out.name}: {'MATCHES the re-derivation' if same else 'DIFFERS from the re-derivation'}")
         return 0 if same else 1
     args.out.parent.mkdir(parents=True, exist_ok=True)

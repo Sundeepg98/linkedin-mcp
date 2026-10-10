@@ -91,6 +91,9 @@ EXPECTED_TOOLS = (
     # 2026-09-23, the live lane: a READ that presses, the share link of one of
     # his own posts; census M C72, proven live on his own post.
     "linkedin_own_item_link",
+    # 2026-10-10, lane B1 (lb1-audience): a READ, his follower count and
+    # demographics off one admitted page; census P L1, banked at merge.
+    "linkedin_audience_analytics",
 )
 
 
@@ -353,4 +356,7 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # linkedin_read_named_profile (ruling NAMED-PROFILE-READ-BEHIND-A-GRANT;
     # census N 178 stays GAP on its capture), measured off the registry and
     # moved with every other count site in the same commit.
-    assert len(_tool_names()) == 61
+    # SIXTY-TWO ON LANE B1, 2026-10-10: one READ, linkedin_audience_analytics
+    # (census P L1, banked by the lane B1 lead at merge), measured off the
+    # registry and moved with every other count site in the same commit.
+    assert len(_tool_names()) == 62

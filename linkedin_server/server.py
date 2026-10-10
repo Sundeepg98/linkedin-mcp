@@ -1,4 +1,11 @@
-"""The tool surface: sixty-one tools, seventeen of which write to LinkedIn.
+"""The tool surface: sixty-two tools, seventeen of which write to LinkedIn.
+
+THE SIXTY-SECOND IS A READ, 2026-10-10, lane B1: ``linkedin_audience_analytics``,
+his follower count and follower demographics off ONE admitted page, as its
+first render draws them -- no press. The entries are other people's attributes,
+aggregated, and leave only as census shapes, redacted when rare. Census row
+``P L1``, banked by the lane B1 lead at merge. The headline read "sixty-one
+tools, seventeen of which write" until then.
 
 THE SIXTY-FIRST IS A READ, 2026-09-28, on lane L5's order of 08:06 and the
 operator's ruling of 08:01 (``NAMED-PROFILE-READ-BEHIND-A-GRANT``):
@@ -212,9 +219,9 @@ assigned to anybody -- it waits for whoever next runs the suite, and in the
 meantime the pin goes on asserting the old number with full confidence.
 
 THE NUMBERS ABOVE ARE DERIVED NOW, and that is a statement about a test rather
-than about an intention. Sixty-one is ``len(await mcp.list_tools())``,
+than about an intention. Sixty-two is ``len(await mcp.list_tools())``,
 pinned in ``test_server_surface.py`` by
-``test_the_surface_is_exactly_the_sixty_one_tools``; the split is pinned by
+``test_the_surface_is_exactly_the_sixty_two_tools``; the split is pinned by
 ``tests/test_prose_that_makes_a_claim.py::test_the_server_docstring_numbers_are_derived``,
 which reads THESE WORDS and fails if any of the three disagrees with the
 registry.
@@ -227,9 +234,9 @@ POINTER to it was dangling, so a reader who followed it found nothing and
 would reasonably conclude these numbers are unchecked. A citation is a claim
 like any other.
 The surface splits three ways and the split is the part a reader actually
-needs: FORTY-FOUR read, SEVENTEEN write, and ZERO are write-shaped,
-registered, gated and unable to act. Forty-four plus seventeen plus zero is
-sixty-one. (Thirty-eight, thirteen and fifty-one until 2026-09-24; thirty-nine,
+needs: FORTY-FIVE read, SEVENTEEN write, and ZERO are write-shaped,
+registered, gated and unable to act. Forty-five plus seventeen plus zero is
+sixty-two. (Thirty-eight, thirteen and fifty-one until 2026-09-24; thirty-nine,
 thirteen and fifty-two at the live lane's merge the same day; thirty-nine,
 fourteen and fifty-three at lane L7's; forty-one, fifteen and fifty-six at
 lane L5's; forty-one, sixteen and fifty-seven at lane L8's merge on
@@ -238,7 +245,8 @@ eighteen and fifty-nine from that merge until lane L5 RETIRED
 ``linkedin_send_message`` later the same day -- aimed by a name; forty-one,
 seventeen and fifty-eight until lane S's two reads arrived at its merge of
 master 0867bda, 2026-09-28; forty-three, seventeen and sixty until lane L5's
-read of a named profile the same day.)
+read of a named profile the same day; forty-four, seventeen and sixty-one
+until lane B1's audience read, 2026-10-10.)
 
 THE FIFTY-THIRD IS ONE WRITE, 2026-09-24 (lane L7, census row ``P I14``).
 ``linkedin_mark_company_interest`` presses "I'm interested" in the
@@ -11420,6 +11428,49 @@ async def linkedin_page_plugin_snippet(page_id: str) -> dict[str, Any]:
     """
     try:
         return {"ok": True, **page_plugin.follow_plugin_snippet(page_id)}
+    except Exception as exc:
+        return _error(exc)
+
+
+# ---- lane B1 (lb1-audience): P L1 ----
+from linkedin_server import audience_analytics  # noqa: E402 -- lane B1's one block
+
+
+@mcp.tool()
+async def linkedin_audience_analytics() -> dict[str, Any]:
+    """Your follower count and follower DEMOGRAPHICS, as the audience page draws them.
+
+    ONE LOAD of LinkedIn's audience-analytics page, read as its first render
+    draws it: no press, no scroll, nothing on LinkedIn changed.
+
+    WHAT COMES BACK
+
+        total_followers   the integer beside LinkedIn's "Total followers" label
+        view              the demographics tab the page marks current ("All")
+        dimensions        the demographic tabs, in LinkedIn's words: Job title,
+                          Location, Seniority, Company, Industry, Company size
+        entries           one per dimension under "All": its dimension word,
+                          a LABEL and its percentage (``share_percent``, an
+                          integer)
+        lists_unread      every dimension whose own list needs a tab press --
+                          present, and NOT read: no press is sanctioned here
+
+    THE LABELS ARE OTHER PEOPLE'S ATTRIBUTES, AGGREGATED -- a job title, a
+    place, an employer -- so each is returned only as its census shape: a
+    capitalised run in a label drawn once comes back ``<redacted>``, one the
+    shape gate refuses ``<opaque>``. A label that is one capitalised word and
+    nothing else is the shaper's stated residual and survives. Your profile
+    card on the same page is never read.
+
+    READ ``readable`` AND ``denominators`` BEFORE BELIEVING AN EMPTY ANSWER:
+    together they say which step found nothing -- no label, no demographics
+    nav, a word this server does not know, an entry it could not pair.
+    """
+    try:
+        async with BROWSER.session() as page:
+            landed = await BROWSER.goto(page, audience_analytics.AUDIENCE_URL)
+            assert_not_authwall(landed, surface="audience-analytics")
+            return await audience_analytics.read_audience_analytics(page)
     except Exception as exc:
         return _error(exc)
 

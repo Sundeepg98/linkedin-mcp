@@ -1,4 +1,4 @@
-"""The tool surface: sixty-one tools, forty-four of which do not write.
+"""The tool surface: sixty-two tools, forty-five of which do not write.
 
 **AND THIS LINE IS NOW DERIVED, NOT MAINTAINED, 2026-09-20.** It had gone stale
 a THIRD time -- "forty-four tools, thirty-two of which do not write" against a
@@ -514,6 +514,9 @@ EXPECTED_TOOLS = {
     # its merge of master 52b55b6), two WRITES: see SANCTIONED_WRITE_TOOLS.
     "linkedin_connect_from_profile",
     "linkedin_message_from_profile",
+    # THE SIXTY-SECOND, 2026-10-10 (lane B1, child lb1-audience), a READ:
+    # follower count and demographics off one admitted page, no press.
+    "linkedin_audience_analytics",
 }
 
 #: Names a reader must never grow. Listed explicitly so that adding one is a
@@ -598,8 +601,13 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_sixty_one_tools(tools):
-    """RENAMED AGAIN ON LANE L5'S ORDER OF 2026-09-28 08:06, to
+async def test_the_surface_is_exactly_the_sixty_two_tools(tools):
+    """RENAMED AGAIN ON LANE B1, 2026-10-10, to ``..._sixty_two_tools``: one
+    READ, ``linkedin_audience_analytics`` (census P L1, banked by the lane B1
+    lead at merge), his follower count and demographics off one admitted
+    page. MEASURED off the registry; the name moved with the pin.
+
+    RENAMED AGAIN ON LANE L5'S ORDER OF 2026-09-28 08:06, to
     ``..._sixty_one_tools``: one READ, ``linkedin_read_named_profile`` (ruling
     NAMED-PROFILE-READ-BEHIND-A-GRANT), the profile of a member he names,
     loaded once behind the single-use grant. MEASURED off the registry;
@@ -904,7 +912,9 @@ async def test_the_surface_is_exactly_the_sixty_one_tools(tools):
     # SIXTY-ONE ON LANE L5'S ORDER OF 2026-09-28 08:06: linkedin_read_named_profile,
     # a READ, so the split moves on its read side and the write set holds.
     # MEASURED off mcp.list_tools().
-    assert len(tools) == 61
+    # SIXTY-TWO ON LANE B1, 2026-10-10: linkedin_audience_analytics, a READ,
+    # so the split moves on its read side and the write set holds.
+    assert len(tools) == 62
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -1073,7 +1083,10 @@ async def test_the_surface_is_exactly_the_sixty_one_tools(tools):
     # linkedin_read_named_profile is a READ -- its preview loads nothing, its
     # confirmed call loads one profile he named through the second door and
     # presses nothing -- and the write side is unmoved.
-    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 44
+    # FORTY-FIVE ON LANE B1, 2026-10-10: linkedin_audience_analytics is a READ
+    # -- it loads one admitted page and presses nothing -- and the write side
+    # is unmoved.
+    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 45
 
 
 def test_the_read_that_was_nearly_named_a_write():
