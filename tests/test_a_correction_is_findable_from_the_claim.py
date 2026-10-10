@@ -185,6 +185,21 @@ CORRECTION_VOCABULARY = (
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
 
+    # 2026-10-10, lane S (settings), registering the build-class rulings of
+    # 2026-09-28. THE RULING CALLS A BLOCKER LABEL STALE AND CITES THE UPLOAD
+    # DOCUMENT FOR ONE OF ITS WORDS -- read, not inferred from the filenames.
+    ("2026-09-28-rulings-build-classes.md", "2026-09-05-upload-sanction.md"): (
+        "A BLOCKER LABEL CALLED STALE, NOT THE CITED DOCUMENT CORRECTED. The "
+        "ruling's section on uploads says the label `FILE-UPLOAD-UNSANCTIONED` "
+        "is stale -- the operator's upload decision of 2026-09-04 retired the "
+        "blocker -- and on the next line cites `2026-09-05-upload-sanction.md` "
+        "as the source of the word AIM, what those rows still lack. The matched "
+        "word is about the label, and the cited document is quoted for its own "
+        "concept; nothing in the ruling says it is wrong. **WHAT WOULD MAKE "
+        "THIS ENTRY WRONG:** the ruling asserting that something in the upload "
+        "sanction document does not hold while leaving that document unmarked."
+    ),
+
     # 2026-09-28, the live lane's session 2. A CENSUS ROW CITES THE LANE'S
     # RECORD AS THE EVIDENCE FOR ITS OWN FIRE -- read, not inferred from the
     # filenames. The lane's real corrections run the other way and are

@@ -1184,9 +1184,10 @@ REGISTER: tuple = (
                "GRANTS",
         note="Orchestrator's call applying WRITE-CLASS-B and the operator's "
              "08:11 principle; overridable. Extends "
-             "OUTWARD-CLASSES-BUILT-BEHIND-GRANTS to every outward class; does "
-             "not reach measured PERMANENTLY_FORBIDDEN grounds, "
-             "ACCOUNT-DESTRUCTION-STAYS-MANUAL or purchases.",
+             "OUTWARD-CLASSES-BUILT-BEHIND-GRANTS to every outward class. Its "
+             "document names what it does not reach: the permanent refusals "
+             "whose grounds are measured, the 2026-09-27 manual-only "
+             "destruction ruling, and purchases.",
     ),
     Ruling(
         id="HIS-OWN-SETTINGS-NOT-OUTWARD",
@@ -1234,12 +1235,13 @@ REGISTER: tuple = (
     ),
     Ruling(
         id="READ-PAST-AN-ACT-SUBSTRING",
-        claim="A forbidden substring whose recorded ground is an ACT does not "
-              "bar the READ of a page of his own account that carries it; such "
-              "a page is admitted by ONE exact anchored pattern with a control "
-              "shown failing, and the press gate still refuses its controls. "
-              "It does not reach a substring whose ground is the read itself.",
-        binds="read boundary -- pages of his own account behind an act substring",
+        claim="A forbidden substring whose recorded ground is an ACT -- "
+              "sending, following, applying -- does not bar the READ of his "
+              "own page that carries it; such a page is admitted by ONE exact "
+              "anchored pattern with a control shown failing, and the press "
+              "gate still refuses its controls. It does not reach a substring "
+              "whose ground is the read itself.",
+        binds="read boundary -- his own pages behind an act substring",
         document="_audit/2026-09-28-rulings-build-classes.md",
         anchor="RULED: (orchestrator, 2026-09-28, applying OUTWARD-ACTS-NEED-THE-"
                "OPERATOR and D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING) "
