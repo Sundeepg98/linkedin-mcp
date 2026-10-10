@@ -261,7 +261,7 @@ REACHED: dict[str, tuple[str, str, str]] = {
         JOB,
     ),
     "unset_similar_jobs_alert": (
-        "tests/test_similar_jobs_alert.py::ON_WORLD",
+        "tests/test_similar_jobs_alert.py",
         ALERT_ON_WORLD,
         JOB,
     ),

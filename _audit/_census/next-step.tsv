@@ -72,7 +72,6 @@ J 117	J	R	-	ADMIT:https://www.linkedin.com/preload/guideOverlay/?interop=guideOv
 J 118	J	R	-	ADMIT:https://www.linkedin.com/preload/guideOverlay/?interop=guideOverlay&query=Show+match+details	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/preload/guideOverlay/?interop=guideOverlay&query=Show+match+details ; RULING:READ-PAST-AN-ACT-SUBSTRING
 J 119	J	R	-	ADMIT:https://www.linkedin.com/preload/guideOverlay/?interop=guideOverlay&query=Show+match+details	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/preload/guideOverlay/?interop=guideOverlay&query=Show+match+details ; RULING:READ-PAST-AN-ACT-SUBSTRING
 J 120	J	R	-	ADMIT:https://www.linkedin.com/preload/guideOverlay/?interop=guideOverlay&query=Show+match+details	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/preload/guideOverlay/?interop=guideOverlay&query=Show+match+details ; RULING:READ-PAST-AN-ACT-SUBSTRING
-J 124	J	R	-	CAPTURE:job-posting-panels	NAMED	_audit/_census/jobs-directions.tsv::The candidates disagree, so the class waits on a live look
 J 126	J	R	-	ADMIT:https://www.linkedin.com/preload/guideOverlay/?interop=guideOverlay&query=Help+me+stand+out	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/preload/guideOverlay/?interop=guideOverlay&query=Help+me+stand+out ; RULING:READ-PAST-AN-ACT-SUBSTRING
 J 129	J	W	-	TARGET:a job he applied to, and its poster	INFERRED	RULING:OPERATOR-NAMES-THE-TARGET ; J 129
 J 131	J	R	-	RULING:Q-CALLER-COMPOSES	NAMED	RULING:D6-CAPABILITY-OVER-AFFORDANCE ; J 57
@@ -100,7 +99,6 @@ J 156	J	R+W	-	ADMIT:https://www.linkedin.com/learning/career-journey/	MEASURED	_
 J 157	J	W	-	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 J 159	J	R	-	ADMIT:https://www.linkedin.com/ad-library/search/	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/ad-library/search/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
 J 160	J	R	-	ADMIT:https://www.linkedin.com/explore-career-insights/	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/explore-career-insights/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
-J 161	J	W	-	BUILD:tests/fixtures/job_detail_hydrated.html	MEASURED	tests/fixtures/job_detail_hydrated.html ; RULING:HIS-OWN-CURATION-NOT-OUTWARD
 J 162	J	W	-	PURPOSE:feedback to LinkedIn about its own product	INFERRED	J 162 ; N 198
 J 163	J	W	-	CAPTURE:jobs-recommended-feedback	INFERRED	_audit/_census/jobs.md::Your feedback helps us improve job recommendations
 J 164	J	W	-	PURPOSE:feedback to LinkedIn about its own product	INFERRED	J 162 ; N 198

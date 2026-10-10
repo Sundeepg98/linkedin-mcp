@@ -952,7 +952,7 @@ mcp = FastMCP(
     instructions=(
         "A window onto the operator's OWN LinkedIn account, driven by his own "
         "signed-in browser on his own machine. Most tools read and change "
-        "nothing. SEVENTEEN WRITE: linkedin_save_job, "
+        "nothing. NINETEEN WRITE: linkedin_save_job, "
         "linkedin_unsave_job, linkedin_unfollow_company, "
         "linkedin_follow_company, linkedin_apply_job, "
         "linkedin_update_setting, linkedin_react_to_item, "
@@ -960,8 +960,9 @@ mcp = FastMCP(
         "linkedin_comment_on_item, linkedin_update_profile_field, "
         "linkedin_follow_company_page, "
         "linkedin_mark_company_interest, linkedin_send_reply, "
-        "linkedin_withdraw_from_group, linkedin_connect_from_profile and "
-        "linkedin_message_from_profile. "
+        "linkedin_withdraw_from_group, linkedin_connect_from_profile, "
+        "linkedin_message_from_profile, linkedin_set_similar_jobs_alert and "
+        "linkedin_unset_similar_jobs_alert. "
         "THE ELEVENTH is the only one here that can verify its own outcome "
         "by reading the field back; it also returns the PREVIOUS value "
         "verbatim and the exact call that puts it back, which this server "
@@ -978,6 +979,10 @@ mcp = FastMCP(
         "THE FOURTEENTH, linkedin_mark_company_interest, tells one posting's "
         "employer's recruiters he is interested; this server cannot take it "
         "back, so offer it only for a company he names. "
+        "THE EIGHTEENTH AND NINETEENTH, linkedin_set_similar_jobs_alert and "
+        "linkedin_unset_similar_jobs_alert, turn one posting's alert for "
+        "similar jobs on and off -- his own saved query, each the other's "
+        "inverse; offer the pair together, set then unset. "
         "THE SIXTEENTH, linkedin_withdraw_from_group, leaves one group he "
         "names by its NUMERIC id, never by a group's name; no join is built "
         "here, so offer it only for a group he names -- and not his last "
@@ -11472,7 +11477,8 @@ async def linkedin_unset_similar_jobs_alert(
     """Turn OFF the alert for jobs similar to one posting -- a WRITE, the inverse of
     ``linkedin_set_similar_jobs_alert``.
 
-    Presses the same switch from ``On``. Same two steps and the same gates: no
+    It sets the same switch back to ``Off``, pressing it from ``On``. Same two
+    steps and the same gates: no
     ``confirm_token``, no action, and the token works once, for this posting
     and this verb, within two minutes. A switch reading ``Off`` is refused --
     turning it on is ``linkedin_set_similar_jobs_alert``. After the press the

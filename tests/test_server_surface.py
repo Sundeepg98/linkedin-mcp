@@ -1,4 +1,4 @@
-"""The tool surface: sixty-one tools, forty-four of which do not write.
+"""The tool surface: sixty-three tools, forty-four of which do not write.
 
 **AND THIS LINE IS NOW DERIVED, NOT MAINTAINED, 2026-09-20.** It had gone stale
 a THIRD time -- "forty-four tools, thirty-two of which do not write" against a
@@ -1657,8 +1657,13 @@ async def test_server_info_stops_claiming_read_only_once_writes_are_on(monkeypat
         # fourteen siblings: a reply inside a conversation he names by thread
         # id, which reports SENT only off a fresh load of that conversation.
         "send_reply",
+        # THE EIGHTEENTH AND NINETEENTH, 2026-10-10 (census J 161, lane B4),
+        # typed here by hand: the similar-jobs alert switch on one posting,
+        # set and unset, each the other's inverse.
+        "set_similar_jobs_alert",
         "unfollow_company",
         "unsave_job",
+        "unset_similar_jobs_alert",
         # SIXTH, 2026-08-31. The first write here that acts on neither a job
         # nor a company Page: one named account setting, on a page measured
         # six times, by clicking the radio named for the destination.
@@ -1729,8 +1734,13 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
         # branch). Typed by hand, as this list requires, by the lane that
         # built it.
         "send_reply",
+        # THE EIGHTEENTH AND NINETEENTH, 2026-10-10 (census J 161, lane B4),
+        # typed here by hand: the similar-jobs alert switch on one posting,
+        # set and unset, each the other's inverse.
+        "set_similar_jobs_alert",
         "unfollow_company",
         "unsave_job",
+        "unset_similar_jobs_alert",
         # THE TWELFTH, 2026-09-02, on his ruling "I want all capabilities".
         # It is the FIRST write here that can verify its own outcome by
         # reading the field back -- publish_post declared its outcome
@@ -2101,6 +2111,7 @@ async def test_the_server_instructions_name_every_write_that_ships():
         # reached; seventeen is spelled so the map has no hole a later count
         # could fall into.
         17: "seventeen", 18: "eighteen",
+        19: "nineteen",
     }
     assert f"{words[len(writes.PERFORMABLE)]} write" in text
     for action in writes.PERFORMABLE:
