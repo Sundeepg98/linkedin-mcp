@@ -10333,14 +10333,21 @@ async def perform(
             # ``tests/test_upload_hands_over_verified_bytes.py``. Now the
             # bytes are read ONCE, with every property of the path guard
             # re-run, and the digest compared below is of exactly the bytes
-            # the call at the bottom hands over. The guard's own refusals
-            # leave as this function's, so their words reach the receipt.
+            # the call at the bottom hands over. A refusal by the path guard
+            # here leaves in this function's OWN words, interpolating only the
+            # action: an exception's text is not carried into a receipt
+            # (``tests/test_a_write_receipt_carries_no_library_message.py``),
+            # and the preview, run again, prints the guard's exact reason.
             try:
                 verified_bytes = attachments.read_once(upload_file)
             except WriteAttemptError as exc:
                 raise _PerformRefused(
-                    f"refusing to upload for {spec.action!r}: {exc} Nothing "
-                    "was clicked."
+                    f"refusing to upload for {spec.action!r}: the file no "
+                    "longer passes the path guard it passed at the preview -- "
+                    "it was moved, replaced, emptied, grown past the cap, or "
+                    "is no longer a regular file inside the upload directory. "
+                    "Preview it again to read which. Nothing was uploaded and "
+                    "nothing was clicked."
                 ) from exc
             current = verified_bytes.digest
             if current != approved:
