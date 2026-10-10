@@ -26,9 +26,9 @@ anything not yet landed is not described.
 **THE LANE'S COMMITS, by SUBJECT.** The short hashes beside them are this
 lane's branch's: every one is nowhere on `master` until the orchestrator
 merges the branch, and the subject is how a reader finds each after a
-rewrite. Eight merges of `master` sit among them: of `53908ea`, `b10bde8`,
-`fe119de`, `f8c7392`, `66eb699`, `1027bf8`, `f93104c` and `16ee59a` (the last
-in the same commit as this table's last edit). A commit cannot carry its own
+rewrite. Merges of `master` sit among them: of `53908ea`, `b10bde8`,
+`fe119de`, `f8c7392`, `66eb699`, `1027bf8`, `f93104c`, `16ee59a` and
+`71d83ca`, and any after it at the lane's close. A commit cannot carry its own
 hash, so the table ends at the commit before the one that last edited it.
 
 | subject | lane branch |
@@ -59,6 +59,9 @@ hash, so the table ends at the commit before the one that last edited it.
 | record: the sixth merge, its gate, and the green run at the lane's merge of 1027bf8 | 2ec5c46 |
 | merge origin/master f93104c into lane A: the CI lane's shared tree reading and its section 87.8 | fecb159 |
 | rulings register regenerated over the merge of f93104c, and the red run that found it recorded | f5a849a |
+| merge origin/master 16ee59a into lane A: master's own regeneration of the rulings register | 970454f |
+| merge origin/master 71d83ca into lane A: lane K's ledger rulings, 21 rows excluded, J 17 and J 57 proven | cbad8b2 |
+| rulings: register the orchestrator's rulings on lane A's questions | 046c68a |
 
 ---
 
@@ -1126,6 +1129,11 @@ bounds a local gate at two minutes).
 
 ## 7. Questions for the orchestrator, each with its ground
 
+**ANSWERED 2026-10-10** in `_audit/2026-10-10-rulings-lane-a-questions.md`
+(five rulings, registered): questions 1, 2, 3, 6 and 7 each by a ruling of
+its own, and 4, 5, 8 and 9 without one. The questions stay as they were asked;
+section 8 applies the answers.
+
 1. **R1's second question, on the invitation manager's received tab (`N 13`,
    `N 14`, `N 19`).** Ground: `_audit/2026-08-30-linkedin-nine.md` 2.2, "Q2
    emission | unmeasured, and the cost lands on someone else | Whether an
@@ -1198,3 +1206,62 @@ bounds a local gate at two minutes).
    rulings register regenerated to its fixed point"; this lane merged it and
    regenerated over the merge (the only difference left is this lane's own
    document, counted).
+
+---
+
+## 8. The orchestrator's rulings on section 7, applied
+
+The rulings document was copied byte-identical and its five ids registered,
+after master's lane K ledger (21 rows excluded, `J 17` and `J 57` proven) was
+merged and every pin re-derived on the merged tree. Each ruling, by its own
+words:
+
+1. `RECEIVED-INVITATIONS-READ-STAYS-ADMITTED` -- `N 13`, `N 14`, `N 19` carry
+   the passive-cost note (UNMEASURED; reopener "a capture shows the SENDER can
+   see it"), and the boundary comment says so. State unchanged, GAP.
+2. `NAMED-SETTINGS-PAGES-RATIFIED` -- `N 39`, `P P15` and the eight
+   application-settings rows (`P M2`, `P M4`, `P M5`, `P M6`, `P M12`, `J 71`,
+   `J 72`, `J 73`) carry the ratification. No line changed.
+3. `CREDENTIAL-ADJACENT-STAYS-REFUSED` -- `P M9` and `J 77` GAP ->
+   EXCLUDED-RULED. The census's bar for that state is a registered ruling plus
+   a reopener, and this ruling is both; both rows are one page's read and
+   delete, so each goes whole. Exclusion-basis lines and a family in
+   `scripts/check_exclusion_basis.py` (63 of 63); their side-table lines,
+   ledger steps and capture line leave. If GAP-with-a-note was meant, it is one
+   cell each to put back.
+4. `NAMED-ADDRESS-NEEDS-LOG-REDACTION` -- `M C101` stays GAP on that blocker,
+   and the newsletters capture line names it. NOT BUILT, and why is measured:
+   `browser.goto` logs no address (no logger call in `browser.py` takes the
+   url; its navigation-failure message names only the first path segment), and
+   no other module's logger call carries one. The load records that do carry
+   addresses are the probe and capture scripts' own (`scripts/_probe_*.py`, the
+   live lane's harness among them): more than an hour's work and partly
+   another lane's code, so the order's condition left the blocker. Which of
+   those lines the ruling reaches is the orchestrator's to name.
+5. `CONTENT-VERTICAL-NOT-ALL-RESULTS` -- `/search/results/content/` admitted
+   by its own exact line, D2's spelling, under D1-SEARCH-AS-READS's three
+   conditions, the D2 line untouched. RED FIRST: the new tests against the
+   boundary without the line, 7 failed; with it, the harness, the search
+   blast-radius file and the digest invariant 232 passed. The control the
+   ruling asks for: `/search/results/all/`, with and without a query, still
+   refused, plus a sub-path, a longer word, the account-ending traversal, an
+   unruled vertical and a fragment. `_ALLOWED_URL_PATTERNS` re-pinned (86
+   patterns; every other key byte-identical); the census count cell 85 -> 86.
+   `M C70` REFUSED -> ADMITTED; `M C93` re-addressed to its D6 route and
+   ADMITTED; both gate MEASURE and both GAP: no capture of the content page
+   exists in the tracked fixtures or the raw store, so no reader; their next
+   step is the capture line `admit-search-results-content`. The all-results
+   line leaves the queue.
+
+**PINS, measured:** achievable 710 -> 708, adjudicated 213 -> 215,
+b3_admitted 57 -> 59, b3_refused 18 -> 15, capabilities_achievable 724 -> 722,
+gap 558 -> 556, gap_read 92 -> 91, gap_unknown 101 -> 100, jobs_dir_r 35 ->
+34, jobs_gap 101 -> 100, jobs_refused 11 -> 10, out_of_scope 61 -> 63.
+
+**GATES:** census_completion, every pin; check_read_addresses 91 of 91;
+check_jobs_directions 100 of 100; check_write_classes 373; ruling_holds;
+check_next_step 556; check_exclusion_basis 63 of 63; the derived views
+--check. The merge's seventeen table-reading test files 542 passed (three
+minutes, over the bound); one wider background run over every
+boundary-reading file was started and STOPPED within a minute, its processes
+killed by lineage, because it widened the local gate -- CI runs the rest.

@@ -1924,7 +1924,14 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # decimal digits, which tests/test_no_committed_identity.py reads as a
     # telephone number. Python joins the two halves into the one string the
     # live digest is compared with; the text simply carries no ten-digit run.
-    "_ALLOWED_URL_PATTERNS": "d3c96a81" "03316665",
+    #
+    # d3c96a81 + 03316665 (the two halves above) until lane A's content
+    # vertical, 2026-10-10: one anchored line,
+    # `/search/results/content/?(\?[^#]*)?$`, on CONTENT-VERTICAL-NOT-ALL-
+    # RESULTS -- its own line, the D2 alternation untouched, no exemption --
+    # and every other key byte-identical. The new digest carries no long
+    # digit run, so it is one literal again.
+    "_ALLOWED_URL_PATTERNS": "b8eebaa9a90587e8",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     # 419e64a3cd92ec7e until the same REVIEW: commit: a third entry, excusing
     # exactly {"/follow"} for exactly the anchored follower-list address.

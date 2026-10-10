@@ -30,7 +30,6 @@ J 73	J	R	-	CAPTURE:admit-jobs-application-settings	MEASURED	_audit/_census/jobs-
 J 74	J	W	-	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 J 75	J	W	-	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 J 76	J	W	-	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
-J 77	J	R	-	ADMIT:https://www.linkedin.com/mypreferences/d/job-application-accounts	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/mypreferences/d/job-application-accounts ; RULING:READ-PAST-AN-ACT-SUBSTRING
 J 78	J	W	-	ADMIT:https://www.linkedin.com/preload/guideOverlay/?interop=guideOverlay&query=Create+cover+letter	INFERRED	_audit/_census/jobs-directions.tsv::Create cover letter ; RULING:READ-PAST-AN-ACT-SUBSTRING
 J 79	J	W	-	TARGET:a job he names to mark Top Choice (one of three monthly marks, not refunded)	INFERRED	RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS ; J 79
 J 80	J	W	-	SIBLING:J 79	INFERRED	J 79
@@ -160,7 +159,7 @@ M C66	M	W	R2	TARGET:a member he names to mention	INFERRED	RULING:MENTION-COMPOSI
 M C67	M	W	R3	TARGET:a group post or comment of his he names	INFERRED	RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS ; M C67
 M C68	M	W	R3	TARGET:a group he names that holds posts for admin approval	INFERRED	RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS ; M C68
 M C69	M	W	R3	BUILD:tests/fixtures/live2/group_home.html	INFERRED	tests/fixtures/live2/group_home.html ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
-M C70	M	R	-	ADMIT:https://www.linkedin.com/search/results/content/	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/search/results/content/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
+M C70	M	R	-	CAPTURE:admit-search-results-content	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/search/results/content/ ; RULING:CONTENT-VERTICAL-NOT-ALL-RESULTS
 M C73	M	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 M C76	M	W	R3	PRECONDITION:an invitation to contribute to a collaborative article	INFERRED	M C76
 M C77	M	W	R3	PRECONDITION:an article he has published	INFERRED	M C49 ; M C77
@@ -179,7 +178,7 @@ M C89	M	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 M C90	M	W	R3	BUILD:tests/fixtures/synthetic/own_post_menu.html	MEASURED	tests/fixtures/synthetic/own_post_menu.html ; RULING:HIS-OWN-CURATION-NOT-OUTWARD
 M C91	M	W	R3	SIBLING:M C32	INFERRED	RULING:D6-CAPABILITY-OVER-AFFORDANCE ; M C32
 M C92	M	W	R3	TARGET:an event he names	NAMED	_audit/_census/read-addresses.tsv::ADMITTED 2026-09-23 BY A REVIEW: COMMIT (lane L1): one event by its NUMERIC id ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
-M C93	M	R	-	ADMIT:https://www.linkedin.com/search/results/all/	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/search/results/all/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
+M C93	M	R	-	CAPTURE:admit-search-results-content	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/search/results/content/?keywords=placeholder ; RULING:CONTENT-VERTICAL-NOT-ALL-RESULTS
 M C94	M	W	R2	TARGET:a post and a connection he names	INFERRED	RULING:OPERATOR-NAMES-THE-TARGET ; M C94
 M C97	M	W	R3	BUILD:tests/fixtures/notifications.html	MEASURED	tests/fixtures/notifications.html ; RULING:HIS-OWN-CURATION-NOT-OUTWARD
 M C100	M	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
@@ -500,7 +499,6 @@ P M5	P	R	-	CAPTURE:admit-jobs-application-settings	MEASURED	_audit/_census/read-
 P M6	P	R+W	-	CAPTURE:admit-jobs-application-settings	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/jobs/application-settings/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
 P M7	P	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 P M8	P	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
-P M9	P	R+W	-	ADMIT:https://www.linkedin.com/mypreferences/d/job-application-accounts	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/mypreferences/d/job-application-accounts ; RULING:READ-PAST-AN-ACT-SUBSTRING
 P M10	P	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 P M11	P	R+W	-	ADMIT:https://www.linkedin.com/resume-builder/	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/resume-builder/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
 P M12	P	R	-	CAPTURE:admit-jobs-application-settings	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/jobs/application-settings/ ; RULING:READ-PAST-AN-ACT-SUBSTRING

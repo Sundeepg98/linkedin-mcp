@@ -549,6 +549,36 @@ ADMISSIONS = (
                     "the apply route (J 82), not admitted"),
         ),
     ),
+    # THE CONTENT SEARCH VERTICAL, 2026-10-10, on CONTENT-VERTICAL-NOT-ALL-
+    # RESULTS: its own exact line, D2's spelling (a closed segment, the query
+    # as a shape), and the CONTROL the ruling asks for -- the mixed
+    # all-results page, with and without a query, still refused.
+    Admission(
+        key="search-content",
+        rows=("M C70", "M C93"),
+        address=f"{B}/search/results/content/",
+        excused=frozenset(),
+        query=True,
+        siblings=(
+            Sibling(f"{B}/search/results/all/?keywords=x", None,
+                    "the mixed all-results page the ruling keeps refused"),
+            Sibling(f"{B}/search/results/all/", None,
+                    "the all-results page with no query"),
+            Sibling(f"{B}/search/results/content/x/", None, "a SUB-PATH"),
+            Sibling(f"{B}/search/results/contents/", None, "a longer word"),
+            Sibling(f"{B}/search/results/content/../../mypreferences/d/close-account",
+                    None, "the account-ending traversal"),
+            Sibling(f"{B}/search/results/schools/?keywords=x", None,
+                    "a vertical no ruling reached"),
+            Sibling(f"{B}/search/results/content/?keywords=a#frag", None,
+                    "a fragment"),
+        ),
+        spellings=(
+            f"{B}/search/results/content/?keywords=placeholder",
+            f"{B}/search/results/content?keywords=placeholder",
+            f"{B}/search/results/content/?keywords=%23placeholder&origin=HASHTAG_SEARCH",
+        ),
+    ),
 )
 
 KEYS = [a.key for a in ADMISSIONS]

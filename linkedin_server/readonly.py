@@ -1150,6 +1150,14 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     #                                ``N 55``, ``N 56`` and ``P L3`` all wait
     #                                here, and they wait on that, not on a
     #                                line.
+    #
+    #                                THE CONDITION, SET 2026-10-10 by
+    #                                NAMED-ADDRESS-NEEDS-LOG-REDACTION (the
+    #                                orchestrator's call): this page is
+    #                                admitted only after every log line that
+    #                                records a page load writes its address as
+    #                                a SHAPE, never the slug. Census M C101 is
+    #                                GAP on that blocker until then.
     #     /newsletters/              the product root, which is a family
     #     /newsletters/<slug>/analytics/   census ``M C83``, ``P L4``
     #
@@ -2314,7 +2322,10 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # The invitation manager, received tab (census N 13, N 14, N 19). NAMED:
     # the census and `send_invitation`'s own unverifiable block spell it; no
     # capture draws it. If it redirects (to a `received/` leaf), the landing
-    # is recorded and that spelling gets its own line then.
+    # is recorded and that spelling gets its own line then. KEPT 2026-10-10
+    # by RECEIVED-INVITATIONS-READ-STAYS-ADMITTED: whatever a read changes in
+    # an invitation's seen state is a passive cost, UNMEASURED on those rows,
+    # reopened when a capture shows the sender can see it.
     re.compile(r"^https://www\.linkedin\.com/mynetwork/invitation-manager/?$"),
     # The invitation manager, sent tab (census N 9, N 11). NAMED, as above.
     re.compile(r"^https://www\.linkedin\.com/mynetwork/invitation-manager/sent/?$"),
@@ -2341,6 +2352,9 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # with an exemption excusing the one substring it trips; a commit of their
     # own, because how many named pages ONE-NAMED-SETTINGS-PAGE-AT-A-TIME
     # allows at once is the orchestrator's reading (the record, section 7).
+    # RATIFIED 2026-10-10 by NAMED-SETTINGS-PAGES-RATIFIED, with the
+    # application-settings page above: each page named exactly, in its own
+    # commit, is within that ruling, and no pattern widens.
     #
     # The people and Pages he unfollowed (census N 39). MEASURED: the census
     # cell records the address "found live and written down". It trips
@@ -2397,7 +2411,10 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # NOT HERE: the all-results search page (census M C93). A fifth search
     # vertical is D2-SEARCH-VERTICALS-WIDENED's to grant -- its measured scope
     # is "exactly the four" (tests/test_search_admission_blast_radius.py) --
-    # not this clause's. Named to the orchestrator in the record.
+    # not this clause's. Named to the orchestrator in the record. ANSWERED
+    # 2026-10-10 by CONTENT-VERTICAL-NOT-ALL-RESULTS: the mixed /all/ page
+    # stays refused, and M C93 is served by the content vertical, whose own
+    # line closes this block.
     #
     # LinkedIn Learning: its home and catalogue (census J 152), his own
     # library and its in-progress list (J 154), his career-journey page
@@ -2431,6 +2448,26 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # drawn on the tracked job-detail fixtures with exactly this key. Its
     # insights exist only for an uploaded resume, which is a write.
     re.compile(r"^https://www\.linkedin\.com/job-apply-resources/\?jobPostingId=[0-9]{1,20}$"),
+    # THE CONTENT SEARCH VERTICAL (census M C70; M C93 under D6), on
+    # CONTENT-VERTICAL-NOT-ALL-RESULTS (the orchestrator's call, 2026-10-10,
+    # `_audit/2026-10-10-rulings-lane-a-questions.md`): its own exact line,
+    # NOT a fifth word in the D2 alternation above, so the D2 line and its
+    # measured scope stay exactly what was ruled. The spelling is D2's:
+    # one CLOSED literal segment and the query admitted as a shape, so no
+    # traversal follows it and no sibling vertical rides in -- above all not
+    # the mixed /search/results/all/ page, which this ruling keeps refused
+    # (tests/test_search_admission_blast_radius.py and
+    # tests/test_lane_a_admissions.py drive both).
+    #
+    # D1-SEARCH-AS-READS'S THREE CONDITIONS, stated for this line: the
+    # keywords come from a tool's arguments only, never from a page; never an
+    # identifying value of the operator; at most five test searches a live
+    # session. NOTHING IN THE PACKAGE COMPOSES THIS ADDRESS TODAY: the first
+    # tool that opens it lands with its reader in the same commit, and the
+    # results are other people's posts, returned under
+    # THIRD-PARTY-TEXT-AT-RUNTIME. The next step is a capture
+    # (`_audit/_census/capture-queue.tsv`, admit-search-results-content).
+    re.compile(r"^https://www\.linkedin\.com/search/results/content/?(\?[^#]*)?$"),
     # ======================================================================
     # REVIEW (lane L1, 2026-09-23) -- N 184, ONE EVENT BY ITS NUMERIC ID.
     # Census row N 184: "reach an event through its URL after it has been
