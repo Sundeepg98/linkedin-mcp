@@ -819,9 +819,9 @@ captures or live proofs the live lane would otherwise take.
    admitted label. Confirm, or rule that a proof may restore it by hand.
 7. **A LINKEDIN LEARNING SETTINGS PAGE (`J 157`).** Ground: its cell's own
    question, *"Whether the settings-family ruling reaches a Learning settings
-   page"*, and the blocker `LEARNING-SURFACE`, which no ruling of 2026-09-28
-   names. Lane K's ledger assigns the row to this lane under
-   `HIS-OWN-SETTINGS-NOT-OUTWARD`; this lane holds it OUT until you say that
+   page"*, and its census blocker, LEARNING-SURFACE, which no ruling of
+   2026-09-28 names. Lane K's ledger assigns the row to this lane, citing
+   HIS-OWN-SETTINGS-NOT-OUTWARD; this lane holds it OUT until you say that
    ruling reaches a Learning page.
 8. **THE WRITE DOOR EXCUSES TWO FORBIDDEN ENTRIES FOR ONE ACTION.** Ground:
    `assert_write_url`, which honoured exactly one `exempt_substring` per spec.
