@@ -2,9 +2,11 @@
 
 Lane S (settings), `ls2-settings-lead`. Brief written by the orchestrator on
 2026-09-28; relaunched and run on 2026-10-10 from master `3c8edc2` (CI green,
-run 36460989178), on its own worktree branch, never pushed. Not to be confused
-with the earlier lane S of 2026-09-28 (people search, the offline frontier),
-whose record is `_audit/2026-09-24-lane-s-people-search.md`.
+run 36460989178), on its own worktree branch, merged with master twice
+(`53908ea`, then `fe119de`), pushed only to its `ci/` ref by
+`scripts/lane_ci.py`. Not to be confused with the earlier lane S of 2026-09-28
+(people search, the offline frontier), whose record is
+`_audit/2026-09-24-lane-s-people-search.md`.
 
 The ruling applied is `HIS-OWN-SETTINGS-NOT-OUTWARD`
 (`_audit/2026-09-28-rulings-build-classes.md`, section 2): a setting of his own
@@ -21,7 +23,8 @@ started closed during it; every test here ran on frozen pages.
 
 * The five build-class rulings of 2026-09-28, copied byte-identical and
   registered (the lane's first commit), and the two gates their registration
-  tripped, repaired.
+  tripped, repaired. Lane K registered the same five on master; at the merge
+  of `fe119de` master's register entries were kept and this lane's dropped.
 * `linkedin_set_admitted_setting` -- THE GENERIC SETTINGS WRITER. ONE admitted
   settings page, ONE control on it, named by the label LinkedIn draws, behind
   the single-use grant. Only a switch, a radio group or a select; every other
@@ -35,8 +38,16 @@ started closed during it; every test here ran on frozen pages.
   updates".
 * ONE ROW MOVED: `P O17` ("share profile updates with your network") split
   from `P O6-O20` and went GAP -> COVERED-UNFIRED by its own bar.
-* 93 settings rows enumerated (94 after the split); every other one stays GAP with a capture spec
-  (section 5) and a line in `_audit/_census/capture-queue-settings.tsv`.
+* 102 settings rows IN and 26 OUT (section 1): 115 candidates walked by script,
+  then 13 more -- `P O17` made by the split, eleven rows lane K's next-step
+  ledger names as this lane's that the walk had missed, and `N 96`, which a
+  cold review named. Every IN row but `P O17` stays GAP: 94 wait on a line of
+  `_audit/_census/capture-queue-settings.tsv` (22 lines, section 5), 3 are
+  kinds the writer refuses, 3 are not settings pages, and `P N12` waits on
+  question 2.
+* A COLD REVIEW of the writer, fourteen findings, the first of them HIGH: the
+  receipt's STOP fired for one failure shape of five. Every finding is fixed
+  or answered (section 3.4), each fix with a mutation that turns its test red.
 * The live-proof plan for the live lane (section 6).
 
 ## 1. The rows, enumerated
@@ -55,10 +66,48 @@ committed `write-classes.tsv` and the committed `blocker-map.tsv`:
                                                             the rest
 
 The union is 115 candidate rows. Each was read and placed IN (a setting of his
-own account that a write changes) or OUT (named reason). **93 IN, 22 OUT** --
-94 IN after the split of section 4, which adds `P O17`.
+own account that a write changes) or OUT (named reason): 93 IN, 22 OUT.
+
+THE WALK MISSED THIRTEEN, AND TWO INSTRUMENTS FOUND THEM. It read no jobs row:
+the jobs slice is not in `write-classes.tsv`, and its cells name the settings
+family in other words, so neither source 3 nor source 4 saw `J 74`-`J 76`
+(the job application settings page `P M7` and `P M8` already sit on). Lane
+K's next-step ledger (`_audit/_census/next-step.tsv`, held by
+`scripts/check_next_step.py`), cross-checked against this lane's rows after
+the merge of `fe119de`, names eleven rows as this lane's that the walk had
+not reached; the cold review named `N 96`; and the split made `P O17`. Each
+was read and placed like the 115: eight IN (`J 35`, `J 36`, `J 41`, `J 74`,
+`J 75`, `J 76`, `J 100`, `M M52`), four OUT (`J 81`, `J 83`, `J 157`,
+`N 96`), and `P O17` IN as the one built. **102 IN, 26 OUT.** The walk was a
+scratch script and is not kept: its four rules are the list above, and the
+ledger's checker is the committed cross-check that caught what it missed.
+
 Twins are kept as the census keeps them (`N 159`/`P B10`, `N 115`/`P E8`,
-`M C88`/`P N26`, `N 170`/`M M42`): two rows, one control, one capture.
+`M C88`/`P N26`, `N 170`/`M M42`, `J 74`/`P M8`, `J 76`/`P M7`): two rows, one
+control, one capture.
+
+A WRITER IS BUILT FOR THREE KINDS, AND A ROW'S KIND IS ITS CAPTURE'S TO SAY.
+The census sentence on each IN row says which of four things is known of it
+(a cold review found the first form said "the write is BUILT" of all of them,
+including rows whose own note named a refused kind):
+
+    the capture decides the kind: a switch, radio group or select
+      is set; a typed field, button or link is refused            80 rows
+    reads as an act or a typed value (add, remove, connect, sign
+      out, a request, a typed address): the capture decides, and
+      such a control would be refused                             12 rows
+    half settable: `M M39`, its switch and not its typed message   1 row
+    a kind the writer refuses, so not queued: `P N5`, `P N19`,
+      `P O5`                                                       3 rows
+    not a settings page: `P D7`, `P G2`, `M M52`                   3 rows
+    on the sign-in page, waiting on question 2: `P N12`            1 row
+    the split's two rows, written by hand: `P O17` (built) and
+      `P O6-O20` (the fourteen left)                               2 rows
+                                                                 ---
+                                                                 102
+
+Counted from the census itself: 80 cells carry the first sentence (7 in the
+jobs slice, 12 in messaging, 23 in network, 38 in profile).
 
 The surface each row waits on is my reading of LinkedIn's settings layout from
 the census cells, the help articles they cite and the one captured index; it
@@ -66,16 +115,16 @@ is UNVERIFIED for every category page until that page is captured, and the
 capture settles it. The ACCOUNT category's pages are not a reading: the
 captured index draws each one's address (section 5).
 
-IN: 93 rows. OUT: 22 rows. Candidates: 115.
+IN: 102 rows. OUT: 26 rows. Candidates: 128.
 
 | surface | address | state of the capture | rows (live-proof class) |
 |---|---|---|---|
-| S0-SHARE-PROFILE-UPDATES | `/mypreferences/d/settings/notify-network-for-updates` (settings page) | CAPTURED (live2/setting.html, 2026-09-28); admitted by name | `P O6-O20` (ALLOWED) |
-| C-VISIBILITY | `/mypreferences/d/categories/profile-visibility` (category page) | not captured | `P O4` (VISIBLE), `N 137` (VISIBLE), `N 138` (VISIBLE), `N 139` (VISIBLE), `N 67` (VISIBLE), `N 68` (VISIBLE), `N 69` (VISIBLE), `N 70` (VISIBLE), `N 71` (VISIBLE), `N 72` (VISIBLE), `N 74` (VISIBLE), `N 77` (VISIBLE), `N 159` (VISIBLE), `P B10` (VISIBLE), `M C88` (VISIBLE), `M C89` (VISIBLE), `P N26` (VISIBLE), `N 183` (VISIBLE), `N 115` (VISIBLE), `P E8` (VISIBLE), `N 116` (VISIBLE) |
+| S0-SHARE-PROFILE-UPDATES | `/mypreferences/d/settings/notify-network-for-updates` (settings page) | CAPTURED (live2/setting.html, 2026-09-28); admitted by name | `P O17` (ALLOWED) |
+| C-VISIBILITY | `/mypreferences/d/categories/profile-visibility` (category page) | not captured | `P O6-O20` (VISIBLE), `P O4` (VISIBLE), `N 137` (VISIBLE), `N 138` (VISIBLE), `N 139` (VISIBLE), `N 67` (VISIBLE), `N 68` (VISIBLE), `N 69` (VISIBLE), `N 70` (VISIBLE), `N 71` (VISIBLE), `N 72` (VISIBLE), `N 74` (VISIBLE), `N 77` (VISIBLE), `N 159` (VISIBLE), `P B10` (VISIBLE), `M C88` (VISIBLE), `M C89` (VISIBLE), `P N26` (VISIBLE), `N 183` (VISIBLE), `N 115` (VISIBLE), `P E8` (VISIBLE), `N 116` (VISIBLE) |
 | C-PRIVACY | `/mypreferences/d/categories/privacy` (category page) | not captured | `P P4` (ALLOWED), `P P5` (ALLOWED), `P P6` (ALLOWED), `P P7` (ALLOWED), `P P8` (ALLOWED), `P N25` (ALLOWED), `M C73` (VISIBLE), `M M35` (ALLOWED), `M M36` (ALLOWED), `M M37` (VISIBLE), `M M39` (VISIBLE), `M M41` (ALLOWED), `M M46` (ALLOWED), `M M50` (ALLOWED), `P M10` (ALLOWED) |
 | C-ADS | `/mypreferences/d/categories/ads` (category page) | not captured | `P P10` (ALLOWED), `P P11` (ALLOWED), `P P12` (ALLOWED), `P P13` (ALLOWED), `P P14` (ALLOWED) |
-| C-NOTIFICATIONS | `/mypreferences/d/categories/notifications` (category page) | not captured | `P P17` (ALLOWED), `P P18` (ALLOWED), `P P19` (ALLOWED), `P P20` (ALLOWED), `P P21` (ALLOWED), `P P22` (ALLOWED), `P P23` (ALLOWED), `N 58` (ALLOWED), `N 73` (ALLOWED), `N 75` (ALLOWED), `N 78` (ALLOWED), `N 117` (ALLOWED), `N 140` (ALLOWED), `M M24` (ALLOWED) |
-| C-SIGNIN | `/mypreferences/d/categories/sign-in-and-security` (category page) | not captured; credential surfaces (question 2) | `P N4` (CREDENTIAL), `P N5` (CREDENTIAL), `P N6` (CREDENTIAL), `P N7` (CREDENTIAL), `P N8` (CREDENTIAL), `P N10` (CREDENTIAL), `P N11` (CREDENTIAL) |
+| C-NOTIFICATIONS | `/mypreferences/d/categories/notifications` (category page) | not captured | `P P17` (ALLOWED), `P P18` (ALLOWED), `P P19` (ALLOWED), `P P20` (ALLOWED), `P P21` (ALLOWED), `P P22` (ALLOWED), `P P23` (ALLOWED), `N 58` (ALLOWED), `N 73` (ALLOWED), `N 75` (ALLOWED), `N 78` (ALLOWED), `N 117` (ALLOWED), `N 140` (ALLOWED), `M M24` (ALLOWED), `J 41` (ALLOWED) |
+| C-SIGNIN | `/mypreferences/d/categories/sign-in-and-security` (category page) | not captured; credential surfaces (question 2) | `P N4` (CREDENTIAL), `P N6` (CREDENTIAL), `P N7` (CREDENTIAL), `P N8` (CREDENTIAL), `P N10` (CREDENTIAL), `P N11` (CREDENTIAL) |
 | A-LANGUAGE | `/mypreferences/d/settings/language` (settings page) | drawn on the captured index | `P N15` (CANNOT-BE-PUT-BACK) |
 | A-CONTENT-LANGUAGE | `/mypreferences/d/language-for-translation` (settings page) | drawn on the captured index | `P S7` (ALLOWED) |
 | A-AUTOPLAY | `/mypreferences/d/settings/autoplay-videos` (settings page) | drawn on the captured index | `P N16` (ALLOWED) |
@@ -84,23 +133,25 @@ IN: 93 rows. OUT: 22 rows. Candidates: 115.
 | A-PREFERRED-VIEW | `/mypreferences/d/settings/preferred-view` (settings page) | drawn on the captured index | `M C100` (ALLOWED) |
 | A-SYNCING | `/mynetwork/settings/manage-syncing/` (settings page) | drawn on the captured index (twice: calendar, contacts) | `P N20` (ALLOWED), `P N21` (CANNOT-BE-PUT-BACK) |
 | A-MICROSOFT | `/mypreferences/d/connected-microsoft-accounts` (settings page) | drawn on the captured index | `P N23` (ALLOWED) |
-| A-BASIC-INFO | `/profile/edit-basic-info` (editor page) | drawn on the captured index | `P N19` (VISIBLE) |
 | A-DEMOGRAPHIC | `/mypreferences/d/demographic-info-copy` (settings page) | drawn on the captured index; reading it reads his self-identification answers (question 3) | `P S6` (SENSITIVE) |
 | O-PUBLIC-PROFILE | `/public-profile/settings` (settings page) | named by the census; not captured | `P C2` (CANNOT-BE-PUT-BACK), `P C3` (VISIBLE), `P C4` (VISIBLE), `P C5` (VISIBLE), `P C6` (CANNOT-BE-PUT-BACK), `P B4` (VISIBLE) |
 | O-GUEST-CONTROLS | `/psettings/guest-controls` (legacy settings address) | named by the census; may redirect | `P C7` (ALLOWED) |
 | O-PERMITTED-SERVICES | `/psettings/permitted-services` (legacy settings address) | named by the census; may redirect | `P N24` (ALLOWED) |
 | O-GENAI-DATA | `/mypreferences/d/settings/data-for-ai-improvement` (settings page) | named by census finding 7.2 | `P P9` (ALLOWED) |
 | O-MEMBER-COOKIES | `/mypreferences/d/member-cookies` (settings page) | named by census finding 7.1 | `P P16` (ALLOWED) |
-| O-JOB-APPLICATION-SETTINGS | `/jobs/application-settings/` (settings page) | named by the census; refused on an ACT substring (READ-PAST-AN-ACT-SUBSTRING) | `P M7` (ALLOWED), `P M8` (VISIBLE) |
+| O-JOB-APPLICATION-SETTINGS | `/jobs/application-settings/` (settings page) | named by the census; refused on an ACT substring (READ-PAST-AN-ACT-SUBSTRING) | `P M7` (ALLOWED), `P M8` (VISIBLE), `J 74` (VISIBLE), `J 75` (VISIBLE), `J 76` (ALLOWED) |
 | O-GROUP-SETTINGS | `/psettings/group/<id>/` (per-group settings page) | named by the census; the address carries a group id (question 4) | `N 176` (ALLOWED), `M M42` (ALLOWED), `N 170` (ALLOWED) |
-| O-BADGE | `/badges/profile/create` (creation page) | named by the census; refused on '/create', an ACT substring (READ-PAST-AN-ACT-SUBSTRING) | `P O5` (ALLOWED) |
+| O-JOB-ALERTS | `/jobs/jam/` (job alerts page) | ADMITTED for reading (J 37's address); its controls not captured | `J 35` (ALLOWED), `J 36` (ALLOWED), `J 100` (VISIBLE) |
+| R-REFUSED-KIND | `(none: a kind the writer refuses)` (no page to queue) | not queued: a capture would not unblock it | `P N19` (VISIBLE), `P N5` (CREDENTIAL), `P O5` (ALLOWED) |
 | O-SIGNIN | `/uas/login` (sign-in surface) | READ-PAST does not reach a sign-in surface (question 2) | `P N12` (CREDENTIAL) |
 | X-POSITION-EDITOR | `his experience editor (per-edit control)` (editor dialog) | not a settings page | `P D7` (VISIBLE) |
 | X-ACTIVITY-SECTION | `his profile's Activity section` (profile section) | not a settings page; queued DEFAULT-ACTIVITY-FORM | `P G2` (ALLOWED) |
+| X-COMPOSER | `the compose window's send-options menu` (composer control) | not a settings page | `M M52` (ALLOWED) |
 
 | row | capability | surface | live-proof class | note |
 |---|---|---|---|---|
-| `P O6-O20` | fifteen further visibility toggles: contact-info and email visibility, connection-list visibility, who can see | S0-SHARE-PROFILE-UPDATES | ALLOWED | SPLIT: 'share profile updates with your network' is the admitted switch (BUILT); the other 14 toggles stay GAP on C-VISIBILITY |
+| `P O17` | Share profile updates with your network (the switch Share key profile updates) | S0-SHARE-PROFILE-UPDATES | ALLOWED | SPLIT from O6-O20 on 2026-10-10: the admitted switch, BUILT on its capture, COVERED-UNFIRED |
+| `P O6-O20` | fifteen further visibility toggles: contact-info and email visibility, connection-list visibility, who can see | C-VISIBILITY | VISIBLE | the fourteen visibility toggles left when O17 split out; each its own control, none captured |
 | `P O4` | Profile viewing options (his own browsing mode) | C-VISIBILITY | VISIBLE | profile viewing options: the radio group N 137-139 name its three values |
 | `N 137` | Set your profile viewing option to "Your name and headline" | C-VISIBILITY | VISIBLE | a value of P O4's radio group |
 | `N 138` | Set your profile viewing option to private characteristics | C-VISIBILITY | VISIBLE | a value of P O4's radio group |
@@ -122,18 +173,18 @@ IN: 93 rows. OUT: 22 rows. Candidates: 115.
 | `N 115` | Opt out of receiving endorsements entirely | C-VISIBILITY | VISIBLE | opt out of endorsements; twin of P E8 |
 | `P E8` | Opt out of endorsements entirely | C-VISIBILITY | VISIBLE | opt out of endorsements; twin of N 115 |
 | `N 116` | Manage endorsement settings | C-VISIBILITY | VISIBLE | endorsement settings |
-| `P P4` | Change or correct his data -- the data right "Change or Correct Data" | C-PRIVACY | ALLOWED | a data-rights REQUEST, not a switch; the capture says what it draws |
-| `P P5` | Restrict or object to the use of his data -- the data right "Restrict or Object to the use of Data" | C-PRIVACY | ALLOWED | a data-rights REQUEST, not a switch; the capture says what it draws |
+| `P P4` | Change or correct his data -- the data right "Change or Correct Data" | C-PRIVACY | ALLOWED | a data-rights REQUEST: reads as an act or a typed value, which the writer refuses by kind; the capture decides its control's kind |
+| `P P5` | Restrict or object to the use of his data -- the data right "Restrict or Object to the use of Data" | C-PRIVACY | ALLOWED | a data-rights REQUEST: reads as an act or a typed value, which the writer refuses by kind; the capture decides its control's kind |
 | `P P6` | Salary data: the settings page for the salary data he has shared with LinkedIn | C-PRIVACY | ALLOWED | salary data page; a delete half would split off (census cell) |
 | `P P7` | Research invitations: whether LinkedIn may invite him to take part in research | C-PRIVACY | ALLOWED | research invitations |
 | `P P8` | Harmful message detection: turn it on or off | C-PRIVACY | ALLOWED | harmful message detection |
-| `P N24` | Permitted Services -- third-party app access | O-PERMITTED-SERVICES | ALLOWED | third-party app access |
-| `P N25` | LinkedIn Services (DMA) connect / disconnect | C-PRIVACY | ALLOWED | LinkedIn services (DMA) connect / disconnect; nav path only |
+| `P N24` | Permitted Services -- third-party app access | O-PERMITTED-SERVICES | ALLOWED | third-party app access (remove an app): reads as an act or a typed value, which the writer refuses by kind; the capture decides its control's kind |
+| `P N25` | LinkedIn Services (DMA) connect / disconnect | C-PRIVACY | ALLOWED | LinkedIn services (DMA) connect / disconnect; nav path only: reads as an act or a typed value, which the writer refuses by kind; the capture decides its control's kind |
 | `M C73` | Allow or disallow your posts being embedded | C-PRIVACY | VISIBLE | embedding of his posts |
 | `M M35` | Choose Messaging inbox layout | C-PRIVACY | ALLOWED | messaging inbox layout |
 | `M M36` | Manage how new conversations open (conversation windows) | C-PRIVACY | ALLOWED | conversation windows |
 | `M M37` | Turn read receipts and typing indicators on or off | C-PRIVACY | VISIBLE | read receipts and typing indicators (others see them) |
-| `M M39` | Set or edit an away message (Premium) | C-PRIVACY | VISIBLE | away message (Premium): a TYPED message, a refused kind; its switch half alone is settable |
+| `M M39` | Set or edit an away message (Premium) | C-PRIVACY | VISIBLE | away message (Premium): the message is TYPED, a refused kind; only its on/off switch is a kind the writer sets |
 | `M M41` | Manage smart features in Messaging | C-PRIVACY | ALLOWED | smart features in messaging |
 | `M M46` | Opt out of receiving InMail messages | C-PRIVACY | ALLOWED | InMail opt-out |
 | `M M50` | Manage LinkedIn message nudges | C-PRIVACY | ALLOWED | message nudges |
@@ -170,29 +221,37 @@ IN: 93 rows. OUT: 22 rows. Candidates: 115.
 | `M C100` | Choose the feed's default view: most relevant or most recent posts | A-PREFERRED-VIEW | ALLOWED | preferred feed view (also HIS-OWN-CURATION-NOT-OUTWARD) |
 | `P N20` | Calendar sync | A-SYNCING | ALLOWED | calendar sync |
 | `P N21` | Contact / address-book sync | A-SYNCING | CANNOT-BE-PUT-BACK | contact sync: turning it on uploads other people's contact data, which turning it off does not withdraw |
-| `P N23` | Partners and services / Microsoft account link | A-MICROSOFT | ALLOWED | Microsoft account link |
-| `P N19` | Name / location / industry via settings | A-BASIC-INFO | VISIBLE | name, location, industry: typed and autocomplete fields, refused kinds; the intro editor rows carry them |
+| `P N23` | Partners and services / Microsoft account link | A-MICROSOFT | ALLOWED | Microsoft account link (connect / disconnect): reads as an act or a typed value, which the writer refuses by kind; the capture decides its control's kind |
+| `P N19` | Name / location / industry via settings | R-REFUSED-KIND | VISIBLE | name, location, industry: typed and autocomplete fields, kinds the writer refuses; the intro editor rows carry them |
 | `P S6` | Personal demographic information, a page of the account settings | A-DEMOGRAPHIC | SENSITIVE | personal demographic information |
-| `P C2` | Customise the public profile URL | O-PUBLIC-PROFILE | CANNOT-BE-PUT-BACK | custom public URL: releasing an address another member may take, and every link to it breaks |
+| `P C2` | Customise the public profile URL | O-PUBLIC-PROFILE | CANNOT-BE-PUT-BACK | custom public URL, a typed address: releasing it lets another member take it, and every link to it breaks; reads as an act or a typed value, which the writer refuses by kind; the capture decides its control's kind |
 | `P C3` | Public profile visibility master switch | O-PUBLIC-PROFILE | VISIBLE | public profile master switch |
 | `P C4` | Per-section public visibility toggles | O-PUBLIC-PROFILE | VISIBLE | per-section public visibility |
 | `P C5` | Search-engine visibility of the public profile | O-PUBLIC-PROFILE | VISIBLE | search-engine visibility |
-| `P C6` | Unlink a prior public URL | O-PUBLIC-PROFILE | CANNOT-BE-PUT-BACK | unlinking a prior public URL |
+| `P C6` | Unlink a prior public URL | O-PUBLIC-PROFILE | CANNOT-BE-PUT-BACK | unlinking a prior public URL: reads as an act or a typed value, which the writer refuses by kind; the capture decides its control's kind |
 | `P B4` | Profile photo visibility audience | O-PUBLIC-PROFILE | VISIBLE | profile photo audience |
 | `P N4` | Two-step verification on / off | C-SIGNIN | CREDENTIAL | two-step verification |
-| `P N5` | Change password | C-SIGNIN | CREDENTIAL | change password: a typed field, a refused kind |
-| `P N6` | Passkeys add / delete | C-SIGNIN | CREDENTIAL | passkeys |
-| `P N7` | Email addresses -- add / remove / change primary | C-SIGNIN | CREDENTIAL | email addresses |
-| `P N8` | Phone numbers -- add / remove / choose reset number | C-SIGNIN | CREDENTIAL | phone numbers |
-| `P N10` | Sign out of one session / all sessions | C-SIGNIN | CREDENTIAL | sign out of sessions: ends this server's own session |
-| `P N11` | Devices that remember your password | C-SIGNIN | CREDENTIAL | devices that remember the password |
+| `P N5` | Change password | R-REFUSED-KIND | CREDENTIAL | change password: a typed field, a kind the writer refuses |
+| `P N6` | Passkeys add / delete | C-SIGNIN | CREDENTIAL | passkeys (add, remove): reads as an act or a typed value, which the writer refuses by kind; the capture decides its control's kind |
+| `P N7` | Email addresses -- add / remove / change primary | C-SIGNIN | CREDENTIAL | email addresses (add, remove): reads as an act or a typed value, which the writer refuses by kind; the capture decides its control's kind |
+| `P N8` | Phone numbers -- add / remove / choose reset number | C-SIGNIN | CREDENTIAL | phone numbers (add, remove): reads as an act or a typed value, which the writer refuses by kind; the capture decides its control's kind |
+| `P N10` | Sign out of one session / all sessions | C-SIGNIN | CREDENTIAL | sign out of sessions, which ends this server's own session: reads as an act or a typed value, which the writer refuses by kind; the capture decides its control's kind |
+| `P N11` | Devices that remember your password | C-SIGNIN | CREDENTIAL | devices that remember the password (add, remove): reads as an act or a typed value, which the writer refuses by kind; the capture decides its control's kind |
 | `P N12` | Keep me logged in / auto sign-in | O-SIGNIN | CREDENTIAL | keep me logged in, on the sign-in page |
 | `N 176` | Prevent your network being updated when you join a group | O-GROUP-SETTINGS | ALLOWED | network updates when he joins a group; queued GROUP-SETTINGS-PAGE |
 | `M M42` | Settings to allow or prevent messages from group members | O-GROUP-SETTINGS | ALLOWED | messages from group members; twin of N 170 |
 | `N 170` | Allow or prevent other group members from messaging you | O-GROUP-SETTINGS | ALLOWED | messages from group members; twin of M M42 |
-| `P O5` | Public profile badge creation | O-BADGE | ALLOWED | public profile badge: creates an embed snippet, not a setting the writer sets |
+| `P O5` | Public profile badge creation | R-REFUSED-KIND | ALLOWED | public profile badge: creates an embed snippet, not a value the writer sets; and whether loading its creation page creates is unmeasured, so it is not queued |
 | `P D7` | Notify network of a job change | X-POSITION-EDITOR | VISIBLE | the per-edit 'notify network' control in the position editor; its standing default is the admitted switch |
 | `P G2` | Activity section default view | X-ACTIVITY-SECTION | ALLOWED | Activity section default view; its own queue stands |
+| `J 35` | Set alert frequency (daily / weekly) | O-JOB-ALERTS | ALLOWED | an alert's frequency (daily / weekly) |
+| `J 36` | Set alert delivery channel (email / app / both) | O-JOB-ALERTS | ALLOWED | an alert's delivery channel (email / app / both) |
+| `J 100` | Signal your interest to recruiters at companies you have created job alerts for | O-JOB-ALERTS | VISIBLE | signal interest to recruiters at companies he has alerts for (recruiters see it) |
+| `J 41` | Subscribe / unsubscribe the job-collections weekly digest | C-NOTIFICATIONS | ALLOWED | the job-collections weekly digest (an email subscription) |
+| `J 74` | Toggle Share resume data with recruiters | O-JOB-APPLICATION-SETTINGS | VISIBLE | share resume data with recruiters; twin of P M8 |
+| `J 75` | Toggle Share your full profile when you click Apply (and the Undo banner) | O-JOB-APPLICATION-SETTINGS | VISIBLE | share his full profile on Apply (employers see it) |
+| `J 76` | Opt out of saving job-application data | O-JOB-APPLICATION-SETTINGS | ALLOWED | opt out of saving job-application data; twin of P M7 |
+| `M M52` | Choose the message composer's send options (the menu beside Send) | X-COMPOSER | ALLOWED | the composer's send options: a menu in the compose window, not a settings page |
 
 | row | capability | why it is not a settings write of his own account |
 |---|---|---|
@@ -218,18 +277,27 @@ IN: 93 rows. OUT: 22 rows. Candidates: 115.
 | `P M3` | Delete a saved resume | deleting stored application data, queued JOB-APPLICATION-SETTINGS: deletion of his own item |
 | `P M6` | Saved screening-question answers | stored screening answers: records he edits, not a setting (R/W) |
 | `P M9` | Stored job applicant accounts | stored applicant accounts: records he views or removes, not a setting (R/W) |
+| `J 81` | Verify account to raise the Easy Apply daily limit | account verification to raise a limit, as P K2-K6: not a setting |
+| `J 83` | Save voluntary self-identification answers for reuse | stored self-identification answers: records he edits, as P M6, and a sensitive attribute |
+| `J 157` | Change LinkedIn Learning settings | a LinkedIn Learning settings page: its own blocker, LEARNING-SURFACE, stands, and whether HIS-OWN-SETTINGS-NOT-OUTWARD reaches a Learning page is a question for the orchestrator |
+| `N 96` | Clear your search history | clearing his search history is a button that deletes his own record -- no value the writer sets, and nothing restores it |
 
 ## 2. The exclusions the ruling names, per row
 
 Every IN row carries one live-proof class:
 
-    ALLOWED              49   proven read, benign value, read back, restore, read back
-    VISIBLE              31   ALLOWED, and the change shows to other members:
+    ALLOWED              54   proven read, benign value, read back, restore, read back
+    VISIBLE              35   ALLOWED, and the change shows to other members:
                               restored inside the same minute (question 5)
     CREDENTIAL            8   CREDENTIAL-SETTINGS-NEED-THE-OPERATOR's set: built,
                               never live-proven unless he names it
     CANNOT-BE-PUT-BACK    4   built, never live-proven unless he names it
     SENSITIVE             1   built, never live-proven unless he names it
+
+Counted over the 102 IN rows, after the split: `P O17` is ALLOWED and the
+fourteen toggles left in `P O6-O20` are VISIBLE, on the Visibility category
+page's line. (This record's first form counted `P O6-O20` as the switch that
+left it -- ALLOWED, on the switch's own page -- which a cold review caught.)
 
 The four that cannot be put back exactly, and why:
 
@@ -279,24 +347,40 @@ for two minutes. The second call, with the token, acts.
   `unknown` -- a name drawn twice (in either spelling, switch or checkbox), an
   undeclared choice or option, nothing checked, a checked property that
   disagrees with aria-checked, a landing that did not keep the address.
-* PRESS: through `writes.perform`'s one click site (a switch by its own name,
-  a radio group on the radio named for the destination) or its one
-  `select_option` site (a select, by the option's label). Nothing new is added
-  to `readonly.SANCTIONED_MUTATIONS`; the press is strict (a second match at
-  press time throws).
+* PRESS: through `writes.perform`'s one click site (a switch by its own name;
+  a radio group on the `<label for>` bound to the radio named for the
+  destination, the binding read live by `dom.read_radio_label_binding` just
+  before the press -- LinkedIn covers a settings radio's input, measured on
+  the dark-mode page) or its one `select_option` site (a select, by the
+  option's label). Nothing new is added to `readonly.SANCTIONED_MUTATIONS`.
+  The click is strict, and so is the choice, for this action alone (a second
+  match at the moment of the press throws); the select reader counts every
+  combobox wearing the name, as the press's selector would match them.
+* BEFORE THE PRESS: every switch, checkbox, radio and native select on the
+  page is read. A page whose controls cannot all be read, or that draws more
+  than the reader's ceiling, is not pressed at all: the check after the press
+  could never pass.
 * WAIT: `profile_editor.wait_for_state`, the bounded liveness wait of
   `c3b2393`, for the control to read the requested value.
-* ONLY THAT CONTROL MOVED: every switch, checkbox, radio and select on the page
-  is read before the press and after it, position by position, and the page
-  may move exactly what one press of the control's kind moves -- one checkable
-  for a switch, two radios for a group, one select -- and nothing else. A
-  select's value is compared in this process and never leaves it.
+* ONLY THAT CONTROL MOVED: the same four kinds read again after the press,
+  position by position and by each position's IDENTITY (its role and
+  accessible name, digested), so a page that redrew -- fewer controls, more,
+  or as many but not the same -- is refused rather than compared; the page may
+  move exactly what one press of the control's kind moves -- one checkable for
+  a switch, two radios for a group, one select -- and nothing else. NOTHING
+  ELSE ON THE PAGE IS READ: a pressed button, a menu item, a custom listbox or
+  a typed value that moved would not be seen, and the pass says so. A select's
+  value and every name are compared in this process and never leave it.
 * SAVE: only if that holds and the page draws one (exactly one enabled control
-  of that name). A page whose capture drew no Save stores on the press; if
-  another control moved there, the change is already stored and the receipt
-  says STOP.
+  of that name). A page whose capture drew no Save stores on the press, so
+  EVERY press there whose check did not pass -- another control moved, the
+  control did not move, the page redrew, the read after failed, or the press
+  raised -- carries STOP: open the page, read every control, put each one back
+  by hand before anything else runs. A press refused before it is made is not
+  one.
 * VERIFY: a fresh navigation to the page and a re-read of the control;
-  `performed` is true, false or "unknown".
+  `performed` is true, false or "unknown". The receipt prints the address
+  asked for, never the landing.
 * RESTORE: the receipt's `restore` block holds the value the click-time read
   found and the exact call that puts it back. Nothing restores on its own.
 
@@ -352,6 +436,27 @@ holds.
 The four `writes.py` mutations ran the same way, on the integration's own
 hooks, after it landed: all four caught, the file restored byte-identical.
 
+After the cold review (section 3.4), ten more, one per fix, the same way:
+
+| guard broken | caught by |
+|---|---|
+| R1 STOP set for `another_control_moved` alone, as first shipped | `test_the_three_patterns_through_the_shipped_doors` |
+| R2 the identity comparison dropped | `test_the_three_patterns_through_the_shipped_doors` (the other switch replaced, same count) |
+| R3 the radio pressed on its covered input again | `test_the_three_patterns_through_the_shipped_doors` (the late radio: the press times out) |
+| R4 the select reader counts native selects only | `test_the_select_reader_the_choice_and_the_save_gate` (a div combobox wearing the name) |
+| R5 a colliding audience overwrites in silence | `test_the_audiences_are_every_value_with_its_control_and_a_collision_is_refused` |
+| W5 (`writes.py`) a page whose controls could not all be read is pressed | `test_a_page_whose_controls_cannot_all_be_read_is_never_pressed` |
+| W6 (`writes.py`) a radio label pressed without its binding read | `test_a_radio_whose_label_is_not_bound_to_it_is_never_pressed` |
+| W7 (`writes.py`) the verification prints the landing | `test_the_real_page_end_to_end_off_to_on_verified_on_a_fresh_render` (a landing with a query) |
+| W8 (`writes.py`) the click block prints the landing | the same test |
+| W9 (`writes.py`) STOP told no press was attempted | `test_the_three_patterns_through_the_shipped_doors` |
+
+All ten caught; both files restored byte-identical after each (sha256
+checked). Two of the `writes.py` anchors first matched nothing -- the runner
+wrote them with LF line ends and the file is checked out with CRLF -- and were
+re-run with the file's own line ends; the runner reports such a mutation as
+SKIPPED, never as caught.
+
 ### 3.3 What the shipped guards caught in the integration, and what changed
 
 * `tests/test_unverifiable_outcomes.py` finds an action's verification branch
@@ -377,6 +482,48 @@ hooks, after it landed: all four caught, the file restored byte-identical.
   clean. Both are driven by `tests/test_settings_writer.py` over the synthetic
   pages and the real capture, and each returns only declared values,
   constants and counts.
+* THE LANE'S FIRST CI RUN (38036544654) failed eleven tests outside the cited-
+  SHA family the coordinator named as infrastructure, each fixed in `959a1dc`
+  and its follow-ups: the navigation guard convicted the observe and verify
+  loads (the address now comes through the spec's own template and the landing
+  is COMPARED, never handed to a call); `valid_from` returned an exception's
+  text; a package module named a tracked fixture outside a sentence; a
+  module-level `url_pattern` read; the count claims in the README, the package
+  docstring and the server docstring; the locator's row total; the landing and
+  tool-envelope baselines; an asserted name; and `tests/test_writes.py`'s
+  hand-typed tables. THE CROSS-MODULE WALK, which runs only where `CI` is set,
+  then convicted `writes.py` and a probe script through the registry: the
+  admitted page's address field was called `url`, and the guard reads every
+  `.url` attribute as an address the browser chose. It is `address` now.
+
+### 3.4 What a cold review found, and what was done
+
+A cold reviewer read the lane at `baa2fe1` -- the record, the module, the
+integration and the census edits -- with no pytest and no browser, and ran
+pure-Python probes over an archive of that commit. Fourteen findings; every
+one is fixed or answered here, at `c4edf60` and its record commit.
+
+| # | severity | finding | done |
+|---|---|---|---|
+| F1 | HIGH | STOP fired for one failure shape of five, and no test read it | STOP on every unpassed press on a page that stores on the press (`settings_writer.press_stop`); a page whose controls cannot all be read before the press is never pressed; every end-to-end scenario asserts STOP or its absence (R1, W5, W9) |
+| F2 | MEDIUM | the split counted one capability twice (786, 748) | `COLLAPSED` `O6-O20` 15 -> 14; capabilities 785; the cell and the write-classes note say fourteen |
+| F3 | MEDIUM | 89 cells said "the write is BUILT", six of them rows the record called refused kinds | four sentence forms (section 1); three refused kinds leave the queue |
+| F4 | MEDIUM, latent | the choice was not strict; the reader counted native selects only | strict for this action; the reader counts every combobox wearing the name (R4) |
+| F5 | MEDIUM, latent | the radio press aimed at the input LinkedIn covers | the bound label, read live; the synthetic radio page covers its inputs (R3, W6) |
+| F6 | MEDIUM | the live-proof plan: STOP-ALL keyed on the narrow STOP, no failure branch at step 3, load 7 not independent, spacing inside a confirm | section 6 rewritten on each point; question 5 |
+| F7 | MEDIUM-LOW | "only that control moved" claimed more than it checked | each position's identity compared (R2); the pass names the four kinds it reads |
+| F8 | LOW | the receipt printed LinkedIn's landing | the address asked for, in both places (W7, W8) |
+| F9 | LOW | the switch named `P O6-O20`, which the record classed as the switch | `rows=("P O17",)`; `P O6-O20` VISIBLE on the Visibility line; 54 ALLOWED, 35 VISIBLE |
+| F10 | LOW | `N 96` missed; the walk not kept | `N 96` OUT with its reason, and eleven more found by lane K's ledger (section 1); the walk's rules are written in section 1 rather than kept as a script |
+| F11 | LOW | `P D7` and `P N12` named queue lines that do not exist; "93 queued" | both `classify-only` again; this lane's queued dispositions are 86. Commit `0ae7946`'s title counted IN rows, not queued lines |
+| F12 | LOW | "20 loads clear" included the badge page and a page under `/mynetwork/` | the badge page left the queue with `P O5`; the syncing page's cost is named; 19 (section 5) |
+| F13 | LOW | the retry sentence and the server instructions did not hold for this action | both rewritten |
+| F14 | LOW, latent | a second admitted switch would overwrite the audiences in silence | the builder refuses a collision (R5) |
+
+THE REVIEW'S OWN EVIDENCE CLASSES, kept: it marked every test count and the
+seven mutations UNVERIFIED because it could not run pytest. Those counts are
+pytest's (section 9), and the mutation runner's log for each set is in the
+lane's scratch, restored byte-identical each time.
 
 ## 4. The row moved
 
@@ -393,17 +540,24 @@ his own needs no named target.
 
 `P O6-O20` stays GAP with its fourteen, its blocker restated: each waits on its
 page's capture (first the Visibility category page) and that page's admission.
+Its capability cell names fourteen now, and `census_completion.COLLAPSED`
+counts it as fourteen: a split moves a capability between rows and adds none.
 
-Every other IN row stays GAP. Its write is built -- the same writer -- and what
-it lacks is its page in the registry, which needs a capture of the page and
-the page's admission by name.
+Every other IN row stays GAP. What each lacks is said in its cell (section 1):
+for 80, its page captured and admitted by name, and the capture showing a
+switch, a radio group or a select; for 12 that read as acts or typed values,
+the same capture, which will most likely show a control this writer refuses;
+for the three refused kinds, a write of their own.
 
 ## 5. The capture specs
 
 `_audit/_census/capture-queue-settings.tsv` holds one line per uncaptured
-surface a GAP row waits on: 23 lines, columns surface-id, address, presses,
+surface a GAP row waits on: 22 lines, columns surface-id, address, presses,
 save, loads, searches, rows. Every capture is a ZERO-PRESS load: the page is
-loaded and read; nothing on it is pressed.
+loaded and read; nothing on it is pressed. (23 lines in this record's first
+form: the basic-info and badge pages left with `P N19` and `P O5`, whose
+kinds the writer refuses, and the job alerts page joined for `J 35`, `J 36`
+and `J 100`.)
 
 What to save, per line:
 
@@ -417,30 +571,41 @@ What to save, per line:
   may redirect, and a redirect is recorded, not followed).
 
 Grouped so one load captures several rows: the Visibility category page
-serves 21 rows, Data privacy 15, Notifications 14, Advertising data 5, and
-"Public profile settings" 6. The ACCOUNT category was captured on 2026-09-23 and
-drew these addresses, so their pages need no category load first: language,
-content language, autoplay videos, sound effects, showing profile photos,
-preferred feed view, syncing (calendar and contacts on one page), the
-Microsoft link, basic info and personal demographic info.
+serves 22 rows, Data privacy 15, Notifications 15, Advertising data 5, "Public
+profile settings" 6, the job application settings page 5 and the job alerts
+page 3. The ACCOUNT category was captured on 2026-09-23 and drew these
+addresses, so their pages need no category load first: language, content
+language, autoplay videos, sound effects, showing profile photos, preferred
+feed view, syncing (calendar and contacts on one page), the Microsoft link and
+personal demographic info.
 
-ADMISSION. Every one of these addresses is refused by the read boundary today,
-and each is admitted by name, one at a time, before its load
-(ONE-NAMED-SETTINGS-PAGE-AT-A-TIME; question 1). Two are refused on an ACT
-substring and fall under `READ-PAST-AN-ACT-SUBSTRING`: the job application
-settings page (`"/jobs/application"`) and the badge page (`"/create"`). Not in
-the queue, with the reason:
+ADMISSION. Every one of these addresses but one is refused by the read
+boundary today, and each is admitted by name, one at a time, before its load
+(ONE-NAMED-SETTINGS-PAGE-AT-A-TIME; question 1). The exception is the job
+alerts page, already admitted for reading (`J 37`'s address), so its capture
+needs no admission. One is refused on an ACT substring, which the ruling
+READ-PAST-AN-ACT-SUBSTRING reaches: the job application settings page
+(`"/jobs/application"`). Not in the queue, with the reason:
 
 * `/uas/login` (`P N12`) -- a sign-in surface, which READ-PAST does not reach
   (question 2);
-* his position editor (`P D7`) and his profile's Activity section (`P G2`) --
-  not settings pages; their own rows' editor captures carry them.
+* his position editor (`P D7`), his profile's Activity section (`P G2`) and
+  the compose window's send options (`M M52`) -- not settings pages; their
+  own rows' captures carry them;
+* the basic-info page (`P N19`) and the badge page (`P O5`) -- kinds the
+  writer refuses, so a capture would not unblock them; and the badge page's
+  address ends `/create`, and whether loading it creates anything is not
+  measured.
 
-LOADS. 23 lines at one load each, of which three wait on a question (the
+LOADS. 22 lines at one load each, of which three wait on a question (the
 Sign in & security category, the demographic page, a group's settings page),
-so **20 loads clear without a ruling**. The category loads then name the
-settings pages below them: the 55 rows behind the four category pages sit on
-pages not yet seen, at most one load each and fewer where pages are shared.
+so **19 loads clear without a ruling** -- and one of the 19 carries a cost
+nobody has measured: the syncing page sits under `/mynetwork/`, whose root
+the boundary refused because loading it clears his pending-invitations badge.
+Whether this page does the same is unknown; the live lane loads it last, or
+asks. The category loads then name the settings pages below them: the rows
+behind the four category pages sit on pages not yet seen, at most one load
+each and fewer where pages are shared.
 
 ## 6. The live-proof plan (the live lane runs it, not this lane)
 
@@ -452,18 +617,30 @@ pages not yet seen, at most one load each and fewer where pages are shared.
    select the value that changes the least for others; confirm the token (one
    load to the page, one load for the verification's fresh render).
 3. READ BACK: the verification is the read back; `performed` must be true and
-   `setting_press.check.proceed` true.
+   `setting_press.check.proceed` true. If either is not, it is STOP-ALL
+   (below) -- not a retry.
 4. RESTORE THE EXACT ORIGINAL: the receipt's `restore.to_put_it_back` call --
    preview (one load), confirm (two loads).
-5. READ BACK AGAIN: the restore's verification, and one more preview naming the
-   restored value's opposite, never confirmed (one load): it reads the value
-   off the control a second time and its token expires unused.
+5. READ BACK AGAIN: the restore's verification, and then a preview of the
+   ORIGINAL value (one load), which must REFUSE as a no-op -- the control
+   already reads it -- and so mints no token. It is the same tool, reader and
+   page as the verification, a second render rather than an independent
+   witness: no read-only route to a settings control exists outside dark
+   mode's.
 
 ONE SETTING AT A TIME: nothing else runs between step 2 and step 5, and no
-other write runs while any setting is away from its original. STOP-ALL: if the
-restore's `performed` is not true, or `setting_press` carries `stop`, every
-write stops; the page is opened by hand and every control on it put back
-before anything else.
+other write runs while any setting is away from its original. STOP-ALL: on ANY
+receipt of the proof -- the benign write's or the restore's -- whose
+`performed` is not true, whose `setting_press.check.proceed` is not true, or
+whose `setting_press` carries `stop`, every write stops; the page is opened by
+hand and every control on it put back before anything else. (This record's
+first form keyed STOP-ALL on `stop`, which then fired for one failure shape of
+five.)
+
+THE SPACING. A confirm makes two loads in one call, back to back -- the page
+for the press, then the verification's fresh render -- as every shipped
+write's confirm does. The 20 s spacing of the live budget is kept between
+calls; inside a confirm it cannot be (question 5).
 
 ### 6.2 The one built setting: "Share key profile updates"
 
@@ -474,14 +651,27 @@ before anything else.
     load 4  preview  value="off"  the restore's preview: must read on
     load 5  confirm               the press
     load 6                        the verification: must read off
-    load 7  preview  value="on"   an independent read: must read off; never confirmed
+    load 7  preview  value="off"  must REFUSE as a no-op (it reads off); no token
 
-**SEVEN LOADS.** At the session's spacing of 20 s per load
-(LIVE-BUDGET-40-LOADS) the switch is away from off from the press at load 2
-to the press at load 5, about 60 s. While it reads on, a profile edit could be
+**SEVEN LOADS**, two of them inside each confirm. With 20 s between calls
+(LIVE-BUDGET-40-LOADS), the switch is away from off from the press at load 2
+to the press at load 5 -- the verification, the restore's preview, the
+restore's confirm -- about 45 s. While it reads on, a profile edit could be
 shared with his network, so NO profile edit runs from load 2 to load 6, and
 the intro-edit rows' condition 1 is unaffected because it reads this switch
 before any edit. Nobody else sees the switch itself.
+
+ONE RISK THE CAPTURE CANNOT SETTLE. The writer presses the switch's own
+`input` by its role and name. Dark mode learned live (2026-09-03, recorded
+in `dom.settings_radio_label_selector`) that LinkedIn covered its radio inputs
+and only the bound label took a press -- which is why this writer's radio
+path now presses the label -- and a styled switch may be covered the same way;
+a skeleton with no stylesheet cannot show it. If the press does not land, the
+bounded wait ends unreached and the check reads `the_control_did_not_move`;
+on this page, which stores on the press, that receipt carries STOP, because a
+press on a switch of his has been measured landing minutes late (the Premium
+badge, `writes.perform`'s note). So it IS STOP-ALL: the page is read by hand,
+and what received the press is the measurement for the next build.
 
 ### 6.3 The order for the settings still to be built
 
@@ -496,22 +686,43 @@ he names them.
 ## 7. The side tables
 
 * `write-classes.tsv`: `P O17` enters as a built line,
-  `built:set_admitted_setting`, act profile-setting, R3 -- the split moves to
-  16 R1 + 37 R2 + 337 R3 = 390. The IN rows that were `classify-only` are
-  queued on their surface's capture, `queued:SETTINGS-<surface-id>`; rows
-  another lane had already queued keep their queue (`P G2`, `N 176`).
-* The census cells of the IN rows each gain one sentence naming the writer,
-  their surface's line in the capture queue, and their live-proof class.
+  `built:set_admitted_setting`, act profile-setting, R3. On this branch the
+  split read 16 R1 + 37 R2 + 337 R3 = 390; at the merge of `fe119de`, where
+  PURCHASES-STAY-MANUAL had taken `P S9` and `M C71` out of the table, it is
+  16 + 37 + 335 = 388, measured by `check_write_classes`. 86 IN rows that were
+  `classify-only` are queued on their surface's capture,
+  `queued:SETTINGS-<surface-id>`, each naming a line the queue holds; the three
+  refused kinds, `P D7` and `P N12` are `classify-only` again, with a note
+  saying why; rows another lane had already queued keep their queue (`P G2`,
+  `N 176`). The jobs rows are not in this table (the jobs slice keeps its own
+  direction table), and `M M52` stays `classify-only`.
+* The census cells of the IN rows each carry one sentence in one of the forms
+  of section 1, naming the writer, the surface's line in the capture queue
+  where there is one, and the live-proof class.
+* The citation triage (`tests/test_a_correction_is_findable_from_the_claim.py`)
+  holds one entry per slice file whose cells cite this record near words a
+  correction would use: profile, network and messaging since the first form,
+  and the jobs slice since its seven rows gained the sentence. Every hit was
+  read; each belongs to a neighbouring row's own history.
 
 ## 8. Pins re-derived, each from its measured value
 
 * `tests/census_row_pin.json` by `scripts/pin_census_rows.py --write`, with
   `PINNED_ROW_TOTAL` 771 -> 772 and `PINNED_SLICE_ROWS` P 236 -> 237.
-* `census_completion.PINNED`, nine figures, each +1: stated_rows 772,
-  capabilities 786, capabilities_achievable 748, achievable 734, adjudicated
-  185, delivered_broad 131, unfired 30, b1_no_ruling 13, b1_released 2; and
-  `PINNED_B1_ROWS` gains `P O17` under no ruling.
-* The write-classes split (16, 37, 336) -> (16, 37, 337).
+* `census_completion.PINNED`, as first pinned on this branch, each +1:
+  stated_rows 772, capabilities 786, capabilities_achievable 748, achievable
+  734, adjudicated 185, delivered_broad 131, unfired 30, b1_no_ruling 13,
+  b1_released 2; and `PINNED_B1_ROWS` gains `P O17` under no ruling. AT THE
+  MERGE OF MASTER `53908ea` (live session 7 had banked `N 25`, `N 81`, `N 26`
+  and moved `N 155`), two were RE-MEASURED on the merged tree, not summed:
+  unfired 26 (master 25 + `P O17`) and b1_no_ruling 10 (master 9 + `P O17`).
+  THE CAPABILITY PAIR WAS ONE TOO HIGH (the cold review's F2): `O6-O20`'s
+  collapse kept counting 15 after `P O17` left it. `COLLAPSED` is 14, and at
+  the merge of `fe119de` (PURCHASES-STAY-MANUAL had excluded `P S9` and
+  `M C71`) the figures are capabilities 785, capabilities_achievable 745,
+  achievable 732, adjudicated 187 -- `--check` green on the merged tree.
+* The write-classes split (16, 37, 336) -> (16, 37, 337) on this branch, and
+  (16, 37, 335) = 388 at the merge of `fe119de`.
 * The tool surface: 61 -> 62 tools, 96 -> 100 parameters; writes.PERFORMABLE
   and the hand-typed write lists in `tests/test_server_surface.py`; the server
   instructions and the module docstring's counts (forty-four read, eighteen
@@ -519,7 +730,43 @@ he names them.
 
 ## 9. Gates run
 
-(filled at the lane's close)
+Every local run was TARGETED and SERIAL (`-p no:randomly`, no `-n`): while
+the live session's flag stood, by the brief; after it, by the orchestrator's
+order of 11:35 (the tests touched, their importers and the census instruments;
+the full suite runs on CI), and from 14:02 each local gate under two minutes,
+by the coordinator's resume order. Counts are pytest's own.
+
+| what | result |
+|---|---|
+| the five rulings registered: the register, the audit index, ruling holds, the citation triage, the reason locator, the identity guard | first run 2 failed / 1198 passed (the two gates of section 0); after the repair **1200 passed** |
+| `tests/test_settings_writer.py` | **43 passed**; seven module mutations, **7 caught** (one only after its test was strengthened, section 3.2) |
+| `tests/test_set_admitted_setting.py` | before the integration **5 failed / 1 passed**; after it **6 passed**, then 7 with the landing test |
+| the first sixteen pin files (tool surface, server surface, write door, scanner, reachability, write classes, ...) | **14 failed / 727 passed** -- every failure a pin the new write should move; after the re-pins **233 passed** on the failed files |
+| the browser-heavy action tables and the reader-leak guard | after the re-pins **769 passed / 3 failed** (the reader guard, section 3.3); after the fixes **797 passed** (with the lane's files, the tool pins and the gap-on-refused pin) |
+| the census tests (row pin, write classes, literal repeats, ruling holds, offline frontier, triage, pointer graph, exclusion basis, gap-on-refused) | **182 passed / 1 failed** (the gap-on-refused pin, moved by addresses in the appended sentences; removed, section 7); then inside the 797 |
+| the landing test and `tests/test_no_committed_identity.py` after the guard commit | **1053 passed** |
+| four `writes.py` mutations of the integration's hooks | **4 caught** |
+| the merge of master `53908ea`, focused | **173 passed** |
+| lane CI, first run (`38036544654`, on `b9cb2e7`) | failed: eleven tests outside the cited-SHA family the coordinator named as infrastructure, each fixed (section 3.3) |
+| the merge of master `fe119de`: the census instruments, then the pin and ledger tests | every instrument GREEN (below); **46 passed** |
+| `tests/test_no_committed_identity.py` after each commit, scoped to the files this lane changed against master (every unparametrized test, and the per-file test of each changed file) | **95 passed** at the merge; again after the review commit and the record commit (below) |
+| the navigation guards with `CI=1` (the cross-module walk and the per-file walk) | after the `address` rename **308 passed**; on the review commit **308 passed** |
+| `tests/test_settings_writer.py` after the review's fixes | **58 passed** |
+| `tests/test_set_admitted_setting.py`, the notify-setting admission and the server surface | **83 passed** |
+| the review's ten mutations (R1-R5, W5-W9) | **10 caught**; two anchors first matched nothing and were re-run (section 3.2) |
+| the census-text guards after the sentences were rewritten | the citation triage found one new pair (the jobs slice; triaged, section 7) -- then **92 passed** with the derived views, the locator and the write classes |
+| the receipt, prose and landing guards | **117 passed / 1 failed**: an asserted name in this record's committed form, reworded here; then passed |
+| the reader-leak guard and the tool-envelope guard | the reader guard could no longer drive `snapshot` -- its planted page had no accessibility snapshot -- so the harness gained one (`tests/plantedpage.py`); then **683 passed** and **4 passed** |
+| `tests/test_writes.py`'s hand-typed tables and the receipt-ownership test | **14 passed**, **17 passed** |
+| the census instruments, after every census edit and on each merged tree | `census_completion`: *every headline figure matches its pin*; `check_write_classes` GREEN (388 lines), `check_read_addresses` GREEN (98 of 98), `check_jobs_directions` GREEN (108 of 108), `ruling_holds` GREEN (1 hold, 3 lifted, 2 releases), `check_next_step` GREEN (585 GAP rows once), `check_exclusion_basis` 0 problems; the three derived views regenerated |
+| the pre-commit identity gate, every commit | armed: *226 spellings*, 0 hits |
+| lane CI on `ci/worktree-agent-acb0f259b1e2f44e2`, the lane's head | @@CI@@ |
+
+NOT RUN LOCALLY: the full suite, and the browser-heavy action tables
+(`tests/test_preview_state_and_click_state.py`,
+`tests/test_a_performable_action_can_reach_its_control.py`,
+`tests/test_writes_nine.py`), which run past two minutes on this box; CI runs
+them.
 
 ## 10. Questions for the orchestrator
 
@@ -530,17 +777,20 @@ captures or live proofs the live lane would otherwise take.
    Ground: `ONE-NAMED-SETTINGS-PAGE-AT-A-TIME`, *"ONE NAMED settings page
    below /mypreferences/d/ is admitted, one at a time"*; the brief: *"each
    settings page is admitted by NAME, exactly, with a control shown failing"*.
-   Twenty pages clear without any other ruling (section 5), the four category
-   pages first. May the live lane admit them as one reviewed batch -- each its
-   own exact anchored line and its own failing control -- or must each
-   admission precede only its own capture?
+   Nineteen pages clear without any other ruling (section 5), the four
+   category pages first, and one of them (syncing, under `/mynetwork/`) has a
+   load cost nobody has measured. May the live lane admit them as one reviewed
+   batch -- each its own exact anchored line and its own failing control -- or
+   must each admission precede only its own capture?
 2. **THE SIGN IN AND SECURITY CATEGORY AND THE SIGN-IN PAGE -- CAPTURED AT
    ALL?** Ground: `READ-PAST-AN-ACT-SUBSTRING`, *"It does NOT reach a substring
    whose ground is the read itself: ... a credential, recovery, session or
    security surface; a sign-in challenge"*; and `CREDENTIAL-SETTINGS-NEED-THE-
    OPERATOR`. Those pages draw his email addresses, phone numbers and sessions.
-   Until he says, `P N4`-`P N8`, `P N10`, `P N11` (surface C-SIGNIN) and
-   `P N12` (`/uas/login`) stay GAP on this question, named rather than queued.
+   Until he says, `P N4`, `P N6`-`P N8`, `P N10`, `P N11` (surface C-SIGNIN)
+   and `P N12` (`/uas/login`) stay GAP on this question, named rather than
+   queued. (`P N5`, the password, is a typed field the writer refuses either
+   way.)
 3. **THE DEMOGRAPHIC PAGE -- MAY IT BE READ?** Ground:
    `HIS-OWN-SETTINGS-NOT-OUTWARD`, *"a setting that records a sensitive
    personal attribute: demographics, disability or veteran status, or
@@ -557,27 +807,34 @@ captures or live proofs the live lane would otherwise take.
    `HIS-OWN-SETTINGS-NOT-OUTWARD`, *"A setting whose change shows to other
    people ... is proven by restoring it inside the same minute"*; and
    LIVE-BUDGET-40-LOADS, *"40 LinkedIn page loads per live session, 20s+
-   apart"*. Between a benign press and its restore press sit three loads (the
-   verification, the restore's preview, the restore's press), so at the
-   minimum spacing the restore lands about 60 s later. Does that satisfy the
-   ruling for the 31 VISIBLE rows, or may the loads inside one proof run
-   closer than 20 s?
+   apart"*. Every confirm makes two loads in one call, back to back -- the
+   page, then the verification's fresh render -- as every shipped write's
+   confirm does, so the 20 s spacing can only hold between calls. With it
+   held between calls, a benign press and its restore press sit about 45 s
+   apart. Does that reading satisfy both rules for the 35 VISIBLE rows?
 6. **`P N15`, THE INTERFACE LANGUAGE, IS FILED CANNOT-BE-PUT-BACK -- MY
    APPLICATION.** Ground: the ruling's exclusion, *"a setting whose change
    cannot be put back exactly"*. Changing the language changes every label
    LinkedIn draws, so this writer could not find the switch back by its
    admitted label. Confirm, or rule that a proof may restore it by hand.
-7. **THE WRITE DOOR EXCUSES TWO FORBIDDEN ENTRIES FOR ONE ACTION.** Ground:
+7. **A LINKEDIN LEARNING SETTINGS PAGE (`J 157`).** Ground: its cell's own
+   question, *"Whether the settings-family ruling reaches a Learning settings
+   page"*, and the blocker `LEARNING-SURFACE`, which no ruling of 2026-09-28
+   names. Lane K's ledger assigns the row to this lane under
+   `HIS-OWN-SETTINGS-NOT-OUTWARD`; this lane holds it OUT until you say that
+   ruling reaches a Learning page.
+8. **THE WRITE DOOR EXCUSES TWO FORBIDDEN ENTRIES FOR ONE ACTION.** Ground:
    `assert_write_url`, which honoured exactly one `exempt_substring` per spec.
    The admitted address trips `"/settings/"` and `"settings"`, so the spec
    carries a new field, `exempt_substrings`, excusing both by equality -- the
    first spec to excuse two. Confirm the field, or prefer a per-page exemption
    table beside the registry.
 
-ON MERGING: three other lanes copy and register the same five ruling ids. The
-copies of the rulings document are byte-identical; the register entries in
-`scripts/build_rulings_index.py` are this lane's own wording and will conflict
-at the tail of `REGISTER`. Keep one set and regenerate `_audit/RULINGS.md`.
+NOTED, NOT ASKED: dark mode's receipt (`update_setting`) prints the same
+retry sentence the cold review found untrue here -- *"it may do the same thing
+twice, to the same person or the same employer"* -- of a radio aimed at a
+value. This lane changed its own action's sentence and left that one to its
+owner.
 
 ## 11. Instruments
 

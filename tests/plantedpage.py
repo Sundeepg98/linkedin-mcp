@@ -335,6 +335,14 @@ class PlantedLocator:
     async def all_inner_texts(self) -> list[PageString]:
         return [PageString(PLANT)]
 
+    async def aria_snapshot(self, **kwargs: Any) -> PageString:
+        # THE ACCESSIBILITY SNAPSHOT IS PAGE TEXT TOO, shaped as Playwright
+        # spells it (``- <role> "<name>" [state]``) with the name planted, so a
+        # reader that parses it is driven down its parsing path. Added
+        # 2026-10-10 (lane S): ``settings_writer.snapshot`` reads each
+        # control's identity off it and must reduce the name to a digest.
+        return PageString('- switch "' + PLANT + '" [checked]')
+
     async def all(self) -> list["PlantedLocator"]:
         if self._depth >= MAX_DEPTH:
             return []
