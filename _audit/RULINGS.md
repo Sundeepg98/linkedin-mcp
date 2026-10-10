@@ -8,9 +8,9 @@
 
 **THIS REGISTER IS NOT THE CORPUS AND DOES NOT CLAIM TO BE COMPLETE.** Read section 4 before concluding a question is unruled: the scan that keeps it honest reads ONE marker, and the ruling that caused this file to be written does not carry it.
 
-    rulings registered       89
-    documents scanned        266
-    RULED: declarations      76 claimed, 7 triaged, 0 unclaimed
+    rulings registered       94
+    documents scanned        267
+    RULED: declarations      81 claimed, 7 triaged, 0 unclaimed
 
 ---
 
@@ -133,7 +133,12 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | `NAMED-PROFILE-READ-BEHIND-A-GRANT` | A read of a member's profile he names in the call -- by link or member id, never a name read off a page -- is built behind the single-use grant, its preview stating that LinkedIn may show the member the view; declared fields leave as people records; never for a measurement. | a third-party profile he names | 2026-09-28 | [2026-09-28-rulings-named-profile-read.md](2026-09-28-rulings-named-profile-read.md)<br>*His answer* |
 | `READ-PAST-AN-ACT-SUBSTRING` | A refused substring whose recorded ground is an ACT -- sending, following, applying -- does not bar the READ of his own page that carries it: one exact anchored pattern, a control shown failing, the press gate still refusing every control. Not for a GET that changes state, a credential, recovery, session or security surface, a sign-in challenge, or a refusal grounded in an operator's ruling. | substrings written to stop an act | 2026-09-28 | [2026-09-28-rulings-build-classes.md](2026-09-28-rulings-build-classes.md)<br>*5. Reading past a substring written to stop an act* |
 | `APPLY-FLOW-IS-THE-APPLICATION` | Opening the Easy Apply flow is the first step of an application, so its read stays refused; the daily-limit row waits on the limit being reached. | the Easy Apply flow | 2026-10-10 | [2026-10-10-rulings-ledger-questions.md](2026-10-10-rulings-ledger-questions.md)<br>*9. Opening the apply flow is the application* |
+| `CONTENT-VERTICAL-NOT-ALL-RESULTS` | D2-SEARCH-VERTICALS-WIDENED does not reach the mixed /search/results/all/ page. The hashtag row M C93 is served under D6 by the content vertical, /search/results/content/?keywords=<hashtag>, admitted by its own exact pattern under D1-SEARCH-AS-READS's three conditions with /all/ shown still refused; M C70 shares it, and post text returns under THIRD-PARTY-TEXT-AT-RUNTIME. | the content search vertical | 2026-10-10 | [2026-10-10-rulings-lane-a-questions.md](2026-10-10-rulings-lane-a-questions.md)<br>*5. Content search, not all-results search* |
+| `CREDENTIAL-ADJACENT-STAYS-REFUSED` | His stored applicant sign-ins for other sites (P M9, J 77) are treated as credential-adjacent and stay refused -- an inference, held on purpose to be conservative -- reopened when a capture shows the page holds no credential or secret. | stored applicant sign-ins for other sites | 2026-10-10 | [2026-10-10-rulings-lane-a-questions.md](2026-10-10-rulings-lane-a-questions.md)<br>*3. Credential-adjacent pages stay refused* |
+| `NAMED-ADDRESS-NEEDS-LOG-REDACTION` | A page whose address carries a person's or a publication's name (M C101's newsletter page) is admitted only after every log line that records a page load writes that route's address as a shape, never the slug; until the redaction is built and shown failing first, the row is GAP on that blocker. | addresses that carry a name | 2026-10-10 | [2026-10-10-rulings-lane-a-questions.md](2026-10-10-rulings-lane-a-questions.md)<br>*4. A page whose address names a person is read only through a redacted log* |
 | `NAMED-PROFILE-DETAIL-PAGES` | The read of a profile he names includes that same profile's own detail pages (/in/<the same slug>/details/<section>/), one load per call, behind the same single-use grant and the same preview warning; any other slug and any non-details path stay refused. | a third-party profile he names | 2026-10-10 | [2026-10-10-rulings-named-profile-detail-pages.md](2026-10-10-rulings-named-profile-detail-pages.md)<br>*The ruling* |
+| `NAMED-SETTINGS-PAGES-RATIFIED` | Each settings page lane A admitted by its exact address in its own commit -- N 39, P P15 and /jobs/application-settings/ -- is within ONE-NAMED-SETTINGS-PAGE-AT-A-TIME; this is the second decision that one asks for, with HIS-OWN-SETTINGS-NOT-OUTWARD, and no pattern widens. | his named settings pages | 2026-10-10 | [2026-10-10-rulings-lane-a-questions.md](2026-10-10-rulings-lane-a-questions.md)<br>*2. One named settings page per commit is within the ruling* |
+| `RECEIVED-INVITATIONS-READ-STAYS-ADMITTED` | His received-invitations tab (N 13, N 14, N 19) stays admitted. A change a read makes to an invitation's seen state is a passive cost, recorded on those rows as UNMEASURED and reopened when a capture shows the sender can see it. | his received invitations | 2026-10-10 | [2026-10-10-rulings-lane-a-questions.md](2026-10-10-rulings-lane-a-questions.md)<br>*1. Received invitations stay admitted* |
 
 ### read results
 
@@ -317,6 +322,10 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 **`CONTAINER-EXCLUSION-PROPAGATES-ONLY-IF-UNREACHABLE`** -- Built ON `P I12` as a SOUND exclusion: *zero of 237 urls reach one* is ground four of EXCLUDED-RULED-ADMISSION. Two later documents call `P I12` a miscategorisation; see the register's DISPUTED note in the report for this wave.
 
+**`CONTENT-VERTICAL-NOT-ALL-RESULTS`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable.
+
+**`CREDENTIAL-ADJACENT-STAYS-REFUSED`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable. Rests on inference, not measurement.
+
 **`CREDENTIAL-SETTINGS-NEED-THE-OPERATOR`** -- The cannot-be-undone arm of OUTWARD-ACTS-NEED-THE-OPERATOR.
 
 **`D1-SEARCH-AS-READS`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable.
@@ -361,9 +370,13 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 **`MESSAGING-SETTINGS-CAPABILITY-LEVEL`** -- The ruling CANONICAL-RULING-ID was written about: one sentence wearing three names across three slices. Its census twin is `_audit/_census/profile.md`.
 
+**`NAMED-ADDRESS-NEEDS-LOG-REDACTION`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR, applying PEOPLE-DATA-MITIGATIONS; overridable.
+
 **`NAMED-PROFILE-DETAIL-PAGES`** -- Orchestrator's application of NAMED-PROFILE-READ-BEHIND-A-GRANT; overridable. Admitted for the four detail sections measured on his own profile; N 178 and N 65 wait on the Interests page's capture.
 
 **`NAMED-PROFILE-READ-BEHIND-A-GRANT`** -- The operator's ruling, verbatim in its document; mitigations as the question put them.
+
+**`NAMED-SETTINGS-PAGES-RATIFIED`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable.
 
 **`NAMES-AT-RUNTIME`** -- The operator's ruling, verbatim in its document. Amends the 2026-09-05 name-free doctrine for runtime returns; answers WHO-WHICH-COUNTS-ARE-NOT-DELIVERY's question.
 
@@ -394,6 +407,8 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 **`PURCHASES-STAY-MANUAL`** -- Orchestrator's call applying the operator's COST-AWARE STAKES-GATING rule; overridable.
 
 **`READ-PAST-AN-ACT-SUBSTRING`** -- Orchestrator's call applying OUTWARD-ACTS-NEED-THE-OPERATOR and D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING; overridable. A page the allowlist refuses by its silence is admitted the same way.
+
+**`RECEIVED-INVITATIONS-READ-STAYS-ADMITTED`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR, applying D5-PASSIVE-COST-IS-NOT-A-ROW; overridable.
 
 **`RELATION-REMOVALS-BUILT-BEHIND-GRANTS`** -- Orchestrator's call applying the operator's 08:11 principle and OUTWARD-ACTS-NEED-THE-OPERATOR; overridable. Decides N 29, N 141 and N A14, which lane L8 left outside the three classes.
 
@@ -431,7 +446,7 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 | signal NOT scanned | files | lines |
 |---|---|---|
-| a heading naming a ruling | 130 | 287 |
+| a heading naming a ruling | 131 | 289 |
 | a bold line opening on RULING/RULED | 64 | 151 |
 | the phrase THE RULING | 38 | 63 |
 | a named -RULING id | 40 | 100 |
@@ -508,6 +523,11 @@ Every `RULED:` line in the corpus, and what became of it. An UNCLAIMED row fails
 | [2026-09-28-rulings-build-classes.md](2026-09-28-rulings-build-classes.md) | RULED: (orchestrator, 2026-09-28, applying COST-AWARE STAKES-GATING) PURCHASES-STAY-MANUAL | `PURCHASES-STAY-MANUAL` |
 | [2026-09-28-rulings-build-classes.md](2026-09-28-rulings-build-classes.md) | RULED: (orchestrator, 2026-09-28, applying OUTWARD-ACTS-NEED-THE-OPERATOR and D3-UNREGISTE | `READ-PAST-AN-ACT-SUBSTRING` |
 | [2026-09-28-rulings-named-profile-read.md](2026-09-28-rulings-named-profile-read.md) | RULED: (operator, 2026-09-28 08:01, verbatim) "Yes, I'm giving you permission." | `NAMED-PROFILE-READ-BEHIND-A-GRANT` |
+| [2026-10-10-rulings-lane-a-questions.md](2026-10-10-rulings-lane-a-questions.md) | RULED: (orchestrator, 2026-10-10) RECEIVED-INVITATIONS-READ-STAYS-ADMITTED: the received-i | `RECEIVED-INVITATIONS-READ-STAYS-ADMITTED` |
+| [2026-10-10-rulings-lane-a-questions.md](2026-10-10-rulings-lane-a-questions.md) | RULED: (orchestrator, 2026-10-10) NAMED-SETTINGS-PAGES-RATIFIED: each settings page lane A | `NAMED-SETTINGS-PAGES-RATIFIED` |
+| [2026-10-10-rulings-lane-a-questions.md](2026-10-10-rulings-lane-a-questions.md) | RULED: (orchestrator, 2026-10-10) CREDENTIAL-ADJACENT-STAYS-REFUSED: stored applicant acco | `CREDENTIAL-ADJACENT-STAYS-REFUSED` |
+| [2026-10-10-rulings-lane-a-questions.md](2026-10-10-rulings-lane-a-questions.md) | RULED: (orchestrator, 2026-10-10) NAMED-ADDRESS-NEEDS-LOG-REDACTION: a page whose ADDRESS | `NAMED-ADDRESS-NEEDS-LOG-REDACTION` |
+| [2026-10-10-rulings-lane-a-questions.md](2026-10-10-rulings-lane-a-questions.md) | RULED: (orchestrator, 2026-10-10) CONTENT-VERTICAL-NOT-ALL-RESULTS: D2-SEARCH-VERTICALS-WI | `CONTENT-VERTICAL-NOT-ALL-RESULTS` |
 | [2026-10-10-rulings-ledger-questions.md](2026-10-10-rulings-ledger-questions.md) | RULED: (orchestrator, 2026-10-10) CAPTURE-PRESS-UNDER-PROBE-RULE: a live-lane CAPTURE may | `CAPTURE-PRESS-UNDER-PROBE-RULE` |
 | [2026-10-10-rulings-ledger-questions.md](2026-10-10-rulings-ledger-questions.md) | RULED: (orchestrator, 2026-10-10) ARTICLE-COMPOSER-CAPTURE: one capture load of /article/n | `ARTICLE-COMPOSER-CAPTURE` |
 | [2026-10-10-rulings-ledger-questions.md](2026-10-10-rulings-ledger-questions.md) | RULED: (orchestrator, 2026-10-10) NO-INDEX-PINNED-JUDGEMENTS: a control is judged by its o | `NO-INDEX-PINNED-JUDGEMENTS` |

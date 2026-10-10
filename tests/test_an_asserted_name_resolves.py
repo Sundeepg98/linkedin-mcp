@@ -84,6 +84,13 @@ PINNED: set[tuple[str, str, str, int]] = {
     # orchestrator's, copied byte-identical.
     ("BLOCKER", "OUTWARD-ACTS-NEED-THE-OPERATOR",
      "_audit/2026-10-10-rulings-ledger-questions.md", 1),
+    # SURFACED 2026-10-10 BY LANE A's registration of the rulings on its own
+    # questions, the same shape on one line: "They are the orchestrator's,
+    # under `OUTWARD-ACTS-NEED-THE-OPERATOR`", a slot phrase before the
+    # registered RULING id, not a blocker. Pinned, not repaired: the document
+    # is the orchestrator's, copied byte-identical.
+    ("BLOCKER", "OUTWARD-ACTS-NEED-THE-OPERATOR",
+     "_audit/2026-10-10-rulings-lane-a-questions.md", 1),
 }
 
 #: REPAIRED 2026-10-10 (lane G2), the eight sites this pin carried until then,
