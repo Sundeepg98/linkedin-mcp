@@ -85,10 +85,22 @@ stand in that order. Master's older 88-then-84 order is untouched.
 
 ## Merge 6: lane B4
 
-Lane B4's certified head 0f7e6d0 (`J 161`, the similar-jobs alert pair, and
-`J 124`; ci/ run 38058465627; merge base a457819), merged onto 4c3c001 at the
-coordinator's order of 19:59 IST. The SHA was merged, not the branch; the
-branch stood at 0f7e6d0 itself, so nothing after it exists to exclude.
+Lane B4's certified head, subject "merge origin/master a457819 into lane B4:
+lane S's set_admitted_setting beside the alert pair; pins measured again"
+(`J 161`, the similar-jobs alert pair, and `J 124`; ci/ run 38058465627; merge
+base a457819), was merged onto 4c3c001 by the coordinator's order of 19:59 IST.
+The SHA was merged, not the branch, and the branch tip was that same commit,
+so nothing after it exists to exclude.
+SHA NOTE: 0f7e6d0 lives on lane B4's branch and is nowhere on `master` until this merge lands there.
+
+THE FIRST CI RUN WAS RED, AND THIS RECORD WAS THE CAUSE. Lane run 38060371469
+on the merge commit failed one test on shard 0, `tests/test_a_cited_sha_resolves.py`
+(shards 1-3 green). This section had named lane B4's head in a commit slot
+(the words "the branch stood", then the hash). The guard resolves a cited SHA
+as an ancestor of `master`. That commit is an ancestor of the ci/ ref but not
+of `master`, so the citation could not be checked from a clone. The fix, in
+this record only: the commit's subject is recorded, and the hash is kept in
+the SHA NOTE above. No code or count changed.
 
 Measured on the merged tree: 72 tools (50 read, 22 write), 115 parameters,
 PERFORMABLE and REACHED 22, 23 sanctioned actions against 22 write tools, 16
