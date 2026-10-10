@@ -21,7 +21,7 @@ anything not yet landed is not described.
 **THE LANE'S COMMITS, by SUBJECT.** The short hashes beside them are this
 lane's branch's: every one is nowhere on `master` until the orchestrator
 merges the branch, and the subject is how a reader finds each after a
-rewrite. Two merges of `master` sit among them (`53908ea` and `b10bde8`).
+rewrite. Merges of `master` sit among them (`53908ea`, `b10bde8`, `fe119de`, and the last one below).
 
 | subject | lane branch |
 |---|---|
@@ -38,6 +38,10 @@ rewrite. Two merges of `master` sit among them (`53908ea` and `b10bde8`).
 | instruments: section 83, the lane A admission harness | 21f0d04 |
 | reader: the jobs an alert delivered, off the notifications page -- J 38 COVERED-UNFIRED by D6 | e6c7d76 |
 | merge origin/master b10bde8 into lane A: the CI lane fixes and session 7's offline follow-ups | f5e561f |
+| record: the commit table, two branch-only hashes disclosed, section 6, and N 86 told straight | 02e948b |
+| merge origin/master fe119de into lane A: lane K's ledger and the CI fast lane | f3daa5d |
+| reader: the job tracker's interview, archived and clicked_apply stages -- J 50, J 51 COVERED-UNFIRED; lane K's ledger advanced | 8f2726b |
+| reader: linkedin_tracker_stage defaults to interview, so the envelope guard drives it | 7f4e05c |
 
 ---
 
