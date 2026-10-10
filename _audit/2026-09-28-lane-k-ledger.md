@@ -877,43 +877,44 @@ row's next step becomes the proof.
 
 ### 12.4 The ledger and the queue now
 
-`_audit/_census/next-step.tsv` holds 561 rows, the counter's gap:
+`_audit/_census/next-step.tsv` holds 561 rows, the counter's gap, after the
+rulings and after live session 8 (12.7):
 
     kind          rows   payload
     ADMIT          152   the address lane A must admit
     SIBLING        151   lane-S 105, lane-U 20, lane-NP 2, another row 24
     TARGET         100   what he must name
+    BUILD           69   the tracked fixture (or planned skeleton) to build on
     PRECONDITION    58   what he lacks
-    CAPTURE         51   a surface id in the capture queue
-    BUILD           48   the tracked fixture (or planned skeleton) to build on
+    CAPTURE         30   a surface id in the capture queue
     RULING           1   Q-AWAY-MESSAGE, the operator's
     PURPOSE          0   ruled
     total          561
 
-    basis: NAMED 267, INFERRED 215, MEASURED 79
+    basis: NAMED 275, INFERRED 208, MEASURED 78
 
-`_audit/_census/capture-queue.tsv`: 97 lines -- 14 that need nothing (16
-loads, 2 searches, 51 rows), 11 on a target he names (100 rows), 72 on lane
+`_audit/_census/capture-queue.tsv`: 93 lines -- 10 that need nothing (12
+loads, 2 searches, 30 rows), 11 on a target he names (100 rows), 72 on lane
 A's admission (152 rows), and none gated on a question.
 
-SESSION 8, the first 40 loads: the fourteen open lines first, by rows per
-load -- the people search with its All-filters panel (9 rows), his own
-profile with its three controls opened by name (8), the feed's menus (7),
-the article composer (6), the composer's scheduled-posts list (4), the
-posting's panels (2), his post's reactions (2), the guarded messaging loads
-with the folder and the search box (3 loads, 5 rows), the jobs home's alert
-manager, the recommendations' feedback pair, the key-skills page, the
-first-degree filter bar, the settings index for the sessions page, and the
-thread footer (1 to 3 rows each) -- 16 loads, 51 rows. Then the target lines
-as he names each target: his named connections (4 loads, 13 rows), a school
-(1, 3), an event (4, 11), a non-connection (3, 8), jobs and alerts (9, 16),
-a member to block or unblock (2, 3), a connection to remove (1, 1). Session
-8: 40 loads, 2 searches, 106 rows.
+SESSION 9 (session 8 has run), the first 40 loads: the ten open lines first,
+by rows per load -- the article composer (6 rows), the people search's
+All-filters panel and its fixed labels (5), his own profile's three controls
+opened by name and role (4), the composer's scheduled-posts list (4), his
+post's reactions control found by name (2), the guarded messaging loads with
+the folder and the search box (3 loads, 5 rows), the feed's search box, the
+jobs home's alert manager, the first-degree search's Industry and School
+pills, and the settings index for the sessions page (1 row each) -- 12 loads,
+2 searches, 30 rows. Then the target lines as he names each target: his named
+connections (4 loads, 13 rows), a school (1, 3), an event (4, 11), a
+non-connection (3, 8), jobs and alerts (9, 16), a member to block or unblock
+(2, 3), Pages (3, 4), a connection to remove (1, 1). Session 9: 39 loads, 2
+searches, 89 rows.
 
-SESSION 9: Pages (3 loads, 4 rows), his posts and comments (18, 22) and a
-group (5, 6), then fourteen admission lines in rank order (14 loads, 82
-rows). Session 9: 40 loads, 114 rows. Sessions 10 and 11 take the named
-threads and the remaining admissions.
+SESSION 10: his posts and comments (18 loads, 22 rows) and a group (5, 6),
+then seventeen admission lines in rank order (17 loads, 90 rows). Session 10:
+40 loads, 118 rows. Sessions 11 and 12 take the named threads and the
+remaining admissions.
 
 ### 12.5 The pins, each measured on this tree
 
@@ -976,3 +977,54 @@ local selection had left out:
   from a clone -- the repair `P O3` took. The promotion's own evidence (rows
   45-49, 10, `N 84`, `N 81`, `N 25`) is all in the census.
 Both files then passed locally: 42 passed. The other four jobs were green.
+
+Master moved again, to `66eb699` (live session 8), and was merged: both sides
+had re-pinned `delivered_strict` from 105, and the merged tree MEASURES 111
+(session 8's four rows and this lane's two), pinned so; every other pin
+matched as merged. CI run 38041159605 on that merge (`824d6b4`): success, 6
+jobs, 5m53s. The ledger was then brought up to session 8's captures (12.7):
+`check_next_step` GREEN at 561; the ledger test, the prose guards, the index
+and the map, 97 passed in 1m45s.
+
+### 12.7 Live session 8 took the twelve open loads
+
+The live lane's session 8 (re-issued 2026-10-10, merged to master `66eb699`)
+ran this ledger's first twelve open loads, as the plan at `4d66e1c` drew them,
+and recorded each in its section "3: lane K's block". A capture moves no row;
+it changes the next step:
+
+    surface                      session 8 found                      rows -> next
+    feed-menus                   an item's menu pressed and kept;     N 37, N 43, N 51, N 153, N 154,
+                                 the search box not pressed           N 200 -> BUILD; N 95 stays
+    in-me-profile                his profile, raw and skeleton        P D25, P D26, P F1, P K8 -> BUILD;
+                                                                      N 76, P C8, P B3, P S4 stay
+    search-people-labels         the label reading fired              N 80, N 88, N 89, N 93 -> BUILD;
+                                                                      N 82, N 86, N 90-92 stay
+    job-posting-panels           one posting, raw and skeleton        J 115, J 124 -> BUILD
+    jobs-recommended-feedback    kept                                 J 163 -> BUILD (if the pair is drawn)
+    premium-key-skills           kept                                 P S8 -> BUILD (if the chooser is drawn)
+    msg-thread-footer            no video-meeting control in the      M M20, M M40, M M51 -> BUILD: the
+                                 footer                               offline verdict on what is drawn
+    own-post-reactions           not pressed: no [aria-expanded]      M C33, M C35 stay, the control now
+                                 control named for the menu           found by name (rulings 1 and 3)
+    messaging-guarded            the receipt guard refused on the     M M7, M M8, M M9 stay, with
+                                 composer's list; /messaging/ not     M M28, M M34
+                                 opened
+    search-people-first-degree   no Industry or School term drawn     N 26b stays, the pills opened
+                                                                      under ruling 1
+
+Twenty-two rows move to BUILD on seven skeletons in the live lane's
+gitignored `_state/live8/`. Each is a PLANNED tracked skeleton; the live lane
+names the real paths when it commits them:
+
+    PLANNED tests/fixtures/live8/feed_item_menu_open.html <- live-lane _state/live8/lk_feed-item-menu-open.skeleton.html (N 37, N 43, N 51, N 153, N 154, N 200)
+    PLANNED tests/fixtures/live8/in_me.html <- live-lane _state/live8/lk_inme.skeleton.html (P D25, P D26, P F1, P K8; P D25 reads the raw page's anchors)
+    PLANNED tests/fixtures/live8/search_labels.html <- live-lane _state/live8/lk_search_labels.skeleton.html (N 80, N 88, N 89, N 93)
+    PLANNED tests/fixtures/live8/posting.html <- live-lane _state/live8/lk_posting.skeleton.html (J 115; J 124 reads the raw page)
+    PLANNED tests/fixtures/live8/recommended.html <- live-lane _state/live8/lk_recommended.skeleton.html (J 163)
+    PLANNED tests/fixtures/live8/keyskills.html <- live-lane _state/live8/lk_keyskills.skeleton.html (P S8)
+    PLANNED tests/fixtures/live8/thread.html <- live-lane _state/live8/lk_thread.skeleton.html (M M20, M M40, M M51)
+
+The ten lines session 8 could not finish stay CAPTURE, now with the presses
+rulings 1 and 3 permit a capture to make, and the queue is renumbered to start
+at session 9.
