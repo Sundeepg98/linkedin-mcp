@@ -165,7 +165,31 @@ Section A.1 names it. Built here:
   the receipt's own `to_put_it_back` run as the INVERSE, restoring "Example
   Organisation" exactly.
 
-RED FIRST: (RUN PENDING -- filled at the commit)
+RED FIRST, three reds, each kept:
+
+1. The first drive over the copy as first built (15:55), the act failing for a
+   reason in the FIXTURE, caught by the shipped path itself:
+
+        AssertionError ... "performed": false ... "previous_value":
+        "\nExample Organisation\n" ... "field_press": {"waited_for_the_requested_state":
+        {"reached": false, "polls": 25}, "only_the_field_moved": {"proceed": false,
+        "code": "the_field_did_not_move", "why": "the field does not read the
+        requested value after the change; Save was not pressed."}}
+        1 failed, 4 passed
+
+   Fixed in the BUILDER (options inline), never in the test or the package.
+2. THE CONTROL: the same write over session 4's editor, where no
+   "Organization" select is drawn, refuses before anything is chosen:
+   `WriteAttemptError: refusing to click: ... 0 controls in this editor are
+   named 'Organization', where exactly one is required` -- and stores nothing.
+   So the pass is the control's presence, not the harness's
+   (`test_red_session_4s_editor_refuses_the_same_write`).
+3. The builder's `--check`, on a copy with one word planted ("Example
+   Organisatioz"): `the committed fixture is STALE`, exit 1; restored: current,
+   exit 0.
+
+GREEN: 7 passed (the pin, the eleven controls, session 4's absence, the
+preview's target, the write, its inverse, the control), 43 s.
 
 ---
 
@@ -249,13 +273,57 @@ shipped tool does.
 
 ## H. The live-proof specs
 
-(filled at the end)
+Every load 20 s or more apart, inside the session's 40; the live-session flag
+up and the attach check passed first; nothing any step returns is written to a
+tracked file.
+
+### H.1 P A22 -- the Organization select, by A21's pattern (session 6)
+
+- READ FIRST (1 load, his editor): the select's current option. If it reads
+  his one entry, the test value is "Please select" (no company in the intro);
+  if it already reads "Please select", the test value is the entry and the
+  restore is "Please select". Either way the original is read, never assumed.
+- THE ACT (about 4 loads, as session 6 measured per edit):
+  `linkedin_update_profile_field(field="Organization", value=<the test
+  value>)`: the preview names the field and the value; on confirm, his "Share
+  key profile updates" setting read OFF, the editor, the choice, Save only if
+  no other field moved, the fresh render reading the test value.
+- THE INVERSE (about 4 loads): the receipt's own `to_put_it_back` -- the same
+  tool with the exact original option text -- previewed and confirmed; the
+  fresh render must read the original.
+- OPTIONAL (1 load): a read-only re-read of the editor.
+- BUDGET: 9 loads, 0 searches.
+- STOP-ALL: the sharing setting reads anything but OFF (nothing is written);
+  the inverse's fresh render does not read the original (his intro would show
+  no company: the orchestrator is told at once, no other step runs); a wall
+  or a challenge.
+- THE BAR: both writes SAVED and verified on a fresh render, the select back
+  at its original, no other field moved -- COVERED-PROVEN.
 
 ---
 
 ## I. Gates run
 
-(filled as run)
+LOCAL, targeted, serial (`-p no:randomly`, never `-n`); the live-session
+flag was absent at every run; the full suite only on CI.
+
+    gate                                                        result
+    tests/test_the_intro_editor_draws_his_organization_select   red (1 failed, 4 passed), then
+                                                                1 failed (the control's
+                                                                expectation), then 7 passed
+    tests/test_no_committed_identity.py,                        1150 passed (3 min: over the
+      test_fixtures_hold_only_synthetic_people.py (after b693d54)  2-minute cap, the mandated
+                                                                  post-commit check)
+    tests/test_a_literal_repeats_no_member.py,                  1097 passed
+      test_no_committed_identity.py (after d1d2881)
+    scripts/census_completion.py                                every headline figure matches
+                                                                its pin (after each census edit
+                                                                and after the merge of master)
+    check_next_step, check_write_classes, check_read_addresses, GREEN
+      check_jobs_directions, ruling_holds
+    build_audit_index, build_blocker_map, build_rulings_index   regenerated; --check clean
+    pre-commit identity gate                                    ARMED: 226 spellings, 0 hits,
+                                                                every commit
 
 ---
 

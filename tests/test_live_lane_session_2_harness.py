@@ -630,7 +630,12 @@ def test_a_non_ascii_word_survives_the_copy_as_a_reference() -> None:
 #: `accept` declarations recorded live on 2026-09-05 where the skeleton's
 #: shape of each matched exactly. The same checks below hold for it. A later
 #: `--export-fixtures` of session 8 lands beside it and moves this count.
-LIVE_FIXTURE_COUNTS = {"live2": 28, "live3": 14, "live4": 4, "live5": 1, "live8": 1}
+#: `live7` (lane B1, 2026-10-10): ONE copy, his intro editor from session 7's
+#: load, written by `scripts/_build_intro_editor_live7_fixture.py` through this
+#: harness's own `tracked_copy`, after putting back LinkedIn's labels and option
+#: words where the skeleton's shape of each matched exactly under the session's
+#: key, and inventing the organization and school options.
+LIVE_FIXTURE_COUNTS = {"live2": 28, "live3": 14, "live4": 4, "live5": 1, "live7": 1, "live8": 1}
 
 
 @pytest.mark.parametrize("session_dir", sorted(LIVE_FIXTURE_COUNTS))
