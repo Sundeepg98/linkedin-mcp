@@ -26,10 +26,10 @@ anything not yet landed is not described.
 **THE LANE'S COMMITS, by SUBJECT.** The short hashes beside them are this
 lane's branch's: every one is nowhere on `master` until the orchestrator
 merges the branch, and the subject is how a reader finds each after a
-rewrite. Seven merges of `master` sit among them: of `53908ea`, `b10bde8`,
-`fe119de`, `f8c7392`, `66eb699`, `1027bf8` and `f93104c`. A commit cannot
-carry its own hash, so the table ends at the commit before the one that last
-edited it.
+rewrite. Eight merges of `master` sit among them: of `53908ea`, `b10bde8`,
+`fe119de`, `f8c7392`, `66eb699`, `1027bf8`, `f93104c` and `16ee59a` (the last
+in the same commit as this table's last edit). A commit cannot carry its own
+hash, so the table ends at the commit before the one that last edited it.
 
 | subject | lane branch |
 |---|---|
@@ -58,6 +58,7 @@ edited it.
 | merge origin/master 1027bf8 into lane A: lane G2's debts and its red instrument | 91fbedd |
 | record: the sixth merge, its gate, and the green run at the lane's merge of 1027bf8 | 2ec5c46 |
 | merge origin/master f93104c into lane A: the CI lane's shared tree reading and its section 87.8 | fecb159 |
+| rulings register regenerated over the merge of f93104c, and the red run that found it recorded | f5a849a |
 
 ---
 
@@ -993,11 +994,13 @@ it, never by adding deltas:**
     exemption count            4 -> 10 (tests/test_job_alerts_read_boundary.py)
     settings-index refusals    16 -> 14 named (both pages admitted by name)
 
-SEVEN MERGES OF `master`, and on each merged tree every headline figure matched
+EIGHT MERGES OF `master`, and on each merged tree every headline figure matched
 its pin. The sixth, of `1027bf8` (lane G2), moved no figure; its conflicts were
 the derived register and map, regenerated. The seventh, of `f93104c` (the CI
 lane), moved no figure and merged clean -- and carried in a stale rulings
-register, below under CI. Two needed a measurement, not a
+register, below under CI. The eighth, of `16ee59a`, is master's own
+regeneration of that register; its one conflict was the register, regenerated
+again over the merge. Two needed a measurement, not a
 pick: the merge of `f8c7392` (both
 sides had re-pinned the tool surface: 62 tools and 99 parameters, measured) and
 the merge of `66eb699`, the live lane's session 8, where `unfired` stood at 28
@@ -1191,4 +1194,7 @@ bounds a local gate at two minutes).
    without regenerating the register. This branch regenerates it on its own
    tree; the figures differ from master's because this lane's documents are
    counted too, so whichever branch merges next regenerates it on the merged
-   tree.
+   tree. SETTLED ON `master` while this lane ran: `16ee59a`, "derived: the
+   rulings register regenerated to its fixed point"; this lane merged it and
+   regenerated over the merge (the only difference left is this lane's own
+   document, counted).
