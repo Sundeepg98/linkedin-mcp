@@ -384,7 +384,9 @@ async def test_control_each_check_weakened_lets_its_plant_through(browser_page, 
 
 def test_the_fixture_holds_only_declared_synthetic_values():
     declared = (OWNER_MEMBER, ANOTHER_MEMBER, OWNER_MEMBER[:-1] + "1", OWNER_MEMBER[:-1] + "4")
-    for found in re.findall(r"ACoAA[A-Za-z0-9_-]+", ACTIVITY):
+    # THE 39 CHARACTERS OF A MEMBER ID, whatever follows it (the topcard's id
+    # runs "Topcard" straight on).
+    for found in re.findall(r"ACoAA[A-Za-z0-9_-]{34}", ACTIVITY):
         assert found in declared, found
     for found in re.findall(r"urn:li:activity:([0-9]+)", ACTIVITY):
         assert found.startswith("74000000000000000"), found
