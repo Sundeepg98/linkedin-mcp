@@ -121,21 +121,6 @@ DELIBERATELY_UNWIRED: dict[str, str] = {
         "it was ruled unwireable, and the author should replace this reason "
         "with theirs. NOT PERMANENT."
     ),
-    "search_verticals": (
-        "A CAPABILITY HELD ON A WRITTEN CONDITION, ruled by its author "
-        "2026-09-24 (lane S follow-up). It composes the companies, groups and "
-        "events searches D2-SEARCH-VERTICALS-WIDENED admitted, from a tool's "
-        "arguments only, and it is unwired for two reasons that point the "
-        "same way. Readers here are built against captures only, and none of "
-        "the three pages has been captured -- the capture specs are in "
-        "_audit/2026-09-24-lane-s-people-search.md, section F. And the "
-        "search admission's condition 1 binds any tool that opens one: its "
-        "reader lands in the SAME commit or neither does -- a reader that, "
-        "since NAMES-AT-RUNTIME amended the condition (2026-09-24), returns "
-        "what it finds held to PEOPLE-DATA-MITIGATIONS rather than no names "
-        "at all. So the first tool that imports this module brings its reader "
-        "with it, and this entry is deleted in that commit. NOT PERMANENT."
-    ),
 }
 
 # THE member_rosters ENTRY WAS DELETED 2026-10-10 (lane B5), ON ITS OWN

@@ -294,6 +294,21 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "while leaving the record unmarked, which would need its own "
         "CORRECTS: / CORRECTED BY: pair."
     ),
+    # 2026-10-10, lane B2. TABLE-ROW PROXIMITY, read and not inferred from the
+    # filenames: found by the lane's own local gate on its first census commit.
+    ("network.md", "2026-10-10-lane-b2-network-build.md"): (
+        "A RECORD CITED FOR A DATED NOTE, NOT A CORRECTION. Rows `37`, `43`, "
+        "`51`, `56`, `80`, `88`, `89`, `93`, `103`, `104`, `133`, `153`, `154` "
+        "and `200` each gained a note that reads its capture and ends 'Record: "
+        "`_audit/2026-10-10-lane-b2-network-build.md`'. The matched word sits "
+        "in an OLDER note on the same table row -- row 37's 'RESTATED "
+        "2026-09-27 BY LANE L8' -- and the new note corrects nothing in the "
+        "record it cites. The corrections lane B2 does make are declared: its "
+        "record's CORRECTS: line names lane K's ledger record, which carries "
+        "the CORRECTED BY: back-pointer. **WHAT WOULD MAKE THIS ENTRY WRONG:** "
+        "a lane B2 note in network.md overturning a statement of its own "
+        "record, which would need its own marker pair."
+    ),
 
     # 2026-10-10, lane NP. TABLE-ROW PROXIMITY, read and not inferred from the
     # filenames: found by the lane's CI run 38037374698.

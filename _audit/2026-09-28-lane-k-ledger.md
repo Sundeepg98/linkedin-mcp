@@ -605,6 +605,18 @@ Row: `N 152`. The cell: "A harassment or safety report is an accusation",
 with the reopener "an in-product STRUCTURED report". The question: keep it
 GAP on that reopener, or rule it out of scope?
 
+### Q-ORG-IDENTITY -- which organisations a companies search found
+
+Added 2026-10-10 by lane B2 (`_audit/2026-10-10-lane-b2-network-build.md`,
+section 5). Row: `N 104`. The cell's bar: an id reader delivers it if the
+results page draws a numeric organisation id per result, and "If the result
+cards carry slugs only, it does not deliver: a slug is a name". Session 2's
+capture draws slugs only: 10 result Pages, 0 numeric. The question: does
+`NAMES-AT-RUNTIME`, with `THIRD-PARTY-TEXT-AT-RUNTIME` (an organisation Page's
+prose returned at runtime), let a search return each organisation it found as
+its name and its Page link, held to the ruling `PEOPLE-DATA-MITIGATIONS` --
+or does the row wait on a page that draws numeric ids?
+
 ## 8. Preconditions and purposes
 
 PRECONDITION rows stay GAP; each waits on something he does not hold.
@@ -1037,6 +1049,8 @@ names the real paths when it commits them:
 The eleven lines session 8 did not finish stay CAPTURE, now with the presses
 rulings 1 and 3 permit a capture to make, and the queue is renumbered to start
 at session 9.
+
+**CORRECTED BY:** `_audit/2026-10-10-lane-b2-network-build.md` -- read against the two skeletons, the feed menu cannot be aimed at an item he names and the search page's first render draws no School, Industry or Keywords control, so `N 37`, `N 43`, `N 51`, `N 153`, `N 154`, `N 200`, `N 88`, `N 89` and `N 93` return to CAPTURE and `N 80` is discharged under D6; and section 5's "unsubscribe" on the newsletter list was counted inside the fixture's header comment, so `N 56` goes to ADMIT.
 
 THE THREAD FOOTER, as the live lane re-read it at 15:32. Its session-8
 capture `lk_thread` is the NEW-MESSAGE COMPOSER page, not a named thread's

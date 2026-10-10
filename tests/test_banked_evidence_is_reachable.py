@@ -66,6 +66,14 @@ PINNED = {
     #: a gitignored capture in the lane's own words, and was reworded.
     ("_audit/_census/messaging-and-content.md", "C72", "COVERED-PROVEN"),
     ("_audit/_census/network.md", "134", "COVERED-PROVEN"),
+    #: ONE MORE, 2026-10-10 (lane B2), the same generator: `N 133` was
+    #: discharged under D6 onto `N 134`'s live fire and banked. Its two
+    #: gitignored `_audit/_scratch/` citations sit in the PRIOR READINGS its
+    #: cell keeps from 2026-09-05, written before the row was banked. The
+    #: evidence for the promotion -- `N 134`'s banked cell and the lane's
+    #: record, `_audit/2026-10-10-lane-b2-network-build.md` section 4 -- is
+    #: reachable. Found by the lane's CI run 38047725191.
+    ("_audit/_census/network.md", "133", "COVERED-PROVEN"),
 }
 
 #: A census table shaped like the real ones, for planting defects into.
@@ -389,8 +397,9 @@ def test_every_unreachable_artifact_is_named_and_classified(measured):
     rows, _, _ = measured
     bad = [a for r in rows for a in r.unreachable]
     # 18 since the live lane's merge, 2026-09-24: 15 plus C72's one and 134's
-    # two, all in kept prior readings (see PINNED).
-    assert len(bad) == 18, [str(a) for a in bad]
+    # two, all in kept prior readings (see PINNED). 20 since lane B2's D6
+    # discharge of N 133, 2026-10-10: its cell's two kept prior readings.
+    assert len(bad) == 20, [str(a) for a in bad]
     assert {a.verdict for a in bad} == {"GITIGNORED"}, sorted({a.verdict for a in bad})
     assert all(a.path.startswith("_audit/_scratch/") for a in bad), bad
 

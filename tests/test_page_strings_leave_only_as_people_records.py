@@ -997,6 +997,7 @@ def cache_writes(source: str, functions: set[str]) -> list[tuple[str, int]]:
 _RECORD_PATH = {
     "linkedin_server/people_data.py": {
         "sanitise", "canonical_degree", "canonical_profile_link", "as_record", "text_fields",
+        "canonical_group_link", "canonical_event_link",
     },
     "linkedin_server/shape.py": {
         "parse_person_card", "envelope", "messaging_overview", "_conversation_rows",
@@ -1013,9 +1014,17 @@ _RECORD_PATH = {
         # mint and consume -- which hold his own argument and never a page
         # string.
         "linkedin_read_named_profile",
+        # The search verticals (2026-10-10, lane B2): the two tools, and below,
+        # their reader -- every function a group or event record passes
+        # through, from the card to the envelope.
+        "linkedin_search_groups", "linkedin_search_events",
     },
     "linkedin_server/named_profile.py": {
         "read_the_confirmed_profile", "person_from_the_topcard", "name_the_profile_target",
+    },
+    "linkedin_server/search_vertical_results.py": {
+        "read_group_results", "read_event_results", "_read_cards",
+        "_read_group_card", "_read_event_card", "_nested_text",
     },
 }
 

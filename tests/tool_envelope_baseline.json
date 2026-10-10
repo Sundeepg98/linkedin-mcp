@@ -51,6 +51,8 @@
     "linkedin_save_job": "not_driven:never read the page",
     "linkedin_saved_jobs": "clean",
     "linkedin_search_appearances": "returns_text:the plant reached a published payload",
+    "linkedin_search_events": "clean",
+    "linkedin_search_groups": "clean",
     "linkedin_search_jobs": "clean",
     "linkedin_send_attachment": "not_driven:never read the page",
     "linkedin_send_invitation": "not_driven:never read the page",

@@ -530,6 +530,9 @@ class Post:
 #: ``linkedin_group_members`` joined on 2026-10-10 (lane B5,
 #: ``group_roster.read_group_members``, MEMBER-ROSTERS-AS-BOUNDED-READS): one
 #: page of a group's member list, with no opt-in -- people are its answer.
+#: The two search verticals joined on 2026-10-10 (lane B2,
+#: ``search_vertical_results``): the groups and the events a keyword search
+#: drew, as group and event records, are those tools' whole answer.
 PEOPLE_TOOLS: frozenset[str] = frozenset(
     {
         "linkedin_group_members",
@@ -540,6 +543,8 @@ PEOPLE_TOOLS: frozenset[str] = frozenset(
         "linkedin_recruiter_insights",
         "linkedin_messaging_presence",
         "linkedin_read_named_profile",
+        "linkedin_search_groups",
+        "linkedin_search_events",
     }
 )
 

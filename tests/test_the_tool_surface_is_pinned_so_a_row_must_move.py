@@ -137,6 +137,10 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_save_job": ("confirm_token", "job_id"),
     "linkedin_saved_jobs": ("limit",),
     "linkedin_search_appearances": (),
+    # 2026-10-10, lane B2: census N 161 and N 179, REPORTED to the lane's lead
+    # rather than banked -- the census is the lead's to move at merge.
+    "linkedin_search_events": ("keywords",),
+    "linkedin_search_groups": ("keywords",),
     "linkedin_search_jobs": (
         "company_id", "date_posted", "easy_apply", "experience_level",
         "fair_chance_employer", "in_your_network", "job_type", "keywords",
@@ -564,8 +568,24 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: **AT THE INTEGRATION MERGE OF LANE NP ONTO LANES S AND B5 (2026-10-10): 65 TOOLS AND
 #: 107 PARAMETERS** -- lane NP's tool and two parameters beside lanes S's
 #: and B5's, counted on the merged registry, never summed.
-PINNED_TOOL_COUNT = 65
-PINNED_PARAMETER_COUNT = 107
+#: **RE-PINNED 2026-10-10 AT 63 TOOLS AND 99 PARAMETERS for lane B2's search
+#: verticals: two READS, `linkedin_search_groups(keywords)` and
+#: `linkedin_search_events(keywords)` -- one search results page each,
+#: composed from the keyword alone, its results returned as group and event
+#: records.** THE CENSUS DECISION, stated in the commit: NO ROW MOVES ON THE
+#: CHILD BRANCH THAT BUILT THEM. `N 161` and `N 179` are REPORTED to lane B2's
+#: lead, whose census slice it is, to move GAP -> COVERED-UNFIRED at the
+#: lane's merge on the evidence of that commit.
+#: **RE-PINNED AT LANE B2'S MERGE OF ITS SEARCH VERTICALS OVER MASTER, 2026-10-10:
+#: THE UNION, MEASURED BY THIS FILE'S OWN TEST.** Master's 62 tools and 100
+#: parameters (lane NP's one parameter, lane U's one tool and three) and lane
+#: B2's two read tools with one parameter each: 62 + 2 tools, 100 + 2
+#: parameters. Neither side moved the other's entries.
+#: **AT THE INTEGRATION MERGE OF LANE B2 ONTO LANE NP (2026-10-10): 67 TOOLS AND
+#: 109 PARAMETERS** -- lane B2's two tools and their one parameter each
+#: beside the sixty-five, counted on the merged registry, never summed.
+PINNED_TOOL_COUNT = 67
+PINNED_PARAMETER_COUNT = 109
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:
