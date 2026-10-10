@@ -221,7 +221,24 @@ A token minted for the profile loads no detail page, and the other way round.
 
 ## E. The census
 
-PENDING -- written at the census commit.
+NO STATE MOVES IN THIS LANE, so no pin is re-derived: `scripts/census_completion.py`
+ends "every headline figure matches its pin" after every census edit and after
+the merge of master `53908ea`.
+
+- `N 30`, `N 85`, `N 172`, `N 31` (network): each cell gains the paragraph
+  "BLOCKER, NAMED: member token from the named read (lane NP)" -- the route
+  takes the named member's token as `connections_of`, and the named read now
+  returns it as `member_token`. They move only when proven live (F). At the
+  merge of master these four cells had ALSO gained live session 7's paragraph;
+  resolved keyed by row, master's cell whole and this lane's paragraph after it.
+- `M C32` (messaging-and-content): the cell names the new route -- see the
+  merge of child B below.
+- `P A8` (profile): the cell names the clear-restore -- see the merge of child C
+  below.
+- NOT EDITED, and why: `N 178` and `N 65` keep their cells -- their blocker is
+  still a capture (C-NP1 now, on the detail page the new door admits), which D.2
+  specifies; `M C35` ("Remove or change a reaction") is a candidate for the next
+  session's un-react and is left to its own cell's bar.
 
 ---
 

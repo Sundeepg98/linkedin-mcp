@@ -10450,13 +10450,14 @@ async def linkedin_read_named_profile(
     pass back as arguments -- nothing in this server uses them on its own:
     ``member_token``, the member's opaque token exactly as their own topcard's
     links write it, returned only when every one of those links names that one
-    member and their one Message control is theirs (else null, with
+    member and the topcard's one visible composer link is theirs (else null, with
     ``member_token_why``) -- the ``connections_of`` that
     linkedin_people_search_shape takes; and ``activity_items``, the item keys
     of the posts their Activity section draws on this load, at most ten, each
-    with ``author``: ``owner``, ``another_member`` (a repost or a comment:
-    acting on it acts on somebody else's post) or ``unknown`` -- the ``item``
-    that linkedin_react_to_item takes. ``groups`` is ABSENT (null):
+    with ``author``: ``owner``, ``another_member`` (an item somebody else
+    wrote, which reached this profile through the owner: acting on it acts on
+    a stranger's item) or ``unknown`` -- the ``item`` that
+    linkedin_react_to_item takes. ``groups`` is ABSENT (null):
     no capture shows a member's groups on their profile yet, and a field no
     capture shows is not read. The degree is absent for the same reason.
     Nothing is stored: not the answer, not the name, not the page.
