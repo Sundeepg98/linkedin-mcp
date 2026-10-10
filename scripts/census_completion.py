@@ -1544,7 +1544,10 @@ PINNED = {
     #: `N 13`, `N 14`, `N 19` and `N 38` REFUSED -> ADMITTED (gate MEASURE),
     #: his invitation manager and the people he follows read past the act
     #: substrings "invitation" and "/follow" on READ-PAST-AN-ACT-SUBSTRING.
-    "b3_admitted": 49,
+    #: 54 ON LANE A'S SECOND ADMISSION THE SAME DAY, MEASURED: `P M2`, `P M4`,
+    #: `P M5`, `P M6` and `P M12` REFUSED -> ADMITTED (gate MEASURE), his job
+    #: application settings page.
+    "b3_admitted": 54,
     #: 38 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     #: 40 ON LANE L5'S ORDER OF 2026-09-28 12:32, MEASURED: `N 30`, `N 31`, `N 65`
@@ -1556,7 +1559,8 @@ PINNED = {
     #: left the table for COVERED-UNFIRED by D6 (see `adjudicated`).
     #: 32 ON LANE A'S ADMISSIONS OF 2026-10-10, MEASURED: the same six rows
     #: left REFUSED (see `b3_admitted`).
-    "b3_refused": 32,
+    #: 27 ON LANE A'S SECOND ADMISSION, MEASURED: the same five rows left.
+    "b3_refused": 27,
     "b3_no_address": 1,
     "b3_needs_session": 14,
     "b3_undetermined": 2,
@@ -1841,8 +1845,11 @@ PINNED = {
     #: shipped page and never fired, so they leave buckets 3 and 1-by-side and
     #: enter bucket 1 held by no ruling. `P K1` stays GAP and is re-gated
     #: READER -> MEASURE: no capture draws its section.
-    "jobs_admitted": 12,
-    "jobs_refused": 34,
+    #: 15 and 31 ON LANE A'S SECOND ADMISSION OF 2026-10-10, MEASURED: `J 71`,
+    #: `J 72` and `J 73` REFUSED -> ADMITTED (gate MEASURE), his job
+    #: application settings page read past "/jobs/application" and "settings".
+    "jobs_admitted": 15,
+    "jobs_refused": 31,
     "jobs_no_address": 0,
     "jobs_needs_session": 2,
     "jobs_undetermined": 0,

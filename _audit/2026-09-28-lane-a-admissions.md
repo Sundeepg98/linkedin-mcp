@@ -370,3 +370,44 @@ block, hashes to the prior pin on all thirteen keys); the census count cell
 unchanged on all six (no capture, no reader). `census_completion.py`:
 `b3_admitted` 43 -> 49 and `b3_refused` 38 -> 32, re-derived from the measured
 values in the same commit.
+
+**GATE, after the commit** (`8a0636a`, with the triage commit `2f94b79`
+before it): the lane A file, the boundary, refusal and side-table tests, the
+census-prose and gap-row guards, the four document guards, the three derived
+views, the identity sweep over the committed blob and the dict-literal guard --
+1667 passed in 186s.
+
+### 3.2 His job application settings
+
+One more pair in the same blocks, its own commit so it can be taken or left
+alone:
+
+    /jobs/application-settings/     excuses {"/jobs/application", "settings"}
+                                    P M2, P M4, P M5, P M6, P M12, J 71, J 72, J 73
+
+Both substrings the address trips are excused, and only for it -- the 2026-09-03
+`settings` word keeps its full reach on every other spelling (a settings page
+the dark-mode entry declined by name, `/public-profile/settings`), and
+`/jobs/application` keeps it on an application, the applied-jobs list and any
+query or sub-path of this page. `/mypreferences/d/job-application-accounts`
+stays refused on `job-application` (2.6).
+
+**RED FIRST:** the file's new entry against the previous `readonly.py`, 6
+failed, 1 passed (the sibling test, true before and after); with the pair, 30
+passed.
+
+**PINS:** digests `c0249a5bfde871da` -> `94bf0916c1be3824` and
+`6f99bceb4d139db3` -> `ffebed391e628195`, the base hashing to the prior pin on
+all thirteen keys; census count cell 58 -> 59. **BASIS RAISED** to MEASURED on
+all eight lines: the drawn-route corpus carries the address (section 0). The
+side tables keep each row's own source, because their checkers accept
+`.py/.md/.tsv/.json` citations and the corpus is a `.txt` file; the note
+names it. Both checkers GREEN (98 of 98; 108 of 108).
+`census_completion.py`: `b3_admitted` 49 -> 54, `b3_refused` 32 -> 27,
+`jobs_admitted` 12 -> 15, `jobs_refused` 34 -> 31, re-derived. One capture
+line added (`job-application-settings`).
+
+**P M12 STAYS HONEST ABOUT ITS PAGE.** The side table tied "AI resume feedback"
+to this address by inference from M1; the live lane captured a job posting for
+the same row on 2026-09-28. Both captures record whether they carry it, and
+the reader is whichever page does.

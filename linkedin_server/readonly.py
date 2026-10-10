@@ -2325,6 +2325,18 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # comment, not a ruling (D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING); this
     # line reads the list and shortens nothing.
     re.compile(r"^https://www\.linkedin\.com/mynetwork/network-manager/people-follow/following/?$"),
+    # His job application settings (census P M2, P M4, P M5, P M6, P M12,
+    # J 71, J 72, J 73): saved resumes and screening answers. DRAWN, not
+    # inferred: `tests/fixtures/synthetic/drawn_routes.txt` carries it, an
+    # anchor on a surface captured live 2026-09-20. It trips TWO substrings
+    # and the paired exemption excuses both, for this address alone:
+    # "/jobs/application", the first commit's fence against APPLYING (census
+    # P M1: "no argument recorded"), and "settings", the 2026-09-03 second
+    # gate over the toggle-bearing settings family. A settings page is
+    # admitted by name (ONE-NAMED-SETTINGS-PAGE-AT-A-TIME); this line names
+    # one. Every resume delete, upload and answer edit on it stays refused by
+    # the press gate and is a write with its own spec.
+    re.compile(r"^https://www\.linkedin\.com/jobs/application-settings/?$"),
     # ======================================================================
     # REVIEW (lane L1, 2026-09-23) -- N 184, ONE EVENT BY ITS NUMERIC ID.
     # Census row N 184: "reach an event through its URL after it has been
@@ -2894,6 +2906,10 @@ _FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS: tuple[
             r"people-follow/following/?$"
         ),
         frozenset({"/follow"}),
+    ),
+    (
+        re.compile(r"^https://www\.linkedin\.com/jobs/application-settings/?$"),
+        frozenset({"/jobs/application", "settings"}),
     ),
     # "SHARING PROFILE EDITS", READ ONLY -- the second gate of the pair whose
     # first gate is the matching allowlist line beside dark-mode. 2026-09-27,

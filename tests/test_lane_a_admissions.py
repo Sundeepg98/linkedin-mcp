@@ -141,6 +141,30 @@ ADMISSIONS = (
                     "the family root, refused by the allowlist alone"),
         ),
     ),
+    Admission(
+        key="job-application-settings",
+        rows=("P M2", "P M4", "P M5", "P M6", "P M12", "J 71", "J 72", "J 73"),
+        address=f"{B}/jobs/application-settings/",
+        excused=frozenset({"/jobs/application", "settings"}),
+        siblings=(
+            Sibling(f"{B}/jobs/application-settings/?resume=1",
+                    "/jobs/application", "a QUERY"),
+            Sibling(f"{B}/jobs/application-settings/resume/delete",
+                    "/jobs/application", "a SUB-PATH naming a write"),
+            Sibling(f"{B}/jobs/application/1234567890/", "/jobs/application",
+                    "an application itself"),
+            Sibling(f"{B}/jobs/applications/", "/jobs/application",
+                    "a sibling the exemption does not reach"),
+            Sibling(f"{B}/jobs/easy-apply/", "easy-apply", "applying"),
+            Sibling(f"{B}/mypreferences/d/job-application-accounts",
+                    "job-application", "the stored applicant accounts, NOT "
+                    "admitted (a credential-adjacent surface; the record, 2.6)"),
+            Sibling(f"{B}/mypreferences/d/settings/language", "/settings/",
+                    "a settings page the dark-mode entry declined by name"),
+            Sibling(f"{B}/public-profile/settings", "settings",
+                    "the second spelling the 2026-09-03 block closed"),
+        ),
+    ),
 )
 
 KEYS = [a.key for a in ADMISSIONS]

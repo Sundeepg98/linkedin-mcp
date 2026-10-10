@@ -1869,7 +1869,12 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # tree minus exactly the lane A block, and it hashes to the prior pin on
     # all thirteen keys; only this key and the pattern-exemption key moved.
     # Record: _audit/2026-09-28-lane-a-admissions.md.
-    "_ALLOWED_URL_PATTERNS": "c0249a5bfde871da",
+    #
+    # c0249a5bfde871da until lane A's second admission the same day: his job
+    # application settings page, one line, paired with one exemption below;
+    # the tree minus that line and that entry hashes to c0249a5bfde871da and
+    # 6f99bceb4d139db3, and the other eleven keys are byte-identical.
+    "_ALLOWED_URL_PATTERNS": "94bf0916c1be3824",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     # 419e64a3cd92ec7e until the same REVIEW: commit: a third entry, excusing
     # exactly {"/follow"} for exactly the anchored follower-list address.
@@ -1880,7 +1885,10 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # {"invitation"} for the invitation manager's received and sent tabs and
     # exactly {"/follow"} for his own following list, each for exactly its
     # anchored address; the forbidden tuple is unchanged at 33.
-    "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "6f99bceb4d139db3",
+    # 6f99bceb4d139db3 until the second: one more, excusing exactly
+    # {"/jobs/application", "settings"} -- the two substrings that address
+    # trips, measured -- for exactly /jobs/application-settings/.
+    "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "ffebed391e628195",
     "_FORBIDDEN_URL_SUBSTRINGS": "b0291a66ec9bd51e",
     # 23aece1483afdee9 until 2026-09-19. See the re-freeze note above: eleven
     # detector classes added, zero removed, and the direction is pinned by
