@@ -130,6 +130,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_publish_post": ("confirm_token", "text"),
     "linkedin_react_to_item": ("confirm_token", "item"),
     "linkedin_read_named_profile": ("confirm_token", "profile", "section"),
+    "linkedin_withdraw_reaction": ("confirm_token", "item"),
     "linkedin_recent_job_searches": (),
     "linkedin_recruiter_insights": (),
     "linkedin_save_job": ("confirm_token", "job_id"),
@@ -484,8 +485,14 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: The read's two new fields (`member_token`, `activity_items`) are not
 #: parameters; `N 30`, `N 85`, `N 172`, `N 31` and `M C32` move only when proven
 #: live.
-PINNED_TOOL_COUNT = 61
-PINNED_PARAMETER_COUNT = 97
+#: **RE-PINNED 2026-10-10 AT 62 TOOLS AND 99 PARAMETERS on lane NP (the
+#: orchestrator's ruling of 14:14): one tool, two parameters --
+#: `linkedin_withdraw_reaction(item, confirm_token)`, the reaction's inverse.**
+#: THE CENSUS DECISION, in the same commit: NO ROW MOVES. `M C32` waits on its
+#: live proof (react, then withdraw, on a post of the member he named); `M C35`
+#: ("Remove or change a reaction") is compound and keeps its cell. Never fired.
+PINNED_TOOL_COUNT = 62
+PINNED_PARAMETER_COUNT = 99
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:

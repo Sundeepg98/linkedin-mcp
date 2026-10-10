@@ -1,4 +1,15 @@
-"""The tool surface: sixty-one tools, seventeen of which write to LinkedIn.
+"""The tool surface: sixty-two tools, eighteen of which write to LinkedIn.
+
+THE SIXTY-SECOND IS A WRITE, 2026-10-10, on the orchestrator's ruling of 14:14
+(lane NP): ``linkedin_withdraw_reaction``, the inverse of
+``linkedin_react_to_item``. It takes back HIS OWN reaction on one item he
+names by key, and it is named on a verb the conservation law already admits
+("delete or withdraw one of his own items",
+OUTWARD-CLASSES-BUILT-BEHIND-GRANTS), behind the flag and the single-use
+grant. Its preview and its press require the post's one toggle to wear a
+MEASURED ON name, and it verifies off the MEASURED OFF name on a fresh render
+of the same post. Census row ``M C32``, COVERED-UNFIRED. The headline read
+"sixty-one tools, seventeen of which write" until then.
 
 THE SIXTY-FIRST IS A READ, 2026-09-28, on lane L5's order of 08:06 and the
 operator's ruling of 08:01 (``NAMED-PROFILE-READ-BEHIND-A-GRANT``):
@@ -212,9 +223,9 @@ assigned to anybody -- it waits for whoever next runs the suite, and in the
 meantime the pin goes on asserting the old number with full confidence.
 
 THE NUMBERS ABOVE ARE DERIVED NOW, and that is a statement about a test rather
-than about an intention. Sixty-one is ``len(await mcp.list_tools())``,
+than about an intention. Sixty-two is ``len(await mcp.list_tools())``,
 pinned in ``test_server_surface.py`` by
-``test_the_surface_is_exactly_the_sixty_one_tools``; the split is pinned by
+``test_the_surface_is_exactly_the_sixty_two_tools``; the split is pinned by
 ``tests/test_prose_that_makes_a_claim.py::test_the_server_docstring_numbers_are_derived``,
 which reads THESE WORDS and fails if any of the three disagrees with the
 registry.
@@ -227,9 +238,9 @@ POINTER to it was dangling, so a reader who followed it found nothing and
 would reasonably conclude these numbers are unchecked. A citation is a claim
 like any other.
 The surface splits three ways and the split is the part a reader actually
-needs: FORTY-FOUR read, SEVENTEEN write, and ZERO are write-shaped,
-registered, gated and unable to act. Forty-four plus seventeen plus zero is
-sixty-one. (Thirty-eight, thirteen and fifty-one until 2026-09-24; thirty-nine,
+needs: FORTY-FOUR read, EIGHTEEN write, and ZERO are write-shaped,
+registered, gated and unable to act. Forty-four plus eighteen plus zero is
+sixty-two. (Thirty-eight, thirteen and fifty-one until 2026-09-24; thirty-nine,
 thirteen and fifty-two at the live lane's merge the same day; thirty-nine,
 fourteen and fifty-three at lane L7's; forty-one, fifteen and fifty-six at
 lane L5's; forty-one, sixteen and fifty-seven at lane L8's merge on
@@ -238,7 +249,8 @@ eighteen and fifty-nine from that merge until lane L5 RETIRED
 ``linkedin_send_message`` later the same day -- aimed by a name; forty-one,
 seventeen and fifty-eight until lane S's two reads arrived at its merge of
 master 0867bda, 2026-09-28; forty-three, seventeen and sixty until lane L5's
-read of a named profile the same day.)
+read of a named profile the same day; forty-four, seventeen and sixty-one
+until lane NP's ``linkedin_withdraw_reaction``, 2026-10-10.)
 
 THE FIFTY-THIRD IS ONE WRITE, 2026-09-24 (lane L7, census row ``P I14``).
 ``linkedin_mark_company_interest`` presses "I'm interested" in the
@@ -367,11 +379,13 @@ the moment ``update_profile_field`` was given an address while still refusing.
 always meant: an address is not a permission.
 
 NOTE THE ACTION THAT HAS NO TOOL. ``writes.SANCTIONED_WRITES`` holds
-EIGHTEEN actions where this surface registers SEVENTEEN write-shaped tools, and
+NINETEEN actions where this surface registers EIGHTEEN write-shaped tools, and
 the missing one is ``set_open_to_work``: it is sanctioned, it is refused by
-``_refuse_unperformable``, and no tool was ever registered for it. So seventeen
-counts TOOLS and eighteen counts ACTIONS, and a reader comparing the two
-numbers is not looking at a discrepancy. (NINETEEN and EIGHTEEN from lane L5's
+``_refuse_unperformable``, and no tool was ever registered for it. So eighteen
+counts TOOLS and nineteen counts ACTIONS, and a reader comparing the two
+numbers is not looking at a discrepancy. (EIGHTEEN and SEVENTEEN until lane
+NP's ``withdraw_reaction``, 2026-10-10, which added one to each; NINETEEN and
+EIGHTEEN from lane L5's
 merge of master 52b55b6 until lane L5 retired ``send_message`` the same day,
 which took one from each; SEVENTEEN and SIXTEEN until lane
 L5's merge of master 52b55b6, 2026-09-27, ``connect_from_profile`` and
@@ -952,7 +966,7 @@ mcp = FastMCP(
     instructions=(
         "A window onto the operator's OWN LinkedIn account, driven by his own "
         "signed-in browser on his own machine. Most tools read and change "
-        "nothing. SEVENTEEN WRITE: linkedin_save_job, "
+        "nothing. EIGHTEEN WRITE: linkedin_save_job, "
         "linkedin_unsave_job, linkedin_unfollow_company, "
         "linkedin_follow_company, linkedin_apply_job, "
         "linkedin_update_setting, linkedin_react_to_item, "
@@ -960,8 +974,8 @@ mcp = FastMCP(
         "linkedin_comment_on_item, linkedin_update_profile_field, "
         "linkedin_follow_company_page, "
         "linkedin_mark_company_interest, linkedin_send_reply, "
-        "linkedin_withdraw_from_group, linkedin_connect_from_profile and "
-        "linkedin_message_from_profile. "
+        "linkedin_withdraw_from_group, linkedin_connect_from_profile, "
+        "linkedin_message_from_profile and linkedin_withdraw_reaction. "
         "THE ELEVENTH is the only one here that can verify its own outcome "
         "by reading the field back; it also returns the PREVIOUS value "
         "verbatim and the exact call that puts it back, which this server "
@@ -10576,6 +10590,55 @@ async def linkedin_read_named_profile(
     except Exception as exc:
         return _error(exc)
 
+
+# ---------------------------------------------------------------------------
+# lane NP, 2026-10-10 -- the tools this lane registers, in ONE block
+# ---------------------------------------------------------------------------
+#
+# ``linkedin_withdraw_reaction``: the reaction's inverse, on the orchestrator's
+# ruling of 14:14 -- named on the verb the conservation law already admits
+# (withdrawing HIS OWN reaction is "delete or withdraw one of his own items",
+# OUTWARD-CLASSES-BUILT-BEHIND-GRANTS), with the reaction's own address, reader
+# and preview, aimed only at a MEASURED ON name.
+
+
+@mcp.tool()
+async def linkedin_withdraw_reaction(
+    item: str, confirm_token: str = ""
+) -> dict[str, Any]:
+    """Withdraw your reaction from one feed item. PERFORMS, behind the gate.
+
+    THE INVERSE OF linkedin_react_to_item, on the same page: the item's own
+    permalink, its ONE reaction toggle, read live. It is valid only while that
+    toggle is ON and wears one of the two MEASURED ON names -- "Reaction button
+    state: Like" or "Unreact Like" -- and it presses exactly that control. An
+    OFF toggle is the wrong state: pressing it would REACT under your name and
+    notify the author, so it is refused. An ON name of a kind nobody has
+    measured is refused too.
+
+    THE PREVIEW NAMES THE ITEM AND ITS AUTHOR: the post's author as a people
+    record read off the permalink, and ``author_kind``, which reads
+    ``unknown`` until a capture of another member's post shows the rule that
+    tells his post from theirs. Whose post a key is comes from where you read
+    it: linkedin_read_named_profile's ``activity_items`` marks each item.
+
+    THE VERIFICATION is a fresh render of the permalink reading the MEASURED
+    OFF name ("Reaction button state: no reaction"); anything else is not a
+    success. WHAT IT COSTS: the author was notified of the reaction when it
+    was made, and taking it back does not recall that.
+
+    Args:
+        item: which feed item, as ``urn:li:activity:<digits>`` -- one of his
+            own items (linkedin_my_activity_items) or an item on a profile he
+            names (linkedin_read_named_profile's activity_items).
+        confirm_token: leave empty to read the gate. NEVER confirm on his
+            behalf: a token from that block, used once within two minutes, is
+            the only thing that acts.
+    """
+    try:
+        return await _write_tool("withdraw_reaction", item, confirm_token)
+    except Exception as exc:
+        return _error(exc)
 
 
 #: Fields that answer "what is running and what can it do". Everything else in

@@ -1,4 +1,4 @@
-"""The tool surface: sixty-one tools, forty-four of which do not write.
+"""The tool surface: sixty-two tools, forty-four of which do not write.
 
 **AND THIS LINE IS NOW DERIVED, NOT MAINTAINED, 2026-09-20.** It had gone stale
 a THIRD time -- "forty-four tools, thirty-two of which do not write" against a
@@ -156,6 +156,12 @@ SANCTIONED_WRITE_TOOLS = frozenset(SANCTIONED_WRITES) & {
     # Keys in writes.SANCTIONED_WRITES.
     "linkedin_connect_from_profile",
     "linkedin_message_from_profile",
+    # THE NINETEENTH, 2026-10-10 (lane NP, the orchestrator's ruling of
+    # 14:14): the reaction's inverse, named on "withdraw", a verb the
+    # conservation law already admits. Its NAME announces the write and its
+    # docstring must describe one, so it is on both exemptions -- which are
+    # one set. A key in writes.SANCTIONED_WRITES.
+    "linkedin_withdraw_reaction",
 }
 
 #: THE DOCSTRING EXEMPTION IS THE SAME SET AS THE NAME EXEMPTION, and it took
@@ -514,6 +520,8 @@ EXPECTED_TOOLS = {
     # its merge of master 52b55b6), two WRITES: see SANCTIONED_WRITE_TOOLS.
     "linkedin_connect_from_profile",
     "linkedin_message_from_profile",
+    # THE SIXTY-SECOND, 2026-10-10 (lane NP), a WRITE: see SANCTIONED_WRITE_TOOLS.
+    "linkedin_withdraw_reaction",
 }
 
 #: Names a reader must never grow. Listed explicitly so that adding one is a
@@ -598,8 +606,13 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_sixty_one_tools(tools):
-    """RENAMED AGAIN ON LANE L5'S ORDER OF 2026-09-28 08:06, to
+async def test_the_surface_is_exactly_the_sixty_two_tools(tools):
+    """RENAMED AGAIN ON LANE NP, 2026-10-10, to ``..._sixty_two_tools``: one
+    WRITE, ``linkedin_withdraw_reaction``, the reaction's inverse (the
+    orchestrator's ruling of 14:14). MEASURED off the registry; the name
+    moved with the pin.
+
+    RENAMED AGAIN ON LANE L5'S ORDER OF 2026-09-28 08:06, to
     ``..._sixty_one_tools``: one READ, ``linkedin_read_named_profile`` (ruling
     NAMED-PROFILE-READ-BEHIND-A-GRANT), the profile of a member he names,
     loaded once behind the single-use grant. MEASURED off the registry;
@@ -904,7 +917,9 @@ async def test_the_surface_is_exactly_the_sixty_one_tools(tools):
     # SIXTY-ONE ON LANE L5'S ORDER OF 2026-09-28 08:06: linkedin_read_named_profile,
     # a READ, so the split moves on its read side and the write set holds.
     # MEASURED off mcp.list_tools().
-    assert len(tools) == 61
+    # SIXTY-TWO ON LANE NP, 2026-10-10: linkedin_withdraw_reaction, a WRITE,
+    # so the split moves on its write side and the non-write count holds.
+    assert len(tools) == 62
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -936,6 +951,8 @@ async def test_the_surface_is_exactly_the_sixty_one_tools(tools):
         "linkedin_withdraw_from_group",
         "linkedin_connect_from_profile",
         "linkedin_message_from_profile",
+        # 2026-10-10 (lane NP): the reaction's inverse.
+        "linkedin_withdraw_reaction",
     }
     # THE NON-WRITE COUNT MOVES TO SIXTEEN, and the reason is NOT the reason
     # it moved last time. The comment here said: "THE READ COUNT MOVES OFF
@@ -1181,6 +1198,8 @@ async def test_the_exemption_covers_only_the_names_on_it(tools):
         "linkedin_withdraw_from_group",
         "linkedin_connect_from_profile",
         "linkedin_message_from_profile",
+        # 2026-10-10 (lane NP): the reaction's inverse.
+        "linkedin_withdraw_reaction",
     }
     # The probe has to be genuinely sanctioned for this to test the thing it
     # claims to. A name nobody ever specced would only show that made-up names
@@ -1662,6 +1681,10 @@ async def test_server_info_stops_claiming_read_only_once_writes_are_on(monkeypat
         # numeric id, two presses through the one click site, verified off a
         # fresh render of his Groups page.
         "withdraw_from_group",
+        # THE EIGHTEENTH, 2026-10-10 (lane NP, the orchestrator's ruling of
+        # 14:14), typed here by hand: the reaction's inverse, aimed only at
+        # a measured ON name, verified off the measured OFF name.
+        "withdraw_reaction",
     ]
 
 
@@ -1729,6 +1752,10 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
         # THE SIXTEENTH, 2026-09-27 (census M C63 / N 64). Typed by hand, as
         # this list requires, at the merge of the lane that built it.
         "withdraw_from_group",
+        # THE EIGHTEENTH, 2026-10-10 (lane NP, the orchestrator's ruling of
+        # 14:14), typed here by hand: the reaction's inverse, aimed only at
+        # a measured ON name, verified off the measured OFF name.
+        "withdraw_reaction",
     ]
     assert "OFF" in info["writes_note"]
     assert "unsave_job" in info["writes_note"]

@@ -215,6 +215,8 @@ _VERIFIED_FROM_OWNERS: dict[str, frozenset[str]] = {
 #:
 #: ``"the post"`` has two owners for a third reason -- ``react_to_item`` and
 #: ``comment_on_item`` act on the same class of surface, an item permalink.
+#: (THREE OWNERS SINCE 2026-10-10: ``withdraw_reaction``, the reaction's
+#: inverse, acts on and verifies off the same permalink -- see its entry.)
 #: ``publish_post`` is NOT an owner: its answer is on his profile's activity
 #: rail, which is a different page, and a row pointing a publish at a post
 #: permalink is the shape this whole file exists to catch.
@@ -241,7 +243,14 @@ _WHERE_TO_LOOK_OWNERS: dict[str, frozenset[str]] = {
     # neither action's verification can read it (its address carries a
     # forbidden substring), so for both it is the place a HUMAN settles it.
     "My Network": frozenset({"send_invitation", "connect_from_profile"}),
-    "the post": frozenset({"react_to_item", "comment_on_item"}),
+    # A THIRD OWNER FROM 2026-10-10 (lane NP), entitled rather than borrowing:
+    # ``withdraw_reaction`` presses the reaction toggle on the item's own
+    # permalink and VERIFIES on a fresh render of that permalink -- its
+    # ``_verify_after`` branch reads the same control's accessible name there
+    # -- so the post is both the surface it read and the place a human opens.
+    # Its ``_VERIFIED_FROM`` row was checked against every owned phrase above
+    # and holds none of another action's.
+    "the post": frozenset({"react_to_item", "comment_on_item", "withdraw_reaction"}),
     # ADDED 2026-09-02 FOR THE TWELFTH ACTION. ``send_message`` sends him to
     # his own LinkedIn messages, which no other row names. THE PHRASE IS THE
     # TWO-WORD SURFACE AND NOT THE BARE WORD, for the reason the module
@@ -285,6 +294,11 @@ _LEGITIMATE_SHARED_PLACES: frozenset[frozenset[str]] = frozenset(
         # profile -- settling in the one list LinkedIn keeps of every
         # invitation sent. The argument is on the "My Network" owner entry.
         frozenset({"send_invitation", "connect_from_profile"}),
+        # THE REACTION PAIR, 2026-10-10 (lane NP), by the same equality edit:
+        # an act and its inverse on one toggle, settled on the one post that
+        # carries the toggle's state -- the save pair's and the follow
+        # group's shape exactly. The argument is on the "the post" owner entry.
+        frozenset({"react_to_item", "withdraw_reaction"}),
     }
 )
 
@@ -487,9 +501,10 @@ def check_no_two_actions_share_a_place_by_accident(
     assert not unsanctioned, (
         "these actions print the IDENTICAL place to look and are not one of "
         "the groups sanctioned to: %s. The sanctioned groups are the save "
-        "pair, the follow group and (since 2026-09-27) the invitation pair, "
-        "and they are compared by equality -- an action joining any one of "
-        "them fails here too." % unsanctioned
+        "pair, the follow group, (since 2026-09-27) the invitation pair and "
+        "(since 2026-10-10) the reaction pair, and they are compared by "
+        "equality -- an action joining any one of them fails here too."
+        % unsanctioned
     )
 
 
@@ -648,8 +663,17 @@ def test_the_action_set_is_the_one_this_file_was_measured_against():
     # SEVENTEEN SINCE LANE L5'S ORDER OF 2026-09-27 23:36: ``send_message``
     # RETIRED (aimed by a name). No row was re-derived for it -- an action
     # leaving takes its rows with it -- and its two owner entries above went.
-    assert len(writes.PERFORMABLE) == 17, (
-        "writes.PERFORMABLE holds %d actions, not the 17 this file was "
+    # EIGHTEEN FROM 2026-10-10 (lane NP, the orchestrator's ruling of 14:14):
+    # ``withdraw_reaction``'s two rows were read, and this file went red on
+    # exactly the two places it shares with ``react_to_item``: the phrase
+    # "the post" and the identical value "the post itself". Each was decided
+    # on the surface the action MEASURES -- it presses and verifies on the
+    # item's own permalink -- so it became a third owner of "the post" and
+    # the reaction pair a fourth sanctioned shared place, an act and its
+    # inverse on one toggle like the save pair. No row was reworded to dodge
+    # a phrase. Its ``_VERIFIED_FROM`` row holds no phrase another action owns.
+    assert len(writes.PERFORMABLE) == 18, (
+        "writes.PERFORMABLE holds %d actions, not the 18 this file was "
         "measured against: %s. Re-derive the phrase owners in this file for "
         "the new action, then update this count."
         % (len(writes.PERFORMABLE), sorted(writes.PERFORMABLE))

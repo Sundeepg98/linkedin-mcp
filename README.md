@@ -3,10 +3,22 @@
 An MCP server that shows you your own LinkedIn account data as structured tool
 results instead of pages you have to click through.
 
-**Sixty-one tools ship. Forty-four read. Seventeen write. None is
+**Sixty-two tools ship. Forty-four read. Eighteen write. None is
 write-shaped and unable to act.**
 
-**THAT LINE READ "Sixty ... Forty-three read. Seventeen write" UNTIL THE
+**THAT LINE READ "Sixty-one ... Forty-four read. Seventeen write" UNTIL THE
+ORCHESTRATOR'S RULING OF 2026-10-10 14:14** (lane NP). One write arrived:
+`linkedin_withdraw_reaction` takes back YOUR OWN reaction on one item you name
+by key -- the inverse of `linkedin_react_to_item`, on a verb the outward-class
+law already admits (withdrawing one of your own items). Its first call loads
+the post and hands you a token only if the post's one reaction toggle wears a
+name that was measured as ON; the confirmed call presses that exact control
+and verifies off the measured OFF name on a fresh render. Census row `M C32`,
+COVERED-UNFIRED. The same lane made `linkedin_read_named_profile` return the
+member's token and recent activity keys, and admitted that profile's own detail
+pages behind the same grant (ruling NAMED-PROFILE-DETAIL-PAGES).
+
+**AND "Sixty ... Forty-three read. Seventeen write" UNTIL THE
 OPERATOR'S RULING OF 2026-09-28 08:01** (NAMED-PROFILE-READ-BEHIND-A-GRANT).
 One read arrived: `linkedin_read_named_profile` reads the profile of ONE member
 you name, by profile link or member id -- never a name. Its first call loads
@@ -984,7 +996,7 @@ linkedin_server/
   cdp_bridge.py              the recovery path: attach to a running Chrome
   dom.py                     the read-only harvesters and the control readers
   shape.py                   pure parsers and the result envelope
-  server.py                  the sixty-one tools
+  server.py                  the sixty-two tools
   errors.py
 tests/                       1393 tests, no network, no account
   fixtures/                  frozen LinkedIn markup, scrubbed

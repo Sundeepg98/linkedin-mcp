@@ -679,7 +679,9 @@ def test_the_urn_probe_is_load_bearing():
         ):
             reached_by_urn.add(spec.action)
 
-    assert reached_by_urn == {"comment_on_item", "react_to_item"}, (
+    # GREW BY ONE, 2026-10-10 (lane NP): withdraw_reaction, the reaction's
+    # inverse, is addressed by the same urn as react_to_item.
+    assert reached_by_urn == {"comment_on_item", "react_to_item", "withdraw_reaction"}, (
         "the set of specs reachable ONLY through the urn probe changed: %s. "
         "If it is now empty the literal is no longer needed and should become "
         "a placeholder; if it grew, say so here." % sorted(reached_by_urn)

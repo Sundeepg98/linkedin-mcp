@@ -1635,8 +1635,9 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "one would TAKE IT BACK. That is not a harmless no-op and it is "
             "not what was asked for -- and it is worse than the same mistake "
             "on a save, because the reaction it would remove is one that has "
-            "already notified the author. There is no un-react action in this "
-            "server, so it is refused here rather than offered as an inverse."
+            "already notified the author. It is refused here; the inverse is "
+            "its own action since 2026-10-10, linkedin_withdraw_reaction, aimed "
+            "only at a MEASURED ON name."
         ),
         reversibility="STILL-UNKNOWN whether a reaction can be taken back here",
         reversibility_measured=False,
@@ -1666,7 +1667,12 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "no un-react spec, it is in no table, and PERFORMABLE is "
             "hand-written, so nothing in this server can be pointed at that "
             "control however well it can now be found. Building one is a "
-            "decision, not a consequence of the measurement."
+            "decision, not a consequence of the measurement. THE DECISION WAS "
+            "MADE 2026-10-10 (the orchestrator's ruling of 14:14, lane NP): "
+            "linkedin_withdraw_reaction is the inverse, named on the verb the "
+            "conservation law already admits, and aimed only at the two "
+            "measured ON names. Whether pressing them gives the reaction back "
+            "is still UNMEASURED live."
         ),
         residue=(
             "A reaction NOTIFIES THE AUTHOR and can surface in his own "
@@ -1721,7 +1727,84 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "and the field promising both was the same over-reach it was "
             "written to prevent. Note also what the fire left behind: a "
             "reaction now sits on one of his items that this server has no "
-            "action to remove."
+            "action to remove. SINCE 2026-10-10 THERE IS ONE: "
+            "linkedin_withdraw_reaction (lane NP, the orchestrator's ruling of "
+            "14:14), aimed at the two MEASURED ON labels only. What it gives "
+            "back is still UNMEASURED live -- nobody has fired it -- and the "
+            "procedure is now: react to a post he names, withdraw it, and read "
+            "what the toggle becomes (lane NP's record, F)."
+        ),
+    ),
+    # THE INVERSE OF THE REACTION (lane NP, 2026-10-10; the orchestrator's
+    # ruling of 14:14). NAMED ON THE VERB THE CONSERVATION LAW ALREADY ADMITS:
+    # withdrawing HIS OWN reaction is "delete or withdraw one of his own items"
+    # (OUTWARD-CLASSES-BUILT-BEHIND-GRANTS), and ``_VERBS_ADMITTED_BY_RULING``
+    # is NOT widened -- "unreact" stays refused by name. The same address, the
+    # same permalink reading and the same strictness as ``react_to_item``; the
+    # aim is the ONE toggle on the item's own permalink wearing one of the two
+    # MEASURED ON labels (``dom.REACTION_MEASURED_ON_LABELS``), and nothing
+    # else -- an unmeasured ON kind is never aimed at. Verified by a fresh
+    # render reading the MEASURED OFF label.
+    "linkedin_withdraw_reaction": WriteSpec(
+        action="withdraw_reaction",
+        tool_name="linkedin_withdraw_reaction",
+        url_template="https://www.linkedin.com/feed/update/{target}/",
+        url_pattern=re.compile(
+            r"^https://www\.linkedin\.com/feed/update/"
+            r"urn:li:[A-Za-z]+:[0-9]+/$"
+        ),
+        exempt_substring=None,
+        summary="Withdraw your reaction from one feed item.",
+        from_state="reacted",
+        to_state="no_reaction",
+        target_kind="item_urn",
+        state_from="item_permalink",
+        direction_source=(
+            "The CONTROL'S OWN ACCESSIBLE NAME, ON THIS ITEM'S OWN PERMALINK "
+            "-- the page this action acts on and the control it presses -- "
+            "read by the same pure reader the reaction uses "
+            "(dom.reaction_toggle_state). THE GATE REQUIRES EXACTLY ONE "
+            "toggle, wearing exactly one of the two MEASURED ON labels: "
+            "'Reaction button state: Like' (his profile rail, 2026-09-04) and "
+            "'Unreact Like' (his own liked post's permalink, 2026-09-23 and "
+            "2026-09-24). Any other ON name is refused as unmeasured, and an "
+            "OFF toggle is the wrong state."
+        ),
+        wrong_state_note=(
+            "A TOGGLE, so performing this from the wrong state performs its "
+            "OPPOSITE: withdrawing a reaction the item does not carry would "
+            "REACT, under your name, and notify the author. So it is refused "
+            "unless the one toggle on the item's own permalink wears one of "
+            "the two MEASURED ON labels."
+        ),
+        reversibility=(
+            "the reaction can be put back by linkedin_react_to_item -- "
+            "LinkedIn's DEFAULT reaction, which is not necessarily the kind "
+            "withdrawn"
+        ),
+        reversibility_measured=False,
+        reversibility_class="STILL-UNKNOWN",
+        reversibility_evidence=(
+            "NOT MEASURED: nobody has withdrawn a reaction through this "
+            "server. The aim rests on two measured ON labels and the "
+            "verification on the measured OFF label; what LinkedIn does when "
+            "the ON toggle is pressed is read for the first time on the live "
+            "proof (lane NP's record, F)."
+        ),
+        reversible_by=(
+            "linkedin_react_to_item, which re-applies LinkedIn's DEFAULT "
+            "reaction -- the measured ON name is 'Like' -- and not "
+            "necessarily the kind that was withdrawn."
+        ),
+        residue=(
+            "The author was notified of the original reaction. Withdrawing "
+            "it takes back the row and not the notification, and not "
+            "whatever was shown to whoever saw it."
+        ),
+        reversibility_procedure=(
+            "React to a post he names (linkedin_react_to_item), withdraw it "
+            "with this action, and read what the toggle becomes on a fresh "
+            "render; then react again only if he wants the reaction back."
         ),
     ),
     "linkedin_update_profile_field": WriteSpec(
@@ -4569,6 +4652,30 @@ async def _read_item_permalink(
             "'Unreact' implies), and a click is never aimed at an inferred "
             f"label. The labels found were {reading.get('labels')}.",
         )
+    if state == "reacted" and spec.action == "withdraw_reaction":
+        # THE INVERSE AIMS ONLY AT A MEASURED ON NAME (lane NP, 2026-10-10),
+        # and says so at the preview as well as at the click, so no token is
+        # minted for a toggle the press would refuse.
+        measured = dom.measured_on_label(reading, await dom.read_measured_on_labels(page))
+        if measured is None:
+            return (
+                facts,
+                UNKNOWN,
+                "the one reaction control on this permalink is ON, and it "
+                "wears an ON name this server has not MEASURED -- only "
+                f"{list(dom.REACTION_MEASURED_ON_LABELS)} are -- so a "
+                "withdrawal is never aimed at it. The labels found were "
+                f"{reading.get('labels')}.",
+            )
+        facts["measured_on_label"] = measured
+        return (
+            facts,
+            "reacted",
+            f"the one reaction control on this permalink wears {measured!r}, "
+            "one of the two MEASURED ON names, so this item carries a reaction "
+            "a withdrawal may aim at -- read off the very control the press "
+            "would land on.",
+        )
     if state == "reacted":
         return (
             facts,
@@ -6464,6 +6571,11 @@ PERFORMABLE: frozenset[str] = frozenset(
         # readonly.SANCTIONED_MUTATIONS -- so for those the missing thing is a
         # mutation class nobody has sanctioned, not a url.
         "update_setting",
+        # THE NINETEENTH, 2026-10-10 (lane NP, the orchestrator's ruling of
+        # 14:14): the reaction's inverse, on the reaction's own address and
+        # reader. NOTHING WAS PERMITTED TO LET IT CROSS: the click is
+        # perform()'s existing one, aimed at a measured ON label.
+        "withdraw_reaction",
     }
 )
 
@@ -6821,6 +6933,14 @@ def anchor_label_for(
         # (dom.reaction_toggle_state), where they used to read it as no
         # control at all.
         return dom.REACTION_OFF_LABEL
+
+    if spec.action == "withdraw_reaction":
+        # THE INVERSE'S ANCHOR (lane NP, 2026-10-10): an ON name MEASURED on an
+        # item's own permalink. The press aims at whichever of the two measured
+        # ON names the one toggle wears (``_live_control``); this names the
+        # permalink-measured one, which is what perform needs to know an
+        # anchor exists at all.
+        return dom.REACTION_UNREACT_PREFIX + "Like"
 
     if spec.action == "update_setting":
         # THE ANCHOR IS PER-CALL, WHICH NO OTHER ACTION'S IS, and that is why
@@ -7301,6 +7421,8 @@ _WHERE_TO_LOOK: dict[str, str] = {
     # after an act that may not be repeatable, by somebody who can open any
     # page he likes and is not bound by this server's read boundary.
     "react_to_item": "the post itself",
+    # 2026-10-10 (lane NP): the inverse is settled on the same post.
+    "withdraw_reaction": "the post itself",
     "comment_on_item": "the post you commented on",
     "publish_post": "your profile's recent activity",
     "send_invitation": "My Network, then Manage, then Sent",
@@ -7326,7 +7448,7 @@ _WHERE_TO_LOOK: dict[str, str] = {
 #: applied to the receipt.
 _TOGGLE_ACTIONS: frozenset[str] = frozenset(
     {"save_job", "unsave_job", "follow_company", "unfollow_company",
-     "react_to_item", "follow_company_page"}
+     "react_to_item", "follow_company_page", "withdraw_reaction"}
 )
 
 
@@ -7420,6 +7542,14 @@ _VERIFIED_FROM: dict[str, str] = {
     ),
 }
 _VERIFIED_FROM["unsave_job"] = _VERIFIED_FROM["save_job"]
+# 2026-10-10 (lane NP): the reaction's inverse, read where the reaction is.
+_VERIFIED_FROM["withdraw_reaction"] = (
+    "THE SAME PAGE, RELOADED -- the item's own permalink, the one surface "
+    "carrying its reaction state -- and read off the control's own accessible "
+    "name. The verdict is 'no_reaction' ONLY off the MEASURED OFF name; an "
+    "OFF name in the unmeasured family, or a page that drew no single toggle, "
+    "is UNKNOWN rather than a success."
+)
 _VERIFIED_FROM["mark_company_interest"] = (
     "THE SAME POSTING, RE-RENDERED by a fresh navigation, and read in the "
     "employer's own card. No other surface this server may read lists his "
@@ -8512,6 +8642,38 @@ async def _live_control(
             dom.reaction_control_selector(),
         )
 
+    if spec.action == "withdraw_reaction":
+        # THE INVERSE (lane NP, 2026-10-10). The same one-toggle reading as
+        # the reaction, and the press aimed at the EXACT measured ON name the
+        # toggle wears -- built from the module's constant, never from a
+        # string the page wrote. An OFF toggle is the wrong state (pressing it
+        # would REACT); an ON toggle of a kind nobody measured is refused.
+        reading = await dom.read_reaction_surface(page)
+        state, drawn = dom.reaction_toggle_state(reading)
+        if state != "reacted":
+            return (
+                state if state in ("no_reaction",) else UNKNOWN,
+                f"{drawn} reaction control(s) on this permalink, reading "
+                f"{state!r}: a withdrawal presses only the one ON toggle, and "
+                "pressing an OFF one would REACT under his name.",
+                "",
+            )
+        measured = dom.measured_on_label(reading, await dom.read_measured_on_labels(page))
+        if measured is None:
+            return (
+                UNKNOWN,
+                "the one reaction control is ON in a name this server has not "
+                "measured, and a click is never aimed at an inferred label.",
+                "",
+            )
+        return (
+            "reacted",
+            f"the one reaction control on this permalink wears {measured!r}, a "
+            "MEASURED ON name, read off the very control the click will land "
+            "on, after the click url was loaded.",
+            'button[aria-label="' + measured + '"]',
+        )
+
     if spec.action == "follow_company_page":
         # THE SAME READING AND THE SAME VERDICT THE PREVIEW TOOK, on the page
         # the click is about to land on -- so this is FRESHNESS, not a second
@@ -9021,6 +9183,43 @@ async def _verify_after(
             "no_reaction",
             "the one reaction control still wears an OFF label after the "
             "click, so the reaction did not take effect.",
+            landed,
+        )
+
+    if spec.action == "withdraw_reaction":
+        # THE INVERSE'S VERIFICATION (lane NP, 2026-10-10): a fresh render of
+        # the same permalink, and "no_reaction" -- its to_state -- ONLY off the
+        # MEASURED OFF name. Here the unmeasured "React" family is NOT a
+        # success: for a withdrawal, OFF is the outcome claimed, and an OFF
+        # name nobody has read is not evidence of it.
+        landed = await _load(
+            navigator,
+            page,
+            spec.url_template.format(target=url_target_of(spec, grant.target)),
+            surface="the item permalink",
+        )
+        reading = await dom.read_reaction_surface(page)
+        state, drawn = dom.reaction_toggle_state(reading)
+        if state == "no_reaction":
+            return (
+                "no_reaction",
+                f"the one reaction control reads {dom.REACTION_OFF_LABEL!r} "
+                "on a fresh render after the press: the reaction is withdrawn.",
+                landed,
+            )
+        if state == "reacted":
+            return (
+                "reacted",
+                "the one reaction control still wears an ON name on a fresh "
+                "render after the press, so the withdrawal did not take effect. "
+                f"Its name: {reading.get('labels')}.",
+                landed,
+            )
+        return (
+            UNKNOWN,
+            f"{drawn} reaction control(s) on the re-read, reading {state!r}: "
+            "only the measured OFF name verifies a withdrawal, and an absent "
+            "or unmeasured toggle is not one.",
             landed,
         )
 
@@ -11082,7 +11281,7 @@ async def perform(
     # guard that keeps a member's name out of this block on the day LinkedIn
     # writes one into the neighbouring "Hide post by <name>" control.
     newly_observed_reaction_labels: Optional[list[str]] = None
-    if spec.action == "react_to_item":
+    if spec.action in ("react_to_item", "withdraw_reaction"):
         try:
             reaction_reading = await dom.read_reaction_surface(page)
             newly_observed_reaction_labels = reaction_reading.get("labels")
@@ -11737,7 +11936,7 @@ async def perform(
                 "RE-MEASURED, not this table widened to whatever turned up "
                 "here."
             )
-            if spec.action == "react_to_item"
+            if spec.action in ("react_to_item", "withdraw_reaction")
             else (
                 "not applicable to this action: the list above it is a sweep "
                 "for REACTION controls, taken only on the item permalink "

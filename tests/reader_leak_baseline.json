@@ -48,6 +48,7 @@
     "dom:read_job_insight_panels": "returns_text",
     "dom:read_job_posting": "returns_text",
     "dom:read_main_text": "returns_text",
+    "dom:read_measured_on_labels": "clean",
     "dom:read_named_profile": "clean",
     "dom:read_named_profile_handles": "clean",
     "dom:read_own_activity_items": "returns_text",

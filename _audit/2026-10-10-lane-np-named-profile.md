@@ -154,9 +154,43 @@ reviewed and merged here; its report is the source of the reds below.
   the actor's profile link with his own identity card's (the sidebar card beside
   his private analytics widget). That returns `you` on his own post; that it
   returns `another_member` on another member's is DERIVED (every name in the
-  captures is sanitised, and none shows another member's post page), and the
-  block says so.
-- B3, THE INVERSE, IS NOT BUILT. Under the lane's time box child B committed
+  captures is sanitised, and none shows another member's post page). THE
+  ORCHESTRATOR'S RULING OF 14:14: "make it 'unknown' until a capture of
+  ANOTHER member's post shows the rule. The surface may not print a claim it
+  cannot derive." So `author_kind` reads `unknown`
+  (`item_author.AUTHOR_KIND_SHOWN_ON_ANOTHER_MEMBERS_POST = False`); the
+  comparison is kept and tested with that switched on. RED FIRST: with the old
+  behaviour the new test failed `assert 'another_member' == 'unknown'`.
+- B3, THE INVERSE -- BUILT AFTER THE MERGE, BY THE LEAD, ON THE ORCHESTRATOR'S
+  RULING OF 14:14: "name it on the verb the law ALREADY admits. Withdrawing
+  his OWN reaction is 'delete or withdraw one of his own items'
+  (OUTWARD-CLASSES-BUILT-BEHIND-GRANTS). Do NOT widen
+  _VERBS_ADMITTED_BY_RULING." `linkedin_withdraw_reaction(item, confirm_token)`,
+  action `withdraw_reaction`, in the lane NP block of `server.py`: the
+  reaction's own address, pattern and permalink reader; from `reacted` to
+  `no_reaction`; the preview and the click each require the ONE toggle to wear
+  one of the two MEASURED ON names (`dom.REACTION_MEASURED_ON_LABELS`,
+  `dom.measured_on_label`, a locator count per constant name), and the press
+  is that exact name; the verification is a fresh render reading the MEASURED
+  OFF name, an unmeasured OFF name being UNKNOWN; the preview names the author
+  as the reaction's does. Registered in PERFORMABLE (18 actions; 19
+  sanctioned), `_TOGGLE_ACTIONS`,
+  `_WHERE_TO_LOOK`, `_VERIFIED_FROM`, `item_author.REACTION_ACTIONS` and
+  `outward_classes` (`delete_or_withdraw_own`, BUILT); the react spec's
+  `wrong_state_note`, `reversible_by` and `reversibility_procedure` name it.
+  RED FIRST: 8 of 10 tests failed before the wiring (the tool unregistered,
+  'no measured anchor', the reaction spec naming no inverse); 10 passed
+  after. Pins moved, each with its note: 62 tools and 99 parameters, 18 write
+  tools, the sanctioned and performable sets, the reversibility tables, the
+  urn-probe set, the preview-state REACHED table, the two driven-set
+  baselines; `tests/test_receipt_names_its_own_action.py` (18 actions: the
+  new action a third owner of "the post", which it presses and verifies on,
+  and the reaction pair a fourth sanctioned shared place, an act and its
+  inverse like the save pair -- no row reworded to dodge a phrase); and the
+  three count-prose sites the guards read (`server.py`'s docstring,
+  `README.md`, the package docstring: 62 tools, 44 read, 18 write, the
+  mutating-call count unmoved at 15 because the press is `perform`'s own
+  click). THE ORIGINAL TIME-BOX NOTE, KEPT: under the lane's time box child B committed
   only what was green; the un-react moves a dozen pinned tables across about
   fifteen test files. ITS DESIGN IS BUILD-READY in child B's report and is
   summarised here: action `unreact_to_item`, the react spec's address and
@@ -407,11 +441,21 @@ STOP RULES, as every session: any wall, challenge or unexpected landing stops
 the session; a refused step is recorded and the next INDEPENDENT step runs
 (2-4 hang on 2's token; 6-11 on 2's items; 16-19 on 12-15).
 
-STEPS 6-11 WAIT ON THE INVERSE. His YES was to react AND take the reaction
-back; the un-react tool (its name is the first question below) is not built
-(B3). Until it is on master and green, steps 6-11 are NOT RUN -- a reaction
-this server cannot take back is not fired -- and the session spends 14 loads,
-2 searches.
+STEPS 6-11 RUN ONLY WITH THE INVERSE ON MASTER. His YES was to react AND take
+the reaction back; the inverse is `linkedin_withdraw_reaction` (B3), so step 9
+reads `linkedin_withdraw_reaction(item=<the same key>)`. Until it is on master
+and green, steps 6-11 are NOT RUN -- a reaction this server cannot take back is
+not fired.
+
+STEPS 12-19 (P A8) ARE NOT RUN: the orchestrator's ruling of 14:14 -- "my
+earlier call stands. Any value is a statement he has not made. The clear-restore
+makes the edit safe to undo, and that is all it does." P A8 stays
+COVERED-UNFIRED with no live proof unless he names a value; the session then
+spends 12 loads (11 without the re-read), 2 searches.
+
+STEP 5 (C-NP1) IS SESSION 9'S CAPTURE, on the same ruling: the four measured
+sections stay; no tab address and no press until that capture shows what the
+page does.
 
 ---
 
@@ -455,7 +499,14 @@ guards green.
 
 ---
 
-## Questions for the orchestrator
+## Questions for the orchestrator -- ANSWERED 14:14 (kept as asked)
+
+Rulings: (1) the inverse is `linkedin_withdraw_reaction`, the law unwidened --
+BUILT (B3); (2) P A8's value: the earlier call stands, no live proof unless he
+names one; (3) the four sections stay, the tab and redirect are session 9's
+capture; (4) `author_kind` reads `unknown` until a capture of another member's
+post shows the rule -- DONE (B2). Questions 5 and 6 below are folded into (4)
+and D.3.
 
 1. THE INVERSE'S NAME (B3). `tests/test_writes.py`'s verb conservation law
    refuses `unreact` by name

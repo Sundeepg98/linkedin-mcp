@@ -762,6 +762,10 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         # ruling THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET.
         "connect_from_profile",
         "message_from_profile",
+        # TWENTY FROM 2026-10-10 (lane NP, the orchestrator's ruling of
+        # 14:14): the reaction's inverse, sanctioned and performable in the
+        # same move, on the reaction's own address and reader.
+        "withdraw_reaction",
     }
     # THREE UNTIL 2026-08-25, four until 2026-08-30, five since. This line read
     # ``{"save_job", "unsave_job", "unfollow_company"}``.
@@ -899,6 +903,10 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         # fill are perform()'s own.
         "connect_from_profile",
         "message_from_profile",
+        # THE NINETEENTH, 2026-10-10 (lane NP): the reaction's inverse,
+        # named on "withdraw" -- the law is not widened. NOTHING WAS
+        # PERMITTED TO LET IT CROSS: the click is perform()'s existing one.
+        "withdraw_reaction",
     }
     assert writes.PERFORMABLE < sanctioned_actions
 
@@ -1408,6 +1416,9 @@ _UNMEASURED_REVERSIBILITY = {
     # L5's merge of master 52b55b6.
     "connect_from_profile",
     "message_from_profile",
+    # 2026-10-10 (lane NP). Whether pressing a measured ON name gives the
+    # reaction back has never been observed: the live proof reads it.
+    "withdraw_reaction",
 }
 
 REVERSIBILITY_CLASS = {
@@ -1448,6 +1459,8 @@ REVERSIBILITY_CLASS = {
     # _UNMEASURED_REVERSIBILITY.
     "connect_from_profile": "STILL-UNKNOWN",
     "message_from_profile": "STILL-UNKNOWN",
+    # 2026-10-10 (lane NP): see _UNMEASURED_REVERSIBILITY.
+    "withdraw_reaction": "STILL-UNKNOWN",
 }
 
 #: Which actions have had their reversibility MEASURED. Split out from the
@@ -1474,6 +1487,7 @@ REVERSIBILITY_MEASURED = {
     "withdraw_from_group": False,
     "connect_from_profile": False,
     "message_from_profile": False,
+    "withdraw_reaction": False,
 }
 
 def test_the_two_reversibility_tables_agree_with_each_other():

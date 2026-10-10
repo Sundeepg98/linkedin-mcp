@@ -99,6 +99,7 @@ from linkedin_server.writes import (
 # THE HARNESS, from the file that already owns it. ``over`` gives one browser
 # per test and a fresh isolated context per READING, with innerWidth asserted
 # on each -- which is the standard this package holds every measurement to.
+from tests.test_a_reaction_can_be_withdrawn import WITHDRAW_MARKUP
 from tests.test_apply_modal_fixture import VIEWPORT, over  # noqa: F401
 from tests.test_editor_fields import TWO_DIALOG_HTML
 from tests.test_follow_company_page import (
@@ -115,6 +116,7 @@ from tests.test_selectors_resolve import PAGE as SELECTOR_RESOLUTION_PAGE
 from tests.test_writes import (  # noqa: F401 -- two of these are fixtures
     FOLLOWED_COMPANY,
     JOB,
+    REACTED_ITEM,
     SAVED_JOB,
     SAVED_POSTING,
     _bare_grant,
@@ -303,6 +305,17 @@ REACHED: dict[str, tuple[str, str, str]] = {
                 {"profile": NAMED_PROFILE_LINK, "text": "Thursday works."},
             )
         ),
+    ),
+    # THE NINETEENTH, 2026-10-10 (lane NP, the orchestrator's ruling of 14:14):
+    # the reaction's inverse. A SYNTHETIC permalink built by the reaction
+    # tests' own builder over his own post's measured structure, its one
+    # toggle wearing the ON name measured on an item's own permalink. The
+    # preview and the click read it through ONE reader and ONE measured-name
+    # check, ``dom.measured_on_label``.
+    "withdraw_reaction": (
+        "tests/test_a_reaction_can_be_withdrawn.py",
+        WITHDRAW_MARKUP,
+        str(writes._target_for(spec_for_action("withdraw_reaction"), REACTED_ITEM)),
     ),
 }
 
@@ -550,8 +563,11 @@ def test_every_performable_action_is_either_reached_or_declared_unreachable():
     # 18 -> 17 later the same day (lane L5, the orchestrator's order of 23:36):
     # ``send_message`` RETIRED -- it was aimed by a name -- and its row left
     # ``REACHED`` with it. MEASURED.
-    assert len(PERFORMABLE) == 17, sorted(PERFORMABLE)
-    assert len(REACHED) == 17, sorted(REACHED)
+    # 17 -> 18 on 2026-10-10 (lane NP, the orchestrator's ruling of 14:14):
+    # ``withdraw_reaction`` shipped, reached over the synthetic permalink its
+    # own tests read, not declared unreachable. MEASURED.
+    assert len(PERFORMABLE) == 18, sorted(PERFORMABLE)
+    assert len(REACHED) == 18, sorted(REACHED)
     assert len(CANNOT_REACH) == 0, sorted(CANNOT_REACH)
 
 
