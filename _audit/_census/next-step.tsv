@@ -72,7 +72,7 @@ J 117	J	R	-	ADMIT:https://www.linkedin.com/preload/guideOverlay/?interop=guideOv
 J 118	J	R	-	ADMIT:https://www.linkedin.com/preload/guideOverlay/?interop=guideOverlay&query=Show+match+details	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/preload/guideOverlay/?interop=guideOverlay&query=Show+match+details ; RULING:READ-PAST-AN-ACT-SUBSTRING
 J 119	J	R	-	ADMIT:https://www.linkedin.com/preload/guideOverlay/?interop=guideOverlay&query=Show+match+details	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/preload/guideOverlay/?interop=guideOverlay&query=Show+match+details ; RULING:READ-PAST-AN-ACT-SUBSTRING
 J 120	J	R	-	ADMIT:https://www.linkedin.com/preload/guideOverlay/?interop=guideOverlay&query=Show+match+details	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/preload/guideOverlay/?interop=guideOverlay&query=Show+match+details ; RULING:READ-PAST-AN-ACT-SUBSTRING
-J 124	J	R	-	BUILD:tests/fixtures/live2/job_detail.html	INFERRED	tests/fixtures/live2/job_detail.html ; RULING:PEOPLE-DATA-MITIGATIONS
+J 124	J	R	-	BUILD:tests/fixtures/synthetic/job_insights_panel.html	INFERRED	_audit/_census/jobs-directions.tsv::which surface draws AI company intelligence
 J 126	J	R	-	ADMIT:https://www.linkedin.com/preload/guideOverlay/?interop=guideOverlay&query=Help+me+stand+out	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/preload/guideOverlay/?interop=guideOverlay&query=Help+me+stand+out ; RULING:READ-PAST-AN-ACT-SUBSTRING
 J 129	J	W	-	TARGET:a job he applied to, and its poster	INFERRED	RULING:OPERATOR-NAMES-THE-TARGET ; J 129
 J 131	J	R	-	RULING:Q-CALLER-COMPOSES	NAMED	RULING:D6-CAPABILITY-OVER-AFFORDANCE ; J 57

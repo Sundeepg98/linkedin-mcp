@@ -254,7 +254,10 @@ Load 1 is one feed load with two presses the feed basis prices: one item's
 overflow menu (the curation acts: mute, hide, unfollow, save) and the global
 search box (his recent searches). Load 3 is the member he already named for
 session 6's addendum, through the named-profile route; check the live
-lane's session-7 record first, since its `named` key may be this load. Loads
+lane's session-7 record first, since its `named` key may be this load. The
+operator's named-profile ruling reads "never for a measurement"; this load
+stands on the orchestrator's addendum of session 6, which ordered it, and
+falls with it. Loads
 6 to 8 are the guarded pattern the live lane uses: the badge read off his
 feed, the composer's list, then `/messaging/`. Load 10 opens a conversation
 he named before, behind the badge at 0.
@@ -327,6 +330,12 @@ entered. Paths and shapes only; no capture text is copied here.
     live-lane    30        48      151            7    236
     all          87       135      181          201    604
 
+The per-file table is `_audit/_census/capture-inventory.tsv`: the 403 files
+that are captures (store, path, date, kind, surface, url evidence, shape),
+the 201 non-capture files left out. It is a SNAPSHOT of 2026-10-10 11:53,
+dated here and checked by no instrument; the live lane was writing
+`_state/live7/` while it was taken.
+
 48 distinct surfaces carry a raw, skeleton or derived capture. The ones that
 hold a GAP row's surface, and the rows that can be BUILT on them now:
 
@@ -370,6 +379,7 @@ fixture that is neither tracked nor planned here fails.
     PLANNED tests/fixtures/synthetic/sharebox.html <- _state/cap-ct-sharebox.html (M C2, M C8, M C9, M C13, M C54)
     PLANNED tests/fixtures/synthetic/own_profile_sections.html <- _state/cap-rc-badges.html (P D25, P D26, P D27, P D28, P F1, P H11, P J4, P K1)
     PLANNED tests/fixtures/live7/editor.html <- live-lane _state/live7/editor.skeleton.html (P A9, P A14, P A15, P A22)
+    PLANNED tests/fixtures/synthetic/job_insights_panel.html <- _state/worktree-archive/agent-a95d2a970e4a6b54b/_state/unfired-job-detail-insights-raw.json (J 124)
 
 The first five are lane L1's five pages, which session 1 captured and whose
 offline readers were never written (the session record, item 8). The sixth
@@ -377,7 +387,10 @@ is the share box as captured 2026-09-20, which draws Post, Schedule and the
 add controls. The seventh is his own profile as captured 2026-09-20, raw,
 which answers offline whether a section renders on a passive load. The
 eighth is session 7's editor capture, named here by this lane; the live
-lane's record names the real path.
+lane's record names the real path. The ninth is the job-detail insights
+tool output of 2026-09-23, raw: the session record says a skeleton cannot
+answer `J 124`'s question, so its builder reads the raw output offline and
+commits only the reduced shape.
 
 Other raw captures on the box that a later step can use: nine jobs-tracker
 stages, an events home, a groups list and a newsletters page, all raw under
@@ -548,3 +561,52 @@ orchestrator rules.
     N 152                         a Help Center safety form
     P S10, P B7, P J1, P J2, P J3 hiring: posting a job, the #Hiring frame
     P L6                          hosting an audio event, existence uncertain
+
+## 9. The instrument: `scripts/check_next_step.py`
+
+It holds both tables to the census on every run, and says what it did not
+check:
+
+- every GAP row exactly once, by the shipped walk, and no other row;
+- the count equal to the walk's still-GAP figure and to
+  `census_completion`'s pinned `gap`;
+- each line's slice, direction (the jobs side table for `jobs.md`) and class
+  (the write-class table) agreeing with their sources;
+- every source resolving: a census id against the census, a tracked fixture
+  path against git, and every other form through
+  `check_write_classes.source_problems`, the shipped resolver, imported;
+- every payload resolving: a CAPTURE id on a queue line that lists the row; a
+  BUILD path tracked, or PLANNED in section 6 of this record; a RULING id with
+  a `### Q-...` heading in section 7; a SIBLING a lane or a census row; an
+  ADMIT address the read boundary refuses TODAY, so a step goes red the day
+  its admission lands;
+- the queue: every listed row a census row, every row's step matching its
+  line's gate, every CAPTURE, TARGET and ADMIT row on some line, and every
+  address verdict re-driven through `readonly.is_read_url`.
+
+NOT CHECKED, printed every run: the press-verdict text in the queue (the
+generator re-drove it through `press.py`; the checker does not), and the
+session cut (the queue's own arithmetic).
+
+SHOWN FAILING BEFORE IT WAS TRUSTED. `scripts/_check_next_step_can_fail.py`
+copies the two tables, runs a control over the unplanted copies (GREEN), then
+plants one defect per run. Measured 2026-10-10, 11 s:
+
+    A  CAUGHT  N 37: a GAP row today with NO line -- nobody gave it a next step
+    B  CAUGHT  P S1: 2 lines, want exactly one
+    C  CAUGHT  J 82: phrase does not resolve
+    D  CAUGHT  N 169: source N 9999 is not a census row
+    E  CAUGHT  P K8: CAPTURE:a-surface-planted-by-the-control has no line in
+               the capture queue
+    F  CAUGHT  queue in-me-profile: N 9999 is not a census row
+    G  CAUGHT  N 104: BUILD:tests/fixtures/planted/no-such-capture.html is
+               neither a tracked fixture nor PLANNED
+
+The first run over the real tables was RED, on the instrument's own blind spot: the
+shipped resolver reads `.py`, `.md`, `.tsv` and `.json` paths only, so all 27
+lines citing a tracked `.html` fixture failed as unparseable. The checker now
+resolves a bare `tests/fixtures/...` path itself -- tracked, or it fails --
+and passes every other form to the shipped resolver unchanged.
+`tests/test_next_step.py` runs the committed check, the control and each of
+the seven plants: 10 tests, 19 s. Registered in `_audit/INSTRUMENTS.md`,
+section 82.
