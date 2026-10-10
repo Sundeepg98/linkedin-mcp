@@ -26,9 +26,9 @@ anything not yet landed is not described.
 **THE LANE'S COMMITS, by SUBJECT.** The short hashes beside them are this
 lane's branch's: every one is nowhere on `master` until the orchestrator
 merges the branch, and the subject is how a reader finds each after a
-rewrite. Five merges of `master` sit among them: of `53908ea`, `b10bde8`,
-`fe119de`, `f8c7392` and `66eb699`. A commit cannot carry its own hash, so the
-table ends at the commit before the one that last edited it.
+rewrite. Six merges of `master` sit among them: of `53908ea`, `b10bde8`,
+`fe119de`, `f8c7392`, `66eb699` and `1027bf8`. A commit cannot carry its own
+hash, so the table ends at the commit before the one that last edited it.
 
 | subject | lane branch |
 |---|---|
@@ -53,6 +53,8 @@ table ends at the commit before the one that last edited it.
 | merge origin/master f8c7392 into lane A: lane NP's named-profile detail pages and the CI lane follow-ups | 8713e6e |
 | record: the session-9 overlap timed to the second, and the newest hashes tabled and disclosed | b2311c7 |
 | merge origin/master 66eb699 into lane A: the live lane's session 8 | adec4b7 |
+| record: section 4 told straight about the two readers, and section 6 through the fifth merge | d32e746 |
+| merge origin/master 1027bf8 into lane A: lane G2's debts and its red instrument | 91fbedd |
 
 ---
 
@@ -988,8 +990,10 @@ it, never by adding deltas:**
     exemption count            4 -> 10 (tests/test_job_alerts_read_boundary.py)
     settings-index refusals    16 -> 14 named (both pages admitted by name)
 
-FIVE MERGES OF `master`, and on each merged tree every headline figure matched
-its pin. Two needed a measurement, not a pick: the merge of `f8c7392` (both
+SIX MERGES OF `master`, and on each merged tree every headline figure matched
+its pin. The sixth, of `1027bf8` (lane G2), moved no figure; its conflicts were
+the derived register and map, regenerated. Two needed a measurement, not a
+pick: the merge of `f8c7392` (both
 sides had re-pinned the tool surface: 62 tools and 99 parameters, measured) and
 the merge of `66eb699`, the live lane's session 8, where `unfired` stood at 28
 here and 21 there from the same 25 -- the merged tree measured 24. That merge
@@ -1048,6 +1052,15 @@ document guards) and, after 11:35 IST, under the orchestrator's policy:**
                                    skipped in 187 s at -n 4 (no flag) -- OVER the
                                    two-minute bound, by about a minute; the
                                    correction scan 15 passed
+    after the merge 91fbedd        census instruments all GREEN and the three
+    (1027bf8, lane G2)             derived views --check ok, about two and a half
+                                   minutes before the tests; then the eleven
+                                   files where lane G2's changes meet this lane's
+                                   (the reader-leak drive, the asserted-name and
+                                   orphan-module guards, the engine controls,
+                                   people data, the envelope guard and the three
+                                   test files this lane wrote or extended), 1181
+                                   passed in 114 s at -n 4 (no flag)
 
 **CI, on GitHub's free runners via `scripts/lane_ci.py` (ci/ ref, one ubuntu
 3.13 cell, four shards):**
@@ -1070,6 +1083,13 @@ document guards) and, after 11:35 IST, under the orchestrator's policy:**
                                  lane K's ledger still read "REFUSED: waits on lane
                                  A" for addresses this lane had admitted. Advanced
                                  in its own vocabulary in 8f2726b (section 4.3).
+    run 38042302645 at 91fbedd   (the lane branch's merge of `1027bf8`, nowhere
+                                 on `master` until this lane merges) SUCCESS:
+                                 all six jobs green -- the shard plan, the four
+                                 pytest shards and the every-shard check -- wall
+                                 5 min 56 s. The code and
+                                 the census at this head are what that run
+                                 certified; what follows it is this record.
     the final run                its id and conclusion are in this lane's final
                                  message: a record cannot carry the verdict of the
                                  run that certifies it.
