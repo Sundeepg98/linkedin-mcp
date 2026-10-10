@@ -185,7 +185,59 @@ RED FIRST: (RUN PENDING -- filled at the commit)
 
 ## F. The rows left GAP, each with its exact reason
 
-(filled with the census edit)
+Each cell carries its paragraph (2026-10-10, lane B1); the reason, the evidence
+section above, and the step that would lift it:
+
+    row    the reason, measured                                     next step
+    A11    the pick has no measured list to aim at: Country/Region  capture C-B1a
+           is aria-autocomplete=list with no list relation, and
+           no capture draws a listbox or an option (A.1)
+    A13    the same, City                                           capture C-B1a
+    A17    the same, Industry                                       capture C-B1a
+    A14    session 7's eleven controls hold no postal code (A.1)    the orchestrator:
+                                                                    MEASURED-ABSENT?
+    A15    nor a location display choice (A.1)                      the same question
+    D25    the capture draws the control (3 links), not the menu;   the operator names
+           the target address is on no allowlist line (A.2)         the address
+    D26    no capture draws a meter: 0 everywhere in session 8's    a capture below the
+           first render, 0 in sessions 2 and 3 (A.2)                first render
+    F1     no Recommendations section on the first render, and      ADMIT
+           /in/me/details/recommendations/ is not admitted (A.2)    /in/me/details/recommendations/
+    K8     re-read: 0 "Top Voice" in text, labels and markup of     the orchestrator:
+           session 8's first render, top card included (A.2)        MEASURED-ABSENT?
+    S8     the chooser is drawn, but the add path is the same       capture C-B1a on this
+           unmeasured pick and no removal is drawn, so no inverse   page, and the removal
+           can be aimed (A.4)
+    A25    the panel is not drawn: the address redirected and no    a sanctioned route to
+           dialog is the panel (A.3)                                the panel
+
+WHY NOTHING WAS BUILT FOR THEM ON SYNTHETIC MARKUP. Every one of these would
+have needed a list, a meter, a badge, a section or a panel that no capture
+draws. A reader or a pick built on invented markup moves no row -- a reader
+built that way has failed live here before -- and it would be the code most
+likely to be trusted wrongly the day a capture disagrees with it.
+
+### F.1 Capture C-B1a: the entry list of one autocomplete field
+
+The one measurement that would unblock four rows (A11, A13, A17, and S8's add
+half). NEEDS A SANCTION: it types into his own editor without saving, which no
+shipped tool does.
+
+- WHERE: `/in/me/edit/intro/` (admitted), his own intro editor.
+- WHAT: on ONE autocomplete field (City first: no other person is named by it),
+  read the field's stored value (never written to a tracked file), type its
+  first three characters, wait up to 5 s for an element with `role=listbox`
+  or `role=option` to appear anywhere in the document, and keep a SKELETON of
+  the page (keyed shapes, as sessions 2 to 8). Then press Escape, close the
+  dialog by its Dismiss control -- NEVER Save -- and load the editor again.
+- RECORD (counts and shapes only): the input's `aria-expanded`,
+  `aria-controls`, `aria-owns`, `aria-activedescendant` after typing; where
+  the list sits (inside the dialog or at the body); the option count, each
+  option's role, and the shape of its accessible name; whether the stored
+  value's own entry is among them (by keyed shape).
+- LOADS: 2 (the editor; the re-read). PRESSES: none but Escape and Dismiss.
+- STOP-ALL: the re-read shows the field's stored value changed; a Save
+  pressed or drawn as pressed; any wall or challenge.
 
 ---
 
