@@ -11570,3 +11570,53 @@ through `readonly.is_read_url` and `press.py`'s pre-press checks, and the two
 children's inventory and session-extraction scripts. Each one's output is a
 committed table or a section of the lane record; the tables are the record,
 and `check_next_step` is what keeps them true.
+
+
+## 87. A REF NAME IS NOT A PERMISSION; ANCESTRY PLUS THE SHIPPED SWEEP IS (lci-fastlane-lead, 2026-10-10)
+
+**Registered 2026-10-10.** Full record: `_audit/2026-10-10-lane-ci-fastlane.md`.
+Numbered 87 by the orchestrator's allocation, appended at the end; renumber
+at the merge if another lane took it.
+
+### 87.1 A PUSH GATE THAT ADMITS A BRANCH MUST ASK THE REPOSITORY, NOT THE NAME
+
+`scripts/pre_push_ref_gate.py` refused every remote ref but master because
+local branches carry blobs purged from master's history. Admitting a lane's
+`ci/<name>` by its NAME would have let any of those branches out under a new
+name. The admission asks two questions of the pushing repository instead:
+is `origin/master` (one resolved sha) an ancestor of the pushed commit, and
+does the SHIPPED blob sweep read PASS over `<master>..<sha>`. The first
+bounds what the push can add to the lane's own commits; the second reads
+every blob of every one of them. A sweep that cannot speak (exit 2, or a
+wordlist that does not load) refuses like a hit.
+
+    A NAME SAYS WHAT A REF IS FOR. ONLY THE GRAPH SAYS WHAT IT CARRIES.
+
+### 87.2 A CHECK THAT DEPENDS ON THE REPOSITORY IS TESTED THROUGH THE ENTRY POINT THE HOOK CALLS
+
+The old gate's decision was a pure function of stdin and its tests called
+`verdicts()`. The `ci/` decision is not pure, so its tests build real
+repositories in tmp dirs, write git's pre-push line format to stdin and call
+`main()`. And each refusal is pinned by the CLAUSE that must fire: the old
+gate refused everything as "not master", so an exit-code-only test of the
+ancestry clause passed on the old gate for the wrong reason -- the red run
+shows seven of the ten failures were on the reason, not the code.
+
+    A REFUSAL TEST THAT CHECKS ONLY THE EXIT CODE CANNOT TELL WHICH GUARD
+    REFUSED. NAME THE CLAUSE, OR THE OLD GATE PASSES IT.
+
+### 87.3 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `scripts/pre_push_ref_gate.py` -- the `ci/` clauses (`verdicts`, `_ci_verdict`, `git_ci_check`, `_sweep`); `tests/test_pre_push_ci_refs.py` | the full file run against the 3c8edc2 gate: 10 failed, 8 passed -- both ALLOW tests (a clean descending `ci/` push, a `ci/` delete) refused, the seven clause tests (not descending, a planted synthetic value, a value removed in a later commit, a multi-ref push, another remote, a missing wordlist, master's own commit) failed on the clause they name, and the injected-check test failed on the missing parameter; 27 passed with the change and `tests/test_pre_push_ref_gate.py` |
+| `.github/workflows/ci.yml` -- the plan step's `ci/` fast path; `tests/test_ci_fast_lane.py`, which EXECUTES the plan step under bash per event shape | against the 3c8edc2 workflow: 4 failed (both fast shapes, the concurrency arithmetic, the env read), 10 passed (every full shape -- the byte-for-byte half -- and the structure); 14 passed with the change |
+| `scripts/lane_ci.py`; `tests/test_lane_ci.py` | five mutants applied after collection, each turning its named test red: the dirty check removed, the ancestry/sweep check emptied, run choice ignoring branch and event, a cancelled run read as a failure, the hook probe always true |
+
+### 87.4 DECLARED DISPOSABLE
+
+The lane's scratch tools: the per-step CI timing reader over a saved run's
+jobs json, the ASCII checker, the old-versus-new plan-step byte comparison,
+the red-run copies of the two test files aimed at the 3c8edc2 gate and
+workflow, and the mutation plugin for `tests/test_lane_ci.py`. Each answered
+one question once; the answers are in the full record.
