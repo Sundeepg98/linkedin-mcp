@@ -1222,20 +1222,6 @@ WHAT_WOULD_DRIVE_IT: dict[str, str] = {
         "a browser, and no tracked fixture carries a flight payload -- the "
         "sanitised captures keep none by design."
     ),
-    "profile_editor:read_save_gate": (
-        "SCRIPT: its reading is dom.read_self_owned_editor_fields, whose "
-        "script (dom.EDITOR_FIELDS_JS) the planted page answers with page "
-        "strings: the anchor count is refused, the fields reader answers "
-        "no_anchor, and the gate returns its code 0_editor_not_found in its "
-        "own words. tests/test_intro_editor_switches.py drives it in a "
-        "headless browser over "
-        "tests/fixtures/synthetic/intro_editor_switches.html: "
-        "test_each_switch_is_recognised_and_neither_is_a_notify_control "
-        "reads both switches recognised, and test_with_his_account_setting_"
-        "read_off_the_recognised_pair_does_not_block reads proceed True. Its "
-        "verdict carries counts and the package's words, never a label, so a "
-        "drive over that fixture would come back clean."
-    ),
     "server:_open_profile_views_filter_menus": (
         "ACTION: its success path presses each filter pill in main through "
         "press.disclose -- a click, then an Escape -- and reads what each "
@@ -2015,6 +2001,10 @@ FIXTURE_BREAKS: dict[str, dict[str, str]] = {
         "needle": "<p>Placeholder setting A</p>", "into": "<p>Placeholder setting Z</p>",
     },
     "writes:_editor_values_or_refusal": {
+        "fixture": "synthetic/intro_editor_switches.html",
+        "needle": "<p>Placeholder setting A</p>", "into": "<p>Placeholder setting Z</p>",
+    },
+    "profile_editor:read_save_gate": {
         "fixture": "synthetic/intro_editor_switches.html",
         "needle": "<p>Placeholder setting A</p>", "into": "<p>Placeholder setting Z</p>",
     },

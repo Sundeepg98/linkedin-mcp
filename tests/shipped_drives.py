@@ -1035,6 +1035,35 @@ async def editor_values_or_refusal_as_shipped(page: Any) -> Any:
     )
 
 
+async def read_save_gate_as_shipped(page: Any) -> Any:
+    """``profile_editor.read_save_gate`` as ``writes.perform`` calls it before
+    the press, on the same editor, with his account-level share setting read
+    off (2026-10-10, lane G2).
+
+    THE SIGNATURE DRIVE: the fields reader's ``no_anchor`` refusal, so the
+    gate's own ``0_editor_not_found`` and its sentence -- the same over a page
+    that draws nothing, so not driven since the reader guard asked for
+    something the page made.
+
+    THE FIXTURE: the intro editor's one dialog -- one Save, the city field,
+    two unnamed checked switches -- as the fields reader's drive reads it;
+    ``tests/test_intro_editor_switches.py`` reads the same gate in a browser
+    (``test_with_his_account_setting_read_off_the_recognised_pair_does_not_block``).
+
+    WHAT COMES BACK: the gate's verdict -- ``proceed`` True, the Save count,
+    the notify verdict, the unnamed and recognised switches by this
+    package's own words, and its sentence of counts. No label, no value: the
+    reading's fields stay inside the gate.
+    """
+    from linkedin_server import dom, profile_editor
+
+    _the_intro_editor()
+    return await profile_editor.read_save_gate(
+        _TheEditorScript(page, dom.EDITOR_FIELDS_JS, _editor_reading(values=False)),
+        account_share_updates="off",
+    )
+
+
 # ---------------------------------------------------------------------------
 # THE PROFILE-VIEWS PAGE, AS ITS SKELETONS DRAW IT (the order of 2026-09-28 04:25)
 # ---------------------------------------------------------------------------
@@ -1560,6 +1589,9 @@ DRIVES: dict[str, Callable[..., Any]] = {
     "server:_attach_recipient_ids": attach_recipient_ids_as_shipped,
     "server:_profile_views_press_counters": profile_views_press_counters_as_shipped,
     "threads:composer_holds": threads_composer_holds_as_shipped,
+    # 2026-10-10 (lane G2): the Save gate, driven to proceed over the intro
+    # editor once the reader guard stopped counting its refusal as clean.
+    "profile_editor:read_save_gate": read_save_gate_as_shipped,
     # ADMITTED BY THE RULING OF 2026-09-28: each returns page text outside a
     # record on its success path -- his own profile's, or an aggregate that
     # identifies no one -- and is named with its reason in the guard's

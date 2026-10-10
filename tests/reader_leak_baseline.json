@@ -109,7 +109,7 @@
     "press:disclose": "not_driven:navigates (locator.click)",
     "profile_editor:read_account_share_updates": "clean",
     "profile_editor:read_premium_badge": "clean",
-    "profile_editor:read_save_gate": "not_driven:read the page and returned nothing the page made",
+    "profile_editor:read_save_gate": "clean",
     "profile_editor:recognise_intro_editor_switches": "clean",
     "profile_editor:wait_for_editor_dialog": "clean",
     "profile_editor:wait_for_editor_to_close": "clean",

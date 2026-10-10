@@ -17,7 +17,7 @@ code, because several were queued before a lane that landed them.
 | item | verdict | section |
 |---|---|---|
 | 1. the asserted-names check, red on 8 sites | fixed in `912cc25`; red test shown | 1 |
-| 2. earned-clean, the people-search readers | fixed in `f3b46fb`; 17 readers move, red tests shown (this branch's hashes do not resolve on `master` until it merges) | 2 |
+| 2. earned-clean, the people-search readers | fixed in `f3b46fb`; 17 readers move, one driven back since; red tests shown (this branch's hashes do not resolve on `master` until it merges) | 2 |
 | 3a. a post record in `people_data.py` | built in `d1529ff`; red tests shown | 3 |
 | 3b. the root-logger captures that could not fail | done before: `4daa38d`, `de8e95e` | 4.1 |
 | 3c. a record path in a comment read as a dependency | done before: `467b52f`, `739c117`; measured | 4.2 |
@@ -154,19 +154,29 @@ used `anchors.read_anchors` as the reader that earns clean, and it never had;
 it now uses `item_addresses.read_item_addresses`, whose hrefs the blank page
 cannot match.
 
-EVERY MOVED READER SAYS WHAT WOULD DRIVE IT. The holding test requires a drive
-or an entry in `WHAT_WOULD_DRIVE_IT`, and the seventeen entries use two new
-kinds besides the old ones. A child of this lane drafted sixteen from the
-source, the fixtures and the tests, read-only; each was reviewed here, every
-cited test, fixture and symbol checked to resolve, and three re-kinded:
+EVERY MOVED READER IS DRIVEN OR SAYS WHAT WOULD DRIVE IT. The holding test
+requires a drive or an entry in `WHAT_WOULD_DRIVE_IT`; one of the seventeen
+got a drive, and the sixteen entries use two new kinds besides the old ones.
+A child of this lane drafted sixteen from the source, the fixtures and the
+tests, read-only; each was reviewed here, every cited test, fixture and symbol
+checked to resolve, and three re-kinded. The baseline after the drive: clean
+81, not driven 49.
 
-    SCRIPT  11  its reading is a script this package runs in the page, which
+    SCRIPT  10  its reading is a script this package runs in the page, which
                 the planted page answers with strings: the seven script
                 readers, press._take_reading, dom.read_sdui_actions,
-                profile_editor.read_save_gate, writes._editor_value_of --
-                each names the test that drives its success path, over a
-                fake answering the script's shape or in a headless browser
-                over a tracked fixture, or says that none does
+                writes._editor_value_of -- each names the test that drives
+                its success path, over a fake answering the script's shape or
+                in a headless browser over a tracked fixture, or says that
+                none does
+    DRIVEN   1  profile_editor.read_save_gate, back to an earned clean: a
+                curated drive (`tests/shipped_drives.py`,
+                `read_save_gate_as_shipped`) over the tracked intro editor,
+                with his account-level share setting read off as the browser
+                test reads it, reaches proceed True -- one Save, two
+                recognised switches, no label -- from pieces the drives of its
+                fields reader already had; its premise break is in
+                `FIXTURE_BREAKS`
     WORDS    3  its success path keys on LinkedIn's own words in the page's
                 text (a tab strip), which the planted page can only answer
                 with the plant: the three tracker-state readers; a tracked
@@ -363,6 +373,12 @@ the orchestrator's gate policy of 11:35 none is the full suite.
                                                           readers red under the shipped
                                                           int(), green on its removal);
                                                           refusing grant PASS (5 of 5)
+             the Save gate's drive: its verdict and
+               premise tests, the coverage and holding
+               tests                                     11 passed
+             the guard's file, the skeleton double's,
+               the orphan-module test and the intro
+               editor's browser tests, sharded           970 passed (135 s)
 
 THE COERCION SCRIPT'S SAMPLE SHRANK, AND THE GUARD DID NOT LOSE THE LEAK. It
 samples only readers recorded clean, and lane G recorded 15 of 88 red there;
