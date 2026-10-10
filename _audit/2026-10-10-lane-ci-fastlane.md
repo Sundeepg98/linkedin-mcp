@@ -5,14 +5,17 @@ operator's order was VELOCITY: lanes took 30-60 minutes because they could
 not use GitHub Actions and ran full suites on the one shared 8-core box. This
 lane fixes the CI half. It merges FIRST, ahead of five other lanes.
 
-**Status: built, tested locally, NOT yet proven on GitHub.** The pre-push hook
-runs the MAIN checkout's copy of the gate (section 5), so a `ci/` push from
-this worktree would be refused by today's gate. Per the brief, the lane
-stopped before pushing; the end-to-end proof follows the merge, and the
-recipe for it is in section 5.3.
+**Status at 12:24 (first version): built, tested locally, NOT yet proven on
+GitHub.** The pre-push hook runs the MAIN checkout's copy of the gate
+(section 5), so a `ci/` push from this worktree would have been refused by
+that day's gate; the lane stopped before pushing. The orchestrator merged the
+lane into master as 53908ea; lanes used it at once; section 10 records the
+first defect that surfaced (no local `master` on a `ci/` checkout) and this
+lane's own first `ci/` run.
 
 The lane's commits, by SUBJECT (the short hashes beside them are the lane
-branch's and are nowhere on `master` until the merge):
+branch's; the first seven reached master through 53908ea, the rest wait on
+the next merge):
 
 | subject | lane branch |
 |---|---|
@@ -22,7 +25,12 @@ branch's and are nowhere on `master` until the merge):
 | lane_ci tests: the ssh remote case is spelled without an address-shaped string | 2651bc4 |
 | record: lane CI fast lane -- how a lane uses it, the red runs, and why the proof waits on the merge | 5dc7cb7 |
 | ci: the fast-path comment says which comparison was a one-time check | 77039a7 |
-| this table's last two rows | (the commit that adds them) |
+| record: the lane's commit table names its last two commits | a0efbd8 |
+| merge master 733c986 into lane CI: live session 7's records under the fast lane | fdbeb3d |
+| identity blob sweep: one git cat-file --batch per sweep; lane_ci push leaves the sweep to the hook | 454f554 |
+| merge origin/master 53908ea into lane CI: the fast lane's own merge, ahead of the local-master fix | 42b8513 |
+| ci: every shard off master gets a local master ref before any test runs | 4bc1c84 |
+| this record's sections 9 and 10, INSTRUMENTS 87.5-87.6 | (the commit that adds them) |
 
 ## 1. How a lane uses it -- two commands
 
@@ -42,19 +50,16 @@ A worktree has no venv, so the interpreter is the main checkout's. Until a
 lane has merged this branch, it can run the MAIN checkout's copy of the
 helper from its own worktree root -- the helper works on the cwd's repository.
 
-EXPECTED WALL CLOCK, every figure labelled with what it is:
+EXPECTED WALL CLOCK, every figure labelled with what it is (CURRENT since
+the 12:46 follow-up, section 9 -- the first version of this table quoted the
+sweep at 72-217 s and twice per push):
 
 | step | figure | class |
 |---|---|---|
-| `push`: the gate's checks in the helper | ~72 s (one commit, 997 blobs, box quiet-ish); 217 s for 3 commits / 1002 blobs while this lane ran its own tests beside it | MEASURED on this box |
-| `push`: the same checks again in the hook | same as above -- the hook re-runs them authoritatively | DERIVED (same code) |
-| CI run, one ubuntu 3.13 cell in four shards | ~5 minutes | PREDICTED from run 36460989178, section 3.2 |
-| total, push to verdict | ~7-10 minutes, against 30-60 locally | DERIVED |
-
-The sweep is the expensive local step: `sweep_blobs_for_identity.py` spawns
-one `git cat-file` per blob. A `--batch` reader inside that instrument would
-cut it to seconds; that is a change to a shipped instrument with its own test
-file and is left as a proposal (section 7).
+| `push`: the helper's checks (dirty tree, branch, hook gate, ancestry) | well under a second -- no sweep | DERIVED (git plumbing only) |
+| `push`: the hook's full check, sweep included, ONCE | 9.8 s for 3 commits / 1002 blobs; 10.4 s for 8 commits -- once the main checkout carries section 9's sweep; until then the hook's sweep is the per-blob one (this lane's own push: 104.6 s in all) | MEASURED on this box, sections 9 and 10 |
+| CI run, one ubuntu 3.13 cell in four shards | 6m21s (run 38036281943); ~4.5 minutes once the shard timings are regenerated | MEASURED once, section 10; the second figure DERIVED |
+| total, push to verdict | ~6.5-8 minutes, against 30-60 locally | DERIVED from the two rows above |
 
 ## 2. The gate -- `scripts/pre_push_ref_gate.py`
 
@@ -199,10 +204,11 @@ actionlint is not installed on this box. Instead:
 `push`, in order: refuses a dirty tree (tracked changes or untracked files --
 an untracked `_TEAM_LEAD_*.md` refuses too: read it first); refuses a
 detached HEAD; refuses unless the MAIN checkout's gate admits `ci/` refs
-(the hook runs that copy); runs the gate's own `git_ci_check` (ancestry, then
-the shipped sweep over `origin/master..HEAD`); pushes the CHECKED sha (not
-`HEAD` again), forced (`+sha:ref` -- the ref belongs to one lane), with
-`--no-follow-tags`; prints the sha.
+(the hook runs that copy); runs the gate's own ancestry clause
+(`git_ci_check(sha, sweep=False)` since the 12:46 follow-up -- the identity
+sweep is left to the hook, which runs it on the same push; section 9);
+pushes the CHECKED sha (not `HEAD` again), forced (`+sha:ref` -- the ref
+belongs to one lane), with `--no-follow-tags`; prints the sha.
 
 `wait <sha>`: `gh run list --commit <sha> --event push`, keeping only runs on
 a `ci/` ref (master's run of the same sha after the merge is never it),
@@ -311,12 +317,143 @@ run locally; the master merge's full matrix certifies them.
 * The fast lane covers ubuntu 3.13 only. The 3.10 floor and the Windows cell
   are certified by the full matrix on master after a merge; the fast lane is a
   lane's early signal, never a receipt.
-* The sweep runs twice per push (helper, then hook), ~72-217 s each on this
-  box. PROPOSAL: a `git cat-file --batch` reader inside
-  `sweep_blobs_for_identity.py`.
+* DONE in the 12:46 follow-up (section 9): the sweep reads its blobs through
+  one `git cat-file --batch` process and runs once per push, in the hook.
+  (This bullet first read "the sweep runs twice per push, ~72-217 s each";
+  that was true until section 9 landed.)
 * Not built: a real `git push` end-to-end test through a hook into a synthetic
   bare remote. The tests drive `main()` with git's exact line format instead;
   the hook's own environment is exercised only by the post-merge proof.
+
+## 9. Follow-up, 12:46: the sweep through one process, run once per push
+
+The orchestrator accepted the four decisions in section 8 (four shards stay;
+a merge commit, not a squash; lanes merge `origin/master` before each `ci/`
+push) and ordered this follow-up on the same branch, master merged in first.
+Master had moved to 733c986 (live session 7's records); the only path both
+sides touched was `_audit/INDEX.md`, a derived view, which git merged cleanly
+and `build_audit_index.py --check` read ok.
+
+### 9.1 One `git cat-file --batch` per sweep
+
+`scripts/sweep_blobs_for_identity.py` read each blob with its own
+`git cat-file -p` launch. It now reads them all through one
+`git cat-file --batch` process (`_BlobReader`: started on the first read, so
+the zero cases launch nothing; closed in a `finally`). The text each blob is
+matched as is unchanged by construction: `_as_text` decodes the raw bytes
+through the same `io.TextIOWrapper` that `subprocess.run(text=True,
+errors="replace")` built -- the locale's encoding, replacement, universal
+newlines. A blob git cannot produce raises `GitError` (exit 128, what
+`cat-file -p` exited with) and the sweep refuses with exit 2, as before.
+
+BEFORE AND AFTER, measured on this box back to back, old = the main
+checkout's copy (blob 064bcd3, the 3c8edc2/733c986 version), new = this
+branch's, same real wordlist (226 needles):
+
+| range | old | new | stdout |
+|---|---|---|---|
+| 3c8edc2..b508b8f (3 commits, 1002 blobs) | 281.6 s | 9.8 s | byte-identical, 164 bytes |
+| 733c986..fdbeb3d (this branch's 8 commits) | 190 s | 10.4 s | byte-identical, 164 bytes |
+
+(The first version of this record quoted 72 s for one commit and 217 s for
+the 3-commit range; the old figure moves with the box's load, the new one
+stays near 10 s because it no longer pays a launch per blob.) Target was
+under 15 s for a 3-commit range: met.
+
+THE PLANTED-VALUE CONTROL STILL FAILS. In
+`tests/test_sweep_blobs_reads_through_one_process.py` the whole `main()`
+report over a synthetic repository carrying a planted synthetic value is
+identical with the batch reader and with the old per-blob read swapped back
+in, and it is `FAIL: 1 hit(s) in 1 distinct path(s).` naming the planted
+line, value never printed. The gate's own planted-value tests
+(`tests/test_pre_push_ci_refs.py`, a planted value, and one removed in a
+later commit) still refuse through the new reader.
+
+### 9.2 Once per push: the helper leaves the sweep to the hook
+
+Chosen of the two options: `lane_ci.py push` skips its own sweep and asks
+the gate for the ancestry clause only (`git_ci_check(sha, sweep=False)`); the
+hook runs the full check, sweep included, on the same push. Simpler than a
+sha-bound stamp because it REMOVES code and adds nothing the hook would have
+to trust: a stamp is a new input that says "skip the sweep", and every such
+input needs its own forgery and staleness story. The cost: a planted value
+is now refused from inside the push (the hook's message, nothing
+published) rather than before it.
+
+### 9.3 Red first, and the local gate
+
+| run | result |
+|---|---|
+| `tests/test_sweep_blobs_reads_through_one_process.py` vs the old sweep | 5 failed: "9 cat-file launch(es) for 9 blobs", and no batch reader for the other four |
+| the same, new sweep | 5 passed |
+| `tests/test_lane_ci.py::test_push_leaves_the_sweep_to_the_hook` vs the old helper | failed: "the helper ran the sweep itself over <base>..<sha>" |
+| `tests/test_lane_ci.py`, new helper (incl. `test_the_hook_path_still_sweeps`) | 39 passed |
+| local gate, `-n 4 --dist loadfile`: both sweep test files, both gate test files, the helper's, and `test_banked_evidence_is_reachable.py` (names the sweep) | 110 passed in 53.86 s |
+
+`tests/test_sweep_blobs_refuses_a_vacuous_pass.py`'s zero-blobs test now
+also forbids a batch read: its fake `_git` can no longer see blob reads, so
+without the new line its stated proof ("no blob is read") would have gone
+quietly vacuous.
+
+### 9.4 A latent finding, NOT changed (the order was byte-for-byte)
+
+The sweep decodes blob text with the interpreter's locale encoding, and on
+this box that is cp1252 (no UTF-8 mode) -- before this change and after it.
+9 of the 226 needles contain non-ASCII characters (counted, not printed). A
+UTF-8 file carrying one of those values is matched as mojibake here, so
+those 9 can never hit on this box; on a UTF-8 Linux runner they would.
+Measured today: decoding the 3-commit range as UTF-8 instead also reads
+`PASS: 0 hits across 1002 blobs`, so nothing is being missed NOW. Fixing it
+changes verdicts by design; that is the orchestrator's call (section 8, Q4).
+
+## 10. The 13:22 fix: a `ci/` checkout has no local `master`
+
+THE DEFECT, measured by the orchestrator on lane runs 38035128406 and
+38035353731: the same 20 tests failed on each, the cited-SHA family
+(`tests/test_a_cited_sha_resolves.py` and its kin), all with "cannot resolve
+`master` to a short sha (got '')". actions/checkout creates a local branch
+only for the ref it checks out; with `fetch-depth: 0` everything else,
+master included, arrives as `refs/remotes/origin/*`. Master's own runs check
+master out, so they never saw it -- and section 3's validation ran the plan
+step, which has no checkout, so it could not see it either. A pull_request
+run checks out a detached merge commit and has the same gap.
+
+THE FIX: in the test (shard) job, right after the checkout,
+`git branch --force master origin/master`, guarded by
+`if: github.ref != 'refs/heads/master'` -- a checked-out branch cannot be
+force-updated, and master's runs skip the step so they do not move. The plan
+job has no checkout; the totals job runs no tests; neither changed.
+
+RED FIRST: the new tests in `tests/test_ci_fast_lane.py` failed 2 of 2 on the
+workflow before the step (no step creates a local master; no guard), and 36
+passed after, with the oldest-python test, including a reproduction that
+builds a ci/-shaped clone with no local master, shows `master` failing to
+resolve, runs the step's own script under bash, and shows it resolving to
+origin/master.
+
+THIS LANE'S OWN `ci/` RUN -- the end-to-end proof section 5 deferred.
+Pushed with `lane_ci.py push` from this branch, head = the commit "ci: every
+shard off master gets a local master ref before any test runs" (its short
+hash in the table at the top resolves only on the lane branch until the
+merge), with master 53908ea merged in first, as clause 1 requires:
+
+| what | measured |
+|---|---|
+| `lane_ci.py push` | exit 0 in 104.6 s; the hook (the MAIN checkout's gate, merged) admitted the ref: ancestry held, and the main checkout's sweep -- still the per-blob one until this branch merges again -- read `PASS: 0 hits across 1011 blobs, 226 needles` over 4 commits |
+| `lane_ci.py wait <sha>` | found run 38036281943 by head sha; exit 0 after 376.9 s of polling |
+| run 38036281943 | push event on `ci/worktree-agent-a5475b349ebe80b87`; conclusion SUCCESS; 6 jobs (shard plan, 4 shards, every shard reported), all success; wall 6m21s from the run's own timestamps |
+| the cited-SHA family | from the run's uploaded junit: `tests/test_a_cited_sha_resolves.py` 44 testcases, 0 failures, 0 errors, 0 skips; all four shards 12640 testcases, 0 failures, 0 errors, 9 skips |
+| per shard (job total / Run this shard) | 255 s / 181 s; 362 s / 287 s; 230 s / 166 s; 243 s / 172 s; plan 3 s, totals 9 s |
+
+AGAINST THE 6-MINUTE TARGET: 6m21s, over by 21 s, and the reason is
+measured: shard 1 ran 287 s of tests where the other three ran 166-181 s.
+The packer balances on `scripts/ci_shard_timings.json`, which the workflow's
+own comment says goes stale as the suite grows (it was priced at 3660 tests;
+this run had 12640 testcases). Balanced, the same 806 s of shard time is
+~200 s a shard, about 4.5 minutes a run. The fix is to regenerate the table
+from the junit this run uploaded; not done here (section 8, Q5).
+
+## 8. Questions for the orchestrator
 
 ## 8. Questions for the orchestrator
 
@@ -331,3 +468,20 @@ run locally; the master merge's full matrix certifies them.
    before pushing." The first post-merge `lane_ci.py push` + `wait` is the
    proof and the first measurement of the 6-minute target; section 5.3 is the
    recipe.
+4. (added 13:20) DECODE THE SWEEP'S BLOBS AS UTF-8? Ground: section 9.4 -- the
+   blob sweep reads text in the locale's encoding (cp1252 here), and 9 of 226
+   needles are non-ASCII, so on this box they cannot match a UTF-8 file.
+   Nothing is missed today (UTF-8 decoding of the current tree also reads
+   PASS). Recommendation: decode as UTF-8 with replacement in `_as_text`, as
+   its own change with a planted non-ASCII control; it was not done here
+   because the order was byte-for-byte identical results.
+
+5. (added 13:40) REGENERATE THE SHARD TIMINGS? Ground: section 10 -- run
+   38036281943 took 6m21s because one shard ran 287 s of tests against
+   166-181 s for the others, and `scripts/ci_shard_timings.json` was priced on
+   a 3660-test suite. The run's junit is uploaded per shard for exactly this.
+   Recommendation: a small follow-up that rebuilds the table from a full
+   master run's junit; expected ~4.5 minutes a fast-lane run.
+
+Questions 1-3 were answered at 12:46: four shards stay; the branch merges as
+a merge commit; lanes merge `origin/master` before each `ci/` push.

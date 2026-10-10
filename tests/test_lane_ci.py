@@ -347,6 +347,34 @@ def test_a_clean_lane_branch_is_pushed_to_its_ci_ref_and_the_sha_printed(
     assert capsys.readouterr().out.strip().splitlines()[-1] == sha
 
 
+def test_push_leaves_the_sweep_to_the_hook(world, monkeypatch, capsys):
+    """ONE SWEEP PER PUSH. The hook runs the gate's full check, sweep
+    included, on every ci/ push; the helper running it first as well paid the
+    sweep twice. The helper keeps the cheap clause (ancestry) so a stale
+    branch is refused before any network call, and leaves the sweep to the
+    hook -- this fails the test if the helper reaches the sweep at all."""
+    def no_sweep(rev_range):
+        raise AssertionError(f"the helper ran the sweep itself over {rev_range}")
+    monkeypatch.setattr(lane.gate, "_sweep", no_sweep)
+    world.git("checkout", "-q", "-b", "lane")
+    sha = world.commit({"lane.txt": "a lane's own new work\n"})
+    pushed = []
+    assert lane.cmd_push(pusher=lambda s, r: pushed.append((s, r)) or 0) == 0
+    assert pushed == [(sha, "refs/heads/ci/lane")]
+
+
+def test_the_hook_path_still_sweeps(world, monkeypatch):
+    """The other half: the gate's own check, as the hook calls it, must still
+    reach the sweep -- or "left to the hook" would mean "left to nobody"."""
+    calls = []
+    monkeypatch.setattr(lane.gate, "_sweep",
+                        lambda rev_range: calls.append(rev_range) or (0, ""))
+    world.git("checkout", "-q", "-b", "lane")
+    sha = world.commit({"lane.txt": "a lane's own new work\n"})
+    assert lane.gate.git_ci_check(sha) == []
+    assert calls == [f"{world.base}..{sha}"], calls
+
+
 def test_clean_deletes_exactly_the_ci_ref_and_nothing_else():
     seen = []
     assert lane.cmd_clean("lane", pusher=lambda argv: seen.append(argv) or 0) == 0
