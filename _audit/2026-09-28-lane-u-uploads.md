@@ -33,8 +33,8 @@ master `3c8edc2`. Every number below was measured in this lane's worktree on
 `e4c6cca`, `18dd736`, `4710609`, `f4d3eeb`, `7f9caa6` -- these do not resolve
 on `master` until the orchestrator merges this branch -- and `1096eef`,
 `45466b8`, `502d868`, `c28a699`, `01e4ea2`, `2b7f9b3`, which do not resolve
-there either until then. Each one's subject, which survives a rebase, is in
-the table below.
+there either until then, nor do `c7e70dc`, `c0e3c76` and `9649d38`. Each
+one's subject, which survives a rebase, is in the table below.
 
 | short SHA | subject |
 |---|---|
@@ -51,6 +51,9 @@ the table below.
 | `c28a699` | merge master f8c7392 into lane U: lane NP's named-profile detail pages and the CI lane's follow-ups |
 | `01e4ea2` | tests: the session-8 composer capture as a tracked copy, and each upload row aimed at its own input on it |
 | `2b7f9b3` | census: M M14, M M15 and M M18 GAP -> COVERED-UNFIRED on linkedin_send_attachment; pins re-derived |
+| `c7e70dc` | record + INSTRUMENTS 84.6-84.7: the three moves and their bar; the triage headline re-pinned at 127 |
+| `c0e3c76` | merge origin/master 1027bf8 into lane U: live session 8's record and lane G2's engine-run fixtures |
+| `9649d38` | merge origin/master f93104c into lane U: lane CI's shared tree reading, ahead of the certification push |
 
 ---
 
@@ -422,6 +425,23 @@ GAP rows.
 
 ## 7. The live-proof spec (the live lane runs it; this lane loaded nothing)
 
+**THE SURFACE, AFTER THE ORDER OF 15:31.** That order put the proof on the
+composer: a generated image attached to a NEW message to the named
+first-degree member, through the shipped first-contact path. The shipped
+verbs cannot do that, by construction. `linkedin_send_attachment` takes a
+thread id and refuses any page drawing a recipient box -- "A conversation
+has nobody to choose, so this is not a conversation's reply surface"
+(`threads.reply_state`; held by
+`test_the_preview_refuses_the_composer_it_is_not_a_conversation` on the
+session-8 copy itself) -- and `linkedin_message_from_profile`, the
+first-contact path, carries words and no file. So the proof uses that
+path for what it does: if the member has no conversation with him yet,
+`linkedin_message_from_profile` sends the words and makes one; the image
+then goes into THAT conversation by its thread id, as below. An image on
+the first message itself would be a new verb -- a profile-and-file target
+and a capture of the first-contact composer's attach inputs -- and is not
+built (section 9, Q12).
+
 **THE TARGET (OPERATOR-NAMES-THE-TARGET).** The first-degree member the
 operator named for `M M1` and `M M17` -- the conversation `M M1` made and
 `M M17` replied in, by its thread id from the lane's own state. Named here
@@ -442,7 +462,10 @@ words go with the file).
 
 **THE STEPS AND THE READINGS EXPECTED.**
 
-1. *(1 load)* Resolve the conversation as session 6 did for `M M17`.
+1. *(1 load)* Resolve the conversation as session 6 did for `M M17`; if
+   none exists, the first-contact path makes it with the words (its own
+   preview, confirm and verification, as session 5 ran for `M M1`), and
+   step 2 is skipped.
 2. *(3 loads)* `linkedin_send_reply(thread_id, <the words>)`: preview,
    confirm, fresh load. Expected exactly as session 6: `reply_box_empty`,
    Send on within the 5 s wait, `reply_sent` on the fresh load.
@@ -520,8 +543,20 @@ lane CI (below).
 | `c28a699` merge of master `f8c7392` | three conflicts resolved with both sides kept (the register's last entries, the surface pin at 62 / 100, INSTRUMENTS 87.7 and 88 before 84); the derived views regenerated and `--check`; seven census instruments; the surface pins and the register | RULINGS 75, INDEX 265, blocker map 409 lines; the seven instruments exit 0, `check_next_step` 585; 139 passed; 27 passed |
 | `01e4ea2` the session-8 copy | `tests/test_send_attachment.py`; four mutations (section 5's moves rest on them); the committed-identity sweep; the two people guards over fixtures | 25 passed; four kills -- a photo to the documents input (1 failed), the copy's declarations swapped (3), the recipient-box refusal removed (1), a keyed shape left in the copy (1) -- every restore verified by sha256; identity 1080 passed; people guards 93 passed |
 | `2b7f9b3` the three moves | the seven census instruments; every test that reads the census files the move edits, in serial groups | instruments exit 0 (`census_completion` "every headline figure matches its pin", `check_next_step` 582, `check_write_classes` 384 lines); 87, 100, 140 and 135 passed. Two groups ran past the cap and were re-run in pieces: write classes, next step and covered rows 61 passed; the blocker map 19; corrections 15; asserted names 12; pointer graph 4; and ONE RED, the messaging triage headline (`tests/test_triage_instrument.py`), which pins the slice's GAP split and was not moved with the census: re-pinned in the next commit at 127 (writes 110 - 3), measured with `scripts/triage_messaging_gap_rows.py` |
+| `c7e70dc` the record and the triage pin | the triage files; register numbering, corrections, asserted names, the audit index; the committed-identity sweep; the people guards | 29 passed; 66 passed; identity 1080 passed; people guards 93 passed |
+| `c0e3c76` merge of origin/master `1027bf8` | the census pins summed, then MEASURED (session 8 banked four out of COVERED-UNFIRED, this lane moved three in: unfired 24, standing 15); the reader-leak baseline regenerated by its own writer; derived views; the seven instruments | `census_completion` "every headline figure matches its pin"; the baseline differs from master by exactly this lane's five attachment readers, all `clean` under lane G2's earned-clean rule; all seven exit 0 |
+| `9649d38` merge of origin/master `f93104c` | no conflict; derived views; `census_completion`; covered rows, triage and write classes; the attachment tests; committed identity | clean; 68 passed; 25 passed; 1082 passed |
+| LANE CI, run 38043099901 on `9649d38` | the suite on four shards | FAILURE, 2 failed, both found by the merges. Shard 0: 1 failed, 1917 passed -- `test_every_session_fixture_directory_is_counted`: `tests/fixtures/live8/` was not in the session-fixture table. Shard 1: 1 failed, 3228 passed -- the hand-off's AST pin read every `current` in `writes.py` and met lane NP's `current = None` in `_live_control`, another function: re-scoped to `perform`, and shown still failing on a second binding inside it. Shards 2 and 3: 3559 and 4312 passed. Both fixed in the next commit: 7 passed |
+| the 15:31 correction | the three cells say which surface each capture is and what the row rests on; section 7's surface; Q12 | corrections and asserted names 27 passed; covered rows and census prose 42 passed; no unresolved citation in the record, the census slice or the register |
 
-**THE TWO REDS I LEFT AND THEN CLOSED, said plainly.** `d295e6e` was red on
+**THE REDS I LEFT AND THEN CLOSED, said plainly.** Five, and each was a
+guard my targeted set did not include. The three latest: the triage
+headline at `2b7f9b3`, re-pinned in the next commit, and the two lane CI
+found at `9649d38`, both met through merges -- a new fixture directory
+nobody had counted, and a pin written module-wide that a sibling's unrelated
+name entered. The two earliest follow.
+
+**THE TWO EARLIEST.** `d295e6e` was red on
 the correction guard and `e4c6cca` on the receipt-message pin, each because
 the targeted set I chose did not include the guard the change met. Both were
 closed in the next commit. The lesson is the repository's own: a scoped gate
@@ -613,7 +648,10 @@ ledger's ranked queue and replacing the twelve SIBLING steps is an edit to
 lane K's judged tables; left for the orchestrator to assign.
 
 **Q11. THE ORDER OF 14:23 CALLED THE SESSION-8 CAPTURE A THREAD; IT IS THE
-COMPOSER.** Ground, measured by the verb's selectors on the skeleton: one
+COMPOSER** -- and the correction of 15:31 says the same, from the live
+lane's own re-read: one messaging load, the thread refused by the
+receipt guard. Each of the three cells now says which surface each
+capture is and what rests on what. Ground, measured by the verb's selectors on the skeleton: one
 recipient box, no message event, no conversation title, no active row, and a
 "New message" heading -- the same reading as session 3's capture, which this
 lane's own text had also called a conversation's reply form (corrected in
@@ -623,3 +661,14 @@ read live in sessions 5 and 6. What stays derived is the LABELS in an opened
 conversation: if they differ from the composer's, the aim refuses at the
 preview and nothing is handed over. The live proof's preview is that
 measurement, at zero uploads; its record should say which way it went.
+
+**Q12. A FILE INTO A NEW MESSAGE IS NOT BUILT.** The order of 15:31 puts
+the live proof on the composer, through the first-contact path. Ground:
+`linkedin_send_attachment`'s target kind is `thread_and_file` and its
+preview refuses a recipient box -- "A conversation has nobody to choose,
+so this is not a conversation's reply surface" -- and
+`linkedin_message_from_profile` takes no file. Section 7 therefore runs
+the first-contact path for the words when no conversation exists, then
+attaches into that conversation. An attachment on the first message is a
+new verb (a profile-and-file target, the first-contact bubble's attach
+inputs captured) and a call on whether a first message may carry a file.

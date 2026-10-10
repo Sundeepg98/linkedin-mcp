@@ -644,10 +644,26 @@ def test_the_upload_hands_over_the_verified_bytes_and_never_a_callers_string():
     holder = payload.func.value
     assert isinstance(holder, ast.Name), ast.unparse(call)
 
+    # SCOPED TO THE FUNCTION THAT UPLOADS, SINCE THE MERGE OF MASTER f8c7392
+    # (2026-10-10). This read every assignment in writes.py, and lane NP's
+    # record-gated clear brought a `current = None` into `_live_control` --
+    # a different function, a different `current` -- which turned this pin
+    # red on lane CI run 38043099901 without any change to the hand-off. The
+    # property is about the one function holding the one drain point, so the
+    # search is that function's body; a second binding INSIDE it still fails.
+    enclosing = [
+        fn
+        for fn in ast.walk(_WRITES_TREE)
+        if isinstance(fn, (ast.FunctionDef, ast.AsyncFunctionDef))
+        and any(node is call for node in ast.walk(fn))
+    ]
+    innermost = min(enclosing, key=lambda fn: fn.end_lineno - fn.lineno)
+    assert innermost.name == "perform", innermost.name
+
     def _bound(name: str) -> list[ast.Assign]:
         return [
             node
-            for node in ast.walk(_WRITES_TREE)
+            for node in ast.walk(innermost)
             if isinstance(node, ast.Assign)
             and any(isinstance(t, ast.Name) and t.id == name for t in node.targets)
         ]
