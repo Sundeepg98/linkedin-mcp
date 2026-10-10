@@ -480,8 +480,12 @@ class Post:
 #: people are those two tools' whole answer. ``linkedin_read_named_profile``
 #: joined the same day (lane L5, ruling NAMED-PROFILE-READ-BEHIND-A-GRANT): the
 #: ONE member he names, read once behind the single-use grant, is its answer.
+#: ``linkedin_group_members`` joined on 2026-10-10 (lane B5,
+#: ``group_roster.read_group_members``, MEMBER-ROSTERS-AS-BOUNDED-READS): one
+#: page of a group's member list, with no opt-in -- people are its answer.
 PEOPLE_TOOLS: frozenset[str] = frozenset(
     {
+        "linkedin_group_members",
         "linkedin_who_viewed_me",
         "linkedin_list_conversations",
         "linkedin_open_messaging",

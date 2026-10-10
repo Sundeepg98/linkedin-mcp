@@ -19,14 +19,18 @@ The admission is the four roster entries at the end of
 ``readonly._ALLOWED_URL_PATTERNS``. This module is conditions 1, 2 and 4 in
 code, and it is the ONLY place this package assembles a roster address.
 
-## WHY NOTHING IN THE PACKAGE CALLS THIS YET
+## WHO CALLS THIS, AND WHO DOES NOT YET
 
-READERS HERE ARE BUILT AGAINST CAPTURES ONLY, and no roster page has ever been
-captured. So this is the address half of each row -- the exact page a capture
-must load, composed by the code the reader will later be handed. Nothing in the
-package imports this module; ``tests/test_every_orphan_module_is_ruled.py``
-records that as a ruling, and the first tool that imports it lands with its
-reader, built against a capture, in the same commit.
+READERS HERE ARE BUILT AGAINST CAPTURES ONLY. Until 2026-10-10 no roster page
+had been captured and nothing imported this module. The live lane captured
+ONE group's member list on 2026-09-28 (``tests/fixtures/live2/
+group_members.html``), and lane B5 built its reader over that skeleton
+(``group_roster.read_group_members``) and wired ``linkedin_group_members`` in
+``server.py`` to this module's ``group_members`` roster, in one commit
+(census ``N 165`` and ``N 177``). THE OTHER THREE ROSTERS -- event attendees,
+a company's and a school's People tab -- are still the address half of their
+rows only: none has been captured, none has a reader, and nothing in the
+package composes them.
 
 A roster is a list of PEOPLE. When this module was written the server published
 no names (the name-free shaper doctrine,

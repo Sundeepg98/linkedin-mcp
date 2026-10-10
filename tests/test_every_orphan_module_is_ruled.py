@@ -136,21 +136,18 @@ DELIBERATELY_UNWIRED: dict[str, str] = {
         "at all. So the first tool that imports this module brings its reader "
         "with it, and this entry is deleted in that commit. NOT PERMANENT."
     ),
-    "member_rosters": (
-        "A CAPABILITY HELD ON A WRITTEN CONDITION, ruled by its author "
-        "2026-09-24 (lane S follow-up, item 2). It composes ONE page of a "
-        "group's members, an event's attendees or a company's or school's "
-        "People tab from a caller-supplied numeric id -- the four rosters "
-        "MEMBER-ROSTERS-AS-BOUNDED-READS admitted -- and it is unwired because "
-        "readers here are built against captures only and no roster page has "
-        "been captured (specs in _audit/2026-09-24-lane-s-people-search.md, "
-        "section F). A roster is a list of people, so the reader that wires "
-        "it returns names held to PEOPLE-DATA-MITIGATIONS -- NAMES-AT-RUNTIME "
-        "amended the name-free doctrine for what a read returns, 2026-09-24 "
-        "-- and lands in the same commit, and this entry is deleted then. "
-        "NOT PERMANENT."
-    ),
 }
+
+# THE member_rosters ENTRY WAS DELETED 2026-10-10 (lane B5), ON ITS OWN
+# INSTRUCTION: "the reader that wires it returns names held to
+# PEOPLE-DATA-MITIGATIONS ... and lands in the same commit, and this entry is
+# deleted then." It did, in one commit: the live lane captured one group's
+# member list on 2026-09-28 (tests/fixtures/live2/group_members.html), and
+# `group_roster.read_group_members` was built over that skeleton with
+# `linkedin_group_members` in server.py importing the composer -- each of the
+# six mitigations shown failing in tests/test_group_members.py. ONE roster of
+# the four is wired; the event, company and school rosters have no capture and
+# no reader, and nothing composes them (asserted in that file, section 6).
 
 # THE cdp_download ENTRY WAS DELETED 2026-09-24, AND NOT ON ITS OWN INSTRUCTION.
 #

@@ -284,6 +284,36 @@ def landed_on_the_same_group(
     return str(verdict.get("identifier")) == str(identifier)
 
 
+def group_link(
+    identifier: Optional[str], same_group: Optional[bool]
+) -> Optional[str]:
+    """The group's own link -- census ``N 197`` -- or ``None``. PURE.
+
+    ``N 197`` is "Copy a group's link", drawn as 'Copy link to group' in the
+    group's own menu. Under ``CALLER-COMPOSITION-UNDER-D6`` (the
+    orchestrator, 2026-10-10) a row named for an affordance is discharged
+    when the caller can compose SHIPPED tools to deliver its payload: the
+    payload is the link, and this is where a tool returns it (lane B5,
+    2026-10-10). Lane K's ledger recorded that no tool did.
+
+    THE LINK IS COMPOSED, NEVER READ. It is :func:`group_page_url`'s address
+    for the caller's own digits -- the template this repository authored --
+    and it is returned ONLY when ``same_group`` is ``True``: the navigation to
+    that very address landed on a page whose group id reduced to the same
+    digits (:func:`landed_on_the_same_group`), so it is a link LinkedIn was
+    just shown to serve this group at. Any other landing -- a redirect, an
+    auth wall, a page naming no group -- returns ``None``, and the landing
+    itself is never published. Nothing the menu's own copy would hold (a
+    tracking query, a share token) is reproduced, and nothing is pressed.
+    """
+    if same_group is not True:
+        return None
+    built = group_page_url(identifier)
+    if not built.get("built"):
+        return None
+    return str(built["url"])
+
+
 async def read_group_page(page: Any, html: str = "") -> dict[str, Any]:
     """Classify a group page's anchors. Returns COUNTS and integers.
 

@@ -84,6 +84,9 @@ EXPECTED_TOOLS = (
     "linkedin_server_info",
     "linkedin_session_info",
     "linkedin_group_page",
+    # 2026-10-10, lane B5: a READ, one page of a group's member list as people
+    # records, banking census rows N 165 and N 177 in the same commit.
+    "linkedin_group_members",
     "linkedin_company_page_counts",
     # 2026-09-23, lane L3: a READ on the jobs surface, banking census row
     # J 18 (recent searches, off the jobs home) in the same commit.
@@ -353,4 +356,8 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # linkedin_read_named_profile (ruling NAMED-PROFILE-READ-BEHIND-A-GRANT;
     # census N 178 stays GAP on its capture), measured off the registry and
     # moved with every other count site in the same commit.
-    assert len(_tool_names()) == 61
+    # SIXTY-TWO ON LANE B5, 2026-10-10: one READ, linkedin_group_members -- one
+    # page of a group's member list as people records (census N 165 and N 177,
+    # GAP -> COVERED-UNFIRED in the same commit), measured off the registry and
+    # moved with every other count site in the same commit.
+    assert len(_tool_names()) == 62

@@ -98,6 +98,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_follow_company": ("confirm_token", "job_id"),
     "linkedin_follow_company_page": ("confirm_token", "organisation_id"),
     "linkedin_followed_companies": ("company", "limit"),
+    "linkedin_group_members": ("group_id",),
     "linkedin_group_memberships": (),
     "linkedin_group_page": ("group_id",),
     "linkedin_job_collections": (),
@@ -484,8 +485,20 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: The read's two new fields (`member_token`, `activity_items`) are not
 #: parameters; `N 30`, `N 85`, `N 172`, `N 31` and `M C32` move only when proven
 #: live.
-PINNED_TOOL_COUNT = 61
-PINNED_PARAMETER_COUNT = 97
+#: **RE-PINNED 2026-10-10 AT 62 TOOLS AND 98 PARAMETERS on lane B5 (the groups
+#: slice): one tool, one parameter -- `linkedin_group_members("group_id")`, ONE
+#: page of a group's member list as people records, on
+#: MEMBER-ROSTERS-AS-BOUNDED-READS, NAMES-AT-RUNTIME and the six
+#: PEOPLE-DATA-MITIGATIONS.** THE CENSUS DECISION, in the same commit: `N 165`
+#: and `N 177` move GAP -> COVERED-UNFIRED, over the live lane's tracked
+#: skeleton of one member list; not PROVEN, nothing was fired. The id is a
+#: NUMERIC IDENTIFIER, refused unless it is 1 to 20 ASCII digits -- the rule
+#: `linkedin_group_page("group_id")` already carries, reused through
+#: `member_rosters.compose`. `linkedin_group_page` gains a FIELD, `group_link`,
+#: and no parameter; `N 197` moves on it by CALLER-COMPOSITION-UNDER-D6. See
+#: `_audit/2026-10-10-lane-b5-groups-build.md`.
+PINNED_TOOL_COUNT = 62
+PINNED_PARAMETER_COUNT = 98
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:

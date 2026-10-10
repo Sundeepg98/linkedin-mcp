@@ -540,7 +540,7 @@ def test_a_roster_read_costs_one_load_and_the_budget_is_the_ruled_one():
 
 
 # ---------------------------------------------------------------------------
-# 6. Nothing opens a roster yet -- the rows stay GAP until a reader lands
+# 6. One roster is opened (lane B5, 2026-10-10): the group's member list
 # ---------------------------------------------------------------------------
 
 def _orphan_walk():
@@ -555,7 +555,13 @@ def _orphan_walk():
     return module._imported_submodules
 
 
-def test_no_package_module_or_entry_point_imports_the_composer():
+def test_the_one_importer_of_the_composer_is_the_group_members_tool():
+    """RENAMED AND NARROWED 2026-10-10 (lane B5), from ``test_no_package_
+    module_or_entry_point_imports_the_composer``: the first reader landed --
+    ``group_roster.read_group_members``, built over the live lane's skeleton of
+    one group's member list -- and ``linkedin_group_members`` in server.py is
+    the composer's one importer. The other three rosters stay unwired; that is
+    asserted in ``tests/test_group_members.py``, section 6."""
     imported_by = _orphan_walk()
     importers = [
         path.name
@@ -563,7 +569,7 @@ def test_no_package_module_or_entry_point_imports_the_composer():
         if path.name != "member_rosters.py"
         and "member_rosters" in imported_by(path)
     ]
-    assert importers == [], importers
+    assert importers == ["server.py"], importers
 
 
 @pytest.mark.parametrize("line", [
