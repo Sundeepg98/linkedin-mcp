@@ -1,4 +1,4 @@
-"""The tool surface: sixty-two tools, forty-four of which do not write.
+"""The tool surface: sixty-three tools, forty-four of which do not write.
 
 **AND THIS LINE IS NOW DERIVED, NOT MAINTAINED, 2026-09-20.** It had gone stale
 a THIRD time -- "forty-four tools, thirty-two of which do not write" against a
@@ -162,6 +162,12 @@ SANCTIONED_WRITE_TOOLS = frozenset(SANCTIONED_WRITES) & {
     # docstring must describe one, so it is on both exemptions -- which are
     # one set. A key in writes.SANCTIONED_WRITES.
     "linkedin_send_attachment",
+    # THE TWENTIETH, 2026-10-10 (lane S, HIS-OWN-SETTINGS-NOT-OUTWARD; census
+    # P O17, split from P O6-O20): ONE control on ONE admitted settings page.
+    # Its NAME announces the write ("set") and its docstring must describe
+    # one, so it is on both exemptions -- which are one set. A key in
+    # writes.SANCTIONED_WRITES.
+    "linkedin_set_admitted_setting",
 }
 
 #: THE DOCSTRING EXEMPTION IS THE SAME SET AS THE NAME EXEMPTION, and it took
@@ -523,6 +529,9 @@ EXPECTED_TOOLS = {
     # THE SIXTY-SECOND, 2026-10-10 (lane U's branch), a WRITE: see
     # SANCTIONED_WRITE_TOOLS.
     "linkedin_send_attachment",
+    # THE SIXTY-THIRD, 2026-10-10 (lane S, settings, merged after lane U's), a WRITE: see
+    # SANCTIONED_WRITE_TOOLS.
+    "linkedin_set_admitted_setting",
 }
 
 #: Names a reader must never grow. Listed explicitly so that adding one is a
@@ -607,8 +616,14 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_sixty_two_tools(tools):
-    """RENAMED AGAIN ON LANE U'S BRANCH, 2026-10-10, to ``..._sixty_two_tools``:
+async def test_the_surface_is_exactly_the_sixty_three_tools(tools):
+    """RENAMED AGAIN AT LANE S'S MERGE OF MASTER 0103810, 2026-10-10, to
+    ``..._sixty_three_tools``: one WRITE, ``linkedin_set_admitted_setting``
+    (HIS-OWN-SETTINGS-NOT-OUTWARD), ONE control on ONE admitted settings page,
+    on top of lane U's sixty-second. MEASURED off the registry on the merged
+    tree; the name moved with the pin.
+
+    RENAMED AGAIN ON LANE U'S BRANCH, 2026-10-10, to ``..._sixty_two_tools``:
     one WRITE, ``linkedin_send_attachment`` (ruling FILE-UPLOAD-OPENED), one
     file into one conversation he names. MEASURED off the registry on the
     lane's branch, counting from master's sixty-one; a merge beside other
@@ -922,7 +937,10 @@ async def test_the_surface_is_exactly_the_sixty_two_tools(tools):
     # SIXTY-TWO ON LANE U'S BRANCH, 2026-10-10: linkedin_send_attachment, a
     # WRITE, so the split moves on its write side and the non-write count
     # holds. MEASURED off mcp.list_tools() on the branch.
-    assert len(tools) == 62
+    # SIXTY-THREE AT LANE S'S MERGE OF MASTER 0103810, 2026-10-10: linkedin_set_admitted_setting,
+    # a WRITE, so the split moves on its write side and the non-write count
+    # holds. MEASURED off mcp.list_tools().
+    assert len(tools) == 63
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -955,6 +973,8 @@ async def test_the_surface_is_exactly_the_sixty_two_tools(tools):
         "linkedin_connect_from_profile",
         "linkedin_message_from_profile",
         "linkedin_send_attachment",
+        # 2026-10-10, lane S: one control on one admitted settings page.
+        "linkedin_set_admitted_setting",
     }
     # THE NON-WRITE COUNT MOVES TO SIXTEEN, and the reason is NOT the reason
     # it moved last time. The comment here said: "THE READ COUNT MOVES OFF
@@ -1201,6 +1221,8 @@ async def test_the_exemption_covers_only_the_names_on_it(tools):
         "linkedin_connect_from_profile",
         "linkedin_message_from_profile",
         "linkedin_send_attachment",
+        # 2026-10-10, lane S: one control on one admitted settings page.
+        "linkedin_set_admitted_setting",
     }
     # The probe has to be genuinely sanctioned for this to test the thing it
     # claims to. A name nobody ever specced would only show that made-up names
@@ -1669,6 +1691,10 @@ async def test_server_info_stops_claiming_read_only_once_writes_are_on(monkeypat
         # fourteen siblings: a reply inside a conversation he names by thread
         # id, which reports SENT only off a fresh load of that conversation.
         "send_reply",
+        # THE EIGHTEENTH, 2026-10-10 (census P O17, lane S), typed here by
+        # hand like its seventeen siblings: ONE control on ONE admitted
+        # settings page, by its exact label, behind the single-use grant.
+        "set_admitted_setting",
         "unfollow_company",
         "unsave_job",
         # SIXTH, 2026-08-31. The first write here that acts on neither a job
@@ -1744,6 +1770,9 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
         # branch). Typed by hand, as this list requires, by the lane that
         # built it.
         "send_reply",
+        # THE EIGHTEENTH, 2026-10-10 (census P O17). Typed by hand, as this
+        # list requires, by the lane that built it (lane S).
+        "set_admitted_setting",
         "unfollow_company",
         "unsave_job",
         # THE TWELFTH, 2026-09-02, on his ruling "I want all capabilities".
@@ -2116,6 +2145,11 @@ async def test_the_server_instructions_name_every_write_that_ships():
         # reached; seventeen is spelled so the map has no hole a later count
         # could fall into.
         17: "seventeen", 18: "eighteen",
+        # NINETEEN AT LANE S'S MERGE OF MASTER 0103810, 2026-10-10: lane U's
+        # send_attachment and lane S's set_admitted_setting each made eighteen
+        # on its own branch, and the merged tree holds both. The KeyError this
+        # map raises named the count on the merge's first gate.
+        19: "nineteen",
     }
     assert f"{words[len(writes.PERFORMABLE)]} write" in text
     for action in writes.PERFORMABLE:

@@ -358,4 +358,8 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # M18 stayed GAP on two captures, then moved to COVERED-UNFIRED the same
     # day on the session-8 capture), measured off the branch's registry and
     # moved with every other count site in the same commit.
-    assert len(_tool_names()) == 62
+    # SIXTY-THREE ON 2026-10-10 (lane S, settings, merged after lane U's): one WRITE,
+    # linkedin_set_admitted_setting (HIS-OWN-SETTINGS-NOT-OUTWARD; census
+    # P O17, split from P O6-O20, GAP -> COVERED-UNFIRED), measured off the
+    # registry and moved with every other count site in the same commit.
+    assert len(_tool_names()) == 63

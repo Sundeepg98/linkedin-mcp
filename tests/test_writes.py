@@ -766,6 +766,10 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         # ruling THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET.
         "connect_from_profile",
         "message_from_profile",
+        # 2026-10-10 (lane S, settings, HIS-OWN-SETTINGS-NOT-OUTWARD): ONE
+        # control on ONE admitted settings page, sanctioned and performable in
+        # the same move, its press perform()'s own (census P O17).
+        "set_admitted_setting",
     }
     # THREE UNTIL 2026-08-25, four until 2026-08-30, five since. This line read
     # ``{"save_job", "unsave_job", "unfollow_company"}``.
@@ -911,6 +915,11 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         # fill are perform()'s own.
         "connect_from_profile",
         "message_from_profile",
+        # 2026-10-10 (lane S, settings): the generic settings writer, on the
+        # one page admitted by name from a real capture. Nothing was
+        # permitted to let it cross: its click and its select are perform()'s
+        # own, and readonly.SANCTIONED_MUTATIONS is unchanged.
+        "set_admitted_setting",
     }
     assert writes.PERFORMABLE < sanctioned_actions
 
@@ -1424,6 +1433,10 @@ _UNMEASURED_REVERSIBILITY = {
     # L5's merge of master 52b55b6.
     "connect_from_profile",
     "message_from_profile",
+    # 2026-10-10 (lane S, settings). Its inverse is itself with the value the
+    # preview read, and no round trip has been performed live yet: the live
+    # proof is planned in _audit/2026-09-28-lane-s-settings.md, section 6.
+    "set_admitted_setting",
 }
 
 REVERSIBILITY_CLASS = {
@@ -1465,6 +1478,9 @@ REVERSIBILITY_CLASS = {
     # _UNMEASURED_REVERSIBILITY.
     "connect_from_profile": "STILL-UNKNOWN",
     "message_from_profile": "STILL-UNKNOWN",
+    # 2026-10-10 (lane S, settings). STILL-UNKNOWN until its live proof: see
+    # _UNMEASURED_REVERSIBILITY.
+    "set_admitted_setting": "STILL-UNKNOWN",
 }
 
 #: Which actions have had their reversibility MEASURED. Split out from the
@@ -1492,6 +1508,7 @@ REVERSIBILITY_MEASURED = {
     "withdraw_from_group": False,
     "connect_from_profile": False,
     "message_from_profile": False,
+    "set_admitted_setting": False,
 }
 
 def test_the_two_reversibility_tables_agree_with_each_other():

@@ -142,8 +142,14 @@ DELIVERED_STRICT = ("COVERED-PROVEN",)
 #: already elsewhere, 5 are choices inside a row, 1 is named twice, and 7
 #: are named nowhere or disputed. The collapse left with the count it
 #: rested on.
+#:
+#: `O6-O20` STOOD FOR 15 UNTIL 2026-10-10, and stands for 14 since: lane S
+#: split the switch that shares profile updates with his network out as
+#: `P O17` (`_audit/2026-09-28-lane-s-settings.md`, section 4). A split
+#: moves a capability between rows; it does not add one, so the row that
+#: left takes one with it (a cold review caught the first pin, 15 kept).
 COLLAPSED = {
-    ("P", "O6-O20"): (15, "GAP"),
+    ("P", "O6-O20"): (14, "GAP"),
 }
 
 #: ENUMERATED, not inferred. Rows the corpus names as waiting on a decision no
@@ -1050,7 +1056,9 @@ PINNED = {
     #: `N 26b` entered, split from `N 26` (COMPOUND-ROW-SPLITS-ONLY-ON-STATE):
     #: school and industry, GAP, where location and company went
     #: COVERED-UNFIRED by D6.
-    "stated_rows": 771,
+    #: 772 AT LANE S'S MERGE OF MASTER 71d83ca (2026-10-10), MEASURED on the
+    #: merged tree: master's figure after lane K's rulings, plus `P O17` (a stated row).
+    "stated_rows": 772,
     #: 762 = 704 stated rows + 58 declared collapses, computed at HEAD. NOT the
     #: published 761 and NOT the counter docstring's 760: those two differ only
     #: by a `- 2 stateless` term whose two rows are already outside the 704.
@@ -1126,7 +1134,9 @@ PINNED = {
     #: stated rows 771 less out_of_scope 40 (`P S9`, `M C71`).
     #: 710 ON LANE K's APPLICATION OF THE RULINGS OF 2026-10-10, MEASURED:
     #: stated rows 771 less out_of_scope 61.
-    "achievable": 710,
+    #: 711 AT LANE S'S MERGE OF MASTER 71d83ca (2026-10-10), MEASURED on the
+    #: merged tree: master's figure after lane K's rulings, plus `P O17` (a stated row in scope).
+    "achievable": 711,
     #: 205 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
     #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
     #: 179 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: the 30 returned
@@ -1194,7 +1204,9 @@ PINNED = {
     #: `M M14`, `M M15` and `M M18` GAP -> COVERED-UNFIRED -- adjudicated now.
     #: 213 AT LANE U'S MERGE OF ORIGIN/MASTER 71d83ca, MEASURED: lane K's
     #: 210 with lane U's three rows (+3).
-    "adjudicated": 213,
+    #: 214 AT LANE S'S MERGE OF MASTER 0103810 (2026-10-10), MEASURED on the
+    #: merged tree: master's figure after lane U's three rows, plus `P O17` (COVERED-UNFIRED, adjudicated).
+    "adjudicated": 214,
     #: THE LIVE LANE'S FOUR ROWS, RE-DERIVED AT EACH OF ITS MERGES OF MASTER
     #: (2026-09-24; last over lane S): four rows fired live and banked
     #: (`_audit/2026-09-23-live-lane-session-1.md`). `P G6` COVERED-UNFIRED ->
@@ -1265,7 +1277,9 @@ PINNED = {
     #: `M M14`, `M M15` and `M M18` GAP -> COVERED-UNFIRED on `linkedin_send_attachment`.
     #: 135 AT LANE U'S MERGE OF ORIGIN/MASTER 71d83ca, MEASURED: lane K's
     #: 132 with lane U's three rows (+3).
-    "delivered_broad": 135,
+    #: 136 AT LANE S'S MERGE OF MASTER 0103810 (2026-10-10), MEASURED on the
+    #: merged tree: master's figure after lane U's three rows, plus `P O17` (COVERED-UNFIRED, delivered broadly).
+    "delivered_broad": 136,
     #: 79 since the live lane's merge (see `adjudicated`): P G6, N 134, P O3
     #: and M C72 COVERED-PROVEN.
     #: 75 and 21 since the bucket-1 merge: `M C41` fired live and moved from
@@ -1445,7 +1459,9 @@ PINNED = {
     #: 20 AT THE LIVE LANE'S MERGE OF MASTER 0103810 (2026-10-10), MEASURED on the
     #: merged tree, not summed: the live lane's session 9 and the lanes
     #: master carried (K's rulings, U's attachments).
-    "unfired": 20,
+    #: 21 AT LANE S'S MERGE OF MASTER 6c65815 (2026-10-10), MEASURED on the
+    #: merged tree: master's figure after live session 9, plus `P O17` (COVERED-UNFIRED, never fired).
+    "unfired": 21,
     #: 104 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     #: 101 AT LANE S'S NAMES ADOPTION (2026-09-27), MEASURED: `N 79`, `N 172`
@@ -1882,7 +1898,9 @@ PINNED = {
     #: and `N 172` (a named member's connections, as people, by the
     #: Connections-of filter) and `N 31` (the connections he and that member
     #: share) fired live, read-only, and banked.
-    "b1_no_ruling": 5,
+    #: 6 AT LANE S'S MERGE OF MASTER 6c65815 (2026-10-10), MEASURED on the
+    #: merged tree: master's figure after live session 9, plus `P O17` (bucket 1, held by no ruling).
+    "b1_no_ruling": 6,
     #: 7 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
     #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
     #: 4 AT THE LIVE LANE'S MERGE OF MASTER c2825a4 (2026-09-28), MEASURED on the
@@ -1896,7 +1914,9 @@ PINNED = {
     #: with its emoji, sent and verified), `M M33` (the starred pill applied), `M M49`
     #: (the read indicator read) and `P A21`, `P A19` (tested and restored exactly)
     #: fired live and banked.
-    "b1_released": 1,
+    #: 2 AT LANE S'S MERGE OF MASTER 71d83ca (2026-10-10), MEASURED on the
+    #: merged tree: master's figure after lane K's rulings, plus `P O17` (bucket 1, its cell citing RELEASED BY HIS-OWN-SETTINGS-NOT-OUTWARD).
+    "b1_released": 2,
     #: D3's enumerated list: FOUR once `M C83` left it, and THREE since
     #: `N 172` left it the same evening on OTHER-MEMBER-IDS-AS-READS -- see
     #: `RULING_BLOCKED_NAMED`. It was printed as "five rows" and pinned
@@ -2095,6 +2115,11 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
         "J 121", "J 122",
         "N 20", "N 45",
         "P A8",
+        #: `P O17` entered on 2026-10-10 (lane S, settings): split from
+        #: `P O6-O20`, the switch "Share key profile updates" built behind the
+        #: grant on its page's real capture and never fired. A setting of his
+        #: own account, released by HIS-OWN-SETTINGS-NOT-OUTWARD in its cell.
+        "P O17",
         #: `J 107` and `M M53` entered with lane S's offline frontier,
         #: 2026-09-28, fired at session 2 without banking, and LEFT at
         #: session 3 (2026-09-28), fired again and banked -- with `N 194`.

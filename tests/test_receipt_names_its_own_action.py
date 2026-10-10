@@ -665,8 +665,15 @@ def test_the_action_set_is_the_one_this_file_was_measured_against():
     # verifies in the conversation itself, so it is a fourth owner of
     # "LinkedIn messages", and the reply pair is a fourth sanctioned shared
     # place. No row was reworded to dodge a phrase.
-    assert len(writes.PERFORMABLE) == 18, (
-        "writes.PERFORMABLE holds %d actions, not the 18 this file was "
+    # NINETEEN AT LANE S'S MERGE OF MASTER 0103810 (2026-10-10): ``set_admitted_setting``'s
+    # two rows were read. Its ``_WHERE_TO_LOOK`` value ("that page under
+    # Settings and Privacy, named in the preview") and its ``_VERIFIED_FROM``
+    # row (the admitted page re-rendered, its one control read again by its
+    # exact label) were checked by the rest of this file with the rows in
+    # place -- every other test here passed, so neither prints a phrase
+    # another action owns -- and no owner entry was needed.
+    assert len(writes.PERFORMABLE) == 19, (
+        "writes.PERFORMABLE holds %d actions, not the 19 this file was "
         "measured against: %s. Re-derive the phrase owners in this file for "
         "the new action, then update this count."
         % (len(writes.PERFORMABLE), sorted(writes.PERFORMABLE))

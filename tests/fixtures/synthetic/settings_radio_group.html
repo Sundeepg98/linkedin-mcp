@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Synthetic radio group</title>
+<!--FIXTURE_CONFIG-->
+</head>
+<body>
+<!-- SYNTHETIC. Lane S, 2026-10-10. A settings page drawn as ONE radio group:
+     a role radiogroup named through aria-labelledby holding three radio
+     inputs, each named through aria-labelledby -- the pattern the dark-mode
+     page is recorded as drawing in linkedin_server/writes.py (three inputs
+     named through aria-labelledby, exactly one checked). Every name here is
+     invented. A switch beside the group lets a test see another control
+     move. Behaviour by window.__fixtureConfig: lateMs, inert, alsoFlip (the
+     press also flips the switch), extraChoice (a fourth radio is drawn),
+     noneChecked (the group draws with nothing checked), unbound (the
+     labels carry no for). EVERY INPUT IS COVERED by a decorative span
+     that takes the pointer, as LinkedIn covers its settings radios
+     (measured on the dark-mode page, linkedin_server/dom.py
+     settings_radio_label_selector): a press on the input times out, and
+     a press on its bound label sets it. -->
+<style>
+.host { position: relative; display: inline-block; width: 20px; height: 20px; }
+.host input { margin: 0; width: 20px; height: 20px; }
+.cover { position: absolute; left: 0; top: 0; width: 20px; height: 20px; }
+</style>
+<main>
+<h1>Synthetic radio group</h1>
+<div role="radiogroup" aria-labelledby="grp-label" id="grp">
+<span id="grp-label">Synthetic display</span>
+<span class="host"><input type="radio" name="display" id="r-never" aria-labelledby="l-never" checked><span class="cover"></span></span>
+<label id="l-never" for="r-never">Never</label>
+<span class="host"><input type="radio" name="display" id="r-always" aria-labelledby="l-always"><span class="cover"></span></span>
+<label id="l-always" for="r-always">Always</label>
+<span class="host"><input type="radio" name="display" id="r-device" aria-labelledby="l-device"><span class="cover"></span></span>
+<label id="l-device" for="r-device">Follow the device</label>
+<span id="extra-slot"></span>
+</div>
+<span id="lbl-side">Synthetic side switch</span>
+<div role="switch" tabindex="0" aria-checked="false" aria-labelledby="lbl-side" id="sw-side"></div>
+</main>
+<script>
+(function () {
+  var config = window.__fixtureConfig || {};
+  if (config.extraChoice) {
+    document.getElementById("extra-slot").innerHTML =
+      '<input type="radio" name="display" id="r-extra" aria-label="Sometimes">';
+  }
+  if (config.noneChecked) {
+    document.getElementById("r-never").checked = false;
+  }
+  if (config.unbound) {
+    document.querySelectorAll("label[for]").forEach(function (label) { label.removeAttribute("for"); });
+  }
+  window.__presses = 0;
+  var side = document.getElementById("sw-side");
+  side.style.display = "inline-block";
+  side.style.width = "40px";
+  side.style.height = "20px";
+  document.querySelectorAll('input[type="radio"]').forEach(function (el) {
+    el.addEventListener("click", function (event) {
+      window.__presses += 1;
+      if (!config.inert && !config.lateMs) {
+        if (config.alsoFlip) {
+          side.setAttribute("aria-checked", side.getAttribute("aria-checked") === "true" ? "false" : "true");
+        }
+        return;
+      }
+      var previous = document.querySelector('input[name="display"]:checked');
+      event.preventDefault();
+      if (config.inert) { return; }
+      setTimeout(function () {
+        el.checked = true;
+        if (config.alsoFlip) {
+          side.setAttribute("aria-checked", side.getAttribute("aria-checked") === "true" ? "false" : "true");
+        }
+      }, config.lateMs);
+      void previous;
+    });
+  });
+})();
+</script>
+</body>
+</html>

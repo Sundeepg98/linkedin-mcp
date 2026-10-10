@@ -18,9 +18,11 @@ THE CONTROLS THE ORDER NAMED: a sibling settings page
 (``/mypreferences/d/settings/show-profile-photos``) stays refused, and so does
 this address with anything beneath it.
 
-READ ONLY: ``writes.assert_write_url`` does not consult the exemption tables,
-so no write reaches this address through this admission -- asserted below on
-the write door itself.
+READ ONLY THROUGH THIS ADMISSION: ``writes.assert_write_url`` does not consult
+the exemption tables, so no write reaches this address through it. ONE WRITE
+reaches it on its own spec since 2026-10-10 -- lane S's settings writer, under
+HIS-OWN-SETTINGS-NOT-OUTWARD, exempting exactly the two words the address trips
+-- asserted below on the write door itself.
 """
 
 from __future__ import annotations
@@ -192,12 +194,17 @@ def test_the_line_names_nobody_and_nothing_else():
     assert source.endswith("notify-network-for-updates/?$"), source
 
 
-def test_it_is_no_write_surface():
-    """READ ONLY, on the write door's own terms. ``assert_write_url`` rebuilds
-    the url from a grant's spec and walks the forbidden tuple honouring only
-    that spec's ``exempt_substring`` -- it consults neither exemption table.
-    So no write reaches this address unless a spec names it or exempts one of
-    the two words it trips, and none does."""
+def test_exactly_one_write_names_it_and_it_exempts_only_its_own_two_words():
+    """ONE WRITE SINCE 2026-10-10, on the write door's own terms. This said
+    "it is no write surface" until lane S (settings) admitted the page's one
+    switch for writing, under HIS-OWN-SETTINGS-NOT-OUTWARD: the generic
+    settings writer ``set_admitted_setting`` names this address -- its pattern
+    matches it -- and its spec excuses the two words the address trips,
+    ``/settings/`` and ``settings``, by equality. ``assert_write_url`` still
+    consults neither exemption table. So the claim moved from "none" to
+    "exactly this one, exempting exactly these two", and both halves are held:
+    no other spec names the address, and no spec excuses either word in its
+    one-entry ``exempt_substring``."""
     from linkedin_server import writes
 
     specs = list(writes.SANCTIONED_WRITES.values())
@@ -207,9 +214,12 @@ def test_it_is_no_write_surface():
         if CARRIER in str(spec.url_template or "")
         or (spec.url_pattern is not None and spec.url_pattern.match(SETTING))
     ]
-    assert naming == [], naming
+    assert naming == ["set_admitted_setting"], naming
     exempting = [
         spec.action for spec in specs
         if spec.exempt_substring in ("/settings/", "settings")
+        or set(spec.exempt_substrings) & {"/settings/", "settings"}
     ]
-    assert exempting == [], exempting
+    assert exempting == ["set_admitted_setting"], exempting
+    assert set(writes.spec_for_action("set_admitted_setting").exempt_substrings) == {
+        "/settings/", "settings"}

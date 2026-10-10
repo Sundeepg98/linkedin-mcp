@@ -1153,10 +1153,10 @@ def test_a_composite_target_changes_when_only_the_content_changes(action):
     """
     spec = spec_for_action(action)
     first, second = _components(action)
-    subject = CLEAN_COMPONENT[first]
+    subject = CLEAN_SUBJECT_BY_ACTION.get(action, CLEAN_COMPONENT[first])
     # A FILE KIND'S CONTENT IS A FILE (lane U): two files in the temp root.
-    content_a, content_b = (
-        _FILE_CONTENTS if second == "file" else (COMMENT_A, COMMENT_B)
+    content_a, content_b = CONTENT_PAIR_BY_ACTION.get(
+        action, _FILE_CONTENTS if second == "file" else (COMMENT_A, COMMENT_B)
     )
     one = writes._target_for(spec, {first: subject, second: content_a})
     two = writes._target_for(spec, {first: subject, second: content_b})
@@ -1166,6 +1166,23 @@ def test_a_composite_target_changes_when_only_the_content_changes(action):
     # The content is IN the string rather than hashed or summarised into it,
     # because the same string is what the gate prints for him to read.
     assert content_a in one and content_a not in two, action
+
+
+#: PER ACTION, for the one composite action whose target is a CLOSED SET at
+#: ``_target_for`` (lane S, 2026-10-10): the settings writer's subject must
+#: name an admitted page and control and its content be a value that control
+#: holds, so free text is refused before this property can be asked. Its two
+#: values and its subject come from the server's own registry. The refusals
+#: this section tests all fire in ``_clean_target_part``, BEFORE that check,
+#: so they run for this action unchanged.
+CLEAN_SUBJECT_BY_ACTION: dict[str, str] = {
+    "set_admitted_setting": writes.settings_writer.admitted_names()[0],
+}
+CONTENT_PAIR_BY_ACTION: dict[str, tuple[str, str]] = {
+    "set_admitted_setting": tuple(
+        writes.settings_writer.ADMITTED_PAGES[0].controls[0].values[:2]
+    ),
+}
 
 
 @pytest.mark.parametrize("action,component", COMPONENT_CASES)

@@ -222,6 +222,7 @@ from linkedin_server import (
     people_data,
     people_seam,
     profile_editor,
+    settings_writer,
     shape,
     threads,
     uploads,
@@ -483,6 +484,16 @@ class WriteSpec:
     #: value it compares against -- the pairing is enforced, in both
     #: directions, by ``tests/test_unverifiable_outcomes.py``.
     unverifiable: Optional[Unverifiable] = None
+    #: MORE THAN ONE forbidden substring this action's address carries, each
+    #: excused by EQUALITY, for the one action whose address needs it (lane S,
+    #: 2026-10-10): an admitted settings page lives under
+    #: ``/mypreferences/d/settings/``, which the forbidden list refuses twice
+    #: -- ``"/settings/"`` and ``"settings"`` -- exactly as the read door's own
+    #: exemption for that address excuses both. ``exempt_substring`` stays the
+    #: one-entry form for every other action; this adds to it, it does not
+    #: replace it, and :func:`assert_write_url` still refuses every entry not
+    #: named here, by equality.
+    exempt_substrings: tuple[str, ...] = ()
 
 
 #: The complete set of writes this server may ever perform without a new,
@@ -2015,6 +2026,91 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "actually left."
         ),
     ),
+    # LANE S, 2026-10-10: THE GENERIC SETTINGS WRITER, under
+    # HIS-OWN-SETTINGS-NOT-OUTWARD (``_audit/2026-09-28-rulings-build-classes.md``
+    # section 2). ONE admitted settings page, ONE control on it, named by the
+    # label LinkedIn draws. The registry is ``settings_writer.ADMITTED_PAGES``
+    # and a page enters it only BY NAME, from a real capture of it
+    # (ONE-NAMED-SETTINGS-PAGE-AT-A-TIME); every verdict about the page and the
+    # control is that module's, and this spec is the door. Dark mode keeps its
+    # own spec above, unchanged.
+    "linkedin_set_admitted_setting": WriteSpec(
+        action="set_admitted_setting",
+        tool_name="linkedin_set_admitted_setting",
+        # THE PAGE IS CHOSEN BY ITS NAME; ITS ADDRESS IS THE REGISTRY'S
+        # CONSTANT for that name, through ``url_target_of`` -- a caller never
+        # supplies an address and a page never does either. The pattern admits
+        # the admitted addresses and nothing beside them.
+        url_template=settings_writer.HOST_PREFIX + "{target}",
+        url_pattern=settings_writer.admitted_address_pattern(),
+        exempt_substring=None,
+        # The admitted address lives under ``/mypreferences/d/settings/``,
+        # which trips two forbidden entries; both are excused by equality, as
+        # the read door's own exemption for that address excuses both.
+        exempt_substrings=("/settings/", "settings"),
+        summary="Change ONE control on ONE admitted settings page of his own account.",
+        from_state=None,
+        to_state=None,
+        target_kind="setting_and_value",
+        state_from=settings_writer.STATE_FROM,
+        direction_source=(
+            "The admitted settings page itself, loaded by this gate and read "
+            "through the role engine: the ONE control named exactly as "
+            "admitted, as one of the values its capture drew -- a switch's "
+            "checked state, the one checked radio of the group, the one "
+            "selected option. Read off the very control a change would move."
+        ),
+        wrong_state_note=(
+            "Not a toggle. The destination is named, and the gate refuses a "
+            "control that cannot be read as exactly one of its values, or one "
+            "that already reads the destination."
+        ),
+        # THE VALUES OF EVERY ADMITTED CONTROL, keyed as the generic branches
+        # expect. This action's own arms in ``_direction`` and ``valid_from``
+        # check the value against ITS control; this enumeration only keeps the
+        # generic branches truthful if they are ever reached -- and the builder
+        # REFUSES two controls sharing a value word with different meanings,
+        # which a dict keyed by the bare value would overwrite in silence.
+        audiences=settings_writer.audiences(),
+        reversibility=(
+            "STILL-UNKNOWN as a VERDICT. Structurally the inverse of this "
+            "action IS this action with the value the preview read: every "
+            "admitted control holds one of a closed set of values, readable "
+            "before and after, on the page that sets it."
+        ),
+        reversibility_measured=False,
+        reversibility_class="STILL-UNKNOWN",
+        reversibility_evidence=(
+            "THE ROUND TRIP HAS NOT BEEN PERFORMED LIVE on any admitted page. "
+            "What is measured: the one admitted page's capture draws its one "
+            "switch, readable off, and no Save (the press stores). The live "
+            "proof the ruling prescribes -- read, benign value, read back, "
+            "restore the exact original, read back -- is planned in "
+            "_audit/2026-09-28-lane-s-settings.md and run by the live lane."
+        ),
+        reversible_by=(
+            "THIS SERVER, by calling this same tool with the value the preview "
+            "read -- the receipt's restore block prints that exact call. "
+            "Nothing restores on its own: a restore is a write with its own "
+            "preview and its own token."
+        ),
+        residue=(
+            "A control that also changes what OTHER members see is restored "
+            "inside the same minute in its live proof. A page that stores on "
+            "the press has nothing to discard: if the check after the press "
+            "did not pass -- another control moved, the control did not "
+            "move, the page redrew, or the press raised -- whatever it did is "
+            "already stored and the receipt says STOP. The ruling's "
+            "exclusions -- credential settings, a setting that cannot be put "
+            "back exactly, a sensitive personal attribute -- are carried per "
+            "control and printed in the preview."
+        ),
+        reversibility_procedure=(
+            "ONE ROUND TRIP PER SETTING, WATCHED, one setting at a time: read "
+            "it, write a benign value, read it back, restore the exact "
+            "original, read it back. Any failed restore is STOP-ALL."
+        ),
+    ),
     "linkedin_send_invitation": WriteSpec(
         action="send_invitation",
         tool_name="linkedin_send_invitation",
@@ -3009,10 +3105,16 @@ def assert_write_url(url: str, grant: WriteGrant) -> str:
     # exactly one entry, by equality, and everything else still refuses.
     lowered = url.lower()
     for bad in readonly._FORBIDDEN_URL_SUBSTRINGS:
-        if bad in lowered and bad != spec.exempt_substring:
+        if (
+            bad in lowered
+            and bad != spec.exempt_substring
+            and bad not in spec.exempt_substrings
+        ):
             raise WriteAttemptError(
                 f"write blocked: {url!r} contains {bad!r}, which this action "
-                f"does not exempt (it exempts {spec.exempt_substring!r})"
+                f"does not exempt (it exempts {spec.exempt_substring!r}"
+                + (f" and {list(spec.exempt_substrings)!r}" if spec.exempt_substrings else "")
+                + ")"
             )
     return url
 
@@ -3407,6 +3509,12 @@ def url_target_of(spec: WriteSpec, target: str) -> str:
     which is the rule this module already applies to the two functions above.
     """
     kind = spec.target_kind
+    if spec.action == "set_admitted_setting":
+        # THE ADMITTED PAGE'S ADDRESS, BY ITS NAME (lane S, 2026-10-10): the
+        # target names a page and a control, and the registry holds the page's
+        # CONSTANT address. The path after the host is returned -- never
+        # raising -- and the anchored pattern refuses anything else.
+        return settings_writer.page_path_for_target(target, TARGET_JOIN)
     if kind == "profile":
         # THE SEGMENT OF THE CANONICAL LINK, 2026-09-27: the template is
         # ``https://www.linkedin.com/in/{target}/`` and the grant holds the
@@ -3847,6 +3955,13 @@ def _target_for(spec: WriteSpec, target: Any) -> str:
                     + repr(badge_value)
                     + " is neither. Refused before any token exists for it."
                 )
+        if spec.action == "set_admitted_setting":
+            # ONE ADMITTED PAGE, ONE ADMITTED CONTROL, ONE OF ITS VALUES (lane
+            # S, 2026-10-10), respelled in LinkedIn's own words -- or refused
+            # HERE, where ``observe`` and ``mint`` both pass, so no page is
+            # loaded and no token is minted for anything the registry does not
+            # admit. See ``settings_writer.canonical_target``.
+            canonical = settings_writer.canonical_target(canonical, TARGET_JOIN)
         if spec.action in UPLOAD_ACTIONS:
             # THE FILE IS CHECKED WHERE THE TARGET IS MADE, so that BOTH doors
             # get it. ``observe`` canonicalises and ``mint`` canonicalises
@@ -3944,6 +4059,10 @@ STRICT_PRESS_ACTIONS: frozenset[str] = NAMED_PROFILE_ACTIONS | frozenset(
         "withdraw_from_group",
         "follow_company",
         "send_invitation",
+        # Lane S, 2026-10-10: the generic settings writer's press is aimed by
+        # the control's exact name, which the gate required to be drawn once;
+        # a second match at press time can only be something drawn since.
+        "set_admitted_setting",
         # LANE U, 2026-10-10: the attachment's Send, the reply form's own --
         # its gate required exactly one form and one Send, so a second match
         # at the press is something drawn since, and it throws.
@@ -5411,6 +5530,38 @@ async def observe(
             same_page_as_action=True,
         )
 
+    if spec.state_from == settings_writer.STATE_FROM:
+        # ONE load, of the admitted page the click lands on (lane S,
+        # 2026-10-10). The address is the registry's CONSTANT for the page's
+        # name; the control is read by its exact label, counts only
+        # (``settings_writer.read_control``). A landing that did not keep the
+        # admitted address reads ``unknown`` whatever it drew.
+        admitted, control, _destination = settings_writer.resolve_target(target, TARGET_JOIN)
+        # THE ADDRESS THROUGH THE SPEC'S OWN TEMPLATE, the derivation the write
+        # door rebuilds with -- never an attribute read off a record, which the
+        # navigation guard (rightly) cannot tell from one read off a page.
+        url = str(spec.url_template or "").format(target=url_target_of(spec, target))
+        landed = await _load(navigator, page, url, surface="settings")
+        reading = await settings_writer.read_control(page, control)
+        # A COMPARISON, NOT A CALL ON THE LANDING: see
+        # ``settings_writer.landed_path`` for why the navigation guard needs
+        # the landing compared rather than handed to a function.
+        state, why = settings_writer.state_of(
+            reading,
+            control,
+            served=settings_writer.landed_path(landed) == settings_writer.landed_path(url),
+        )
+        return _record(
+            spec,
+            target=target,
+            facts=settings_writer.preview_facts(admitted, control, reading),
+            facts_url=url,
+            state=state,
+            state_why=why,
+            state_url=url,
+            same_page_as_action=True,
+        )
+
     if spec.state_from == "apply_control":
         # ONE load, and the facts and the route come off the same page. The
         # route is read from the CONTROL rather than from the payload, which
@@ -5830,6 +5981,21 @@ def _direction(
             )
         ),
     }
+
+    if spec.action == "set_admitted_setting":
+        # ITS OWN CONTROL'S VALUES, NOT A SPEC-WIDE ENUMERATION (lane S,
+        # 2026-10-10): each admitted control holds its own closed set, so the
+        # current value and the destination are checked against THAT set, and
+        # the destination is the grant's own canonical value -- never the
+        # caller's spelling. The block names the page and the control.
+        admitted, control, destination = settings_writer.resolve_target(
+            observation.target, TARGET_JOIN
+        )
+        out = dict(read_from)
+        out.update(settings_writer.direction_block(control, state, destination))
+        out["page"] = admitted.name
+        out["control"] = control.label
+        return out
 
     if spec.from_state is None:
         # Not a binary toggle. Open To Work has three states, so the
@@ -6431,6 +6597,12 @@ _SAVE_FAMILY: frozenset[str] = frozenset({"save_job", "unsave_job"})
 
 PERFORMABLE: frozenset[str] = frozenset(
     {
+        # LANE S, 2026-10-10, under HIS-OWN-SETTINGS-NOT-OUTWARD: ONE control
+        # on ONE admitted settings page, by its exact label. One page is
+        # admitted ("Share profile updates", measured on its capture); its
+        # press drains this module's one click site, or its one select_option
+        # site for a select, and nothing new is sanctioned.
+        "set_admitted_setting",
         # THE SIXTEENTH AND SEVENTEENTH, 2026-09-27 (lane L5's follow-up, on
         # ruling THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET): Connect and Message
         # on the profile of a person he names. Every clause the others needed,
@@ -6969,6 +7141,35 @@ def valid_from(spec: WriteSpec, state: str, target: str) -> tuple[bool, str]:
     # and it defaults to ``from_state`` so the ten actions whose two readings
     # coincide are unchanged. What the field buys is that the coincidence is
     # now RULED rather than relied on.
+    if spec.action == "set_admitted_setting":
+        # THE CLICK-TIME READING AGAINST ITS OWN CONTROL (lane S, 2026-10-10),
+        # the question ``_direction`` asked at preview: one of the control's
+        # values, and not already the destination.
+        try:
+            _admitted, control, destination = settings_writer.resolve_target(
+                target, TARGET_JOIN
+            )
+        except WriteAttemptError:
+            # A REASON THIS PACKAGE COMPOSES, never the exception's text (the
+            # receipt rule ``tests/test_a_write_receipt_carries_no_library_
+            # message.py`` holds for every return of this module).
+            return False, (
+                "this grant's target no longer names an admitted settings page, "
+                "control and value, so there is nothing to move from."
+            )
+        if state not in control.values:
+            return False, (
+                f"the control on the page reads {state!r}, which is not one of "
+                f"its values {list(control.values)}; a state that cannot be "
+                "named cannot be moved from."
+            )
+        if state == destination:
+            return False, (
+                f"the setting already reads {state!r}, which is where this grant "
+                "was going. Nothing to change -- and this reading is fresher than "
+                "the preview's, so it may have been changed elsewhere since."
+            )
+        return True, ""
     wanted_here = spec.click_from_state or spec.from_state
     if wanted_here is not None:
         if state == wanted_here or state in spec.also_from_states:
@@ -7109,6 +7310,16 @@ def anchor_label_for(
             if destination.strip().casefold() == known.casefold():
                 return known
         return None
+    if spec.action == "set_admitted_setting":
+        # THE CANONICAL DESTINATION, per call (lane S, 2026-10-10): the value
+        # the admitted control will read once the press lands, in the
+        # control's own spelling -- which is also what ``perform`` compares
+        # the verification against. ``None`` when the target does not resolve,
+        # and ``perform`` refuses on that.
+        try:
+            return settings_writer.resolve_target(str(target or ""), TARGET_JOIN)[2]
+        except WriteAttemptError:
+            return None
     if spec.action == "send_attachment":
         # LANE U: THE LABEL OF THE BUTTON THE FILE'S INPUT SHARES ITS WRAPPER
         # WITH -- 'Attach an image ...' for an image, 'Attach a file ...' for
@@ -7517,6 +7728,8 @@ _WRITE_SURFACE_FOR_ACTION: dict[str, str] = {
     # 2026-09-27: addressed by a person's link, acting on HIS OWN profile's
     # suggestion rail -- the page the press lands on, not the linked one.
     "send_invitation": "your own profile's suggestion rail",
+    # Lane S, 2026-10-10: the admitted settings page the target names.
+    "set_admitted_setting": "the admitted settings page",
 }
 
 
@@ -7580,6 +7793,9 @@ _WHERE_TO_LOOK: dict[str, str] = {
     # The page the leave is pressed on and verified off: his memberships are
     # listed there and nowhere else this server may read.
     "withdraw_from_group": "your LinkedIn Groups page",
+    # Lane S, 2026-10-10: the one page that renders the value is the page that
+    # sets it, under Settings and Privacy, named in the preview.
+    "set_admitted_setting": "that page under Settings and Privacy, named in the preview",
     # THE FOUR WHOSE ANSWER IS NOT ON A SURFACE THIS SERVER MAY READ, and each
     # names the place a HUMAN would look rather than the place this server
     # would. That distinction is the whole value of the field: it is read
@@ -7765,6 +7981,14 @@ _VERIFIED_FROM["follow_company_page"] = (
     "however many Pages he follows, so a follow that landed but whose row is "
     "not drawn is reported UNKNOWN, never as not having happened."
 )
+_VERIFIED_FROM["set_admitted_setting"] = (
+    "THE ADMITTED SETTINGS PAGE, RE-RENDERED by a fresh navigation to its "
+    "constant address, the one control read again by its exact label: there "
+    "is no second surface for a setting, so this is a new render from "
+    "LinkedIn rather than an independent witness. A page that did not keep "
+    "its address, a control drawn twice, or a value outside the control's "
+    "closed set answers unknown."
+)
 
 
 #: A landed profile path, split into the MEMBER SEGMENT and everything after
@@ -7814,7 +8038,7 @@ def _publishable_landing(spec: "WriteSpec", url: str, landed: str) -> str:
     the landing was held to the caller's segment with case folded, and any
     query LinkedIn appended to it is the page's, not the caller's.
     """
-    if spec.state_from in ("company_page", "named_profile"):
+    if spec.state_from in ("company_page", "named_profile", settings_writer.STATE_FROM):
         return url
     return landed
 
@@ -7897,6 +8121,21 @@ def _assert_landed_on_target(
                 "invitation or a message pressed on any other page would reach "
                 "somebody else. THE LANDING IS WITHHELD rather than named; what "
                 f"is safe to say about it -- {landing.withheld(landed)}."
+            )
+        return
+    if spec.state_from == settings_writer.STATE_FROM:
+        # THE ADMITTED SETTINGS PAGE, BY ITS PATH (lane S, 2026-10-10): host
+        # fixed, trailing slash and query ignored -- the rule the read of the
+        # same page set (``profile_editor.served_at_account_setting``). A
+        # redirect to the category page that lists it, or anywhere else,
+        # VETOES the press.
+        admitted, _control, _value = settings_writer.resolve_target(grant.target, TARGET_JOIN)
+        if not settings_writer.served_at(admitted, landed):
+            raise WriteAttemptError(
+                "refusing to press: this setting lives on the admitted page its "
+                "grant names, and the browser landed somewhere that is not that "
+                "page. THE LANDING IS WITHHELD rather than named; what is safe to "
+                f"say about it -- {landing.withheld(landed)}."
             )
         return
     if spec.state_from == "thread_page":
@@ -8516,6 +8755,45 @@ async def _live_control(
             "#" + dom_id,
             kind,
         )
+
+    if spec.action == "set_admitted_setting":
+        # THE SAME READER THE PREVIEW USED, ON THE SAME PAGE (lane S,
+        # 2026-10-10): freshness, not a second source. The control is re-read
+        # by its exact label, the origin checked by ``valid_from``, and the
+        # press built from the ROLE the reading found -- a switch by its own
+        # name, a radio group on the radio named for the destination, a
+        # select through ``perform``'s one select_option site. The kind
+        # returned is "click" or "select_option", NEVER "switch": that kind
+        # routes a press into the profile editor's save gate.
+        _admitted, control, destination = settings_writer.resolve_target(
+            grant.target, TARGET_JOIN
+        )
+        reading = await settings_writer.read_control(page, control)
+        state, why = settings_writer.state_of(reading, control, served=True)
+        if state == UNKNOWN:
+            return (UNKNOWN, why, "")
+        ok, refusal = valid_from(spec, state, grant.target)
+        if not ok:
+            return (state, refusal + " " + why, "")
+        selector, kind = settings_writer.press_for(control, destination, reading)
+        if control.kind == settings_writer.RADIO_GROUP:
+            # THE LABEL IS PRESSED ONLY IF IT IS BOUND to the radio named for
+            # the destination -- ``<label for>`` equal to that radio's id, one
+            # such label -- read here, immediately before the press, as
+            # ``update_setting`` reads it (``dom.read_radio_label_binding``).
+            # The input itself is covered on LinkedIn's settings radios
+            # (measured, ``dom.settings_radio_label_selector``).
+            binding = await dom.read_radio_label_binding(page, "radio", destination)
+            if binding.get("bound") is not True:
+                return (
+                    state,
+                    "the radio named for the destination has no single label "
+                    "bound to it by its id, and LinkedIn covers a settings "
+                    "radio's input, so there is nothing this writer may press. "
+                    + why,
+                    "",
+                )
+        return (state, why, selector, kind)
 
     if spec.action == "update_setting":
         # THE SAME READER THE PREVIEW USED, ON THE SAME PAGE -- so this is
@@ -9348,6 +9626,29 @@ async def _verify_after(
             "click, so the reaction did not take effect.",
             landed,
         )
+
+    if spec.action == "set_admitted_setting":
+        # A FRESH NAVIGATION TO THE ADMITTED PAGE AND A RE-READ OF THE ONE
+        # CONTROL (lane S, 2026-10-10): the page that renders the value is the
+        # page that sets it, so this is a new render rather than an
+        # independent witness. A landing elsewhere, a control drawn twice or a
+        # value outside its closed set answers unknown.
+        _admitted, control, _destination = settings_writer.resolve_target(
+            grant.target, TARGET_JOIN
+        )
+        url = str(spec.url_template or "").format(target=url_target_of(spec, grant.target))
+        landed = await _load(navigator, page, url, surface="settings")
+        reading = await settings_writer.read_control(page, control)
+        state, why = settings_writer.state_of(
+            reading,
+            control,
+            served=settings_writer.landed_path(landed) == settings_writer.landed_path(url),
+        )
+        # THE ADDRESS ASKED FOR, never the landing (a cold review's finding):
+        # LinkedIn may append a query to a page that kept its path, and a
+        # landing that did not keep it reads unknown above. The admitted
+        # constant is what a human opens; the landing stays here.
+        return state, why, url
 
     if spec.action == "update_setting":
         # A FRESH NAVIGATION AND A RE-READ OF THE GROUP, which is the
@@ -10424,6 +10725,79 @@ def _typed_text_with_the_box(
     return {**block, "words_left_in_the_box": words_left}
 
 
+async def _settings_after_press(
+    page: Any, settings_target: Any, settings_before: Optional[dict[str, Any]]
+) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
+    """After the generic settings writer's press (lane S, 2026-10-10).
+
+    The bounded wait for the control to read the destination
+    (``profile_editor.wait_for_state``, deciding nothing), then whether ONLY
+    that control moved (``settings_writer.only_that_control_moved``), then
+    the page's Save gate -- asked only if it did. READS ONLY; ``perform``
+    appends a Save press to its one click queue on ``save["proceed"]``.
+    Returns ``(wait, check, save)``.
+    """
+    admitted, control, destination = settings_target
+    _reading, wait = await profile_editor.wait_for_state(
+        page,
+        lambda: settings_writer.read_control(page, control),
+        lambda reading: settings_writer.reads(reading, destination),
+    )
+    after = await settings_writer.snapshot(page)
+    check = settings_writer.only_that_control_moved(
+        settings_before, after, control, reached=bool(wait.get("reached"))
+    )
+    if check["proceed"]:
+        save = await settings_writer.save_gate(page, admitted)
+    else:
+        save = {
+            "needed": admitted.save_label is not None,
+            "proceed": False,
+            "selector": "",
+            "why": "not asked: " + str(check.get("why") or ""),
+        }
+    return wait, check, save
+
+
+def _settings_press_block(
+    settings_target: Any,
+    settings_before: Optional[dict[str, Any]],
+    wait: Optional[dict[str, Any]],
+    check: Optional[dict[str, Any]],
+    save: Optional[dict[str, Any]],
+    *,
+    attempted: bool,
+) -> dict[str, Any]:
+    """The receipt's account of a settings press (lane S, 2026-10-10). PURE.
+
+    Counts and verdicts only: what the page drew before (``snapshot_counts``,
+    never a value), the wait, the only-it-moved verdict and the Save gate. A
+    check of ``None`` means the post-press step never ran -- the press did not
+    land or raised -- and is said as such, never as a pass.
+    """
+    admitted, control, destination = settings_target or (None, None, "")
+    block: dict[str, Any] = {
+        "page": getattr(admitted, "name", None),
+        "control": getattr(control, "label", None),
+        "kind": getattr(control, "kind", None),
+        "requested": destination or None,
+        "controls_before": settings_writer.snapshot_counts(settings_before),
+        "wait": wait,
+        "check": check
+        or {"proceed": False, "code": "not_run", "why": "the post-press step did not run.", "moved": None},
+        "save": save
+        or {"needed": None, "proceed": False, "selector": "", "why": "the post-press step did not run."},
+    }
+    # STOP ON EVERY PRESS THAT DID NOT PASS, on a page that stores on the
+    # press (``settings_writer.press_stop``). Until a cold review read it, this
+    # was set for ``another_control_moved`` alone -- one shape of five -- and
+    # no test read it.
+    stop = settings_writer.press_stop(admitted, check, attempted=attempted)
+    if stop is not None:
+        block["stop"] = stop
+    return block
+
+
 class _PerformRefused(WriteAttemptError):
     """A refusal ``perform`` composed itself, inside its dispatch block.
 
@@ -10883,6 +11257,22 @@ async def perform(
             # chosen or typed field, and no other, moved.
             editor_values_before = await _editor_values_or_refusal(page)
 
+    # THE SETTINGS WRITER'S BEFORE-READINGS (lane S, 2026-10-10), taken on the
+    # page already open and before anything is pressed: every switch,
+    # checkbox, radio and select on it, position by position -- what
+    # ``settings_writer.only_that_control_moved`` compares against after the
+    # press -- and the control's value, which is the whole of the restore path.
+    settings_target: Optional[tuple[Any, Any, str]] = None
+    settings_before: Optional[dict[str, Any]] = None
+    settings_wait: Optional[dict[str, Any]] = None
+    settings_check: Optional[dict[str, Any]] = None
+    settings_save: Optional[dict[str, Any]] = None
+    if spec.action == "set_admitted_setting":
+        settings_target = settings_writer.resolve_target(grant.target, TARGET_JOIN)
+        settings_before = await settings_writer.snapshot(page)
+        prior_value = live_state
+        prior_why = live_why
+
     selects_made = 0
     uploads_made = 0
     uploaded: Optional[dict[str, Any]] = None
@@ -10908,7 +11298,31 @@ async def perform(
     # below keep only the exception's TYPE, so none of it reaches a receipt.
     press_strictly = spec.action in STRICT_PRESS_ACTIONS
     fill_strictly = spec.action in NAMED_PROFILE_ACTIONS
+    # THE SETTINGS WRITER'S CHOICE IS STRICT TOO (lane S, 2026-10-10, a cold
+    # review's finding): its select is aimed by the control's exact name,
+    # which the reader required drawn once page-wide, so a second match at
+    # the moment of the choice can only be something drawn since. Every other
+    # action's select keeps the call it has always made.
+    select_strictly = spec.action == "set_admitted_setting"
+    settings_refused_before_press = False
     try:
+        # A SETTINGS PRESS THE CHECK AFTER IT COULD NOT JUDGE IS NOT MADE
+        # (lane S, 2026-10-10, a cold review's HIGH finding). The before
+        # snapshot is what ``settings_writer.only_that_control_moved``
+        # compares against; one that failed, or drew more controls than this
+        # writer reads, can never pass -- and on a page that stores on the
+        # press, a press then could only be reported, never checked.
+        if spec.action == "set_admitted_setting" and not settings_writer.snapshot_readable(
+            settings_before
+        ):
+            settings_refused_before_press = True
+            raise _PerformRefused(
+                "refusing to press for 'set_admitted_setting': the page's "
+                "switches, checkboxes, radios and selects could not all be read "
+                "before the press, so nothing could say afterwards that only "
+                "this control moved -- and a page that stores on the press "
+                "keeps whatever a press did. Nothing was pressed."
+            )
         # THE UPLOAD DRAINS FIRST, AND THE ORDER IS AN ARGUMENT RATHER THAN A
         # PREFERENCE.
         #
@@ -11078,7 +11492,10 @@ async def perform(
             # would be a submission token the page chose, and neither is the
             # thing he agreed to.
             await page.select_option(
-                select_selector, label=select_text, timeout=CLICK_TIMEOUT_MS
+                select_selector,
+                label=select_text,
+                timeout=CLICK_TIMEOUT_MS,
+                strict=select_strictly,
             )
             selects_made += 1
         # THE COMMIT, FOR A CHANGE MADE BY CHOOSING. A select drains before
@@ -11114,6 +11531,15 @@ async def perform(
                 )
                 if editor_save_gate["proceed"]:
                     click_plan.append(editor_save_gate["selector"])
+        # A SETTING CHANGED BY CHOOSING (lane S, 2026-10-10): the select has
+        # drained, so its wait, its only-it-moved check and its Save gate run
+        # here; a Save joins the one click queue only on the gate's word.
+        if spec.action == "set_admitted_setting" and selects_made:
+            settings_wait, settings_check, settings_save = await _settings_after_press(
+                page, settings_target, settings_before
+            )
+            if settings_save.get("proceed"):
+                click_plan.append(settings_save["selector"])
         # ONE LOOP OVER TWO QUEUES, AND CLICKS DRAIN FIRST.
         #
         # THIS WAS TWO SEQUENTIAL LOOPS -- every fill, then every click -- and
@@ -11222,6 +11648,21 @@ async def perform(
                 ):
                     # THE CLOSE PRESS. It dispatched nothing.
                     closer_clicks += 1
+                elif (
+                    spec.action == "set_admitted_setting"
+                    and clicks_made == 1
+                    and not selects_made
+                ):
+                    # A SETTING CHANGED BY A PRESS (lane S, 2026-10-10): a
+                    # switch or a radio was just pressed. The bounded wait,
+                    # the only-it-moved check and the Save gate -- and a Save
+                    # joins this same queue only on the gate's word. A page
+                    # whose capture drew no Save stored on the press.
+                    settings_wait, settings_check, settings_save = await _settings_after_press(
+                        page, settings_target, settings_before
+                    )
+                    if settings_save.get("proceed"):
+                        click_plan.append(settings_save["selector"])
                 elif control_kind == "switch" and clicks_made == 1:
                     # THE SWITCH WAS PRESSED; SAVE IS PRESSED ONLY IF THE
                     # BADGE, AND NOTHING ELSE, MOVED. Read in the dialog,
@@ -11685,6 +12126,24 @@ async def perform(
             restore_block["clear"] = field_restore.recorded_note(
                 restore_record, performed, control_kind
             )
+    if spec.action == "set_admitted_setting" and settings_target is not None:
+        # THE SETTING'S RESTORE PATH (lane S, 2026-10-10): the value the
+        # click-time read found, verbatim, and the exact call that puts it
+        # back -- his to run, through its own preview and token. The live
+        # proof's restore step is that call.
+        restore_admitted, restore_control, _restore_dest = settings_target
+        restore_block = {
+            "previous_value": prior_value,
+            "how_it_was_read": prior_why,
+            "to_put_it_back": settings_writer.restore_call(
+                restore_admitted, restore_control, prior_value
+            ),
+            "this_server_will_not_do_it_for_you": (
+                "Restoring is a WRITE and gets its own preview, its own token "
+                "and its own confirmation. Nothing here is queued, scheduled "
+                "or held."
+            ),
+        }
 
     return {
         "action": spec.action,
@@ -11692,6 +12151,24 @@ async def perform(
         "target": target_block,
         "performed": performed,
         **({"restore": restore_block} if restore_block is not None else {}),
+        # THE SETTINGS WRITER'S PRESS, read around it (lane S, 2026-10-10):
+        # the wait, whether only that control moved, the Save gate, and STOP
+        # on any press a page that stores on the press did not pass.
+        **(
+            {
+                "setting_press": _settings_press_block(
+                    settings_target, settings_before, settings_wait,
+                    settings_check, settings_save,
+                    # A PRESS WAS ATTEMPTED if one was made, or if the press
+                    # itself raised -- it may have dispatched. Not if this
+                    # function refused before it.
+                    attempted=(clicks_made + selects_made) > 0
+                    or (click_error is not None and not settings_refused_before_press),
+                )
+            }
+            if spec.action == "set_admitted_setting"
+            else {}
+        ),
         # WHAT IS LEFT IN HIS COMPOSER. Beside "clicked" rather than inside
         # it, because it is a fact about HIS SCREEN rather than about this
         # server's click, and a reader looking for consequences should not
@@ -12184,6 +12661,14 @@ async def perform(
                 "a retry on a toggle that did land performs the opposite "
                 "action."
                 if spec.action in _TOGGLE_ACTIONS
+                # A SETTING IS AIMED AT A VALUE (lane S, 2026-10-10, a cold
+                # review's finding: it was told it might act twice "to the
+                # same person or the same employer").
+                else "this action names the VALUE it sets, so a retry reads the "
+                "control first and refuses if it already reads that value -- "
+                "but on a page that stores on the press, read the page before "
+                "any retry."
+                if spec.action == "set_admitted_setting"
                 else "this action is NOT a toggle, so a retry does not undo a "
                 "first attempt that landed -- it may do the same thing twice, "
                 "to the same person or the same employer."

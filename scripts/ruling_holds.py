@@ -235,6 +235,16 @@ ROW_RELEASES: dict[str, Release] = {
     "SELF-PROFILE-EDITS-NOT-OUTWARD": Release(
         gist="his own profile field is not an outward act: prove with "
              "notify-network off, restore in-session, before/after reading"),
+    #: Ruled 2026-09-28 by the orchestrator, registered on lane S's branch
+    #: 2026-10-10 (``_audit/2026-09-28-rulings-build-classes.md`` section 2):
+    #: a setting of his own account is not an outward act. Its proof is
+    #: read, benign value, read back, restore the exact original, read back,
+    #: one setting at a time. Its exclusions -- the credential set, a setting
+    #: that cannot be put back exactly, a sensitive personal attribute -- are
+    #: never live-proven unless he names them, so their cells do not cite this.
+    "HIS-OWN-SETTINGS-NOT-OUTWARD": Release(
+        gist="a setting of his own account is not an outward act: read, "
+             "benign value, read back, restore the exact original, read back"),
 }
 
 #: ``**HELD BY `<ID>`**`` -- the bold is optional, the backticked id is not.
