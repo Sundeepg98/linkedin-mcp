@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Synthetic select</title>
+<!--FIXTURE_CONFIG-->
+</head>
+<body>
+<!-- SYNTHETIC. Lane S, 2026-10-10. A settings page drawn as a SELECT with a
+     Save button: a select named through its label, a second select beside it,
+     and one Save. Every name here is invented. Behaviour by
+     window.__fixtureConfig: lateMs (the choice is re-applied this many ms
+     later after being held back), alsoChange (choosing also changes the other
+     select), extraOption (a fourth option is drawn), twoSaves (a second Save
+     is drawn), disabledSave (Save is disabled), noSave (no Save is drawn). -->
+<main>
+<h1>Synthetic select</h1>
+<form onsubmit="return false;">
+<label for="sel-lang">Synthetic language</label>
+<select id="sel-lang">
+<option value="v-a">Alpha</option>
+<option value="v-b" selected>Beta</option>
+<option value="v-c">Gamma</option>
+</select>
+<label for="sel-region">Synthetic region</label>
+<select id="sel-region">
+<option value="r-1" selected>North</option>
+<option value="r-2">South</option>
+</select>
+<span id="save-slot"><button type="button" id="save">Save</button></span>
+</form>
+</main>
+<script>
+(function () {
+  var config = window.__fixtureConfig || {};
+  var lang = document.getElementById("sel-lang");
+  var region = document.getElementById("sel-region");
+  if (config.extraOption) {
+    var opt = document.createElement("option");
+    opt.value = "v-d";
+    opt.textContent = "Delta";
+    lang.appendChild(opt);
+  }
+  var slot = document.getElementById("save-slot");
+  if (config.noSave) { slot.innerHTML = ""; }
+  if (config.twoSaves) { slot.innerHTML += '<button type="button">Save</button>'; }
+  if (config.disabledSave) { document.getElementById("save").disabled = true; }
+  window.__saves = 0;
+  slot.addEventListener("click", function () { window.__saves += 1; });
+  var held = lang.value;
+  lang.addEventListener("change", function () {
+    if (config.alsoChange) { region.value = region.value === "r-1" ? "r-2" : "r-1"; }
+    if (config.lateMs) {
+      var wanted = lang.value;
+      lang.value = held;
+      setTimeout(function () { lang.value = wanted; }, config.lateMs);
+    }
+  });
+})();
+</script>
+</body>
+</html>
