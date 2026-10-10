@@ -1298,7 +1298,14 @@ PINNED = {
     #: branch: `J 17` and `J 57` COVERED-PROVEN by D6, every part proven.
     #: 111 AT LANE K's MERGE OF MASTER 66eb699 (2026-10-10), MEASURED on the
     #: merged tree, not summed: session 8's four rows and lane K's two.
-    "delivered_strict": 111,
+    #: 113 AT THE LIVE LANE'S SESSION 9 (2026-10-10), MEASURED: `N 30`, `N 85`
+    #: and `N 172` (a named member's connections, as people, by the
+    #: Connections-of filter) and `N 31` (the connections he and that member
+    #: share) fired live, read-only, and banked.
+    #: 115 AT THE LIVE LANE'S MERGE OF MASTER 0103810 (2026-10-10), MEASURED on the
+    #: merged tree, not summed: the live lane's session 9 and the lanes
+    #: master carried (K's rulings, U's attachments).
+    "delivered_strict": 115,
     #: The live lane's merge: N 134, P O3 and M C72 left GAP.
     #: Lane D's merge: N 132 left GAP, for COVERED-UNFIRED under D6.
     #: 544 AT THE ORCHESTRATOR'S MERGE OF LANE D (2026-09-27), MEASURED: lane D
@@ -1431,7 +1438,14 @@ PINNED = {
     #: `M M14`, `M M15` and `M M18` entered COVERED-UNFIRED, never fired.
     #: 24 AT LANE U'S MERGE OF ORIGIN/MASTER 1027bf8, MEASURED: session 8's
     #: four banked out (25 - 4) and lane U's three in (+ 3).
-    "unfired": 26,
+    #: 17 AT THE LIVE LANE'S SESSION 9 (2026-10-10), MEASURED: `N 30`, `N 85`
+    #: and `N 172` (a named member's connections, as people, by the
+    #: Connections-of filter) and `N 31` (the connections he and that member
+    #: share) fired live, read-only, and banked.
+    #: 20 AT THE LIVE LANE'S MERGE OF MASTER 0103810 (2026-10-10), MEASURED on the
+    #: merged tree, not summed: the live lane's session 9 and the lanes
+    #: master carried (K's rulings, U's attachments).
+    "unfired": 22,
     #: 104 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     #: 101 AT LANE S'S NAMES ADOPTION (2026-09-27), MEASURED: `N 79`, `N 172`
@@ -1864,7 +1878,11 @@ PINNED = {
     #: the results) and `N 26` (his connections filtered by place) fired live and
     #: banked; `N 155` moved on the orchestrator's call of that day, by D6 on
     #: `M M1`'s session-5 send.
-    "b1_no_ruling": 11,
+    #: 5 AT THE LIVE LANE'S SESSION 9 (2026-10-10), MEASURED: `N 30`, `N 85`
+    #: and `N 172` (a named member's connections, as people, by the
+    #: Connections-of filter) and `N 31` (the connections he and that member
+    #: share) fired live, read-only, and banked.
+    "b1_no_ruling": 7,
     #: 7 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
     #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
     #: 4 AT THE LIVE LANE'S MERGE OF MASTER c2825a4 (2026-09-28), MEASURED on the
@@ -2074,15 +2092,15 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
     #: degree filter: a name search of his first degree, and his first degree
     #: filtered by place or employer; never fired. Reads no ruling holds.
     #: `J 124` and `J 161` entered with lane B4, 2026-10-10, MEASURED at its
-    #: merge of master 2b165fd: the posting's AI company intelligence read whole
+    #: merge of master 6c65815: the posting's AI company intelligence read whole
     #: and marked as third-party text (a read), and the similar-jobs alert set
     #: and unset (his own curation, HIS-OWN-CURATION-NOT-OUTWARD: proven with its
     #: inverse in one session), both built on live session 8's posting and never
     #: fired. No ruling holds either.
     NO_RULING: (
-        "J 121", "J 122", "J 124", "J 161",
-        "N 20", "N 30", "N 31",
-        "N 45", "N 85", "N 172",
+        "J 124", "J 161",
+        "J 121", "J 122",
+        "N 20", "N 45",
         "P A8",
         #: `J 107` and `M M53` entered with lane S's offline frontier,
         #: 2026-09-28, fired at session 2 without banking, and LEFT at
@@ -2094,6 +2112,9 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
         #: live and banked, the two edits tested and restored exactly.
         #: `N 25`, `N 81` and `N 26` LEFT at session 7 (2026-10-10), fired live and
         #: banked: the name search, the degree facet, the place filter.
+        #: `N 30`, `N 85`, `N 172` and `N 31` LEFT at session 9 (2026-10-10),
+        #: fired live at the member he named, read-only, and banked: his
+        #: connections as people, and the ones the two of them share.
     ),
 }
 
