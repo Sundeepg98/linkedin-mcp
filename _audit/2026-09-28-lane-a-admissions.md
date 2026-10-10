@@ -689,6 +689,72 @@ re-derived: `adjudicated` 184 -> 185, `delivered_broad` 130 -> 131, `unfired`
 NO_RULING), `gap` 587 -> 586, `gap_unknown` 108 -> 107, `jobs_gap` 108 -> 107,
 `jobs_dir_r` 40 -> 39, `jobs_refused` 12 -> 11.
 
+### 4.2 A second reader on a tracked capture: the tracker's three further stages
+
+The tracker is ONE page whose list `?stage=` selects, and it HAS tracked
+skeletons from a live capture -- `tests/fixtures/jobs_tracker_row.html` and
+`jobs_tracker_empty.html` -- whose strip `tests/test_sdui_surfaces_fixture.py`
+already reads: "Interview <dot> 0" with a count, "Archived" without one, and
+no clicked_apply tab at all. The shipped reader, `server._read_tracker`, is
+generic over the stage. So the brief's step 5 applies, and the build is one
+tool in a contiguous `LANE A` block of `server.py`:
+
+* `linkedin_tracker_stage(stage, limit)`: `stage` is exactly `interview`,
+  `archived` or `clicked_apply`, anything else refused before a page opens;
+  the reader is the tracker's own, with its zero rule -- an empty list is
+  believed only when LinkedIn's own count says zero and the page draws its
+  empty state. Its docstring says the consequence plainly: Archived and
+  clicked_apply have no count on the captures, so an empty list there is a
+  failure, never "you have none". It presses nothing; the write-verb
+  docstring scanner finds no claim.
+* RED FIRST: `tests/test_lane_a_tracker_stages.py` against the previous
+  `server.py` fails to collect (the tool did not exist); with it, 20 passed --
+  each stage's own url, ten refused spellings with zero navigations, a
+  corroborated empty Interview list as an answer, an empty Archived or
+  clicked_apply list as a failure, and each address admitted by exactly its
+  own line. The covered-row guard binds `J 50` and `J 51` to the chain, with a
+  control that renames the reader call on a copy and watches it convict.
+* THE SURFACE PINS, each moved with its cause: 61 -> 62 tools and 96 -> 98
+  parameters (`tests/test_the_tool_surface_is_pinned_so_a_row_must_move.py`),
+  the registry counts in `tests/test_server_surface.py` (renamed
+  `..._sixty_two_tools`, reads 44 -> 45) and
+  `tests/test_every_tool_is_on_the_surface.py`, `server.py`'s docstring
+  numbers, and the README's headline (the stale line kept beside it) and
+  module listing.
+
+**ROWS, each by its own bar:** `J 50` (Interview) and `J 51` (Archived) GAP ->
+COVERED-UNFIRED -- code aimed at the real captured page, never fired; `J 51`'s
+cell states its scope (an empty archived list cannot be certified). `J 52`
+STAYS GAP: no capture draws a clicked_apply tab, so whether the stage renders a
+list at all is unmeasured; its capture line now asks for exactly that. Both
+moved rows leave the jobs side table, lane K's ledger and lane K's queue (the
+two single-row capture lines for those stages are gone: their next step is a
+fire, not a capture). `census_completion.py` re-derived: `adjudicated`
+187 -> 189, `delivered_broad` 131 -> 133, `unfired` 26 -> 28,
+`b1_no_ruling` 10 -> 12 (`J 50`, `J 51` into NO_RULING), `gap` 584 -> 582,
+`gap_unknown` 107 -> 105, `jobs_gap` 107 -> 105, `jobs_dir_r` 39 -> 37,
+`jobs_admitted` 34 -> 32.
+
+### 4.3 Lane K's ledger, advanced past these admissions
+
+Master's lane K ledger (`_audit/_census/next-step.tsv`, `capture-queue.tsv`)
+had anticipated this lane: 24 queue lines read "ADMIT: lane A's admission of
+this address" with the verdict "REFUSED: waits on lane A's admission", and 49
+census rows carried the step `ADMIT:<that address>`. CI run 38038875372 went
+red on exactly that once the admissions landed (`tests/test_next_step.py`, two
+tests; every other test in the run passed). Advanced in the ledger's own
+vocabulary, which its checker states: each admitted line now reads needs "-",
+verdict ADMITTED, session "after lane A's merge"; each of the 49 rows' step is
+now `CAPTURE:<that line's surface id>`; `J 38` leaves (it left GAP); `P S3`'s
+line and source follow its re-address to the drawn integer segment.
+`scripts/check_next_step.py`: GREEN, every GAP row once, 582 = the pinned
+`gap`. Lane K's ADMIT lines for addresses this lane did NOT admit keep their
+verdict, which is still true; which of them lane A declined, and why, is
+section 2 (for the 72 rows of this brief) -- the rest (`/mynetwork/`, the
+editor forms, `/feed/hashtag/<tag>/`, `/pulse/<article>/`, the privacy
+category, the recommendations detail page) were not this lane's rows and were
+not weighed here.
+
 **D6 ROUTES named, not built here:**
 
 * `N 86`, followers of a member: the people-search facet `followerOf` is on
@@ -859,22 +925,29 @@ SERVED-BY-GMAIL-SKILL at once rather than row by row.
 
 ## 6. Rows moved, pins re-derived, gates run, and what was not run
 
-**ROWS.** Of the 72 refused read rows: 38 REFUSED -> ADMITTED (gate MEASURE,
-state GAP unchanged) -- 16 past an act substring (3.1-3.3) and 22 on allowlist
-silence (3.4) -- and `J 38` GAP -> COVERED-UNFIRED by D6 on the notifications
-page (4.1). The other 33 stay refused, each on a named ground (2.5-2.7). The 17
-press-or-ruling rows: one paragraph each (section 5), no gate moved.
+**ROWS.** Of the 72 refused read rows: 38 REFUSED -> ADMITTED -- 16 past an
+act substring (3.1-3.3) and 22 on allowlist silence (3.4) -- of which 36 stay
+GAP with gate MEASURE and `J 50` and `J 51` went on to COVERED-UNFIRED on a
+reader built over the tracker's tracked live captures (4.2); `J 38` GAP ->
+COVERED-UNFIRED by D6 on the notifications page without its own address being
+admitted (4.1). The other 33 stay refused, each on a named ground (2.5-2.7).
+THREE CENSUS STATES MOVED, ALL GAP -> COVERED-UNFIRED: `J 38`, `J 50`, `J 51`.
+The 17 press-or-ruling rows: one paragraph each (section 5), no gate moved.
 
 **PINS, each re-derived from the measured value by the instrument that owns
 it, never by adding deltas:**
 
-    census_completion.PINNED   b3_admitted   43 -> 59     b3_refused    38 -> 22
-                               jobs_admitted 12 -> 34     jobs_refused  34 -> 11
-                               adjudicated  184 -> 185    delivered_broad 130 -> 131
-                               unfired       25 -> 26     b1_no_ruling    9 -> 10
-                               gap          587 -> 586    gap_unknown   108 -> 107
-                               jobs_gap     108 -> 107    jobs_dir_r     40 -> 39
-                               PINNED_B1_ROWS: J 38 into NO_RULING
+    census_completion.PINNED   (lane A's own moves; master's lane K moved
+                               adjudicated +2 and gap -2 in between, and the
+                               merge re-measured both)
+                               b3_admitted   43 -> 59     b3_refused    38 -> 22
+                               jobs_admitted 12 -> 32     jobs_refused  34 -> 11
+                               adjudicated   +3 (now 189) delivered_broad 130 -> 133
+                               unfired       25 -> 28     b1_no_ruling    9 -> 12
+                               gap           -3 (now 582) gap_unknown   108 -> 105
+                               jobs_gap     108 -> 105    jobs_dir_r     40 -> 37
+                               PINNED_B1_ROWS: J 38, J 50, J 51 into NO_RULING
+    the tool surface           61 -> 62 tools, 96 -> 98 parameters, 44 -> 45 reads
     the census count cell      55 -> 85 read patterns (messaging-and-content.md)
     boundary digests           _ALLOWED_URL_PATTERNS 18e5958586c2c367 -> d3c96a81 03316665 (two halves, as in 3.4)
                                _FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS 14f567fd160048a8 -> 28643e7ca768b7df

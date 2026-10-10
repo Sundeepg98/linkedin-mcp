@@ -94,6 +94,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_connections": ("limit",),
     "linkedin_creator_analytics": (),
     "linkedin_draft_applications": ("limit",),
+    "linkedin_tracker_stage": ("limit", "stage"),
     "linkedin_events_home": (),
     "linkedin_follow_company": ("confirm_token", "job_id"),
     "linkedin_follow_company_page": ("confirm_token", "organisation_id"),
@@ -474,8 +475,16 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: connections) GAP -> COVERED-UNFIRED by D6 on the orchestrator's ruling, on
 #: `connections_of`, which shipped earlier. Never fired. See
 #: `_audit/2026-09-24-lane-s-people-search.md`, "Four people-search items".
-PINNED_TOOL_COUNT = 61
-PINNED_PARAMETER_COUNT = 96
+#: **RE-PINNED 2026-10-10 AT 62 TOOLS AND 98 PARAMETERS (lane A): one tool,
+#: `linkedin_tracker_stage(stage, limit)`, a READ of the tracker's interview,
+#: archived and clicked_apply stages.** THE CENSUS DECISION, in the same
+#: commit: `J 50` and `J 51` GAP -> COVERED-UNFIRED (the tracker's own reader,
+#: aimed at the tracked live captures of that page, never fired); `J 52`
+#: stays GAP -- no capture draws a clicked_apply tab, so whether the stage
+#: renders a list is the capture's to learn. See
+#: `_audit/2026-09-28-lane-a-admissions.md`, section 4.2.
+PINNED_TOOL_COUNT = 62
+PINNED_PARAMETER_COUNT = 98
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:

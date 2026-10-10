@@ -1182,7 +1182,9 @@ PINNED = {
     #: an alert's delivered job ids, read off the notifications page (never fired).
     #: MERGED AT LANE A'S MERGE OF MASTER fe119de (2026-10-10), MEASURED on the
     #: merged tree: lane K's two exclusions and lane A's `J 38` (each above).
-    "adjudicated": 187,
+    #: 189 ON LANE A'S TRACKER STAGES (2026-10-10), MEASURED: `J 50` and `J 51`
+    #: GAP -> COVERED-UNFIRED on linkedin_tracker_stage, never fired.
+    "adjudicated": 189,
     #: THE LIVE LANE'S FOUR ROWS, RE-DERIVED AT EACH OF ITS MERGES OF MASTER
     #: (2026-09-24; last over lane S): four rows fired live and banked
     #: (`_audit/2026-09-23-live-lane-session-1.md`). `P G6` COVERED-UNFIRED ->
@@ -1249,7 +1251,9 @@ PINNED = {
     #: type into, now refused by it).
     #: 131 ON LANE A'S J 38 BUILD (2026-10-10), MEASURED: `J 38` GAP -> COVERED-UNFIRED by D6 --
     #: an alert's delivered job ids, read off the notifications page (never fired).
-    "delivered_broad": 131,
+    #: 133 ON LANE A'S TRACKER STAGES (2026-10-10), MEASURED: `J 50` and `J 51`
+    #: GAP -> COVERED-UNFIRED on linkedin_tracker_stage, never fired.
+    "delivered_broad": 133,
     #: 79 since the live lane's merge (see `adjudicated`): P G6, N 134, P O3
     #: and M C72 COVERED-PROVEN.
     #: 75 and 21 since the bucket-1 merge: `M C41` fired live and moved from
@@ -1331,7 +1335,9 @@ PINNED = {
     #: an alert's delivered job ids, read off the notifications page (never fired).
     #: MERGED AT LANE A'S MERGE OF MASTER fe119de (2026-10-10), MEASURED on the
     #: merged tree: lane K's two exclusions and lane A's `J 38` (each above).
-    "gap": 584,
+    #: 582 ON LANE A'S TRACKER STAGES (2026-10-10), MEASURED: `J 50` and `J 51`
+    #: GAP -> COVERED-UNFIRED on linkedin_tracker_stage, never fired.
+    "gap": 582,
     #: 18 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: `M M1` built (`linkedin_message_from_profile`).
     #: 16 ON LANE L5'S ORDER OF 2026-09-27 23:36, MEASURED:
     #: `linkedin_send_message` RETIRED (aimed by a name): `M M2` to GAP and `N
@@ -1397,7 +1403,9 @@ PINNED = {
     #: `M M1`'s session-5 send.
     #: 26 ON LANE A'S J 38 BUILD (2026-10-10), MEASURED: `J 38` GAP -> COVERED-UNFIRED by D6 --
     #: an alert's delivered job ids, read off the notifications page (never fired).
-    "unfired": 26,
+    #: 28 ON LANE A'S TRACKER STAGES (2026-10-10), MEASURED: `J 50` and `J 51`
+    #: GAP -> COVERED-UNFIRED on linkedin_tracker_stage, never fired.
+    "unfired": 28,
     #: 104 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     #: 101 AT LANE S'S NAMES ADOPTION (2026-09-27), MEASURED: `N 79`, `N 172`
@@ -1485,7 +1493,9 @@ PINNED = {
     #: READER -> MEASURE: no capture draws its section.
     #: 107 ON LANE A'S J 38 BUILD (2026-10-10), MEASURED: `J 38` GAP -> COVERED-UNFIRED by D6 --
     #: an alert's delivered job ids, read off the notifications page (never fired).
-    "gap_unknown": 107,
+    #: 105 ON LANE A'S TRACKER STAGES (2026-10-10), MEASURED: `J 50` and `J 51`
+    #: GAP -> COVERED-UNFIRED on linkedin_tracker_stage, never fired.
+    "gap_unknown": 105,
     "gap_ambiguous": 0,
     #: BUCKET 3, MEASURED 2026-09-23 (`_audit/2026-09-23-bucket3-addresses.md`),
     #: counted off `_audit/_census/read-addresses.tsv`, whose every verdict
@@ -1830,7 +1840,9 @@ PINNED = {
     #: `M M1`'s session-5 send.
     #: 10 ON LANE A'S J 38 BUILD (2026-10-10), MEASURED: `J 38` GAP -> COVERED-UNFIRED by D6 --
     #: an alert's delivered job ids, read off the notifications page (never fired).
-    "b1_no_ruling": 10,
+    #: 12 ON LANE A'S TRACKER STAGES (2026-10-10), MEASURED: `J 50` and `J 51`
+    #: GAP -> COVERED-UNFIRED on linkedin_tracker_stage, never fired.
+    "b1_no_ruling": 12,
     #: 7 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
     #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
     #: 4 AT THE LIVE LANE'S MERGE OF MASTER c2825a4 (2026-09-28), MEASURED on the
@@ -1885,7 +1897,9 @@ PINNED = {
     #: READER -> MEASURE: no capture draws its section.
     #: 107 ON LANE A'S J 38 BUILD (2026-10-10), MEASURED: `J 38` GAP -> COVERED-UNFIRED by D6 --
     #: an alert's delivered job ids, read off the notifications page (never fired).
-    "jobs_gap": 107,
+    #: 105 ON LANE A'S TRACKER STAGES (2026-10-10), MEASURED: `J 50` and `J 51`
+    #: GAP -> COVERED-UNFIRED on linkedin_tracker_stage, never fired.
+    "jobs_gap": 105,
     #: 40 AT LANE S'S OFFLINE FRONTIER (2026-09-28), MEASURED: the five rows
     #: bucket 3 called blocked on nothing, taken one by one. `M M53`, `N 195`
     #: and `P S5` (three R rows ADMITTED and gated READER) and `J 107` (the one
@@ -1895,7 +1909,9 @@ PINNED = {
     #: READER -> MEASURE: no capture draws its section.
     #: 39 ON LANE A'S J 38 BUILD (2026-10-10), MEASURED: `J 38` GAP -> COVERED-UNFIRED by D6 --
     #: an alert's delivered job ids, read off the notifications page (never fired).
-    "jobs_dir_r": 39,
+    #: 37 ON LANE A'S TRACKER STAGES (2026-10-10), MEASURED: `J 50` and `J 51`
+    #: GAP -> COVERED-UNFIRED on linkedin_tracker_stage, never fired.
+    "jobs_dir_r": 37,
     #: 60 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: `J 69` and
     #: `J 87`, both W.
     "jobs_dir_w": 60,
@@ -1916,7 +1932,9 @@ PINNED = {
     #: `J 148`, `J 149`, `J 152`, `J 154`, `J 156`, `J 160`, `J 165`, `J 166`,
     #: `J 167`. `J 38` stays REFUSED, re-addressed to the drawn alert spelling
     #: (refused on action=).
-    "jobs_admitted": 34,
+    #: 32 ON LANE A'S TRACKER STAGES (2026-10-10), MEASURED: `J 50` and `J 51`
+    #: GAP -> COVERED-UNFIRED on linkedin_tracker_stage, never fired.
+    "jobs_admitted": 32,
     #: 11 ON LANE A'S J 38 BUILD (2026-10-10), MEASURED: `J 38` GAP -> COVERED-UNFIRED by D6 --
     #: an alert's delivered job ids, read off the notifications page (never fired).
     "jobs_refused": 11,
@@ -2045,6 +2063,10 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
         #: alert delivered, as `alert_job_ids` on the notifications page, read
         #: by `linkedin_job_detail`; never fired. A read no ruling holds.
         "J 38",
+        #: `J 50` and `J 51` entered on lane A's tracker stages, 2026-10-10:
+        #: the Interview and Archived lists through linkedin_tracker_stage;
+        #: never fired. Reads no ruling holds.
+        "J 50", "J 51",
         #: `J 107` and `M M53` entered with lane S's offline frontier,
         #: 2026-09-28, fired at session 2 without banking, and LEFT at
         #: session 3 (2026-09-28), fired again and banked -- with `N 194`.

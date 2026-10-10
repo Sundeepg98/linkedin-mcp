@@ -1,4 +1,4 @@
-"""The tool surface: sixty-one tools, forty-four of which do not write.
+"""The tool surface: sixty-two tools, forty-five of which do not write.
 
 **AND THIS LINE IS NOW DERIVED, NOT MAINTAINED, 2026-09-20.** It had gone stale
 a THIRD time -- "forty-four tools, thirty-two of which do not write" against a
@@ -360,6 +360,11 @@ EXPECTED_TOOLS = {
     # ``draft`` is on no write-verb list, so nothing here is a rename dodging
     # a guard. What it reads is the tab LinkedIn labels "In Progress".
     "linkedin_draft_applications",
+    # A READ, added 2026-10-10 by lane A: the tracker's three further stages
+    # (interview, archived, clicked_apply; census J 50, J 51, J 52), one tool
+    # with a closed ``stage`` argument, each stage admitted by its own
+    # anchored allowlist line. Reads the list; presses nothing.
+    "linkedin_tracker_stage",
     # 2026-08-26. NOT A JOB-SEARCH TOOL, and the only name on this list that
     # is not: linkedin_surface_census measures what controls a page carries so
     # that the capabilities this server refuses can be costed from a reading
@@ -598,8 +603,13 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_sixty_one_tools(tools):
-    """RENAMED AGAIN ON LANE L5'S ORDER OF 2026-09-28 08:06, to
+async def test_the_surface_is_exactly_the_sixty_two_tools(tools):
+    """RENAMED AGAIN ON LANE A, 2026-10-10, to ``..._sixty_two_tools``: one
+    READ, ``linkedin_tracker_stage``, the job tracker's interview, archived
+    and clicked_apply stages. MEASURED off the registry; the name moved with
+    the pin.
+
+    RENAMED AGAIN ON LANE L5'S ORDER OF 2026-09-28 08:06, to
     ``..._sixty_one_tools``: one READ, ``linkedin_read_named_profile`` (ruling
     NAMED-PROFILE-READ-BEHIND-A-GRANT), the profile of a member he names,
     loaded once behind the single-use grant. MEASURED off the registry;
@@ -904,7 +914,10 @@ async def test_the_surface_is_exactly_the_sixty_one_tools(tools):
     # SIXTY-ONE ON LANE L5'S ORDER OF 2026-09-28 08:06: linkedin_read_named_profile,
     # a READ, so the split moves on its read side and the write set holds.
     # MEASURED off mcp.list_tools().
-    assert len(tools) == 61
+    # SIXTY-TWO ON LANE A, 2026-10-10: linkedin_tracker_stage, a READ, so the
+    # split moves on its read side and the write set holds. MEASURED off
+    # mcp.list_tools().
+    assert len(tools) == 62
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -1073,7 +1086,10 @@ async def test_the_surface_is_exactly_the_sixty_one_tools(tools):
     # linkedin_read_named_profile is a READ -- its preview loads nothing, its
     # confirmed call loads one profile he named through the second door and
     # presses nothing -- and the write side is unmoved.
-    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 44
+    # FORTY-FIVE ON LANE A, 2026-10-10: linkedin_tracker_stage is a READ --
+    # it loads one tracker stage he names and presses nothing -- and the
+    # write side is unmoved.
+    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 45
 
 
 def test_the_read_that_was_nearly_named_a_write():

@@ -625,3 +625,40 @@ def test_control_the_alert_landing_chain_convicts_a_dropped_handle() -> None:
                 "&originToLandingJobPostings=4300000001",
     })
     assert "alert_job_ids" not in row
+def _tracker_stage_calls_the_reader(server_src: str) -> bool:
+    """Does ``linkedin_tracker_stage`` hand its stage to ``_read_tracker``?"""
+    tree = ast.parse(server_src)
+    for node in ast.walk(tree):
+        if isinstance(node, ast.AsyncFunctionDef) and node.name == "linkedin_tracker_stage":
+            return any(
+                isinstance(inner, ast.Call)
+                and ast.unparse(inner.func) == "_read_tracker"
+                for inner in ast.walk(node)
+            )
+    return False
+
+
+def test_the_tracker_stage_chain_is_still_whole() -> None:
+    """``J 50`` and ``J 51`` (lane A, 2026-10-10): tool -> stage table ->
+    the tracker's own reader. Both rows claim COVERED-UNFIRED on it."""
+    from linkedin_server import server
+
+    stages = getattr(server, "TRACKER_STAGES_LANE_A", {})
+    for stage in ("interview", "archived"):
+        assert stage in stages, (
+            f"the tool no longer reads the {stage} stage; census J 50/J 51 "
+            "claim COVERED-UNFIRED on it")
+    assert _tracker_stage_calls_the_reader(_source("server.py")), (
+        "linkedin_tracker_stage no longer hands its stage to _read_tracker; "
+        "J 50 and J 51's chain is broken")
+
+
+def test_control_the_tracker_stage_chain_convicts_a_dropped_reader() -> None:
+    """SHOWN FAILING against a MUTATED COPY: the reader call renamed away."""
+    source = _source("server.py")
+    assert _tracker_stage_calls_the_reader(source)
+    start = source.index("async def linkedin_tracker_stage(")
+    mutated = (source[:start]
+               + source[start:].replace("await _read_tracker(",
+                                        "await _read_tracker_gone(", 1))
+    assert not _tracker_stage_calls_the_reader(mutated)
