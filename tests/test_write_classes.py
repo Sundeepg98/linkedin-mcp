@@ -177,10 +177,16 @@ def test_the_split_is_the_one_the_lane_report_quotes():
     `P S9` (the Premium plan, act purchase) and `M C71` (a paid boost, act
     publish) EXCLUDED-RULED, so both lines leave the table, and the act
     purchase leaves the closed vocabulary with its one line. Both R3.
-    389 - 2 = 387 = 16 R1 + 37 R2 + 334 R3."""
+    389 - 2 = 387 = 16 R1 + 37 R2 + 334 R3.
+
+    384 AT LANE U'S MOVE (2026-10-10), MEASURED
+    (`_audit/2026-09-28-lane-u-uploads.md` s5): `M M14`, `M M15` and `M M18`
+    GAP -> COVERED-UNFIRED on `linkedin_send_attachment`, so their three lines
+    leave the table. All three R2 (queued on the conversation's attachments).
+    387 - 3 = 384 = 16 R1 + 34 R2 + 334 R3."""
     rows, _ = cwc.load()
     split = cwc.split(rows)
-    assert (split["R1"], split["R2"], split["R3"]) == (16, 37, 334)
+    assert (split["R1"], split["R2"], split["R3"]) == (16, 34, 334)
     assert split["R1:built"] + split["R1:queued"] == split["R1"]
 
 

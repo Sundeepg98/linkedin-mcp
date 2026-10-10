@@ -1178,7 +1178,9 @@ PINNED = {
     #: 186 ON LANE K's PURCHASES-STAY-MANUAL EXCLUSIONS (2026-10-10), MEASURED:
     #: `P S9` and `M C71` GAP -> EXCLUDED-RULED -- adjudicated, delivered by
     #: neither line.
-    "adjudicated": 186,
+    #: 189 ON LANE U'S MOVE OF 2026-10-10, MEASURED:
+    #: `M M14`, `M M15` and `M M18` GAP -> COVERED-UNFIRED -- adjudicated now.
+    "adjudicated": 189,
     #: THE LIVE LANE'S FOUR ROWS, RE-DERIVED AT EACH OF ITS MERGES OF MASTER
     #: (2026-09-24; last over lane S): four rows fired live and banked
     #: (`_audit/2026-09-23-live-lane-session-1.md`). `P G6` COVERED-UNFIRED ->
@@ -1243,7 +1245,9 @@ PINNED = {
     #: merged tree: master's figure with this branch's `P A11`, `P A13` and `P A17`
     #: COVERED-UNFIRED -> GAP (session 4: autocomplete inputs the one tool can only
     #: type into, now refused by it).
-    "delivered_broad": 130,
+    #: 133 ON LANE U'S MOVE OF 2026-10-10, MEASURED:
+    #: `M M14`, `M M15` and `M M18` GAP -> COVERED-UNFIRED on `linkedin_send_attachment`.
+    "delivered_broad": 133,
     #: 79 since the live lane's merge (see `adjudicated`): P G6, N 134, P O3
     #: and M C72 COVERED-PROVEN.
     #: 75 and 21 since the bucket-1 merge: `M C41` fired live and moved from
@@ -1321,7 +1325,9 @@ PINNED = {
     #: type into, now refused by it).
     #: 585 ON LANE K's PURCHASES-STAY-MANUAL EXCLUSIONS (2026-10-10), MEASURED:
     #: `P S9` and `M C71` left GAP (see `adjudicated`).
-    "gap": 585,
+    #: 582 ON LANE U'S MOVE OF 2026-10-10, MEASURED:
+    #: `M M14`, `M M15` and `M M18` left GAP (see `adjudicated`).
+    "gap": 582,
     #: 18 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: `M M1` built (`linkedin_message_from_profile`).
     #: 16 ON LANE L5'S ORDER OF 2026-09-27 23:36, MEASURED:
     #: `linkedin_send_message` RETIRED (aimed by a name): `M M2` to GAP and `N
@@ -1385,7 +1391,9 @@ PINNED = {
     #: the results) and `N 26` (his connections filtered by place) fired live and
     #: banked; `N 155` moved on the orchestrator's call of that day, by D6 on
     #: `M M1`'s session-5 send.
-    "unfired": 25,
+    #: 28 ON LANE U'S MOVE OF 2026-10-10, MEASURED:
+    #: `M M14`, `M M15` and `M M18` entered COVERED-UNFIRED, never fired.
+    "unfired": 28,
     #: 104 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     #: 101 AT LANE S'S NAMES ADOPTION (2026-09-27), MEASURED: `N 79`, `N 172`
@@ -1457,7 +1465,9 @@ PINNED = {
     #: type into, now refused by it).
     #: 379 ON LANE K's PURCHASES-STAY-MANUAL EXCLUSIONS (2026-10-10), MEASURED:
     #: `P S9` and `M C71`, two W rows, left GAP; their write-classes lines go.
-    "gap_write": 379,
+    #: 376 ON LANE U'S MOVE OF 2026-10-10, MEASURED:
+    #: `M M14`, `M M15` and `M M18`, three W rows, left GAP; their write-classes lines go.
+    "gap_write": 376,
     #: All 54 are `jobs.md`, which has no per-row R/W column (56 until the
     #: lane-L3 merge built J 18 and J 39). Not a coincidence
     #: and not a defect in the finder: it is the whole of that slice's still-GAP
@@ -1745,7 +1755,9 @@ PINNED = {
     #: the results) and `N 26` (his connections filtered by place) fired live and
     #: banked; `N 155` moved on the orchestrator's call of that day, by D6 on
     #: `M M1`'s session-5 send.
-    "b1_standing": 16,
+    #: 19 ON LANE U'S MOVE OF 2026-10-10, MEASURED:
+    #: `M M14`, `M M15` and `M M18` entered, held by OPERATOR-NAMES-THE-TARGET.
+    "b1_standing": 19,
     "b1_relayed": 0,
     "b1_pending": 0,
     #: 22 AT THE ORCHESTRATOR'S MERGE OF LANE D (2026-09-27), MEASURED: lane D
@@ -1928,9 +1940,16 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
     #: its emoji among his words, sent and verified -- COVERED-PROVEN.
     #: `N 155` LEFT ON THE ORCHESTRATOR'S CALL OF 2026-10-10, by D6 on `M M1`'s
     #: session-5 send to a first-degree connection -- COVERED-PROVEN.
+    #: `M M14`, `M M15` and `M M18` entered ON LANE U'S MOVE OF 2026-10-10,
+    #: MEASURED: one file from the declared upload root into one conversation
+    #: he names (`linkedin_send_attachment`), built offline under the
+    #: operator's upload decision (FILE-UPLOAD-OPENED) and never fired; a
+    #: photo, a video and a document each aimed at its own input on the live
+    #: lane's session-8 composer capture. Held until he names the conversation
+    #: and the file.
     "OPERATOR-NAMES-THE-TARGET": (
         "J 103", "J 104", "J 128",
-        "M C1", "M C25", "M C32", "M C63", "M M10",
+        "M C1", "M C25", "M C32", "M C63", "M M10", "M M14", "M M15", "M M18",
         "N 1", "N 2", "N 4", "N 46", "N 47", "N 48", "N 64",
         "P I14",
     ),

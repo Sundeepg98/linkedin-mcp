@@ -355,6 +355,7 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # moved with every other count site in the same commit.
     # SIXTY-TWO ON LANE U'S BRANCH, 2026-10-10: one WRITE,
     # linkedin_send_attachment (ruling FILE-UPLOAD-OPENED; census M M14, M15,
-    # M18 stay GAP on two captures), measured off the branch's registry and
+    # M18 stayed GAP on two captures, then moved to COVERED-UNFIRED the same
+    # day on the session-8 capture), measured off the branch's registry and
     # moved with every other count site in the same commit.
     assert len(_tool_names()) == 62

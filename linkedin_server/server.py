@@ -4,11 +4,15 @@ THE SIXTY-SECOND IS A WRITE, 2026-10-10, on lane U's branch, on ruling
 ``FILE-UPLOAD-OPENED`` (the operator's decision of 2026-09-04):
 ``linkedin_send_attachment``, ONE file from the declared upload root into ONE
 conversation he names by thread id, behind the single-use grant. Its file
-input is aimed on a real capture; the bytes handed over are the bytes read
-and compared; Send is pressed only if the form draws the file's name exactly
-once. Census rows ``M M14``, ``M M15``, ``M M18`` stay GAP on two uncaptured
-surfaces (the composer holding an attachment, a sent attachment message). The
-headline read "sixty-one tools, seventeen of which write" until then.
+input is aimed on two real captures of the message composer's footer (the
+live lane's sessions 3 and 8) and cross-checked against the declarations an
+opened conversation drew live; the bytes handed over are the bytes read and
+compared; Send is pressed only if the form draws the file's name exactly
+once. Census rows ``M M14``, ``M M15``, ``M M18`` are COVERED-UNFIRED since
+2026-10-10, held until he names the conversation and the file; the composer
+holding an attachment and a sent attachment message are not captured, so the
+read-back and the verification are aimed at the file's name. The headline
+read "sixty-one tools, seventeen of which write" until then.
 
 THE SIXTY-FIRST IS A READ, 2026-09-28, on lane L5's order of 08:06 and the
 operator's ruling of 08:01 (``NAMED-PROFILE-READ-BEHIND-A-GRANT``):

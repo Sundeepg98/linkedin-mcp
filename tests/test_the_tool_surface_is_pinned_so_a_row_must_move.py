@@ -497,6 +497,10 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: the file's name rather than at markup; each row waits on its capture
 #: (U-REPLY-ATTACHMENT-SENT and -PENDING). No other row moves. See
 #: `_audit/2026-09-28-lane-u-uploads.md`, section 5.
+#: THE THREE ROWS MOVED LATER THE SAME DAY, with no change to the surface:
+#: GAP -> COVERED-UNFIRED on the live lane's session-8 capture of the
+#: composer's footer, each row aimed at its own input there; the read-back
+#: and the verification stay aimed at the file's name, and refuse otherwise.
 #: **RE-PINNED AT THE MERGE OF MASTER f8c7392 INTO LANE U, 2026-10-10: 62
 #: TOOLS AND 100 PARAMETERS.** The two re-pins above meet here: lane NP's one
 #: parameter (96 -> 97, no tool) and lane U's one tool with its three

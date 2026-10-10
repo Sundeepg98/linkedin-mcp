@@ -14,8 +14,8 @@ by thread id. Its first call attaches nothing: it names the file, its exact
 size, the type its bytes declare and who it would reach. On confirm the file
 is read once, compared with what you were shown, and those bytes are handed
 over; Send is pressed only if the conversation's form draws the file's name
-exactly once. Census rows `M M14`, `M M15` and `M M18` stay GAP until a
-composer holding an attachment, and a sent one, are captured.
+exactly once. Census rows `M M14`, `M M15` and `M M18` are COVERED-UNFIRED:
+built and never fired, held until you name the conversation and the file.
 
 **THAT LINE READ "Sixty ... Forty-three read. Seventeen write" UNTIL THE
 OPERATOR'S RULING OF 2026-09-28 08:01** (NAMED-PROFILE-READ-BEHIND-A-GRANT).
