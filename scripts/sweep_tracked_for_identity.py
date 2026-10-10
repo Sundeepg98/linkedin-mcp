@@ -124,9 +124,41 @@ def load_wordlist() -> dict[str, set[str]]:
     return out
 
 
+def decode_text(data: bytes) -> str:
+    """THE ONE WAY text is read before it is matched against the wordlist.
+
+    UTF-8 when the bytes are valid UTF-8; otherwise cp1252, with replacement
+    for the five bytes cp1252 leaves undefined. Universal newlines after, as
+    every reader here applied before.
+
+    NEVER THE LOCALE'S ENCODING, and that is the change, made 2026-10-10 on the
+    orchestrator's ruling. The blob sweep and the pre-commit gate decoded with
+    ``text=True`` and no encoding, which on the operator's Windows box is
+    cp1252: 9 of the 226 needles hold non-ASCII letters, and a UTF-8 file
+    carrying one was read as mojibake there, so those 9 could never match at
+    commit or push time. This sweep and ``identity_gate.py`` read UTF-8 with
+    replacement, which turned a cp1252 file's non-ASCII letters into U+FFFD,
+    so a value saved by a cp1252 tool could never match here. Every reader of
+    the wordlist now calls this, so the four of them read one text.
+    """
+    try:
+        text = data.decode("utf-8")
+    except UnicodeDecodeError:
+        text = data.decode("cp1252", errors="replace")
+    return text.replace("\r\n", "\n").replace("\r", "\n")
+
+
 def redact(line: str) -> str:
-    """The line's SHAPE, never its content."""
-    return re.sub(r"[A-Za-z0-9]", "x", line.strip())[:70]
+    """The line's SHAPE, never its content.
+
+    Every letter and digit IN ANY SCRIPT becomes ``x`` (it was ``[A-Za-z0-9]``
+    until 2026-10-10, which would have printed the accented letters of a
+    non-ASCII value once ``decode_text`` let those values match), and anything
+    else outside ASCII becomes ``?`` -- so a shape carries no letter of the
+    value and prints on any console, a cp1252 one included.
+    """
+    shape = re.sub(r"[^\W_]", "x", line.strip())
+    return shape.encode("ascii", "replace").decode("ascii")[:70]
 
 
 def main() -> int:
@@ -143,7 +175,7 @@ def main() -> int:
             continue
         path = REPO / rel
         try:
-            lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+            lines = decode_text(path.read_bytes()).splitlines()
         except OSError:
             continue
         lowered = [line.lower() for line in lines]
