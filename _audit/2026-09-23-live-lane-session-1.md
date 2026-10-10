@@ -5026,8 +5026,8 @@ this repository.** Every step below names them by role.
 Port 9224 was held by the same one Chrome process (started 11:15:16). **THE ATTACH CHECK:
 PASS `[0, 1, 0]`** (19:03), and he was signed in (load 1: no wall, 0 challenge terms, the
 messaging badge 0). Master carried this branch's `6c65815` from 19:05:16, by the
-orchestrator's fast-forward; the sign-in and `P B9`'s two read-only loads ran just before,
-on the identical tree, and no write ran before it. The live-session flag was raised at the
+orchestrator's fast-forward, as this lane's fetch saw it; only the sign-in (19:04:43) ran
+before that, on the identical tree, and every other load after it. The live-session flag was raised at the
 first load and deleted at the close, by this lane.
 
 ### The session, load by load
