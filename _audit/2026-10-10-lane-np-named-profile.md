@@ -371,7 +371,11 @@ the merge of master `53908ea`.
 
 ---
 
-## F. The next live session's spec (session 8): 40 loads and 5 searches assumed
+## F. The next live session's spec (session 9): 40 loads and 5 searches assumed
+
+SESSION 8 HAS RUN (the live lane's record, merged to master at `91ed87c`) and
+fired none of this lane's rows, so this is session 9's spec -- the session the
+orchestrator's ruling 3 names for C-NP1.
 
 PRECONDITIONS, ZERO LOADS. Master carries lane NP (A to D) and is CI-green by
 its sha; the live lane merges it and its harness tests pass; the live-session
@@ -399,14 +403,17 @@ THE ORDER, AND EACH STEP'S LOADS (20 s or more apart, as always):
              preview (0), confirm (1). The capture C-NP1 of D.2. A        (capture only)
              landing elsewhere is recorded (path depth) and NOT retried.
     6      linkedin_react_to_item(item=<the FIRST item whose author    M C32
-             is "owner">): preview (1). It must read no_reaction and
-             name the member's own post. IF IT READS REACTED -- his own
+             is "owner">): preview (1). It must read no_reaction; the
+             post's ownership is activity_items' (step 2), the
+             preview's author_kind reading `unknown` by ruling 4.
+             IF IT READS REACTED -- his own
              earlier reaction -- take the next owner item; if none,
              STOP: a reaction that predates the session is never taken
              back.
     7-8    confirm: the press (1) and the verification's fresh render  M C32
              (1); verified "reacted".
-    9      the un-react tool on the same key: preview (1);    M C35 (candidate)
+    9      linkedin_withdraw_reaction(item=<the same key>):            M C35 (candidate)
+             preview (1);
              it must read reacted.
     10-11  confirm: the press and the fresh render; verified          M C32's inverse
              "no_reaction" -- the post back as it was.
@@ -487,11 +494,34 @@ CI. Every red below was this lane's own and is fixed in the commit named.
     census_completion.py; build_rulings_index, build_audit_     every headline figure matches its pin;
       index, build_blocker_map --check                            all three derived views clean
 
+AFTER THE RULINGS OF 14:14 (the inverse, author_kind), with `-n 6` and the
+file kept on one worker, each batch on the committed tree:
+
+    file(s)                                                     result
+    tests/test_a_reaction_can_be_withdrawn.py                   red first: 8 of 10 failed; then 10 passed
+    test_a_reaction_takes_any_item_and_names_its_author.py      red first ('another_member' == 'unknown')
+    tests/test_receipt_names_its_own_action.py                  4 red (the count, "the post", the shared
+                                                                  place) -> owners and the pair; 17 passed
+    test_prose_that_makes_a_claim.py, test_the_other_two_       4 red (the three count-prose sites) ->
+      count_claims_are_pinned_too.py                              re-derived
+    batch 1: the twelve directly touched files                  300 passed (100 s)
+    batch 2: test_writes.py, test_writes_nine.py (spread)       303 passed (104 s)
+    batch 2b: the nine write-class files                        210 passed (70 s)
+    batch 3: the page-string harness and corpus guards          811 passed (126 s)
+    batch 4: the ten other write-tool files                     419 passed, 3 skipped (554 s: a browser
+                                                                  file on a loaded box -- CI's from now on)
+    test_no_committed_identity.py, after the commit             1072 passed
+    the merge of master `1027bf8`: build_audit_index,           all clean; every headline figure
+      build_blocker_map, build_rulings_index, census_             matches its pin
+      completion --check
+
 ON CI (`scripts/lane_ci.py`): run `38035128406` on `678c4d8` FAILED -- this
 lane's two docstring words and three pin copies (fixed in `49ac33b` and
 `15d4675`), and the cited-SHA family's "cannot resolve master" on every `ci/`
 run, which the coordinator confirmed is infrastructure (KNOWN-INFRA, its fix
-merging to master). Run `38036699018` on `6222f1b` (both children merged) FAILED on two more of this lane's own -- a document naming the unbuilt inverse by a tool name, and child B's DEBUG capture leaving the package logger at INFO (fixed in `de0a4ae`) -- beside the same KNOWN-INFRA family. Run `38037374698` on `4230f00` (master `b10bde8` merged, its local-master fix in) FAILED on ONE test: `test_every_candidate_pair_is_declared_or_triaged`, a table-row-proximity pair (row 33's own vocabulary two lines below row 31's citation of this record), triaged on `NOT_A_CORRECTION` after reading the line. The certifying run is the one named in the lane's final message.
+merging to master). Run `38036699018` on `6222f1b` (both children merged) FAILED on two more of this lane's own -- a document naming the unbuilt inverse by a tool name, and child B's DEBUG capture leaving the package logger at INFO (fixed in `de0a4ae`) -- beside the same KNOWN-INFRA family. Run `38037374698` on `4230f00` (master `b10bde8` merged, its local-master fix in) FAILED on ONE test: `test_every_candidate_pair_is_declared_or_triaged`, a table-row-proximity pair (row 33's own vocabulary two lines below row 31's citation of this record), triaged on `NOT_A_CORRECTION` after reading the line. Run `38038413611` on `0b41978` (master `fe119de` merged; A to F) SUCCEEDED,
+and master fast-forwarded to that head. The runs after the rulings of 14:14
+are named in the lane's final message.
 
 The children's own runs are in their reports: child C 42 new tests and 842
 existing targeted tests green; child B 16 new tests and its react-touching
