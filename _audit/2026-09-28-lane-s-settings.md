@@ -70,15 +70,16 @@ committed `write-classes.tsv` and the committed `blocker-map.tsv`:
 The union is 115 candidate rows. Each was read and placed IN (a setting of his
 own account that a write changes) or OUT (named reason): 93 IN, 22 OUT.
 
-THE WALK MISSED THIRTEEN, AND TWO INSTRUMENTS FOUND THEM. It read no jobs row:
+THE WALK MISSED TWELVE, AND LANE K'S LEDGER AND THE COLD REVIEW FOUND THEM.
+It read no jobs row:
 the jobs slice is not in `write-classes.tsv`, and its cells name the settings
 family in other words, so neither source 3 nor source 4 saw `J 74`-`J 76`
 (the job application settings page `P M7` and `P M8` already sit on). Lane
 K's next-step ledger (`_audit/_census/next-step.tsv`, held by
 `scripts/check_next_step.py`), cross-checked against this lane's rows after
 the merge of `fe119de`, names eleven rows as this lane's that the walk had
-not reached; the cold review named `N 96`; and the split made `P O17`. Each
-was read and placed like the 115: eight IN (`J 35`, `J 36`, `J 41`, `J 74`,
+not reached, and the cold review named `N 96`; the split made a thirteenth
+row, `P O17`. Each was read and placed like the 115: eight IN (`J 35`, `J 36`, `J 41`, `J 74`,
 `J 75`, `J 76`, `J 100`, `M M52`), four OUT (`J 81`, `J 83`, `J 157`,
 `N 96`), and `P O17` IN as the one built. **102 IN, 26 OUT.** The walk was a
 scratch script and is not kept: its four rules are the list above, and the
@@ -89,8 +90,8 @@ Twins are kept as the census keeps them (`N 159`/`P B10`, `N 115`/`P E8`,
 control, one capture.
 
 A WRITER IS BUILT FOR THREE KINDS, AND A ROW'S KIND IS ITS CAPTURE'S TO SAY.
-The census sentence on each IN row says which of four things is known of it
-(a cold review found the first form said "the write is BUILT" of all of them,
+The census sentence on each IN row says which of these is known of it (a
+cold review found the first form said "the write is BUILT" of all of them,
 including rows whose own note named a refused kind):
 
     the capture decides the kind: a switch, radio group or select
