@@ -137,14 +137,12 @@ M C34	M	W	R3	TARGET:a comment he names	INFERRED	RULING:EVERY-OUTWARD-CLASS-BUILT
 M C35	M	W	R3	CAPTURE:own-post-reactions	INFERRED	linkedin_server/press.py::"/feed/update/", ; RULING:OUTWARD-CLASSES-BUILT-BEHIND-GRANTS
 M C36	M	W	R1	ADMIT:https://www.linkedin.com/my-items/saved-posts/	NAMED	_audit/_census/messaging-and-content.md::admit the address and run the landed-address check IN THE SAME WAVE
 M C37	M	W	R1	ADMIT:https://www.linkedin.com/my-items/saved-posts/	NAMED	_audit/_census/write-classes.tsv::queued:SAVED-POSTS-SURFACE ; M C36
-M C38	M	R	-	BUILD:tests/fixtures/live1/post_summary.html	NAMED	_audit/2026-09-23-live-lane-session-1.md::lane L1's five NEEDS-CAPTURE pages, captured ; _audit/_census/read-addresses.tsv::https://www.linkedin.com/analytics/post-summary/urn:li:activity:12345/
 M C39	M	R	-	ADMIT:https://www.linkedin.com/analytics/creator/content/?metricType=x	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/analytics/creator/content/?metricType=x ; RULING:READ-PAST-AN-ACT-SUBSTRING
 M C42	M	R	-	TARGET:another member's post he names, by link	NAMED	_audit/_census/read-addresses.tsv::THE ROW HOLDS FOR OTHER PEOPLE'S POSTS ONLY
 M C44	M	W	R3	CAPTURE:article-composer	NAMED	RULING:ARTICLE-COMPOSER-CAPTURE ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
 M C45	M	W	R3	SIBLING:lane-U	NAMED	_audit/2026-09-28-rulings-build-classes.md::`FILE-UPLOAD-UNSANCTIONED` is therefore a stale label.
 M C46	M	W	R3	CAPTURE:article-composer	NAMED	RULING:ARTICLE-COMPOSER-CAPTURE ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
 M C47	M	R+W	-	ADMIT:https://www.linkedin.com/pulse/drafts/	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/pulse/drafts/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
-M C48	M	R	-	BUILD:tests/fixtures/live1/articles.html	NAMED	_audit/2026-09-23-live-lane-session-1.md::lane L1's five NEEDS-CAPTURE pages, captured ; _audit/_census/read-addresses.tsv::https://www.linkedin.com/in/me/recent-activity/articles/
 M C49	M	W	R3	PRECONDITION:an article he has published	INFERRED	M C49 ; M C77
 M C50	M	W	R3	CAPTURE:article-composer	NAMED	RULING:ARTICLE-COMPOSER-CAPTURE ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
 M C51	M	W	R3	PRECONDITION:a newsletter he authors	INFERRED	_audit/_census/read-addresses.tsv::the page listing his newsletters links no analytics address
@@ -167,7 +165,7 @@ M C73	M	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 M C76	M	W	R3	PRECONDITION:an invitation to contribute to a collaborative article	INFERRED	M C76
 M C77	M	W	R3	PRECONDITION:an article he has published	INFERRED	M C49 ; M C77
 M C78	M	W	R3	CAPTURE:article-composer	NAMED	RULING:ARTICLE-COMPOSER-CAPTURE ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
-M C79	M	W	R1	ADMIT:https://www.linkedin.com/pulse/placeholder-article/	INFERRED	_audit/_census/read-addresses.tsv::/pulse/ (also driven) stays refused ; RULING:READ-PAST-AN-ACT-SUBSTRING
+M C79	M	W	R1	ADMIT:https://www.linkedin.com/pulse/placeholder-article/	INFERRED	_audit/_census/messaging-and-content.md::`/pulse/` stays refused ; RULING:READ-PAST-AN-ACT-SUBSTRING
 M C80	M	W	R3	ADMIT:https://www.linkedin.com/newsletters/1234567890/	NAMED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/newsletters/1234567890/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
 M C81	M	W	R3	CAPTURE:article-composer	NAMED	RULING:ARTICLE-COMPOSER-CAPTURE ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
 M C82	M	W	R3	ADMIT:https://www.linkedin.com/newsletters/1234567890/	NAMED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/newsletters/1234567890/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
@@ -255,8 +253,8 @@ N 37	N	W	R1	BUILD:tests/fixtures/live8/feed_item_menu_open.html	NAMED	_audit/202
 N 38	N	R	-	ADMIT:https://www.linkedin.com/mynetwork/network-manager/people-follow/following/	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/mynetwork/network-manager/people-follow/following/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
 N 39	N	R	-	ADMIT:https://www.linkedin.com/mypreferences/d/unfollowed	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/mypreferences/d/unfollowed ; RULING:READ-PAST-AN-ACT-SUBSTRING
 N 40	N	W	R1	ADMIT:https://www.linkedin.com/mypreferences/d/unfollowed	INFERRED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/mypreferences/d/unfollowed ; RULING:READ-PAST-AN-ACT-SUBSTRING
-N 41	N	W	R1	ADMIT:https://www.linkedin.com/pulse/placeholder-article/	INFERRED	_audit/_census/read-addresses.tsv::/pulse/ (also driven) stays refused ; RULING:READ-PAST-AN-ACT-SUBSTRING
-N 42	N	W	R1	ADMIT:https://www.linkedin.com/pulse/placeholder-article/	INFERRED	_audit/_census/read-addresses.tsv::/pulse/ (also driven) stays refused ; RULING:READ-PAST-AN-ACT-SUBSTRING
+N 41	N	W	R1	ADMIT:https://www.linkedin.com/pulse/placeholder-article/	INFERRED	_audit/_census/messaging-and-content.md::`/pulse/` stays refused ; RULING:READ-PAST-AN-ACT-SUBSTRING
+N 42	N	W	R1	ADMIT:https://www.linkedin.com/pulse/placeholder-article/	INFERRED	_audit/_census/messaging-and-content.md::`/pulse/` stays refused ; RULING:READ-PAST-AN-ACT-SUBSTRING
 N 43	N	W	R3	BUILD:tests/fixtures/live8/feed_item_menu_open.html	NAMED	_audit/2026-09-23-live-lane-session-1.md::a post's control menu PRESSED: ; RULING:HIS-OWN-CURATION-NOT-OUTWARD
 N 49	N	W	R1	TARGET:a skills Page he names	INFERRED	RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS ; N 49
 N 50	N	W	R1	SIBLING:N 47	NAMED	_audit/_census/network.md::Only the ROUTE is retired, not the outcome ; RULING:D6-CAPABILITY-OVER-AFFORDANCE

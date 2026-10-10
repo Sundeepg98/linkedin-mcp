@@ -110,6 +110,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_message_from_profile": ("confirm_token", "profile", "text"),
     "linkedin_my_activity_items": (),
     "linkedin_my_applications": ("limit",),
+    "linkedin_my_articles": (),
     "linkedin_my_profile": ("details", "include_skills"),
     "linkedin_new_messages": (),
     "linkedin_newsletter_subscriptions": (),
@@ -118,6 +119,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_open_messaging": ("allow_unread", "include_names", "message_filter"),
     "linkedin_open_thread": ("allow_unread", "thread_id"),
     "linkedin_page_plugin_snippet": ("page_id",),
+    "linkedin_item_viewer_demographics": ("item",),
     "linkedin_people_search_shape": (
         "connections_of", "current_company_ids", "include_names", "keywords",
         "location_ids", "network", "past_company_ids",
@@ -515,8 +517,21 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: COVERED-UNFIRED on it, never fired. Neither side moved the other's
 #: entry, so the sum holds: 62 + 1 tools, 100 + 1 parameters. See
 #: `_audit/2026-10-10-lane-b3-messaging-build.md`.
-PINNED_TOOL_COUNT = 63
-PINNED_PARAMETER_COUNT = 101
+#: **RE-PINNED 2026-10-10 AT 63 TOOLS AND 98 PARAMETERS on lane B3's child
+#: branch: two READS, one parameter -- `linkedin_my_articles()` (census `M C48`)
+#: and `linkedin_item_viewer_demographics(item)` (census `M C38`, the viewer-
+#: demographics half), each over an address the read allowlist already admits,
+#: each built and tested over a tracked skeleton of the session-1 capture.**
+#: THE CENSUS DECISION: NO ROW MOVES IN THIS COMMIT. The child does not edit
+#: census files; lane B3's LEAD banks both rows against these tools. Measured
+#: off mcp.list_tools(), not summed.
+#: **RE-PINNED AT LANE B3'S MERGE OF ITS CHILD, 2026-10-10: 65 TOOLS AND
+#: 102 PARAMETERS.** The lead's 63 and 101 meet the child's two reads and
+#: one parameter: 63 + 2 tools, 101 + 1 parameters. THE CENSUS DECISION, in
+#: the lead's census commit: `M C48` and `M C38` GAP -> COVERED-UNFIRED on
+#: them, never fired. See `_audit/2026-10-10-lane-b3-messaging-build.md`.
+PINNED_TOOL_COUNT = 65
+PINNED_PARAMETER_COUNT = 102
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:

@@ -1,4 +1,4 @@
-"""The tool surface: sixty-three tools, forty-five of which do not write.
+"""The tool surface: sixty-five tools, forty-seven of which do not write.
 
 **AND THIS LINE IS NOW DERIVED, NOT MAINTAINED, 2026-09-20.** It had gone stale
 a THIRD time -- "forty-four tools, thirty-two of which do not write" against a
@@ -238,6 +238,12 @@ EXPECTED_TOOLS = {
     # permalink its caller's key names, returned inside one people_data.Post
     # record. It writes nothing and is on no write table (census M C43).
     "linkedin_read_item_text",
+    # THE SIXTY-SECOND AND SIXTY-THIRD, 2026-10-10 (lane B3's child): two
+    # READS over addresses the read allowlist already admits -- his own
+    # articles list (census M C48) and one of his items' viewer demographics,
+    # shaped (census M C38). Each loads one page and presses nothing.
+    "linkedin_my_articles",
+    "linkedin_item_viewer_demographics",
     # THE THIRTY-EIGHTH, 2026-09-05: linkedin_events_home, a READ. No
     # write was added. It is the only tool here whose whole answer can be
     # ZERO, and its reader returns that integer only when four
@@ -931,7 +937,14 @@ async def test_the_surface_is_exactly_the_sixty_two_tools(tools):
     # linkedin_read_item_text (census M C43, ruling THIRD-PARTY-TEXT-AT-RUNTIME),
     # a READ, so the split moves on its read side and the write set holds.
     # MEASURED off mcp.list_tools() on the merged tree.
-    assert len(tools) == 63
+    # SIXTY-THREE ON LANE B3'S CHILD BRANCH, 2026-10-10: two READS,
+    # linkedin_my_articles and linkedin_item_viewer_demographics, so the split
+    # moves on its read side and the write set holds. MEASURED off
+    # mcp.list_tools().
+    # SIXTY-FIVE AT LANE B3'S MERGE OF ITS CHILD, 2026-10-10: the child's two
+    # READS on top of the lead's sixty-three -- measured off the merged
+    # registry, not summed, and moved with every other count site.
+    assert len(tools) == 65
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -1104,7 +1117,12 @@ async def test_the_surface_is_exactly_the_sixty_two_tools(tools):
     # FORTY-FIVE ON LANE B3, 2026-10-10: linkedin_read_item_text is a READ --
     # it loads one permalink composed from its caller's key and presses
     # nothing -- and the write side is unmoved.
-    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 45
+    # FORTY-SIX ON LANE B3'S CHILD BRANCH, 2026-10-10: linkedin_my_articles and
+    # linkedin_item_viewer_demographics are READS -- each loads one admitted
+    # page and presses nothing -- and the write side is unmoved.
+    # FORTY-SEVEN AT LANE B3'S MERGE OF ITS CHILD, 2026-10-10: the lead's
+    # read and the child's two, the write side unmoved.
+    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 47
 
 
 def test_the_read_that_was_nearly_named_a_write():

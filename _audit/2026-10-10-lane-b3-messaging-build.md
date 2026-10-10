@@ -10,8 +10,8 @@ THE BRIEF'S SIXTEEN ROWS, each `next=BUILD` in lane K's ledger:
 
     row     capture the ledger named                  verdict here
     M C43   live2/own_post.html                       COVERED-UNFIRED (section 2)
-    M C48   live1/articles.html (to be built)         see section 3
-    M C38   live1/post_summary.html (to be built)     see section 3
+    M C48   live1/articles.html (built here)          COVERED-UNFIRED (section 3)
+    M C38   live1/post_summary.html (built here)      COVERED-UNFIRED (section 3)
     M M20   live8/thread.html                         GAP: no opened conversation captured (4.1)
     M M40   live8/thread.html                         GAP: the same (4.1)
     M M51   live8/thread.html                         GAP: the same (4.1)
@@ -145,7 +145,107 @@ bucket 3, so its line left `_audit/_census/read-addresses.tsv` and lane K's
 
 ## 3. `M C48` and `M C38`: the two session-1 pages (child)
 
-(Filled in at the child's merge.)
+Built by the lane's child (general-purpose, its own worktree, branch
+`worktree-agent-aae4845b01117efe1`, five commits `2d021f3`..`3203e27`),
+reviewed and merged here; its report is the source of the reds below.
+
+### 3.1 The tracked skeletons
+
+`scripts/_build_live1_l1_fixtures.py` builds `tests/fixtures/live1/articles.html`
+and `tests/fixtures/live1/post_summary.html` from the live lane's raw session-1
+captures (`_state/l1-articles.html`, `_state/l1-post_summary.html`; gitignored,
+read, never copied) through the SHIPPED reduction, imported and not rewritten
+(`_probe_live_lane_session_2.skeleton_of`, then `tracked_copy`), with a fresh
+random key per run. One substitution between the two: a closed tuple of
+LinkedIn's fixed words kept where a whole text node or label equals one --
+"All activity", "Top demographics", "All", and the six category words. Every
+demographic VALUE and percentage stays x. The builder prints counts only and
+refuses if a keyed shape survives; `tests/test_no_committed_identity.py` and
+`tests/test_fixtures_hold_only_synthetic_people.py` pass over both.
+
+### 3.2 `M C48`: what the page draws, and the reader
+
+MEASURED on the skeleton (counts and LinkedIn's words only): the address is
+SERVED as the "All activity" shell -- one section, its heading "All
+activity", one filter pill "Posts", and one SDUI screen slot holding one
+CHILDLESS container; 22 anchors on the page, 0 `/pulse/`, no list, no
+empty-state words. `linkedin_server/own_articles.py` keys on the heading (a
+fixed word) and the slot (an attribute name), never a position; it returns
+`readable`, `articles` (`/pulse/<one segment>/` paths, titles sanitised and
+capped), `count`, `empty` and `truncated`. On the real skeleton: readable,
+no article, empty. DERIVED: the entry shape (no capture draws an article),
+and the reading of an empty slot as drawn rather than still streaming (the
+same session's analytics slot drew 653 elements, so the page had settled).
+
+RED (child): `ImportError: cannot import name 'own_articles'`; a harness red
+on the network guard (the same as section 2.3's), fixed with the route
+refusal. GREEN: 6 passed.
+
+THE LEAD'S FIX AT THE MERGE, red first: `empty` was computed from a count
+helper that turns a FAILED count into 0, so a page whose section and slot
+were found but whose content count failed read `empty: True` -- the module's
+own docstring says "an unreadable page is never empty". The new test makes
+the content count raise (a selector the engine refuses) and failed on the
+child's code (`assert True is False`); `empty` now reads a count that is
+`None` when it fails. 7 passed.
+
+### 3.3 `M C38`: the demographics card is drawn
+
+MEASURED: the per-post page DRAWS a viewer-demographics card -- title "Top
+demographics", a nav of seven buttons ("All" with `aria-current`, then Job
+title, Location, Seniority, Company, Industry, Company size), five rows each
+with a category word, a value, a percentage and a `role=progressbar` whose
+`aria-valuenow` equals the percentage; no anchor and no member link inside
+the card. Session 1's "38 chart labels, none in the metric vocabulary" was
+the creator-analytics `aria-label` route, which cannot see text and
+`aria-valuenow`; it was never an absence. The page's other people card (a
+Premium list of members) sits outside the card and nothing selects it.
+
+`linkedin_server/post_viewer_demographics.py` finds the card from its one
+title, reads tabs and rows by structure, takes category words only from the
+closed vocabulary, cross-checks each percentage against its progressbar, and
+lets each VALUE leave only through `shape.census_shape` then
+`shape.census_redact_rare` at count one -- the cell's own requirement. Its
+residual, stated in the module: a one-word value survives that redactor, as
+the redactor documents of itself; it names a bucket, never a viewer. On the
+real skeleton: card found, categories read, 5 rows drawn, 0 points (the
+values are x). On a copy with synthetic rows planted: 5 points, multi-word
+values `<redacted>`, the reader-leak guard's own plant nowhere in the reading,
+a row whose progressbar disagrees with its text refused.
+
+RED (child): `ImportError: cannot import name 'post_viewer_demographics'`.
+GREEN: 7 passed.
+
+### 3.4 The tools
+
+`linkedin_my_articles()` loads the constant address; `linkedin_item_viewer_demographics(item)`
+takes `urn:li:activity:<digits>` from its caller and refuses anything else
+before loading. The child named the second `linkedin_post_viewer_demographics`
+first and the name law refused it ("post" is a write verb), so it ships under
+the item vocabulary. Both are in the one lane B3 block of `server.py`; the
+child's mid-file import moved to the module's import list at the merge.
+Envelope verdicts, each driven through its guard's own function: `clean` for
+the articles tool; `not_driven:never read the page` for the demographics tool
+(the harness's argument is not an activity key -- the verdict
+`linkedin_company_page_counts` carries for the same reason). Both readers
+are `clean` in the reader-leak baseline.
+
+WHAT THE GUARDS DO NOT REACH, stated by the child and kept here: the
+reader-leak harness's plant is never a `/pulse/` address nor a category word,
+so its `clean` covers the paths it reached, not the title path or the value
+path; those are covered by the modules' own plant tests. Reaching them
+through the guard means a shipped drive and `ADMITTED_TEXT` entries (his own
+titles as HIS_OWN, the values as AGGREGATE) -- the guard's one door, left as
+question 5.
+
+### 3.5 The census
+
+`M C48` and `M C38` GAP -> COVERED-UNFIRED, each by its cell's bar: a tool
+aimed at real captured markup that has never returned a live payload. `M
+C38`'s impressions half was already read by `linkedin_creator_analytics`'s
+`per_post` (`P G6`); its demographics half is this tool, and the row's state
+is the weaker of the two. Whether LinkedIn serves the per-post page for
+another member's item is UNMEASURED; a page that draws no card reads nothing.
 
 ---
 
@@ -280,6 +380,13 @@ each on both):
     gap_read          98 -> 97                92 -> 91
     unfired           21 -> 22                24 -> 25
 
+and at the child's merge, `M C48` and `M C38` moved the same seven by two
+each, measured: adjudicated 216, b1_no_ruling 12, b3_admitted 38,
+delivered_broad 138, gap 555, gap_read 89, unfired 27 -- both rows join
+`PINNED_B1_ROWS` under NO RULING and leave the ledger and the address table;
+the triage constant `AFTER_LANE_B3_CHILD_READS` reads (120, R 10); the tool
+surface reads 65 tools (47 reads, 18 writes) and 102 parameters
+
 and `PINNED_B1_ROWS` gains `M C43` under NO RULING. It ends "every headline
 figure matches its pin". `tests/test_triage_instrument.py` gains
 `AFTER_LANE_B3_ITEM_TEXT` -- (129, R 15) on the branch, (122, R 12) merged;
@@ -365,6 +472,28 @@ third, unchanged, created `ci/worktree-agent-a008721ba8a0553be` at
   page string outside the record in the envelope. Never another member's
   item for the proof unless he names it.
 
+`M C48` -- `linkedin_my_articles`:
+
+- TARGET: his own articles list, a constant address. LOADS: 1. Nothing pressed.
+- THE BAR: `readable` true. If he has no article the honest reading is
+  `articles` [] with `empty` true, and the proof records whether the slot drew
+  anything at all; if an article is drawn, each entry a `/pulse/` path and a
+  title matching what the page shows. Then COVERED-PROVEN, with the entry shape
+  measured only if one was drawn.
+- INVERSE: none. STOP-ALL: a redirect off the address; an auth wall;
+  `readable` false (record the counts and stop the row).
+
+`M C38` -- `linkedin_item_viewer_demographics`:
+
+- TARGET: one of HIS OWN items, its key from `linkedin_my_activity_items` --
+  ideally the one session 1 loaded. LOADS: 1. Nothing pressed (no tab).
+- THE BAR: `card_found` true and `points_found` > 0, each row a category
+  word, an integer percentage agreeing with its progressbar, and a value that
+  is either one word or `<redacted>`/`<opaque>`. Then COVERED-PROVEN.
+- INVERSE: none. STOP-ALL: a redirect off the per-post address; an auth wall;
+  any multi-word value leaving unredacted (the shaper failed -- stop and
+  report, never store it); never another member's key.
+
 ---
 
 ## 8. Questions for the orchestrator, each with its ground
@@ -389,3 +518,10 @@ third, unchanged, created `ci/worktree-agent-a008721ba8a0553be` at
 4. A PAGE'S ITEM. `people_data.Post` requires a member author, so an
    organisation Page's item returns no words. Lane G2's new `Organisation`
    record could carry that author; widening `Post` is that owner's call.
+5. THE TWO TEXT PATHS THE READER GUARD CANNOT REACH (section 3.4). His own
+   article titles and the shaped demographic values leave outside a
+   `people_data` record, covered by the modules' own plant tests but not by
+   the reader-leak harness, whose plant never takes those shapes. Admit them
+   through a shipped drive and `ADMITTED_TEXT` (HIS_OWN, AGGREGATE), or have
+   the titles leave inside a record type -- the guard's one door, so the
+   orchestrator's call.

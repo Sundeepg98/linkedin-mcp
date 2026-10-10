@@ -1,4 +1,11 @@
-"""The tool surface: sixty-three tools, eighteen of which write to LinkedIn.
+"""The tool surface: sixty-five tools, eighteen of which write to LinkedIn.
+
+THE SIXTY-FOURTH AND SIXTY-FIFTH ARE READS, 2026-10-10, lane B3's child,
+merged by its lead: ``linkedin_my_articles`` (census ``M C48``) and
+``linkedin_item_viewer_demographics`` (census ``M C38``, its demographics
+half), each over an address the read allowlist already admits, each loading
+ONE page and writing nothing. The headline read "sixty-three tools,
+eighteen of which write" until then.
 
 THE SIXTY-THIRD IS A READ, 2026-10-10, on lane B3 and the orchestrator's
 ruling ``THIRD-PARTY-TEXT-AT-RUNTIME``: ``linkedin_read_item_text``, ONE
@@ -250,9 +257,11 @@ POINTER to it was dangling, so a reader who followed it found nothing and
 would reasonably conclude these numbers are unchecked. A citation is a claim
 like any other.
 The surface splits three ways and the split is the part a reader actually
-needs: FORTY-FIVE read, EIGHTEEN write, and ZERO are write-shaped,
-registered, gated and unable to act. Forty-five plus eighteen plus zero is
-sixty-three. (Thirty-eight, thirteen and fifty-one until 2026-09-24; thirty-nine,
+needs: FORTY-SEVEN read, EIGHTEEN write, and ZERO are write-shaped,
+registered, gated and unable to act. Forty-seven plus eighteen plus zero is
+sixty-five. (Forty-five, eighteen and sixty-three until lane B3's child's
+two reads arrived at its lead's merge, 2026-10-10; thirty-eight, thirteen
+and fifty-one until 2026-09-24; thirty-nine,
 thirteen and fifty-two at the live lane's merge the same day; thirty-nine,
 fourteen and fifty-three at lane L7's; forty-one, fifteen and fifty-six at
 lane L5's; forty-one, sixteen and fifty-seven at lane L8's merge on
@@ -523,9 +532,11 @@ from linkedin_server import (
     named_profile,
     newsletters,
     notify_cost,
+    own_articles,
     page_plugin,
     people_results,
     people_search,
+    post_viewer_demographics,
     preflight,
     premium,
     presence,
@@ -11525,10 +11536,13 @@ async def linkedin_page_plugin_snippet(page_id: str) -> dict[str, Any]:
         return _error(exc)
 
 
-# ---- lane B3 (2026-10-10): M C43 -------------------------------------------
-# One block for this lane's tools, as the lane rules require. The reader is
-# ``item_text``; this function only composes the address from the caller's
-# key, loads it once, and refuses a landing anywhere else.
+# ---- lane B3 (2026-10-10): M C43, M C48, M C38 ------------------------------
+# One block for this lane's tools, as the lane rules require. Readers live in
+# their own modules (``item_text``, ``own_articles``,
+# ``post_viewer_demographics``); each tool loads ONE address composed from a
+# constant or from its caller's own argument, never from a page
+# (PAGE-MAY-VETO-NEVER-SUPPLY). The two reads after the first were built by
+# the lane's child and merged by its lead.
 @mcp.tool()
 async def linkedin_read_item_text(item: str) -> dict[str, Any]:
     """ONE item's own words, read off its permalink, as an untrusted record.
@@ -11580,6 +11594,88 @@ async def linkedin_read_item_text(item: str) -> dict[str, Any]:
                     ),
                 }
             return {"ok": True, **await item_text.read_item_text(page, link=url)}
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_my_articles() -> dict[str, Any]:
+    """Your own ARTICLES list. One page load; nothing pressed, nothing written.
+
+    Loads ``/in/me/recent-activity/articles/`` -- a constant, which nothing a
+    page draws can change -- and reads it with ``own_articles``: each article
+    as ``{title, link}``, the title your own words sanitised and capped, the
+    link a ``/pulse/`` path only.
+
+    **READ ``readable`` AND ``empty`` BEFORE YOU BELIEVE A ZERO.** Measured on
+    the one capture of this page (2026-09-23): LinkedIn serves it as the "All
+    activity" shell -- one filter pill, and one screen slot drawn with nothing
+    in it -- and no article. ``empty`` is True only when that slot is drawn
+    holding nothing, never from a zero count; ``readable`` False means the
+    page's own structure was not found and the list is UNMEASURED.
+
+    **THE ARTICLE ENTRY IS DERIVED.** No capture has shown an article, so an
+    entry is read as a ``/pulse/`` link inside that slot -- LinkedIn's article
+    address -- and that has not yet been seen returning live. Census row
+    ``M C48``.
+    """
+    try:
+        async with BROWSER.session() as page:
+            landed = await BROWSER.goto(page, own_articles.ARTICLES_URL)
+            assert_not_authwall(landed, surface="my-articles")
+            return await own_articles.read_own_articles(page)
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_item_viewer_demographics(item: str) -> dict[str, Any]:
+    """Who viewed ONE of your items, as aggregated demographics. NUMBERS AND CATEGORY WORDS, NEVER A VIEWER.
+
+    ``item`` is an activity key YOU name -- ``urn:li:activity:<digits>``, as
+    ``linkedin_my_activity_items`` returns them. It is checked against that
+    closed shape and nothing a page draws can replace it; the per-item
+    analytics page for it is loaded ONCE and nothing on it is pressed.
+
+    Read with ``post_viewer_demographics``: the "Top demographics" card's
+    category words (Job title, Location, Seniority, Company, Industry,
+    Company size), the tab drawn as current, and each row's percentage,
+    checked against the row's own progressbar. A row's VALUE -- the job
+    title, place or company of the people who viewed it -- leaves ONLY
+    through ``shape.census_shape`` and then ``census_redact_rare`` at count
+    one: a run of two or more capitalised words comes back ``<redacted>``,
+    anything long or outside a narrow alphabet ``<opaque>``. A one-word value
+    survives, as that redactor documents of itself; it names a bucket, never a
+    viewer. The list of people the page draws beside the card is not read.
+
+    **READ ``points_found`` BEFORE YOU BELIEVE AN EMPTY LIST** -- the
+    creator-analytics semantics. 0 means UNMEASURED, never "no viewers";
+    ``labels_seen`` beside it separates a page that drew no card from one
+    whose numbers stopped parsing; ``readable`` is ``points_found > 0``.
+
+    The same item's impressions are ``linkedin_creator_analytics``'s
+    ``per_post``. Census row ``M C38``, its demographics half. Measured
+    offline on one capture's skeleton; not yet seen returning live.
+
+    Args:
+        item: one of your activity keys, ``urn:li:activity:<digits>``.
+    """
+    try:
+        address = post_viewer_demographics.address_for(item)
+        if address is None:
+            return {
+                "ok": False,
+                "refused": "not_an_activity_key",
+                "reason": (
+                    "item must be urn:li:activity: followed by one to twenty "
+                    "ASCII digits, the one form the read allowlist admits for "
+                    "this page. Nothing was loaded."
+                ),
+            }
+        async with BROWSER.session() as page:
+            landed = await BROWSER.goto(page, address)
+            assert_not_authwall(landed, surface="post-viewer-demographics")
+            return await post_viewer_demographics.read_post_viewer_demographics(page)
     except Exception as exc:
         return _error(exc)
 

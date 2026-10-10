@@ -1197,7 +1197,10 @@ PINNED = {
     #: RE-PINNED AT LANE B3'S MERGE OF MASTER 0103810, 2026-10-10, MEASURED:
     #: 213 -> 214. `M C43` GAP -> COVERED-UNFIRED on THIRD-PARTY-TEXT-AT-RUNTIME
     #: (`linkedin_read_item_text`), the only row lane B3 moved.
-    "adjudicated": 214,
+    #: RE-PINNED AT LANE B3'S MERGE OF ITS CHILD, 2026-10-10, MEASURED: 214 ->
+    #: 216. `M C48` and `M C38` GAP -> COVERED-UNFIRED (`linkedin_my_articles`,
+    #: `linkedin_item_viewer_demographics`), two reads, the only rows moved.
+    "adjudicated": 216,
     #: THE LIVE LANE'S FOUR ROWS, RE-DERIVED AT EACH OF ITS MERGES OF MASTER
     #: (2026-09-24; last over lane S): four rows fired live and banked
     #: (`_audit/2026-09-23-live-lane-session-1.md`). `P G6` COVERED-UNFIRED ->
@@ -1271,7 +1274,10 @@ PINNED = {
     #: RE-PINNED AT LANE B3'S MERGE OF MASTER 0103810, 2026-10-10, MEASURED:
     #: 135 -> 136. `M C43` GAP -> COVERED-UNFIRED on THIRD-PARTY-TEXT-AT-RUNTIME
     #: (`linkedin_read_item_text`), the only row lane B3 moved.
-    "delivered_broad": 136,
+    #: RE-PINNED AT LANE B3'S MERGE OF ITS CHILD, 2026-10-10, MEASURED: 136 ->
+    #: 138. `M C48` and `M C38` GAP -> COVERED-UNFIRED (`linkedin_my_articles`,
+    #: `linkedin_item_viewer_demographics`), two reads, the only rows moved.
+    "delivered_broad": 138,
     #: 79 since the live lane's merge (see `adjudicated`): P G6, N 134, P O3
     #: and M C72 COVERED-PROVEN.
     #: 75 and 21 since the bucket-1 merge: `M C41` fired live and moved from
@@ -1366,7 +1372,10 @@ PINNED = {
     #: RE-PINNED AT LANE B3'S MERGE OF MASTER 0103810, 2026-10-10, MEASURED:
     #: 558 -> 557. `M C43` GAP -> COVERED-UNFIRED on THIRD-PARTY-TEXT-AT-RUNTIME
     #: (`linkedin_read_item_text`), the only row lane B3 moved.
-    "gap": 557,
+    #: RE-PINNED AT LANE B3'S MERGE OF ITS CHILD, 2026-10-10, MEASURED: 557 ->
+    #: 555. `M C48` and `M C38` GAP -> COVERED-UNFIRED (`linkedin_my_articles`,
+    #: `linkedin_item_viewer_demographics`), two reads, the only rows moved.
+    "gap": 555,
     #: 18 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: `M M1` built (`linkedin_message_from_profile`).
     #: 16 ON LANE L5'S ORDER OF 2026-09-27 23:36, MEASURED:
     #: `linkedin_send_message` RETIRED (aimed by a name): `M M2` to GAP and `N
@@ -1443,7 +1452,10 @@ PINNED = {
     #: RE-PINNED AT LANE B3'S MERGE OF MASTER 0103810, 2026-10-10, MEASURED:
     #: 24 -> 25. `M C43` GAP -> COVERED-UNFIRED on THIRD-PARTY-TEXT-AT-RUNTIME
     #: (`linkedin_read_item_text`), the only row lane B3 moved.
-    "unfired": 25,
+    #: RE-PINNED AT LANE B3'S MERGE OF ITS CHILD, 2026-10-10, MEASURED: 25 ->
+    #: 27. `M C48` and `M C38` GAP -> COVERED-UNFIRED (`linkedin_my_articles`,
+    #: `linkedin_item_viewer_demographics`), two reads, the only rows moved.
+    "unfired": 27,
     #: 104 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     #: 101 AT LANE S'S NAMES ADOPTION (2026-09-27), MEASURED: `N 79`, `N 172`
@@ -1476,7 +1488,10 @@ PINNED = {
     #: RE-PINNED AT LANE B3'S MERGE OF MASTER 0103810, 2026-10-10, MEASURED:
     #: 92 -> 91. `M C43` GAP -> COVERED-UNFIRED on THIRD-PARTY-TEXT-AT-RUNTIME
     #: (`linkedin_read_item_text`), the only row lane B3 moved.
-    "gap_read": 91,
+    #: RE-PINNED AT LANE B3'S MERGE OF ITS CHILD, 2026-10-10, MEASURED: 91 ->
+    #: 89. `M C48` and `M C38` GAP -> COVERED-UNFIRED (`linkedin_my_articles`,
+    #: `linkedin_item_viewer_demographics`), two reads, the only rows moved.
+    "gap_read": 89,
     #: 151, not the 152 published by `_audit/2026-09-21-the-write-ceiling.md`.
     #: That document scoped itself to `profile.md`, `network.md` and
     #: `messaging-and-content.md`; measured at HEAD those three carry W 151 and
@@ -1640,7 +1655,10 @@ PINNED = {
     #: RE-PINNED AT LANE B3'S MERGE OF MASTER 0103810, 2026-10-10, MEASURED:
     #: 41 -> 40. `M C43` GAP -> COVERED-UNFIRED on THIRD-PARTY-TEXT-AT-RUNTIME
     #: (`linkedin_read_item_text`), the only row lane B3 moved.
-    "b3_admitted": 40,
+    #: RE-PINNED AT LANE B3'S MERGE OF ITS CHILD, 2026-10-10, MEASURED: 40 ->
+    #: 38. `M C48` and `M C38` GAP -> COVERED-UNFIRED (`linkedin_my_articles`,
+    #: `linkedin_item_viewer_demographics`), two reads, the only rows moved.
+    "b3_admitted": 38,
     #: 38 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     #: 40 ON LANE L5'S ORDER OF 2026-09-28 12:32, MEASURED: `N 30`, `N 31`, `N 65`
@@ -1885,7 +1903,10 @@ PINNED = {
     #: RE-PINNED AT LANE B3'S MERGE OF MASTER 0103810, 2026-10-10, MEASURED:
     #: 9 -> 10. `M C43` GAP -> COVERED-UNFIRED on THIRD-PARTY-TEXT-AT-RUNTIME
     #: (`linkedin_read_item_text`), the only row lane B3 moved.
-    "b1_no_ruling": 10,
+    #: RE-PINNED AT LANE B3'S MERGE OF ITS CHILD, 2026-10-10, MEASURED: 10 ->
+    #: 12. `M C48` and `M C38` GAP -> COVERED-UNFIRED (`linkedin_my_articles`,
+    #: `linkedin_item_viewer_demographics`), two reads, the only rows moved.
+    "b1_no_ruling": 12,
     #: 7 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
     #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
     #: 4 AT THE LIVE LANE'S MERGE OF MASTER c2825a4 (2026-09-28), MEASURED on the
@@ -2115,6 +2136,12 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
         #: THIRD-PARTY-TEXT-AT-RUNTIME permits and shapes it (untrusted,
         #: sanitised, bounded, never stored); no ruling holds it.
         "M C43",
+        #: `M C48` and `M C38` entered on lane B3, 2026-10-10, at its child's
+        #: merge: his own articles list (`linkedin_my_articles`) and one of his
+        #: items' viewer demographics, shaped (`linkedin_item_viewer_demographics`),
+        #: each built offline over a tracked skeleton of a session-1 capture and
+        #: never fired. Reads of pages the allowlist admits; no ruling holds them.
+        "M C38", "M C48",
     ),
 }
 

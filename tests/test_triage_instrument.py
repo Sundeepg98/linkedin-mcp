@@ -439,7 +439,14 @@ AFTER_LANE_U_MERGE_OF_LANE_K = (123, {"R": 13, "W": 107, "R+W": 3})
 #: 123 - 1 = 122, reads 13 - 1.
 AFTER_LANE_B3_ITEM_TEXT = (122, {"R": 12, "W": 107, "R+W": 3})
 
-EXPECTED_NOW = AFTER_LANE_B3_ITEM_TEXT
+#: AT LANE B3'S MERGE OF ITS CHILD (2026-10-10), MEASURED with the merged
+#: tree's guard: `C48` and `C38` -- two READS -- left GAP, COVERED-UNFIRED on
+#: `linkedin_my_articles` and `linkedin_item_viewer_demographics`
+#: (`_audit/2026-10-10-lane-b3-messaging-build.md` section 3). 122 - 2 = 120,
+#: reads 12 - 2.
+AFTER_LANE_B3_CHILD_READS = (120, {"R": 10, "W": 107, "R+W": 3})
+
+EXPECTED_NOW = AFTER_LANE_B3_CHILD_READS
 
 
 def test_the_headline_split_is_the_one_the_report_quotes():
