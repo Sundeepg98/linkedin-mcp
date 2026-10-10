@@ -30,7 +30,15 @@ the next merge):
 | identity blob sweep: one git cat-file --batch per sweep; lane_ci push leaves the sweep to the hook | 454f554 |
 | merge origin/master 53908ea into lane CI: the fast lane's own merge, ahead of the local-master fix | 42b8513 |
 | ci: every shard off master gets a local master ref before any test runs | 4bc1c84 |
-| this record's sections 9 and 10, INSTRUMENTS 87.5-87.6 | (the commit that adds them) |
+| record: lane CI sections 9 and 10 -- the batched sweep's before/after, the local-master fix, and the lane's own ci/ run | 4edba7e |
+| merge master 60587b0 into lane CI: the unfollow confirmation and badge-switch lanes, ahead of the UTF-8 sweep | b910eff |
+| identity readers decode one way: UTF-8 when valid, else cp1252 -- a deliberate behaviour change | d8ef400 |
+| merge master fe119de into lane CI: lane K's ledger and the merged CI fixes, ahead of the timings rebuild | 66c6241 |
+| ci: shard timings rebuilt from master run 38034133514 | 54dd6c1 |
+| this record's sections 11 and 12, INSTRUMENTS 87.7 | (the commit that adds them) |
+
+(Through 4bc1c84 the commits reached master in its merges 53908ea and
+b10bde8; 4edba7e onward wait on the next merge.)
 
 ## 1. How a lane uses it -- two commands
 
@@ -57,9 +65,9 @@ sweep at 72-217 s and twice per push):
 | step | figure | class |
 |---|---|---|
 | `push`: the helper's checks (dirty tree, branch, hook gate, ancestry) | well under a second -- no sweep | DERIVED (git plumbing only) |
-| `push`: the hook's full check, sweep included, ONCE | 9.8 s for 3 commits / 1002 blobs; 10.4 s for 8 commits -- once the main checkout carries section 9's sweep; until then the hook's sweep is the per-blob one (this lane's own push: 104.6 s in all) | MEASURED on this box, sections 9 and 10 |
-| CI run, one ubuntu 3.13 cell in four shards | 6m21s (run 38036281943); ~4.5 minutes once the shard timings are regenerated | MEASURED once, section 10; the second figure DERIVED |
-| total, push to verdict | ~6.5-8 minutes, against 30-60 locally | DERIVED from the two rows above |
+| `push`: the hook's full check, sweep included, ONCE | 9.8 s for 3 commits / 1002 blobs; 10.4 s for 8 commits. Whole `lane_ci.py push` once master carried section 9: 14.4 s (section 12), against 104.6 s before | MEASURED on this box, sections 9, 10 and 12 |
+| CI run, one ubuntu 3.13 cell in four shards | 5m50s on the rebuilt timings (run 38038508157, section 12.3); 6m21s before them (run 38036281943) | MEASURED, sections 10 and 12 |
+| total, push to verdict | ~6 minutes (14.4 s push, 5m50s run), against 30-60 locally | MEASURED, section 12.3 |
 
 ## 2. The gate -- `scripts/pre_push_ref_gate.py`
 
@@ -448,12 +456,160 @@ merge), with master 53908ea merged in first, as clause 1 requires:
 AGAINST THE 6-MINUTE TARGET: 6m21s, over by 21 s, and the reason is
 measured: shard 1 ran 287 s of tests where the other three ran 166-181 s.
 The packer balances on `scripts/ci_shard_timings.json`, which the workflow's
-own comment says goes stale as the suite grows (it was priced at 3660 tests;
-this run had 12640 testcases). Balanced, the same 806 s of shard time is
-~200 s a shard, about 4.5 minutes a run. The fix is to regenerate the table
-from the junit this run uploaded; not done here (section 8, Q5).
+own comment says goes stale as the suite grows. Balanced, the same 806 s of
+shard time is ~200 s a shard, about 4.5 minutes a run. The fix is to
+regenerate the table from the junit this run uploaded; not done here
+(section 8, Q5).
 
-## 8. Questions for the orchestrator
+CORRECTED 14:10, by section 12. Two claims in the paragraph above were
+wrong, and are left in place so the correction can be found from them. (1)
+This record first said the table "was priced at 3660 tests". It was not:
+its own label names run 36338770074 (head 687b07c, 2026-09-27), two weeks
+old; the 3660 was the workflow comment's suite size, misattributed. (2) "about
+4.5 minutes" assumed balance was the whole story. It is not: one file,
+`tests/test_impact_gate_selects_data_dependencies.py`, runs 189 s on ubuntu
+by itself, so no packing of whole files gets its shard much below that.
+
+## 11. The 13:43 ruling on Q4: one decoding rule for every reader of the wordlist -- A DELIBERATE BEHAVIOUR CHANGE
+
+The orchestrator ruled YES on section 8's Q4: "a sweep that cannot match 9 of
+the 226 needles on UTF-8 files is a latent hole in an identity gate on a
+PUBLIC repo." This section is NOT a byte-for-byte change. It changes what
+text the wordlist is matched against, on purpose, in four places.
+
+### 11.1 The hole, reader by reader
+
+| reader | decoded with, before | what it could not see |
+|---|---|---|
+| `scripts/sweep_blobs_for_identity.py` (the push gate's sweep) | the LOCALE's encoding (`text=True`, no encoding) -- cp1252 on this box | a non-ASCII needle in a UTF-8 file (mojibake) |
+| `scripts/pre_commit_identity_gate.py` (the installed commit hook) | the locale's encoding, the same way | the same |
+| `scripts/sweep_tracked_for_identity.py` | UTF-8 with replacement | a non-ASCII needle in a cp1252 file (U+FFFD) |
+| `scripts/identity_gate.py` (the manual staged-blob gate) | UTF-8 with replacement | the same |
+
+On a UTF-8 Linux runner the first two would have read UTF-8 correctly -- the
+hole was the operator's box, which is where the commit and push hooks run.
+
+### 11.2 The rule
+
+`sweep_tracked_for_identity.decode_text(data)`: UTF-8 when the bytes are
+valid UTF-8; otherwise cp1252, with replacement for its five undefined
+bytes; universal newlines after. Never the locale. All four readers now call
+it: the tracked sweep reads `path.read_bytes()` through it; the blob sweep's
+`_as_text` returns it; the pre-commit gate reads the staged blob as bytes and
+decodes it through the sweep module (loaded once); `identity_gate.py`'s
+`_git` decodes stdout through it.
+
+AND THE SHAPE PRINTED FOR A HIT. `redact` replaced `[A-Za-z0-9]` only. Once a
+non-ASCII value can match, that rule would print its accented letters, and a
+character outside cp1252 could crash the print on a cp1252 console. `redact`
+now turns every letter and digit of ANY script into `x` and anything else
+outside ASCII into `?`. The pre-commit gate's `_mask` and `identity_gate.py`'s
+`redact` now call it instead of carrying their own copies. For an ASCII line
+the shape is unchanged.
+
+### 11.3 Red first, and the real tree
+
+`tests/test_identity_text_is_decoded_one_way.py`, with a SYNTHETIC non-ASCII
+needle written in both encodings, committed and staged in a tmp repository.
+Against the old readers on this box: 6 failed --
+
+| test | why it failed on the old code |
+|---|---|
+| the rule (UTF-8, cp1252, newlines, an undefined byte) | no `decode_text` |
+| the shape | the old `redact` kept the accented letters |
+| the blob sweep, both encodings | missed the UTF-8 copy (locale cp1252) |
+| the tracked sweep, both encodings | missed the cp1252 copy (U+FFFD) |
+| the pre-commit gate, both encodings | missed the UTF-8 copy (locale cp1252) |
+| `identity_gate.py`, both encodings | missed the cp1252 copy (U+FFFD) |
+
+6 passed after. Each detector test also asserts the printed report is ASCII
+and does not carry the value. With the blob-sweep, identity-gate, ci-ref and
+staged-shape tests: 64 passed in 26.7 s (before the live session began).
+
+THE REAL TREE STILL READS PASS under the new decoder: the tracked sweep
+`PASS: 0 hits across 1001 swept files`; the blob sweep
+`PASS: 0 hits across 1041 blobs, 226 needles` over 3c8edc2..HEAD (20
+commits, 8.4 s). `tests/test_no_committed_identity.py` after the commit: 1051
+passed.
+
+### 11.4 Readers left as they were, and why
+
+* `scripts/completeness_harvest.py`'s `Veto` matches text its callers read
+  as UTF-8 with replacement, from browser captures -- the UTF-8 half of the
+  rule already holds there.
+* `scripts/purge_denied_term.py` replaces UTF-8 byte literals with
+  filter-repo. A cp1252 copy would survive a purge, but its own post-check
+  runs both sweeps, which now see that copy and would block the push.
+* The fixture builders and `scripts/_probe_live_lane_session_2.py` read the
+  key itself, not files to sweep.
+
+THE HOOKS RUN THE MAIN CHECKOUT'S COPIES (section 5.1), so the new decoding
+guards commits and pushes from every worktree only once this branch is in
+the main checkout's working tree.
+
+## 12. The 13:43 ruling on Q5: the shard timings, rebuilt
+
+### 12.1 What was done
+
+`scripts/ci_shard_timings.json` rebuilt with the shipped recipe,
+`ci_shard.py --write-timings` over all 18 junit reports of master's run
+38034133514 (head 53908ea; ubuntu 3.10, ubuntu 3.13 and windows 3.13, 6
+shards each), each file priced at its slowest cell: 292 files, 12628 tests,
+3742.2 s. The previous table was run 36338770074's (head 687b07c,
+2026-09-27).
+
+ONE DEPARTURE FROM THE RECIPE, written into the table's own label: the
+recipe collects with `pytest --collect-only -q` at the run's head. From
+14:01 `_state/LIVE_SESSION_ON` was present, which forbids full-suite work on
+the box, so the collection was read back from the run's own ubuntu 3.13
+junit instead: every collected test ran (the per-shard and per-cell guards
+refuse a run where that is not so), so the union of a cell's testcases IS
+its collection at the run's head. All three cells read back to the same
+12628 tests in 292 files. `tests/test_ci_shard.py`: 136 passed (serial).
+
+### 12.2 What it buys, predicted, and the floor it cannot move
+
+The shipped planner balances the four fast-lane shards exactly in table
+seconds (935.6 each). In ubuntu 3.13 seconds -- the fast lane's -- predicted
+by the shipped packer plus a replay of xdist 3.8's loadfile scheduling on 4
+workers (units ordered by test count, the `--loadscope-reorder` default):
+
+| table | ubuntu seconds per shard | slowest shard, 4 workers |
+|---|---|---|
+| before (run 36338770074) | 758 / 692 / 646 / 502 | 238 s |
+| after (run 38034133514) | 638 / 656 / 707 / 598 | 211 s |
+
+The same replay put the old table's worst shard at 238 s where this lane's
+own run measured 287 s, so the model runs ~20 % fast; the ratio is what to
+read. THE FLOOR: `tests/test_impact_gate_selects_data_dependencies.py` runs
+189 s on ubuntu by itself, and its shard cannot finish sooner. The table is
+priced at the SLOWEST cell (windows sets the full matrix's wall clock), so
+ubuntu sums stay within about 9 % of their mean rather than equal. Section
+8, Q6 asks for the file to be split or sped up.
+
+### 12.3 The certification run
+
+Pushed with `lane_ci.py push` once master fe119de was merged in (clause 1),
+head = the commit "ci: shard timings rebuilt from master run 38034133514"
+(the short hash in the table at the top; lane branch only until the merge).
+It carries sections 11 and 12's code; this record follows it.
+
+| what | measured |
+|---|---|
+| `lane_ci.py push` | exit 0 in 14.4 s, all of it: the hook (the main checkout's gate, now with the batched sweep) read `PASS: 0 hits across 1036 blobs, 226 needles` over 4 commits. The same command took 104.6 s before section 9 reached master |
+| `lane_ci.py wait <sha>` | found run 38038508157 by head sha; exit 0 after 349.1 s |
+| run 38038508157 | push on `ci/worktree-agent-a5475b349ebe80b87`; conclusion SUCCESS; 6 jobs, all success; wall 5m50s from the run's own timestamps |
+| per shard, job total / Run this shard | 332 / 261 s; 271 / 203 s; 302 / 223 s; 303 / 223 s; plan 3 s; totals 8 s |
+| ubuntu test seconds per shard, from its junit | 741 / 730 / 792 / 767 -- within 4 % of their mean. The previous run, on the old table: 653 / 801 / 532 / 631, within 21 % |
+| the new tests and the cited-SHA family | `tests/test_identity_text_is_decoded_one_way.py` 6 cases, 0 failures; `tests/test_a_cited_sha_resolves.py` 44 cases, 0 failures; all shards 12698 cases, 0 failures, 0 errors, 9 skips |
+
+AGAINST THE ~4.5-MINUTE TARGET: 5m50s, NOT met, and the reason is measured.
+The shards are balanced now (within 4 %, from 21 %), and the run is 31 s
+faster than the old table's. But the slowest shard, 261 s of tests, is the one
+holding `tests/test_impact_gate_selects_data_dependencies.py` at 199 s, and
+the suite grew under the run: 12698 tests and 3030 s of ubuntu test time,
+against 2617 s in the run before. Balance is spent; what is left is that
+one file (section 8, Q6).
 
 ## 8. Questions for the orchestrator
 
@@ -478,10 +634,21 @@ from the junit this run uploaded; not done here (section 8, Q5).
 
 5. (added 13:40) REGENERATE THE SHARD TIMINGS? Ground: section 10 -- run
    38036281943 took 6m21s because one shard ran 287 s of tests against
-   166-181 s for the others, and `scripts/ci_shard_timings.json` was priced on
-   a 3660-test suite. The run's junit is uploaded per shard for exactly this.
-   Recommendation: a small follow-up that rebuilds the table from a full
-   master run's junit; expected ~4.5 minutes a fast-lane run.
+   166-181 s for the others. (The ground first added "priced on a 3660-test
+   suite"; wrong, see section 10's correction.) The run's junit is uploaded
+   per shard for exactly this. Recommendation: a small follow-up that
+   rebuilds the table from a full master run's junit.
 
 Questions 1-3 were answered at 12:46: four shards stay; the branch merges as
 a merge commit; lanes merge `origin/master` before each `ci/` push.
+Questions 4 and 5 were answered at 13:43: YES to both -- section 11 (the
+decoding rule, as a deliberate behaviour change) and section 12 (the
+timings).
+
+6. (added 14:15) SPLIT OR SPEED UP ONE TEST FILE? Ground: section 12 --
+   `tests/test_impact_gate_selects_data_dependencies.py` runs 189 s on
+   ubuntu, about 30 % of a balanced shard on its own, and it is the floor
+   of the fast lane's slowest shard. Recommendation: whoever owns the impact
+   gate measures where its 189 s go (if each test re-collects the suite, a
+   module-scoped fixture would do it once) and splits or shares; the fast
+   lane would then sit near 4.5 minutes.

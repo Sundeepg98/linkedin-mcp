@@ -357,4 +357,11 @@ def test_the_scope_statement_cost_no_boundary_movement():
     # freeze was re-frozen for exactly those three in the same change
     # (tests/test_readonly_boundary_invariant.py names them and attributes the
     # digest). The module docstring's scope statement is untouched.
-    assert len(functions) == 17, len(functions)
+    #
+    # NINETEEN SINCE 2026-10-10 (lane NP): the third check --
+    # ``named_profile_details_url`` and ``assert_named_profile_details_url`` --
+    # arrived together, ruling NAMED-PROFILE-DETAIL-PAGES, and the boundary
+    # freeze was re-frozen for exactly those two in the same lane (the tree
+    # minus them hashes to the replaced `<functions>` pin). The module
+    # docstring's scope statement is untouched.
+    assert len(functions) == 19, len(functions)
