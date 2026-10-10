@@ -1206,7 +1206,16 @@ PINNED = {
     #: 210 with lane U's three rows (+3).
     #: 214 AT LANE S'S MERGE OF MASTER 0103810 (2026-10-10), MEASURED on the
     #: merged tree: master's figure after lane U's three rows, plus `P O17` (COVERED-UNFIRED, adjudicated).
-    "adjudicated": 214,
+    #: 216 AT LANE B5'S MERGE OF MASTER 0103810 (2026-10-10), MEASURED on the
+    #: merged tree: master's 213 with the lane's `N 165`, `N 177` and `N 197`
+    #: GAP -> COVERED-UNFIRED -- one page of a group's member list as people
+    #: records (`linkedin_group_members`) and the group's link
+    #: (`linkedin_group_page`'s `group_link`, by CALLER-COMPOSITION-UNDER-D6);
+    #: never fired. Three R rows that leave bucket 3 and enter bucket 1 held
+    #: by no ruling (189 on the lane's branch, over master f93104c).
+    #: MEASURED AT THE INTEGRATION MERGE OF LANE B5 ONTO MASTER a457819 (2026-10-10) on the
+    #: merged tree, never summed (lane S's and lane B5's figures above).
+    "adjudicated": 217,
     #: THE LIVE LANE'S FOUR ROWS, RE-DERIVED AT EACH OF ITS MERGES OF MASTER
     #: (2026-09-24; last over lane S): four rows fired live and banked
     #: (`_audit/2026-09-23-live-lane-session-1.md`). `P G6` COVERED-UNFIRED ->
@@ -1279,7 +1288,12 @@ PINNED = {
     #: 132 with lane U's three rows (+3).
     #: 136 AT LANE S'S MERGE OF MASTER 0103810 (2026-10-10), MEASURED on the
     #: merged tree: master's figure after lane U's three rows, plus `P O17` (COVERED-UNFIRED, delivered broadly).
-    "delivered_broad": 136,
+    #: 138 AT LANE B5'S MERGE OF MASTER 0103810 (2026-10-10), MEASURED on the
+    #: merged tree: `N 165`, `N 177` and `N 197` GAP -> COVERED-UNFIRED (see
+    #: `adjudicated`).
+    #: MEASURED AT THE INTEGRATION MERGE OF LANE B5 ONTO MASTER a457819 (2026-10-10) on the
+    #: merged tree, never summed (lane S's and lane B5's figures above).
+    "delivered_broad": 139,
     #: 79 since the live lane's merge (see `adjudicated`): P G6, N 134, P O3
     #: and M C72 COVERED-PROVEN.
     #: 75 and 21 since the bucket-1 merge: `M C41` fired live and moved from
@@ -1378,7 +1392,9 @@ PINNED = {
     #: `M M14`, `M M15` and `M M18` left GAP (see `adjudicated`).
     #: 558 AT LANE U'S MERGE OF ORIGIN/MASTER 71d83ca, MEASURED: lane K's
     #: 561 with lane U's three rows (-3).
-    "gap": 558,
+    #: 555 AT LANE B5'S MERGE OF MASTER 0103810 (2026-10-10), MEASURED on the
+    #: merged tree: `N 165`, `N 177` and `N 197` left GAP (see `adjudicated`).
+    "gap": 555,
     #: 18 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: `M M1` built (`linkedin_message_from_profile`).
     #: 16 ON LANE L5'S ORDER OF 2026-09-27 23:36, MEASURED:
     #: `linkedin_send_message` RETIRED (aimed by a name): `M M2` to GAP and `N
@@ -1461,7 +1477,13 @@ PINNED = {
     #: master carried (K's rulings, U's attachments).
     #: 21 AT LANE S'S MERGE OF MASTER 6c65815 (2026-10-10), MEASURED on the
     #: merged tree: master's figure after live session 9, plus `P O17` (COVERED-UNFIRED, never fired).
-    "unfired": 21,
+    #: 23 AT LANE B5'S MERGE OF MASTER 6c65815 (2026-10-10), MEASURED on the
+    #: merged tree: master's 20 with the lane's `N 165`, `N 177` and `N 197`
+    #: GAP -> COVERED-UNFIRED (built offline over the live lane's skeletons,
+    #: never fired).
+    #: MEASURED AT THE INTEGRATION MERGE OF LANE B5 ONTO MASTER a457819 (2026-10-10) on the
+    #: merged tree, never summed (lane S's and lane B5's figures above).
+    "unfired": 24,
     #: 104 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     #: 101 AT LANE S'S NAMES ADOPTION (2026-09-27), MEASURED: `N 79`, `N 172`
@@ -1491,7 +1513,10 @@ PINNED = {
     #: both (see `adjudicated`).
     #: 92 ON LANE K's APPLICATION OF THE RULINGS OF 2026-10-10, MEASURED: `P
     #: N13`, `M C95`, `M C96`, `M C98`, `M C99` (R+W) and `P J4` left GAP.
-    "gap_read": 92,
+    #: 89 AT LANE B5'S MERGE OF MASTER 0103810 (2026-10-10), MEASURED on the
+    #: merged tree: `N 165`, `N 177` and `N 197`, three R rows, left GAP and
+    #: bucket 3 (see `adjudicated`).
+    "gap_read": 89,
     #: 151, not the 152 published by `_audit/2026-09-21-the-write-ceiling.md`.
     #: That document scoped itself to `profile.md`, `network.md` and
     #: `messaging-and-content.md`; measured at HEAD those three carry W 151 and
@@ -1652,7 +1677,10 @@ PINNED = {
     #: a capture first.
     #: 41 ON LANE K's APPLICATION OF THE RULINGS OF 2026-10-10, MEASURED: `P
     #: J4` and `M C96` left GAP.
-    "b3_admitted": 41,
+    #: 38 AT LANE B5'S MERGE OF MASTER 0103810 (2026-10-10), MEASURED on the
+    #: merged tree: `N 165`, `N 177` and `N 197`, three ADMITTED R rows, left
+    #: GAP and bucket 3 (see `adjudicated`).
+    "b3_admitted": 38,
     #: 38 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     #: 40 ON LANE L5'S ORDER OF 2026-09-28 12:32, MEASURED: `N 30`, `N 31`, `N 65`
@@ -1900,7 +1928,11 @@ PINNED = {
     #: share) fired live, read-only, and banked.
     #: 6 AT LANE S'S MERGE OF MASTER 6c65815 (2026-10-10), MEASURED on the
     #: merged tree: master's figure after live session 9, plus `P O17` (bucket 1, held by no ruling).
-    "b1_no_ruling": 6,
+    #: 8 AT LANE B5'S MERGE OF MASTER 6c65815 (2026-10-10), MEASURED on the
+    #: merged tree: `N 165`, `N 177` and `N 197` entered, reads no ruling holds.
+    #: MEASURED AT THE INTEGRATION MERGE OF LANE B5 ONTO MASTER a457819 (2026-10-10) on the
+    #: merged tree, never summed (lane S's and lane B5's figures above).
+    "b1_no_ruling": 9,
     #: 7 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
     #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
     #: 4 AT THE LIVE LANE'S MERGE OF MASTER c2825a4 (2026-09-28), MEASURED on the
@@ -2111,9 +2143,22 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
     #: `N 25` and `N 26` entered on his call of 17:46 (lane S), by D6 on that
     #: degree filter: a name search of his first degree, and his first degree
     #: filtered by place or employer; never fired. Reads no ruling holds.
+    #: `N 165`, `N 177` and `N 197` entered on lane B5's groups build,
+    #: 2026-10-10: one page of a group's member list as people records
+    #: (`linkedin_group_members`, MEMBER-ROSTERS-AS-BOUNDED-READS, which
+    #: bounds and does not hold) and the group's link (`linkedin_group_page`'s
+    #: `group_link`, by CALLER-COMPOSITION-UNDER-D6), built offline over the
+    #: live lane's skeletons and never fired. Each fires at a group he belongs
+    #: to, by the numeric id `linkedin_group_memberships` returns.
+    #: `N 165`, `N 177` and `N 197` entered on lane B5's groups build,
+    #: 2026-10-10: one page of a group's member list as people records
+    #: (`linkedin_group_members`, MEMBER-ROSTERS-AS-BOUNDED-READS, which bounds
+    #: and does not hold) and the group's link (`linkedin_group_page`'s
+    #: `group_link`, by CALLER-COMPOSITION-UNDER-D6), built offline over the
+    #: live lane's skeletons and never fired.
     NO_RULING: (
         "J 121", "J 122",
-        "N 20", "N 45",
+        "N 20", "N 45", "N 165", "N 177", "N 197",
         "P A8",
         #: `P O17` entered on 2026-10-10 (lane S, settings): split from
         #: `P O6-O20`, the switch "Share key profile updates" built behind the

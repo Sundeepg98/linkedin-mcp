@@ -98,6 +98,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_follow_company": ("confirm_token", "job_id"),
     "linkedin_follow_company_page": ("confirm_token", "organisation_id"),
     "linkedin_followed_companies": ("company", "limit"),
+    "linkedin_group_members": ("group_id",),
     "linkedin_group_memberships": (),
     "linkedin_group_page": ("group_id",),
     "linkedin_job_collections": (),
@@ -525,8 +526,26 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: PARAMETERS** -- master's 62 and 100 (lane U's tool and its three
 #: parameters, on lane NP's 97) with lane S's one tool and its four,
 #: counted on the merged tree.
-PINNED_TOOL_COUNT = 63
-PINNED_PARAMETER_COUNT = 104
+#: **RE-PINNED 2026-10-10 AT 63 TOOLS AND 101 PARAMETERS on lane B5 (the groups
+#: slice), at its merge of master 0103810: one tool, one parameter --
+#: `linkedin_group_members("group_id")`, ONE page of a group's member list as
+#: people records, on MEMBER-ROSTERS-AS-BOUNDED-READS, NAMES-AT-RUNTIME and the
+#: six PEOPLE-DATA-MITIGATIONS.** THE CENSUS DECISION, in the lane's commit:
+#: `N 165` and `N 177` move GAP -> COVERED-UNFIRED, over the live lane's
+#: tracked skeleton of one member list; not PROVEN, nothing was fired. The id
+#: is a NUMERIC IDENTIFIER, refused unless it is 1 to 20 ASCII digits -- the
+#: rule `linkedin_group_page("group_id")` already carries, reused through
+#: `member_rosters.compose`. `linkedin_group_page` gains a FIELD, `group_link`,
+#: and no parameter; `N 197` moves on it by CALLER-COMPOSITION-UNDER-D6. The
+#: lane's branch pinned 62 and 98 over the base's 61 and 97; master stood at 62
+#: and 100; 62 + 1 and 100 + 1, measured off the merged registry. See
+#: `_audit/2026-10-10-lane-b5-groups-build.md`.
+#: **AT THE INTEGRATION MERGE OF LANE B5 ONTO MASTER a457819 (2026-10-10):
+#: 64 TOOLS AND 105 PARAMETERS** -- lane S's tool and four parameters
+#: and lane B5's tool and one parameter, both over 62 and 100, counted on
+#: the merged registry, never summed.
+PINNED_TOOL_COUNT = 64
+PINNED_PARAMETER_COUNT = 105
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:

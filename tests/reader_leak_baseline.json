@@ -88,6 +88,8 @@
     "group_leave:read_rows": "clean",
     "group_leave:read_state": "clean",
     "group_page:read_group_page": "not_driven:read the page and returned nothing the page made",
+    "group_roster:_count": "clean",
+    "group_roster:read_group_members": "not_driven:reaches a people-record builder and built no record",
     "groups_page:read_group_memberships": "clean",
     "item_addresses:read_item_addresses": "clean",
     "item_author:read_item_author": "returns_records",

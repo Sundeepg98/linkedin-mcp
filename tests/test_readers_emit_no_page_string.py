@@ -1358,6 +1358,20 @@ WHAT_WOULD_DRIVE_IT: dict[str, str] = {
         "are states and sentences of counts and the package's words, so a "
         "drive would come back clean."
     ),
+    #: ADDED 2026-10-10 (lane B5, the groups build): one page of a group's
+    #: member list, as people records. Found by the lane's CI run 38047812344.
+    "group_roster:read_group_members": (
+        "CAPTURE: a member list whose rows each hold ONE member link -- the "
+        "planted page answers every href with the plant, which is no member "
+        "link, so its one row is skipped as no_member_link and no record is "
+        "built. The live lane's tracked skeleton of one group's member list, "
+        "tests/fixtures/live2/group_members.html (20 rows), draws it, and "
+        "tests/test_group_members.py drives this reader over that skeleton in "
+        "a headless browser with synthetic people filled in and a needle "
+        "planted in every place it must not read, none crossing. A double "
+        "answering those reads off the skeleton -- a drive in "
+        "shipped_drives -- is not built."
+    ),
 }
 
 #: The verdicts that mean a drive never reached its success path.

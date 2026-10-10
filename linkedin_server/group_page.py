@@ -284,6 +284,50 @@ def landed_on_the_same_group(
     return str(verdict.get("identifier")) == str(identifier)
 
 
+#: The reach states on which :func:`group_link` publishes: the page drew
+#: anchors on the same group. ``reader_blind`` (nothing drawn -- an error page
+#: at the same address looks like this) and ``off_group`` never publish.
+LINK_REACH_STATES: tuple[str, ...] = ("feed_drawn", "ambiguous")
+
+
+def group_link(
+    identifier: Optional[str],
+    same_group: Optional[bool],
+    reach_state: Optional[str] = None,
+) -> Optional[str]:
+    """The group's own link -- census ``N 197`` -- or ``None``. PURE.
+
+    ``N 197`` is "Copy a group's link", drawn as 'Copy link to group' in the
+    group's own menu. Under ``CALLER-COMPOSITION-UNDER-D6`` (the
+    orchestrator, 2026-10-10) a row named for an affordance is discharged
+    when the caller can compose SHIPPED tools to deliver its payload: the
+    payload is the link, and this is where a tool returns it (lane B5,
+    2026-10-10). Lane K's ledger recorded that no tool did.
+
+    THE LINK IS COMPOSED, NEVER READ. It is :func:`group_page_url`'s address
+    for the caller's own digits -- the template this repository authored --
+    and it is returned ONLY when ``same_group`` is ``True``: the navigation to
+    that very address landed on a page whose group id reduced to the same
+    digits (:func:`landed_on_the_same_group`), so it is a link LinkedIn was
+    just shown to serve this group at. Any other landing -- a redirect, an
+    auth wall, a page naming no group -- returns ``None``, and the landing
+    itself is never published. Nothing the menu's own copy would hold (a
+    tracking query, a share token) is reproduced, and nothing is pressed.
+
+    AND THE PAGE MUST HAVE DRAWN SOMETHING: ``reach_state`` -- the state
+    :func:`reachability` gave the same reading -- must be one of
+    :data:`LINK_REACH_STATES`. Added 2026-10-10 on the lane's cold review: a
+    blank page at the same address read ``landed_on_the_same_group`` True and
+    ``reader_blind``, and published the link on the evidence of nothing.
+    """
+    if same_group is not True or reach_state not in LINK_REACH_STATES:
+        return None
+    built = group_page_url(identifier)
+    if not built.get("built"):
+        return None
+    return str(built["url"])
+
+
 async def read_group_page(page: Any, html: str = "") -> dict[str, Any]:
     """Classify a group page's anchors. Returns COUNTS and integers.
 

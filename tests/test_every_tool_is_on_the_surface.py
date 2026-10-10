@@ -84,6 +84,9 @@ EXPECTED_TOOLS = (
     "linkedin_server_info",
     "linkedin_session_info",
     "linkedin_group_page",
+    # 2026-10-10, lane B5: a READ, one page of a group's member list as people
+    # records, banking census rows N 165 and N 177 in the same commit.
+    "linkedin_group_members",
     "linkedin_company_page_counts",
     # 2026-09-23, lane L3: a READ on the jobs surface, banking census row
     # J 18 (recent searches, off the jobs home) in the same commit.
@@ -362,4 +365,12 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # linkedin_set_admitted_setting (HIS-OWN-SETTINGS-NOT-OUTWARD; census
     # P O17, split from P O6-O20, GAP -> COVERED-UNFIRED), measured off the
     # registry and moved with every other count site in the same commit.
-    assert len(_tool_names()) == 63
+    # SIXTY-THREE AT LANE B5'S MERGE OF MASTER 0103810, 2026-10-10: one READ,
+    # linkedin_group_members -- one page of a group's member list as people
+    # records (census N 165 and N 177, GAP -> COVERED-UNFIRED on the lane's
+    # branch, where it was the sixty-second) -- on top of master's sixty-two,
+    # measured off the merged registry, not summed.
+    # SIXTY-FOUR AT THE INTEGRATION MERGE OF LANE B5 ONTO MASTER a457819,
+    # 2026-10-10: lane S's write and lane B5's read, both counted from
+    # sixty-two, are two tools -- measured off the merged registry, not summed.
+    assert len(_tool_names()) == 64

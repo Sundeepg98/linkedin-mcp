@@ -3,8 +3,19 @@
 An MCP server that shows you your own LinkedIn account data as structured tool
 results instead of pages you have to click through.
 
-**Sixty-three tools ship. Forty-four read. Nineteen write. None is
+**Sixty-four tools ship. Forty-five read. Nineteen write. None is
 write-shaped and unable to act.**
+
+**THAT LINE READ "Sixty-three ... Forty-four read. Nineteen write" UNTIL LANE B5,
+2026-10-10, merged after lane S** (the groups slice, ruling MEMBER-ROSTERS-AS-BOUNDED-READS). One
+read arrived: `linkedin_group_members` returns ONE page of a group's member
+list -- a group you belong to, named by its numeric id -- each member as a
+record of four fields (name, headline, link, degree), marked as other people's
+words. The list's own load control is counted and never pressed, so a long
+list comes back as its first page and says so. `linkedin_group_page` also
+returns the group's own link now, when the page it loaded was that group.
+Census rows `N 165`, `N 177` and `N 197` are COVERED-UNFIRED: built over the
+live lane's captures and never fired.
 
 **THAT LINE READ "Sixty-two ... Forty-four read. Eighteen write" UNTIL
 LANE S (SETTINGS), 2026-10-10, merged after lane U** (HIS-OWN-SETTINGS-NOT-OUTWARD). One write
@@ -1006,7 +1017,7 @@ linkedin_server/
   cdp_bridge.py              the recovery path: attach to a running Chrome
   dom.py                     the read-only harvesters and the control readers
   shape.py                   pure parsers and the result envelope
-  server.py                  the sixty-three tools
+  server.py                  the sixty-four tools
   errors.py
 tests/                       1393 tests, no network, no account
   fixtures/                  frozen LinkedIn markup, scrubbed

@@ -257,8 +257,7 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
     "N 174": ("RULING", "", "the surface is unobservable until a pending "
                             "request exists, and creating one is a WRITE at a "
                             "real group"),
-    "N 177": ("RULING", "", "needs a group's member directory, refused here "
-                            "and, in the boundary's own words, anywhere"),
+    # N 177 LEFT 2026-10-10 (lane B5) -- see LEFT THE READ-GAP SET below.
     "N 178": ("RULING", "", "needs another member's profile, the boundary's "
                             "sharpest refusal"),
     "N 179": ("RULING", "", "the events vertical was deliberately left out of "
@@ -276,11 +275,7 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
     # N 195 LEFT 2026-09-28 (lane S's offline frontier) -- see LEFT THE
     # READ-GAP SET below. It had stayed BUILDABLE under
     # WHO-WHICH-COUNTS-ARE-NOT-DELIVERY (2026-09-24): the page names no member.
-    "N 197": ("PRESS", "", "the group page is admitted and the copy-link item "
-                           "sits behind the group's own menu; whether a link "
-                           "composed from the group id discharges the row is "
-                           "D6-CAPABILITY-OVER-AFFORDANCE's question, not "
-                           "decided here"),
+    # N 197 LEFT 2026-10-10 (lane B5) -- see LEFT THE READ-GAP SET below.
     "N 199": ("ADDRESS", "ABSENT", "the Premium suggestions page is drawn from "
                                    "a notification and no pattern names it; "
                                    "the list is of other people, so as "
@@ -309,7 +304,7 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
     "N 39": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
     "N 97": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
     "N 143": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
-    "N 165": ("RETURNED", "", "returned by lane R 2026-09-23; a member roster, admitted as a bounded read by MEMBER-ROSTERS-AS-BOUNDED-READS -- needs an admission and a reader; blocker named in its cell"),
+    # N 165 LEFT 2026-10-10 (lane B5) -- see LEFT THE READ-GAP SET below.
     "N 188": ("RETURNED", "", "returned by lane R 2026-09-23; a member roster, admitted as a bounded read by MEMBER-ROSTERS-AS-BOUNDED-READS -- needs an admission and a reader; blocker named in its cell"),
     "N 189": ("RETURNED", "", "returned by lane R 2026-09-23; a member roster, admitted as a bounded read by MEMBER-ROSTERS-AS-BOUNDED-READS -- needs an admission and a reader; blocker named in its cell"),
     "P K1": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
@@ -389,6 +384,19 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
 #:            degree: network F beside a keyword
 #:     N 26   COVERED-UNFIRED  (was RETURNED) -- its location and company
 #:            halves; school and industry split to N 26b, which ENTERED GAP
+#:
+#: LEFT THE READ-GAP SET 2026-10-10, on lane B5's groups build: built offline
+#: over the live lane's skeletons and never fired. N 177's DECIDED_SINCE_TRIAGE
+#: entry left with it, since CONTROL 4 refuses an entry for a row that is not
+#: a read-GAP row.
+#:
+#:     N 165  COVERED-UNFIRED  (was RETURNED) -- one page of a group's member
+#:            list as people records (group_roster.read_group_members)
+#:     N 177  COVERED-UNFIRED  (was RULING) -- the same read: each member's
+#:            degree as LinkedIn draws it; he knows the 1st-degree ones
+#:     N 197  COVERED-UNFIRED  (was PRESS) -- the group's link, composed from
+#:            the caller's id and returned by linkedin_group_page when the
+#:            landing is that group (CALLER-COMPOSITION-UNDER-D6)
 
 #: These four 2026-09-21 verdicts were measured past by the bucket-3 address
 #: table (`_audit/_census/read-addresses.tsv`, audit
@@ -453,14 +461,8 @@ DECIDED_SINCE_TRIAGE: dict[str, str] = {
              "name-returning reader held to PEOPLE-DATA-MITIGATIONS on lane "
              "G's people-record foundation, and a capture; bucket-3 gate "
              "MEASURE (the foundation landed 2026-09-27; the cell names the capture it waits on)",
-    "N 177": "D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING and "
-             "MEMBER-ROSTERS-AS-BOUNDED-READS: a group's member directory; "
-             "an admission and a reader -- admitted in lane S's follow-up "
-             "(2026-09-24); the people are WHO, a doctrine question since "
-             "answered by NAMES-AT-RUNTIME, so it now waits on a "
-             "name-returning reader held to PEOPLE-DATA-MITIGATIONS on lane "
-             "G's people-record foundation, and a capture; bucket-3 gate "
-             "MEASURE (the foundation landed 2026-09-27; the cell names the capture it waits on)",
+    # N 177 LEFT 2026-10-10 (lane B5): the name-returning reader and the
+    # capture its entry here waited on both exist -- see LEFT THE READ-GAP SET.
     "N 178": "D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING: GAP on an admission "
              "and a reader; its live proof loads another member's profile, "
              "so the operator names that member "

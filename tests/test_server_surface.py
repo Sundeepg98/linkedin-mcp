@@ -1,4 +1,4 @@
-"""The tool surface: sixty-three tools, forty-four of which do not write.
+"""The tool surface: sixty-four tools, forty-five of which do not write.
 
 **AND THIS LINE IS NOW DERIVED, NOT MAINTAINED, 2026-09-20.** It had gone stale
 a THIRD time -- "forty-four tools, thirty-two of which do not write" against a
@@ -503,6 +503,11 @@ EXPECTED_TOOLS = {
     # no parameter. Both are READS. No write was added by either.
     "linkedin_group_page",
     "linkedin_company_page_counts",
+    # THE SIXTY-SECOND, 2026-10-10 (lane B5), a READ on the groups surface.
+    # ``linkedin_group_members`` opens ONE page of a group's member list, the
+    # roster line MEMBER-ROSTERS-AS-BOUNDED-READS admitted, and returns its
+    # members as people records. No press, no scroll, no write.
+    "linkedin_group_members",
     # THE FIFTIETH, 2026-09-23 (lane L3), a READ on the jobs surface.
     # ``linkedin_recent_job_searches`` reads the jobs home, /jobs/jam/,
     # admitted 2026-09-20 with nothing behind it, and banks census J 18. It
@@ -616,12 +621,24 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_sixty_three_tools(tools):
-    """RENAMED AGAIN AT LANE S'S MERGE OF MASTER 0103810, 2026-10-10, to
+async def test_the_surface_is_exactly_the_sixty_four_tools(tools):
+    """RENAMED AGAIN AT THE INTEGRATION MERGE OF LANE B5 ONTO MASTER a457819,
+    2026-10-10, to ``..._sixty_four_tools``: lane S's write and lane B5's read
+    were each the sixty-third on their own trees; the merged registry holds
+    both. MEASURED off the merged registry, not summed; the name moved with
+    the pin.
+
+    RENAMED AGAIN AT LANE S'S MERGE OF MASTER 0103810, 2026-10-10, to
     ``..._sixty_three_tools``: one WRITE, ``linkedin_set_admitted_setting``
     (HIS-OWN-SETTINGS-NOT-OUTWARD), ONE control on ONE admitted settings page,
     on top of lane U's sixty-second. MEASURED off the registry on the merged
     tree; the name moved with the pin.
+
+    RENAMED AGAIN AT LANE B5'S MERGE OF MASTER 0103810, 2026-10-10, to
+    ``..._sixty_three_tools``: one READ from the lane's branch,
+    ``linkedin_group_members`` -- one page of a group's member list as people
+    records (MEMBER-ROSTERS-AS-BOUNDED-READS) -- on top of master's sixty-two.
+    MEASURED off the merged registry; the name moved with the pin.
 
     RENAMED AGAIN ON LANE U'S BRANCH, 2026-10-10, to ``..._sixty_two_tools``:
     one WRITE, ``linkedin_send_attachment`` (ruling FILE-UPLOAD-OPENED), one
@@ -940,7 +957,14 @@ async def test_the_surface_is_exactly_the_sixty_three_tools(tools):
     # SIXTY-THREE AT LANE S'S MERGE OF MASTER 0103810, 2026-10-10: linkedin_set_admitted_setting,
     # a WRITE, so the split moves on its write side and the non-write count
     # holds. MEASURED off mcp.list_tools().
-    assert len(tools) == 63
+    # SIXTY-THREE AT LANE B5'S MERGE OF MASTER 0103810, 2026-10-10:
+    # linkedin_group_members, a READ, so the split moves on its read side and
+    # the write set holds. MEASURED off mcp.list_tools() on the merged tree;
+    # the NAME moved with the pin.
+    # SIXTY-FOUR AT THE INTEGRATION MERGE OF LANE B5 ONTO MASTER a457819,
+    # 2026-10-10: lane S's write and lane B5's read together. MEASURED off
+    # mcp.list_tools() on the merged tree; the NAME moved with the pin.
+    assert len(tools) == 64
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -1112,7 +1136,10 @@ async def test_the_surface_is_exactly_the_sixty_three_tools(tools):
     # linkedin_read_named_profile is a READ -- its preview loads nothing, its
     # confirmed call loads one profile he named through the second door and
     # presses nothing -- and the write side is unmoved.
-    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 44
+    # FORTY-FIVE ON LANE B5, 2026-10-10: linkedin_group_members is a READ --
+    # one admitted roster page, nothing pressed, nothing scrolled -- and the
+    # write side is unmoved.
+    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 45
 
 
 def test_the_read_that_was_nearly_named_a_write():
