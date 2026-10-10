@@ -197,13 +197,90 @@ preview's target, the write, its inverse, the control), 43 s.
 
 (filled at merge)
 
-## D. P L8 -- child lb1-dashboard
+## D. P L8 -> COVERED-UNFIRED -- child lb1-dashboard
 
-(filled at merge)
+Built by child `lb1-dashboard` in its own worktree (commits `d9dea2c`,
+`ef2af22`, `05efa66`), reviewed and merged here; its report is the source of
+the reds below.
 
-## E. P L1 -- child lb1-audience
+- THE FIXTURE: `scripts/_build_dashboard_fixture.py` -> `tests/fixtures/live1/overview.html`
+  (lane K's PLANNED path), from session 1's raw capture through the session-2
+  `skeleton_of` and `tracked_copy` under a secret key kept off the tree. Every
+  text one `x` except what the reader reads, each restored only where its
+  keyed shape stands at that node inside one card: four path words, three
+  labels ("Post impressions in 7 days", "Total followers", "Profile viewers
+  in 90 days"), the period "vs. prior 7 days" three times, two icon names.
+  DECLARED SYNTHETIC: every value (41, 512, 63, 27), every delta, and the
+  search card's dated label and period. The build REFUSES on a wrong card
+  count or a label naming another metric than its address.
+- MEASURED on the raw (keyed hash, never a printed value): one `main`, ONE
+  metric `section` holding no `/in/` link, FOUR cards, each an `a` to its
+  analytics page holding exactly four `p` (value, label, delta, period) and,
+  on three of them, an `svg[id]` icon; his profile card in an `aside`
+  outside the section. The icons' geometry: `caret-up-small` points up,
+  `caret-small` down. DERIVED: up means increase (the CSS is never read).
+- THE READER: `linkedin_server/analytics_hub.py`, locator reads only (no
+  evaluate). A card is returned only when its link's analytics address AND
+  its label name the same metric, both closed vocabularies; integers and
+  closed words out (value, delta signed by a named icon only, window,
+  period), with `cards_seen`, `cards_parsed`, `labels_unrecognised`,
+  `paths_unrecognised`, `metrics_drawn_twice` and `readable`. Every string it
+  can publish is in its own `emitted_alphabet()`, tested over nine variants.
+- THE TOOL: `linkedin_analytics_hub()`, one load of `/dashboard/`,
+  `assert_not_authwall`, the reader. Envelope verdict `clean` (measured by the
+  envelope guard's own `drive_tool` at the merge, where the child had not
+  recorded one); reader-leak verdict `clean`.
+- RED FIRST: `ImportError` before the module (16:15); GREEN 26, then 34 after
+  `05efa66` (a plain "1234" read None under the first value pattern: red,
+  `1 failed, 33 passed`, then green). SEVEN mutations, each turning its tests
+  red (any href a card: 8 failed; a label naming another metric: 1; an
+  unrecognised label kept: 3; the card texts carried out: 3; a worded value
+  parsed: 5; no icon read as increase: 1; the scope reaching the aside: 3).
+- EVIDENCE CLASSES: the four addresses, three labels, the period and the icon
+  names MEASURED; values beyond three digits and a period crossing a month
+  UNVERIFIED (accepted, no capture shows them); the sign DERIVED.
 
-(filled at merge)
+## E. P L1 -> COVERED-UNFIRED -- child lb1-audience
+
+Built by child `lb1-audience` in its own worktree (commits `40da8b5`,
+`90ad323`, `d9c45a2`), reviewed and merged here; its report is the source of
+the reds below.
+
+- THE FIXTURE: `scripts/_build_audience_fixture.py` -> `tests/fixtures/live1/audience.html`
+  (lane K's PLANNED path), from session 1's raw capture through the session-2
+  `skeleton_of`, `tracked_copy` and `value_shape` under a secret key kept off
+  the tree. Eight UI words restored only where their keyed shape stands
+  ("Total followers", "All", six dimension words); DECLARED SYNTHETIC: the
+  total (1,250), six label and share pairs, and one planted RARE entry; both
+  asides emptied. Its own `--verify` was shown failing on the child's first
+  build, whose every restore had landed one line early (`HTMLParser.getpos()`
+  in `handle_data` reports the PRECEDING tag's line), which a round-trip
+  `--check` could not see because it re-derives by the same rule; `--check`
+  was shown failing on a planted one-letter change.
+- MEASURED on the raw: ONE nav whose buttons are the dimension words -- SIX,
+  where this row's cell named five ("Company" as well) -- plus "All", the only
+  button with `aria-current="true"`; six `role=progressbar` entries, each a
+  dimension word, a label and a share whose digits equal the bar's
+  aria-label; "Total followers" beside one integer. The first render draws
+  the "All" view, one top entry per dimension; each dimension's own list
+  needs a tab press, which is not sanctioned.
+- THE READER: `linkedin_server/audience_analytics.py`, locator reads only. The
+  total as an integer; the dimensions (closed vocabulary) and the current
+  view; each entry `{dimension, label, share_percent}` with the label through
+  `census_shape` then `census_redact_rare` (count = entries of the same shape
+  in this read), shaped in one place; every other dimension reported
+  present-but-unread; denominators for an empty read.
+- THE TOOL: `linkedin_audience_analytics()`, one load, `assert_not_authwall`,
+  the reader; envelope and reader-leak verdicts `clean`.
+- RED FIRST: the tool's tests failed before it was registered
+  (`AttributeError ... no attribute 'linkedin_audience_analytics'`); then 13
+  passed. FOUR weakenings, each turning tests red: redaction off (5 of 11 --
+  a planted name left the reader), any drawn word accepted (2), entries read
+  page-wide (1 -- the aside read), the view taken from the first tab (2).
+- THE RESIDUAL, put to the orchestrator (section K): `census_redact_rare`'s
+  own contract lets a shape that is exactly ONE capitalised word survive, so
+  on this surface a one-word label -- an employer under "Company" -- can come
+  back verbatim at runtime.
 
 ---
 
