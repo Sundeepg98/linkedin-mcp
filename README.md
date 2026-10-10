@@ -3,10 +3,17 @@
 An MCP server that shows you your own LinkedIn account data as structured tool
 results instead of pages you have to click through.
 
-**Sixty-seven tools ship. Forty-seven read. Twenty write. None is
+**Seventy tools ship. Fifty read. Twenty write. None is
 write-shaped and unable to act.**
 
-**THAT LINE READ "Sixty-five ... Forty-five read. Twenty write" UNTIL LANE
+**THAT LINE READ "Sixty-seven ... Forty-seven read. Twenty write" UNTIL
+LANE B3, 2026-10-10, merged after lane B2.** Three reads arrived: `linkedin_read_item_text` returns
+ONE item's own words off its permalink, inside one people record marked as
+another member's words and kept nowhere; `linkedin_my_articles` reads your
+own articles list; `linkedin_item_viewer_demographics` reads one of your
+items' viewer demographics, each value shaped and rare values redacted.
+
+**AND "Sixty-five ... Forty-five read. Twenty write" UNTIL LANE
 B2'S SEARCH VERTICALS, 2026-10-10, merged after lane NP.** Two reads arrived: `linkedin_search_groups`
 and `linkedin_search_events` (census `N 161`, `N 179`) each load ONE search
 results page composed from your keyword alone and return the groups or events
@@ -1039,7 +1046,7 @@ linkedin_server/
   cdp_bridge.py              the recovery path: attach to a running Chrome
   dom.py                     the read-only harvesters and the control readers
   shape.py                   pure parsers and the result envelope
-  server.py                  the sixty-seven tools
+  server.py                  the seventy tools
   errors.py
 tests/                       1393 tests, no network, no account
   fixtures/                  frozen LinkedIn markup, scrubbed

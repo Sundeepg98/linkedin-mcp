@@ -1,4 +1,4 @@
-"""The tool surface: sixty-seven tools, forty-seven of which do not write.
+"""The tool surface: seventy tools, fifty of which do not write.
 
 **IT READ "sixty-five tools, forty-five of which do not write" UNTIL LANE B2'S
 SEARCH VERTICALS (2026-10-10), merged after lane NP**: two READS, ``linkedin_search_groups`` (census
@@ -258,6 +258,17 @@ EXPECTED_TOOLS = {
     # presses; the groups page's Join control is never read.
     "linkedin_search_groups",
     "linkedin_search_events",
+    # THE SIXTY-SECOND, 2026-10-10 (lane B3, ruling
+    # THIRD-PARTY-TEXT-AT-RUNTIME): a READ of ONE item's own words off the
+    # permalink its caller's key names, returned inside one people_data.Post
+    # record. It writes nothing and is on no write table (census M C43).
+    "linkedin_read_item_text",
+    # THE SIXTY-SECOND AND SIXTY-THIRD, 2026-10-10 (lane B3's child): two
+    # READS over addresses the read allowlist already admits -- his own
+    # articles list (census M C48) and one of his items' viewer demographics,
+    # shaped (census M C38). Each loads one page and presses nothing.
+    "linkedin_my_articles",
+    "linkedin_item_viewer_demographics",
     # THE THIRTY-EIGHTH, 2026-09-05: linkedin_events_home, a READ. No
     # write was added. It is the only tool here whose whole answer can be
     # ZERO, and its reader returns that integer only when four
@@ -644,8 +655,12 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_sixty_seven_tools(tools):
-    """RENAMED AGAIN AT THE INTEGRATION MERGE OF LANE B2 ONTO LANE NP (2026-10-10), to
+async def test_the_surface_is_exactly_the_seventy_tools(tools):
+    """RENAMED AGAIN AT THE INTEGRATION MERGE OF LANE B3 ONTO LANE B2 (2026-10-10),
+    to ``..._seventy_tools``: lane B3's three reads beside the sixty-seven.
+    MEASURED off the merged registry, not summed; the name moved with the pin.
+
+    RENAMED AGAIN AT THE INTEGRATION MERGE OF LANE B2 ONTO LANE NP (2026-10-10), to
     ``..._sixty_seven_tools``: lane B2's two reads beside the sixty-five.
     MEASURED off the merged registry, not summed; the name moved with the pin.
 
@@ -1028,7 +1043,21 @@ async def test_the_surface_is_exactly_the_sixty_seven_tools(tools):
     # SIXTY-SEVEN AT THE INTEGRATION MERGE OF LANE B2 ONTO LANE NP (2026-10-10): lane B2's two
     # READS beside the sixty-five, so the split moves on its read side and the
     # write set holds. MEASURED off mcp.list_tools() on the merged tree.
-    assert len(tools) == 67
+    # SIXTY-THREE AT LANE B3'S MERGE OF MASTER 0103810, 2026-10-10:
+    # linkedin_read_item_text (census M C43, ruling THIRD-PARTY-TEXT-AT-RUNTIME),
+    # a READ, so the split moves on its read side and the write set holds.
+    # MEASURED off mcp.list_tools() on the merged tree.
+    # SIXTY-THREE ON LANE B3'S CHILD BRANCH, 2026-10-10: two READS,
+    # linkedin_my_articles and linkedin_item_viewer_demographics, so the split
+    # moves on its read side and the write set holds. MEASURED off
+    # mcp.list_tools().
+    # SIXTY-FIVE AT LANE B3'S MERGE OF ITS CHILD, 2026-10-10: the child's two
+    # READS on top of the lead's sixty-three -- measured off the merged
+    # registry, not summed, and moved with every other count site.
+    # SEVENTY AT THE INTEGRATION MERGE OF LANE B3 ONTO LANE B2 (2026-10-10): lane B3's three
+    # READS beside the sixty-seven, so the split moves on its read side and the
+    # write set holds. MEASURED off mcp.list_tools() on the merged tree.
+    assert len(tools) == 70
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -1211,7 +1240,18 @@ async def test_the_surface_is_exactly_the_sixty_seven_tools(tools):
     # side is unmoved.
     # FORTY-SEVEN AT THE INTEGRATION MERGE OF LANE B2 ONTO LANE NP (2026-10-10): lane B5's
     # read and lane B2's two, measured on the merged tree, never summed.
-    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 47
+    # FORTY-FIVE ON LANE B3, 2026-10-10: linkedin_read_item_text is a READ --
+    # it loads one permalink composed from its caller's key and presses
+    # nothing -- and the write side is unmoved.
+    # FORTY-SIX ON LANE B3'S CHILD BRANCH, 2026-10-10: linkedin_my_articles and
+    # linkedin_item_viewer_demographics are READS -- each loads one admitted
+    # page and presses nothing -- and the write side is unmoved.
+    # FORTY-SEVEN AT LANE B3'S MERGE OF ITS CHILD, 2026-10-10: the lead's
+    # read and the child's two, the write side unmoved.
+    # FIFTY AT THE INTEGRATION MERGE OF LANE B3 ONTO LANE B2 (2026-10-10): the
+    # two forty-sevens above are different reads and merged as one equal edit;
+    # MEASURED on the merged tree, never summed.
+    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 50
 
 
 def test_the_read_that_was_nearly_named_a_write():

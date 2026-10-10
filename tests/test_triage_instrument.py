@@ -431,7 +431,22 @@ AFTER_LANE_U_UPLOADS = (127, {"R": 16, "W": 107, "R+W": 4})
 #: 126 - 3 = 123, writes 110 - 3.
 AFTER_LANE_U_MERGE_OF_LANE_K = (123, {"R": 13, "W": 107, "R+W": 3})
 
-EXPECTED_NOW = AFTER_LANE_U_MERGE_OF_LANE_K
+#: AT LANE B3'S MERGE OF ORIGIN/MASTER 0103810 (2026-10-10), MEASURED with
+#: the merged tree's guard: `C43` -- a READ -- left GAP, COVERED-UNFIRED on
+#: THIRD-PARTY-TEXT-AT-RUNTIME (`linkedin_read_item_text`;
+#: `_audit/2026-10-10-lane-b3-messaging-build.md`). Lane B3's branch read
+#: (129, R 15) over master's 130. One R row, disjoint from lanes K and U:
+#: 123 - 1 = 122, reads 13 - 1.
+AFTER_LANE_B3_ITEM_TEXT = (122, {"R": 12, "W": 107, "R+W": 3})
+
+#: AT LANE B3'S MERGE OF ITS CHILD (2026-10-10), MEASURED with the merged
+#: tree's guard: `C48` and `C38` -- two READS -- left GAP, COVERED-UNFIRED on
+#: `linkedin_my_articles` and `linkedin_item_viewer_demographics`
+#: (`_audit/2026-10-10-lane-b3-messaging-build.md` section 3). 122 - 2 = 120,
+#: reads 12 - 2.
+AFTER_LANE_B3_CHILD_READS = (120, {"R": 10, "W": 107, "R+W": 3})
+
+EXPECTED_NOW = AFTER_LANE_B3_CHILD_READS
 
 
 def test_the_headline_split_is_the_one_the_report_quotes():

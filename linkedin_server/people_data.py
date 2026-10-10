@@ -457,9 +457,11 @@ class Post:
     unless a reader read the words, and then sanitised and capped at
     ``CAPS["text"]``, LinkedIn's own limit for a post.
 
-    NOT YET ADOPTED: no reader builds one, and no tool returns one. A post
-    with no member author -- a Page's post, a header with no name -- has no
-    record here: :meth:`from_page` returns ``None`` for it.
+    ADOPTED 2026-10-10 (lane B3): ``item_text.read_item_text`` builds one
+    for ``linkedin_read_item_text``, census row ``M C43``, under
+    THIRD-PARTY-TEXT-AT-RUNTIME. A post with no member author -- a Page's
+    post, a header with no name -- has no record here: :meth:`from_page`
+    returns ``None`` for it.
     """
 
     author: Person
@@ -533,6 +535,10 @@ class Post:
 #: The two search verticals joined on 2026-10-10 (lane B2,
 #: ``search_vertical_results``): the groups and the events a keyword search
 #: drew, as group and event records, are those tools' whole answer.
+#: ``linkedin_read_item_text`` joined on 2026-10-10 (lane B3, ruling
+#: THIRD-PARTY-TEXT-AT-RUNTIME): ONE :class:`Post` record, the item whose key
+#: the caller passed, read off that one permalink -- the first adopter of the
+#: post record.
 PEOPLE_TOOLS: frozenset[str] = frozenset(
     {
         "linkedin_group_members",
@@ -545,6 +551,7 @@ PEOPLE_TOOLS: frozenset[str] = frozenset(
         "linkedin_read_named_profile",
         "linkedin_search_groups",
         "linkedin_search_events",
+        "linkedin_read_item_text",
     }
 )
 

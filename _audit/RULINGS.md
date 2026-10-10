@@ -9,7 +9,7 @@
 **THIS REGISTER IS NOT THE CORPUS AND DOES NOT CLAIM TO BE COMPLETE.** Read section 4 before concluding a question is unruled: the scan that keeps it honest reads ONE marker, and the ruling that caused this file to be written does not carry it.
 
     rulings registered       90
-    documents scanned        269
+    documents scanned        270
     RULED: declarations      76 claimed, 7 triaged, 0 unclaimed
 
 ---
@@ -439,7 +439,7 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | a heading naming a ruling | 132 | 287 |
 | a bold line opening on RULING/RULED | 64 | 145 |
 | the phrase THE RULING | 38 | 63 |
-| a named -RULING id | 39 | 97 |
+| a named -RULING id | 40 | 99 |
 | the phrase standing ruling | 18 | 41 |
 | a lead or operator ruling in prose | 40 | 106 |
 

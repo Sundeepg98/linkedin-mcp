@@ -385,4 +385,17 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # beside lanes S's and B5's, measured off the merged registry, not summed.
     # SIXTY-SEVEN AT THE INTEGRATION MERGE OF LANE B2 ONTO LANE NP (2026-10-10): lane B2's two
     # reads beside the sixty-five, measured off the merged registry, not summed.
-    assert len(_tool_names()) == 67
+    # SIXTY-THREE AT LANE B3'S MERGE OF MASTER 0103810, 2026-10-10: one READ,
+    # linkedin_read_item_text (ruling THIRD-PARTY-TEXT-AT-RUNTIME; census M C43
+    # COVERED-UNFIRED), on top of master's sixty-two -- measured off the merged
+    # registry, not summed, and moved with every other count site.
+    # SIXTY-THREE ON LANE B3'S CHILD BRANCH, 2026-10-10: two READS,
+    # linkedin_my_articles (census M C48) and linkedin_item_viewer_demographics
+    # (census M C38), measured off the registry and moved with every other
+    # count site in the same commit. The rows are banked by the lane's lead.
+    # SIXTY-FIVE AT LANE B3'S MERGE OF ITS CHILD, 2026-10-10: the child's two
+    # READS on top of the lead's sixty-three -- measured off the merged
+    # registry, not summed, and moved with every other count site.
+    # SEVENTY AT THE INTEGRATION MERGE OF LANE B3 ONTO LANE B2 (2026-10-10): lane B3's three
+    # reads beside the sixty-seven, measured off the merged registry, not summed.
+    assert len(_tool_names()) == 70

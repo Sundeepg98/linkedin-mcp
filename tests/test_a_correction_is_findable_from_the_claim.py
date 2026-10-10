@@ -2933,6 +2933,24 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "the evidence that the rule the row is retired under is live code "
         "rather than an audit sentence. "
     ),
+    ("messaging-and-content.md", "2026-10-10-lane-b3-messaging-build.md"): (
+        "THE ROWS CITE THIS DOCUMENT AS THEIR EVIDENCE RECORD AND NOTHING IN "
+        "IT IS CORRECTED. Read 2026-10-10: the first line is row M16, whose "
+        "lane B3 paragraph says what was measured on the GIF picker capture "
+        "and points at section 4.3 for the rest; thirteen rows carry the same "
+        "shape, and C43's move cites it for its build. The correction "
+        "vocabulary near the line belongs to OTHER paragraphs of the same "
+        "cells (earlier waves' RETURNED and RETIRED notes), not to this "
+        "citation. The record adds measurements; it withdraws no claim. "
+    ),
+    ("messaging-and-content.md", "2026-10-10-rulings-ledger-questions.md"): (
+        "THE ROW QUOTES THIS DOCUMENT AS THE RULING IT MOVED ON. Read "
+        "2026-10-10: the line is row C43, moved GAP -> COVERED-UNFIRED on "
+        "THIRD-PARTY-TEXT-AT-RUNTIME, citing that document's section 10 as "
+        "the ruling's home. The correction vocabulary in the cell is the "
+        "history of the row's own earlier states (retired, returned to GAP); "
+        "the cited ruling is new, unchanged, and is the reason the row moved. "
+    ),
     ("messaging-and-content.md", "2026-09-19-cross-slice-rulings.md"): (
         "THE ROW CITES THIS DOCUMENT FOR THE NAME OF THE PATTERN IT IS AN "
         "INSTANCE OF. Row C43 calls itself a propagation failure and points "

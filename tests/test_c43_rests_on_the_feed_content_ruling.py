@@ -1,4 +1,9 @@
-"""``M C43`` is retired on the FEED-CONTENT-READ-RULING, and may not outlive it.
+"""``M C43`` rests on the FEED-CONTENT-READ-RULING's storage half, and may not outlive it.
+
+UPDATED 2026-10-10 (lane B3): the row is COVERED-UNFIRED on
+``THIRD-PARTY-TEXT-AT-RUNTIME``, which returns a post's own text at runtime
+and leaves the feed-content ruling governing what is STORED. The history
+below is kept as it was written; the binding further down holds both halves.
 
 ## THE LAW THIS DISCHARGES
 
@@ -89,8 +94,21 @@ _ROW = re.compile(r"^\|\s*([CM]\d+)\s*\|[^|]*\|[^|]*\|\s*\*{0,2}([A-Z-]+)\*{0,2}
 #: still ships and is now the row's NAMED BLOCKER, so the coupling keeps its
 #: point -- put ``text`` into ``feed._PERMITTED_PARAMETER_NAMES`` and this
 #: file goes red, telling you the row's blocker just moved.
+#:
+#: COVERED-UNFIRED SINCE 2026-10-10 (lane B3), AND THIS IS THE RULING THAT
+#: MOVED IT: ``THIRD-PARTY-TEXT-AT-RUNTIME`` (orchestrator, 2026-10-10,
+#: applying the operator's NAMES-AT-RUNTIME) returns a post's own text at
+#: runtime under PEOPLE-DATA-MITIGATIONS, while the FEED-CONTENT-READ-RULING
+#: "still governs what is STORED". So the binding now holds BOTH halves: the
+#: cell must name the ruling that moved it AND the feed-content ruling that
+#: still governs storage, and ``feed.py``'s signature guarantee below must
+#: still ship -- the words leave through ``item_text`` inside one
+#: ``people_data.Post`` record, never through the feed tally.
 ROW_ID = "C43"
-REQUIRED_STATE = "GAP"
+REQUIRED_STATE = "COVERED-UNFIRED"
+
+#: The ruling that moved the row, which its cell must name.
+MOVED_BY = "THIRD-PARTY-TEXT-AT-RUNTIME"
 
 #: Parameter names that would carry a post's TEXT or an author's NAME into a
 #: feed reader. The ruling forbids exactly these, and ``feed.py``'s own
@@ -143,17 +161,21 @@ def test_the_row_is_present_and_retired() -> None:
         "nobody can check." % (ROW_ID, _CENSUS.name)
     )
     assert states[ROW_ID] == REQUIRED_STATE, (
-        "%s carries state %r, but the binding requires %r: the row is GAP "
-        "with the FEED-CONTENT-READ-RULING as its named blocker. If its state "
-        "is legitimately moving, change this binding in the same commit and "
-        "say which ruling changed."
-        % (ROW_ID, states[ROW_ID], REQUIRED_STATE)
+        "%s carries state %r, but the binding requires %r: the row moved on "
+        "%s with the FEED-CONTENT-READ-RULING still governing storage. If its "
+        "state is legitimately moving, change this binding in the same commit "
+        "and say which ruling changed."
+        % (ROW_ID, states[ROW_ID], REQUIRED_STATE, MOVED_BY)
     )
     line = next(ln for ln in _CENSUS.read_text(encoding="utf-8").splitlines()
                 if (m := _ROW.match(ln)) is not None and m.group(1) == ROW_ID)
     assert "FEED-CONTENT-READ-RULING" in line, (
-        "%s is GAP on the FEED-CONTENT-READ-RULING but its cell does not name "
-        "that ruling as its blocker" % ROW_ID
+        "%s's cell no longer names the FEED-CONTENT-READ-RULING, which still "
+        "governs what is stored" % ROW_ID
+    )
+    assert MOVED_BY in line, (
+        "%s is %s but its cell does not name %s, the ruling that moved it"
+        % (ROW_ID, REQUIRED_STATE, MOVED_BY)
     )
 
 

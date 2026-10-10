@@ -660,7 +660,10 @@ def test_a_non_ascii_word_survives_the_copy_as_a_reference() -> None:
 #: AND SIX MORE (the live lane, after session 9): the skeletons lane K's
 #: ledger planned as tracked fixtures (its section 12.7), copied by
 #: ``tracked_copy`` under the names that plan gave them -- seven in all.
-LIVE_FIXTURE_COUNTS = {"live2": 28, "live3": 14, "live4": 4, "live5": 1, "live8": 7}
+#: AND live1 (lane B3, 2026-10-10): session 1's articles list and per-post
+#: analytics page, built by ``scripts/_build_live1_l1_fixtures.py`` through
+#: the same ``skeleton_of`` and ``tracked_copy`` -- two.
+LIVE_FIXTURE_COUNTS = {"live1": 2, "live2": 28, "live3": 14, "live4": 4, "live5": 1, "live8": 7}
 
 
 @pytest.mark.parametrize("session_dir", sorted(LIVE_FIXTURE_COUNTS))

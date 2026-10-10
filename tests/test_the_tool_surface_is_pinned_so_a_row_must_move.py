@@ -111,6 +111,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_message_from_profile": ("confirm_token", "profile", "text"),
     "linkedin_my_activity_items": (),
     "linkedin_my_applications": ("limit",),
+    "linkedin_my_articles": (),
     "linkedin_my_profile": ("details", "include_skills"),
     "linkedin_new_messages": (),
     "linkedin_newsletter_subscriptions": (),
@@ -119,6 +120,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_open_messaging": ("allow_unread", "include_names", "message_filter"),
     "linkedin_open_thread": ("allow_unread", "thread_id"),
     "linkedin_page_plugin_snippet": ("page_id",),
+    "linkedin_item_viewer_demographics": ("item",),
     "linkedin_people_search_shape": (
         "connections_of", "current_company_ids", "include_names", "keywords",
         "location_ids", "network", "past_company_ids",
@@ -130,6 +132,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_profile_editor_values": (),
     "linkedin_publish_post": ("confirm_token", "text"),
     "linkedin_react_to_item": ("confirm_token", "item"),
+    "linkedin_read_item_text": ("item",),
     "linkedin_read_named_profile": ("confirm_token", "profile", "section"),
     "linkedin_withdraw_reaction": ("confirm_token", "item"),
     "linkedin_recent_job_searches": (),
@@ -584,8 +587,32 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: **AT THE INTEGRATION MERGE OF LANE B2 ONTO LANE NP (2026-10-10): 67 TOOLS AND
 #: 109 PARAMETERS** -- lane B2's two tools and their one parameter each
 #: beside the sixty-five, counted on the merged registry, never summed.
-PINNED_TOOL_COUNT = 67
-PINNED_PARAMETER_COUNT = 109
+#: **RE-PINNED AT LANE B3'S MERGE OF MASTER 0103810, 2026-10-10: 63 TOOLS
+#: AND 101 PARAMETERS (ruling THIRD-PARTY-TEXT-AT-RUNTIME).** Lane B3's
+#: branch had re-pinned 62 and 98: one READ, `linkedin_read_item_text(item)`,
+#: ONE item's own words off its permalink inside one people_data.Post record.
+#: THE CENSUS DECISION, in the commit that built it: `M C43` GAP ->
+#: COVERED-UNFIRED on it, never fired. Neither side moved the other's
+#: entry, so the sum holds: 62 + 1 tools, 100 + 1 parameters. See
+#: `_audit/2026-10-10-lane-b3-messaging-build.md`.
+#: **RE-PINNED 2026-10-10 AT 63 TOOLS AND 98 PARAMETERS on lane B3's child
+#: branch: two READS, one parameter -- `linkedin_my_articles()` (census `M C48`)
+#: and `linkedin_item_viewer_demographics(item)` (census `M C38`, the viewer-
+#: demographics half), each over an address the read allowlist already admits,
+#: each built and tested over a tracked skeleton of the session-1 capture.**
+#: THE CENSUS DECISION: NO ROW MOVES IN THIS COMMIT. The child does not edit
+#: census files; lane B3's LEAD banks both rows against these tools. Measured
+#: off mcp.list_tools(), not summed.
+#: **RE-PINNED AT LANE B3'S MERGE OF ITS CHILD, 2026-10-10: 65 TOOLS AND
+#: 102 PARAMETERS.** The lead's 63 and 101 meet the child's two reads and
+#: one parameter: 63 + 2 tools, 101 + 1 parameters. THE CENSUS DECISION, in
+#: the lead's census commit: `M C48` and `M C38` GAP -> COVERED-UNFIRED on
+#: them, never fired. See `_audit/2026-10-10-lane-b3-messaging-build.md`.
+#: **AT THE INTEGRATION MERGE OF LANE B3 ONTO LANE B2 (2026-10-10): 70 TOOLS AND
+#: 111 PARAMETERS** -- lane B3's three tools beside the sixty-seven,
+#: counted on the merged registry, never summed.
+PINNED_TOOL_COUNT = 70
+PINNED_PARAMETER_COUNT = 111
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:
