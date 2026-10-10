@@ -187,15 +187,23 @@ def test_the_split_is_the_one_the_lane_report_quotes():
     `P L6`, `N 198` (OUTSIDE-THE-PRODUCT-PURPOSE), and `P A9`
     (COVERED-CANNOT-DELIVER, P-A9-CANNOT-DELIVER) -- so their lines go. All R3.
     387 - 14 = 373 = 16 R1 + 37 R2 + 320 R3.
+    384 AT LANE U'S MOVE (2026-10-10), MEASURED
+    (`_audit/2026-09-28-lane-u-uploads.md` s5): `M M14`, `M M15` and `M M18`
+    GAP -> COVERED-UNFIRED on `linkedin_send_attachment`, so their three lines
+    leave the table. All three R2 (queued on the conversation's attachments).
+    387 - 3 = 384 = 16 R1 + 34 R2 + 334 R3.
+    370 AT LANE U'S MERGE OF ORIGIN/MASTER 71d83ca, MEASURED: lane K's
+    fourteen R3 lines and lane U's three R2 lines, disjoint, all gone.
+    373 - 3 = 370 = 16 R1 + 34 R2 + 320 R3.
 
-    374 AT LANE S'S MERGE OF MASTER 71d83ca (2026-10-10), MEASURED
+    371 AT LANE S'S MERGE OF MASTER 0103810 (2026-10-10), MEASURED
     (`_audit/2026-09-28-lane-s-settings.md`, section 4): `P O17` split from
     `P O6-O20` and BUILT -- `built:set_admitted_setting`, COVERED-UNFIRED --
     so it keeps a line as a built row; classed R3 by its act (profile-setting).
-    `P O6-O20` stays a GAP line. 373 + 1 = 374 = 16 R1 + 37 R2 + 321 R3."""
+    `P O6-O20` stays a GAP line. 370 + 1 = 371 = 16 R1 + 34 R2 + 321 R3."""
     rows, _ = cwc.load()
     split = cwc.split(rows)
-    assert (split["R1"], split["R2"], split["R3"]) == (16, 37, 321)
+    assert (split["R1"], split["R2"], split["R3"]) == (16, 34, 321)
     assert split["R1:built"] + split["R1:queued"] == split["R1"]
 
 

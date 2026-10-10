@@ -79,7 +79,7 @@ import pytest
 # but typing.get_type_hints() on it raised NameError, measured 2026-09-02.
 from typing import Optional
 
-from linkedin_server import dom, readonly, shape, writes
+from linkedin_server import config, dom, readonly, shape, writes
 from linkedin_server.errors import WriteAttemptError
 from linkedin_server.writes import (
     PERMANENTLY_FORBIDDEN,
@@ -566,7 +566,28 @@ CLEAN_COMPONENT = {
     # a bare word is refused as a possible name. The segment carries the
     # declared synthetic slug token ``someone``.
     "profile": "https://www.linkedin.com/in/someone-clean-example/",
+    # ``send_attachment``'s content, 2026-10-10 (lane U): a FILE in the
+    # declared upload root, which the autouse fixture below provides.
+    "file": "clean-example.png",
 }
+
+#: THE TWO CONTENTS OF A FILE KIND (lane U, ``thread_and_file``): two files
+#: in the same temp root. A file kind's content is checked against the root
+#: by every property of ``uploads`` and held root-relative, so free text
+#: cannot stand in for it -- and a Windows name may not end in a period.
+_FILE_CONTENTS = ("content-a.png", "content-b.png")
+
+
+@pytest.fixture(autouse=True)
+def _a_declared_root_for_the_file_kind(tmp_path, monkeypatch):
+    """``thread_and_file`` canonicalises its FILE against the declared root:
+    a temp root holding the clean file and the two contents, for every test
+    here. No other kind reads it."""
+    root = tmp_path / "uploads"
+    root.mkdir()
+    for name in ("clean-example.png",) + _FILE_CONTENTS:
+        (root / name).write_bytes(b"\x89PNG\r\n\x1a\n" + name.encode("ascii"))
+    monkeypatch.setattr(config, "UPLOAD_ROOT", root)
 
 
 def _components(action: str) -> tuple[str, ...]:
@@ -1133,7 +1154,10 @@ def test_a_composite_target_changes_when_only_the_content_changes(action):
     spec = spec_for_action(action)
     first, second = _components(action)
     subject = CLEAN_SUBJECT_BY_ACTION.get(action, CLEAN_COMPONENT[first])
-    content_a, content_b = CONTENT_PAIR_BY_ACTION.get(action, (COMMENT_A, COMMENT_B))
+    # A FILE KIND'S CONTENT IS A FILE (lane U): two files in the temp root.
+    content_a, content_b = CONTENT_PAIR_BY_ACTION.get(
+        action, _FILE_CONTENTS if second == "file" else (COMMENT_A, COMMENT_B)
+    )
     one = writes._target_for(spec, {first: subject, second: content_a})
     two = writes._target_for(spec, {first: subject, second: content_b})
     assert one != two, action

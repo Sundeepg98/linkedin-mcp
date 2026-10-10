@@ -261,7 +261,13 @@ _WHERE_TO_LOOK_OWNERS: dict[str, frozenset[str]] = {
     # ``message_from_profile`` VERIFIES in the conversation its press opened,
     # read in place with a before-count, so the conversation in his LinkedIn
     # messages is the surface it read.
-    "LinkedIn messages": frozenset({"send_reply", "message_from_profile"}),
+    # A FOURTH OWNER FROM 2026-10-10 (lane U), entitled for the reply's
+    # reason: ``send_attachment`` VERIFIES in the conversation itself, by a
+    # fresh load of the conversation he named and the count of messages
+    # drawing the file's name.
+    "LinkedIn messages": frozenset(
+        {"send_reply", "message_from_profile", "send_attachment"}
+    ),
     # ADDED 2026-09-27 FOR ``withdraw_from_group`` (lane L8): his Groups page is where
     # his memberships are listed and where the leave is verified, and no other
     # row sends him there. Measured to occur in exactly one row.
@@ -285,6 +291,10 @@ _LEGITIMATE_SHARED_PLACES: frozenset[frozenset[str]] = frozenset(
         # profile -- settling in the one list LinkedIn keeps of every
         # invitation sent. The argument is on the "My Network" owner entry.
         frozenset({"send_invitation", "connect_from_profile"}),
+        # THE CONVERSATION PAIR, 2026-10-10 (lane U), by the same equality
+        # edit: a reply and an attachment go into the one conversation he
+        # names, and both are read back there.
+        frozenset({"send_reply", "send_attachment"}),
     }
 )
 
@@ -648,15 +658,22 @@ def test_the_action_set_is_the_one_this_file_was_measured_against():
     # SEVENTEEN SINCE LANE L5'S ORDER OF 2026-09-27 23:36: ``send_message``
     # RETIRED (aimed by a name). No row was re-derived for it -- an action
     # leaving takes its rows with it -- and its two owner entries above went.
-    # EIGHTEEN FROM 2026-10-10 (lane S, settings): ``set_admitted_setting``'s
+    # EIGHTEEN FROM LANE U'S BRANCH, 2026-10-10: ``send_attachment``'s rows
+    # were read against every owned phrase, and the file went red on exactly
+    # the two it shares with the reply -- "LinkedIn messages", and the
+    # identical place to look. Each was decided on the surface it MEASURES: it
+    # verifies in the conversation itself, so it is a fourth owner of
+    # "LinkedIn messages", and the reply pair is a fourth sanctioned shared
+    # place. No row was reworded to dodge a phrase.
+    # NINETEEN AT LANE S'S MERGE OF MASTER 0103810 (2026-10-10): ``set_admitted_setting``'s
     # two rows were read. Its ``_WHERE_TO_LOOK`` value ("that page under
     # Settings and Privacy, named in the preview") and its ``_VERIFIED_FROM``
     # row (the admitted page re-rendered, its one control read again by its
     # exact label) were checked by the rest of this file with the rows in
     # place -- every other test here passed, so neither prints a phrase
     # another action owns -- and no owner entry was needed.
-    assert len(writes.PERFORMABLE) == 18, (
-        "writes.PERFORMABLE holds %d actions, not the 18 this file was "
+    assert len(writes.PERFORMABLE) == 19, (
+        "writes.PERFORMABLE holds %d actions, not the 19 this file was "
         "measured against: %s. Re-derive the phrase owners in this file for "
         "the new action, then update this count."
         % (len(writes.PERFORMABLE), sorted(writes.PERFORMABLE))

@@ -3,7 +3,8 @@
 Lane S (settings), `ls2-settings-lead`. Brief written by the orchestrator on
 2026-09-28; relaunched and run on 2026-10-10 from master `3c8edc2` (CI green,
 run 36460989178), on its own worktree branch, merged with master as it moved
-(`53908ea`, `fe119de`, `1027bf8`, `f93104c`, `16ee59a`, `71d83ca`), pushed only to its
+(`53908ea`, `fe119de`, `1027bf8`, `f93104c`, `16ee59a`, `71d83ca`, `0103810`),
+pushed only to its
 `ci/` ref by `scripts/lane_ci.py`. Not to be confused with the earlier lane S of 2026-09-28
 (people search, the offline frontier), whose record is
 `_audit/2026-09-24-lane-s-people-search.md`.
@@ -711,7 +712,9 @@ he names them.
   PURCHASES-STAY-MANUAL had taken `P S9` and `M C71` out of the table, it is
   16 + 37 + 335 = 388, measured by `check_write_classes`; at the merge of
   `71d83ca`, where lane K's rulings took fourteen lines out (`P N10` and
-  `P N21` among them), 16 + 37 + 321 = 374. 84 IN rows that were
+  `P N21` among them), 16 + 37 + 321 = 374; at the merge of `0103810`, where
+  lane U's three message rows left for COVERED-UNFIRED, 16 + 34 + 321 = 371.
+  84 IN rows that were
   `classify-only` are queued on their surface's capture,
   `queued:SETTINGS-<surface-id>`, each naming a line the queue holds; the three
   refused kinds, `P D7` and `P N12` are `classify-only` again, with a note
@@ -748,15 +751,23 @@ he names them.
   OF `71d83ca` (lane K applied the orchestrator's rulings on its questions),
   master's figures plus `P O17`, measured: stated_rows 772, capabilities 785,
   capabilities_achievable 724, achievable 711, adjudicated 211,
-  delivered_broad 133, unfired 22, b1_no_ruling 10, b1_released 2.
+  delivered_broad 133, unfired 22, b1_no_ruling 10, b1_released 2. At the
+  merge of `0103810` (lane U's `M M14`, `M M15`, `M M18` COVERED-UNFIRED):
+  adjudicated 214, delivered_broad 136, unfired 25 -- master's plus `P O17`.
 * The write-classes split (16, 37, 336) -> (16, 37, 337) on this branch, and
   (16, 37, 335) = 388 at the merge of `fe119de`.
 * The tool surface: 61 -> 62 tools, 96 -> 100 parameters on this branch; at
   the merge of `1027bf8`, 62 tools and 101 parameters (lane NP had added one
-  parameter to master's 61 tools); writes.PERFORMABLE
-  and the hand-typed write lists in `tests/test_server_surface.py`; the server
-  instructions and the module docstring's counts (forty-four read, eighteen
-  write, sixty-two; nineteen actions, eighteen tools); the strict-press set.
+  parameter to master's 61 tools); at the merge of `0103810`, 63 TOOLS AND
+  104 PARAMETERS: lane U's `linkedin_send_attachment` had landed on master
+  first as the sixty-second tool and eighteenth write, so this lane's is the
+  sixty-third and the nineteenth. Both branches had moved every count from 61
+  to 62 and 17 to 18, and git merged those equal moves as ONE -- each was
+  re-derived on the merged tree, and the number-word map of the instructions
+  test raised on nineteen, as it is built to. writes.PERFORMABLE and the
+  hand-typed write lists in `tests/test_server_surface.py`; the server
+  instructions and the module docstring's counts (forty-four read, nineteen
+  write, sixty-three; twenty actions, nineteen tools); the strict-press set.
 
 ## 9. Gates run
 
@@ -795,6 +806,7 @@ by the coordinator's resume order. Counts are pytest's own.
 | lane CI, second run (`38043402778`, on `c956797`, after the merges of `1027bf8`, `f93104c` and `16ee59a`) | **failure, one test**: `test_no_new_unresolvable_citation_appears` read three of this lane's own commit hashes in this record in the guard's slot forms -- they resolve on the lane's branch, not yet on master -- and they are cited by subject now (section 3.4). Shard 0: 1 failed / 2545 passed / 5 skipped; shards 1-3 green. The cited-SHA family the coordinator named as infrastructure passed: the local-master fix had landed |
 | lane CI, third run (`38044337714`, on `ae27fe5`) | **success**, all four shards |
 | the merge of `71d83ca` (lane K's application of the orchestrator's rulings): every census instrument, the write-classes and completion pins | `census_completion --check`: every headline figure matches its pin; `check_write_classes` GREEN (374 lines); the rest below |
+| the merge of `0103810` (lane U's attachment write), on a box at 100% CPU from other lanes' suites | the surface, tool-pin, count-claim and prose tests **170 passed**; the end-to-end file **10 passed**; `test_writes.py`'s tables **18 passed**; the census instruments GREEN (371 write-class lines; 558 GAP rows once); the rest certified on CI |
 | lane CI on the commit that carries this table | a record cannot carry its own run: the lane's final message names it |
 
 NOT RUN LOCALLY: the full suite, and the browser-heavy action tables

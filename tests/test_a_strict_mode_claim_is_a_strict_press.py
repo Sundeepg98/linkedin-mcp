@@ -69,6 +69,10 @@ PINNED_STRICT_PRESS_ACTIONS = frozenset(
         # 2026-10-10, lane S: the generic settings writer's press is aimed by
         # the control's exact name, which its gate required drawn once.
         "set_admitted_setting",
+        # LANE U, 2026-10-10: the attachment's Send. Its gate counted exactly
+        # one reply form and one Send before appending the press, so a second
+        # match at the press is something drawn since; strict, it throws.
+        "send_attachment",
     }
 )
 

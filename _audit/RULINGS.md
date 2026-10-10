@@ -8,8 +8,8 @@
 
 **THIS REGISTER IS NOT THE CORPUS AND DOES NOT CLAIM TO BE COMPLETE.** Read section 4 before concluding a question is unruled: the scan that keeps it honest reads ONE marker, and the ruling that caused this file to be written does not carry it.
 
-    rulings registered       89
-    documents scanned        266
+    rulings registered       90
+    documents scanned        267
     RULED: declarations      76 claimed, 7 triaged, 0 unclaimed
 
 ---
@@ -180,6 +180,7 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 | id | what was ruled | binds | when | where (document / section) |
 |---|---|---|---|---|
+| `FILE-UPLOAD-OPENED` | This server may upload a file from this machine: the operator opened file upload on 2026-09-04, in full -- profile photo, post media and message attachments. The browser's upload verb joined SANCTIONED_MUTATIONS in 615a5c4. The FILE-UPLOAD-UNSANCTIONED blocker retires and its rows do not: each still needs a performable verb and a captured file input on its own surface. No extension allowlist -- one would narrow his decision. | uploading a file from this machine | 2026-09-20 | [2026-09-20-the-decides.md](2026-09-20-the-decides.md)<br>*1. `FILE-UPLOAD-UNSANCTIONED` -- **DECIDED, 2026-09-04, BY THE OPERATOR. THE BLOCKER RETIRES; THE 15 ROWS DO NOT.*** |
 | `OUTWARD-CLASSES-BUILT-BEHIND-GRANTS` | Repost or share, endorse or recommend, and delete or withdraw one of his own items are BUILT behind the single-use grant, off by default, fired only at a target he names. PERMANENTLY_FORBIDDEN keeps only entries whose grounds are mitigations. | the classes ruling (b) did not name | 2026-09-24 | [2026-09-24-rulings-names-at-runtime.md](2026-09-24-rulings-names-at-runtime.md)<br>*The outward classes ruling (b) did not name* |
 | `ACCOUNT-DESTRUCTION-STAYS-MANUAL` | Merging or closing his account, and deleting the data LinkedIn holds about him, are NOT built: EXCLUDED-RULED, reopened only when he asks for one by name in the call that would make it. | his account and its data | 2026-09-27 | [2026-09-27-rulings-relation-removals-and-account-destruction.md](2026-09-27-rulings-relation-removals-and-account-destruction.md)<br>*Destroying the account or its data* |
 | `PREVIEW-NAMES-THE-RESOLVED-TARGET` | A preview names whom the tool resolved -- the page-read name and headline, sanitised, marked untrusted, inside a people record -- and is returned at runtime, never written; a receipt (anything persisted after a write fires) carries only the caller-supplied target. | previews and receipts | 2026-09-27 | [2026-09-27-rulings-previews-and-receipts.md](2026-09-27-rulings-previews-and-receipts.md)<br>*A preview is the identity check, not a receipt* |
@@ -230,6 +231,7 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | DEFECT ONE | `GATE-IS-SAFE-AND-BLIND` |
 | ERROR-MESSAGE-PROVENANCE | `ERROR-MESSAGE-RULED-AT-THE-RAISE` |
 | ERROR-URL-PER-SITE | `ERROR-URL-ASKED-FOR-OR-NOTHING` |
+| FILE-UPLOAD-UNSANCTIONED | `FILE-UPLOAD-OPENED` |
 | FORBIDDEN-CLASS-FIX-LANDED | `INCIDENTAL-CAPTURE-IS-NOT-A-RULING` |
 | incidental capture | `INCIDENTAL-CAPTURE-IS-NOT-A-RULING` |
 | L118-123 | `EXCLUDED-RULED-ADMISSION` |
@@ -284,6 +286,7 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | the standing order | `NO-IRREVERSIBLE-WRITE-IS-FIRED` |
 | the standing shape | `STANDING-SHAPE-OF-A-WRITE-RULING` |
 | the twenty sites | `ERROR-URL-ASKED-FOR-OR-NOTHING` |
+| the upload sanction | `FILE-UPLOAD-OPENED` |
 | the write class (b) | `WRITE-CLASS-B` |
 | the write-partition's section 4.4.2 question | `COMPOUND-ROW-SPLITS-ONLY-ON-STATE` |
 | third-party exception text | `ERROR-MESSAGE-RULED-AT-THE-RAISE` |
@@ -340,6 +343,8 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 **`EXCLUDED-RULED-ADMISSION`** -- Written twice, once per slice, in near-identical words; `_audit/_census/profile.md` carries the twin. This is the ORIGIN of the forbidden-substring question and it already answers it: a substring entry counts only when it is one of the four WRITTEN grounds, i.e. when it was aimed at the capability.
 
 **`FEED-CONTENT-READ-RULING`** -- The ground `M C85`'s read half would rest on if that row were ever split -- see OPEN-QUESTIONS.
+
+**`FILE-UPLOAD-OPENED`** -- THE OPERATOR'S decision, made 2026-09-04. No committed source records his words: it is recorded by 615a5c4 and _audit/2026-09-20-the-decides.md section 1, and registered on that record. The date shown is the record's, 2026-09-20.
 
 **`FIXED-UI-LABEL-MATCH`** -- Orchestrator's call; overridable. Decides N 82.
 
@@ -431,8 +436,8 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 | signal NOT scanned | files | lines |
 |---|---|---|
-| a heading naming a ruling | 130 | 285 |
-| a bold line opening on RULING/RULED | 63 | 144 |
+| a heading naming a ruling | 131 | 286 |
+| a bold line opening on RULING/RULED | 64 | 145 |
 | the phrase THE RULING | 38 | 63 |
 | a named -RULING id | 39 | 97 |
 | the phrase standing ruling | 18 | 41 |

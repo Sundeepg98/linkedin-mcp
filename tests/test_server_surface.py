@@ -1,4 +1,4 @@
-"""The tool surface: sixty-two tools, forty-four of which do not write.
+"""The tool surface: sixty-three tools, forty-four of which do not write.
 
 **AND THIS LINE IS NOW DERIVED, NOT MAINTAINED, 2026-09-20.** It had gone stale
 a THIRD time -- "forty-four tools, thirty-two of which do not write" against a
@@ -156,7 +156,13 @@ SANCTIONED_WRITE_TOOLS = frozenset(SANCTIONED_WRITES) & {
     # Keys in writes.SANCTIONED_WRITES.
     "linkedin_connect_from_profile",
     "linkedin_message_from_profile",
-    # THE EIGHTEENTH, 2026-10-10 (lane S, HIS-OWN-SETTINGS-NOT-OUTWARD; census
+    # THE NINETEENTH, 2026-10-10 (lane U; census rows M M14, M M15, M M18,
+    # ruling FILE-UPLOAD-OPENED): one file, as an attachment, into one
+    # conversation he names by thread id. Its NAME announces the write and its
+    # docstring must describe one, so it is on both exemptions -- which are
+    # one set. A key in writes.SANCTIONED_WRITES.
+    "linkedin_send_attachment",
+    # THE TWENTIETH, 2026-10-10 (lane S, HIS-OWN-SETTINGS-NOT-OUTWARD; census
     # P O17, split from P O6-O20): ONE control on ONE admitted settings page.
     # Its NAME announces the write ("set") and its docstring must describe
     # one, so it is on both exemptions -- which are one set. A key in
@@ -520,7 +526,10 @@ EXPECTED_TOOLS = {
     # its merge of master 52b55b6), two WRITES: see SANCTIONED_WRITE_TOOLS.
     "linkedin_connect_from_profile",
     "linkedin_message_from_profile",
-    # THE SIXTY-SECOND, 2026-10-10 (lane S, settings), a WRITE: see
+    # THE SIXTY-SECOND, 2026-10-10 (lane U's branch), a WRITE: see
+    # SANCTIONED_WRITE_TOOLS.
+    "linkedin_send_attachment",
+    # THE SIXTY-THIRD, 2026-10-10 (lane S, settings, merged after lane U's), a WRITE: see
     # SANCTIONED_WRITE_TOOLS.
     "linkedin_set_admitted_setting",
 }
@@ -607,11 +616,18 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_sixty_two_tools(tools):
-    """RENAMED AGAIN ON 2026-10-10 (lane S, settings), to
-    ``..._sixty_two_tools``: one WRITE, ``linkedin_set_admitted_setting``
-    (HIS-OWN-SETTINGS-NOT-OUTWARD), ONE control on ONE admitted settings page.
-    MEASURED off the registry; the name moved with the pin.
+async def test_the_surface_is_exactly_the_sixty_three_tools(tools):
+    """RENAMED AGAIN AT LANE S'S MERGE OF MASTER 0103810, 2026-10-10, to
+    ``..._sixty_three_tools``: one WRITE, ``linkedin_set_admitted_setting``
+    (HIS-OWN-SETTINGS-NOT-OUTWARD), ONE control on ONE admitted settings page,
+    on top of lane U's sixty-second. MEASURED off the registry on the merged
+    tree; the name moved with the pin.
+
+    RENAMED AGAIN ON LANE U'S BRANCH, 2026-10-10, to ``..._sixty_two_tools``:
+    one WRITE, ``linkedin_send_attachment`` (ruling FILE-UPLOAD-OPENED), one
+    file into one conversation he names. MEASURED off the registry on the
+    lane's branch, counting from master's sixty-one; a merge beside other
+    lanes' tools re-derives it.
 
     RENAMED AGAIN ON LANE L5'S ORDER OF 2026-09-28 08:06, to
     ``..._sixty_one_tools``: one READ, ``linkedin_read_named_profile`` (ruling
@@ -918,10 +934,13 @@ async def test_the_surface_is_exactly_the_sixty_two_tools(tools):
     # SIXTY-ONE ON LANE L5'S ORDER OF 2026-09-28 08:06: linkedin_read_named_profile,
     # a READ, so the split moves on its read side and the write set holds.
     # MEASURED off mcp.list_tools().
-    # SIXTY-TWO ON 2026-10-10 (lane S, settings): linkedin_set_admitted_setting,
+    # SIXTY-TWO ON LANE U'S BRANCH, 2026-10-10: linkedin_send_attachment, a
+    # WRITE, so the split moves on its write side and the non-write count
+    # holds. MEASURED off mcp.list_tools() on the branch.
+    # SIXTY-THREE AT LANE S'S MERGE OF MASTER 0103810, 2026-10-10: linkedin_set_admitted_setting,
     # a WRITE, so the split moves on its write side and the non-write count
     # holds. MEASURED off mcp.list_tools().
-    assert len(tools) == 62
+    assert len(tools) == 63
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -953,6 +972,7 @@ async def test_the_surface_is_exactly_the_sixty_two_tools(tools):
         "linkedin_withdraw_from_group",
         "linkedin_connect_from_profile",
         "linkedin_message_from_profile",
+        "linkedin_send_attachment",
         # 2026-10-10, lane S: one control on one admitted settings page.
         "linkedin_set_admitted_setting",
     }
@@ -1200,6 +1220,7 @@ async def test_the_exemption_covers_only_the_names_on_it(tools):
         "linkedin_withdraw_from_group",
         "linkedin_connect_from_profile",
         "linkedin_message_from_profile",
+        "linkedin_send_attachment",
         # 2026-10-10, lane S: one control on one admitted settings page.
         "linkedin_set_admitted_setting",
     }
@@ -1654,6 +1675,10 @@ async def test_server_info_stops_claiming_read_only_once_writes_are_on(monkeypat
         # siblings, because a derived list would admit the eighth silently.
         "react_to_item",
         "save_job",
+        # THE NINETEENTH, 2026-10-10 (census M M14 / M15 / M18, lane U), typed
+        # here by hand: one file into one conversation he names, its bytes
+        # handed over as read and compared, SENT only off a fresh load.
+        "send_attachment",
         # EIGHTH, same day. Ships under Ruling 1 -- nothing this server may
         # read can confirm a sent invitation -- and it is the second
         # performable action that cannot be undone.
@@ -1732,6 +1757,9 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
         # typed here by somebody who meant it.
         "react_to_item",
         "save_job",
+        # THE NINETEENTH, 2026-10-10 (census M M14 / M15 / M18). Typed by
+        # hand, as this list requires, by the lane that built it (lane U).
+        "send_attachment",
         # THE EIGHTH, same day, and the first write on this surface that
         # reaches another person AND cannot confirm its own outcome.
         "send_invitation",
@@ -2117,6 +2145,11 @@ async def test_the_server_instructions_name_every_write_that_ships():
         # reached; seventeen is spelled so the map has no hole a later count
         # could fall into.
         17: "seventeen", 18: "eighteen",
+        # NINETEEN AT LANE S'S MERGE OF MASTER 0103810, 2026-10-10: lane U's
+        # send_attachment and lane S's set_admitted_setting each made eighteen
+        # on its own branch, and the merged tree holds both. The KeyError this
+        # map raises named the count on the merge's first gate.
+        19: "nineteen",
     }
     assert f"{words[len(writes.PERFORMABLE)]} write" in text
     for action in writes.PERFORMABLE:
@@ -2438,6 +2471,14 @@ async def test_server_info_reports_irreversibility_before_a_caller_commits(
         "connect_from_profile",
         "message_from_profile",
         "publish_post",
+        # THE NINTH, 2026-10-10 (lane U), TYPED BY HAND AS THIS LIST DEMANDS,
+        # AND THE DECISION IT RECORDS: a FILE FROM THIS MACHINE lands in a
+        # person's conversation, and LinkedIn holds the bytes from the moment
+        # they reach the composer -- before Send. Nothing here withdraws a
+        # file LinkedIn or the person already holds; no delete is built. It
+        # spends no credit this server can see; its spec says what is
+        # unmeasured.
+        "send_attachment",
         "send_invitation",
         # (THE FIFTH, send_message, 2026-09-02 to 2026-09-27 -- the most
         # irreversible-in-audience action in the design, and the only entry
