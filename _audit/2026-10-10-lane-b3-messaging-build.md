@@ -220,8 +220,8 @@ GREEN: 7 passed.
 
 `linkedin_my_articles()` loads the constant address; `linkedin_item_viewer_demographics(item)`
 takes `urn:li:activity:<digits>` from its caller and refuses anything else
-before loading. The child named the second `linkedin_post_viewer_demographics`
-first and the name law refused it ("post" is a write verb), so it ships under
+before loading. The child's first name for the second carried the word "post",
+and the name law refused it ("post" is a write verb), so it ships under
 the item vocabulary. Both are in the one lane B3 block of `server.py`; the
 child's mid-file import moved to the module's import list at the merge.
 Envelope verdicts, each driven through its guard's own function: `clean` for
@@ -293,7 +293,7 @@ another member's item is UNMEASURED; a page that draws no card reads nothing.
 - NEEDS-CAPTURE (one capture serves all four): `/messaging/thread/<id>/` for a
   conversation he has already read, with the ACTIVE row's options menu -- or
   the thread header's own, whichever is drawn -- opened and closed on Escape;
-  a menu is a disclosure under `CAPTURE-PRESS-UNDER-PROBE-RULE`, nothing
+  a menu is a disclosure under the capture-press probe rule (ruling 1 of `_audit/2026-10-10-rulings-ledger-questions.md`), nothing
   committed. Then each act is built on that menu, its inverse in the same
   change: `M M29` Mute and its inverse on the same toggle; `M M31` "Mark as
   unread" (drawn, on a read row) and "Mark as read" (DERIVED -- and a read mark
@@ -327,7 +327,7 @@ top of profile", "Save", "Copy link to post", "Embed this post", "Edit post",
 "View analytics".
 
 - `M C18` (edit a published post): "Edit post" opens an editor nobody has
-  captured, and `CAPTURE-PRESS-UNDER-PROBE-RULE` admits "never a composer or an
+  captured, and the capture-press probe rule (ruling 1 of `_audit/2026-10-10-rulings-ledger-questions.md`) admits "never a composer or an
   editor". Its capture is an act on an item he names.
 - `M C23` (turn off or limit comments): "Who can comment on this post?" opens
   a dialog nobody has captured. Opening it commits nothing, so the probe rule
