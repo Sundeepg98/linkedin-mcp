@@ -121,7 +121,7 @@ conditions:
   spelling and every sibling path.
 - The press gate still refuses every control on the page unless a press is
   separately permitted.
-- A page that lists other people is read under `NAMES-AT-RUNTIME` and
+- A page that lists other people is read under the ruling `NAMES-AT-RUNTIME` and
   `PEOPLE-DATA-MITIGATIONS`.
 - A badge the load may clear is a passive cost (`D5-PASSIVE-COST-IS-NOT-A-ROW`),
   recorded on the row.
@@ -137,3 +137,12 @@ It does NOT reach a substring whose ground is the read itself:
 Rows resting on one of those are named to the orchestrator with the ground
 quoted. It also does not reach a refusal whose ground is a ruling of the
 operator's; those rows are named to the orchestrator with the ruling quoted.
+
+---
+
+EDITED ONCE, 2026-10-10, ON ITS AUTHOR'S AUTHORISATION. The orchestrator, who
+wrote this document, authorised one edit at 14:56 IST that day, made by lane
+G2: in the read-admission conditions, the ruling id the people-page condition
+names is now introduced as "the ruling", because it is a ruling id and not a
+code name, and the asserted-names check had read it as a blocker. The meaning
+does not change, and no other line of the ruling text was touched.
