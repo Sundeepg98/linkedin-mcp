@@ -3,10 +3,21 @@
 An MCP server that shows you your own LinkedIn account data as structured tool
 results instead of pages you have to click through.
 
-**Sixty-four tools ship. Forty-four read. Twenty write. None is
+**Sixty-five tools ship. Forty-four read. Twenty-one write. None is
 write-shaped and unable to act.**
-(Sixty-two and Eighteen write until lane B4, 2026-10-10: the similar-jobs
+(Sixty-three and Nineteen write until lane B4's merge, 2026-10-10: the similar-jobs
 alert, `linkedin_set_similar_jobs_alert` and its inverse.)
+
+**THAT LINE READ "Sixty-two ... Forty-four read. Eighteen write" UNTIL
+LANE S (SETTINGS), 2026-10-10, merged after lane U** (HIS-OWN-SETTINGS-NOT-OUTWARD). One write
+arrived: `linkedin_set_admitted_setting` changes ONE control on ONE settings
+page of your own account -- a page admitted by name, one at a time, from a
+real capture of it. One page is admitted, "Share profile updates", whose switch
+decides whether later profile edits are shared with your network. Its first
+call reads the page and hands you a token; it presses only on your
+confirmation, checks that nothing else on the page moved, verifies on a fresh
+load, and returns the exact call that puts the value back. Census `P O17`,
+COVERED-UNFIRED: built on the capture, never fired.
 
 **THAT LINE READ "Sixty-one ... Forty-four read. Seventeen write" UNTIL LANE
 U'S BRANCH, 2026-10-10** (ruling FILE-UPLOAD-OPENED, the operator's decision
@@ -997,7 +1008,7 @@ linkedin_server/
   cdp_bridge.py              the recovery path: attach to a running Chrome
   dom.py                     the read-only harvesters and the control readers
   shape.py                   pure parsers and the result envelope
-  server.py                  the sixty-four tools
+  server.py                  the sixty-five tools
   errors.py
 tests/                       1393 tests, no network, no account
   fixtures/                  frozen LinkedIn markup, scrubbed

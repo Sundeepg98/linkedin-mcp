@@ -114,6 +114,7 @@ from tests.test_named_profile_route import LINK as NAMED_PROFILE_LINK
 from tests.test_named_profile_route import PROFILE as NAMED_PROFILE
 from tests.test_result_verification_block import SHAREBOX_MARKUP
 from tests.test_selectors_resolve import PAGE as SELECTOR_RESOLUTION_PAGE
+from tests.test_set_admitted_setting import SETTINGS_PAGE_MARKUP, SETTINGS_RAW_TARGET
 from tests.test_writes import (  # noqa: F401 -- two of these are fixtures
     FOLLOWED_COMPANY,
     JOB,
@@ -310,6 +311,16 @@ REACHED: dict[str, tuple[str, str, str]] = {
         "tests/test_leave_group.py",
         GROUPS_LEAVE_MARKUP,
         GROUPS_LEAVE_ID,
+    ),
+    # THE EIGHTEENTH, 2026-10-10 (census ``P O17``, lane S, settings). THE
+    # REAL PAGE: the live lane's capture of "Share profile updates" as a
+    # tracked skeleton. The preview and the click read its one switch
+    # through ONE reader, ``settings_writer.read_control``, and the
+    # click-time selector is the switch by its own name.
+    "set_admitted_setting": (
+        "tests/fixtures/live2/setting.html",
+        SETTINGS_PAGE_MARKUP,
+        str(writes._target_for(spec_for_action("set_admitted_setting"), SETTINGS_RAW_TARGET)),
     ),
     # THE SEVENTEENTH AND EIGHTEENTH, 2026-09-27 (census rows ``N 4`` by D6,
     # ``N 2`` and ``M M1``, lane L5's follow-up; the sixteenth and seventeenth
@@ -625,11 +636,12 @@ def test_every_performable_action_is_either_reached_or_declared_unreachable():
     # 17 -> 18 on 2026-10-10 (lane U's branch): ``send_attachment`` shipped,
     # reached over the conversation its own tests read, its file in a
     # temp upload root. MEASURED on the branch.
-    # 18 -> 20 at lane B4's merge of master 2b165fd (17 -> 19 on its branch):
-    # the similar-jobs alert pair, reached over session 8's tracked posting
-    # and its derived On world. MEASURED on the merged tree.
-    assert len(PERFORMABLE) == 20, sorted(PERFORMABLE)
-    assert len(REACHED) == 20, sorted(REACHED)
+    # 18 -> 19 at lane S's merge of master 0103810 (2026-10-10): ``set_admitted_setting``
+    # shipped, reached over the real capture of the one admitted page.
+    # 19 -> 21 at lane B4's merge of master a457819: the similar-jobs alert
+    # pair, reached over session 8's tracked posting. MEASURED on the merged tree.
+    assert len(PERFORMABLE) == 21, sorted(PERFORMABLE)
+    assert len(REACHED) == 21, sorted(REACHED)
     assert len(CANNOT_REACH) == 0, sorted(CANNOT_REACH)
 
 
@@ -647,7 +659,7 @@ def test_no_corpus_this_file_fans_out_over_is_empty():
         )
 
 
-def test_exactly_one_performable_action_is_multi_state():
+def test_the_multi_state_actions_are_the_two_this_file_names():
     """The premise the two-shaped check rests on, asserted rather than assumed.
 
     ``_assert_the_two_ends_agree`` branches on ``from_state is None``. If a
@@ -655,15 +667,32 @@ def test_exactly_one_performable_action_is_multi_state():
     covering it silently -- and ``audiences`` is a WEAKER check than a named
     origin, so coverage would quietly soften. That should be a decision, so it
     fails here first.
+
+    THE DECISION, 2026-10-10 (lane S, settings): the second is
+    ``set_admitted_setting``, and its coverage does NOT soften to the
+    audiences branch. Its own arms in ``writes._direction`` and
+    ``writes.valid_from`` check the reading against ITS control's closed set
+    of values (``settings_writer``), which is per control and so stronger than
+    a spec-wide enumeration; its ``audiences`` is the union of the admitted
+    controls' values, held equal to the registry below so the generic branch
+    stays truthful if it is ever reached. Renamed from
+    ``test_exactly_one_performable_action_is_multi_state``.
     """
     multi = sorted(
         action
         for action in PERFORMABLE
         if spec_for_action(action).from_state is None
     )
-    assert multi == ["update_setting"], multi
-    # And its enumeration is not empty, or the audiences branch is vacuous.
+    assert multi == ["set_admitted_setting", "update_setting"], multi
+    # And each enumeration is not empty, or the audiences branch is vacuous.
     assert spec_for_action("update_setting").audiences
+    admitted_values = {
+        value.casefold()
+        for page in writes.settings_writer.ADMITTED_PAGES
+        for control in page.controls
+        for value in control.values
+    }
+    assert set(spec_for_action("set_admitted_setting").audiences) == admitted_values
 
 
 def test_the_reachable_table_names_a_real_source_for_every_document():

@@ -668,13 +668,20 @@ def test_the_action_set_is_the_one_this_file_was_measured_against():
     # verifies in the conversation itself, so it is a fourth owner of
     # "LinkedIn messages", and the reply pair is a fourth sanctioned shared
     # place. No row was reworded to dodge a phrase.
-    # TWENTY AT LANE B4'S MERGE OF MASTER 2b165fd (nineteen on its branch): ``set_similar_jobs_alert`` and its
+    # NINETEEN AT LANE S'S MERGE OF MASTER 0103810 (2026-10-10): ``set_admitted_setting``'s
+    # two rows were read. Its ``_WHERE_TO_LOOK`` value ("that page under
+    # Settings and Privacy, named in the preview") and its ``_VERIFIED_FROM``
+    # row (the admitted page re-rendered, its one control read again by its
+    # exact label) were checked by the rest of this file with the rows in
+    # place -- every other test here passed, so neither prints a phrase
+    # another action owns -- and no owner entry was needed.
+    # TWENTY-ONE AT LANE B4'S MERGE OF MASTER a457819 (nineteen on its branch): ``set_similar_jobs_alert`` and its
     # inverse ``unset_similar_jobs_alert``. Their four rows were read: the
     # two ``_WHERE_TO_LOOK`` values are one place (the switch on the posting,
     # or his job alerts), a third sanctioned shared pair above; the two
     # ``_VERIFIED_FROM`` rows are one row (a fresh render of the posting).
-    assert len(writes.PERFORMABLE) == 20, (
-        "writes.PERFORMABLE holds %d actions, not the 20 this file was "
+    assert len(writes.PERFORMABLE) == 21, (
+        "writes.PERFORMABLE holds %d actions, not the 21 this file was "
         "measured against: %s. Re-derive the phrase owners in this file for "
         "the new action, then update this count."
         % (len(writes.PERFORMABLE), sorted(writes.PERFORMABLE))

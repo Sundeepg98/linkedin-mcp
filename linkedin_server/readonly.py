@@ -1289,10 +1289,13 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # which is the difference from the trade the dark-mode entry above
     # declined for language and autoplay-videos: nothing is NARROWED.
     #
-    # READ ONLY. writes.assert_write_url consults neither exemption table and
-    # no WriteSpec names this address, so it is no write surface. The reader
-    # that opens it (profile_editor.read_account_share_updates) counts; it
-    # never presses the switch, which is his to change.
+    # READ ONLY THROUGH THESE TWO ENTRIES. writes.assert_write_url consults
+    # neither exemption table. The reader that opens it for the editor writes
+    # (profile_editor.read_account_share_updates) counts and never presses.
+    # SINCE 2026-10-10 ONE WRITE names this address on its own spec: lane S's
+    # settings writer (set_admitted_setting, HIS-OWN-SETTINGS-NOT-OUTWARD)
+    # presses the page's one switch behind the single-use grant, its spec
+    # excusing "/settings/" and "settings" by equality for this address alone.
     #
     # NOT ADMITTED: a query, a sub-path, a sibling settings page, the category
     # page that lists it, the other candidate, the old /psettings/ address.

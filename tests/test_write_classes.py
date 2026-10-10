@@ -194,10 +194,16 @@ def test_the_split_is_the_one_the_lane_report_quotes():
     387 - 3 = 384 = 16 R1 + 34 R2 + 334 R3.
     370 AT LANE U'S MERGE OF ORIGIN/MASTER 71d83ca, MEASURED: lane K's
     fourteen R3 lines and lane U's three R2 lines, disjoint, all gone.
-    373 - 3 = 370 = 16 R1 + 34 R2 + 320 R3."""
+    373 - 3 = 370 = 16 R1 + 34 R2 + 320 R3.
+
+    371 AT LANE S'S MERGE OF MASTER 0103810 (2026-10-10), MEASURED
+    (`_audit/2026-09-28-lane-s-settings.md`, section 4): `P O17` split from
+    `P O6-O20` and BUILT -- `built:set_admitted_setting`, COVERED-UNFIRED --
+    so it keeps a line as a built row; classed R3 by its act (profile-setting).
+    `P O6-O20` stays a GAP line. 370 + 1 = 371 = 16 R1 + 34 R2 + 321 R3."""
     rows, _ = cwc.load()
     split = cwc.split(rows)
-    assert (split["R1"], split["R2"], split["R3"]) == (16, 34, 320)
+    assert (split["R1"], split["R2"], split["R3"]) == (16, 34, 321)
     assert split["R1:built"] + split["R1:queued"] == split["R1"]
 
 

@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Synthetic switches</title>
+<!--FIXTURE_CONFIG-->
+</head>
+<body>
+<!-- SYNTHETIC. Lane S, 2026-10-10. A settings page drawn as ARIA switches:
+     each control is a div with role switch, named through aria-labelledby,
+     its state in aria-checked -- the pattern a settings page uses when it
+     draws no input. Every name here is invented. Behaviour is chosen by
+     window.__fixtureConfig: lateMs (the press lands this many ms later),
+     inert (the press changes nothing), alsoFlip (the press also flips the
+     other switch), duplicateName (a second switch wears the first's name),
+     duplicateAsCheckbox (a checkbox wears the first switch's name),
+     flipOtherOnly (the press flips the OTHER switch and not its own),
+     addOnPress (the press also draws a new switch), replaceOther (the
+     press also replaces the other switch with a differently named one,
+     so the page draws as many switches as before but not the same ones).
+     The last three are the shapes a cold review of 2026-10-10 found the
+     receipt's STOP did not cover. -->
+<main>
+<h1>Synthetic switches</h1>
+<ul>
+<li>
+<span id="lbl-alerts">Synthetic alerts</span>
+<div role="switch" tabindex="0" aria-checked="false" aria-labelledby="lbl-alerts" id="sw-alerts"></div>
+</li>
+<li>
+<span id="lbl-digest">Synthetic digest</span>
+<div role="switch" tabindex="0" aria-checked="true" aria-labelledby="lbl-digest" id="sw-digest"></div>
+</li>
+<li id="dup-slot"></li>
+</ul>
+<a href="/x">Back</a>
+</main>
+<script>
+(function () {
+  var config = window.__fixtureConfig || {};
+  if (config.duplicateName) {
+    document.getElementById("dup-slot").innerHTML =
+      '<div role="switch" tabindex="0" aria-checked="false" aria-label="Synthetic alerts"></div>';
+  }
+  if (config.duplicateAsCheckbox) {
+    document.getElementById("dup-slot").innerHTML =
+      '<input type="checkbox" aria-label="Synthetic alerts">';
+  }
+  window.__presses = 0;
+  function flip(el) {
+    el.setAttribute("aria-checked", el.getAttribute("aria-checked") === "true" ? "false" : "true");
+  }
+  document.querySelectorAll('[role="switch"]').forEach(function (el) {
+    el.style.display = "inline-block";
+    el.style.width = "40px";
+    el.style.height = "20px";
+    el.addEventListener("click", function () {
+      window.__presses += 1;
+      if (config.inert) { return; }
+      if (config.flipOtherOnly) {
+        document.querySelectorAll('[role="switch"]').forEach(function (other) {
+          if (other !== el) { flip(other); }
+        });
+        return;
+      }
+      if (config.addOnPress) {
+        document.getElementById("dup-slot").innerHTML =
+          '<div role="switch" tabindex="0" aria-checked="false" aria-label="Synthetic newcomer"></div>';
+      }
+      if (config.replaceOther) {
+        var old = document.getElementById("sw-digest");
+        var span = document.createElement("span");
+        span.innerHTML = '<div role="switch" tabindex="0" aria-checked="true" aria-label="Synthetic stranger"></div>';
+        old.parentNode.replaceChild(span.firstChild, old);
+      }
+      var apply = function () {
+        flip(el);
+        if (config.alsoFlip) {
+          document.querySelectorAll('[role="switch"]').forEach(function (other) {
+            if (other !== el) { flip(other); }
+          });
+        }
+      };
+      if (config.lateMs) { setTimeout(apply, config.lateMs); } else { apply(); }
+    });
+  });
+})();
+</script>
+</body>
+</html>

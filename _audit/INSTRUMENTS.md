@@ -11520,7 +11520,6 @@ the class:
     BEFORE IT CAN STILL LEAN ON THE RETIRED THING, AND A CLEAN MERGE SAYS
     NOTHING ABOUT THAT. READ THE OTHER SIDE'S ADDED LINES FOR IT.
 
-
 ## 82. A LEDGER OF NEXT STEPS HELD TO THE CENSUS, AND A CAPTURE QUEUE WHOSE VERDICTS ARE RE-DRIVEN (lane-k-ledger, 2026-10-10)
 
 **Registered 2026-10-10.** Full record: `_audit/2026-09-28-lane-k-ledger.md`,
@@ -11570,6 +11569,84 @@ through `readonly.is_read_url` and `press.py`'s pre-press checks, and the two
 children's inventory and session-extraction scripts. Each one's output is a
 committed table or a section of the lane record; the tables are the record,
 and `check_next_step` is what keeps them true.
+
+## 85. ONE CONTROL ON ONE ADMITTED SETTINGS PAGE, AND THE PAGE MAY MOVE ONLY WHAT ONE PRESS MOVES (lane-s-settings, 2026-10-10)
+
+**Registered 2026-10-10.** Full record: `_audit/2026-09-28-lane-s-settings.md`.
+Numbered 85 on the orchestrator's allocation in the brief.
+
+### 85.1 A PRESS IS JUDGED BY WHAT THE WHOLE PAGE DID, NOT BY THE CONTROL
+
+The generic settings writer reads every switch, checkbox, radio and native
+select on the page before its press and after it, position by position and by
+each position's identity (role and accessible name, digested), and accepts the
+press only if the page moved EXACTLY what one press of that control's kind
+moves -- one checkable for a switch, two radios for a group, one select -- and
+the control reads the requested value. A control that redrew correctly while a
+second one flipped beside it is refused, and so is a page that replaced a
+control with another of the same role. Nothing else on the page is read, and
+the verdict says so. Counts, booleans and digests only: no value or name the
+page wrote is put on a receipt.
+
+On a page that stores on the press there is nothing to discard, so EVERY press
+whose check did not pass carries STOP -- the first form set it for one failure
+shape of five, and no test read it (a cold review's HIGH finding) -- and a page
+whose controls cannot all be read before the press is not pressed at all.
+
+    A WRITE THAT CHECKS ONLY THE CONTROL IT PRESSED CANNOT SEE THE CONTROL IT
+    MOVED BY ACCIDENT. COMPARE THE PAGE, AND ALLOW EXACTLY THE PRESS'S OWN MOVE.
+    AND WHERE THE PRESS IS THE STORE, A CHECK THAT DID NOT PASS IS A STOP,
+    WHATEVER THE REASON IT DID NOT PASS.
+
+### 85.2 A GUARD SHOWN FAILING MUST FAIL FOR ITS OWN REASON
+
+Seven guards were broken one at a time in a copy-restored module. Six were
+caught at once. The name-count guard on the switch reader was NOT: loosened to
+"at least one", the world with two switches of one name still read unknown --
+through a later step that found no state -- so the test passed and said
+nothing about the guard. The world that guard exists for is a switch and a
+checkbox sharing one name, where the loosened reader returns a state while a
+second control answers to the same name. With that world added and the test
+requiring the count's own refusal, the mutation is caught.
+
+    A TEST THAT PASSES BECAUSE ANOTHER GUARD CAUGHT THE CASE IS NOT EVIDENCE
+    FOR THE GUARD UNDER TEST. ASSERT THE REFUSAL'S OWN REASON.
+
+### 85.3 AN ENUMERATION IS CHECKED AGAINST ANOTHER LANE'S, NOT AGAINST ITSELF
+
+The lane walked four sources by script and placed 115 rows. The walk read no
+jobs row -- the jobs slice is not in `write-classes.tsv`, and its cells name
+the settings family in other words -- so three job-application toggles that
+twin rows it DID place were never candidates. Nothing in the walk could say
+so. Lane K's next-step ledger, built independently and held by
+`scripts/check_next_step.py`, assigns rows to lanes; cross-checked against
+this lane's rows after a merge, it named eleven the walk had missed, and a
+cold review named a twelfth.
+
+    A ROW SET IS COMPLETE ONLY AGAINST A SOURCE THAT DID NOT DERIVE IT. CROSS
+    THE ENUMERATION WITH ANOTHER LANE'S LEDGER BEFORE CALLING IT DONE.
+
+### 85.4 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `linkedin_server/settings_writer.py` -- `read_control` (exact-one name in either spelling, declared choices only, one checked, every combobox of the name counted), `only_that_control_moved` with `_EXPECTED_MOVES` and per-position identities, `press_stop`, `snapshot_readable`, `audiences`, `save_gate`, `check_kind`, `resolve` / `canonical_target`, `state_of` / `served_at` | twelve mutations, each caught: `tests/test_settings_writer.py` and `tests/test_set_admitted_setting.py` (the record's tables name the test for each) |
+| `linkedin_server/writes.py` -- the settings writer's hooks: the refusal before a press the check could not judge, the radio label's binding read, the receipt's addresses, the STOP's `attempted` | nine mutations, each caught (W1-W9 in the record) |
+| `tests/test_set_admitted_setting.py` -- the end-to-end harness: real preview, real token door, real `writes.perform`, over the real capture and three synthetic patterns registered at the admitted address, with the page's own press and Save witness read before each load | written before the integration and run against it: 5 failed, 1 passed; 6 passed after |
+| `tests/fixtures/synthetic/settings_switch_aria.html`, `settings_radio_group.html`, `settings_select.html` -- the three kinds, each able to land late, ignore the press, or move a second control; the switch page can also move only the OTHER switch, draw a new one, or replace one with a same-role stranger; the radio page covers its inputs as LinkedIn does and binds each label; the select page can draw a div combobox wearing the select's name | the scenarios above; the switch page gained a switch-and-checkbox world when 85.2 found the gap, and the three STOP shapes when the cold review found them |
+| `scripts/ruling_holds.py` -- the release `HIS-OWN-SETTINGS-NOT-OUTWARD` | `scripts/census_completion.py` derived `P O17`'s hold as OPERATOR-NAMES-THE-TARGET until its cell cited the release, then as no ruling |
+
+### 85.5 DECLARED DISPOSABLE
+
+The lane's scratch scripts -- the enumeration over the four sources (its four
+rules are written in the record, section 1, and 85.3 says what it missed), the
+classification and its table generator, the census-cell and disposition
+writer, the reader of the settings index's links, the copy-restore mutation
+runner, the targeted test runner and the re-pin helper -- are declared
+disposable. What each measured is in the record with its numbers. The mutation
+runner is worth keeping as a METHOD: write the mutated module, run only the
+test meant to catch it, restore the original bytes in a finally block, and
+check the restore by digest after every mutation.
 
 ## 86. A RED INSTRUMENT MADE GREEN IN ITS RECORDS, A CLEAN THAT MUST SHOW WHAT THE PAGE MADE, AND A RECORD TYPE THE BOUND COULD NOT NAME (lane-g2-debts, 2026-10-10)
 
