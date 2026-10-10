@@ -43,7 +43,7 @@ are listed as `(undated)`; no date is taken from git history, because
 | blockquoted markers naming ANOTHER document | 0 |
 | edges missing one of their two markers | 0 |
 | edges declared a different number of times in each direction | 2 |
-| marker lines rejected as malformed | 0 |
+| marker lines rejected as malformed | 1 |
 | marker-shaped lines inside a fenced code block | 0 |
 | reasons that continue past their own line (printed whole below) | 15 |
 | tightest margin over the 20-character admission floor, in characters | 0 |
@@ -1858,6 +1858,7 @@ against the same line, so a missing continuation satisfies it.
 
 - TIGHTEST ADMISSION MARGIN [2026-09-03-linkedin-gap-blockers.md](2026-09-03-linkedin-gap-blockers.md) line 272 clears the 20-character floor by 0. The floor is applied to the marker's OWN LINE, so a reason of 723 characters is admitted on the strength of 20. Reflow that paragraph by one word and a guard rejects it saying it *carries no reason after the citation*, which would not be true. Reported every regeneration rather than counted, because a count of rejections reads zero until the day it does not.
 
+- MALFORMED MARKER [2026-09-28-lane-k-ledger.md](2026-09-28-lane-k-ledger.md) line 1053 -- names 0 documents that resolve
 - LOPSIDED EDGE [2026-09-05-census-recounted.md](2026-09-05-census-recounted.md) declares 1 correction of [2026-09-05-decide-retire-rulings.md](2026-09-05-decide-retire-rulings.md), which carries 2 back-pointers to it. Two claims under one back-pointer read to the correction guard as one clean pair, because its test is over distinct pairs.
 - LOPSIDED EDGE [2026-09-19-search-admission-preconditions.md](2026-09-19-search-admission-preconditions.md) declares 2 corrections of [2026-09-05-search-results-consent.md](2026-09-05-search-results-consent.md), which carries 1 back-pointer to it. Two claims under one back-pointer read to the correction guard as one clean pair, because its test is over distinct pairs.
 - DEFUSED CITATION [2026-09-03-linkedin-gap-blockers.md](2026-09-03-linkedin-gap-blockers.md) -- its CORRECTED BY: reason quotes the spelling network.md in backticks, which the correction guard's `CITATION` pattern RESOLVES. That guard raises a candidate pair whenever correction vocabulary sits within two lines of a resolving citation, and this file is nothing but document names beside the words CORRECTED and corrects, so the quoted string would make this index raise a pair it means nothing by. **The backticks are removed here and not one character of the text is**; the quoted string still says exactly what the document says, it simply stops being a citation.

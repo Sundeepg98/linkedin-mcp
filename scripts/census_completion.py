@@ -1190,7 +1190,10 @@ PINNED = {
     #: 21 exclusions, `P A9` COVERED-CANNOT-DELIVER (P-A9-CANNOT-DELIVER), and
     #: `J 17` and `J 57` COVERED-PROVEN by D6 (GEOLOCATION-BY-D6,
     #: CALLER-COMPOSITION-UNDER-D6).
-    "adjudicated": 210,
+    #: 212 ON LANE B2's D6 DISCHARGES (2026-10-10), MEASURED: `N 80` and
+    #: `N 133` GAP -> COVERED-PROVEN, each resting on a shipped route's live
+    #: proofs (_audit/2026-10-10-lane-b2-network-build.md, sections 3 and 4).
+    "adjudicated": 212,
     #: THE LIVE LANE'S FOUR ROWS, RE-DERIVED AT EACH OF ITS MERGES OF MASTER
     #: (2026-09-24; last over lane S): four rows fired live and banked
     #: (`_audit/2026-09-23-live-lane-session-1.md`). `P G6` COVERED-UNFIRED ->
@@ -1257,7 +1260,9 @@ PINNED = {
     #: type into, now refused by it).
     #: 132 ON LANE K's APPLICATION OF THE RULINGS OF 2026-10-10, MEASURED: `J
     #: 17` and `J 57` COVERED-PROVEN by D6, every part proven.
-    "delivered_broad": 132,
+    #: 134 ON LANE B2's D6 DISCHARGES (2026-10-10), MEASURED: `N 80` and
+    #: `N 133` COVERED-PROVEN (see `adjudicated`).
+    "delivered_broad": 134,
     #: 79 since the live lane's merge (see `adjudicated`): P G6, N 134, P O3
     #: and M C72 COVERED-PROVEN.
     #: 75 and 21 since the bucket-1 merge: `M C41` fired live and moved from
@@ -1290,7 +1295,9 @@ PINNED = {
     #: branch: `J 17` and `J 57` COVERED-PROVEN by D6, every part proven.
     #: 111 AT LANE K's MERGE OF MASTER 66eb699 (2026-10-10), MEASURED on the
     #: merged tree, not summed: session 8's four rows and lane K's two.
-    "delivered_strict": 111,
+    #: 113 ON LANE B2's D6 DISCHARGES (2026-10-10), MEASURED: `N 80` and
+    #: `N 133` COVERED-PROVEN, every part proven (see `adjudicated`).
+    "delivered_strict": 113,
     #: The live lane's merge: N 134, P O3 and M C72 left GAP.
     #: Lane D's merge: N 132 left GAP, for COVERED-UNFIRED under D6.
     #: 544 AT THE ORCHESTRATOR'S MERGE OF LANE D (2026-09-27), MEASURED: lane D
@@ -1345,7 +1352,9 @@ PINNED = {
     #: `P S9` and `M C71` left GAP (see `adjudicated`).
     #: 561 ON LANE K's APPLICATION OF THE RULINGS OF 2026-10-10, MEASURED: 24
     #: rows left GAP (see `adjudicated`).
-    "gap": 561,
+    #: 559 ON LANE B2's D6 DISCHARGES (2026-10-10), MEASURED: `N 80` and
+    #: `N 133` left GAP (see `adjudicated`).
+    "gap": 559,
     #: 18 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: `M M1` built (`linkedin_message_from_profile`).
     #: 16 ON LANE L5'S ORDER OF 2026-09-27 23:36, MEASURED:
     #: `linkedin_send_message` RETIRED (aimed by a name): `M M2` to GAP and `N
@@ -1445,7 +1454,9 @@ PINNED = {
     #: both (see `adjudicated`).
     #: 92 ON LANE K's APPLICATION OF THE RULINGS OF 2026-10-10, MEASURED: `P
     #: N13`, `M C95`, `M C96`, `M C98`, `M C99` (R+W) and `P J4` left GAP.
-    "gap_read": 92,
+    #: 90 ON LANE B2's D6 DISCHARGES (2026-10-10), MEASURED: `N 80` and
+    #: `N 133`, both R rows, left GAP and bucket 3.
+    "gap_read": 90,
     #: 151, not the 152 published by `_audit/2026-09-21-the-write-ceiling.md`.
     #: That document scoped itself to `profile.md`, `network.md` and
     #: `messaging-and-content.md`; measured at HEAD those three carry W 151 and
@@ -1602,7 +1613,9 @@ PINNED = {
     #: a capture first.
     #: 41 ON LANE K's APPLICATION OF THE RULINGS OF 2026-10-10, MEASURED: `P
     #: J4` and `M C96` left GAP.
-    "b3_admitted": 41,
+    #: 39 ON LANE B2's D6 DISCHARGES (2026-10-10), MEASURED: `N 80` and
+    #: `N 133` left GAP, so their ADMITTED lines left the table.
+    "b3_admitted": 39,
     #: 38 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     #: 40 ON LANE L5'S ORDER OF 2026-09-28 12:32, MEASURED: `N 30`, `N 31`, `N 65`
