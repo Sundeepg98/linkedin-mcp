@@ -164,11 +164,29 @@ COUNT_PRESSES = (
     "'button.scaffold-finite-scroll__load-button').forEach((b) => "
     "b.addEventListener('click', () => { window.__presses += 1; })); }"
 )
+#: Added 2026-10-10 on the lane's cold review: a screen-reader-only span
+#: inside the first headline (it crossed before the headline was held to the
+#: name's nested-text rule), and the name and the headline each hidden on
+#: their own, so mitigation 5's per-field check has a control of its own.
+NESTED_HEADLINE = (
+    "() => { const t = document.querySelector('.artdeco-entity-lockup__subtitle');"
+    " const s = document.createElement('span'); s.className = 'visually-hidden';"
+    " s.textContent = 'Zzqneedle SrOnly'; t.appendChild(s); }"
+)
+HIDE_FIRST_NAME = (
+    "() => { document.querySelector('.artdeco-entity-lockup__title')"
+    ".style.display = 'none'; }"
+)
+HIDE_FIRST_HEADLINE = (
+    "() => { document.querySelector('.artdeco-entity-lockup__subtitle')"
+    ".style.display = 'none'; }"
+)
+CLEAR_THE_PAGE = "() => { document.body.innerHTML = ''; }"
 
 #: Reader scenarios: (mutate script, its argument, a module patch, extra read).
 READER_SCENARIOS: dict[str, dict[str, Any]] = {
     "clean": {},
-    "badge_headline": {"patch": ("HEADLINE", ".artdeco-entity-lockup__badge")},
+    "badge_headline": {"patch": ("HEADLINE", ".artdeco-entity-lockup__badge .a11y-text")},
     "nested": {"mutate": NESTED_NAME},
     "two_links": {"mutate": TWO_LINKS},
     "laced": {"mutate": SET_FIRST_NAME, "arg": LACED, "raw_title": True},
@@ -176,14 +194,17 @@ READER_SCENARIOS: dict[str, dict[str, Any]] = {
     "hidden": {"mutate": HIDE_FIRST_ROW},
     "anonymised": {"mutate": SET_FIRST_NAME, "arg": people_data.ANONYMISED_NAME},
     "presses": {"mutate": COUNT_PRESSES, "presses": True},
+    "nested_headline": {"mutate": NESTED_HEADLINE},
+    "hidden_name": {"mutate": HIDE_FIRST_NAME},
+    "hidden_headline": {"mutate": HIDE_FIRST_HEADLINE},
 }
 
 ELSEWHERE = f"https://www.linkedin.com/groups/{GROUP_ID}/?zzqlanding=1"
 AUTHWALL = "https://www.linkedin.com/authwall?sessionRedirect=zzqbounced"
 OTHER_GROUP = "https://www.linkedin.com/groups/87654321/"
 
-#: Tool scenarios: (tool name, skeleton, landing, arguments).
-TOOL_SCENARIOS: dict[str, tuple[str, Path, str, dict[str, str]]] = {
+#: Tool scenarios: (tool name, skeleton, landing, arguments[, mutate]).
+TOOL_SCENARIOS: dict[str, tuple] = {
     "members_ok": ("linkedin_group_members", SKELETON, "", {"group_id": GROUP_ID}),
     "members_elsewhere": ("linkedin_group_members", SKELETON, ELSEWHERE, {"group_id": GROUP_ID}),
     "members_authwall": ("linkedin_group_members", SKELETON, AUTHWALL, {"group_id": GROUP_ID}),
@@ -192,6 +213,8 @@ TOOL_SCENARIOS: dict[str, tuple[str, Path, str, dict[str, str]]] = {
     "page_feed": ("linkedin_group_page", GROUP_HOME, "https://www.linkedin.com/feed/",
                   {"group_id": GROUP_ID}),
     "page_other": ("linkedin_group_page", GROUP_HOME, OTHER_GROUP, {"group_id": GROUP_ID}),
+    "page_blank": ("linkedin_group_page", GROUP_HOME, "", {"group_id": GROUP_ID},
+                   CLEAR_THE_PAGE),
 }
 
 
@@ -235,8 +258,10 @@ async def _reader_scenario(context: Any, spec: dict[str, Any]) -> dict[str, Any]
 
 
 async def _tool_scenario(context: Any, spec: tuple) -> dict[str, Any]:
-    name, skeleton, land_on, arguments = spec
+    name, skeleton, land_on, arguments = spec[:4]
     page, _drawn = await _load(context, skeleton, skeleton == SKELETON)
+    if len(spec) > 4:
+        await page.evaluate(spec[4])
     gotos: list[str] = []
 
     @asynccontextmanager
@@ -379,9 +404,10 @@ def test_no_needle_crosses_from_any_place_the_reader_must_not_read():
 
 
 def test_THIS_CONTROL_CAN_FAIL_a_reader_aimed_at_the_badge_carries_the_screen_reader_copy():
-    """The needle check is not vacuous: aim the headline at the badge, which
-    holds the screen-reader copy beside the visible degree, and the needle
-    crosses."""
+    """The needle check is not vacuous: aim the headline at the badge's
+    screen-reader copy, which sits beside the visible degree, and the needle
+    crosses. (Aimed at the whole badge until the headline was held to the
+    nested-text rule, which now refuses the badge for its child spans.)"""
     assert "a11y" in needles_in(result_of("badge_headline"))
 
 
@@ -427,15 +453,60 @@ def test_THIS_CONTROL_CAN_FAIL_the_lace_really_reached_the_page():
     assert raw == LACED and chr(0x200B) in raw and chr(0x202E) in raw
 
 
+#: What a module needs to STORE anything: a writer it imports, a name it
+#: calls, or a method it calls. Widened 2026-10-10 on the lane's cold review,
+#: whose plant -- ``Path(...).open("w")`` and ``json.dump`` -- the first
+#: version's two lists both missed.
+_STORING_MODULES = frozenset({
+    "json", "pickle", "marshal", "shelve", "sqlite3", "csv", "logging",
+    "pathlib", "os", "io", "tempfile", "shutil",
+})
+_STORING_NAMES = frozenset({"open", "print", "logger", "LOG", "Path"})
+_STORING_METHODS = frozenset({
+    "open", "write", "write_text", "write_bytes", "writelines", "dump",
+    "info", "debug", "warning", "error", "exception", "critical", "log",
+})
+
+
+def stores_anything(source: str) -> list[str]:
+    """Every way ``source`` could write a value out: an import of a writer, a
+    call to a writing name, a call of a writing method. Off the AST."""
+    found = []
+    for node in ast.walk(ast.parse(source)):
+        if isinstance(node, ast.Import):
+            found += [f"import {a.name}" for a in node.names
+                      if a.name.split(".")[0] in _STORING_MODULES]
+        elif isinstance(node, ast.ImportFrom):
+            if (node.module or "").split(".")[0] in _STORING_MODULES:
+                found.append(f"from {node.module} import")
+        elif isinstance(node, ast.Call):
+            func = node.func
+            if isinstance(func, ast.Name) and func.id in _STORING_NAMES:
+                found.append(f"{func.id}() at line {node.lineno}")
+            elif isinstance(func, ast.Attribute) and func.attr in _STORING_METHODS:
+                found.append(f".{func.attr}() at line {node.lineno}")
+    return found
+
+
 def test_mitigation_3_the_reader_keeps_no_state_and_writes_nothing():
     source = READER_SOURCE.read_text(encoding="utf-8")
     assert containers_written_at_module_level(source) == []
-    tree = ast.parse(source)
-    names = {node.id for node in ast.walk(tree) if isinstance(node, ast.Name)}
-    attributes = {node.attr for node in ast.walk(tree) if isinstance(node, ast.Attribute)}
-    assert not names & {"open", "print", "logger", "logging", "LOG"}
-    assert not attributes & {"write_text", "write_bytes", "write", "info", "debug",
-                             "warning", "error", "exception"}
+    assert stores_anything(source) == []
+
+
+@pytest.mark.parametrize("plant", [
+    "import json\nfrom pathlib import Path\n"
+    "def keep(people):\n"
+    "    with Path('members.json').open('w') as fh:\n"
+    "        json.dump(people, fh)\n",
+    "def keep(people):\n    print(people)\n",
+    "import logging\ndef keep(people):\n    logging.getLogger(__name__).info(people)\n",
+    "def keep(people, fh):\n    fh.write(str(people))\n",
+], ids=["path-open-json-dump", "print", "logger", "handle-write"])
+def test_THIS_CONTROL_CAN_FAIL_a_reader_that_stores_is_caught(plant):
+    """The cold review's plant first: the first version of this check let a
+    file write through."""
+    assert stores_anything(plant) != []
 
 
 def test_mitigation_3_a_failure_is_counted_by_its_type_and_never_quoted():
@@ -486,8 +557,40 @@ def test_mitigation_5_a_row_the_page_hides_is_not_read():
     assert ROWS[0]["name"] not in [p["name"] for p in result["people"]]
 
 
+def test_mitigation_5_a_name_the_page_hides_is_not_read():
+    """The per-field check, on its own: the row and its link are shown, the
+    name element is not -- the row is skipped, never read off the hidden
+    element."""
+    result = result_of("hidden_name")
+    assert result["people_denominators"]["skipped"]["not_visible"] == 1
+    assert ROWS[0]["name"] not in [p["name"] for p in result["people"]]
+    assert len(result["people"]) == CAPTURED_ROWS - 1
+
+
+def test_mitigation_5_a_headline_the_page_hides_is_absent_not_read():
+    result = result_of("hidden_headline")
+    first = result["people"][0]
+    assert first["name"] == ROWS[0]["name"] and first["headline"] is None
+    assert result["people_denominators"]["headline_unread"] == 1
+
+
+def test_a_headline_holding_a_screen_reader_span_is_absent_not_read():
+    """Found by the lane's cold review: the headline was not held to the
+    name's nested-text rule, and a screen-reader-only span inside it crossed."""
+    result = result_of("nested_headline")
+    assert result["people"][0]["headline"] is None
+    assert result["people_denominators"]["headline_unread"] == 1
+    assert not any("Zzqneedle SrOnly" in text for text in walk_strings(result))
+
+
 def test_mitigation_5_an_anonymised_member_stays_anonymised():
-    assert result_of("anonymised")["people"][0]["name"] == people_data.ANONYMISED_NAME
+    """The name LinkedIn drew is returned exactly. The row's own link, which
+    the page drew on that row, comes back with it (``Person.from_page``: "with
+    whatever link the row itself carried"); nothing here looks anywhere else
+    for who it was."""
+    first = result_of("anonymised")["people"][0]
+    assert first["name"] == people_data.ANONYMISED_NAME
+    assert first["link"] == f"https://www.linkedin.com/in/{ROWS[0]['slug']}/"
 
 
 def _imports_of(path: Path) -> set[str]:
@@ -588,13 +691,28 @@ def test_the_tool_takes_no_paging_argument():
 
 
 def test_group_link_is_the_composed_address_only_on_the_same_group():
-    link = group_page.group_link(GROUP_ID, True)
-    assert link == f"https://www.linkedin.com/groups/{GROUP_ID}/"
-    assert link == people_data.canonical_group_link(link)
-    assert readonly.is_read_url(link)
-    assert group_page.group_link(GROUP_ID, False) is None
-    assert group_page.group_link(GROUP_ID, None) is None
-    assert group_page.group_link("a-group-slug", True) is None
+    for state in group_page.LINK_REACH_STATES:
+        link = group_page.group_link(GROUP_ID, True, state)
+        assert link == f"https://www.linkedin.com/groups/{GROUP_ID}/"
+        assert link == people_data.canonical_group_link(link)
+        assert readonly.is_read_url(link)
+    assert group_page.group_link(GROUP_ID, False, "ambiguous") is None
+    assert group_page.group_link(GROUP_ID, None, "ambiguous") is None
+    assert group_page.group_link("a-group-slug", True, "ambiguous") is None
+
+
+@pytest.mark.parametrize("state", [None, "reader_blind", "off_group", "not-a-state"])
+def test_group_link_is_withheld_when_the_page_drew_nothing_there(state):
+    """Found by the lane's cold review: a blank page at the same address read
+    the same group and published the link on the evidence of nothing."""
+    assert group_page.group_link(GROUP_ID, True, state) is None
+
+
+def test_the_group_page_tool_withholds_the_link_on_a_page_that_drew_nothing():
+    envelope = readings()["page_blank"]
+    assert envelope["landed_on_the_same_group"] is True
+    assert envelope["reach"]["state"] == "reader_blind"
+    assert envelope["group_link"] is None
 
 
 def test_the_group_page_tool_returns_the_link_when_it_landed_on_that_group():

@@ -185,6 +185,30 @@ CORRECTION_VOCABULARY = (
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
 
+    # 2026-10-10, lane B5. TABLE-ROW PROXIMITY, read and not inferred from the
+    # filenames: found by the lane's CI run 38047812344.
+    ("network.md", "2026-10-10-lane-b5-groups-build.md"): (
+        "A BLOCKER NAMED, NOT A CORRECTION. Rows `63`, `163`, `165`, `168`, "
+        "`177` and `197` cite lane B5's record for the paragraph each gained -- "
+        "three moves on a built reader and the exact reason three writes stay "
+        "GAP on their captures -- which corrects nothing in the record. The "
+        "matched vocabulary is row `63`'s own 2026-09-21 paragraph ('THAT "
+        "ADDRESS CLAUSE IS FALSE AT THIS TREE'), about that row's older "
+        "citation, on the same line. **WHAT WOULD MAKE THIS ENTRY WRONG:** a "
+        "network row saying something in lane B5's record does not hold while "
+        "leaving the record unmarked, which would need its own CORRECTS: / "
+        "CORRECTED BY: pair."
+    ),
+    ("messaging-and-content.md", "2026-10-10-lane-b5-groups-build.md"): (
+        "A BLOCKER NAMED, NOT A CORRECTION. Rows `C61`, `C64` and `C69` cite "
+        "lane B5's record for why each stays GAP -- the capture lane K queued "
+        "them on cannot serve the act -- and correct nothing in it. The matched "
+        "vocabulary is row `C61`'s own 2026-09-21 paragraph ('THAT ADDRESS "
+        "CLAUSE IS FALSE AT THIS TREE'), on the same line. **WHAT WOULD MAKE "
+        "THIS ENTRY WRONG:** a messaging row saying something in lane B5's "
+        "record does not hold while leaving the record unmarked."
+    ),
+
     # 2026-10-10, lane K. THE CLASS RULINGS OF 2026-09-28 CITE THE UPLOAD
     # SANCTION FOR WHAT THE UPLOAD ROWS STILL LACK -- read, not inferred from
     # the filenames. The document is a byte-identical copy of the

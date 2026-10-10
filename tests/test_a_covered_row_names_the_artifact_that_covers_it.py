@@ -202,7 +202,59 @@ COVERED_ROWS: dict[tuple[str, str], tuple[str, str]] = {
         "to the input declaring images_and_documents; one file per call; "
         "never fired",
     ),
+    # THREE NETWORK ROWS, 2026-10-10 (lane B5, the groups build), pinned at
+    # UNFIRED for the same reason: built offline over the live lane's
+    # skeletons, and an unannounced promotion is what inflates a count. The
+    # chain they rest on is asserted below (_GROUP_READER_CHAIN). A fire that
+    # promotes or demotes any of them moves its pin here in the same commit.
+    ("network.md", "165"): (
+        "COVERED-UNFIRED",
+        "one page of a group's member list as people records, by "
+        "linkedin_group_members over group_roster.read_group_members; never "
+        "fired",
+    ),
+    ("network.md", "177"): (
+        "COVERED-UNFIRED",
+        "the same read: each member's degree as LinkedIn draws it, the people "
+        "he knows being the 1st-degree ones; never fired",
+    ),
+    ("network.md", "197"): (
+        "COVERED-UNFIRED",
+        "a group's link, by CALLER-COMPOSITION-UNDER-D6: "
+        "linkedin_group_memberships for the id, linkedin_group_page's "
+        "group_link when the landing is that group; never fired with the field",
+    ),
 }
+
+#: ``module -> the names census rows N 165, N 177 and N 197 rest on`` (lane
+#: B5). A row left claiming coverage after one of these is deleted is the
+#: defect this file exists to catch.
+_GROUP_READER_CHAIN: dict[str, tuple[str, ...]] = {
+    "group_roster.py": ("read_group_members", "landed_on_the_members_page"),
+    "member_rosters.py": ("compose",),
+    "group_page.py": ("group_link", "landed_on_the_same_group", "group_page_url"),
+    "server.py": ("linkedin_group_members", "linkedin_group_page"),
+}
+
+
+def test_the_group_reader_chain_behind_n165_n177_n197_is_whole() -> None:
+    for module, names in _GROUP_READER_CHAIN.items():
+        defined = _defined_names(_source(module))
+        for name in names:
+            assert name in defined, (
+                f"{module} no longer defines {name}. Census rows N 165, N 177 "
+                "and N 197 claim COVERED-UNFIRED against this chain."
+            )
+
+
+def test_control_the_group_chain_check_convicts_a_renamed_reader() -> None:
+    """SHOWN FAILING on a mutated copy: one name extended per module."""
+    for module, names in _GROUP_READER_CHAIN.items():
+        source = _source(module)
+        target = names[0]
+        mutated = source.replace(f"def {target}(", f"def {target}_renamed(")
+        assert mutated != source, (module, target)
+        assert target not in _defined_names(mutated), (module, target)
 
 
 def _states(slice_name: str) -> dict[str, str]:

@@ -70,7 +70,7 @@ a control that fails:
 And the leak check over the whole payload: a needle is planted in every
 never-read place (seven), and none crosses -- with its control,
 `test_THIS_CONTROL_CAN_FAIL_a_reader_aimed_at_the_badge_carries_the_screen_reader_copy`:
-aim the headline at the badge and the screen-reader needle crosses.
+aim the headline at the badge's screen-reader copy and the needle crosses.
 
 HOW THE TESTS RUN. No new fixture is committed. Each scenario loads the TRACKED
 skeleton into a local headless Chromium with every request aborted, fills
@@ -118,10 +118,17 @@ asserts the one importer), `member_rosters.py`'s docstring.
 ## 3. The census
 
 Pins re-derived on the measured values `scripts/census_completion.py` printed,
-never by hand: `adjudicated` 186 -> 189, `delivered_broad` 130 -> 133, `gap` 585
--> 582, `gap_read` 98 -> 95, `unfired` 21 -> 24, `b1_no_ruling` 9 -> 12;
-`N 165`, `N 177` and `N 197` join `PINNED_B1_ROWS[NO_RULING]` (reads no ruling
-holds). The three leave `read-addresses.tsv` (bucket 3) and `next-step.tsv`
+never by hand. On the lane's branch over master `f93104c`: `adjudicated` 186 ->
+189, `delivered_broad` 130 -> 133, `gap` 585 -> 582, `gap_read` 98 -> 95,
+`unfired` 21 -> 24, `b1_no_ruling` 9 -> 12. RE-DERIVED AT THE MERGE OF MASTER
+`0103810` (lane U's attachments, lane K's rulings applied), on the merged
+tree: `adjudicated` 216, `delivered_broad` 138, `gap` 555, `gap_read` 89,
+`unfired` 27, `b3_admitted` 38 (master's 213, 135, 558, 92, 24 and 41 with this
+lane's three rows), `b1_no_ruling` 12. `N 165`, `N 177` and `N 197` join
+`PINNED_B1_ROWS[NO_RULING]` (reads no ruling holds), and
+`tests/test_a_covered_row_names_the_artifact_that_covers_it.py` pins the three
+at COVERED-UNFIRED with the chain they rest on (shown failing on a renamed
+copy), so an unannounced promotion goes red. The three leave `read-addresses.tsv` (bucket 3) and `next-step.tsv`
 (GAP rows only) -- each table's checker went red naming them and is green after.
 Derived views regenerated: `_audit/INDEX.md`, `_audit/RULINGS.md`,
 `_audit/_census/blocker-map.tsv`.
@@ -234,12 +241,13 @@ a landing that was not the same group (a defect: stop and report).
 3. **C-B5-3 opens a dialog listing his connections and types a name into its
    filter.** Is that dialog "a list" under CAPTURE-PRESS-UNDER-PROBE-RULE, and
    its filter "a SEARCH box"?
-4. **Merge order.** `N 197`'s cell cites CALLER-COMPOSITION-UNDER-D6, registered
-   in lane K's `_audit/2026-10-10-rulings-ledger-questions.md`. This lane's
-   branch deleted `N 165`, `N 177` and `N 197` from `next-step.tsv`; lane K's
-   rewrote `N 197`'s line, so a merge meets one conflict there, resolved by the
-   deletion. The six rows left GAP keep `next=BUILD` there and now need
-   `CAPTURE:C-B5-1..4` (section 4.5) -- lane K's queue to re-derive.
+4. **The ledger's next step for the six rows left GAP.** They keep
+   `next=BUILD:tests/fixtures/live2/group_home.html` in `next-step.tsv`, which
+   section 4 shows that capture cannot serve; each now needs
+   `CAPTURE:C-B5-1..4` (section 4.5) and a line in `capture-queue.tsv`, whose
+   verdicts lane K's generator re-drives -- so the re-queue is lane K's, not
+   written here. (CALLER-COMPOSITION-UNDER-D6, which `N 197`'s cell cites, came
+   onto this branch registered with master `0103810`.)
 
 ## 7. Gates
 
@@ -255,8 +263,50 @@ a landing that was not the same group (a defect: stop and report).
   pin"; `check_read_addresses.py` GREEN 95 of 95; `check_next_step.py` GREEN
   (582); `check_write_classes.py`, `check_jobs_directions.py`, `ruling_holds.py`
   GREEN.
+- On the tree merged with master `2b165fd`: `tests/test_group_members.py`,
+  `test_the_tool_surface_is_pinned_so_a_row_must_move` and
+  `test_every_tool_is_on_the_surface`: 129 passed (132 s); every census checker
+  above GREEN again (`check_read_addresses` 89 of 89, `check_next_step` 555).
 - The full suite runs on CI (section 8).
 
-## 8. Certification
+## 8. Merges and certification
 
-Filled in at the CI run.
+- Merged `origin/master` `0103810` (lane U's `linkedin_send_attachment`, lane
+  K's ledger rulings and census moves): nine files conflicted, each resolved by
+  measurement -- the tool surface read off the merged registry (63 tools, 101
+  parameters, 45 reads), the census pins printed on the merged tree,
+  `network.md`'s `N 197` beside lane K's `N 198` exclusion, `next-step.tsv`
+  keeping lane K's `N 178` and dropping `N 177`, `N 197` and the excluded
+  `N 198`, INSTRUMENTS keeping lane U's section 84 and this lane's 93, and
+  the derived views and both page-string baselines regenerated. Then
+  `2b165fd` (lane G2's record conversions), clean.
+- CI, first push: `3b66370` to `ci/worktree-agent-a4cc861612983721b`, run
+  `38047812344`: RED, 9 failures in 3 of 4 shards, each a site this lane had
+  not moved, none a regression of a shipped behaviour: the reader-triage table
+  (the new reader named in `WHAT_WOULD_DRIVE_IT`), the correction-pair guard
+  (two table-row proximities declared on `NOT_A_CORRECTION`), the server
+  instructions' people-tool list, README's headline and module listing, the
+  server docstring's headline, and the pointer-graph guard with its two
+  self-tests (`M C64`'s new note read as an ACCOUNT-FACT through the words
+  "his own", which re-classified the argument `M C65` and `M C66` inherit;
+  reworded, and the guard reads PASS on all 64 pinned pointers).
+- CI, second push: the run named in the lane's final message.
+
+## 9. The cold review, and what changed on it
+
+One cold reviewer (a child, read-only, never warm to this build) answered seven
+questions against `466c230` / `45592c0`: 1 DEFECT, 9 GAP, 7 OK. Dispositions:
+
+| finding | disposition |
+|---|---|
+| DEFECT: mitigation 3's static check let `Path(...).open("w")` + `json.dump` through, with no control | FIXED: `stores_anything` reads imports of writers, writing names and writing methods; four plants each caught, the reviewer's first |
+| GAP: a screen-reader-only span inside the headline crossed | FIXED: the headline is held to the name's nested-text rule -- ABSENT and counted, never read with the child |
+| GAP: mitigation 5's per-field visibility check had no control | FIXED: a hidden name alone (row skipped `not_visible`) and a hidden headline alone (ABSENT, counted) |
+| GAP: `group_link` published on a blank page at the same address (`reader_blind`) | FIXED: it publishes only on reach `feed_drawn` or `ambiguous`; a blank page and three other states withhold it |
+| GAP: `landed_on_the_same_group` does not check the host | NOT CHANGED: shared with `N 175`'s shipped reader; the members-page check this lane wrote does check it. Named for the owner of `group_page` |
+| GAP: `N 165` asks for the FULL list; the read is one page | KEPT, by the ruling: MEMBER-ROSTERS-AS-BOUNDED-READS admits a roster as one page per call and names `N 165` among the rows it governs; the cell says the bound is the row's limit |
+| GAP: "a needle in every place" overclaimed (the search box has none) | FIXED in the cell: seven places, named |
+| GAP: no DELTA block in `network.md` | ADDED, re-derived with `count_census_states.py` |
+| GAP: the shared leak guards never drive this reader | KEPT, stated: `WHAT_WOULD_DRIVE_IT` names the skeleton drive in `tests/test_group_members.py` |
+| GAP: `tests/test_group_members.py` over two minutes on a loaded box | NOTED: one browser launch for the file; 69 s on a quiet box |
+| OK x7 | mitigations 1, 2, 4, 6; no named place leaks; no press, scroll or second load; `group_link` only ever the caller's digits; the six GAP reasons true of the skeleton |

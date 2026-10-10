@@ -200,6 +200,17 @@ async def _visible_text(element: Any) -> Optional[str]:
     return await element.inner_text()
 
 
+async def _has_nested_text(element: Any) -> bool:
+    """Does any child element carry text? The capture's name and headline
+    elements hold none; a child with text -- a screen-reader copy, a badge --
+    is a drawing nothing here can split, so the field is refused rather than
+    read with it."""
+    for child in await element.query_selector_all(NESTED):
+        if str(await child.text_content() or "").strip():
+            return True
+    return False
+
+
 async def _read_row(row: Any) -> Any:
     """One row: a :class:`people_data.Person` and whether its headline was
     read, or the SKIP_REASONS entry that stopped it."""
@@ -217,14 +228,21 @@ async def _read_row(row: Any) -> Any:
     title = await _one(link_handle, NAME)
     if title is None:
         return "no_single_name"
-    for child in await title.query_selector_all(NESTED):
-        if str(await child.text_content() or "").strip():
-            return "name_has_nested_text"
+    if await _has_nested_text(title):
+        return "name_has_nested_text"
     name = await _visible_text(title)
     if name is None:
         return "not_visible"
     degree = await _visible_text(await _one(link_handle, DEGREE))
-    headline = await _visible_text(await _one(link_handle, HEADLINE))
+    # THE HEADLINE IS HELD TO THE NAME'S RULE (added 2026-10-10 on the lane's
+    # cold review): a subtitle holding a child with text -- a screen-reader
+    # copy, say -- is ABSENT and counted, never read with the child in it.
+    subtitle = await _one(link_handle, HEADLINE)
+    headline = (
+        None
+        if subtitle is None or await _has_nested_text(subtitle)
+        else await _visible_text(subtitle)
+    )
     # THE LINK AGAIN, AFTER EVERY TEXT READ. A row the page reused for another
     # member meanwhile would pair one person's name with another's link; a
     # row whose link moved is skipped, never returned.

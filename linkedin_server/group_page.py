@@ -284,8 +284,16 @@ def landed_on_the_same_group(
     return str(verdict.get("identifier")) == str(identifier)
 
 
+#: The reach states on which :func:`group_link` publishes: the page drew
+#: anchors on the same group. ``reader_blind`` (nothing drawn -- an error page
+#: at the same address looks like this) and ``off_group`` never publish.
+LINK_REACH_STATES: tuple[str, ...] = ("feed_drawn", "ambiguous")
+
+
 def group_link(
-    identifier: Optional[str], same_group: Optional[bool]
+    identifier: Optional[str],
+    same_group: Optional[bool],
+    reach_state: Optional[str] = None,
 ) -> Optional[str]:
     """The group's own link -- census ``N 197`` -- or ``None``. PURE.
 
@@ -305,8 +313,14 @@ def group_link(
     auth wall, a page naming no group -- returns ``None``, and the landing
     itself is never published. Nothing the menu's own copy would hold (a
     tracking query, a share token) is reproduced, and nothing is pressed.
+
+    AND THE PAGE MUST HAVE DRAWN SOMETHING: ``reach_state`` -- the state
+    :func:`reachability` gave the same reading -- must be one of
+    :data:`LINK_REACH_STATES`. Added 2026-10-10 on the lane's cold review: a
+    blank page at the same address read ``landed_on_the_same_group`` True and
+    ``reader_blind``, and published the link on the evidence of nothing.
     """
-    if same_group is not True:
+    if same_group is not True or reach_state not in LINK_REACH_STATES:
         return None
     built = group_page_url(identifier)
     if not built.get("built"):

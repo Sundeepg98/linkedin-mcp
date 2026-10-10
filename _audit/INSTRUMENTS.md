@@ -11978,7 +11978,7 @@ title. The reader passes only if every person comes back and no needle does.
 
 | path | shown failing by |
 |---|---|
-| `tests/test_group_members.py` (`FILL`, `NEEDLES`, `readings()`); the reader `linkedin_server/group_roster.py` | the headline aimed at the badge (`group_roster.HEADLINE` patched) carries the screen-reader needle out (`test_THIS_CONTROL_CAN_FAIL_a_reader_aimed_at_the_badge_carries_the_screen_reader_copy`); the laced name really reached the page (`test_THIS_CONTROL_CAN_FAIL_the_lace_really_reached_the_page`); a click, a wheel and a scroll plant each caught by the read-only allowlist; a write tool reaching the reader through a helper found; and, on the base tree `f93104c`, the file fails at collection (`ImportError: group_roster`) |
+| `tests/test_group_members.py` (`FILL`, `NEEDLES`, `readings()`); the reader `linkedin_server/group_roster.py` | the headline aimed at the badge's screen-reader copy (`group_roster.HEADLINE` patched) carries the needle out (`test_THIS_CONTROL_CAN_FAIL_a_reader_aimed_at_the_badge_carries_the_screen_reader_copy`); the laced name really reached the page (`test_THIS_CONTROL_CAN_FAIL_the_lace_really_reached_the_page`); a click, a wheel and a scroll plant each caught by the read-only allowlist; a write tool reaching the reader through a helper found; and, on the base tree `f93104c`, the file fails at collection (`ImportError: group_roster`) |
 
 ### 93.3 DECLARED DISPOSABLE
 
