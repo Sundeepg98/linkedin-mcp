@@ -929,9 +929,10 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "'Follow ' followed by the Page's own name -- and a Page whose "
             "control reads anything else is refused rather than pressed. That "
             "includes a Page you ALREADY follow: the label LinkedIn draws on "
-            "that control once a Page is followed has never been captured, so "
-            "this server cannot recognise it, and pressing a follow control in "
-            "its other state is how a follow becomes an unfollow."
+            "that control once a Page is followed was read live only once, as a "
+            "shape (2026-10-10), and this server does not read it, so it cannot "
+            "recognise it -- and pressing a follow control in its other state is "
+            "how a follow becomes an unfollow."
         ),
         direction_source=(
             "the Page's OWN follow control, read off the Page root this action "
@@ -939,12 +940,14 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "Page-root capture: eight controls on that page open 'Follow ' and "
             "every one reads 'Follow <that Page's name>' -- one outside <main>, "
             "one in <main>, six in <aside>, where LinkedIn recommends OTHER "
-            "Pages. So the gate requires exactly one such control in the main "
-            "column outside every aside, requires its name to be 'Follow ' "
-            "followed by a heading the Page prints in that same column, and "
-            "requires the Page's own people-search link to name the numeric id "
-            "this action was asked about. Three agreements, all read on the "
-            "page; none typed here."
+            "Pages -- and MEASURED 2026-10-10, another entity's in the main "
+            "column too. So the gate requires, among the controls in the main "
+            "column outside every aside, exactly one whose name is 'Follow ' "
+            "followed by a heading the Page prints in that same column -- as "
+            "this server compares them and as the page's own engine does, the "
+            "press being that engine's selector -- and requires the Page's own "
+            "people-search link to name the numeric id this action was asked "
+            "about. Every agreement is read on the page; none is typed here."
         ),
         reversibility="reversible by unfollowing the same Page",
         reversibility_measured=True,
@@ -974,8 +977,9 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "can surface in his network's feed and a Page's admins see their "
             "follower count move; the data is restorable and the impression "
             "is not. SECOND: the label the Page's control wears ONCE FOLLOWED "
-            "has never been captured, so a Page he already follows reads "
-            "UNKNOWN at preview rather than 'following'. THIRD: whether Manage "
+            "was read live only once, as a shape (2026-10-10), and is not read "
+            "here, so a Page he already follows reads UNKNOWN at preview rather "
+            "than 'following'. THIRD: whether Manage "
             "Pages draws a freshly followed Page among the rows it renders is "
             "unmeasured, so the verification may honestly answer UNKNOWN on a "
             "follow that landed."
@@ -4026,6 +4030,8 @@ NAMED_PROFILE_ACTIONS: frozenset[str] = frozenset(
 #:
 #:   mark_company_interest  company_interest.OFF_CONTROL_IN_CARD   6 presses, 1 each
 #:   follow_company_page    dom.COMPANY_PAGE_FOLLOW_CONTROL        6 presses, 1 each
+#:                          (its press is dom.COMPANY_PAGE_BOUND_FOLLOW_CONTROL
+#:                          since 2026-10-10, required by the gate to match 1)
 #:   update_profile_field   profile_editor.SAVE_SELECTOR          12 presses, 1 each
 #:                          and the Premium badge switch           8 presses, 1 each
 #:   withdraw_from_group    group_leave.disclosure_selector       16 presses, 1 each
@@ -4369,6 +4375,7 @@ def company_page_follow_verdict(
     controls = coerce.as_count(reading.get("follow_controls"))
     anywhere = coerce.as_count(reading.get("follow_controls_anywhere"))
     bound = coerce.as_count(reading.get("bound_controls"))
+    bound_in_page = coerce.as_count(reading.get("bound_in_page"))
     links = coerce.as_count(reading.get("identity_links"))
     malformed = coerce.as_count(reading.get("identity_malformed"))
     ids = [
@@ -4384,6 +4391,7 @@ def company_page_follow_verdict(
         "follow_controls_in_main_column": controls,
         "follow_controls_on_the_page": anywhere,
         "controls_bound_to_the_pages_own_heading": bound,
+        "controls_bound_in_the_pages_own_engine": bound_in_page,
         "identity_links": links,
         "identity_ids_named": len(ids),
     }
@@ -4427,19 +4435,23 @@ def company_page_follow_verdict(
             f"in the Page's main column ({anywhere} on the page in all). Either "
             "the Page had not drawn its controls, or its own control wears a "
             "label this server has not measured -- and the label a Page he "
-            "ALREADY follows draws has never been captured, so that is where a "
-            "followed Page lands. UNKNOWN, never 'following' and never 'not "
-            "following'.",
+            "ALREADY follows draws, read live once as a shape, does not open "
+            "it, so that is where a followed Page lands. UNKNOWN, never "
+            "'following' and never 'not following'.",
         )
-    if controls > 1:
+    if controls > 1 and (bound != 1 or subject is None):
+        # SEVERAL ARE ADMITTED ONLY THROUGH THE BINDING (2026-10-10, the live
+        # lane's sessions 8 and 9: another entity's control in the main
+        # column). Without exactly one bound, which to press is position.
         return (
             facts,
             UNKNOWN,
             f"{controls} controls whose name opens "
             f"{dom.COMPANY_PAGE_FOLLOW_PREFIX!r} are in the Page's main column, "
-            "where the measured Page root draws exactly one; LinkedIn "
-            "recommends OTHER Pages with the same control, so pressing one of "
-            "several would be picking by position.",
+            f"and {bound} of them read it followed by a heading the Page prints "
+            "there, where exactly one must; LinkedIn draws OTHER entities' "
+            "follow controls beside the Page's, so pressing one of several "
+            "without that binding would be picking by position.",
         )
     if bound != 1 or subject is None:
         return (
@@ -4451,12 +4463,24 @@ def company_page_follow_verdict(
             "Page's control rather than a recommended one. Neither the name it "
             "wears nor the headings are repeated here.",
         )
+    if bound_in_page != 1:
+        return (
+            facts,
+            UNKNOWN,
+            "one control in the Page's main column reads "
+            f"{dom.COMPANY_PAGE_FOLLOW_PREFIX!r} followed by the Page's own "
+            "heading as this server compares them, whitespace folded, but the "
+            f"page's own engine, comparing them exactly, singles out {bound_in_page}; "
+            "the press is aimed by that engine, so it would not land on exactly "
+            "that control.",
+        )
     return (
         facts,
         "not_following",
-        "exactly one control in the Page's main column opens "
-        f"{dom.COMPANY_PAGE_FOLLOW_PREFIX!r}, and the rest of its name is the "
-        f"Page's own heading -- the control stating what a click will do, of "
+        f"exactly one of the {controls} control(s) in the Page's main column "
+        f"whose name opens {dom.COMPANY_PAGE_FOLLOW_PREFIX!r} reads, after it, the "
+        "Page's own heading -- as this server compares them and as the page's "
+        "own engine does -- the control stating what a click will do, of "
         f"{anywhere} such controls on the page. The Page's own people-search "
         f"link names {target}, the id this action was asked about, which is "
         "what ties the page LinkedIn redirected to back to the grant. Read off "
@@ -9100,11 +9124,16 @@ async def _live_control(
         # Playwright's strict mode refuses the click if that stops being true
         # between here and the press (since lane L5's merge of master 52b55b6:
         # STRICT_PRESS_ACTIONS; the press passed no ``strict=`` before).
+        #
+        # SINCE 2026-10-10 IT IS THE BOUND CONTROL'S SELECTOR, not "the one
+        # follow control in the main column": the live lane measured another
+        # entity's control there (sessions 8 and 9), and the verdict now
+        # requires exactly one match of ``COMPANY_PAGE_BOUND_FOLLOW_CONTROL``.
         reading = await dom.read_company_page_follow(page)
         _facts, state, why = company_page_follow_verdict(reading, grant.target)
         if state != spec.from_state:
             return (state, why, "")
-        return (state, why, dom.COMPANY_PAGE_FOLLOW_CONTROL)
+        return (state, why, dom.COMPANY_PAGE_BOUND_FOLLOW_CONTROL)
 
     if spec.action == "unfollow_company":
         control = await dom.read_unfollow_control(page, grant.target)

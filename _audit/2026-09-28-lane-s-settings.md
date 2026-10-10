@@ -3,7 +3,8 @@
 Lane S (settings), `ls2-settings-lead`. Brief written by the orchestrator on
 2026-09-28; relaunched and run on 2026-10-10 from master `3c8edc2` (CI green,
 run 36460989178), on its own worktree branch, merged with master as it moved
-(`53908ea`, `fe119de`, `1027bf8`, `f93104c`, `16ee59a`, `71d83ca`, `0103810`),
+(`53908ea`, `fe119de`, `1027bf8`, `f93104c`, `16ee59a`, `71d83ca`, `0103810`,
+`2b165fd`, and the local master `6c65815` on the coordinator's wrap-up order),
 pushed only to its
 `ci/` ref by `scripts/lane_ci.py`. Not to be confused with the earlier lane S of 2026-09-28
 (people search, the offline frontier), whose record is
@@ -754,6 +755,8 @@ he names them.
   delivered_broad 133, unfired 22, b1_no_ruling 10, b1_released 2. At the
   merge of `0103810` (lane U's `M M14`, `M M15`, `M M18` COVERED-UNFIRED):
   adjudicated 214, delivered_broad 136, unfired 25 -- master's plus `P O17`.
+  At the merge of `6c65815` (live session 9 banked `N 30`, `N 85`, `N 172`,
+  `N 31`): unfired 21 and b1_no_ruling 6 -- master's plus `P O17`.
 * The write-classes split (16, 37, 336) -> (16, 37, 337) on this branch, and
   (16, 37, 335) = 388 at the merge of `fe119de`.
 * The tool surface: 61 -> 62 tools, 96 -> 100 parameters on this branch; at
