@@ -447,8 +447,7 @@ ON CI (`scripts/lane_ci.py`): run `38035128406` on `678c4d8` FAILED -- this
 lane's two docstring words and three pin copies (fixed in `49ac33b` and
 `15d4675`), and the cited-SHA family's "cannot resolve master" on every `ci/`
 run, which the coordinator confirmed is infrastructure (KNOWN-INFRA, its fix
-merging to master). The certifying run is the one named in the lane's final
-message.
+merging to master). Run `38036699018` on `6222f1b` (both children merged) FAILED on two more of this lane's own -- a document naming the unbuilt inverse by a tool name, and child B's DEBUG capture leaving the package logger at INFO (fixed in `de0a4ae`) -- beside the same KNOWN-INFRA family. Run `38037374698` on `4230f00` (master `b10bde8` merged, its local-master fix in) FAILED on ONE test: `test_every_candidate_pair_is_declared_or_triaged`, a table-row-proximity pair (row 33's own vocabulary two lines below row 31's citation of this record), triaged on `NOT_A_CORRECTION` after reading the line. The certifying run is the one named in the lane's final message.
 
 The children's own runs are in their reports: child C 42 new tests and 842
 existing targeted tests green; child B 16 new tests and its react-touching

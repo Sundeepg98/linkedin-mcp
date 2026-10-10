@@ -185,6 +185,20 @@ CORRECTION_VOCABULARY = (
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
 
+    # 2026-10-10, lane NP. TABLE-ROW PROXIMITY, read and not inferred from the
+    # filenames: found by the lane's CI run 38037374698.
+    ("network.md", "2026-10-10-lane-np-named-profile.md"): (
+        "A BLOCKER NAMED, NOT A CORRECTION. Rows `30`, `31`, `85` and `172` "
+        "cite lane NP's record for the paragraph each gained -- 'BLOCKER, "
+        "NAMED: member token from the named read (lane NP)' -- which adds a "
+        "route and corrects nothing. The matched words ('corrected', 'wrong', "
+        "'refutes', 'false') are on row `33`, two lines below row `31`, about "
+        "that row's own count phrases. **WHAT WOULD MAKE THIS ENTRY WRONG:** a "
+        "network row saying something in lane NP's record does not hold while "
+        "leaving the record unmarked, which would need its own CORRECTS: / "
+        "CORRECTED BY: pair."
+    ),
+
     # 2026-09-28, the live lane's session 2. A CENSUS ROW CITES THE LANE'S
     # RECORD AS THE EVIDENCE FOR ITS OWN FIRE -- read, not inferred from the
     # filenames. The lane's real corrections run the other way and are
