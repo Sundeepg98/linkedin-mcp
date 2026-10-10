@@ -358,7 +358,6 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # M18 stayed GAP on two captures, then moved to COVERED-UNFIRED the same
     # day on the session-8 capture), measured off the branch's registry and
     # moved with every other count site in the same commit.
-    assert len(_tool_names()) == 62
     # SIXTY-FOUR AT LANE B4'S MERGE OF MASTER 2b165fd, 2026-10-10: lane B4's
     # two WRITES (linkedin_set_similar_jobs_alert and its inverse, census
     # J 161) on top of master's sixty-two -- measured off the merged registry,

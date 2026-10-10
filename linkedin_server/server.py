@@ -11572,7 +11572,7 @@ async def linkedin_unset_similar_jobs_alert(
     """Turn OFF the alert for jobs similar to one posting -- a WRITE, the inverse of
     ``linkedin_set_similar_jobs_alert``.
 
-    It sets the same switch back to ``Off``, pressing it from ``On``. Same two
+    It will unset the alert: the same switch, pressed from ``On``. Same two
     steps and the same gates: no
     ``confirm_token``, no action, and the token works once, for this posting
     and this verb, within two minutes. A switch reading ``Off`` is refused --
