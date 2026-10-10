@@ -194,8 +194,29 @@ async def test_a_control_in_the_description_reads_not_expanded(browser_page):
     assert out["readable"] is True
 
 
+class _CountFails:
+    """A page whose every locator count raises: the module logs it at DEBUG."""
+
+    def locator(self, _selector):
+        return self
+
+    async def count(self):
+        raise TypeError("synthetic control")
+
+
 async def test_nothing_reaches_a_log_record(browser_page, caplog):
-    caplog.set_level(logging.DEBUG)
+    # The PACKAGE logger is lowered by name: a root-only capture cannot hear
+    # it (tests/test_a_debug_capture_lowers_the_package_logger.py).
+    caplog.set_level(logging.DEBUG, logger="linkedin")
+    # THE CONTROL: a failed read is logged at DEBUG, by its type only -- so
+    # this capture is shown receiving this module's DEBUG records before an
+    # absence is asserted over it.
+    await item_text.read_item_text(_CountFails(), link=LINK)
+    assert any(
+        record.levelno == logging.DEBUG and "a count did not read" in record.getMessage()
+        for record in caplog.records
+    ), "no DEBUG control record came back: the capture cannot hear this module"
+    assert "synthetic control" not in caplog.text
     await _load(browser_page, SET_WORDS, WORDS_PLANT)
     await item_text.read_item_text(browser_page, link=LINK)
     await _load(browser_page, PAGE_AUTHOR, WORDS_PLANT)
