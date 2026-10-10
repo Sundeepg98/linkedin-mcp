@@ -4699,6 +4699,11 @@ shipped gate permits them now. A capture moves no row: it unblocks rows for buil
                                         emoji_keyboard -- no video-meeting
                                         control in the footer
 
+**CORRECTED** by "After session 9, offline", section 2, below: `messaging-guarded`'s "0 rows
+read" was the runner's count of a field a refusal never carries, not the guard's reading -- one
+conversation read unread -- and `msg-thread-footer` did not open the named thread: the footer
+it read is the composer's, and `M M20`, `M M40` and `M M51` were not unblocked.
+
 Every skeleton and raw page is in the gitignored `_state/live8/`.
 
 ### Chrome's end
@@ -4881,3 +4886,122 @@ The tests that pin those rows moved with them, in the same commit:
 
 The session-9 runner (session 8's, with session 9's four read phases and a read-only
 gate), the census, pin and test editors, in the lane's scratch folder.
+
+## After session 9, offline: the badge's toggle, N 47's binding, the guard re-read, the third door, and session 8's six skeletons
+
+The orchestrator's order of 14:42 set three offline items after session 9's wrap-up,
+each red first; its order of 15:43 added the harness's third door and session 8's six
+skeletons as tracked fixtures. Nothing below loaded a page: every page is a fixture or a
+kept skeleton in a local headless Chromium.
+
+### 1: `P B9` -- the press lands on the drawn toggle that holds the named input (`20fc073`)
+
+Session 8 measured why the badge could not be pressed: the named input draws no box and
+is not visible, and a trial click on it timed out; its parent -- one div holding the empty
+label, the input and the knob, 52 x 32 -- is drawn and trial-actionable.
+
+* **The aim:** the reader aims the second shape's press at that toggle
+  (`profile_editor._NAMED_SWITCH_TOGGLE_PATH`), found from the same block by the same named
+  input. The second shape now requires exactly one toggle.
+* **The box:** the reader asks whether the press target draws a box (`is_visible()`, its
+  one question that is not a count), and refuses with `8_press_target_not_drawn` when it
+  does not -- before any press, where session 8's aim would have spent a token on a click
+  that could not land.
+* **Kept, as ordered:** the press wait (`wait_for_state`) and the only-the-badge-moved
+  check (`badge_moved_alone`) are unchanged; the select and fill paths'
+  `only_the_field_moved` is untouched.
+* **Red first:** the badge world's second shape redrawn as measured -- the input hidden,
+  the toggle drawn and pressable -- turned the three named-input writes red against the
+  press aimed at the input, beside three new tests (the aim at a drawn toggle holding the
+  badge's input; a toggle drawing no box refused; an input no toggle holds refused):
+  6 failed, 37 passed. Then 43 passed.
+
+### 2: the receipt guard did not read 0 rows -- a correction to session 8
+
+**CORRECTION, to this record's "Live session 8, re-issued", section 3:** its
+`messaging-guarded` line says the guard refused "(0 rows read)", and its
+`msg-thread-footer` line says the named thread was opened and its footer read. Both are
+wrong, by the same mechanism:
+
+* **The 0 was the runner's.** Its view counted the tool result's top-level `rows`, which
+  `threads.refused_result` never carries, so every refusal printed 0. The guard's own
+  reading (`receipt_guard.rows_rendered`, `unread_positions`) was neither printed nor
+  kept.
+* **The skeleton kept a moment later** draws 20 conversation rows, 10 rendered and 10
+  placeholders, in the measured places (`main li.msg-conversation-listitem`). **Row 1
+  carries LinkedIn's unread markers** -- the class tokens
+  `msg-conversation-card__message-snippet--unread` and
+  `msg-conversation-card__unread-count`, and a shown notification badge
+  (`notification-badge--show`, `artdeco-notification-badge--new`); rows 2-10 carry none.
+  It is the first capture of the unread form in LinkedIn's current markup, which
+  `threads.read_conversation_list` says no capture held.
+* **The shipped reader and guard over that skeleton:** 10 rendered, unread at position 1,
+  refused. DERIVED: the live guard refused for the same reason -- one conversation unread
+  -- which is the guard working as designed, beside a messaging badge of 0 (it counts
+  new-since-last-visit).
+* **The thread footer was never read.** `linkedin_open_thread` reads the composer's list
+  first; the same guard refused, so the ledger counted one messaging load, not two, and
+  the page left open was the composer. Its kept skeleton draws 0 conversation messages and
+  0 active rows. The footer actions recorded -- attach image, attach file, the GIF and
+  emoji keyboards -- are the COMPOSER's, exactly the four `threads` measured on it.
+  `M M20`, `M M40` and `M M51` were not unblocked; lane K's ledger reverted them to
+  CAPTURE the same hour.
+
+Nothing in the guard changes: it refused rightly. The session runner's view of a messaging
+answer now prints the guard's own counts beside the result's, and the session-8 section
+carries a pointer to this correction.
+
+### 3: `N 47` -- among several controls, the one bound to the Page's own heading (`b46736d`)
+
+Session 9 read why the gate refuses (its section 4). The Page root is also redesigned: no
+h1, the Page's name in an h2, class names generated.
+
+* **The gate:** several `Follow `-prefixed controls in the main column are admitted only
+  through the binding -- exactly one whose name is `Follow ` and a heading the Page prints,
+  as the reader compares them (whitespace folded) AND as the page's own XPath engine does,
+  exactly (`dom.COMPANY_PAGE_BOUND_FOLLOW_CONTROL`, a constant: nothing the page wrote is
+  spliced into it). That selector is the press, still strict. If the two comparisons
+  disagree, the gate refuses.
+* **The prose it made stale,** corrected: the tool's docstring and the spec's direction
+  source (one control in the main column), and the followed label, which session 9 read
+  once as a shape and which nothing here reads.
+* **Red first:** 6 failed, 39 passed -- the world with another entity's control in the
+  main column refused, a padded heading pressed, the aim among several missing, and the
+  end-to-end follow beside another control refused at preview. Then 45 passed; the
+  end-to-end test records, through the world's own handlers, that the press landed on the
+  Page's own control.
+
+### 4: the harness's third door (`65f22e0`)
+
+Session 9's load 5 entered through lane NP's detail-page door, `named_profile_details_of=`,
+which the ledger's counted wrapper did not recognise. The wrapper now counts every door
+`BROWSER.goto` has. Red first: the new test failed on the spacing; then 145 passed.
+
+### 5: session 8's six skeletons, tracked (`ca0d0d0`)
+
+The six skeletons lane K's ledger (section 12.7) planned, written by the harness's own
+`tracked_copy` -- every keyed shape one `x`, an id reference `k` and its hash, strict
+ASCII -- at the paths that plan gave them:
+
+    tests/fixtures/live8/feed_item_menu_open.html   N 37, N 43, N 51, N 153, N 154, N 200
+    tests/fixtures/live8/in_me.html                 P D25, P D26, P F1, P K8
+    tests/fixtures/live8/search_labels.html         N 80, N 88, N 89, N 93
+    tests/fixtures/live8/posting.html               J 115, J 124
+    tests/fixtures/live8/recommended.html           J 163
+    tests/fixtures/live8/keyskills.html             P S8
+
+The identity gate over the index: 7 files, 226 spellings, 0 hits; the identity tests on the
+committed tree, 2191 passed.
+
+### Gates
+
+Each item committed first, then its targeted tests in the background: the badge's guards,
+1202 passed; N 47's, 1203 passed; the harness's, 145 passed; identity, 2191 passed. The
+box was loaded by other lanes, so two of these ran past two minutes; none widened to the
+suite. CI certifies the merged tree.
+
+### Scratch, declared disposable
+
+The red and fix editors for each item, the offline diagnoses over the kept skeletons
+(`diag_messaging.py`, `diag_unread_tokens.py`, `diag_n47.py`) and the fixture copier, in
+the lane's scratch folder.
