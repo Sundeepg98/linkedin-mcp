@@ -488,8 +488,16 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: The read's two new fields (`member_token`, `activity_items`) are not
 #: parameters; `N 30`, `N 85`, `N 172`, `N 31` and `M C32` move only when proven
 #: live.
-PINNED_TOOL_COUNT = 61
-PINNED_PARAMETER_COUNT = 97
+#: **RE-PINNED 2026-10-10 AT 63 TOOLS AND 99 PARAMETERS for lane B2's search
+#: verticals: two READS, `linkedin_search_groups(keywords)` and
+#: `linkedin_search_events(keywords)` -- one search results page each,
+#: composed from the keyword alone, its results returned as group and event
+#: records.** THE CENSUS DECISION, stated in the commit: NO ROW MOVES ON THE
+#: CHILD BRANCH THAT BUILT THEM. `N 161` and `N 179` are REPORTED to lane B2's
+#: lead, whose census slice it is, to move GAP -> COVERED-UNFIRED at the
+#: lane's merge on the evidence of that commit.
+PINNED_TOOL_COUNT = 63
+PINNED_PARAMETER_COUNT = 99
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:
