@@ -378,6 +378,36 @@ the merge of master `53908ea`.
   the row stays GAP and no pin moved (`census_completion.py --check`, the
   blocker map's `--check`, both clean). Whether half a row's capability built
   moves it is the census owner's call, asked in the final report.
+- `M C35` SPLIT, ON THE ORCHESTRATOR'S CALL OF 15:45: "an existing ruling
+  answers it. COMPOUND-ROW-SPLITS-ONLY-ON-STATE splits a row when its halves
+  need different states, as P L2 -> L2b and N 26 -> 26b did: M C35, the
+  REMOVE half: COVERED-UNFIRED on linkedin_withdraw_reaction, by its bar;
+  M C35b, the CHANGE half: GAP, with the blocker 'no 'React <kind>' label
+  measured: capture the reactions menu'." Applied over master `71d83ca`:
+  - the slice: `C35` renamed to its half, "Remove a reaction",
+    COVERED-UNFIRED, its cell opening on the tool, its tests and its live
+    proof (F, step 9) and keeping the pre-split cell after it; `C35b`,
+    "Change a reaction to another kind", GAP, its blocker as the call words
+    it and the capture named (the queue's `own-post-reactions` line). Both
+    keep the compound row's REV cell, inherited.
+  - the side tables: `write-classes.tsv` -- `M C35` to
+    `built:withdraw_reaction` under the act `delete-or-withdraw-own` (R3),
+    and a new `M C35b` line, `react`, R3, classify-only; `next-step.tsv` --
+    the `M C35` line becomes `M C35b`, the same CAPTURE step, basis NAMED;
+    `capture-queue.tsv` -- the `own-post-reactions` line now unblocks
+    `M C33, M C35b`.
+  - the pins, re-derived from what `census_completion.py` measured, never
+    summed: stated_rows 772, capabilities 786, capabilities_achievable 725,
+    achievable 711, adjudicated 211, delivered_broad 133, unfired 22,
+    b1_standing 13; `gap` (561) and `gap_write` unmoved, one row leaving and
+    one entering. `M C35` pinned in bucket 1 under the write hold
+    (OPERATOR-NAMES-THE-TARGET). The row pin 771 -> 772 (messaging 153 ->
+    154) by `scripts/pin_census_rows.py --write`, with its two literals.
+  - green after it: `census_completion.py --check`, `check_next_step.py`
+    (every GAP row once, 561), `check_write_classes.py` (374 lines),
+    `check_census_locators_resolve.py`, the exclusion, refused-address,
+    read-address and write-off checkers, `pin_census_rows.py --check`, and
+    the blocker map, rulings register and audit index `--check`s.
 
 ---
 
@@ -422,7 +452,7 @@ THE ORDER, AND EACH STEP'S LOADS (20 s or more apart, as always):
              back.
     7-8    confirm: the press (1) and the verification's fresh render  M C32
              (1); verified "reacted".
-    9      linkedin_withdraw_reaction(item=<the same key>):            M C35 (candidate)
+    9      linkedin_withdraw_reaction(item=<the same key>):            M C35
              preview (1);
              it must read reacted.
     10-11  confirm: the press and the fresh render; verified          M C32's inverse
@@ -448,7 +478,9 @@ THE BARS, each row on its own cell's:
     N 85    the same fire: the facet kept (query_kept), the filter applied
     N 31    search 2: both facets kept, every record at 1st degree
     M C32   a reaction performed and verified on a post of the member he named
-    M C35   the inverse performed and verified -- a candidate; its cell decides
+    M C35   the inverse performed and verified: COVERED-UNFIRED -> COVERED-PROVEN
+            (`M C35b`, changing a reaction's kind, waits on the reactions-menu
+            capture and is not fired here)
     P A8    the test and the clear both SAVED and verified, the field reading its
             empty original on a fresh render
     N 178,  no move on a capture: the reader of D.3 is built offline over the

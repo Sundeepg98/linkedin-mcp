@@ -186,10 +186,17 @@ def test_the_split_is_the_one_the_lane_report_quotes():
     (SAFETY-REPORTS-STAY-MANUAL), `P S10`, `P B7`, `P J1`, `P J2`, `P J3`,
     `P L6`, `N 198` (OUTSIDE-THE-PRODUCT-PURPOSE), and `P A9`
     (COVERED-CANNOT-DELIVER, P-A9-CANNOT-DELIVER) -- so their lines go. All R3.
-    387 - 14 = 373 = 16 R1 + 37 R2 + 320 R3."""
+    387 - 14 = 373 = 16 R1 + 37 R2 + 320 R3.
+
+    374 ON THE ORCHESTRATOR'S CALL OF 2026-10-10 15:45, MEASURED
+    (`_audit/2026-10-10-lane-np-named-profile.md`, E): `M C35` split under
+    COMPOUND-ROW-SPLITS-ONLY-ON-STATE. Its line stays as a BUILT line --
+    `built:withdraw_reaction`, its act now delete-or-withdraw-own, still R3 --
+    and `M C35b`, the change half, enters GAP with a line of its own, act
+    react, R3. 373 + 1 = 374 = 16 R1 + 37 R2 + 321 R3."""
     rows, _ = cwc.load()
     split = cwc.split(rows)
-    assert (split["R1"], split["R2"], split["R3"]) == (16, 37, 320)
+    assert (split["R1"], split["R2"], split["R3"]) == (16, 37, 321)
     assert split["R1:built"] + split["R1:queued"] == split["R1"]
 
 

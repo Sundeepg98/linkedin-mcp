@@ -1050,7 +1050,11 @@ PINNED = {
     #: `N 26b` entered, split from `N 26` (COMPOUND-ROW-SPLITS-ONLY-ON-STATE):
     #: school and industry, GAP, where location and company went
     #: COVERED-UNFIRED by D6.
-    "stated_rows": 771,
+    #: 772 ON THE ORCHESTRATOR'S CALL OF 2026-10-10 15:45 (lane NP), MEASURED:
+    #: `M C35b` entered, split from `M C35` (COMPOUND-ROW-SPLITS-ONLY-ON-STATE):
+    #: changing a reaction's kind, GAP, where removing one went COVERED-UNFIRED
+    #: on `linkedin_withdraw_reaction`.
+    "stated_rows": 772,
     #: 762 = 704 stated rows + 58 declared collapses, computed at HEAD. NOT the
     #: published 761 and NOT the counter docstring's 760: those two differ only
     #: by a `- 2 stateless` term whose two rows are already outside the 704.
@@ -1082,7 +1086,9 @@ PINNED = {
     #: entered; no collapse moved.
     #: 785 ON THE ORCHESTRATOR'S CALL OF 2026-09-28 17:46 (lane S), MEASURED:
     #: `N 26b` entered (see `stated_rows`); no collapse moved.
-    "capabilities": 785,
+    #: 786 ON THE ORCHESTRATOR'S CALL OF 2026-10-10 15:45 (lane NP), MEASURED:
+    #: `M C35b` entered (see `stated_rows`); no collapse moved.
+    "capabilities": 786,
     #: 741 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: the achievable
     #: move, with `O6-O20`'s 14 unchanged.
     #: 742 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: `N 2` left the exclusions.
@@ -1095,7 +1101,9 @@ PINNED = {
     #: `P S9` and `M C71` GAP -> EXCLUDED-RULED; `O6-O20`'s 14 unchanged.
     #: 724 ON LANE K's APPLICATION OF THE RULINGS OF 2026-10-10, MEASURED: the
     #: same 21 rows; `O6-O20`'s 14 unchanged.
-    "capabilities_achievable": 724,
+    #: 725 ON THE ORCHESTRATOR'S CALL OF 2026-10-10 15:45 (lane NP), MEASURED:
+    #: `M C35b` entered, in scope (see `stated_rows`); `O6-O20`'s 14 unchanged.
+    "capabilities_achievable": 725,
     #: 43 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: 29 rows returned
     #: to GAP when OUTWARD-CLASSES-BUILT-BEHIND-GRANTS retired their key, and
     #: `P P2` at the merge (-30); `P N27` and `P P2` then EXCLUDED-RULED on
@@ -1126,7 +1134,9 @@ PINNED = {
     #: stated rows 771 less out_of_scope 40 (`P S9`, `M C71`).
     #: 710 ON LANE K's APPLICATION OF THE RULINGS OF 2026-10-10, MEASURED:
     #: stated rows 771 less out_of_scope 61.
-    "achievable": 710,
+    #: 711 ON THE ORCHESTRATOR'S CALL OF 2026-10-10 15:45 (lane NP), MEASURED:
+    #: stated rows 772 less out_of_scope 61 -- `M C35b` entered, in scope.
+    "achievable": 711,
     #: 205 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
     #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
     #: 179 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: the 30 returned
@@ -1190,7 +1200,12 @@ PINNED = {
     #: 21 exclusions, `P A9` COVERED-CANNOT-DELIVER (P-A9-CANNOT-DELIVER), and
     #: `J 17` and `J 57` COVERED-PROVEN by D6 (GEOLOCATION-BY-D6,
     #: CALLER-COMPOSITION-UNDER-D6).
-    "adjudicated": 210,
+    #: 211 ON THE ORCHESTRATOR'S CALL OF 2026-10-10 15:45 (lane NP), MEASURED:
+    #: `M C35` (removing his own reaction) GAP -> COVERED-UNFIRED on
+    #: `linkedin_withdraw_reaction`, built offline and never fired. A W row, so
+    #: it enters bucket 1 held by the write hold (OPERATOR-NAMES-THE-TARGET);
+    #: `M C35b`, split from it, enters GAP, so `gap` and `gap_write` do not move.
+    "adjudicated": 211,
     #: THE LIVE LANE'S FOUR ROWS, RE-DERIVED AT EACH OF ITS MERGES OF MASTER
     #: (2026-09-24; last over lane S): four rows fired live and banked
     #: (`_audit/2026-09-23-live-lane-session-1.md`). `P G6` COVERED-UNFIRED ->
@@ -1257,7 +1272,9 @@ PINNED = {
     #: type into, now refused by it).
     #: 132 ON LANE K's APPLICATION OF THE RULINGS OF 2026-10-10, MEASURED: `J
     #: 17` and `J 57` COVERED-PROVEN by D6, every part proven.
-    "delivered_broad": 132,
+    #: 133 ON THE ORCHESTRATOR'S CALL OF 2026-10-10 15:45 (lane NP), MEASURED:
+    #: `M C35` GAP -> COVERED-UNFIRED (see `adjudicated`).
+    "delivered_broad": 133,
     #: 79 since the live lane's merge (see `adjudicated`): P G6, N 134, P O3
     #: and M C72 COVERED-PROVEN.
     #: 75 and 21 since the bucket-1 merge: `M C41` fired live and moved from
@@ -1415,7 +1432,9 @@ PINNED = {
     #: (the unfollow through LinkedIn's confirmation, the row gone and a posting
     #: reading not-following) and `N 46` and `J 103` (the follow from a posting
     #: that restored it, verified on Manage Pages) fired live and banked.
-    "unfired": 21,
+    #: 22 ON THE ORCHESTRATOR'S CALL OF 2026-10-10 15:45 (lane NP), MEASURED:
+    #: `M C35` COVERED-UNFIRED, never fired (see `adjudicated`).
+    "unfired": 22,
     #: 104 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     #: 101 AT LANE S'S NAMES ADOPTION (2026-09-27), MEASURED: `N 79`, `N 172`
@@ -1789,7 +1808,10 @@ PINNED = {
     #: (the unfollow through LinkedIn's confirmation, the row gone and a posting
     #: reading not-following) and `N 46` and `J 103` (the follow from a posting
     #: that restored it, verified on Manage Pages) fired live and banked.
-    "b1_standing": 12,
+    #: 13 ON THE ORCHESTRATOR'S CALL OF 2026-10-10 15:45 (lane NP), MEASURED:
+    #: `M C35` entered bucket 1, a W row the write hold binds with no marker
+    #: (OPERATOR-NAMES-THE-TARGET).
+    "b1_standing": 13,
     "b1_relayed": 0,
     "b1_pending": 0,
     #: 22 AT THE ORCHESTRATOR'S MERGE OF LANE D (2026-09-27), MEASURED: lane D
@@ -1983,9 +2005,13 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
     #: `N 48`, `J 104`, `N 46` and `J 103` LEFT AT SESSION 8 (2026-10-10): the
     #: first-by-rule Page unfollowed through LinkedIn's confirmation and followed
     #: again from one of its postings, each verified -- COVERED-PROVEN.
+    #: `M C35` entered ON THE ORCHESTRATOR'S CALL OF 2026-10-10 15:45 (lane NP),
+    #: MEASURED: withdrawing his own reaction (`linkedin_withdraw_reaction`),
+    #: built offline on the ruling of 14:14 and never fired. Held until he
+    #: names the item -- his live proof is a reaction the same session placed.
     "OPERATOR-NAMES-THE-TARGET": (
         "J 128",
-        "M C1", "M C25", "M C32", "M C63", "M M10",
+        "M C1", "M C25", "M C32", "M C35", "M C63", "M M10",
         "N 1", "N 2", "N 4", "N 47", "N 64",
         "P I14",
     ),

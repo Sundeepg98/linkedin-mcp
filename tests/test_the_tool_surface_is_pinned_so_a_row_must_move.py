@@ -491,6 +491,10 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: THE CENSUS DECISION, in the same commit: NO ROW MOVES. `M C32` waits on its
 #: live proof (react, then withdraw, on a post of the member he named); `M C35`
 #: ("Remove or change a reaction") is compound and keeps its cell. Never fired.
+#: **A ROW MOVED THE SAME DAY, ON THE ORCHESTRATOR'S CALL OF 15:45:** `M C35`
+#: was split under COMPOUND-ROW-SPLITS-ONLY-ON-STATE -- `M C35` ("Remove a
+#: reaction") COVERED-UNFIRED on this tool, `M C35b` ("Change a reaction to
+#: another kind") GAP. The counts above did not move with it.
 PINNED_TOOL_COUNT = 62
 PINNED_PARAMETER_COUNT = 99
 
