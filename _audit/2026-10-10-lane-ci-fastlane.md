@@ -20,7 +20,9 @@ branch's and are nowhere on `master` until the merge):
 | ci: a push to refs/heads/ci/* runs one ubuntu 3.13 cell in four shards | baa36f8 |
 | lane_ci: push a lane to ci/<branch>, wait on its run by head sha, clean the ref | b508b8f |
 | lane_ci tests: the ssh remote case is spelled without an address-shaped string | 2651bc4 |
-| this record, INSTRUMENTS section 87 and the regenerated index | (the commit that adds this file) |
+| record: lane CI fast lane -- how a lane uses it, the red runs, and why the proof waits on the merge | 5dc7cb7 |
+| ci: the fast-path comment says which comparison was a one-time check | 77039a7 |
+| this table's last two rows | (the commit that adds them) |
 
 ## 1. How a lane uses it -- two commands
 
