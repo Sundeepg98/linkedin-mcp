@@ -251,7 +251,8 @@ demographic data) is a switch that records no attribute and is ALLOWED.
 
 ### 3.1 What it is
 
-`linkedin_set_admitted_setting(page, control, value, confirm_token="")`. Two
+`linkedin_set_admitted_setting(settings_page, control, value, confirm_token="")`
+(`settings_page`, never `page`, which in this package means a browser page). Two
 calls; the first loads the page, reads the control and returns a block naming
 the PAGE, the CONTROL, its CURRENT value and the REQUESTED one, what each value
 means, whether anybody else sees the change, how the page stores it, and the
@@ -344,12 +345,31 @@ holds.
 | M6 a page name admitted case-folded | `test_a_page_and_a_control_are_admitted_by_their_exact_names` |
 | M7 a refused kind accepted | `test_a_kind_that_is_not_a_switch_radio_group_or_select_is_refused_by_name` |
 
-The integration also tripped a guard that the house style anticipates:
-`tests/test_unverifiable_outcomes.py` finds an action's verification branch by
-its LITERAL name, and the first draft compared `spec.action` against the
-module's constant. Every comparison in `writes.py` now spells
-`"set_admitted_setting"`, and a test pins the module's constants to the same
-strings.
+### 3.3 What the shipped guards caught in the integration, and what changed
+
+* `tests/test_unverifiable_outcomes.py` finds an action's verification branch
+  by its LITERAL name; the first draft compared `spec.action` against the
+  module's constant, so the branch was invisible to it. Every comparison in
+  `writes.py` now spells `"set_admitted_setting"`, and a test pins the
+  module's constants to the same strings.
+* `tests/refusinggrant.py` builds one synthetic target per TARGET KIND, and
+  `setting_and_value`'s sample is dark mode's. This action checks its target
+  against the admitted registry in `_target_for`, so the sample was refused --
+  and the refusal stopped the reader-leak guard's whole measurement, not one
+  spec. The harness gained a per-action sample read from the registry; two
+  more tests that key targets by kind gained the same.
+* THE READER-LEAK GUARD CAUGHT A REAL PROPERTY: the first snapshot RETURNED
+  each select's `input_value()`, which is text the page chose, although only
+  equality is ever asked of it. The value is now reduced to a digest inside
+  the reader, and the test holds the whole snapshot free of the values.
+* The guard discovers every coroutine taking a parameter called `page` as a
+  page reader, and the tool's first draft named the admitted page's NAME
+  `page`. It is `settings_page` now.
+* The guard records `read_control` and `save_gate` as not driven (it cannot
+  build their `AdmittedControl` / `AdmittedPage` arguments) and `snapshot` as
+  clean. Both are driven by `tests/test_settings_writer.py` over the synthetic
+  pages and the real capture, and each returns only declared values,
+  constants and counts.
 
 ## 4. The row moved
 

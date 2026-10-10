@@ -146,9 +146,28 @@ class RefusingGrant(writes.WriteGrant):
         return True
 
 
+#: PER ACTION, where two actions share a target kind and one of them checks its
+#: target against a closed set the other does not (lane S, 2026-10-10).
+#: ``set_admitted_setting`` shares ``setting_and_value`` with
+#: ``update_setting``, and its setting half must name an ADMITTED page and
+#: control and its value one the control holds -- so the kind's dark-mode
+#: sample is refused by ``_target_for`` and no reader would be driven with
+#: this spec (and the refusal stopped the whole measurement, not one spec).
+#: Taken from the server's own registry rather than typed, so it cannot drift.
+SYNTHETIC_RAW_TARGETS_BY_ACTION: dict[str, Any] = {
+    "set_admitted_setting": {
+        "setting": writes.settings_writer.admitted_names()[0],
+        "value": writes.settings_writer.ADMITTED_PAGES[0].controls[0].values[0],
+    },
+}
+
+
 def synthetic_target(spec: writes.WriteSpec) -> str:
     """The canonical target for ``spec``, normalised by the server itself."""
-    return writes._target_for(spec, SYNTHETIC_RAW_TARGETS[spec.target_kind])
+    raw = SYNTHETIC_RAW_TARGETS_BY_ACTION.get(
+        spec.action, SYNTHETIC_RAW_TARGETS[spec.target_kind]
+    )
+    return writes._target_for(spec, raw)
 
 
 def grant_for(spec: writes.WriteSpec) -> RefusingGrant:

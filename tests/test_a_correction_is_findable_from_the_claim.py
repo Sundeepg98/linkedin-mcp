@@ -185,6 +185,43 @@ CORRECTION_VOCABULARY = (
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
 
+    # 2026-10-10, lane S (settings): ONE SENTENCE APPENDED TO EACH OF 92
+    # SETTINGS ROWS CITES THE LANE'S RECORD, and the three slice files it lands
+    # in produce one candidate pair each. EVERY HIT WAS LISTED AND READ (a
+    # scan of each citing line and its two neighbours either side), not
+    # inferred from the filenames; the words belong to OLDER TEXT, never to a
+    # claim about the record.
+    ("profile.md", "2026-09-28-lane-s-settings.md"): (
+        "OLDER TEXT ABOUT EACH ROW'S OWN EARLIER CLAIM, NOT A CORRECTION OF THE "
+        "RECORD. The hits near the lane's sentences are the 2026-09-20 notes "
+        "on the rows themselves -- `B4`, `C2`, `N12`, `O5`: *'THAT CLAUSE IS "
+        "FALSE AND THE ROW MOVES ON THE CORRECTION'*; `C3`-`C6`: *'was "
+        "measured FALSE ... the corrected section header'* -- a neighbour's "
+        "own history two lines away (`B2`, `B9`, `N2`), and the boolean "
+        "`is_read_url=False` in `B10`. Each predates the record and is about "
+        "the census's own reading. **WHAT WOULD MAKE THIS ENTRY WRONG:** a "
+        "profile row saying the lane S record does not hold, while leaving the "
+        "record unmarked."
+    ),
+    ("network.md", "2026-09-28-lane-s-settings.md"): (
+        "TABLE-ROW PROXIMITY AND OTHER LANES' OWN CORRECTIONS, NOT A "
+        "CORRECTION OF THE RECORD. The hits sit on neighbouring rows the lane "
+        "did not write: `76` (*'Not a wrong reading -- a reading with a "
+        "timestamp'*), `118`, `135`, `136`, `157` and `175`, each a note "
+        "about that row's own measurement and its older citations. **WHAT "
+        "WOULD MAKE THIS ENTRY WRONG:** a network row saying the lane S record "
+        "does not hold, while leaving the record unmarked."
+    ),
+    ("messaging-and-content.md", "2026-09-28-lane-s-settings.md"): (
+        "A BOOLEAN AND OTHER ROWS' OWN HISTORY, NOT A CORRECTION OF THE "
+        "RECORD. The hit on `M24` itself is the boolean `is_read_url=False` "
+        "(the settings category measured refused, 2026-09-19); the others sit "
+        "on rows the lane did not write -- `M35`, `M45`, `C72` -- each about "
+        "that row's own earlier reading. **WHAT WOULD MAKE THIS ENTRY "
+        "WRONG:** a messaging row saying the lane S record does not hold, "
+        "while leaving the record unmarked."
+    ),
+
     # 2026-10-10, lane S (settings), registering the build-class rulings of
     # 2026-09-28. THE RULING CALLS A BLOCKER LABEL STALE AND CITES THE UPLOAD
     # DOCUMENT FOR ONE OF ITS WORDS -- read, not inferred from the filenames.

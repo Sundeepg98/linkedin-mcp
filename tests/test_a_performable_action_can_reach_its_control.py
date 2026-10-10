@@ -144,6 +144,18 @@ _TARGETS: dict[str, object] = {
 }
 
 
+#: PER ACTION, where an action shares its target kind with another but checks
+#: the target against a closed set (lane S, 2026-10-10): the settings writer's
+#: setting half must name an ADMITTED page and control, and its value one the
+#: control holds. Taken from the server's own registry, so it cannot drift.
+_TARGETS_BY_ACTION: dict[str, object] = {
+    "set_admitted_setting": {
+        "setting": writes.settings_writer.admitted_names()[0],
+        "value": writes.settings_writer.ADMITTED_PAGES[0].controls[0].values[0],
+    },
+}
+
+
 def _canonical(action: str) -> str:
     """The target ``perform`` would hold for this action, normalised."""
     spec = spec_for_action(action)
@@ -153,7 +165,9 @@ def _canonical(action: str) -> str:
         "PERFORMABLE without a row here makes this whole file skip it "
         "silently, which is the shape of hole it exists to close."
     )
-    return writes._target_for(spec, _TARGETS[spec.target_kind])
+    return writes._target_for(
+        spec, _TARGETS_BY_ACTION.get(action, _TARGETS[spec.target_kind])
+    )
 
 
 def test_the_target_shapes_cover_every_performable_kind():

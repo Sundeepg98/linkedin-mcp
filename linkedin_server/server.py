@@ -10045,7 +10045,7 @@ async def linkedin_update_setting(
 
 @mcp.tool()
 async def linkedin_set_admitted_setting(
-    page: str, control: str, value: str, confirm_token: str = ""
+    settings_page: str, control: str, value: str, confirm_token: str = ""
 ) -> dict[str, Any]:
     """Change ONE control on ONE admitted settings page of his own account.
 
@@ -10081,7 +10081,9 @@ async def linkedin_set_admitted_setting(
     receipt's ``restore`` block holds the exact call that puts the value back.
 
     Args:
-        page: the admitted page's name, exactly as LinkedIn draws its heading.
+        settings_page: the admitted page's NAME, exactly as LinkedIn draws its
+            heading -- a name, never an address. (Not called ``page``: in this
+            package that word means a browser page.)
         control: the control's label, exactly as LinkedIn draws it.
         value: the value to set -- "on" or "off" for a switch, the option or
             choice's own label otherwise. Part of the target, so the token
@@ -10092,7 +10094,7 @@ async def linkedin_set_admitted_setting(
         return await _write_tool(
             "set_admitted_setting",
             {
-                "setting": f"{page}{writes.settings_writer.SETTING_JOIN}{control}",
+                "setting": f"{settings_page}{writes.settings_writer.SETTING_JOIN}{control}",
                 "value": value,
             },
             confirm_token,

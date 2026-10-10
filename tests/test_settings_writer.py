@@ -258,7 +258,7 @@ def test_the_direction_names_from_and_to_and_refuses_a_no_op():
 def test_the_restore_call_is_exact_and_absent_when_nothing_was_read():
     call = sw.restore_call(THE_PAGE, THE_CONTROL, "off")
     assert call.startswith(
-        "linkedin_set_admitted_setting(page='Share profile updates', "
+        "linkedin_set_admitted_setting(settings_page='Share profile updates', "
         "control='Share key profile updates', value='off')"
     )
     assert sw.restore_call(THE_PAGE, THE_CONTROL, None) is None
@@ -430,7 +430,12 @@ async def test_the_snapshot_never_returns_what_a_select_holds(browser_page):
     counts = sw.snapshot_counts(shot)
     assert counts == {"switches": 0, "checkboxes": 0, "radios": 0, "selects": 2,
                       "error": None, "too_many": False}
-    assert "v-b" not in json.dumps(counts) and "r-1" not in json.dumps(counts)
+    # THE WHOLE SNAPSHOT, not only its counts: the selects' values ("v-b",
+    # "r-1") are reduced to digests inside the reader, so none of the page's
+    # text leaves it -- and two different values still compare unequal.
+    whole = json.dumps(shot)
+    assert "v-b" not in whole and "r-1" not in whole, whole
+    assert len(set(shot["select"])) == 2
 
 
 # ---------------------------------------------------------------------------

@@ -47,6 +47,7 @@ they are BUILT, and never live-proven unless he names them.
 """
 from __future__ import annotations
 
+import hashlib
 import re
 from dataclasses import dataclass
 from typing import Any, Optional
@@ -641,14 +642,22 @@ def state_of(
     return UNKNOWN, str(reading.get("why") or "the control could not be read.")
 
 
+def _digest(value: Any) -> str:
+    """A select's value reduced to a digest INSIDE the reader: only equality is
+    ever asked of it, and a digest answers that while carrying none of the
+    text the page wrote (``tests/test_readers_emit_no_page_string.py`` holds
+    that no page string leaves a reader except as a people record)."""
+    return hashlib.sha256(str(value).encode("utf-8", "replace")).hexdigest()[:16]
+
+
 async def snapshot(page: Any) -> dict[str, Any]:
     """EVERY checkable or choosable control's state, position by position.
 
     For ``only_that_control_moved``: each switch, checkbox and radio on the
     page by role, in document order, as ``is_checked()``; each ``select`` as
-    its ``input_value()``. Kept in this process and compared, never returned
-    on a receipt -- a select's value can be an identifier the page chose.
-    READ ONLY; never raises; a failure is its exception type.
+    a DIGEST of its ``input_value()`` -- the value itself never leaves this
+    function, because a select's value is text the page chose. READ ONLY;
+    never raises; a failure is its exception type.
     """
     out: dict[str, Any] = {role: [] for role in _CHECKABLE_ROLES}
     out["select"] = []
@@ -669,7 +678,7 @@ async def snapshot(page: Any) -> dict[str, Any]:
             out["too_many"] = True
             return out
         for index in range(drawn):
-            out["select"].append(str(await selects.nth(index).input_value()))
+            out["select"].append(_digest(await selects.nth(index).input_value()))
     except Exception as exc:  # noqa: BLE001 - the TYPE is the whole report
         out["error"] = type(exc).__name__
     return out
@@ -867,6 +876,6 @@ def restore_call(admitted: AdmittedPage, control: AdmittedControl, previous: Opt
     if previous is None or previous not in control.values:
         return None
     return (
-        f"{TOOL_NAME}(page={admitted.name!r}, control={control.label!r}, "
+        f"{TOOL_NAME}(settings_page={admitted.name!r}, control={control.label!r}, "
         f"value={previous!r})  # then confirm the token it returns"
     )

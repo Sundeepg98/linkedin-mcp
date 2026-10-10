@@ -648,8 +648,15 @@ def test_the_action_set_is_the_one_this_file_was_measured_against():
     # SEVENTEEN SINCE LANE L5'S ORDER OF 2026-09-27 23:36: ``send_message``
     # RETIRED (aimed by a name). No row was re-derived for it -- an action
     # leaving takes its rows with it -- and its two owner entries above went.
-    assert len(writes.PERFORMABLE) == 17, (
-        "writes.PERFORMABLE holds %d actions, not the 17 this file was "
+    # EIGHTEEN FROM 2026-10-10 (lane S, settings): ``set_admitted_setting``'s
+    # two rows were read. Its ``_WHERE_TO_LOOK`` value ("that page under
+    # Settings and Privacy, named in the preview") and its ``_VERIFIED_FROM``
+    # row (the admitted page re-rendered, its one control read again by its
+    # exact label) were checked by the rest of this file with the rows in
+    # place -- every other test here passed, so neither prints a phrase
+    # another action owns -- and no owner entry was needed.
+    assert len(writes.PERFORMABLE) == 18, (
+        "writes.PERFORMABLE holds %d actions, not the 18 this file was "
         "measured against: %s. Re-derive the phrase owners in this file for "
         "the new action, then update this count."
         % (len(writes.PERFORMABLE), sorted(writes.PERFORMABLE))

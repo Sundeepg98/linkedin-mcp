@@ -50,6 +50,12 @@ _REAL_ON = _REAL.replace(_SWITCH_TAG, 'role="switch" type="checkbox" checked>')
 _URL = sw.SHARE_PROFILE_UPDATES.url
 _SETTING = "Share profile updates / Share key profile updates"
 
+#: IMPORTED BY ``tests/test_preview_state_and_click_state.py``, which serves
+#: committed markup only and names its source: the real page as captured, and
+#: a target a real grant for this action could carry.
+SETTINGS_PAGE_MARKUP = _REAL
+SETTINGS_RAW_TARGET = {"setting": _SETTING, "value": "on"}
+
 
 def _spec():
     return spec_for_action(_ACTION)
@@ -110,7 +116,10 @@ def test_the_action_is_sanctioned_performable_and_its_tool_takes_page_control_va
     assert writes.assert_write_url is not None
     tool = getattr(server, sw.TOOL_NAME)
     params = list(inspect.signature(getattr(tool, "fn", tool)).parameters)
-    assert params == ["page", "control", "value", "confirm_token"]
+    # ``settings_page``, never ``page``: in this package a parameter called
+    # ``page`` is a browser page, and the reader-leak guard discovers every
+    # coroutine taking one as a page reader.
+    assert params == ["settings_page", "control", "value", "confirm_token"]
 
 
 def test_the_write_door_admits_the_admitted_page_and_exempts_only_its_own_two_substrings():
@@ -183,6 +192,24 @@ async def test_an_unadmitted_page_control_or_value_loads_nothing_and_mints_nothi
                           navigator=nav, page=page, to_state=value)
         assert nav.gotos == [], (setting, value)
     assert writes._GRANTS == {}
+
+
+async def test_a_landing_elsewhere_is_refused_before_any_press(writes_on, browser_page, monkeypatch):
+    """A PAGE MAY VETO, NEVER SUPPLY. A perform whose load lands anywhere but
+    the admitted address -- here the category page that lists settings --
+    refuses before it reads a control or presses one, and the landing itself
+    is withheld from the refusal."""
+    page = browser_page
+    monkeypatch.setattr(sw, "ADMITTED_PAGES", (_synthetic_page(SYN_SWITCH),))
+    setting = "Synthetic page / " + SYN_SWITCH.label
+    grant, _block, _nav = await _granted(page, "on", world(SWITCH_MARKUP), setting=setting)
+    elsewhere = "https://www.linkedin.com/mypreferences/d/categories/account"
+    act = _Navigator(world(SWITCH_MARKUP), landed=elsewhere)
+    with pytest.raises(WriteAttemptError) as caught:
+        await writes.perform(act, page, grant)
+    assert "refusing to press" in str(caught.value)
+    assert "categories/account" not in str(caught.value)
+    assert await page.evaluate("() => window.__presses") == 0
 
 
 def _synthetic_page(control, save_label=None, name="Synthetic page"):
