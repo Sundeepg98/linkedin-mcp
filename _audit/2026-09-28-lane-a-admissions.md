@@ -26,9 +26,10 @@ anything not yet landed is not described.
 **THE LANE'S COMMITS, by SUBJECT.** The short hashes beside them are this
 lane's branch's: every one is nowhere on `master` until the orchestrator
 merges the branch, and the subject is how a reader finds each after a
-rewrite. Six merges of `master` sit among them: of `53908ea`, `b10bde8`,
-`fe119de`, `f8c7392`, `66eb699` and `1027bf8`. A commit cannot carry its own
-hash, so the table ends at the commit before the one that last edited it.
+rewrite. Seven merges of `master` sit among them: of `53908ea`, `b10bde8`,
+`fe119de`, `f8c7392`, `66eb699`, `1027bf8` and `f93104c`. A commit cannot
+carry its own hash, so the table ends at the commit before the one that last
+edited it.
 
 | subject | lane branch |
 |---|---|
@@ -55,6 +56,8 @@ hash, so the table ends at the commit before the one that last edited it.
 | merge origin/master 66eb699 into lane A: the live lane's session 8 | adec4b7 |
 | record: section 4 told straight about the two readers, and section 6 through the fifth merge | d32e746 |
 | merge origin/master 1027bf8 into lane A: lane G2's debts and its red instrument | 91fbedd |
+| record: the sixth merge, its gate, and the green run at the lane's merge of 1027bf8 | 2ec5c46 |
+| merge origin/master f93104c into lane A: the CI lane's shared tree reading and its section 87.8 | fecb159 |
 
 ---
 
@@ -990,9 +993,11 @@ it, never by adding deltas:**
     exemption count            4 -> 10 (tests/test_job_alerts_read_boundary.py)
     settings-index refusals    16 -> 14 named (both pages admitted by name)
 
-SIX MERGES OF `master`, and on each merged tree every headline figure matched
+SEVEN MERGES OF `master`, and on each merged tree every headline figure matched
 its pin. The sixth, of `1027bf8` (lane G2), moved no figure; its conflicts were
-the derived register and map, regenerated. Two needed a measurement, not a
+the derived register and map, regenerated. The seventh, of `f93104c` (the CI
+lane), moved no figure and merged clean -- and carried in a stale rulings
+register, below under CI. Two needed a measurement, not a
 pick: the merge of `f8c7392` (both
 sides had re-pinned the tool surface: 62 tools and 99 parameters, measured) and
 the merge of `66eb699`, the live lane's session 8, where `unfired` stood at 28
@@ -1090,6 +1095,21 @@ document guards) and, after 11:35 IST, under the orchestrator's policy:**
                                  5 min 56 s. The code and
                                  the census at this head are what that run
                                  certified; what follows it is this record.
+    run 38042938410 at fecb159   (the lane branch's merge of `f93104c`, nowhere
+                                 on `master` until this lane merges) shards 0, 1,
+                                 2 green; shard 3: 1 failed, 3335 passed, 6
+                                 skipped. REAL AND THIS LANE'S:
+                                 tests/test_the_rulings_register_is_derived.py,
+                                 "_audit/RULINGS.md is stale". The merge brought
+                                 two headings naming "the 14:21 ruling" (the CI
+                                 lane's record, section 13, and the register's
+                                 87.8) and a register not regenerated over them:
+                                 `master` at `f93104c` is red on the same test in
+                                 its own run 38042601470. This lane's merge gate
+                                 checked the audit index and not the register,
+                                 so it passed the staleness on. Regenerated in
+                                 the next commit; every merge since runs all
+                                 three generators' --check before its commit.
     the final run                its id and conclusion are in this lane's final
                                  message: a record cannot carry the verdict of the
                                  run that certifies it.
@@ -1164,3 +1184,11 @@ bounds a local gate at two minutes).
    `x`, and no raw capture holding it remains on disk), and it would change an
    existing tool's signature in `server.py`, outside any lane block. A capture
    first. (The other, `J 38`'s, was built: 4.1.)
+10. **A notice, not a ruling: `master` is red at `f93104c` on the rulings
+   register.** Ground: its own run 38042601470, "_audit/RULINGS.md is stale;
+   regenerate it with --write" (`tests/test_the_rulings_register_is_derived.py`),
+   after the CI lane's merge added two headings naming "the 14:21 ruling"
+   without regenerating the register. This branch regenerates it on its own
+   tree; the figures differ from master's because this lane's documents are
+   counted too, so whichever branch merges next regenerates it on the merged
+   tree.
