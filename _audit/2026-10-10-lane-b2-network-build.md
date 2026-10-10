@@ -60,9 +60,12 @@ this rests on is `FIXED-UI-LABEL-MATCH`: a fixed product label is not
 third-party text.
 
 WHAT IT MAY NOT DO, and did not do: test a name, a company, a title or any
-string that is somebody's; print or commit a hash or the key. The scratch
-scripts that ran it printed labels from the closed list and letter, digit and
-length counts only, and are declared disposable in section 11.
+string that is somebody's; print or commit a hash or the key. The method is
+committed as `scripts/verify_fixed_labels.py` (`_audit/INSTRUMENTS.md`
+section 90): it tests only its own closed vocabulary, takes no label from a
+caller, and prints counts. Every label reading in this record was re-taken
+with it over the three skeletons it rests on; the scratch readers that found
+them first are declared disposable in section 11.
 
 ## 2. The feed item menu: N 37, N 43, N 51, N 153, N 154, N 200
 

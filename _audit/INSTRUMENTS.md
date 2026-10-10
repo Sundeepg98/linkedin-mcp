@@ -11836,3 +11836,52 @@ The lane's scratch tools: the skeleton peekers (structure tree, topcard shapes,
 fixture grep), the targeted page-string driver for the new readers, the freeze
 attribution script, the ASCII checker, the census cell appender and the planted
 builder run. Each answered one question once; the answers are in the record.
+
+## 90. A FIXED LABEL READ OFF A KEYED SKELETON, FROM A CLOSED VOCABULARY, BEFORE ANYTHING IS BUILT ON IT (lb2-network-build, 2026-10-10)
+
+**Registered 2026-10-10.** Full record: `_audit/2026-10-10-lane-b2-network-build.md`.
+Numbered 90 by the orchestrator's allocation, appended at the end; renumber
+at the merge if another lane took it.
+
+### 90.1 READ THE CAPTURE A BUILD STEP NAMES BEFORE BUILDING ON IT
+
+A next-step ledger that says BUILD names a capture; it does not say the
+capture draws what the row needs. Lane B2 was handed seventeen BUILD rows and
+read each capture first: twelve did not draw the control or the section their
+row needed -- a feed menu no route can aim at an item he names, a search page
+whose first render draws no School, Industry or Keywords control, a
+newsletter list with no unsubscribe control (the ledger had counted the word
+inside the fixture's own header comment), a named profile with no rail, a
+companies search drawing slugs where the row's bar needed numeric ids. Two
+more needed no build: their payload was already delivered and proven by a
+shipped route (D6).
+
+    A STEP THAT NAMES A CAPTURE IS A HYPOTHESIS ABOUT THE CAPTURE. READ THE
+    CAPTURE AGAINST THE ROW BEFORE THE FIRST LINE OF THE BUILD.
+
+### 90.2 A KEYED SHAPE CAN BE TESTED, AND ONLY A CLOSED LIST MAY BE TESTED AGAINST IT
+
+The live lane's skeletons hide every value off a closed list behind a keyed
+shape, so a menu entry or a filter label reads as `{L13D0n14:...}`. With the
+session's key on the box, a candidate's shape can be computed by the same
+function and compared: an equal shape is the label, measured. The same key
+would let a list of NAMES be tested -- the reversal it exists to prevent -- so
+the instrument tests its OWN literals and takes no label from any caller.
+
+    A KEY THAT LETS YOU CHECK A STRING LETS YOU GUESS ONE. ALLOW THE CHECK
+    ONLY OVER A VOCABULARY WRITTEN IN THE CODE.
+
+### 90.3 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `scripts/verify_fixed_labels.py`; `tests/test_verify_fixed_labels.py` | RED under a one-line mutation, reverted: the keyed-shape lookup removed, `test_a_planted_label_is_counted_verbatim_and_by_keyed_shape` fails `assert 0 == 1` on `Not interested` (1 failed, 6 passed); the control `test_the_key_decides_it_another_key_counts_only_the_verbatim_word` reads the same planted skeleton with another key and counts 0 for every shaped label, 1 for the verbatim one; a decorated `School (3)` counts 0 for `School`; the parser's options are exactly `--skeleton` and `--key` |
+
+### 90.4 DECLARED DISPOSABLE
+
+The lane's scratch readers -- the first label checker the instrument replaced,
+the label locator, the markup excerpter (verified labels spelled, every other
+shape reduced to its counts), the open item's tree printer, the feed aim
+probe, the People-tab outline probe -- and the census, ledger and pin editors.
+Each answered one question once; the answers are in the record, and the label
+readings were re-taken with the committed instrument.

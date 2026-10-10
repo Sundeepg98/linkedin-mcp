@@ -614,8 +614,8 @@ cards carry slugs only, it does not deliver: a slug is a name". Session 2's
 capture draws slugs only: 10 result Pages, 0 numeric. The question: does
 `NAMES-AT-RUNTIME`, with `THIRD-PARTY-TEXT-AT-RUNTIME` (an organisation Page's
 prose returned at runtime), let a search return each organisation it found as
-its name and its Page link, under `PEOPLE-DATA-MITIGATIONS` -- or does the
-row wait on a page that draws numeric ids?
+its name and its Page link, held to the ruling `PEOPLE-DATA-MITIGATIONS` --
+or does the row wait on a page that draws numeric ids?
 
 ## 8. Preconditions and purposes
 
