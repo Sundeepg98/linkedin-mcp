@@ -1,8 +1,8 @@
 # Lane G2 -- queued debts: a red instrument made green in its records, a reader guard that took a refusal tally for success, a post record
 
 Lane G2 (`lg2-debts-lead`) of the LinkedIn MCP capability census, 2026-10-10,
-from master 3c8edc2 (CI green, run 36460989178), merged with master 53908ea
-at the end (section 8). Offline throughout: no LinkedIn load, no Chrome, no
+from master 3c8edc2 (CI green, run 36460989178), merged with master at the
+end, 53908ea and then b10bde8 (section 8). Offline throughout: no LinkedIn load, no Chrome, no
 CDP port. A live session ran on this box until about 12:00, and while its flag
 stood every test run here was serial and targeted; from 11:35 the
 orchestrator's gate policy bound every run: the tests touched, their direct
@@ -326,8 +326,9 @@ census instrument and derived-view check ran green over this slice here
 4. THE FULL SUITE runs on CI for this branch before it merges, because
    `linkedin_server/people_data.py` is imported by the server module and so
    by most of the suite, and the local gates here were scoped by policy: lane
-   CI run 38035353731 is green but for the known `ci/` infrastructure failure
-   (section 8), and a re-run follows the fix.
+   CI runs 38035353731 and 38036894654 are green but for the known `ci/`
+   infrastructure failure (section 8); the run on the final head, with the
+   fix in, is in the lane's report.
 5. ROW `M C70`'s cell can name `people_data.Post` when its owner next edits
    it (section 3).
 6. A CAVEAT FOR WHOEVER DRIVES `server._open_profile_views_filter_menus` TO
@@ -426,3 +427,22 @@ green; shard 1 3215 passed, 5 skipped, 1 xfailed and 14 failed, all 14 in
 `tests/test_a_cited_sha_resolves.py` ("cannot resolve `master` to a short
 sha", and the commit-tree control that needs the same ref). A re-run follows
 once the fix is on master.
+
+Run 38036894654, on 0ae50f4 (the Save gate's drive; a hash which does not
+resolve on `master` until this branch merges): the same, and nothing else --
+14 failures, every one in that family, shards 0, 2 and 3 green.
+
+MASTER MOVED AGAIN, to b10bde8, carrying the CI lane's fix (every shard off
+master gets a local `master` ref) and the live lane's work after session 7 on
+the badge switch and the unfollow gate. Merged once more, in a945128 (a hash
+which does not resolve on `master` until this branch merges), with no textual
+conflict although master touched four files this lane did -- the reader
+baseline (one reader added), the curated drives, the guard and the register.
+Checked on the merged tree, not trusted: the reader guard's live verdicts
+equal the merged baseline, 180 readers, none moved (clean 81, not driven 50,
+text 42, records 7); its coverage, holding, premise and drive tests pass
+(31); every census instrument and the three derived views check clean.
+
+The lane CI run on this branch's final head, with the fix in, cannot be
+written into the commit it certifies; its run id and verdict are in the
+lane's report to the orchestrator.
