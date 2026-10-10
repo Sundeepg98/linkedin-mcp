@@ -64,6 +64,7 @@ import inspect
 import json
 import logging
 import pkgutil
+import re
 import shutil
 from pathlib import Path
 from typing import Any, Callable, Optional
@@ -76,6 +77,8 @@ from tests.plantedpage import (
     PLANT,
     RAISED_PLANT,
     SYNTHETIC_ARGUMENT,
+    BlankLocator,
+    BlankPage,
     NavigationAttempted,
     PlantedLibraryError,
     PlantedPage,
@@ -202,10 +205,51 @@ REFUSED_AFTER_READ = "not_driven:read the page and returned a refusal"
 #: is not a tally.
 ERRORED_AFTER_READ = "not_driven:read the page and returned an error"
 
+#: AND A SUCCESS PATH LEAVES SOMETHING THE PAGE MADE (2026-10-10, lane G2, on
+#: the orchestrator's order: "make clean require that the success path was
+#: reached"). The rules above ask for a read and a result that is neither
+#: empty, a refusal nor an error, and that was met by readers that read the
+#: planted page and handed back what they hand back whatever a page draws.
+#: Measured that day over the 97 readers recorded clean, 17 were clean on
+#: nothing else:
+#:
+#: * SEVEN SCRIPT READERS whose every value the page answered was refused, so
+#:   the one number not zero was the refusal tally (``values_refused``):
+#:   ``anchors.read_anchors`` -- this guard's own control for the rule above
+#:   -- ``collections_page``, ``company_root``, ``group_page``, and the three
+#:   search readers behind ``linkedin_people_search_shape``, one of which
+#:   added the poll budget of a panel that never settled -- so the people
+#:   search's readers were clean without reaching their success path, the
+#:   class lane G closed for its record reader on 2026-09-27.
+#: * EIGHT that returned their own sentence or an "unknown", the same over a
+#:   page that draws nothing; ONE whose only value was its failure's name
+#:   (``press._take_reading``: ``{"read": False, "unreadable": "ValueError"}``);
+#:   and ONE that cannot be run over an empty page at all.
+#:
+#: THE MEASURE is the same call over :class:`plantedpage.BlankPage`, a page
+#: that draws nothing. A value is EVIDENCE (:func:`page_evidence`) when it is a
+#: scalar, is not empty, sits under no refusal or failure key
+#: (:data:`NOT_EVIDENCE_KEY`), and differs from what the blank drive returns at
+#: the same place: a value the planted page changed is the page's, and a value
+#: both pages give is the reader's own. A drive with no evidence is not
+#: driven, and so is one whose call cannot be completed over the blank page
+#: (it raises, times out or acts there), because then nothing shows which of
+#: its values the page made. Applied to the SIGNATURE variants only: a drive
+#: in :data:`AS_SHIPPED` is curated over a tracked fixture, and the tests
+#: below hold each one to its premise and to the verdict it earns.
+NOTHING_FROM_THE_PAGE = "not_driven:read the page and returned nothing the page made"
+
+#: Keys under which a value is a tally of what was REFUSED or FAILED, never
+#: evidence of a reading: ``values_refused``, ``matches_refused``,
+#: ``refused_condition``, ``failure``, ``error``, ``unreadable``.
+NOT_EVIDENCE_KEY = re.compile(r"refus|error|fail|unreadable", re.IGNORECASE)
+
 #: The not-driven verdicts of a drive that DID read the page. When a reader's
 #: variants are all not driven, one of these names the reader: it is the
 #: variant that got furthest (:func:`_worst`).
-READ_BUT_NOT_DRIVEN = (EMPTY_RESULT, NO_RECORD, REFUSED_AFTER_READ, ERRORED_AFTER_READ)
+READ_BUT_NOT_DRIVEN = (
+    EMPTY_RESULT, NO_RECORD, REFUSED_AFTER_READ, ERRORED_AFTER_READ, NOTHING_FROM_THE_PAGE,
+)
 
 #: The prefix of a drive that reached an action the planted page refuses
 #: (:class:`plantedpage.NavigationAttempted`): ``navigates (<which>)``.
@@ -941,8 +985,23 @@ ADMITTED_TEXT: dict[str, tuple[str, ...]] = {
 #:   capture can make this guard's read count move.
 #: * ``RULING`` -- a tracked fixture drives it, and what its success path
 #:   returns is page text outside a record, which the text inventory may not
-#:   admit without one. (None is left: the four held on 2026-09-28 were ruled
-#:   on the same day -- :data:`ADMITTED_TEXT`.)
+#:   admit without one. (The four held on 2026-09-28 were ruled on the same
+#:   day -- :data:`ADMITTED_TEXT`. Two are held since 2026-10-10, found when
+#:   their old clean stopped counting: ``dom:read_radio_label_binding``, whose
+#:   success path returns a control's id attribute, and
+#:   ``writes:_read_followed_state``, whose success path returns a followed
+#:   Page's name.)
+#: * ``SCRIPT`` (2026-10-10, lane G2) -- its reading is a script this package
+#:   runs in the page. The planted page answers every script with page
+#:   strings, the reader's coercion refuses them, and what comes back is a
+#:   refusal tally: its success path runs only where a script engine runs the
+#:   script. The entry names where that happens -- the test that drives it,
+#:   in a browser or over a fake that answers the script's own shape.
+#: * ``WORDS`` (2026-10-10, lane G2) -- its success path keys on LinkedIn's
+#:   own words in the page's text (a tab strip, a control's label), which the
+#:   planted page can only answer with the plant. A tracked capture draws
+#:   them; the entry names the test that drives it there, and says whether a
+#:   double answering those reads off the capture -- a drive here -- is built.
 #:
 #: FIVE OF THE 22 THE ORDER NAMED LEFT THIS SET THE SAME DAY, recorded
 #: ``navigates`` -- a reason that already says what would drive them: a
@@ -1026,13 +1085,263 @@ WHAT_WOULD_DRIVE_IT: dict[str, str] = {
         "tracked compose fixture draws no radio. A committed script reading "
         "exists (tests/test_compose_fields.py MEASURED_MODES), but no page."
     ),
+    #: ADDED 2026-10-10 (lane G2): the seventeen readers NOTHING_FROM_THE_PAGE
+    #: took from clean, each read for why its planted drive comes back with
+    #: nothing the page made and what would drive it to its success path.
+    "press:_take_reading": (
+        "SCRIPT: its reading is dom.read_count_lines, a declared script that "
+        "answers phrase positions and integers. The planted page answers it "
+        "with page strings, int() refuses the first, and the reading comes "
+        "back {'read': False, 'unreadable': 'ValueError'}. Its success path -- "
+        "read True, each term with its numeral -- is driven offline by "
+        "tests/test_press_open_reading.py over a stateful fake whose script "
+        "answers that shape (test_a_value_rides_only_on_the_two_shapes_that_"
+        "carry_one)."
+    ),
+    "anchors:read_anchors": (
+        "SCRIPT: its reading is dom.ANCHOR_CLASSIFY_JS, which takes the route "
+        "table into the page and answers positions and integers. The planted "
+        "page answers it with page strings, and coerce refuses every count "
+        "and scalar (values_refused 4). No test runs that script in an "
+        "engine; it has run only in attach-only live probes -- "
+        "scripts/_probe_anchor_surfaces_live.py on live surfaces, "
+        "scripts/_probe_control_paths_live.py over anchors.control_fixture() "
+        "in a detached document. Any tracked capture with anchors would drive "
+        "it in a headless browser -- tests/fixtures/live2/group_home.html, "
+        "for one -- as tests/test_job_collections.py drives its own reader "
+        "over set_content."
+    ),
+    "collections_page:read_collections": (
+        "SCRIPT: its reading is dom.COLLECTION_GROUPINGS_JS, which takes "
+        "GROUPINGS into the page and answers an index and a card count per "
+        "heading. The planted page answers it with page strings: matches is "
+        "a string, so no row is read, and the heading count is refused "
+        "(values_refused 1). No test runs that script in an engine, and no "
+        "tracked fixture draws a grouping heading -- the recommended "
+        "collection's skeleton keeps no text. It has run only in attach-only "
+        "live probes: scripts/_probe_job_collections_live.py on the live "
+        "page, and scripts/_probe_control_paths_live.py over "
+        "collections_page.control_fixture(), which draws all five and a "
+        "decoy."
+    ),
+    "company_root:read_company_root": (
+        "SCRIPT: its reading is dom.COUNT_LINES_JS, which takes COUNT_PHRASES "
+        "into the page and answers phrase positions and integers. The planted "
+        "page answers it with page strings: every counter is refused "
+        "(values_refused 5), and matches is a string, so no match is read. "
+        "tests/test_company_root.py runs that script under node over "
+        "company_root.control_tree() (test_the_shipped_script_reads_the_"
+        "visible_line_and_not_the_hidden_one) and hands the reading to "
+        "connection_counts, not to this reader; no test runs this reader in "
+        "a browser. No tracked fixture draws a company Page's count lines; "
+        "it has run only in attach-only live probes -- "
+        "scripts/_probe_company_root_wording.py on live Pages, "
+        "scripts/_probe_control_paths_live.py over control_fixture()."
+    ),
+    "group_page:read_group_page": (
+        "SCRIPT: it reads through anchors.read_anchors, whose reading is "
+        "dom.ANCHOR_CLASSIFY_JS; the planted page answers that script with "
+        "page strings, every value is refused, and what comes back is zeros "
+        "and the refusal tally carried up from the classifier. No test runs "
+        "it in a browser -- tests/test_group_page.py drives it over the "
+        "planted page only, and its live runs are the attach-only "
+        "scripts/_probe_group_feed_permalinks.py. "
+        "tests/fixtures/live2/group_home.html is the live lane's tracked "
+        "skeleton of the page linkedin_group_page reads "
+        "(scripts/_probe_live_lane_session_2.py, key group_home), hrefs kept "
+        "as route shapes, and a headless browser over it would reach its "
+        "success path."
+    ),
+    "search_results:read_filters": (
+        "SCRIPT: its reading is dom.FILTER_PANEL_JS, which takes the filter "
+        "phrases into the page and answers per-term counts and integers. The "
+        "planted page answers it with page strings and every value is "
+        "refused (values_refused 6). Its success path is driven offline over "
+        "pages answering that script's shape -- tests/test_search_results.py"
+        "::test_THIS_CONTROL_CAN_FAIL_the_unwaited_reader_returns_the_blind_"
+        "page (_RisingPanel) and tests/test_the_search_shaper_emits_no_name"
+        ".py::test_a_refused_value_is_counted_and_not_silent -- and in a "
+        "headless browser, through read_filters_when_settled, by "
+        "tests/test_people_search_names.py's drives of "
+        "linkedin_people_search_shape over "
+        "tests/fixtures/synthetic/people_search_results.html."
+    ),
+    "search_results:read_filters_when_settled": (
+        "SCRIPT: it polls read_filters, whose reading is dom.FILTER_PANEL_JS; "
+        "the planted page answers every value with a page string, so "
+        "controls_seen stays 0, the panel never settles, and what comes back "
+        "is the refusal tally and its own poll budget. Its success path is "
+        "driven offline over tests/test_search_results.py's _RisingPanel, a "
+        "page answering that script's shape (test_the_panel_wait_returns_"
+        "the_SETTLED_reading_not_the_first_one), and in a headless browser "
+        "by tests/test_people_search_names.py's drives of "
+        "linkedin_people_search_shape over "
+        "tests/fixtures/synthetic/people_search_results.html "
+        "(test_with_include_names_the_same_drive_returns_the_three), which "
+        "assert on the people and not on its reading."
+    ),
+    "search_results:read_results": (
+        "SCRIPT: its reading is dom.SEARCH_RESULTS_JS, which takes the route "
+        "table into the page and answers counts per result kind and "
+        "integers. The planted page answers it with page strings and every "
+        "value is refused (values_refused 5). Its success path is driven "
+        "offline over a page answering that script's shape "
+        "(tests/test_the_search_shaper_emits_no_name.py::test_a_refused_"
+        "value_is_counted_and_not_silent), and in a headless browser by "
+        "tests/test_people_search_names.py's drives of "
+        "linkedin_people_search_shape over "
+        "tests/fixtures/synthetic/people_search_results.html "
+        "(test_with_include_names_the_same_drive_returns_the_three), which "
+        "assert on the people and not on its counts."
+    ),
+    "dom:read_radio_label_binding": (
+        "RULING: the harness hands role its generic string, which "
+        "named_role_selector refuses before any count, so the drive comes "
+        "back with the reader's own sentence. Handed a role this package "
+        "maps -- 'radio', as writes._live_control passes it -- the planted "
+        "page alone reaches its success path, and what comes back is page "
+        "text outside a record: the control's id and its label's for, in "
+        "observed and quoted in why. tests/test_radio_label_binding.py "
+        "drives it in a headless browser over hand-written settings rows "
+        "(test_a_properly_bound_label_verifies); no tracked fixture draws a "
+        "named settings radio. Recording that drive needs a ruling on those "
+        "two attribute values -- or the reader converted to publish only "
+        "whether they match."
+    ),
+    "dom:read_sdui_actions": (
+        "SCRIPT: its reading is dom.SDUI_ACTIONS_JS, which counts action "
+        "tokens in the page's script text and answers integers. The planted "
+        "page answers it with page strings, as_count refuses each, and what "
+        "comes back is zeros under its own floor: readable False, "
+        "residue_suspected True. Over the blank page it raises "
+        "AttributeError, because BlankPage answers the script with None, "
+        "which no engine returns for it, and the reader reads that outside "
+        "its try. Its success path is driven offline over pages answering "
+        "the script's own shape (tests/test_sdui_action_reader.py::test_a_"
+        "payload_with_actions_reads_as_readable); no test runs the script in "
+        "a browser, and no tracked fixture carries a flight payload -- the "
+        "sanitised captures keep none by design."
+    ),
+    "profile_editor:read_save_gate": (
+        "SCRIPT: its reading is dom.read_self_owned_editor_fields, whose "
+        "script (dom.EDITOR_FIELDS_JS) the planted page answers with page "
+        "strings: the anchor count is refused, the fields reader answers "
+        "no_anchor, and the gate returns its code 0_editor_not_found in its "
+        "own words. tests/test_intro_editor_switches.py drives it in a "
+        "headless browser over "
+        "tests/fixtures/synthetic/intro_editor_switches.html: "
+        "test_each_switch_is_recognised_and_neither_is_a_notify_control "
+        "reads both switches recognised, and test_with_his_account_setting_"
+        "read_off_the_recognised_pair_does_not_block reads proceed True. Its "
+        "verdict carries counts and the package's words, never a label, so a "
+        "drive over that fixture would come back clean."
+    ),
+    "server:_open_profile_views_filter_menus": (
+        "ACTION: its success path presses each filter pill in main through "
+        "press.disclose -- a click, then an Escape -- and reads what each "
+        "press disclosed, which the planted page refuses; it stops before "
+        "that, at counters_unreadable_before_any_press, because its counter "
+        "script's headline answers the plant. Over shipped_drives._views_page "
+        "on tests/fixtures/synthetic/profile_views_closed.html the counters "
+        "read and three pills are found, and the first press is the "
+        "time-range pill, whose open state no capture shows: ruling (2) "
+        "refuses it, so a drive ends at that click. "
+        "tests/test_who_viewed_me_filter_menus.py drives it to its menus over "
+        "a page of structure only, with press.disclose replaced by a "
+        "recorder (test_each_pill_is_chosen_by_structure_inside_main)."
+    ),
+    "writes:_editor_value_of": (
+        "SCRIPT: its reading is dom.read_self_owned_editor_values, whose "
+        "script (dom.EDITOR_VALUES_JS) the planted page answers with page "
+        "strings: the anchor count is refused, the values reader answers "
+        "no_anchor, and this returns None with that refusal's sentence. Its "
+        "success path needs that reading and exactly one field named by the "
+        "grant's field word, which the harness's string names on no page. "
+        "tests/test_profile_editor_commit.py drives it in a headless browser "
+        "through update_profile_field over that file's own editor markup "
+        "(test_the_restore_path_round_trips_and_the_readings_prove_it reads "
+        "the value before the write). Over "
+        "tests/fixtures/synthetic/intro_editor_switches.html the shipped "
+        "values-script answer would reach it with the City label answered as "
+        "drawn; what comes back is his field's value verbatim, text outside "
+        "a record, so that drive needs an ADMITTED_TEXT entry (HIS_OWN), as "
+        "_editor_values_or_refusal has."
+    ),
+    "writes:_read_applied_state": (
+        "WORDS: it reads _read_tracker_membership for the Applied tab, which "
+        "keys on the tab's count in LinkedIn's tab strip, read from main's "
+        "text; its rows come from dom.harvest_linked_cards, a script. The "
+        "planted page answers the text with the plant, so no tab count parses "
+        "and it returns unknown with its own sentence. A double answering "
+        "those two reads off a tracked capture would drive it offline; it is "
+        "not built. Its success path runs in a headless browser "
+        "over the tracked tracker captures: tests/test_apply_modal_fixture.py"
+        "::test_an_apply_that_did_not_submit_reports_false_not_unknown reads "
+        "not_applied off tests/fixtures/jobs_tracker_empty.html, and "
+        "test_an_apply_is_verified_against_the_applied_tab reads applied off "
+        "a page derived from tests/fixtures/jobs_tracker_row.html. Its "
+        "answers are states and sentences of counts and the package's words, "
+        "so a drive would come back clean."
+    ),
+    "writes:_read_followed_state": (
+        "RULING: it reads the followed-Pages list by locators -- each control "
+        "named 'Click to stop following' and its row's company link -- and "
+        "LinkedIn's stated total from main's text; the planted page answers "
+        "every label and the text with page strings, so no row parses, no "
+        "total reads, and it returns unknown with its own sentence. "
+        "tests/fixtures/manage_pages_following_hydrated.html draws the list, "
+        "and tests/test_writes.py drives it there in a headless browser "
+        "(test_an_unfollow_that_took_reports_true_and_names_both_totals, "
+        "following before the click); tests/test_follow_state_fixture.py "
+        "drives its pieces (test_a_page_that_did_render_is_answered_"
+        "following). Its success path returns the matched Page's name, in "
+        "facts' company and quoted in why: page text outside a record, and "
+        "which reason, if any, admits a followed organisation's name is a "
+        "ruling's to give."
+    ),
+    "writes:_read_saved_state": (
+        "WORDS: it reads _read_tracker_membership for the Saved tab, which "
+        "keys on the tab's count in LinkedIn's tab strip, read from main's "
+        "text; its rows come from dom.harvest_linked_cards, a script. The "
+        "planted page answers the text with the plant, so no tab count parses "
+        "and it returns unknown with its own sentence. A double answering "
+        "those two reads off a tracked capture would drive it offline; it is "
+        "not built. Its success path runs in a headless browser "
+        "over the tracked tracker captures in tests/test_writes.py: "
+        "test_the_saved_gate_renders_on_the_list_he_actually_has reads "
+        "not_saved, corroborated empty, off "
+        "tests/fixtures/jobs_tracker_empty.html, and test_a_save_runs_end_"
+        "to_end_and_is_verified_from_the_other_surface reads saved off a "
+        "list derived from tests/fixtures/jobs_tracker_row.html. Its answers "
+        "are states and sentences of counts and the package's words, so a "
+        "drive would come back clean."
+    ),
+    "writes:_read_tracker_membership": (
+        "WORDS: it keys on a tracker tab's count in LinkedIn's tab strip, read "
+        "from main's text, and its rows come from dom.harvest_linked_cards, a "
+        "script; the planted page answers the text with the plant, so for "
+        "either stage the harness passes no count parses and it returns "
+        "unknown with its own sentence. A double answering those two reads "
+        "off a tracked capture would drive it offline; it is not built. Its "
+        "success path is its two wrappers': in a "
+        "headless browser over tests/fixtures/jobs_tracker_empty.html it "
+        "reads not_saved (tests/test_writes.py::test_the_saved_gate_renders_"
+        "on_the_list_he_actually_has) and not_applied "
+        "(tests/test_apply_modal_fixture.py::test_an_apply_that_did_not_"
+        "submit_reports_false_not_unknown), and over pages derived from "
+        "tests/fixtures/jobs_tracker_row.html saved and applied. Its answers "
+        "are states and sentences of counts and the package's words, so a "
+        "drive would come back clean."
+    ),
 }
 
 #: The verdicts that mean a drive never reached its success path.
 VACUOUS = (NO_PAGE_READ, *READ_BUT_NOT_DRIVEN)
 
 #: The kinds an entry above may open with.
-WHAT_WOULD_DRIVE_IT_KINDS = ("CAPTURE: ", "ACTION: ", "NOT A PAGE READER: ", "RULING: ")
+WHAT_WOULD_DRIVE_IT_KINDS = (
+    "CAPTURE: ", "ACTION: ", "NOT A PAGE READER: ", "RULING: ", "SCRIPT: ", "WORDS: ",
+)
 
 
 def _reader_key(fn: Callable[..., Any]) -> str:
@@ -1055,10 +1364,61 @@ def drive(fn: Callable[..., Any]) -> tuple[str, str]:
     )
     shipped = AS_SHIPPED.get(_reader_key(fn))
     if shipped is not None:
-        verdicts.append(_drive_once(shipped, [PlantedPage()], {}, builds_records=builds))
+        # A CURATED DRIVE is not compared with the blank page: it builds its
+        # page from a tracked fixture, so the planted page is only its
+        # fallback, and its premise and outcome are held by its own tests.
+        verdicts.append(
+            _drive_once(shipped, [PlantedPage()], {}, builds_records=builds, compare_blank=False)
+        )
     if not verdicts:
         return f"not_driven:{refusal}", refusal
     return _worst(verdicts)
+
+
+class BlankFailed:
+    """The blank drive could not be completed; ``how`` says why."""
+
+    __slots__ = ("how",)
+
+    def __init__(self, how: str) -> None:
+        self.how = how
+
+
+#: ``classify_drive``'s default: no blank drive was taken, so nothing is
+#: compared (a curated drive, or a control that tests the rules above alone).
+NOT_COMPARED = object()
+
+
+def _drive_blank(fn: Callable[..., Any], args: list[Any], kwargs: dict[str, Any]) -> Any:
+    """The same call with each planted page replaced by a :class:`BlankPage`.
+
+    What comes back, or a :class:`BlankFailed` naming how the call ended
+    instead -- an action, the timeout, or an exception's TYPE (never its
+    message: the planted page is not here, and nothing this returns is
+    published, but a type is all the verdict needs).
+    """
+    blanks: dict[int, BlankPage] = {}
+
+    def swap(value: Any) -> Any:
+        if isinstance(value, PlantedPage) and not isinstance(value, BlankPage):
+            return blanks.setdefault(id(value), BlankPage())
+        return value
+
+    blank_args = [swap(v) for v in args]
+    blank_kwargs = {name: swap(v) for name, v in kwargs.items()}
+
+    async def _run() -> Any:
+        call_args, call_kwargs = await resolve_paired_observations(blank_args, blank_kwargs)
+        return await asyncio.wait_for(fn(*call_args, **call_kwargs), timeout=DRIVE_TIMEOUT_S)
+
+    try:
+        return asyncio.run(_run())
+    except NavigationAttempted as exc:
+        return BlankFailed(f"acts ({exc})")
+    except asyncio.TimeoutError:
+        return BlankFailed(f"times out after {DRIVE_TIMEOUT_S}s")
+    except BaseException as exc:  # noqa: BLE001 -- the outcome is the subject
+        return BlankFailed(f"raises {type(exc).__name__}")
 
 
 def _drive_once(
@@ -1067,6 +1427,7 @@ def _drive_once(
     kwargs: dict[str, Any],
     *,
     builds_records: bool = False,
+    compare_blank: bool = True,
 ) -> tuple[str, str]:
     pages = [v for v in (*args, *kwargs.values()) if isinstance(v, PlantedPage)]
     counted = {"reads": 0}
@@ -1094,7 +1455,16 @@ def _drive_once(
         if hits:
             return LEAKS, f"{type(exc).__name__} carries it at {hits[0]}"
         return f"not_driven:raises {type(exc).__name__}", str(exc)[:120]
-    return classify_drive(result, counted["reads"], builds_records=builds_records)
+    verdict = classify_drive(result, counted["reads"], builds_records=builds_records)
+    if verdict[0] != CLEAN or not compare_blank or not pages:
+        return verdict
+    # ONLY A DRIVE ABOUT TO BE CALLED CLEAN pays for the blank drive: every
+    # other verdict is decided by what came back, and this is the one that
+    # must show where it came from. See NOTHING_FROM_THE_PAGE.
+    return classify_drive(
+        result, counted["reads"], builds_records=builds_records,
+        blank=_drive_blank(fn, args, kwargs),
+    )
 
 
 def empty_shape(value: Any, depth: int = 0) -> bool:
@@ -1140,10 +1510,64 @@ def whole_call_error(result: Any) -> Any:
     return _whole_call(result, "error")
 
 
-def classify_drive(result: Any, reads: int, *, builds_records: bool = False) -> tuple[str, str]:
+def _scalar_leaves(value: Any, path: tuple[Any, ...] = (), depth: int = 0):
+    """``(path, value)`` for every scalar in ``value``: strings, numbers and
+    booleans, through dicts (by key) and lists and tuples (by position). A set
+    is one leaf, compared whole; anything else -- an object a reader echoed --
+    is no leaf at all, since no reading made it."""
+    if depth > 16:
+        return
+    if isinstance(value, dict):
+        for key, item in value.items():
+            yield from _scalar_leaves(item, (*path, key), depth + 1)
+    elif isinstance(value, (list, tuple)):
+        for index, item in enumerate(value):
+            yield from _scalar_leaves(item, (*path, index), depth + 1)
+    elif isinstance(value, (set, frozenset)):
+        yield path, frozenset(value)
+    elif isinstance(value, (str, int, float, bool)):
+        yield path, value
+
+
+_NOWHERE = object()
+
+
+def _value_at(value: Any, path: tuple[Any, ...]) -> Any:
+    for step in path:
+        if isinstance(value, dict) and step in value:
+            value = value[step]
+        elif isinstance(value, (list, tuple)) and isinstance(step, int) and 0 <= step < len(value):
+            value = value[step]
+        else:
+            return _NOWHERE
+    return value
+
+
+def page_evidence(result: Any, blank: Any) -> list[str]:
+    """Where ``result`` holds something the PAGE made: each scalar that is not
+    empty, sits under no refusal or failure key, and differs -- in value or in
+    type, so ``True`` is not ``1`` -- from ``blank``, the same call's result
+    over a page that draws nothing. Pure. See :data:`NOTHING_FROM_THE_PAGE`."""
+    found: list[str] = []
+    for path, value in _scalar_leaves(result):
+        if empty_shape(value):
+            continue
+        if any(isinstance(step, str) and NOT_EVIDENCE_KEY.search(step) for step in path):
+            continue
+        other = _value_at(blank, path)
+        if other is not _NOWHERE and type(other) is type(value) and other == value:
+            continue
+        found.append("$" + "".join(f"[{s!r}]" for s in path))
+    return found
+
+
+def classify_drive(
+    result: Any, reads: int, *, builds_records: bool = False, blank: Any = NOT_COMPARED,
+) -> tuple[str, str]:
     """The verdict on one DRIVE: what came back, and whether the success path
     ran to produce it -- for a people reader, its records; for any other, a
-    read and a result that is neither empty nor a refusal. Pure, so the
+    read and a result that is neither empty nor a refusal, and, given the
+    same call's ``blank`` result, something in it the page made. Pure, so the
     controls drive the code the guard runs."""
     verdict, detail = classify_returned(result)
     if verdict != CLEAN:
@@ -1160,6 +1584,17 @@ def classify_drive(result: Any, reads: int, *, builds_records: bool = False) -> 
         return ERRORED_AFTER_READ, f"{reads} read(s), and it failed: {str(failure)[:60]}"
     if empty_shape(result):
         return EMPTY_RESULT, f"{reads} read(s), and every value that came back was empty"
+    if blank is not NOT_COMPARED:
+        if isinstance(blank, BlankFailed):
+            return NOTHING_FROM_THE_PAGE, (
+                f"{reads} read(s); over a page that draws nothing the call "
+                f"{blank.how}, so nothing shows which of its values the page made"
+            )
+        if not page_evidence(result, blank):
+            return NOTHING_FROM_THE_PAGE, (
+                f"{reads} read(s), and every value is empty, a refusal or "
+                "failure tally, or what a page that draws nothing returns too"
+            )
     return CLEAN, f"{reads} read(s)"
 
 
@@ -1316,7 +1751,7 @@ def test_the_named_profile_namer_is_driven_through_a_real_read() -> None:
     from linkedin_server import named_profile
 
     fn = named_profile.name_the_profile_target
-    shipped = _drive_once(AS_SHIPPED[_reader_key(fn)], [PlantedPage()], {})
+    shipped = _drive_once(AS_SHIPPED[_reader_key(fn)], [PlantedPage()], {}, compare_blank=False)
     assert shipped[0] == RETURNS_RECORDS, shipped
     variants, _refusal = _build_call(fn)
     generic = [_drive_once(fn, args, kwargs) for args, kwargs in variants or []]
@@ -1340,7 +1775,7 @@ def test_the_preview_namers_are_driven_to_the_records_they_build(fn_key, records
     variants, _refusal = _build_call(fn)
     generic = [_drive_once(fn, args, kwargs)[0] for args, kwargs in variants or []]
     assert generic and CLEAN not in generic, generic
-    verdict, detail = _drive_once(AS_SHIPPED[fn_key], [PlantedPage()], {})
+    verdict, detail = _drive_once(AS_SHIPPED[fn_key], [PlantedPage()], {}, compare_blank=False)
     assert verdict == RETURNS_RECORDS, (verdict, detail)
     assert detail == f"page text only inside {records} people record(s)", detail
 
@@ -1480,7 +1915,8 @@ def test_lane_s_people_reader_is_driven_to_its_records() -> None:
     generic = [_drive_once(people_results.read_result_people, a, k, builds_records=True)
                for a, k in variants or []]
     assert generic and all(verdict == NO_RECORD for verdict, _ in generic), generic
-    shipped = _drive_once(AS_SHIPPED[key], [PlantedPage()], {}, builds_records=True)
+    shipped = _drive_once(AS_SHIPPED[key], [PlantedPage()], {}, builds_records=True,
+                          compare_blank=False)
     assert shipped == (RETURNS_RECORDS, "page text only inside 1 people record(s)"), shipped
     assert drive(people_results.read_result_people)[0] == RETURNS_RECORDS
     assert _baseline()[key] == RETURNS_RECORDS
@@ -1506,7 +1942,7 @@ def test_a_drive_from_a_tracked_fixture_earns_the_verdict(key: str) -> None:
     fn = dict(discover_readers())[key]
     builds = key in record_readers()
     verdict, detail = _drive_once(shipped_drives.DRIVES[key], [PlantedPage()], {},
-                                  builds_records=builds)
+                                  builds_records=builds, compare_blank=False)
     assert verdict == DRIVEN_TO[key], (verdict, detail)
     variants, _refusal = _build_call(fn)
     generic = [_drive_once(fn, a, k, builds_records=builds)[0] for a, k in variants or []]
@@ -1524,7 +1960,8 @@ def test_a_drive_to_the_press_reaches_the_press_and_no_further(key: str) -> None
     ``counters_unreadable_before_any_press`` -- and fails here. The reader's
     recorded verdict is that action: what would drive it further is a
     stand-in for the click."""
-    verdict, detail = _drive_once(shipped_drives.TO_THE_PRESS[key], [PlantedPage()], {})
+    verdict, detail = _drive_once(shipped_drives.TO_THE_PRESS[key], [PlantedPage()], {},
+                                  compare_blank=False)
     assert verdict == "not_driven:navigates (locator.click)", (verdict, detail)
     fn = dict(discover_readers())[key]
     assert drive(fn)[0] == verdict
@@ -1871,24 +2308,148 @@ def _early_return(fn: Callable[..., Any], *, read_first: bool) -> Callable[..., 
 
 
 def test_a_reader_stubbed_to_return_early_is_not_counted_clean(monkeypatch) -> None:
-    """THE CONTROL THE ORDER NAMED. ``anchors.read_anchors`` reads the page and
-    returns what it read: clean. Stubbed to return a refusal before reading,
-    or to read and hand back an empty shape, it is NOT clean -- and the
-    coverage comparison against the committed baseline FAILS on it by name,
-    the way a real reader that stopped reaching its success path would."""
-    from linkedin_server import anchors
+    """THE CONTROL THE ORDER NAMED (2026-09-27). A reader that reads the page
+    and returns what it read is clean. Stubbed to return a refusal before
+    reading, or to read and hand back an empty shape, it is NOT clean -- and
+    the coverage comparison against the committed baseline FAILS on it by
+    name, the way a real reader that stopped reaching its success path would.
 
-    real = anchors.read_anchors
+    RE-AIMED 2026-10-10 (lane G2). It was ``anchors.read_anchors``, and that
+    reader never reached its success path here: the planted page answers its
+    classifier script with strings, it refuses every one, and it was clean on
+    ``values_refused`` alone -- the gap :data:`NOTHING_FROM_THE_PAGE` closes.
+    ``item_addresses.read_item_addresses`` reads hrefs the planted page drew
+    and reports them, which the blank page cannot match."""
+    from linkedin_server import item_addresses
+
+    real = item_addresses.read_item_addresses
     assert drive(real)[0] == CLEAN, drive(real)
-    assert _baseline()["anchors:read_anchors"] == CLEAN
+    assert _baseline()["item_addresses:read_item_addresses"] == CLEAN
 
     assert drive(_early_return(real, read_first=False))[0] == NO_PAGE_READ
     assert drive(_early_return(real, read_first=True))[0] == EMPTY_RESULT
 
-    monkeypatch.setattr(anchors, "read_anchors", _early_return(real, read_first=False))
+    monkeypatch.setattr(item_addresses, "read_item_addresses", _early_return(real, read_first=False))
     with pytest.raises(AssertionError) as shrunk:
         test_the_driven_set_has_not_silently_shrunk()
-    assert "anchors:read_anchors -> " + NO_PAGE_READ in str(shrunk.value), shrunk.value
+    assert "item_addresses:read_item_addresses -> " + NO_PAGE_READ in str(shrunk.value), shrunk.value
+
+
+def _returns_before_its_success_path(fn: Callable[..., Any], payload: dict[str, Any]) -> Callable[..., Any]:
+    """``fn`` STUBBED to read the page and then hand back ``payload`` whatever
+    the page drew -- dressed as ``fn`` so discovery takes it."""
+
+    async def stub(page: Any, *args: Any, **kwargs: Any) -> Any:
+        await page.evaluate("() => null")
+        page.locator("main")
+        return json.loads(json.dumps(payload))
+
+    stub.__module__ = fn.__module__
+    stub.__name__ = stub.__qualname__ = fn.__name__
+    return stub
+
+
+#: WHAT A READER THAT STOPPED SHORT OF ITS SUCCESS PATH HANDS BACK, in the two
+#: shapes measured on 2026-10-10 over the readers this guard recorded clean
+#: (lane G2): its own words and constants -- a sentence, a poll budget, a
+#: closed word the page did not choose -- and a refusal tally with every count
+#: zero. Neither is empty, a refusal or an error, so "a read and something
+#: back" called both clean.
+RETURNED_BEFORE_ITS_SUCCESS_PATH: dict[str, dict[str, Any]] = {
+    "its own words and constants": {
+        "settled": False, "polls": 6, "poll_ms": 350,
+        "why": "the panel never drew a control",
+    },
+    "only a refusal tally": {"anchors_seen": 0, "counts": [], "values_refused": 4},
+}
+
+
+@pytest.mark.parametrize("shape", sorted(RETURNED_BEFORE_ITS_SUCCESS_PATH))
+def test_a_reader_that_returns_before_its_success_path_is_not_clean(shape: str) -> None:
+    """THE ORDER'S CONTROL (2026-10-10, lane G2): a reader that READS the page
+    and then returns before its success path is not clean.
+    ``item_addresses.read_item_addresses`` reaches its success path on the
+    planted page and is clean; stubbed to read and then return a shape that
+    owes nothing to what the page drew, it is not."""
+    from linkedin_server import item_addresses
+
+    real = item_addresses.read_item_addresses
+    assert drive(real)[0] == CLEAN, drive(real)
+    stub = _returns_before_its_success_path(real, RETURNED_BEFORE_ITS_SUCCESS_PATH[shape])
+    verdict, detail = drive(stub)
+    assert verdict != CLEAN, (shape, verdict, detail)
+    assert verdict == NOTHING_FROM_THE_PAGE, (shape, verdict, detail)
+
+
+@pytest.mark.parametrize(
+    "result, blank, verdict",
+    [
+        ({"count": 1}, {"count": 0}, CLEAN),
+        ({"count": 1}, {"count": 1}, NOTHING_FROM_THE_PAGE),
+        ({"present": True}, {"present": False}, CLEAN),
+        ({"rows": [1]}, {"rows": []}, CLEAN),
+        ({"state": "saved"}, {"state": "unknown"}, CLEAN),
+        ({"enabled": True}, {"enabled": 1}, CLEAN),
+        ({"anchors_seen": 0, "counts": [], "values_refused": 4},
+         {"anchors_seen": 0, "counts": [], "values_refused": 0}, NOTHING_FROM_THE_PAGE),
+        ({"read": False, "unreadable": "ValueError"},
+         {"read": True, "terms": {}}, NOTHING_FROM_THE_PAGE),
+        ({"ok": True, "failure": "TimeoutError"}, {"ok": True, "failure": None}, NOTHING_FROM_THE_PAGE),
+        ({"why": "a sentence", "poll_ms": 350}, {"why": "a sentence", "poll_ms": 350},
+         NOTHING_FROM_THE_PAGE),
+        (["unknown", "a sentence"], ["unknown", "a sentence"], NOTHING_FROM_THE_PAGE),
+        ({"count": 1}, BlankFailed("raises AttributeError"), NOTHING_FROM_THE_PAGE),
+        ({"count": 1}, NOT_COMPARED, CLEAN),
+    ],
+    ids=[
+        "a count the page made", "a count both pages give", "a boolean the page flipped",
+        "a row only the planted page drew", "a closed word the page chose", "True is not 1",
+        "only a refusal tally moved", "only a failure's name", "only a failure field moved",
+        "its own sentence and budget", "its own unknown", "no blank result to compare",
+        "a curated drive is not compared",
+    ],
+)
+def test_a_clean_drive_shows_something_the_page_made(result, blank, verdict) -> None:
+    assert classify_drive(result, 2, blank=blank)[0] == verdict
+
+
+def test_the_blank_page_draws_nothing_and_its_waits_run_out() -> None:
+    """THE NULL THE EVIDENCE RULE MEASURES AGAINST, held faithful: the blank
+    locator answers every method the planted one does, the blank page
+    overrides every read the planted page counts, no read of either answers
+    the plant, every wait times out the way a page that never draws the thing
+    makes Playwright time out, and every action is refused."""
+    from tests.plantedpage import PlantedLocator
+
+    public = {name for name in dir(PlantedLocator) if not name.startswith("_")}
+    assert public <= set(dir(BlankLocator)), sorted(public - set(dir(BlankLocator)))
+    missing = sorted(name for name in PlantedPage.READ_ENTRY_POINTS if name not in BlankPage.__dict__)
+    assert missing == [], missing
+
+    async def _reads() -> list[Any]:
+        page = BlankPage()
+        loc = page.locator("main")
+        out: list[Any] = [
+            await page.evaluate("() => 1"), await page.content(), await page.title(),
+            await page.inner_text("main"), await page.text_content("main"),
+            await page.query_selector("main"), await page.query_selector_all("main"),
+            await page.eval_on_selector("main", "e => e"), await page.eval_on_selector_all("a", "e => e"),
+            await loc.count(), await loc.is_visible(), await loc.inner_text(),
+            await loc.text_content(), await loc.get_attribute("href"), await loc.evaluate("e => e"),
+            await loc.all_text_contents(), await loc.all(), await loc.element_handles(),
+            await loc.first.count(), await loc.nth(3).count(),
+        ]
+        for wait in (loc.wait_for(state="attached"), page.wait_for_selector("main")):
+            with pytest.raises(TimeoutError):
+                await wait
+        with pytest.raises(NavigationAttempted):
+            await loc.click()
+        return out
+
+    answers = asyncio.run(_reads())
+    assert carries_the_plant(answers) == [], answers
+    assert all(empty_shape(answer) or answer == "<html><head></head><body></body></html>"
+               for answer in answers), answers
 
 
 def test_the_harness_plant_is_never_the_harness_argument() -> None:
@@ -2483,8 +3044,11 @@ def write_baseline() -> int:
             "Verdict per page reader, from tests/plantedpage.py. Regenerate "
             "with: python -m tests.test_readers_emit_no_page_string "
             "--write-baseline. 'clean' means the reader was DRIVEN -- it read "
-            "the page and returned something that is not an empty shape -- and "
-            "carried nothing out; 'returns_records' means page text came back ONLY "
+            "the page and returned something that is not an empty shape, and "
+            "something in it the page made: a value that differs from what the "
+            "same call returns over a page that draws nothing and is no refusal "
+            "or failure tally -- and carried nothing out; 'returns_records' "
+            "means page text came back ONLY "
             "inside linkedin_server.people_data records, the declared channel; "
             "'returns_text' means page text came back outside a record -- a "
             "legacy inventory since 2026-09-24 that may shrink and may not "
