@@ -16,10 +16,11 @@ first three sections below:
    them, so the refusals are the closed alternation's doing.
 
 Then the composer: its refusals, its purity, and the fact the rest of this
-change rests on -- that NOTHING in the package calls it and the one search
-tool composes the people vertical only (section 5). See
-``search_verticals.py`` for why that is condition 1 of the search admission
-rather than an unfinished wire.
+change rests on -- condition 1 of the search admission (section 5). Until
+2026-10-10 that was held by absence: nothing in the package called the
+composer. Since lane B2 it is held by presence: the server opens exactly the
+two verticals whose reader landed in the same commit, groups and events. See
+``search_verticals.py`` for the condition.
 
 **MEASURED WITH ``is_read_url`` ON CONCRETE ADDRESSES**, never a substring
 grep over the pattern list, which is the rule the search admission's
@@ -300,7 +301,16 @@ def test_compose_takes_a_vertical_and_a_keyword_and_nothing_else():
 
 
 # ---------------------------------------------------------------------------
-# 5. Nothing opens the three new words yet -- condition 1, held by absence
+# 5. Condition 1: the composer is opened only where its reader landed with it
+#
+# HELD BY ABSENCE UNTIL 2026-10-10: no module imported the composer. Lane B2
+# landed the first importer -- server.py's linkedin_search_groups and
+# linkedin_search_events -- in the SAME commit as their reader,
+# search_vertical_results (held to PEOPLE-DATA-MITIGATIONS by
+# tests/test_search_vertical_results.py), and deleted the orphan ruling then.
+# So the condition is held by PRESENCE now: the one importer is the server,
+# the server imports the reader too, and the verticals it opens are exactly
+# the two whose reader exists. The companies word is still opened by nothing.
 # ---------------------------------------------------------------------------
 
 def _imports_of(path: pathlib.Path) -> set[str]:
@@ -324,18 +334,19 @@ def _imports_of(path: pathlib.Path) -> set[str]:
     return out
 
 
-def test_no_package_module_or_entry_point_imports_the_composer():
-    """CONDITION 1 OF THE SEARCH ADMISSION, HELD BY ABSENCE. The first tool
-    that imports this module must land with its reader in the same commit --
-    held to PEOPLE-DATA-MITIGATIONS since NAMES-AT-RUNTIME amended the
-    condition, 2026-09-24 -- and delete the orphan ruling that says so."""
+def test_only_the_server_imports_the_composer_and_it_imports_the_reader_too():
+    """CONDITION 1 OF THE SEARCH ADMISSION, HELD BY PRESENCE SINCE 2026-10-10.
+    The one importer is the server, and the server imports the reader that
+    landed with it -- held to PEOPLE-DATA-MITIGATIONS since NAMES-AT-RUNTIME
+    amended the condition, 2026-09-24."""
     importers = [
         path.name
         for path in sorted(PKG.glob("*.py")) + sorted(ROOT.glob("*.py"))
         if path.name != "search_verticals.py"
         and "search_verticals" in _imports_of(path)
     ]
-    assert importers == [], importers
+    assert importers == ["server.py"], importers
+    assert "search_vertical_results" in _imports_of(SERVER)
 
 
 def test_control_the_import_walk_sees_a_real_import():
@@ -344,11 +355,36 @@ def test_control_the_import_walk_sees_a_real_import():
     assert "people_search" in _imports_of(SERVER)
 
 
-def test_the_one_search_tool_composes_the_people_vertical_only():
-    """Every search-results address the server can open is composed by
-    ``people_search.compose``, whose base is the people vertical."""
+def _composed_verticals(source: str) -> list[str]:
+    """The first argument of every ``search_verticals.compose(...)`` call in
+    ``source``, read off its syntax tree: the verticals the server opens."""
+    found = []
+    for node in ast.walk(ast.parse(source)):
+        if (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and node.func.attr == "compose"
+            and isinstance(node.func.value, ast.Name)
+            and node.func.value.id == "search_verticals"
+        ):
+            first = node.args[0] if node.args else None
+            found.append(first.value if isinstance(first, ast.Constant) else "<not a literal>")
+    return found
+
+
+def test_every_search_address_the_server_opens_is_composed_and_has_its_reader():
+    """Every search-results address the server can open is composed: the
+    people vertical by ``people_search.compose``, whose base is the people
+    vertical, and the two verticals whose reader landed -- groups and events --
+    by ``search_verticals.compose`` with a literal word. No address is
+    spelled in the server, and the companies word is opened by nothing."""
     assert people_search.BASE_URL == f"{BASE}/search/results/people/"
     source = SERVER.read_text(encoding="utf-8")
     for word in ("companies", "groups", "events"):
         assert f"/search/results/{word}" not in source, word
-    assert "search_verticals" not in source
+    assert sorted(_composed_verticals(source)) == ["events", "groups"]
+
+
+def test_control_the_composed_vertical_walk_sees_a_planted_call():
+    planted = "search_verticals.compose('companies', keywords=k)\nsearch_verticals.compose(word)\n"
+    assert _composed_verticals(planted) == ["companies", "<not a literal>"]

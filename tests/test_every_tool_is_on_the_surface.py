@@ -353,9 +353,13 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # linkedin_read_named_profile (ruling NAMED-PROFILE-READ-BEHIND-A-GRANT;
     # census N 178 stays GAP on its capture), measured off the registry and
     # moved with every other count site in the same commit.
+    # SIXTY-FOUR AT LANE B2'S MERGE OF ITS SEARCH VERTICALS, 2026-10-10: two
+    # READS, linkedin_search_groups (census N 161) and linkedin_search_events
+    # (census N 179), beside lane U's one write below; measured off the
+    # merged registry, never summed.
     # SIXTY-TWO ON LANE U'S BRANCH, 2026-10-10: one WRITE,
     # linkedin_send_attachment (ruling FILE-UPLOAD-OPENED; census M M14, M15,
     # M18 stayed GAP on two captures, then moved to COVERED-UNFIRED the same
     # day on the session-8 capture), measured off the branch's registry and
     # moved with every other count site in the same commit.
-    assert len(_tool_names()) == 62
+    assert len(_tool_names()) == 64
