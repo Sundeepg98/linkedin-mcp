@@ -962,6 +962,12 @@ ADMITTED_TEXT: dict[str, tuple[str, ...]] = {
     # The select path's before-and-after reading (2026-09-28): the values
     # reader above, returned whole, its exception turned into a typed refusal.
     "writes:_editor_values_or_refusal": (HIS_OWN,),
+    # The restore path's reading of ONE named field (2026-10-10, lane G2):
+    # the same values reader, narrowed to the field the caller names, and its
+    # value returned verbatim beside this package's sentence. His own field's
+    # value -- the same ruling, applied to the same reading; driven once the
+    # reader guard stopped counting its refusal as clean.
+    "writes:_editor_value_of": (HIS_OWN,),
     "profile_views_more:read_profile_views_more_insights": (AGGREGATE,),
     "server:_profile_views_more_analytics": (HIS_OWN, AGGREGATE),
 }
@@ -1246,23 +1252,6 @@ WHAT_WOULD_DRIVE_IT: dict[str, str] = {
         "tests/test_who_viewed_me_filter_menus.py drives it to its menus over "
         "a page of structure only, with press.disclose replaced by a "
         "recorder (test_each_pill_is_chosen_by_structure_inside_main)."
-    ),
-    "writes:_editor_value_of": (
-        "SCRIPT: its reading is dom.read_self_owned_editor_values, whose "
-        "script (dom.EDITOR_VALUES_JS) the planted page answers with page "
-        "strings: the anchor count is refused, the values reader answers "
-        "no_anchor, and this returns None with that refusal's sentence. Its "
-        "success path needs that reading and exactly one field named by the "
-        "grant's field word, which the harness's string names on no page. "
-        "tests/test_profile_editor_commit.py drives it in a headless browser "
-        "through update_profile_field over that file's own editor markup "
-        "(test_the_restore_path_round_trips_and_the_readings_prove_it reads "
-        "the value before the write). Over "
-        "tests/fixtures/synthetic/intro_editor_switches.html the shipped "
-        "values-script answer would reach it with the City label answered as "
-        "drawn; what comes back is his field's value verbatim, text outside "
-        "a record, so that drive needs an ADMITTED_TEXT entry (HIS_OWN), as "
-        "_editor_values_or_refusal has."
     ),
     "writes:_read_applied_state": (
         "WORDS: it reads _read_tracker_membership for the Applied tab, which "
@@ -2018,6 +2007,11 @@ FIXTURE_BREAKS: dict[str, dict[str, str]] = {
     "profile_editor:read_save_gate": {
         "fixture": "synthetic/intro_editor_switches.html",
         "needle": "<p>Placeholder setting A</p>", "into": "<p>Placeholder setting Z</p>",
+    },
+    "writes:_editor_value_of": {
+        "fixture": "synthetic/intro_editor_switches.html",
+        "needle": '<label for="intro-city">City</label>',
+        "into": '<label for="intro-city">Town</label>',
     },
     "named_profile:composer_holds": {
         "fixture": "synthetic/named_profile.html",

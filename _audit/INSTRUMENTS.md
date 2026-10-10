@@ -11613,9 +11613,10 @@ the rule met the old baseline.
 
 WHAT IT FOUND BEYOND THE COUNT: two of the 17 had success paths that return
 page text outside a record -- a control's id attribute, a followed Page's
-name -- which no drive had reached; they are held for a ruling. One of the
-17, the Save gate, was driven back to an earned clean the same day by a
-curated drive over the tracked intro editor. The triage
+name -- which no drive had reached; they are held for a ruling. Two of the
+17 got curated drives over the tracked intro editor the same day: the Save
+gate, back to an earned clean, and the editor value reader, whose success
+path returns his own field's value, admitted as `HIS_OWN`. The triage
 added two kinds to `WHAT_WOULD_DRIVE_IT`: `SCRIPT` (a script the planted page
 can only answer with strings) and `WORDS` (LinkedIn's own words in the page's
 text, which it can only answer with the plant).

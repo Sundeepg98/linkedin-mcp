@@ -17,7 +17,7 @@ code, because several were queued before a lane that landed them.
 | item | verdict | section |
 |---|---|---|
 | 1. the asserted-names check, red on 8 sites | fixed in `912cc25`; red test shown; one new site from lane K's merge is the orchestrator's to repair | 1 |
-| 2. earned-clean, the people-search readers | fixed in `f3b46fb`; 17 readers move, one driven back since; red tests shown (this branch's hashes do not resolve on `master` until it merges) | 2 |
+| 2. earned-clean, the people-search readers | fixed in `f3b46fb`; 17 readers move, two driven since; red tests shown (this branch's hashes do not resolve on `master` until it merges) | 2 |
 | 3a. a post record in `people_data.py` | built in `d1529ff`; red tests shown | 3 |
 | 3b. the root-logger captures that could not fail | done before: `4daa38d`, `de8e95e` | 4.1 |
 | 3c. a record path in a comment read as a dependency | done before: `467b52f`, `739c117`; measured | 4.2 |
@@ -166,20 +166,19 @@ it now uses `item_addresses.read_item_addresses`, whose hrefs the blank page
 cannot match.
 
 EVERY MOVED READER IS DRIVEN OR SAYS WHAT WOULD DRIVE IT. The holding test
-requires a drive or an entry in `WHAT_WOULD_DRIVE_IT`; one of the seventeen
-got a drive, and the sixteen entries use two new kinds besides the old ones.
+requires a drive or an entry in `WHAT_WOULD_DRIVE_IT`; two of the seventeen
+got a drive, and the fifteen entries use two new kinds besides the old ones.
 A child of this lane drafted sixteen from the source, the fixtures and the
 tests, read-only; each was reviewed here, every cited test, fixture and symbol
-checked to resolve, and three re-kinded. The baseline after the drive: clean
-81, not driven 49.
+checked to resolve, and three re-kinded. The baseline after the two drives:
+clean 81, not driven 48, text 43, records 7.
 
-    SCRIPT  10  its reading is a script this package runs in the page, which
+    SCRIPT   9  its reading is a script this package runs in the page, which
                 the planted page answers with strings: the seven script
-                readers, press._take_reading, dom.read_sdui_actions,
-                writes._editor_value_of -- each names the test that drives
-                its success path, over a fake answering the script's shape or
-                in a headless browser over a tracked fixture, or says that
-                none does
+                readers, press._take_reading, dom.read_sdui_actions -- each
+                names the test that drives its success path, over a fake
+                answering the script's shape or in a headless browser over a
+                tracked fixture, or says that none does
     DRIVEN   1  profile_editor.read_save_gate, back to an earned clean: a
                 curated drive (`tests/shipped_drives.py`,
                 `read_save_gate_as_shipped`) over the tracked intro editor,
@@ -188,6 +187,13 @@ checked to resolve, and three re-kinded. The baseline after the drive: clean
                 recognised switches, no label -- from pieces the drives of its
                 fields reader already had; its premise break is in
                 `FIXTURE_BREAKS`
+    ADMITTED 1  writes._editor_value_of, driven over the same editor
+                (`editor_value_of_as_shipped`): the restore path's reading of
+                one named field, which returns his own field's value verbatim
+                -- recorded `returns_text` and admitted as `HIS_OWN` under the
+                ruling of 2026-09-28 04:25, as its sibling
+                `writes:_editor_values_or_refusal` is; its premise break
+                relabels the field the drive names
     WORDS    3  its success path keys on LinkedIn's own words in the page's
                 text (a tab strip), which the planted page can only answer
                 with the plant: the three tracker-state readers; a tracked
@@ -321,10 +327,12 @@ census instrument and derived-view check ran green over this slice here
    Each needs the orchestrator's call: admit to the text inventory, with a
    reason, or convert (publish whether the binding holds; publish the Page
    by its id).
-2. `writes._editor_value_of`, driven over the tracked intro editor, would
-   return his field's value verbatim, as its sibling
-   `writes:_editor_values_or_refusal` does under `ADMITTED_TEXT` (his own);
-   a drive for it would need the same admission.
+2. `writes._editor_value_of` WAS ADMITTED HERE, under the standing ruling
+   of 2026-09-28 04:25 (his own text is admitted), as its sibling
+   `writes:_editor_values_or_refusal` was: driven over the tracked intro
+   editor, its success path returns his own field's value verbatim. It is an
+   application of that ruling by this lane, and the orchestrator's to
+   reverse.
 3. FOUR SCRIPT READERS ARE RUN BY NO TEST IN ANY ENGINE: `anchors.read_anchors`,
    `collections_page.read_collections`, `company_root.read_company_root`
    (its script runs under node in a test, its reader does not) and
@@ -398,6 +406,10 @@ the orchestrator's gate policy of 11:35 none is the full suite.
              the guard's file, the skeleton double's,
                the orphan-module test and the intro
                editor's browser tests, sharded           970 passed (135 s)
+             the editor value reader's drive: its
+               verdict, its admission, its premise
+               break, the coverage and holding tests,
+               serial (the live flag back up)            44 passed
 
 THE COERCION SCRIPT'S SAMPLE SHRANK, AND THE GUARD DID NOT LOSE THE LEAK. It
 samples only readers recorded clean, and lane G recorded 15 of 88 red there;

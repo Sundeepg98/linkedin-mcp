@@ -148,7 +148,7 @@
     "view_switch:apply_and_restore": "not_driven:navigates (locator.click)",
     "writes:_apply_submit_gate": "returns_text",
     "writes:_comment_submit_gate": "returns_text",
-    "writes:_editor_value_of": "not_driven:read the page and returned nothing the page made",
+    "writes:_editor_value_of": "returns_text",
     "writes:_editor_values_or_refusal": "returns_text",
     "writes:_first_contact_after_send": "clean",
     "writes:_first_contact_send_check": "clean",
