@@ -309,6 +309,10 @@ then 15 loads and 2 searches), each one load for one to three rows. The
 nine RULING-gated lines are scheduled by nobody until their question is
 answered.
 
+These plans cover the captures GAP rows need. The live lane's own
+carry-over -- the live proofs of rows already built (bucket 1) -- draws on the
+same 40 loads, and the orchestrator splits the budget between the two.
+
 THE YIELD CURVE IS STEEP AND THEN FLAT. The first ten loads unblock 25 rows
 (2.5 a load); a session of named targets unblocks 91; after the admissions,
 most lines are one row a load. The cheapest rows in this ledger are not
@@ -610,3 +614,52 @@ and passes every other form to the shipped resolver unchanged.
 `tests/test_next_step.py` runs the committed check, the control and each of
 the seven plants: 10 tests, 19 s. Registered in `_audit/INSTRUMENTS.md`,
 section 82.
+
+## 10. Gates run, and what was not run
+
+While `_state/LIVE_SESSION_ON` existed (until about 11:51), every run was
+targeted and serial (`-p no:randomly`, no `-n`), the flag checked before each.
+After it, the orchestrator's policy of 11:35 held: the tests touched, their
+direct importers and the census instruments, longer runs in the background,
+the full suite on CI.
+
+    commit    what ran                                          result
+    4b78e5f   15 files: the register, the index, the map, the   564 passed, 3 failed: the new
+              holds, the corpus guards                          document's three guards,
+                                                                repaired before the commit
+              the three again, after the repairs                48 passed
+              the committed-blob identity test                  1044 passed
+    a191fc3   census_completion --check, check_write_classes,   every pin matches; GREEN 387
+              check_exclusion_basis, the refused-address        lines; 40 of 40; PASS at 78;
+              check, the three derived-view checks              all match
+              15 files: the importers of the scripts changed,   392 passed
+              the pins edited, the corpus guards
+              the committed-blob identity test                  1045 passed
+    b6d6bd5   check_next_step                                   GREEN
+              tests/test_next_step.py                           10 passed
+              the identity test, eight corpus and               1175 passed, 2 failed: a
+              derived-view files                                placeholder urn, a drifted map;
+                                                                both repaired in dba0bd9
+    dba0bd9   the identity test, the derived views, the         1320 passed, 1 failed: the map
+              register's numbers and probe controls, the        again, drifted by a table
+              corpus guards, the ledger test                    regenerated after the commit
+
+THE MAP DRIFTED TWICE FOR ONE REASON: the blocker map's reason locator reads
+the census side tables as well as the documents, so any table regenerated
+after the map makes the committed map stale. It is regenerated LAST before
+every commit here.
+
+NOT RUN, and why: the full suite (the 11:35 policy puts it on CI); the impact
+gate's widened run -- `impact_gate.py --against 3c8edc2 --plan-only` selects
+77 test files (72 by impact, 30 corpus-wide, overlapping); this lane ran the
+ones named above, and CI runs the rest. Nothing here touched a live page.
+
+## 11. Commits
+
+    4b78e5f  rulings: register the five class rulings of 2026-09-28
+    a191fc3  census: P S9 and M C71 EXCLUDED-RULED on PURCHASES-STAY-MANUAL;
+             pins re-derived
+    b6d6bd5  census: the next-step ledger for all 585 GAP rows, the capture
+             queue, and their checker
+    dba0bd9  census: register check_next_step (INSTRUMENTS 82), commit the
+             capture inventory, two repairs
