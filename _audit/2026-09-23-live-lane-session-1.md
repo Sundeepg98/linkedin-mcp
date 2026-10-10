@@ -4561,3 +4561,183 @@ followed (read at row 1 at 11:46), the Premium badge switch untouched since sess
 restore, and no message sent in session 7 or 8. Session 8's items -- the badge's two
 read-only loads and its test and restore, and the follow round trip -- wait for a new GO,
 unchanged. The note of this is `_state/live8/session_note.json` (gitignored).
+
+## Live session 8, re-issued, 2026-10-10
+
+The orchestrator's GO of 14:02 IST re-issued session 8 after the safety stop was lifted.
+The session ran from 14:02 to 14:20. **25 of the 40 loads, 2 of the 5 people searches
+(and 1 jobs search, the recovery's). `N 48`, `J 104`, `N 46` and `J 103` FIRED AND
+BANKED. The unfollow LANDED through LinkedIn's confirmation, the Page-root re-follow was
+refused, a STOP-ALL was raised, and the RECOVERY ORDER of 14:10 restored the follow through
+a posting: his account ended at its start state, verified at 14:11.** `P B9`'s re-proof read
+the switch but found it unreachable by a click, so nothing was pressed; lane K's
+twelve-load block ran as reads and gated disclosures.
+
+**THE OPERATOR'S NAMED LIVE-PROOF TARGETS, his Pages and his employers appear nowhere in
+this repository.** Every step below names them by role.
+
+### The go, measured before obeying it
+
+Port 9224 was held by the same one Chrome process (started 11:15:16); master was
+`fe119de` (`b10bde8` plus lane K's ledger), merged into this branch (`d519869`); the main
+checkout's live-session flag stood. **THE ATTACH CHECK: PASS `[0, 1, 0]`** (14:02), and he
+was signed in (load 1: no wall, 0 challenge terms, the messaging badge 0).
+
+### The session, load by load
+
+    n   time      key (the ledger's)        surface     what it read
+    1   14:02:53  signin                    feed        signed in; the badge 0
+    2   14:03:16  badge_check               in          P B9 read; a click cannot reach it
+    3   14:04:16  badge_check               in          the same; where a press could land
+    4   14:05:05  follow_read               mynetwork   the first Page: session 7's
+    5   14:05:38  unfollow_preview          mynetwork   following; a token
+    6   14:06:10  unfollow_confirm          mynetwork   the press drew a confirmation
+    7   14:06:41  unfollow_confirm          mynetwork   the reload: the row gone
+    8   14:07:07  refollow_preview          company     the Page root: refused, no press
+    9   14:07:47  follow_check              mynetwork   the row not drawn: STOP-ALL
+    10  14:10:18  recover_search            jobs        1 posting, of that Page
+    11  14:10:46  recover_follow_preview    jobs        the posting: not following
+    12  14:11:14  recover_follow_confirm    jobs        one press
+    13  14:11:44  follow_check              mynetwork   row 1, following: RESTORED
+    14  14:15:14  lk_feed                   feed        a post's control menu, gated
+    15  14:15:40  lk_inme                   in          his profile, kept
+    16  14:16:05  lk_search_labels          search      the label-shape reading
+    17  14:16:27  lk_posting                jobs        one posting, kept
+    18  14:17:08  lk_own_post               feed        his own post, kept; no press
+    19  14:17:49  lk_recommended            jobs        recommendations, kept
+    20  14:18:12  lk_messaging_badge        feed        the badge: 0
+    21  14:18:42  lk_messaging              messaging   the receipt guard refused
+    22  14:19:11  lk_keyskills              premium     the key-skills page, kept
+    23  14:19:33  lk_search_first           search      his first degree, kept
+    24  14:19:56  lk_thread_badge           feed        the badge: 0
+    25  14:20:25  lk_thread                 messaging   the named thread's footer
+
+By surface: mynetwork 6, feed 5, jobs 5, in 3, search 2, messaging 2, company 1, premium 1.
+The closest two loads stood 21.7 s apart. The window was brought to the front before every
+block that could press.
+
+### 1: `P B9` -- the switch is read, and a click cannot reach it
+
+Two read-only loads of his intro editor (2, 3), the plan of "After session 7, offline":
+
+* **The fixed reader aims it:** aimable, `switch_shape` `named_input`, the badge at
+  position 2, both switches on -- the same on both loads.
+* **The shared label is no notify control:** the save gate read without Save counts 0
+  unnamed switches and reads `notify_network` `not_drawn`.
+* **A CLICK CANNOT REACH THE SWITCH:** the named input draws no box, is not visible, and a
+  trial click (Playwright's actionability checks only, nothing dispatched) timed out. Load
+  3 listed where a press could land, by tag, attribute names and box only: the old wrapper
+  `div` (76 x 32, the role it carried in the first shape gone), a toggle container (52 x 32)
+  holding the empty label, the input and a knob (28 x 28) -- each visible one
+  trial-actionable.
+
+So the (b) pattern was NOT run and nothing was pressed. The orchestrator ruled at 14:10:
+the aim at the visible toggle is an offline fix after this session.
+
+### 2: the follow round trip -- the unfollow landed, the re-follow was refused, and the recovery
+
+* **Load 4:** the first Page by the list's own order is the one session 7 fixed by rule.
+* **Loads 5-7, `linkedin_unfollow_company` through `028daef`:** the press DREW A
+  CONFIRMATION -- one `alertdialog` (`data-test-modal`) drawing a Dismiss, a Cancel and
+  exactly one Unfollow (the two others shaped W7 and W6 by the gate). The gate pressed the
+  Unfollow through the same click call site; the reload read the row gone (`performed`
+  `unknown`, LinkedIn's total unreadable). A skeleton of the page inside the gate, before
+  the confirm press, is in the gitignored state. **Session 7's diagnosis is confirmed
+  live: the press that did not land had drawn a confirmation nothing pressed.**
+* **Load 8, `linkedin_follow_company_page` on the same id:** its preview REFUSED before any
+  press -- as it had in session 7 with the Page followed, so the refusal is the gate's
+  reading of this Page, not its state.
+* **Load 9, Manage Pages:** the target's row not drawn among the 20 (row 1 before). **The
+  end state did not equal the start: STOP-ALL**, the marker written, the orchestrator told
+  at once.
+* **THE RECOVERY ORDER OF 14:10, route (a), N 46's shipped route under the marker:** a
+  keyword-less, Worldwide jobs search for that Page's id drew 1 posting, its employer
+  matched to the Page in the process by a keyed shape of the name (load 10); the posting's
+  own control read `not_following` -- a second surface showing the unfollow had landed --
+  and `linkedin_follow_company` pressed it once (loads 11-12; its in-place verdict
+  `unknown`, the followed-state label being unmeasured). **Load 13, Manage Pages: the
+  Page's row at position 1, `following` -- the start state.** No write was made after it.
+
+### 3: lane K's block -- reads, and disclosures where the gate permits
+
+Every load below was a read; presses went only through `press.disclose`, where the
+shipped gate permits them now. A capture moves no row: it unblocks rows for building.
+
+    surface                      load   what was kept / pressed            rows it unblocks
+    feed-menus                   14     a post's control menu PRESSED:     N 37, N 43, N 51,
+                                        permitted, priced by off_state,    N 153, N 154, N 200
+                                        the witness saw it disclose; the
+                                        feed and the open moment kept.
+                                        The search box NOT pressed: the    (N 95 waits)
+                                        veto admitted 0, and the positions
+                                        did not line up (40 vs 39)
+    in-me-profile                15     his profile, skeleton and raw      P D25, P D26, P F1,
+                                                                           P K8
+    search-people-labels         16     the label-shape reading fired:     N 80, N 88, N 89,
+                                        keyword verbatim, 92 controls      N 93
+                                        settled, by_term read
+    job-posting-panels           17     one posting, raw and skeleton      J 115, J 124
+    own-post-reactions           18     his newest own post kept; NOT      none: M C33, M C35
+                                        pressed -- no [aria-expanded]      wait
+                                        control in main is named for the
+                                        reactions menu (0 of 4)
+    jobs-recommended-feedback    19     kept (a variant of the address)    J 163, if the pair
+                                                                           is drawn (offline)
+    messaging-guarded            20-21  the badge 0; the receipt guard     none: M M7, M M8,
+                                        REFUSED on the composer's list     M M9 wait
+                                        (0 rows read), so /messaging/ was
+                                        not opened; the folder pill not
+                                        pressed (the gate refuses)
+    premium-key-skills           22     kept (a variant of the address)    P S8, if the chooser
+                                                                           is drawn (offline)
+    search-people-first-degree   23     network verbatim; the first        none: N 26b waits
+                                        render's filter bar draws no
+                                        Industry or School term
+    msg-thread-footer            24-25  the named thread, behind the       M M20, M M40, M M51
+                                        badge at 0: attach_image,
+                                        attach_file, gif_keyboard,
+                                        emoji_keyboard -- no video-meeting
+                                        control in the footer
+
+Every skeleton and raw page is in the gitignored `_state/live8/`.
+
+### Chrome's end
+
+At 14:20 port 9224 was held by the same process, and its DevTools target list held 1 page,
+a blank tab, and 0 LinkedIn tabs. Every run closed its own tab.
+
+### The census moves, and the pins
+
+**CORRECTS:** `_audit/_census/network.md` -- rows `48` and `46` read COVERED-UNFIRED, never performed; in session 8 the unfollow landed through LinkedIn's confirmation and the follow from a posting restored it, each verified, and each moves to COVERED-PROVEN.
+
+**CORRECTS:** `_audit/_census/jobs.md` -- rows `103` and `104` read CU, never performed; in session 8 each fired its own tool live and was verified, and each moves to CP.
+
+**FOUR ROWS MOVED, EACH ON ITS OWN CELL'S BAR:**
+
+    row     the bar                                  what session 8 read
+    N 48    an unfollow that landed                  the confirmation's Unfollow pressed;
+                                                     the row gone; a posting not-following
+    J 104   linkedin_unfollow_company performed      the same fire
+    N 46    a follow from a posting                  not_following, one press; Manage
+                                                     Pages: row 1, following
+    J 103   linkedin_follow_company performed        the same fire
+
+`N 47` and `P B9` carry dated notes and keep their states.
+
+**THE COUNTS**, file-wide by `scripts/count_census_states.py`:
+
+    slice         proven                    unfired
+    network       COVERED-PROVEN 20 -> 22   COVERED-UNFIRED 13 -> 11
+    jobs          CP             21 -> 23   CU               3 -> 1
+
+**THE PINS, MEASURED AND RE-PINNED:** `--check` named three figures and four bucket-1 rows:
+
+    delivered_strict    105 -> 109
+    unfired              25 -> 21
+    b1_standing          16 -> 12
+    PINNED_B1_ROWS       OPERATOR-NAMES-THE-TARGET loses J 103, J 104, N 46 and N 48
+
+### Scratch, declared disposable
+
+The session-8 runner (session 7's, plus the badge check, the gate capture, the recovery and
+lane K's captures), the census and pin editors, in the lane's scratch folder.
