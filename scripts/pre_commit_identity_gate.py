@@ -60,7 +60,6 @@ than hidden -- an undocumented bypass gets discovered at the worst moment.
 from __future__ import annotations
 
 import importlib.util
-import re
 import subprocess
 import sys
 from pathlib import Path
@@ -72,16 +71,26 @@ SWEEP = REPO / "scripts" / "sweep_tracked_for_identity.py"
 MIN_LENGTH = 5
 
 
+_SWEEP_MODULE = None
+
+
+def _sweep():
+    """The shipped sweep, loaded once: its wordlist, ``decode_text``, ``redact``."""
+    global _SWEEP_MODULE
+    if _SWEEP_MODULE is None and SWEEP.exists():
+        spec = importlib.util.spec_from_file_location("_sweep", SWEEP)
+        if spec is None or spec.loader is None:
+            return None
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        _SWEEP_MODULE = module
+    return _SWEEP_MODULE
+
+
 def _load_wordlist():
     """Return {class: {spelling}}, or None when the key is legitimately absent."""
-    if not SWEEP.exists():
-        return None
-    spec = importlib.util.spec_from_file_location("_sweep", SWEEP)
-    if spec is None or spec.loader is None:
-        return None
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module.load_wordlist()
+    module = _sweep()
+    return None if module is None else module.load_wordlist()
 
 
 def _staged_paths() -> list[str]:
@@ -101,16 +110,21 @@ def _staged_content(path: str) -> str | None:
     Reading the working tree here would be the exact mistake this repo already
     recorded: a clean tree says nothing about what a commit contains.
     """
+    # BYTES, then the sweep's own decoding rule (UTF-8 when valid, else
+    # cp1252). Until 2026-10-10 this was ``text=True`` with no encoding -- the
+    # locale's, cp1252 on the operator's box -- so the 9 needles with
+    # non-ASCII letters could never match a UTF-8 file at commit time.
     proc = subprocess.run(
-        ["git", "show", ":" + path], cwd=str(REPO),
-        capture_output=True, text=True, errors="replace",
+        ["git", "show", ":" + path], cwd=str(REPO), capture_output=True,
     )
-    return None if proc.returncode != 0 else proc.stdout
+    if proc.returncode != 0:
+        return None
+    return _sweep().decode_text(proc.stdout)
 
 
 def _mask(line: str) -> str:
-    """The line's SHAPE, never its content -- same rule as the sweep."""
-    return re.sub(r"[A-Za-z0-9]", "x", line.strip())[:70]
+    """The line's SHAPE, never its content -- the sweep's own ``redact``."""
+    return _sweep().redact(line)
 
 
 def main() -> int:

@@ -3325,6 +3325,100 @@ def assert_named_profile_url(url: str) -> str:
 
 
 # ---------------------------------------------------------------------------
+# 1c. The same door's ONE sub-page: a detail page of the profile he names
+# ---------------------------------------------------------------------------
+#
+# RULING ``NAMED-PROFILE-DETAIL-PAGES`` (the orchestrator, 2026-10-10, applying
+# the operator's 08:01 YES to reading profiles he names; registered in
+# ``_audit/2026-10-10-rulings-named-profile-detail-pages.md``): "the read of a
+# profile he names includes that SAME profile's own detail pages
+# (/in/<the same slug>/details/<section>/), one load per call, behind the same
+# single-use grant and the same preview warning."
+#
+# SO THIS IS NOT A WIDER SECOND DOOR. ``assert_named_profile_url`` is
+# unchanged and still admits no sub-page. This is a THIRD check, with ONE
+# caller (``browser.LinkedInBrowser.goto(named_profile_details_of=<segment>)``,
+# passed only by ``named_profile.load_the_confirmed_profile``), and it takes
+# the segment the caller NAMED as an argument: the address must be that
+# segment's, so a detail page of anybody else is refused at the door as well as
+# at the grant. The section is one word of a CLOSED vocabulary, and the
+# forbidden-substring list applies with no exemption.
+
+#: THE SECTIONS, and why these four: they are the detail pages this boundary
+#: already admits on HIS OWN profile (``/in/me/details/skills|experience|
+#: education/`` and ``/in/me/details/interests/``, above), each loaded live on
+#: his profile -- so each word is one LinkedIn is measured to use for a detail
+#: page, and none is guessed. ``interests`` is the one census rows ``N 178`` and
+#: ``N 65`` need; it REDIRECTED to the profile on his own account (2026-09-04,
+#: the note at its allowlist entry), so a landing elsewhere vetoes the read.
+NAMED_PROFILE_DETAIL_SECTIONS: tuple[str, ...] = ("experience", "education", "skills", "interests")
+
+#: The one shape this check admits: the named profile's address, ``details``,
+#: one section word, the trailing slash. No query, no fragment, no deeper path.
+_NAMED_PROFILE_DETAILS_URL = re.compile(
+    r"^https://www\.linkedin\.com/in/([^/?#]+)/details/([a-z]+)/$"
+)
+
+
+def named_profile_details_url(segment: str, section: str) -> str:
+    """The detail page ``section`` of the ONE profile ``segment`` names, or raise.
+
+    Composed here from the caller's segment and a word of the closed vocabulary,
+    and nothing else -- as :func:`named_profile_url` composes the profile.
+    """
+    if section not in NAMED_PROFILE_DETAIL_SECTIONS:
+        raise WriteAttemptError(
+            "navigation blocked: a detail page of a profile you name is one of "
+            f"{', '.join(NAMED_PROFILE_DETAIL_SECTIONS)}, and nothing else is "
+            "composed."
+        )
+    return named_profile_url(segment)[: -len("/")] + "/details/" + section + "/"
+
+
+def assert_named_profile_details_url(url: str, segment: str) -> str:
+    """Return ``url`` if it is a detail page of the profile ``segment`` names,
+    else raise.
+
+    Raises:
+        WriteAttemptError: the url is not exactly
+            ``https://www.linkedin.com/in/<segment>/details/<section>/`` for THIS
+            segment and a section of :data:`NAMED_PROFILE_DETAIL_SECTIONS`, or
+            it carries a forbidden substring. No exemption applies.
+    """
+    if not isinstance(url, str) or not url:
+        raise WriteAttemptError("empty navigation target")
+    if any(character.isspace() for character in url):
+        raise WriteAttemptError(
+            "navigation blocked: the address contains whitespace, which no "
+            "address this door rebuilds ever does."
+        )
+    matched = _NAMED_PROFILE_DETAILS_URL.fullmatch(url)
+    if (
+        not matched
+        or not valid_named_profile_segment(matched.group(1))
+        or not isinstance(segment, str)
+        or matched.group(1) != segment
+        or matched.group(2) not in NAMED_PROFILE_DETAIL_SECTIONS
+    ):
+        raise WriteAttemptError(
+            "navigation blocked: the address is not a detail page of the profile "
+            "you named. This door admits https://www.linkedin.com/in/<that "
+            "segment>/details/<section>/ for one of "
+            f"{', '.join(NAMED_PROFILE_DETAIL_SECTIONS)}, and nothing else -- no "
+            "other member, no other sub-page, no query."
+        )
+    lowered = url.lower()
+    for bad in _FORBIDDEN_URL_SUBSTRINGS:
+        if bad in lowered:
+            raise WriteAttemptError(
+                f"navigation blocked: the address contains {bad!r}. The named-"
+                "profile door takes no exemption, so it is refused rather than "
+                "excused."
+            )
+    return url
+
+
+# ---------------------------------------------------------------------------
 # 2. Source scanner
 # ---------------------------------------------------------------------------
 

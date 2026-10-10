@@ -981,7 +981,21 @@ def test_only_dom_module_waives_evaluate():
     # Python. AND WHY IT COULD NOT BE NAMED_PROFILE_JS: the live lane measured
     # the messaging overlay inside an OPEN SHADOW ROOT, which that script's
     # querySelectorAll cannot see into and Playwright's engine can.
-    assert waived_in.get("dom.py", 0) <= 23, waived_in
+    #
+    # 23 -> 24 on 2026-10-10 (lane NP, the named profile's handles):
+    # NAMED_HANDLES_JS, run from ONE call site in dom.read_named_profile_handles.
+    # WHY IT COULD NOT BE A LOCATOR CHAIN: whether every link the topcard writes
+    # names the topcard's own member, and whether an Activity item's overflow
+    # label names the profile's owner, are comparisons between strings the page
+    # holds -- member ids in hrefs and the topcard's id, a person's name in the
+    # title and in a label -- and a locator read hands each to Python. Compared
+    # in the page, what crosses is ONE member token (only when every link agrees
+    # on it), item keys of an anchored shape, one closed token per item and
+    # counts. AND WHY IT COULD NOT BE NAMED_PROFILE_JS OR CONTROL_FACTS_JS: both
+    # return no id by design, and every named act's gate reads them; a token
+    # leaving through a gate's script would make the gate's "no id crosses" a
+    # flag rather than a fact.
+    assert waived_in.get("dom.py", 0) <= 24, waived_in
 
 
 # ---------------------------------------------------------------------------
@@ -1231,6 +1245,14 @@ INJECTED_SCRIPTS = {
     # counts and one closed title token -- no name, label, address or id.
     # dom._closed_bubble_facts re-closes every field.
     "BUBBLE_FACTS_JS": dom.BUBBLE_FACTS_JS,
+    # 2026-10-10 (lane NP). THE NAMED PROFILE'S HANDLES, read on the page the
+    # read he names already loaded: the topcard's own member id, returned ONLY
+    # when every composer and connections link the topcard writes names that
+    # member, and the Activity section's item keys with one closed author token
+    # each. It compares a label's name with the title's INSIDE the page and
+    # returns no name, label or other address; dom.read_named_profile_handles
+    # re-closes every field (a token or key off its anchored shape is dropped).
+    "NAMED_HANDLES_JS": dom.NAMED_HANDLES_JS,
 }
 
 
@@ -1507,7 +1529,12 @@ def test_the_scripts_executed_are_exactly_the_ones_declared():
     # 23 -> 24 on 2026-09-28 for BUBBLE_FACTS_JS, declared in INJECTED_SCRIPTS
     # in the same change and run from exactly ONE call site, dom.read_bubbles.
     # The waiver budget moved 22 -> 23 with it; the two counts stay one apart.
-    assert len(EXECUTED_SCRIPTS) == 24, sorted(EXECUTED_SCRIPTS)
+    #
+    # 24 -> 25 on 2026-10-10 (lane NP) for NAMED_HANDLES_JS, declared in
+    # INJECTED_SCRIPTS in the same change and run from exactly ONE call site,
+    # dom.read_named_profile_handles. The waiver budget moved 23 -> 24 with it;
+    # the two counts stay one apart.
+    assert len(EXECUTED_SCRIPTS) == 25, sorted(EXECUTED_SCRIPTS)
 
 
 def test_a_script_that_replaces_page_behaviour_runs_only_from_a_sanctioned_evaluate():
