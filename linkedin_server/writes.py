@@ -210,6 +210,7 @@ from typing import Any, Optional, Union
 from urllib.parse import urlsplit
 
 from linkedin_server import (
+    attachments,
     coerce,
     company_interest,
     dom,
@@ -2261,6 +2262,104 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "and building one would not recall a reply already read."
         ),
     ),
+    # ---------------------------------------------------------------- lane U
+    # ONE FILE, AS AN ATTACHMENT, INTO ONE CONVERSATION HE NAMES -- lane U,
+    # 2026-10-10, on ruling FILE-UPLOAD-OPENED (the operator's decision of
+    # 2026-09-04: profile photo, post media and message attachments). Census
+    # rows M M14 (a photo), M M15 (a video) and M M18 (files).
+    #
+    # THE CONVERSATION FIRST, because it removes the recipient problem: the
+    # thread id is the whole address, exactly as ``send_reply``'s is, and the
+    # same landing check holds the page to it. THE FILE is the other half of
+    # the target, canonical as its path relative to the upload root, checked
+    # by every property of ``uploads`` before a token exists for it.
+    #
+    # WHAT IS AIMED AT A CAPTURE AND WHAT IS NOT. The two file inputs are
+    # measured on a real capture of a conversation's reply form (the live
+    # lane's session 3): each shares a wrapper with ONE labelled button, and
+    # :mod:`linkedin_server.attachments` aims by that label and cross-checks
+    # the input's own ``accept`` declaration. How the form draws a pending
+    # attachment, and how a sent one draws, are NOT captured: the read-back
+    # before Send and the verification after it read whether the file's
+    # NAME is drawn, and refuse rather than send where it is not.
+    #
+    # NO WORDS GO WITH THE FILE. A message carrying both needs a three-part
+    # target this vocabulary does not express (see :func:`_file_component_of`)
+    # and a composer holding both has never been captured. The words go first,
+    # through ``linkedin_send_reply``, if he wants any.
+    "linkedin_send_attachment": WriteSpec(
+        action="send_attachment",
+        tool_name="linkedin_send_attachment",
+        url_template="https://www.linkedin.com/messaging/thread/{target}/",
+        url_pattern=re.compile(
+            r"^https://www\.linkedin\.com/messaging/thread/"
+            r"[0-9][A-Za-z0-9%\-_=]{0,199}/$"
+        ),
+        exempt_substring=None,
+        summary=(
+            "Send one file from your upload directory as an attachment inside "
+            "one existing LinkedIn conversation, named by its thread id."
+        ),
+        # THE BOX EMPTY AND SEND DISABLED -- the reply's own state, and it is
+        # what proves no earlier attachment is pending: Send is measured
+        # DISABLED on an empty form and turns on for anything sendable.
+        from_state="reply_box_empty",
+        to_state=attachments.ATTACHMENT_SENT,
+        not_performed_state=attachments.ATTACHMENT_HELD,
+        target_kind="thread_and_file",
+        state_from="thread_page",
+        direction_source=(
+            "THE CONVERSATION YOU NAMED, loaded by its thread id, and the state "
+            "is read off its own reply form: exactly one editor, empty, exactly "
+            "one Send control drawn DISABLED -- so nothing, words or an earlier "
+            "attachment, is waiting to go with the file -- and exactly one file "
+            "input beside the button LinkedIn labels for this file's kind. "
+            "After the file is handed over, Send is pressed only if the form "
+            "draws the file's name exactly once with Send enabled; after the "
+            "send, the same conversation is loaded FRESH and read back."
+        ),
+        wrong_state_note=(
+            "Not a toggle. A reply box holding words, or a Send already "
+            "enabled, means something is waiting in the composer that this "
+            "server did not put there; sending the file would send that too, "
+            "so it refuses."
+        ),
+        reversibility="STILL-UNKNOWN whether a sent attachment can be recalled",
+        reversibility_measured=False,
+        reversibility_class="STILL-UNKNOWN",
+        reversibility_evidence=(
+            "NOT MEASURED by this server. LinkedIn's Help Center describes "
+            "deleting a sent message within 60 minutes (census row M M12); no "
+            "message control has been read here and no delete is built."
+        ),
+        reversible_by=(
+            "NOBODY: a delivered attachment cannot be recalled. It is a FILE "
+            "FROM THIS MACHINE in another person's conversation; they can "
+            "download it, and a notification or an email can carry it before "
+            "anything could be deleted."
+        ),
+        residue=(
+            "THE FILE LEAVES THIS MACHINE. LinkedIn receives the bytes when "
+            "they are handed to the composer -- before Send -- and the person "
+            "you are writing to receives them when it is sent. Nothing here "
+            "can withdraw a file LinkedIn or the recipient already holds."
+        ),
+        irreversible=True,
+        spends=(
+            "UNMEASURED, and stated rather than denied: an attachment inside "
+            "an existing conversation is not a new InMail. Whether LinkedIn "
+            "meters attachments, or caps their size below this server's own "
+            "25 MB, is unmeasured -- the census's 'max 5, 20 MB total' has no "
+            "source this repository can reproduce."
+        ),
+        reversibility_procedure=(
+            "Open the per-message menu on one of your own messages under 60 "
+            "minutes old and read its items WITHOUT pressing one (capture "
+            "spec C6 in _audit/2026-09-24-lane-l5-messaging.md). No delete is "
+            "built here, and one would not recall a file already downloaded."
+        ),
+    ),
+    # ------------------------------------------------------------ end lane U
     # A PERSON HE NAMES, THROUGH THAT PERSON'S OWN PROFILE -- 2026-09-27,
     # lane L5's follow-up, on ruling THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET.
     # The two acts the ruling unblocks as builds: Connect (census N 1's route
@@ -3155,6 +3254,11 @@ _COMPOSITE_TARGET_KINDS: dict[str, tuple[str, str]] = {
     # person he names -- canonical as the profile LINK, so re-normalising a
     # canonical target is idempotent -- and only its segment reaches a url.
     "profile_and_text": ("profile", "text"),
+    # 2026-10-10, lane U, ``send_attachment``. The SUBJECT is a thread id, as
+    # ``send_reply``'s is; the CONTENT is a FILE, canonical as its path
+    # relative to the upload root (:func:`attachments.canonical_file`), so no
+    # absolute path -- which carries a username -- is bound, printed or kept.
+    "thread_and_file": ("thread", "file"),
 }
 
 #: THE TARGET KINDS OF A NAMED PERSON'S PROFILE (2026-09-27). The one-part
@@ -3346,7 +3450,15 @@ def url_target_of(spec: WriteSpec, target: str) -> str:
 #: :func:`_file_component_of` for the one shape this vocabulary does NOT yet
 #: express -- an action carrying text AND a file -- and why that is left to
 #: the wave that first needs it rather than invented here.
-UPLOAD_ACTIONS: frozenset[str] = frozenset()
+#:
+#: ONE ACTION SINCE 2026-10-10 (lane U): ``send_attachment``, a file into one
+#: conversation he names. It brings what the paragraph above asks for: a
+#: ``target_kind`` whose content component is the file (``thread_and_file``),
+#: and an arm in ``_live_control`` that measured the input and returns
+#: :data:`UPLOAD_CONTROL_KIND` -- aimed by the label of the button the input
+#: shares its wrapper with, on a real capture. Post media and the profile
+#: photo stay unwired: neither surface has a captured file input.
+UPLOAD_ACTIONS: frozenset[str] = frozenset({"send_attachment"})
 
 #: THE CONTROL CLASSIFICATION AN UPLOADING ACTION'S ARM MUST RETURN, and the
 #: half of the paragraph above that used to be prose only.
@@ -3490,6 +3602,27 @@ def _composite_target(spec: WriteSpec, target: Any) -> str:
         if isinstance(target, dict):
             value = target.get(first)
         return _clean_target_part(spec, first, value)
+    if spec.target_kind == "thread_and_file":
+        # THE FILE HALF, CANONICAL AS ITS PATH RELATIVE TO THE UPLOAD ROOT
+        # (lane U, 2026-10-10). The caller's spelling -- absolute or relative
+        # -- goes through every property of ``uploads`` and comes back as the
+        # root-relative name, which re-normalises to itself; an absolute path
+        # carries a username and would otherwise be bound, printed and kept.
+        if isinstance(target, str) and target.count(TARGET_JOIN) == 1:
+            subject, _, content = target.partition(TARGET_JOIN)
+        elif isinstance(target, dict):
+            subject, content = target.get(first), target.get(second)
+        else:
+            raise WriteAttemptError(
+                f"{spec.action!r} is addressed by {first!r} AND {second!r} "
+                "together: the conversation's thread id and the file, as a "
+                "mapping of the two."
+            )
+        return (
+            _clean_target_part(spec, first, subject)
+            + TARGET_JOIN
+            + attachments.canonical_file(_clean_target_part(spec, second, content))
+        )
     if spec.target_kind in _PROFILE_TARGET_KINDS:
         # THE SUBJECT IS A PROFILE, CANONICAL AS ITS LINK (2026-09-27). The
         # caller's link or member id goes through the named-profile parser, so
@@ -3804,6 +3937,10 @@ STRICT_PRESS_ACTIONS: frozenset[str] = NAMED_PROFILE_ACTIONS | frozenset(
         "withdraw_from_group",
         "follow_company",
         "send_invitation",
+        # LANE U, 2026-10-10: the attachment's Send, the reply form's own --
+        # its gate required exactly one form and one Send, so a second match
+        # at the press is something drawn since, and it throws.
+        "send_attachment",
     }
 )
 
@@ -4986,7 +5123,38 @@ async def _read_thread_reply_box(
     carry exactly the words about to be sent, compared inside the page; it is
     the BEFORE half of the delta ``_verify_after`` reads, so an identical
     earlier message can never stand in for this reply.
+
+    LANE U, ``send_attachment``: no words are compared -- the content half is
+    a FILE. The before-count is of messages drawing the file's NAME, and the
+    facts carry the reading of the input the file would go to, as counts and
+    closed tokens. An empty box whose input cannot be aimed reads UNKNOWN, so
+    no token is minted for a file with nowhere to go.
     """
+    if spec.action in ATTACHMENT_SEND_ACTIONS:
+        reading = await threads.read_thread(page)
+        upload = _file_component_of(spec, target)
+        family = attachments.read_once(upload).family
+        inputs = await attachments.read_reply_inputs(page, family)
+        sent = await attachments.read_sent_attachment(page, upload.name)
+        facts = {
+            "landed_on_the_named_thread": True,
+            **threads.thread_facts(reading),
+            "events_with_the_name": sent.get("events_with_the_name"),
+            "the_input_this_file_goes_to": {
+                key: inputs.get(key)
+                for key in (
+                    "input_label", "declaration_wanted", "labelled_wrappers",
+                    "inputs", "declaration", "error",
+                )
+            },
+        }
+        state, why = threads.reply_state(reading)
+        if state == "reply_box_empty":
+            aimed, aim_why = attachments.aim_verdict(inputs)
+            if not aimed:
+                return facts, UNKNOWN, aim_why
+            why = f"{why} And {aim_why}"
+        return facts, state, why
     reading = await threads.read_thread(page, text=_text_component_of(spec, target))
     facts = {"landed_on_the_named_thread": True, **threads.thread_facts(reading)}
     state, why = threads.reply_state(reading)
@@ -5892,7 +6060,16 @@ def _render(
     # file changed between the two -- which is exactly the news worth having.
     if spec.action in UPLOAD_ACTIONS:
         upload = _file_component_of(spec, observation.target)
-        out["file"] = upload.as_block(digest=uploads.digest_of(upload))
+        # ONE READ FOR THE BLOCK (lane U, 2026-10-10): the digest printed and
+        # the type read from the bytes come from the same bytes, through the
+        # function the drain point reads with. The digest is the path
+        # guard's own algorithm, so it equals ``uploads.digest_of``.
+        previewed = attachments.read_once(upload)
+        out["file"] = upload.as_block(digest=previewed.digest)
+        # WHAT THE FILE IS, READ FROM ITS BYTES, beside the extension its
+        # name claims -- the type the hand-off declares to the browser. A
+        # disagreement is said, never refused.
+        out["file"].update(attachments.facts_of(upload, previewed))
 
     # THE VERIFICATION DISCLOSURE, printed in the preview and again in the
     # result. Ruling 1, 2026-09-01: an unverifiable outcome may ship PROVIDED
@@ -6464,6 +6641,29 @@ PERFORMABLE: frozenset[str] = frozenset(
         # readonly.SANCTIONED_MUTATIONS -- so for those the missing thing is a
         # mutation class nobody has sanctioned, not a url.
         "update_setting",
+        # LANE U, 2026-10-10: ONE FILE INTO ONE CONVERSATION HE NAMES, census
+        # rows ``M M14`` / ``M M15`` / ``M M18``, on ruling FILE-UPLOAD-OPENED.
+        #
+        #   a measured surface   /messaging/thread/<id>/, the reply's own
+        #                        address, on the read allowlist
+        #   a measured anchor    the two file inputs of a conversation's reply
+        #                        form, each sharing a wrapper with ONE labelled
+        #                        button -- a real capture, the live lane's
+        #                        session 3 (tests/fixtures/live3/presence.html)
+        #   an aimable target    the thread id HE supplies, held to the landing,
+        #                        and the input beside the label for the file's
+        #                        kind, its accept declaration cross-checked
+        #   a verification       a FRESH LOAD of the conversation, counting the
+        #                        messages that draw the file's name -- aimed at
+        #                        a property, not at markup: no sent attachment
+        #                        has been captured, so a nameless one reads
+        #                        UNKNOWN, never SENT
+        #   no new permission    perform()'s ONE set_input_files and ONE click;
+        #                        readonly.SANCTIONED_MUTATIONS is unchanged
+        #
+        # ENABLING IS NOT FIRING. OPERATOR-NAMES-THE-TARGET governs its first
+        # live proof, and the lane's record (section 7) specifies it.
+        "send_attachment",
     }
 )
 
@@ -6839,6 +7039,19 @@ def anchor_label_for(
             if destination.strip().casefold() == known.casefold():
                 return known
         return None
+    if spec.action == "send_attachment":
+        # LANE U: THE LABEL OF THE BUTTON THE FILE'S INPUT SHARES ITS WRAPPER
+        # WITH -- 'Attach an image ...' for an image, 'Attach a file ...' for
+        # anything else -- chosen by the family read from the file's own
+        # bytes. A file that cannot be read has no anchor, and ``perform``
+        # refuses on that.
+        if not target:
+            return None
+        try:
+            family = attachments.read_once(_file_component_of(spec, target)).family
+        except WriteAttemptError:
+            return None
+        return attachments.input_for(family)[0]
     if spec.action == "send_reply":
         # THE REPLY EDITOR, the control that will be FILLED -- the same
         # distinction every typing action's arm makes. Send is reached only
@@ -7223,6 +7436,8 @@ _WRITE_SURFACE_FOR_ACTION: dict[str, str] = {
     # for it and would fall back to "linkedin" -- the least useful word in
     # the one message he reads when a write meets an auth wall.
     "send_reply": "messaging thread",
+    # LANE U, 2026-10-10: the same conversation page as the reply.
+    "send_attachment": "messaging thread",
     # 2026-09-27: the profile of the person he names.
     "connect_from_profile": "the named person's profile",
     "message_from_profile": "the named person's profile",
@@ -7307,6 +7522,7 @@ _WHERE_TO_LOOK: dict[str, str] = {
     # 2026-09-24. The conversation he named, which is also the surface this
     # action's own verification re-reads.
     "send_reply": "the conversation itself, in your LinkedIn messages",
+    "send_attachment": "the conversation itself, in your LinkedIn messages",
     # 2026-09-27, the named-person acts. The Sent list settles an invitation
     # (this server may not open it); the conversation settles a message.
     "connect_from_profile": "My Network, then Manage, then Sent",
@@ -7436,6 +7652,14 @@ _VERIFIED_FROM["send_reply"] = (
     "the preview's reading of the same conversation, and your words must be "
     "its last message. The NOT-SENT answer is read in place first: the reply "
     "box still holding your words with Send enabled."
+)
+_VERIFIED_FROM["send_attachment"] = (
+    "THE SAME CONVERSATION, LOADED FRESH (lane U), as for a reply. The DELTA "
+    "is the number of messages drawing the file's NAME, which must rise by "
+    "exactly one against the preview's count, with the last message yours "
+    "and one of them. The NOT-SENT answer is read in place first: the form "
+    "still drawing the file's name with Send enabled. A sent attachment drawn "
+    "without its name -- never captured -- reads UNKNOWN, not either answer."
 )
 _VERIFIED_FROM["connect_from_profile"] = (
     "THE SAME PROFILE, RENDERED FRESH by a new load of the address your link "
@@ -8371,6 +8595,32 @@ async def _live_control(
             dom.comment_editor_selector(),
         )
 
+    if spec.action == "send_attachment":
+        # LANE U: THE FILE INPUT, MEASURED ON THE PAGE ABOUT TO RECEIVE IT.
+        # The landing was held to the named thread id before this; first the
+        # reply box must read EMPTY with Send DISABLED -- nothing, words or an
+        # earlier attachment, waiting to go with the file -- then exactly one
+        # input must sit beside the label for the file's kind, declaring what
+        # that input was measured to declare. The fourth element says this
+        # control was READ and is a file input, which is what perform's
+        # control check requires before it hands anything over.
+        reading = await threads.read_thread(page)
+        state, why = threads.reply_state(reading)
+        if state != "reply_box_empty":
+            return (UNKNOWN, why, "")
+        upload = _file_component_of(spec, grant.target)
+        family = attachments.read_once(upload).family
+        inputs = await attachments.read_reply_inputs(page, family)
+        aimed, aim_why = attachments.aim_verdict(inputs)
+        if not aimed:
+            return (UNKNOWN, aim_why, "")
+        return (
+            "reply_box_empty",
+            f"{why} And {aim_why}",
+            attachments.input_selector(inputs["input_label"]),
+            UPLOAD_CONTROL_KIND,
+        )
+
     if spec.action == "send_reply":
         # THE REPLY BOX, RE-READ ON THE PAGE ABOUT TO BE TYPED INTO. The
         # landing was already held to the named thread id by
@@ -9245,6 +9495,43 @@ async def _verify_after(
         )
         return state, why, ""
 
+    if spec.action == "send_attachment":
+        # LANE U: SENT, READ BACK, the reply's two reads in the reply's order.
+        # IN PLACE first -- does the form still draw the file with Send on? --
+        # because a reload would erase that NOT-SENT evidence; then a FRESH
+        # LOAD of the conversation he named, held to its thread id, counting
+        # the messages that draw the file's name against the preview's count.
+        # A sent attachment drawn without its name reads UNKNOWN, never SENT
+        # and never NOT SENT: no sent attachment has been captured.
+        attached = _file_component_of(spec, grant.target).name
+        held = await attachments.held_in_place(page, attached)
+        landed = await _load(
+            navigator,
+            page,
+            spec.url_template.format(target=url_target_of(spec, grant.target)),
+            surface="messaging thread",
+        )
+        if not threads.landed_on_thread(landed, url_target_of(spec, grant.target)):
+            return (
+                UNKNOWN,
+                "the re-read did not land on the conversation you named, so it "
+                "says nothing about whether the file was sent. THE LANDING IS "
+                "WITHHELD; what is safe to say about it -- "
+                f"{landing.withheld(landed)}. Open the conversation yourself "
+                "and look before retrying.",
+                "",
+            )
+        after = await attachments.read_sent_attachment(page, attached)
+        state, why = attachments.sent_verdict(
+            observation.facts,
+            after,
+            held_in_place=held,
+            send_attempted=send_attempted,
+        )
+        return state, why, str(spec.url_template).format(
+            target=url_target_of(spec, grant.target)
+        )
+
     if spec.action == "send_reply":
         # SENT, READ BACK -- the confirmation ``send_message`` (retired
         # 2026-09-27) could never have while the thread was forbidden. Two
@@ -9506,6 +9793,12 @@ async def _opened_conversation_gate(
 #: publish gate the plain typing branch would otherwise fall into. A set rather
 #: than a test on the action name for the reason the two sets above give.
 REPLY_ACTIONS: frozenset[str] = frozenset({"send_reply"})
+
+#: LANE U, 2026-10-10: the uploads whose Send is appended by
+#: :func:`attachments.attachment_send_gate` after the file is handed over --
+#: a set beside ``REPLY_ACTIONS`` rather than in it, because nothing is typed
+#: and the reply's draft rule and words check do not apply.
+ATTACHMENT_SEND_ACTIONS: frozenset[str] = frozenset({"send_attachment"})
 
 
 #: ``ADDRESSED_TYPING_ACTIONS`` STOOD HERE until 2026-09-27: the actions that
@@ -10518,6 +10811,8 @@ async def perform(
     selects_made = 0
     uploads_made = 0
     uploaded: Optional[dict[str, Any]] = None
+    # The name of the file handed over, for the read-back after it (lane U).
+    attached_name = ""
     # STRICT PRESSES AND FILLS FOR THE NAMED-PERSON ACTS (2026-09-27): a
     # selector that matches two elements at the moment of the call THROWS
     # instead of taking the first. Their controls carry no position -- the
@@ -10583,7 +10878,30 @@ async def perform(
                     "action reads and prints one -- so this means the grant "
                     "was made some other way. Nothing was uploaded."
                 )
-            current = uploads.digest_of(upload_file)
+            # ONE READ, COMPARED AND HANDED OVER (lane U, 2026-10-10). This
+            # read ``uploads.digest_of`` here and then handed the browser the
+            # PATH, so a file swapped after the comparison uploaded bytes
+            # nobody compared -- measured on the node by
+            # ``tests/test_upload_hands_over_verified_bytes.py``. Now the
+            # bytes are read ONCE, with every property of the path guard
+            # re-run, and the digest compared below is of exactly the bytes
+            # the call at the bottom hands over. A refusal by the path guard
+            # here leaves in this function's OWN words, interpolating only the
+            # action: an exception's text is not carried into a receipt
+            # (``tests/test_a_write_receipt_carries_no_library_message.py``),
+            # and the preview, run again, prints the guard's exact reason.
+            try:
+                verified_bytes = attachments.read_once(upload_file)
+            except WriteAttemptError as exc:
+                raise _PerformRefused(
+                    f"refusing to upload for {spec.action!r}: the file no "
+                    "longer passes the path guard it passed at the preview -- "
+                    "it was moved, replaced, emptied, grown past the cap, or "
+                    "is no longer a regular file inside the upload directory. "
+                    "Preview it again to read which. Nothing was uploaded and "
+                    "nothing was clicked."
+                ) from exc
+            current = verified_bytes.digest
             if current != approved:
                 raise _PerformRefused(
                     f"refusing to upload for {spec.action!r}: the file at "
@@ -10647,15 +10965,35 @@ async def perform(
                     "the arm. Nothing was uploaded and nothing was clicked."
                 )
             # THE ONE CALL SITE, and the fifth entry on
-            # readonly.SANCTIONED_MUTATIONS. The path handed over is
-            # ``UploadFile.path`` -- absolute, real, checked to be a regular
-            # file inside the declared root with no link anywhere on its chain
-            # -- and not the string a caller supplied.
+            # readonly.SANCTIONED_MUTATIONS. WHAT IS HANDED OVER IS THE
+            # VERIFIED BYTES, not a path (lane U, 2026-10-10): the payload
+            # carries the bytes ``read_once`` digested above, under the file's
+            # own name and the type read from those bytes. The file they came
+            # from is ``UploadFile.path`` -- absolute, real, inside the
+            # declared root with no link on its chain, re-checked at the read
+            # -- and never the string a caller supplied.
             await page.set_input_files(
-                upload_selector, str(upload_file.path), timeout=CLICK_TIMEOUT_MS
+                upload_selector, verified_bytes.as_payload(), timeout=CLICK_TIMEOUT_MS
             )
             uploads_made += 1
-            uploaded = upload_file.as_block(digest=current)
+            uploaded = {**upload_file.as_block(digest=current), **verified_bytes.as_block()}
+            attached_name = upload_file.name
+        # LANE U: THE READ-BACK BEFORE SEND, for the one upload that sends.
+        # After the hand-off, a bounded wait -- deciding nothing -- for the
+        # form to draw the file's name and turn Send on; then the gate reads
+        # the form and appends Send to the ONE click queue only if it draws
+        # the file's name EXACTLY ONCE, holds no words, carries no recipient
+        # box and shows Send enabled. Reported in the receipt's ``send_gate``
+        # block, the field every send already reports in.
+        if spec.action in ATTACHMENT_SEND_ACTIONS and uploads_made:
+            send_enabled_wait = await attachments.wait_for_attachment_drawn(
+                page, attached_name
+            )
+            send_gate = await attachments.attachment_send_gate(
+                page, file_name=attached_name
+            )
+            if send_gate["proceed"]:
+                click_plan.append(send_gate["selector"])
         while select_plan:
             select_selector, select_text = select_plan.pop(0)
             # BY THE OPTION'S OWN LABEL, never by value and never by index.
