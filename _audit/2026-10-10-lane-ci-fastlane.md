@@ -39,11 +39,15 @@ the next merge):
 | tests: the impact gate's real-tree tests share one reading of the tree -- 410s to 165s, no assertion touched | ef615b9 |
 | merge origin/master 66eb699 into lane CI: the CI follow-ups' merge and live session 8, ahead of the certification push | 5ca58c1 |
 | merge origin/master 1027bf8 into lane CI: lane G2's engine-run fixtures, ahead of the certification push | d7c6576 |
-| this record's section 13, INSTRUMENTS 87.8 | (the commit that adds them) |
+| record: lane CI section 13 -- the slowest test file shares one reading, and the fast lane at 4m46s | f93104c |
+| rulings register regenerated: two headings naming a ruling, added by this lane's record | 7fee549 |
+| merge origin/master 16ee59a into lane CI: master's own rulings-register fix, identical to this branch's | 950e7fe |
+| ci: shard timings rebuilt from master run 38042601470, the first carrying the shared impact-gate reading | 94766d2 |
+| this record's section 14 | (the commit that adds it) |
 
 (Through 4bc1c84 the commits reached master in its merges 53908ea and
-b10bde8, and through ac5cb0a in f8c7392; ef615b9 onward wait on the next
-merge.)
+b10bde8, through ac5cb0a in f8c7392, and through f93104c by fast-forward;
+7fee549 onward wait on the next merge.)
 
 ## 1. How a lane uses it -- two commands
 
@@ -71,7 +75,7 @@ sweep at 72-217 s and twice per push):
 |---|---|---|
 | `push`: the helper's checks (dirty tree, branch, hook gate, ancestry) | well under a second -- no sweep | DERIVED (git plumbing only) |
 | `push`: the hook's full check, sweep included, ONCE | 9.8 s for 3 commits / 1002 blobs; 10.4 s for 8 commits. Whole `lane_ci.py push` once master carried section 9: 14.4 s (section 12), against 104.6 s before | MEASURED on this box, sections 9, 10 and 12 |
-| CI run, one ubuntu 3.13 cell in four shards | 4m46s once the slowest test file shared its reading (run 38041688406, section 13.5); 5m50s on the rebuilt timings alone (run 38038508157); 6m21s before them (run 38036281943) | MEASURED, sections 10, 12 and 13 |
+| CI run, one ubuntu 3.13 cell in four shards | 4m46s once the slowest test file shared its reading (run 38041688406, section 13.5); 5m39s on the timings rebuilt after that, in a runner hour 29 % slower (run 38043644363, section 14); 5m50s and 6m21s before (runs 38038508157, 38036281943). Expect ~4.5-6 min: free-pool runner speed moves it more than the plan does | MEASURED, sections 10, 12, 13 and 14 |
 | total, push to verdict | ~5 minutes (18.1 s push, 4m46s run), against 30-60 locally | MEASURED, section 13.5 |
 
 ## 2. The gate -- `scripts/pre_push_ref_gate.py`
@@ -711,7 +715,58 @@ the packer gave its shard fewer other files (ubuntu sums 440 / 672 / 558 /
 once master has run with this change rebalances them -- the recipe of
 section 12 again, from that run's junit.
 
-## 8. Questions for the orchestrator
+## 14. Q7, answered YES at 15:13: the timings rebuilt from master's own run, and what a table cannot do
+
+MASTER'S RUN FIRST WENT RED, AND IT WAS THIS LANE'S COMMIT. Master's push run
+38042601470 at f93104c failed one test in every cell,
+`tests/test_the_rulings_register_is_derived.py::test_the_committed_register_is_what_the_corpus_derives`:
+section 13's heading and INSTRUMENTS 87.8's heading each name a ruling, the
+register counts such headings (280 became 282), and the record's commit had
+regenerated the audit index but not the register. Master carries the
+one-line re-render (16ee59a; this lane's identical fix was merged, not pushed
+separately). THE PROCESS FIX, from the orchestrator: every record commit runs
+all three derived-view checks -- `build_rulings_index.py`,
+`build_audit_index.py` and `build_blocker_map.py`, each with `--check` --
+not the audit index alone. This section's commit did. (The same record
+commit also left this record with its section 8 heading written twice, an
+edit-splice error; corrected here.)
+
+THE REBUILD, the shipped recipe end to end: `pytest --collect-only -q` at
+f93104c, the run's head (12922 tests; no live session this time), then
+`ci_shard.py --write-timings` over all 18 junit reports of run 38042601470.
+That run was red, but on a stale derived view only: every test ran and its
+totals job passed, so no timing in it moved. 302 files, 3578.2 s; the
+impact-gate test file priced 154 s (was 195 s).
+
+THE 5 % TARGET IS NOT REACHABLE BY A TABLE, predicted and then measured:
+
+| | ubuntu 3.13 test seconds per shard | 4-worker makespans |
+|---|---|---|
+| recipe table, predicted (xdist replay over run 38042601470's ubuntu 3.13 seconds) | 615 / 715 / 734 / 694 (19 % apart) | 160 / 181 / 194 / 190 (21 % apart) |
+| probe: a table priced on ubuntu 3.13 alone, predicted | 690 / 690 / 690 / 690 (0 %) | 174 / 207 / 185 / 176 (19 % apart, and a slower worst) |
+| recipe table, MEASURED in run 38043644363 | 594 / 708 / 783 / 833 (40 % apart) | "Run this shard" 168 / 193 / 231 / 232 s (38 % apart) |
+
+Balanced SUMS do not make balanced WALLS: inside a shard, xdist places whole
+files on 4 workers, most tests first, and that alone leaves the probe's
+perfectly balanced shards 19 % apart. And the measured run adds a third
+source the model cannot hold: the same 12922 tests took 2918 s of ubuntu test
+time here against 2262 s in run 38041688406, an hour earlier -- 29 % slower,
+file for file (the impact-gate file 108 s against 80 s). Per-runner speed on
+GitHub's free pool varies by more than the 5 % the target asks for.
+
+THE CERTIFICATION RUN: 38043644363, push on the lane's `ci/` ref, head = the
+commit "ci: shard timings rebuilt from master run 38042601470, the first
+carrying the shared impact-gate reading"; conclusion SUCCESS; 6 jobs; 12922
+cases, 0 failures, 0 errors, 9 skips; WALL 5m39s (job totals 244 / 269 / 321
+/ 314 s). Against 4m46s for the previous run on the old table -- a slower
+runner hour, by the figures above, not a slower plan. `lane_ci.py push` 17.6 s;
+`wait` 322.7 s.
+
+WHAT WOULD MOVE IT, recorded and not done (the order was "then STOP"): the
+remaining spread is inside shards, so the lever is the scheduler, not the
+table -- e.g. a time-aware order in place of xdist's count order (the same
+replay gives a slowest shard of 183 s against 194 s); or a fifth shard, which
+the 20-job ceiling prices at five lanes x five shards.
 
 ## 8. Questions for the orchestrator
 
@@ -747,7 +802,8 @@ Questions 4 and 5 were answered at 13:43: YES to both -- section 11 (the
 decoding rule, as a deliberate behaviour change) and section 12 (the
 timings).
 
-7. (added 15:10) REBUILD THE TIMINGS ONCE MORE? Ground: section 13.5 -- the
+7. (added 15:10; answered YES at 15:13, done in section 14) REBUILD THE
+   TIMINGS ONCE MORE? Ground: section 13.5 -- the
    table prices the impact-gate test file at its old 199 s where it now runs
    80 s, so the four shards are 440 / 672 / 558 / 592 s of ubuntu test time.
    Recommendation: rerun section 12's recipe on the first master run that

@@ -270,7 +270,13 @@ _WHERE_TO_LOOK_OWNERS: dict[str, frozenset[str]] = {
     # ``message_from_profile`` VERIFIES in the conversation its press opened,
     # read in place with a before-count, so the conversation in his LinkedIn
     # messages is the surface it read.
-    "LinkedIn messages": frozenset({"send_reply", "message_from_profile"}),
+    # A FOURTH OWNER FROM 2026-10-10 (lane U), entitled for the reply's
+    # reason: ``send_attachment`` VERIFIES in the conversation itself, by a
+    # fresh load of the conversation he named and the count of messages
+    # drawing the file's name.
+    "LinkedIn messages": frozenset(
+        {"send_reply", "message_from_profile", "send_attachment"}
+    ),
     # ADDED 2026-09-27 FOR ``withdraw_from_group`` (lane L8): his Groups page is where
     # his memberships are listed and where the leave is verified, and no other
     # row sends him there. Measured to occur in exactly one row.
@@ -294,7 +300,11 @@ _LEGITIMATE_SHARED_PLACES: frozenset[frozenset[str]] = frozenset(
         # profile -- settling in the one list LinkedIn keeps of every
         # invitation sent. The argument is on the "My Network" owner entry.
         frozenset({"send_invitation", "connect_from_profile"}),
-        # THE REACTION PAIR, 2026-10-10 (lane NP), by the same equality edit:
+        # THE CONVERSATION PAIR, 2026-10-10 (lane U), by the same equality
+        # edit: a reply and an attachment go into the one conversation he
+        # names, and both are read back there.
+        frozenset({"send_reply", "send_attachment"}),
+        # THE REACTION PAIR, 2026-10-10 (lane NP), by the same equality edit --
         # an act and its inverse on one toggle, settled on the one post that
         # carries the toggle's state -- the save pair's and the follow
         # group's shape exactly. The argument is on the "the post" owner entry.
@@ -502,7 +512,8 @@ def check_no_two_actions_share_a_place_by_accident(
         "these actions print the IDENTICAL place to look and are not one of "
         "the groups sanctioned to: %s. The sanctioned groups are the save "
         "pair, the follow group, (since 2026-09-27) the invitation pair and "
-        "(since 2026-10-10) the reaction pair, and they are compared by "
+        "(since 2026-10-10) the conversation pair and the reaction pair, and "
+        "they are compared by "
         "equality -- an action joining any one of them fails here too."
         % unsanctioned
     )
@@ -663,17 +674,30 @@ def test_the_action_set_is_the_one_this_file_was_measured_against():
     # SEVENTEEN SINCE LANE L5'S ORDER OF 2026-09-27 23:36: ``send_message``
     # RETIRED (aimed by a name). No row was re-derived for it -- an action
     # leaving takes its rows with it -- and its two owner entries above went.
+    # EIGHTEEN FROM LANE U'S BRANCH, 2026-10-10: ``send_attachment``'s rows
+    # were read against every owned phrase, and the file went red on exactly
+    # the two it shares with the reply -- "LinkedIn messages", and the
+    # identical place to look. Each was decided on the surface it MEASURES: it
+    # verifies in the conversation itself, so it is a fourth owner of
+    # "LinkedIn messages", and the reply pair is a fourth sanctioned shared
+    # place. No row was reworded to dodge a phrase.
     # EIGHTEEN FROM 2026-10-10 (lane NP, the orchestrator's ruling of 14:14):
     # ``withdraw_reaction``'s two rows were read, and this file went red on
     # exactly the two places it shares with ``react_to_item``: the phrase
     # "the post" and the identical value "the post itself". Each was decided
     # on the surface the action MEASURES -- it presses and verifies on the
     # item's own permalink -- so it became a third owner of "the post" and
-    # the reaction pair a fourth sanctioned shared place, an act and its
-    # inverse on one toggle like the save pair. No row was reworded to dodge
+    # the reaction pair a fifth sanctioned shared place (the fourth on the
+    # lane's branch), an act and its inverse on one toggle like the save
+    # pair. No row was reworded to dodge
     # a phrase. Its ``_VERIFIED_FROM`` row holds no phrase another action owns.
-    assert len(writes.PERFORMABLE) == 18, (
-        "writes.PERFORMABLE holds %d actions, not the 18 this file was "
+    # NINETEEN AT LANE NP'S MERGE OF MASTER 0103810, 2026-10-10: the two
+    # lanes' rows, each decided on its own branch, were read against each
+    # other's owned phrases on the merged tree -- "the post" and "LinkedIn
+    # messages" each keep their own owners -- and the rest of this file
+    # passed with both actions' rows in place.
+    assert len(writes.PERFORMABLE) == 19, (
+        "writes.PERFORMABLE holds %d actions, not the 19 this file was "
         "measured against: %s. Re-derive the phrase owners in this file for "
         "the new action, then update this count."
         % (len(writes.PERFORMABLE), sorted(writes.PERFORMABLE))

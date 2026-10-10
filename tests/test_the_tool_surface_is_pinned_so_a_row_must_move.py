@@ -142,6 +142,8 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
         "limit", "location", "locations", "remote", "sort_by", "start",
         "under_ten_applicants",
     ),
+    # 2026-10-10, lane U: one file into one conversation he names.
+    "linkedin_send_attachment": ("confirm_token", "file", "thread_id"),
     # ``member`` -> ``profile`` on 2026-09-27 (lane L5, the orchestrator's
     # order of 23:36): aimed by the person's profile link, never a name.
     # Census N 1 keeps its state; its note records the new aim.
@@ -495,8 +497,34 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: was split under COMPOUND-ROW-SPLITS-ONLY-ON-STATE -- `M C35` ("Remove a
 #: reaction") COVERED-UNFIRED on this tool, `M C35b` ("Change a reaction to
 #: another kind") GAP. The counts above did not move with it.
-PINNED_TOOL_COUNT = 62
-PINNED_PARAMETER_COUNT = 99
+#: **RE-PINNED 2026-10-10 AT 62 TOOLS AND 99 PARAMETERS on lane U's branch
+#: (ruling FILE-UPLOAD-OPENED): one WRITE,
+#: `linkedin_send_attachment(thread_id, file, confirm_token)` -- one file from
+#: the declared upload root into one conversation he names, behind the
+#: single-use grant.** THE CENSUS DECISION, in the same commit: `M M14`,
+#: `M M15` and `M M18` STAY GAP -- the file input is aimed on a real capture,
+#: but no capture shows a composer holding an attachment or a sent
+#: attachment message, so the read-back and the verification are aimed at
+#: the file's name rather than at markup; each row waits on its capture
+#: (U-REPLY-ATTACHMENT-SENT and -PENDING). No other row moves. See
+#: `_audit/2026-09-28-lane-u-uploads.md`, section 5.
+#: THE THREE ROWS MOVED LATER THE SAME DAY, with no change to the surface:
+#: GAP -> COVERED-UNFIRED on the live lane's session-8 capture of the
+#: composer's footer, each row aimed at its own input there; the read-back
+#: and the verification stay aimed at the file's name, and refuse otherwise.
+#: **RE-PINNED AT THE MERGE OF MASTER f8c7392 INTO LANE U, 2026-10-10: 62
+#: TOOLS AND 100 PARAMETERS.** The two re-pins above meet here: lane NP's one
+#: parameter (96 -> 97, no tool) and lane U's one tool with its three
+#: parameters (61 -> 62 tools, 96 -> 99). Neither moved the other's entry, so
+#: the sum holds: 61 + 1 tools, 96 + 1 + 3 parameters.
+#: **RE-PINNED AT LANE NP'S MERGE OF MASTER 0103810, 2026-10-10: 63 TOOLS
+#: AND 102 PARAMETERS.** Lane NP's tool with its two parameters
+#: (`linkedin_withdraw_reaction(item, confirm_token)`) meets lane U's with its
+#: three: 61 + 1 + 1 tools, 97 + 3 + 2 parameters. Neither moved the other's
+#: entry, and the census moves are each lane's own (`M C35` and `M C35b`;
+#: `M M14`, `M M15`, `M M18`).
+PINNED_TOOL_COUNT = 63
+PINNED_PARAMETER_COUNT = 102
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:

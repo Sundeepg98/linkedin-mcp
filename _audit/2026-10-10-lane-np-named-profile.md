@@ -408,6 +408,15 @@ the merge of master `53908ea`.
     `check_census_locators_resolve.py`, the exclusion, refused-address,
     read-address and write-off checkers, `pin_census_rows.py --check`, and
     the blocker map, rulings register and audit index `--check`s.
+  - AT THE LANE'S MERGE OF MASTER 0103810 (lane U's attachment tool, merged to
+    master over 71d83ca without this lane's withdraw tool): both branches had
+    moved the same pins by one tool from one base, so every count was
+    re-derived on the merged tree, never taken from either side -- 63 tools
+    and 102 parameters, 44 read and 19 write, 19 performable actions of 20
+    sanctioned, the receipt file at 19 with the conversation pair and the
+    reaction pair both sanctioned, the preview-state REACHED table at 19, the
+    write classes at 371 (16 R1, 34 R2, 321 R3), and the census at
+    adjudicated 214, delivered_broad 136, unfired 25, b1_standing 16, gap 558.
 
 ---
 

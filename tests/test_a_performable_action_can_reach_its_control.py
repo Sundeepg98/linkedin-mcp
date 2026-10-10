@@ -95,8 +95,20 @@ from __future__ import annotations
 
 import pytest
 
-from linkedin_server import writes
+from linkedin_server import config, writes
 from linkedin_server.writes import spec_for_action
+
+
+@pytest.fixture(autouse=True)
+def _a_declared_root_holding_the_file_shape(tmp_path, monkeypatch):
+    """``thread_and_file`` (lane U, 2026-10-10) canonicalises its FILE against
+    the declared upload root, through every property of ``uploads`` -- so its
+    shape needs a real file in a real root. A temp root holding a tiny PNG,
+    pointed at for every test here; no other kind reads it."""
+    root = tmp_path / "uploads"
+    root.mkdir()
+    (root / "shape-example.png").write_bytes(b"\x89PNG\r\n\x1a\n" + b"shape" * 8)
+    monkeypatch.setattr(config, "UPLOAD_ROOT", root)
 
 #: A canonical target per target kind, because ``anchor_label_for`` takes one
 #: for the multi-state action and ignores it for every other. These are shapes,
@@ -141,6 +153,9 @@ _TARGETS: dict[str, object] = {
         "profile": "https://www.linkedin.com/in/someone-shape-example/",
         "text": "some text",
     },
+    # 2026-10-10, lane U: a thread id and a FILE in the declared root, which
+    # the autouse fixture above provides.
+    "thread_and_file": {"thread": "2-SYNTHETICTHREADAAAA==", "file": "shape-example.png"},
 }
 
 
