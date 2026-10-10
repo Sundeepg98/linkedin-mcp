@@ -11647,7 +11647,13 @@ Chromium, through the probe's own `_classify`, so nothing is copied. Until
 now nothing in the suite had executed the one line that makes a fixture a
 control (`DOMParser` inside the shipped script). SHOWN FAILING: each path's
 planted defect turns it red, and an expectation bent by one turns exactly
-its own path red.
+its own path red. The same file runs the group reader over the live lane's
+tracked group-page skeleton against the live load's own verdict, with a
+planted post permalink as its control.
+
+    A SERIALISED PAGE IS NOT THE PAGE: NESTED ANCHORS DO NOT SURVIVE A
+    RE-PARSE, SO A SKELETON'S COUNT CAN DIFFER FROM THE LIVE COUNT FOR THE
+    PARSER'S REASONS. COMPARE A READER WITH THE ENGINE IT RAN IN.
 
 ### 86.9 DECLARED DISPOSABLE
 

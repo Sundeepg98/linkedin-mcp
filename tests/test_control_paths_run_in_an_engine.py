@@ -78,3 +78,72 @@ async def test_every_planted_defect_turns_its_path_red(browser_page):
         if row["ran"] and row["comparison"]["verdict"] == "PASS"
     ]
     assert still_green == [], still_green
+
+
+# ---------------------------------------------------------------------------
+# THE GROUP READER, over the live lane's tracked skeleton of a group's page
+# ---------------------------------------------------------------------------
+#
+# ``group_page.read_group_page`` reads through ``anchors.read_anchors`` and has
+# no control fixture of its own, and no test had run it in an engine. The live
+# lane's session 2 captured one group's page and tracked its skeleton; the
+# record of that load (``_audit/2026-09-23-live-lane-session-1.md``, "Live
+# session 2") says what the live page gave: reach AMBIGUOUS, not one post
+# permalink. Those two are the expectation, taken from the live load and not
+# from this run.
+#
+# THE ANCHOR COUNT IS COMPARED WITH THE ENGINE'S OWN, NOT WITH THE RECORD'S 122.
+# The skeleton's source holds 122 anchor tags, four of them opened inside an
+# open anchor; a parser splits such nesting, so the engine's DOM holds 126. A
+# live DOM can nest anchors, a serialised and re-parsed one cannot -- so the
+# record's number is not the skeleton's, and the honest check is that the
+# classifier saw every anchor the engine parsed.
+
+GROUP_HOME = REPO / "tests" / "fixtures" / "live2" / "group_home.html"
+
+#: A post permalink, planted as the control: the shape the reader counts as
+#: reach. A five-digit id, under the identity sweep's six-digit floor.
+PLANTED_PERMALINK = '<a href="/feed/update/urn:li:activity:12345/">x</a>'
+
+
+async def _refuse(route) -> None:  # noqa: ANN001 - playwright route
+    await route.abort()
+
+
+async def _read_group(page, html: str):
+    """THE SKELETON KEEPS ITS PIXELS' AND STYLESHEETS' ADDRESS SHAPES, so a
+    browser loading it would fetch them: every request is refused in the
+    page's own route first -- the network guard caught this test without it,
+    as it caught the named-profile skeleton's."""
+    from linkedin_server import group_page
+
+    await page.route("**/*", _refuse)
+    await page.set_content(html, wait_until="domcontentloaded", timeout=60_000)
+    out = await group_page.read_group_page(page)
+    drawn = await page.evaluate("document.querySelectorAll('a').length")
+    return out, group_page.reachability(out), drawn
+
+
+async def test_the_group_reader_reads_the_live_lanes_group_page_in_an_engine(browser_page):
+    html = GROUP_HOME.read_text(encoding="utf-8")
+    assert "</main>" in html and "feed/update" not in html, (
+        "the skeleton no longer has the shape this test rests on"
+    )
+    out, reach, drawn = await _read_group(browser_page, html)
+    assert out["values_refused"] == 0, out
+    assert out["anchors_seen"] == drawn > 0, (out["anchors_seen"], drawn)
+    assert out["feed_update_anchors"] == 0, out
+    assert reach["state"] == "ambiguous", reach
+
+
+async def test_a_planted_post_permalink_moves_the_group_reader_off_ambiguous(browser_page):
+    """THE CONTROL: one post permalink planted in the same page is counted, and
+    the verdict leaves AMBIGUOUS -- so the clean test is not passing on a
+    reader that counts nothing as reach."""
+    html = GROUP_HOME.read_text(encoding="utf-8").replace(
+        "</main>", PLANTED_PERMALINK + "</main>", 1
+    )
+    out, reach, drawn = await _read_group(browser_page, html)
+    assert out["feed_update_anchors"] == 1, out
+    assert out["anchors_seen"] == drawn, (out["anchors_seen"], drawn)
+    assert reach["state"] != "ambiguous", reach

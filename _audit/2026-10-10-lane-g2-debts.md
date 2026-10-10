@@ -333,13 +333,12 @@ census instrument and derived-view check ran green over this slice here
    editor, its success path returns his own field's value verbatim. It is an
    application of that ruling by this lane, and the orchestrator's to
    reverse.
-3. CLOSED HERE IN PART: three script readers no test ran in any engine --
+3. CLOSED HERE: the four script readers no test ran in any engine --
    `anchors.read_anchors`, `collections_page.read_collections`,
-   `company_root.read_company_root` -- and both search readers' control
-   paths now run in the suite (section 9). `group_page.read_group_page`
-   reads through `anchors.read_anchors`, whose script now runs, but the
-   group reader itself still runs in no engine; a headless drive over the
-   live lane's tracked `group_home` skeleton is its next step.
+   `company_root.read_company_root`, `group_page.read_group_page` -- and both
+   search readers' control paths now run in the suite (section 9). The offline
+   guard still records them not driven: a pure-Python page cannot run a
+   script, and the entries say where they do run.
 4. THE FULL SUITE runs on CI for this branch before it merges, because
    `linkedin_server/people_data.py` is imported by the server module and so
    by most of the suite, and the local gates here were scoped by policy: lane
@@ -531,3 +530,19 @@ renamed) changing its fixture and turning its comparison red.
 SHOWN FAILING: the planted run turns all five red; and with one expectation
 bent by one, path by path (a scratch control, disposable), exactly that path
 reads FAIL and the other four PASS. 3 passed in 8.5 s.
+
+AND THE GROUP READER, which has no control fixture: two more tests run
+`group_page.read_group_page` over the live lane's tracked skeleton of a
+group's page (`tests/fixtures/live2/group_home.html`). The expectation is the
+live load's, from the session-2 record: reach AMBIGUOUS, not one post
+permalink -- and the reader reproduces both, counting every anchor the engine
+parsed. The record's anchor count, 122, is not the skeleton's, and the
+difference was measured rather than tuned: the skeleton's source holds 122
+anchor tags, four opened inside an open anchor, and a parser splits such
+nesting, so the engine's DOM holds 126 -- a live DOM can nest anchors, a
+serialised and re-parsed one cannot. So the reader is held to the engine's own
+count, not to either number. THE CONTROL: one post permalink planted in the
+same page is counted and moves the verdict off AMBIGUOUS. The network guard
+caught the first version, which let the browser fetch the skeleton's pixel
+addresses; every request is now refused in the page's own route first, as the
+named-profile skeleton's test does. 5 passed in 7.9 s.
