@@ -512,7 +512,14 @@ def _install_counter() -> None:
         # first version of this wrapper waved it through uncounted and
         # unspaced. Only an address NEITHER door admits passes uncounted, and
         # ``original`` refuses it before ``page.goto``.
-        second_door = kwargs.get("named_profile") is True
+        # AND THE THIRD (found live, 2026-10-10, session 9): lane NP's detail
+        # page enters through ``named_profile_details_of=``, which this
+        # wrapper also waved through, uncounted and unspaced -- the load was
+        # counted by hand. Every door ``BROWSER.goto`` has is counted now.
+        second_door = (
+            kwargs.get("named_profile") is True
+            or kwargs.get("named_profile_details_of") is not None
+        )
         if not second_door and not readonly.is_read_url(url):
             return await original(page, url, **kwargs)
         loads = _ledger_read()["loads"]
