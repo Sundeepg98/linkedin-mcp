@@ -532,16 +532,20 @@ async def _read_named_switch_block(
     ``role=switch`` element, and they are the same control -- the input on
     :data:`_NAMED_SWITCH_PATH`, carrying its own ``aria-label`` -- nothing in
     the block carries ``aria-checked``, and Playwright computes a NON-empty
-    name for the switch. The state is the checkbox's own; there is no second
-    witness to agree with in this shape. Counts only; the caller catches.
+    name for the switch. And exactly one toggle holds it, its empty label
+    beside it (:data:`_NAMED_SWITCH_TOGGLE_PATH`, where the press lands --
+    measured 2026-10-10, the live lane's session 8). The state is the
+    checkbox's own; there is no second witness to agree with in this shape.
+    Counts only; the caller catches.
     """
     switch = block + _NAMED_SWITCH_PATH
     held = await dialog.locator("css=" + block + ' input[type="checkbox"]').count()
     roles = await dialog.locator("css=" + block + ' [role="switch"]').count()
     shaped = await dialog.locator("css=" + switch).count()
+    toggles = await dialog.locator("css=" + block + _NAMED_SWITCH_TOGGLE_PATH).count()
     marked = await dialog.locator("css=" + block + " [aria-checked]").count()
     unnamed = await dialog.locator("css=" + switch).and_(unnamed_switch).count()
-    if any(coerce.as_count(n) != 1 for n in (held, roles, shaped)):
+    if any(coerce.as_count(n) != 1 for n in (held, roles, shaped, toggles)):
         return (False, None)
     if coerce.as_count(marked) != 0 or coerce.as_count(unnamed) != 0:
         return (False, None)
@@ -686,7 +690,9 @@ _BADGE_TITLED: str = ":has(> div:first-child " + _BADGE_TITLE_P + ")"
 #: ``aria-label`` in the second. A row is read in exactly ONE of them -- both
 #: blocks in that shape and nothing of the other anywhere in the row -- or it
 #: is refused. The badge's block is still found by its title, compared in the
-#: page; the press is aimed at the switch's own control, by its role.
+#: page; the press is aimed at the wrapper in the first shape and, in the
+#: second, at the toggle that holds the named input
+#: (:data:`_NAMED_SWITCH_TOGGLE_PATH`) -- the input itself draws no box.
 SWITCH_SHAPES: tuple[str, ...] = ("wrapper", "named_input")
 
 #: From a setting block down to the second shape's switch: the block's second
@@ -695,6 +701,23 @@ SWITCH_SHAPES: tuple[str, ...] = ("wrapper", "named_input")
 _NAMED_SWITCH_PATH: str = (
     ' > div:last-child label:empty + input[type="checkbox"][role="switch"][aria-label]'
     ":not([aria-labelledby]):not(label *)"
+)
+
+#: WHERE THE SECOND SHAPE'S PRESS LANDS: THE TOGGLE THAT HOLDS THE NAMED
+#: INPUT, MEASURED 2026-10-10 (the live lane's session 8: two read-only loads
+#: of his intro editor, where-a-press-could-land listed by tag, attribute
+#: names and box only). The named input draws NO BOX and is not visible, and
+#: a trial click on it timed out -- so the press this module aimed at the
+#: input, from session 7's offline fix to session 8, could never land. Its
+#: parent is drawn (52 x 32) and trial-actionable: one div holding the empty
+#: label, the input and the knob. The press is aimed there, found from the
+#: same block BY the same named input, so it is that switch's toggle and no
+#: other's; the second shape requires exactly one, and the reader requires it
+#: drawn (``8_press_target_not_drawn``).
+_NAMED_SWITCH_TOGGLE_PATH: str = (
+    " > div:last-child div:not(label *)"
+    ':has(> label:empty + input[type="checkbox"][role="switch"][aria-label]'
+    ":not([aria-labelledby]))"
 )
 
 #: The settings row in the second shape: a leading paragraph and exactly two
@@ -746,14 +769,21 @@ PREMIUM_BADGE_REFUSALS: dict[str, str] = {
     "5_switch_not_the_recorded_shape": (
         "a switch in the row is not in a recorded shape: one unnamed checkbox "
         "switch in a wrapper carrying role=switch and aria-checked, or one "
-        "checkbox switch named on its own input, with no aria-checked in its "
-        "block."
+        "checkbox switch named on its own input, held with its empty label by "
+        "one toggle, with no aria-checked in its block."
     ),
     "6_state_unreadable": (
         "a switch's checkbox and its aria-checked wrapper disagree, so its "
         "state cannot be read."
     ),
     "7_reading_failed": "the reading itself failed; only its exception type is kept.",
+    "8_press_target_not_drawn": (
+        "the control the press would land on -- the wrapper in the first "
+        "shape, the toggle holding the named input in the second -- draws no "
+        "box, so a click could not reach it. (Measured 2026-10-10 on the named "
+        "input itself, which is why the second shape's press is aimed at its "
+        "toggle.)"
+    ),
 }
 
 
@@ -771,8 +801,9 @@ def _badge_refusal(out: dict[str, Any], code: str) -> dict[str, Any]:
 async def read_premium_badge(page: Any) -> dict[str, Any]:
     """Find the Premium badge switch BY ITS TITLE, compared in the page. Never raises.
 
-    Every question is a ``locator(...).count()``, so the page runs nothing it
-    did not already run and what comes back is integers. Returns:
+    Every question is a ``locator(...).count()`` but one -- whether the press
+    target draws a box, ``is_visible()`` -- so the page runs nothing it did not
+    already run and what comes back is integers and one boolean. Returns:
 
         aimable            True only when every check below holds
         refused / why      a code from :data:`PREMIUM_BADGE_REFUSALS`, and its
@@ -784,9 +815,13 @@ async def read_premium_badge(page: Any) -> dict[str, Any]:
         switch_shape       which of :data:`SWITCH_SHAPES` that row is in
         badge_position     1 or 2: the badge block's order in its row
         badge_checked / other_checked   the two switches' states
-        selector           the press, when aimable: the wrapper of the titled
-                           block, at that position, in the titled row, in the
-                           dialog -- so the click itself re-checks the title
+        press_target_drawn whether the control the press lands on draws a box
+                           (True required; None until it is asked)
+        selector           the press, when aimable: the wrapper (first shape)
+                           or the toggle holding the named input (second) of
+                           the titled block, at that position, in the titled
+                           row, in the dialog -- so the click itself re-checks
+                           the title
         error              an exception's TYPE if the reading failed
 
     THE OTHER SWITCH is the row's other setting block. The capture identifies
@@ -804,6 +839,7 @@ async def read_premium_badge(page: Any) -> dict[str, Any]:
         "badge_position": None,
         "badge_checked": None,
         "other_checked": None,
+        "press_target_drawn": None,
         "selector": "",
         "error": None,
     }
@@ -828,10 +864,14 @@ async def read_premium_badge(page: Any) -> dict[str, Any]:
         out["recorded_rows_titled"] = wrapper_rows + named_rows
         # EXACTLY ONE ROW, IN EXACTLY ONE SHAPE. A row both shapes claimed, or
         # one in each, would leave the press to a choice between them.
+        # The press lands on the wrapper in the first shape and on the
+        # toggle holding the named input in the second: the input draws no box.
         if (wrapper_rows, named_rows) == (1, 0):
             shape, blocks, path = "wrapper", PREMIUM_BADGE_ROW_BLOCKS, _INTRO_WRAPPER_PATH
         elif (wrapper_rows, named_rows) == (0, 1):
-            shape, blocks, path = "named_input", PREMIUM_BADGE_ROW_BLOCKS_NAMED, _NAMED_SWITCH_PATH
+            shape, blocks, path = (
+                "named_input", PREMIUM_BADGE_ROW_BLOCKS_NAMED, _NAMED_SWITCH_TOGGLE_PATH
+            )
         else:
             return _badge_refusal(out, "3_not_the_recorded_row")
         out["switch_shape"] = shape
@@ -855,13 +895,23 @@ async def read_premium_badge(page: Any) -> dict[str, Any]:
         out["other_checked"] = other_checked
         if badge_checked is None or other_checked is None:
             return _badge_refusal(out, "6_state_unreadable")
+        # THE PRESS MUST BE ABLE TO LAND (2026-10-10, the live lane's session
+        # 8): this reader said aimable over a control that drew no box. The
+        # target is the very selector returned below, so what is checked is
+        # what is pressed; a second match raises, and is reported as code 7.
+        out["press_target_drawn"] = bool(
+            await dialog.locator("css=" + blocks[badge] + _BADGE_TITLED + path).is_visible()
+        )
+        if not out["press_target_drawn"]:
+            return _badge_refusal(out, "8_press_target_not_drawn")
     except Exception as exc:  # noqa: BLE001 - the TYPE is the whole report
         out["error"] = type(exc).__name__
         return _badge_refusal(out, "7_reading_failed")
     out["aimable"] = True
-    # THE PRESS LANDS ON THE SWITCH'S OWN CONTROL: the wrapper carrying the
-    # role in the first shape, the named input carrying it in the second --
-    # inside the titled block, so the click itself re-checks the title.
+    # THE PRESS LANDS ON A DRAWN CONTROL OF THE SWITCH: the wrapper carrying
+    # the role in the first shape, the toggle holding the named input in the
+    # second -- inside the titled block, so the click itself re-checks the
+    # title.
     out["selector"] = _EDITOR_DIALOG + " >> css=" + blocks[badge] + _BADGE_TITLED + path
     out["why"] = (
         "exactly one settings row in the editor's column carries the title "

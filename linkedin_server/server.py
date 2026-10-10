@@ -9926,8 +9926,9 @@ async def linkedin_update_profile_field(
     intro editor: a second row carrying the title, no such row, or a UI in
     another language refuses. (Since 2026-10-10 LinkedIn draws the switch
     named on its own input -- one label shared by both switches, which names
-    neither -- so the title still aims it, and the press lands on the switch's
-    own control in either recorded shape.) Condition 1 is read BEFORE the switch is pressed, Save
+    neither -- so the title still aims it; that input draws no box, so the
+    press lands on the toggle holding it, and a press target that draws no
+    box is refused before anything is pressed.) Condition 1 is read BEFORE the switch is pressed, Save
     is pressed only if the badge and nothing else moved, and the
     verification reads both switches on a fresh render -- the other one, Open
     Profile, must not have moved. The restore is the same call with the
