@@ -1,12 +1,13 @@
 # Lane G2 -- queued debts: a red instrument made green in its records, a reader guard that took a refusal tally for success, a post record
 
 Lane G2 (`lg2-debts-lead`) of the LinkedIn MCP capability census, 2026-10-10,
-from master 3c8edc2 (CI green, run 36460989178). Offline throughout: no
-LinkedIn load, no Chrome, no CDP port. A live session ran on this box the
-whole time, so every test run here was serial and targeted, and from 11:35 the
-orchestrator's gate policy bound it: the tests touched, their direct
-importers, and the census instruments for the files changed, under two
-minutes; the full suite runs on CI.
+from master 3c8edc2 (CI green, run 36460989178), merged with master 53908ea
+at the end (section 8). Offline throughout: no LinkedIn load, no Chrome, no
+CDP port. A live session ran on this box until about 12:00, and while its flag
+stood every test run here was serial and targeted; from 11:35 the
+orchestrator's gate policy bound every run: the tests touched, their direct
+importers, and the census instruments for the files changed; the full suite
+runs on CI (lane CI, section 8).
 
 Each item was first checked against the tree with `git log -S`/`-G` and the
 code, because several were queued before a lane that landed them.
@@ -60,7 +61,8 @@ it does not exist in the blocker ledger, and where the row went instead
 (`J 37` never split and stands GAP; `J 40` built and fired live on
 2026-09-21, COVERED-PROVEN; `J 57` GAP). The guard reads that sentence as the
 disclosure it already knows, so the three sites read `MARKED-ABSENT`. The
-blocker map was re-derived over the edited records and did not move.
+blocker map was re-derived over the edited records and did not move; it moved
+later because of this record itself (section 8).
 
 THE CHECKER WAS NOT TOUCHED. Its pin was emptied, which the ratchet itself
 demands on a repair: `PINNED` is now the empty set, with the eight sites
@@ -306,14 +308,25 @@ census instrument and derived-view check ran green over this slice here
    `collections_page.read_collections`, `company_root.read_company_root`
    (its script runs under node in a test, its reader does not) and
    `group_page.read_group_page`. Their success paths run only in
-   attach-only live probes. A headless drive over a tracked capture (the live
-   lane's `group_home` skeleton, for two of them) is each one's cheapest next
-   step.
-4. THE FULL SUITE should run on CI for this branch before it merges:
+   attach-only live probes. The cheapest next step needs no capture and no
+   LinkedIn: a headless page with each module's own `control_fixture()`
+   passed as `html=` runs the reader as `scripts/_probe_control_paths_live.py`
+   does, with each module's written expectation to assert against (the
+   child's finding; derived, not run here).
+4. THE FULL SUITE runs on CI for this branch before it merges, because
    `linkedin_server/people_data.py` is imported by the server module and so
-   by most of the suite, and the local gates here were scoped by policy.
+   by most of the suite, and the local gates here were scoped by policy: lane
+   CI run 38035353731 is green but for the known `ci/` infrastructure failure
+   (section 8), and a re-run follows the fix.
 5. ROW `M C70`'s cell can name `people_data.Post` when its owner next edits
    it (section 3).
+6. A CAVEAT FOR WHOEVER DRIVES `server._open_profile_views_filter_menus` TO
+   ITS PRESS. `_worst` ranks a drive that read the page (this lane's verdict
+   among them) above `navigates`, so a drive added to `TO_THE_PRESS` for it
+   would be outranked by its own signature variant, and
+   `test_a_drive_to_the_press_reaches_the_press_and_no_further` would fail on
+   it (derived from `_worst`, not run). That was equally true under the old
+   clean, which outranked both.
 
 ## 7. Gates run, and what did not run
 
@@ -359,3 +372,41 @@ the same plant over the 17 moved readers, by a scratch probe: 9 read `leaks`,
 because a leak outranks every not-driven verdict in `drive()`, and
 `test_no_reader_carries_a_page_string_out` asserts no leak for every reader,
 driven or not.
+
+AFTER THE MERGE (section 8), on the merged tree: the census instruments and
+the three derived-view checks green; the asserted-names check, which now
+convicts any absent name, found none in master's new records; the document
+guards (asserted names, the three derived views, corrections) 100 passed.
+
+## 8. The merge of master, and lane CI
+
+MASTER MOVED to 53908ea (the CI fast lane, and the live lane's session 7)
+while this lane worked, and it was merged once, in 5cdaa7b (a hash which
+does not resolve on `master` until this branch merges). Two textual
+conflicts, both in files that only grow or are derived: the register (both
+sides appended a section; kept in number order, 86 then 87) and
+`_audit/INDEX.md` (regenerated, 261 documents). `_audit/RULINGS.md` merged
+with no conflict and undercounted by one -- both sides moved its document
+count 258 -> 259, which a merge takes as one move -- and was regenerated to
+260.
+
+ONE DERIVED VIEW HAD FALLEN BEHIND BECAUSE OF THIS LANE, NOT THE MERGE.
+`_audit/_census/blocker-map.tsv`'s `reason_doc` for the six rows filed with
+J 37, J 40 and J 57 moved CANDIDATE-1-OF-28 -> 1-OF-29: this record names
+those rows, so once it was tracked it became one more candidate document
+(score 2), the top candidate and its score unchanged. The lane's own
+instrument run had been taken before the record was tracked, so the lane's
+commits before the merge carry the 28; the merge regenerates it.
+
+LANE CI, by `scripts/lane_ci.py` as master now ships it: `push` refused
+nothing -- a clean tree, `origin/master` an ancestor, and its identity sweep
+0 hits across 1027 blobs and 226 needles -- and pushed 5cdaa7b to
+`ci/worktree-agent-a83ec2a43bfc5c3e4`. Run 38035353731 (one ubuntu 3.13
+cell, four shards, 6m17s): conclusion failure, and every failure is the
+known infrastructure one the orchestrator named at 13:23 -- a `ci/` checkout
+has no local `master` ref, so the cited-hash test family cannot resolve it.
+Judged by everything else, as the orchestrator directs: shards 0, 2 and 3
+green; shard 1 3215 passed, 5 skipped, 1 xfailed and 14 failed, all 14 in
+`tests/test_a_cited_sha_resolves.py` ("cannot resolve `master` to a short
+sha", and the commit-tree control that needs the same ref). A re-run follows
+once the fix is on master.
