@@ -86,6 +86,7 @@ from linkedin_server import server as server_module
 PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_analytics_hub": (),
     "linkedin_apply_job": ("confirm_token", "job_id"),
+    "linkedin_audience_analytics": (),
     "linkedin_auth_status": (),
     "linkedin_cdp_status": (),
     "linkedin_comment_on_item": ("confirm_token", "item", "text"),
@@ -512,7 +513,12 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: `linkedin_analytics_hub()`, his analytics hub `/dashboard/` loaded once.
 #: THE CENSUS DECISION: the census row `P L8` moves GAP -> COVERED-UNFIRED in
 #: lane B1's census commit (`_audit/2026-10-10-lane-b1-profile-build.md`).
-PINNED_TOOL_COUNT = 63
+#: **RE-PINNED AT LANE B1'S MERGE OF ITS CHILD lb1-audience, 2026-10-10: 64
+#: TOOLS AND 100 PARAMETERS.** One READ with no parameter,
+#: `linkedin_audience_analytics()`, his follower count and follower
+#: demographics off one admitted page. THE CENSUS DECISION: the census row
+#: `P L1` moves GAP -> COVERED-UNFIRED in lane B1's census commit.
+PINNED_TOOL_COUNT = 64
 PINNED_PARAMETER_COUNT = 100
 
 

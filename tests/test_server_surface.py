@@ -1,4 +1,4 @@
-"""The tool surface: sixty-three tools, forty-five of which do not write.
+"""The tool surface: sixty-four tools, forty-six of which do not write.
 
 **AND THIS LINE IS NOW DERIVED, NOT MAINTAINED, 2026-09-20.** It had gone stale
 a THIRD time -- "forty-four tools, thirty-two of which do not write" against a
@@ -528,6 +528,9 @@ EXPECTED_TOOLS = {
     # THE SIXTY-SECOND, 2026-10-10 (lane U's branch), a WRITE: see
     # SANCTIONED_WRITE_TOOLS.
     "linkedin_send_attachment",
+    # THE SIXTY-FOURTH, 2026-10-10 (lane B1, child lb1-audience), a READ:
+    # follower count and demographics off one admitted page, no press.
+    "linkedin_audience_analytics",
 }
 
 #: Names a reader must never grow. Listed explicitly so that adding one is a
@@ -612,7 +615,7 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_sixty_three_tools(tools):
+async def test_the_surface_is_exactly_the_sixty_four_tools(tools):
     """RENAMED AGAIN ON LANE U'S BRANCH, 2026-10-10, to ``..._sixty_two_tools``:
     one WRITE, ``linkedin_send_attachment`` (ruling FILE-UPLOAD-OPENED), one
     file into one conversation he names. MEASURED off the registry on the
@@ -621,6 +624,10 @@ async def test_the_surface_is_exactly_the_sixty_three_tools(tools):
     lb1-dashboard, 2026-10-10, to ``..._sixty_three_tools``: one READ,
     ``linkedin_analytics_hub`` (census P L8), his analytics hub loaded once.
     MEASURED off the merged registry; the name moved with the pin.
+    RENAMED AGAIN AT LANE B1'S MERGE OF ITS CHILD lb1-audience, 2026-10-10, to
+    ``..._sixty_four_tools``: one READ, ``linkedin_audience_analytics`` (census
+    P L1), his follower count and demographics off one admitted page. MEASURED
+    off the merged registry; the name moved with the pin.
 
     RENAMED AGAIN ON LANE L5'S ORDER OF 2026-09-28 08:06, to
     ``..._sixty_one_tools``: one READ, ``linkedin_read_named_profile`` (ruling
@@ -933,7 +940,10 @@ async def test_the_surface_is_exactly_the_sixty_three_tools(tools):
     # SIXTY-THREE AT LANE B1'S MERGE OF ITS CHILD lb1-dashboard, 2026-10-10:
     # linkedin_analytics_hub, a READ, so the split moves on its read side and
     # the write set holds. MEASURED off mcp.list_tools() on the merged tree.
-    assert len(tools) == 63
+    # SIXTY-FOUR AT LANE B1'S MERGE OF ITS CHILD lb1-audience, 2026-10-10:
+    # linkedin_audience_analytics, a READ, so the split moves on its read side
+    # and the write set holds. MEASURED off mcp.list_tools() on the merged tree.
+    assert len(tools) == 64
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -1106,7 +1116,10 @@ async def test_the_surface_is_exactly_the_sixty_three_tools(tools):
     # FORTY-FIVE ON LANE B1'S BRANCH, 2026-10-10: linkedin_analytics_hub is a
     # READ -- it loads one admitted page and presses nothing -- and the write
     # side is unmoved.
-    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 45
+    # FORTY-SIX AT LANE B1'S MERGE OF ITS CHILD lb1-audience, 2026-10-10:
+    # linkedin_audience_analytics is a READ too -- one admitted page, nothing
+    # pressed -- and the write side is unmoved.
+    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 46
 
 
 def test_the_read_that_was_nearly_named_a_write():

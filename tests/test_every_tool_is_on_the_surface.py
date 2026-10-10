@@ -91,6 +91,9 @@ EXPECTED_TOOLS = (
     # 2026-09-23, the live lane: a READ that presses, the share link of one of
     # his own posts; census M C72, proven live on his own post.
     "linkedin_own_item_link",
+    # 2026-10-10, lane B1 (lb1-audience): a READ, his follower count and
+    # demographics off one admitted page; census P L1, banked at merge.
+    "linkedin_audience_analytics",
 )
 
 
@@ -361,4 +364,7 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # SIXTY-THREE AT LANE B1'S MERGE OF ITS CHILD lb1-dashboard, 2026-10-10:
     # one READ, linkedin_analytics_hub (census P L8), measured off the merged
     # registry and moved with every other count site in the same commit.
-    assert len(_tool_names()) == 63
+    # SIXTY-FOUR AT LANE B1'S MERGE OF ITS CHILD lb1-audience, 2026-10-10: one
+    # READ, linkedin_audience_analytics (census P L1), measured off the merged
+    # registry and moved with every other count site in the same commit.
+    assert len(_tool_names()) == 64

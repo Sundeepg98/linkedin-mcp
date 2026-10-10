@@ -3,6 +3,7 @@
   "tools": {
     "linkedin_analytics_hub": "clean",
     "linkedin_apply_job": "not_driven:never read the page",
+    "linkedin_audience_analytics": "clean",
     "linkedin_auth_status": "not_driven:never read the page",
     "linkedin_cdp_status": "not_driven:never read the page",
     "linkedin_comment_on_item": "not_driven:never read the page",

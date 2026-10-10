@@ -8,6 +8,7 @@
     "attachments:read_reply_inputs": "clean",
     "attachments:read_sent_attachment": "clean",
     "attachments:wait_for_attachment_drawn": "clean",
+    "audience_analytics:read_audience_analytics": "clean",
     "auth:_arm_session_store": "not_driven:returned without reading the page",
     "auth:_cookie_records": "not_driven:raises BrowserUnavailableError",
     "auth:_cookies": "not_driven:raises BrowserUnavailableError",
