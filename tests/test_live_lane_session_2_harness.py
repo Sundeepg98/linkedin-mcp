@@ -370,6 +370,34 @@ def test_a_named_profile_load_through_the_second_door_is_counted(tmp_path, monke
     assert calls == [(profile, True)]
 
 
+def test_a_detail_page_load_through_the_third_door_is_counted_and_spaced(tmp_path, monkeypatch) -> None:
+    """FOUND LIVE, 2026-10-10 (session 9): lane NP's detail-page door
+    (``named_profile_details_of=``) loads an address the read door refuses,
+    and the wrapper waved it through uncounted and unspaced -- the load was
+    counted by hand. It is a load: the ledger counts it and spaces it."""
+    calls: list[tuple[str, object]] = []
+
+    class _ThirdDoor:
+        async def goto(self, page, url, **kwargs):  # noqa: ANN001 - fake
+            calls.append((url, kwargs.get("named_profile_details_of")))
+            return url
+
+    monkeypatch.setattr(harness, "BROWSER", _ThirdDoor())
+    monkeypatch.setattr(harness, "STATE", tmp_path)
+    monkeypatch.setattr(harness, "LEDGER", tmp_path / "ledger.json")
+    monkeypatch.setattr(harness, "MIN_GAP_S", 0.4)
+    harness.LEDGER.write_text(json.dumps({"loads": _loads(1, at=time.time())}), encoding="utf-8")
+    harness._install_counter()
+    details = "https://www.linkedin.com/in/" + SYNTHETIC_SLUG + "/details/interests/"
+    assert not readonly.is_read_url(details)
+    started = time.monotonic()
+    asyncio.run(harness.BROWSER.goto(None, details, named_profile_details_of=SYNTHETIC_SLUG))
+    assert time.monotonic() - started >= 0.3, "the third door was not spaced"
+    ledger = json.loads(harness.LEDGER.read_text(encoding="utf-8"))
+    assert [row["surface"] for row in ledger["loads"]] == ["feed", "in"]
+    assert calls == [(details, SYNTHETIC_SLUG)]
+
+
 def test_a_refused_address_is_not_a_load(fake) -> None:
     with pytest.raises(readonly.WriteAttemptError):
         asyncio.run(harness.BROWSER.goto(None, "https://www.linkedin.com/my-items/"))
@@ -628,8 +656,10 @@ def test_a_non_ascii_word_survives_the_copy_as_a_reference() -> None:
 #: `--export-fixtures` but by `scripts/_build_live8_composer_fixture.py`
 #: through this harness's own `tracked_copy`, after putting back the two
 #: `accept` declarations recorded live on 2026-09-05 where the skeleton's
-#: shape of each matched exactly. The same checks below hold for it. A later
-#: `--export-fixtures` of session 8 lands beside it and moves this count.
+#: shape of each matched exactly. The same checks below hold for it.
+#: AND SIX MORE (the live lane, after session 9): the skeletons lane K's
+#: ledger planned as tracked fixtures (its section 12.7), copied by
+#: ``tracked_copy`` under the names that plan gave them -- seven in all.
 #: `live7` (lane B1, 2026-10-10): ONE copy, his intro editor from session 7's
 #: load, written by `scripts/_build_intro_editor_live7_fixture.py` through this
 #: harness's own `tracked_copy`, after putting back LinkedIn's labels and option
@@ -639,7 +669,7 @@ def test_a_non_ascii_word_survives_the_copy_as_a_reference() -> None:
 #: its own builder through this harness's own `skeleton_of` and `tracked_copy`:
 #: the hub (`scripts/_build_dashboard_fixture.py`) and the audience page
 #: (`scripts/_build_audience_fixture.py`).
-LIVE_FIXTURE_COUNTS = {"live1": 2, "live2": 28, "live3": 14, "live4": 4, "live5": 1, "live7": 1, "live8": 1}
+LIVE_FIXTURE_COUNTS = {"live1": 2, "live2": 28, "live3": 14, "live4": 4, "live5": 1, "live7": 1, "live8": 7}
 
 
 @pytest.mark.parametrize("session_dir", sorted(LIVE_FIXTURE_COUNTS))
