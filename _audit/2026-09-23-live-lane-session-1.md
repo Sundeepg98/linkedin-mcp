@@ -4458,3 +4458,83 @@ No skeleton of this session is exported, so there is no tracked copy.
 The session-7 runner (rebuilt, then extended), the replay and verification
 scripts, the census, delta and pin editors, in the lane's scratch folder; the
 rebuilt runner's copy in the gitignored state. Nothing loaded uncounted.
+
+## After session 7, offline: the badge's second shape, and the unfollow's confirmation
+
+The orchestrator's order of 2026-10-10 11:50: two offline items, red first, local gates
+under two minutes in the background, and session 8's measurement written for each. No
+page was loaded for either.
+
+### 1: `P B9` -- the switch moved onto its input (`83aaab6`)
+
+**THE DIAGNOSIS, BY STRUCTURE.** Session 7's editor skeleton (load 17, gitignored) against
+session 4's: in session 4 each setting block's switch sat in a wrapper `div` carrying
+`role=switch`, `aria-checked`, `aria-label` and `tabindex`, around an unnamed checkbox
+`input[role=switch]`. On 2026-10-10 the wrapper carries none of those four, and the
+checkbox input carries an `aria-label` itself -- one label of 21 characters (18 letters,
+measured as a keyed shape and never read), the SAME on both switches, so it names
+neither. The empty `label` before the input, the row's leading paragraph and its two
+blocks are unchanged; the dialog's column drew one row more. Against the recorded wrapper
+shape the reader matched no row: `3_not_the_recorded_row`, on both loads.
+
+**THE FIX.** `profile_editor.SWITCH_SHAPES` names the two recorded shapes, `wrapper` and
+`named_input`, told apart by attribute PRESENCE only. The badge's block is still found by
+its title, compared in the page; the row must be in exactly ONE shape, both blocks alike
+and nothing of the other shape in it, or it is refused; the press is aimed at the switch's
+own control in that shape -- the named input, by its role -- inside the titled block. The
+reading reports `switch_shape`, and `badge_moved_alone` refuses a row that changed shape
+between its two readings. `only_the_field_moved`'s rule for the badge (`badge_moved_alone`)
+and the wait after the press are unchanged. Seven tests in `tests/test_premium_badge.py`
+were written first and run red (`3_not_the_recorded_row`), and are green: the reader on the
+second shape, the first shape still named, the write moving only the badge, the restore, a
+press that also moves Open Profile, a mixed row refused, a nameless input refused.
+
+**SESSION 8's RE-PROOF, TWO LOADS, READ-ONLY, BEFORE ANY PRESS:**
+
+1. His intro editor: `read_premium_badge` must answer aimable, `switch_shape`
+   `named_input`, both states read; the badge input's box non-empty and the element at its
+   centre the input or its empty label (a press can reach it); and the save gate's reading
+   taken without Save (`read_save_gate(require_save=False)`), which must count 0 unnamed
+   switches and read `notify_network` `not_drawn` -- the one thing a skeleton cannot say is
+   whether the shared label is a notify phrase.
+2. A fresh load: the same three readings, equal.
+
+Only if both hold: the badge's test and restore by the (b) pattern (8 loads), STOP-ALL on a
+failed restore.
+
+### 2: the unfollow -- read what the press drew (`028daef`)
+
+**THE FIX.** `writes._unfollow_confirm_gate`, read after the unfollow press and before
+anything navigates: a bounded poll (a liveness bound that decides nothing) for a
+confirmation dialog, or for the row's inverse-action control gone. It presses on only when
+exactly one dialog is drawn and exactly one button in it is named, exactly, `Unfollow` --
+a closed vocabulary of one word; the press goes through the same click call site, with no
+second one. Every other button is reported by its shape, never quoted, and a press that
+drew nothing at all is said so (`no_dialog_drawn`, the row's control still wearing its
+prefix), for the reload to decide. The receipt carries `unfollow_confirm_gate`.
+`tests/test_unfollow_confirmation.py` was written first and run red against the unfixed
+path -- its confirmation world read `performed` false with one press made, the live
+failure -- and its six tests are green.
+
+**SESSION 8's MEASUREMENT, ABOUT NINE LOADS:**
+
+1. Manage Pages (1 load): the first Page by the list's own order must still be the id
+   session 7 fixed by rule; if it is not, stop and report -- no other Page is chosen.
+2. The window fronted. ONE unfollow through the fixed path (preview 1, confirm 2): the
+   receipt's `unfollow_confirm_gate` is the measurement of what LinkedIn draws, and the
+   runner wraps the gate in its scratch copy to keep a skeleton of the page at that moment,
+   before any confirm press and before the reload. Verified by the tool's reload; with
+   LinkedIn's total unreadable, by the Page root's own control in the re-follow's preview.
+3. `linkedin_follow_company_page` on the same id (preview 1, confirm 2), verified on
+   Manage Pages. STOP-ALL and report at once if the re-follow fails.
+4. Manage Pages (1 load): the row drawn, `following` -- the end state equal to the start.
+
+### Gates
+
+Local, targeted, in the background, none widened: `tests/test_premium_badge.py` 24
+passed; the reader-leak guard with the badge drive's double updated, 665 passed, then 699
+with the unfollow tests and the unfollow fixture's; the editor tests (switches, commit,
+the press wait, the dialog wait) green; `tests/test_writes.py`'s unfollow tests 4 passed;
+the receipt and readonly guards green. The new gate's verdict is one line of
+`tests/reader_leak_baseline.json`, its success path triaged in `WHAT_WOULD_DRIVE_IT`
+until session 8 captures LinkedIn's own confirmation.

@@ -85,8 +85,10 @@ read PASS," not "must not read FAIL") without misdirecting the remedy.
 
 from __future__ import annotations
 
+import io
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
@@ -126,6 +128,94 @@ def _git(*args: str, check: bool = True) -> str:
     if check and out.returncode != 0:
         raise GitError(args, out.returncode, out.stderr)
     return out.stdout
+
+
+def _as_text(data: bytes) -> str:
+    """A blob's bytes as the text ``_git("cat-file", "-p", sha)`` handed over.
+
+    ``subprocess.run(text=True, errors="replace")`` wraps the pipe in exactly
+    this ``io.TextIOWrapper``: the locale's encoding, replacement on bytes it
+    cannot decode, and universal newlines (``\\r\\n`` and a lone ``\\r`` both
+    read as ``\\n``). Matching runs on this text, so reproducing it exactly is
+    what keeps every verdict and every line number the same.
+    """
+    return io.TextIOWrapper(io.BytesIO(data), errors="replace").read()
+
+
+class _BlobReader:
+    """Every blob of a sweep through ONE ``git cat-file --batch`` process.
+
+    WHY, MEASURED 2026-10-10. The loop below used to call
+    ``_git("cat-file", "-p", sha)`` once per blob, and a process launch costs
+    tens of milliseconds on Windows: 72s for one commit's 997 blobs, 217s for
+    a 3-commit range of 1002 blobs on a busy box. The pre-push gate runs this
+    sweep on every ``ci/`` push, so the launch cost was most of a lane's push.
+
+    WHAT DID NOT CHANGE: which blobs are read, in what order, and the TEXT
+    each one is matched as (``_as_text``). Started on the first read, so a
+    sweep that refuses before its blob loop never launches it.
+
+    A blob git cannot produce -- ``<sha> missing``, a short read, a process
+    that died -- raises ``GitError`` (exit 128, what ``cat-file -p`` exited
+    with for the same input), so ``main`` refuses with exit 2 exactly as it
+    did when the per-blob call failed.
+    """
+
+    def __init__(self) -> None:
+        self._proc: subprocess.Popen | None = None
+        self._err = None
+
+    def read(self, sha: str) -> str:
+        if self._proc is None:
+            # stderr to a FILE, not a pipe: nobody reads stderr until git has
+            # failed, and a full stderr pipe would block git mid-answer.
+            self._err = tempfile.TemporaryFile()
+            self._proc = subprocess.Popen(
+                ["git", "cat-file", "--batch"], cwd=REPO,
+                stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=self._err,
+            )
+        proc = self._proc
+        try:
+            proc.stdin.write(sha.encode("ascii") + b"\n")
+            proc.stdin.flush()
+            header = proc.stdout.readline()
+        except OSError:  # the pipe broke: git is gone
+            header = b""
+        fields = header.split()
+        if (len(fields) != 3 or fields[1] != b"blob"
+                or fields[0].decode("ascii", "replace") != sha):
+            self._fail(sha, header)
+        size = int(fields[2])
+        data = proc.stdout.read(size)
+        if len(data) != size or proc.stdout.read(1) != b"\n":
+            self._fail(sha, b"short read")
+        return _as_text(data)
+
+    def _fail(self, sha: str, header: bytes) -> None:
+        said = ""
+        if self._err is not None:
+            self._err.seek(0)
+            said = self._err.read().decode("utf-8", "replace").strip()
+        code = self._proc.poll() if self._proc is not None else None
+        raise GitError(("cat-file", "--batch", sha), 128 if code is None else code,
+                       said or header.decode("utf-8", "replace").strip() or "no answer")
+
+    def close(self) -> None:
+        proc, self._proc = self._proc, None
+        if proc is not None:
+            try:
+                proc.stdin.close()
+            except OSError:
+                pass
+            try:
+                proc.wait(timeout=30)
+            except subprocess.TimeoutExpired:
+                proc.kill()
+                proc.wait()
+            proc.stdout.close()
+        if self._err is not None:
+            self._err.close()
+            self._err = None
 
 
 def _default_range() -> str:
@@ -225,6 +315,7 @@ def main(argv: list[str]) -> int:
     seen: set[str] = set()
     hits: list[tuple[str, str, int, str, str]] = []
     blobs = 0
+    reader = _BlobReader()
     try:
         for commit in commits:
             for row in _git("ls-tree", "-r", commit).splitlines():
@@ -237,7 +328,7 @@ def main(argv: list[str]) -> int:
                     continue
                 seen.add(sha)
                 blobs += 1
-                text = _git("cat-file", "-p", sha)
+                text = reader.read(sha)
                 if not text:
                     continue
                 folded = text.casefold()
@@ -257,6 +348,8 @@ def main(argv: list[str]) -> int:
             f"  git said: {exc.stderr.strip()}"
         )
         return 2
+    finally:
+        reader.close()
 
     print(f"swept  : {blobs} distinct blob(s)")
     print()

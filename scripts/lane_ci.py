@@ -28,11 +28,13 @@ WHAT ``push`` DOES, in order, and why each step is where it is:
 3. refuses unless the MAIN checkout's gate knows ci/ refs -- the pre-push
    hook runs that copy, not this worktree's, so until this file's lane is
    merged into the main checkout every ci/ push would be refused anyway.
-4. runs the GATE'S OWN content check (``git_ci_check``: ancestry, then the
-   shipped identity blob sweep over ``origin/master..HEAD``) so a refusal
-   arrives before the push rather than from inside it. The hook runs the same
-   check again, authoritatively; the sweep costs ~72s per run on this box
-   (997 blobs, one ``git cat-file`` each), so a push pays it twice.
+4. runs the GATE'S OWN ancestry clause (``git_ci_check(sha, sweep=False)``)
+   so a branch that does not descend from ``origin/master`` is refused before
+   any network call. It does NOT run the identity sweep: the hook runs the
+   gate's whole check, sweep included, on this very push, and running it here
+   as well paid the sweep twice (2026-10-10: 72-217s each, before the sweep
+   read its blobs through one process). A planted value is therefore refused
+   by the hook, from inside the push, with nothing published.
 5. pushes the CHECKED sha (not ``HEAD`` again) to ``ci/<branch>``, forced --
    the ref belongs to one lane and its old commits were already published --
    with ``--no-follow-tags`` so no tag can ride along and be refused.
@@ -232,7 +234,9 @@ def push_problems() -> tuple[list[str], str, str]:
     rc, sha, err = _git("rev-parse", "--verify", "HEAD^{commit}")
     if rc != 0:
         return [f"HEAD does not resolve: {err}"], "", ref
-    return gate.git_ci_check(sha), sha, ref
+    # ANCESTRY ONLY. The hook runs the gate's whole check, sweep included, on
+    # this very push; sweeping here too paid the sweep twice per push.
+    return gate.git_ci_check(sha, sweep=False), sha, ref
 
 
 def git_push(sha: str, ref: str) -> int:
