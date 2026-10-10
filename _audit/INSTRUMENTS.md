@@ -11568,3 +11568,85 @@ jobs json, the ASCII checker, the old-versus-new plan-step byte comparison,
 the red-run copies of the two test files aimed at the 3c8edc2 gate and
 workflow, and the mutation plugin for `tests/test_lane_ci.py`. Each answered
 one question once; the answers are in the full record.
+
+## 84. A CHECK IS ABOUT THE BYTES IT READ, AND AN AIM IS SHOWN REFUSING ON THE SKELETON IT WAS BUILT FROM (lane-u-uploads, 2026-10-10)
+
+**Registered 2026-10-10.** Full record: `_audit/2026-09-28-lane-u-uploads.md`.
+Numbered 84 by the lane's brief.
+
+### 84.1 A DIGEST COMPARED ON ONE READ GUARDS NOTHING ABOUT ANOTHER READ
+
+The drain point re-read the file's digest, compared it with the preview's,
+and then handed the browser the PATH -- a second read, by somebody else, at a
+moment the comparison did not cover. The check was real and correctly
+written; it was about different bytes from the ones that left. The fix is
+not a second check but one read used twice: `attachments.read_once` returns
+the bytes WITH the digest of exactly those bytes, `perform` compares that
+digest, and the hand-off is those bytes as a payload.
+
+    A CHECK IS ABOUT THE BYTES IT READ. HAND OVER THOSE BYTES, OR THE CHECK
+    GUARDED A DIFFERENT FILE.
+
+### 84.2 A SWAP PLACED INSIDE THE HAND-OFF MEASURES ANY ORDER OF CHECKS
+
+The red-first test could have swapped the file "between the digest check and
+the hand-off" by patching the digest function -- which only works while the
+code calls that function, and would have stopped measuring the moment the fix
+stopped calling it. Instead the page is wrapped and the file is rewritten
+INSIDE the hand-off call, after every check the code under test can make,
+whatever their order; and what the browser holds is read off the node
+(`arrayBuffer()`, `name`, `type`), not off this process's report. The same
+test then measures the old code and the new one without knowing either.
+
+    PLACE THE FAULT AT THE BOUNDARY, NOT INSIDE THE CODE YOU ARE TESTING;
+    READ THE RESULT WHERE THE OTHER SIDE KEEPS IT.
+
+### 84.3 AN AIM WHOSE CROSS-CHECK A SKELETON CANNOT SATISFY IS SHOWN REFUSING ON IT
+
+The conversation's two file inputs are aimed by the label of the button each
+shares its wrapper with, and cross-checked by the input's own `accept`
+declaration. The live lane's skeleton keeps the structure and the labels and
+blanks every attribute value. So the shipped selectors are run over the
+skeleton itself: one form, one wrapper per label, one input in each -- and
+the aim REFUSES there, by its cross-check, because the declaration reads
+`unrecognised`. That is the cross-check shown failing on real markup rather
+than on a planted fixture, and the structure shown matching the capture
+rather than a copy of it.
+
+### 84.4 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `tests/test_upload_hands_over_verified_bytes.py` -- the swap inside the hand-off; the bytes, name and type read off the node; the one read's digest | on the parent tree (only `attachments.py` present, `writes.py` unchanged): 2 failed -- "THE BROWSER RECEIVED BYTES NOBODY COMPARED", and `'text/plain' == 'image/png'` -- 12 passed; after the hand-off change, 14 passed |
+| `linkedin_server/attachments.py` -- `aim_verdict`'s declaration cross-check | M1 below |
+| `linkedin_server/attachments.py` -- `attachment_send_gate`, condition 2 (the file named exactly once) | M2 below |
+| `linkedin_server/attachments.py` -- `canonical_file` (the file held root-relative) | M3 below |
+| `linkedin_server/attachments.py` -- `sent_verdict`'s UNKNOWN for a sent message drawn without the name | M4 below |
+| `linkedin_server/writes.py` -- the `send_attachment` arm of `_live_control` (the box re-read empty before the hand-off) | M5 below |
+
+THE MUTATIONS, each applied alone to this lane's own worktree file, the named
+tests run, the file restored and its sha256 verified (2026-10-10, on 4710609):
+
+| mutation | killed by | result |
+|---|---|---|
+| M1 the declaration cross-check in aim_verdict made False | the swapped-declarations test and the real-capture test (image, document) | 3 failed |
+| M2 condition 2 of attachment_send_gate made True | the never-draws-the-file test | 1 failed |
+| M3 canonical_file returns the absolute path | the root-relative target test | 1 failed |
+| M4 a nameless sent message read as HELD, not unknown | the drawn-without-its-name test | 1 failed |
+| M5 the live arm's empty-box re-read removed | the something-appeared-after-the-preview test | 1 failed |
+
+The unmutated file passed all of them in the same tree (the commit's gate).
+
+### 84.5 DECLARED DISPOSABLE
+
+The lane's scratch tools: the offline reader that listed every file input in
+the tracked captures with its wrapper chain (it found the skeleton's blanked
+`accept` values and the wrapper-and-label pairing), the one-shot editor that
+rewrote the fifteen lines of `blocker-assignments.tsv`, the one-shot cell
+noter for `M M14`, `M M15` and `M M18`, the mutation harness, the scan of
+every changed file for a byte over 127, and the one-shot repair of a test
+fixture line a shell heredoc had mangled (it turned two escapes into a real
+line break and a raw byte; the scan is how that was confirmed gone). Each
+answered one question once. `scripts/make_benign_upload_image.py` is NOT
+disposable: the live proof runs it, and its bytes are pinned by section 7 of
+the record (122 bytes, sha256 prefix `5d03126f1fd64701`).

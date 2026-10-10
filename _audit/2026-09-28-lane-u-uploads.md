@@ -253,8 +253,18 @@ attachment alone; the proof sends its words first through the proven
 `linkedin_send_reply` (section 9, Q3).
 
 **RED FIRST, AND SHOWN FAILING.** Every new guard has a test that fails
-without it -- the mutation runs are recorded in section 8 with the INSTRUMENTS
-entry (section 84).
+without it. Five mutations, each applied alone to this lane's own worktree
+file and restored with its sha256 verified, five kills:
+
+| mutation | failed |
+|---|---|
+| M1 the aim's declaration cross-check removed | 3 (the swapped declarations; the real capture, image and document) |
+| M2 the read-back's "the file named exactly once" made always true | 1 (the form never draws the file: Send would have been pressed) |
+| M3 the file held as its absolute path | 1 (the root-relative target) |
+| M4 a sent message without the file's name read as NOT SENT | 1 (it must read UNKNOWN) |
+| M5 the live arm's empty-box re-read removed | 1 (something waiting in the composer after the preview) |
+
+The instruments are registered in `_audit/INSTRUMENTS.md` section 84.
 
 ---
 
@@ -394,7 +404,11 @@ workers after. The suite is certified on lane CI (below).
 | `3e6b7b7` relabel | blocker map, register, ruling holds, unassigned reason, reason locator, state cells, corrections; five corpus guards | 190 passed; 77 passed; committed identity 1044 passed |
 | `e4c6cca` hand-off | the two upload files; readonly and boundary pins; doc guards, derived views, writes_nine, typed bytes, model-id, page-text, ignored-path | 67 passed 3 skipped; 647 passed; 308 passed. The receipt-message pin was NOT in this set, and was red at this commit |
 | `18dd736` wording | the receipt-message pin and the hand-off tests | 21 passed |
-| commit 4, the verb | every test file that fans out over the write registries (39), the new tests, the surface and count pins, the reader-leak guard with its refreshed baseline (five new readers, all `clean`, nothing else moved) | see the commit message; the census instruments: `census_completion` "every headline figure matches its pin", `check_write_classes`, `check_read_addresses`, `check_jobs_directions`, `ruling_holds` all GREEN |
+| `4710609` the verb | every test file that fans out over the write registries, in batches; the new tests; the surface and count pins; the reader-leak guard with its refreshed baseline (five new readers, all `clean`, nothing else moved) | batch 1: 16 failed, fixed; batch 2: 83 failed (one missing harness row stopped every writes reader), fixed; the reruns 29, 152 and 915 passed. Census: `census_completion` "every headline figure matches its pin"; `check_write_classes`, `check_read_addresses`, `check_jobs_directions`, `ruling_holds` GREEN |
+| mutations on `4710609` | five, section 4 | five kills, every restore verified by sha256 |
+| `f4d3eeb` merge of master `53908ea` | the three derived views regenerated (the only conflicts) and `--check`; `census_completion` | all clean; "every headline figure matches its pin" |
+| INSTRUMENTS 84 | register numbering, probe controls, corrections, asserted names | 38 passed |
+| LANE CI | the suite, on GitHub's runners | pending at this commit: the run on its sha is recorded here once it returns |
 
 **THE TWO REDS I LEFT AND THEN CLOSED, said plainly.** `d295e6e` was red on
 the correction guard and `e4c6cca` on the receipt-message pin, each because
