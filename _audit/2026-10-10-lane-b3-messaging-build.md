@@ -292,3 +292,100 @@ parameters.
 returns_records` and `tests/tool_envelope_baseline.json`
 `linkedin_read_item_text: not_driven:never read the page` -- each driven
 through its guard's own `drive`, one entry each, nothing else regenerated.
+The envelope harness passes a synthetic argument, which the key check refuses
+before any load -- the same verdict `linkedin_read_named_profile` records --
+so the READER is the half that guard drives (`returns_records`).
+
+THE LEDGER AND THE ADDRESS TABLE. `M C43` left GAP, so its lines left
+`_audit/_census/next-step.tsv` (check_next_step GREEN, 557 rows on the merged
+tree) and `_audit/_census/read-addresses.tsv` (91 of 91). The other thirteen
+rows' ledger lines still say BUILD on the capture the ledger named; section 8
+proposes their true next steps to lane K, whose judged table it is.
+
+---
+
+## 6. Gates run
+
+LOCAL, targeted, serial (`-p no:randomly`, never `-n`), the live-session flag
+checked before each file and absent throughout; the full suite on CI only.
+
+    file / instrument                                        result
+    tests/test_item_text.py                                  red first (ImportError), a harness red
+                                                               (network guard, 13 of 33), then 33 passed
+    tests/test_no_committed_identity.py (after commit)       1076 passed
+    tests/test_c43_rests_on_the_feed_content_ruling.py       16 passed (re-bound)
+    tests/test_the_tool_surface_is_pinned_so_a_row_must_move.py  red (62 == 61), re-pinned, 64 passed
+    tests/test_every_tool_is_on_the_surface.py               red (62 == 61), 19 passed
+    tests/test_server_surface.py                             red twice (EXPECTED_TOOLS; 45 == 44), 52 passed
+    tests/test_prose_that_makes_a_claim.py                   red (the headline count), 16 passed
+    tests/test_a_people_reader_reads_one_page.py             91 passed
+    tests/test_page_strings_leave_only_as_people_records.py  44 passed
+    tests/test_feed_tally.py                                 30 passed
+    tests/test_triage_instrument.py                          red (130 -> 129), 17 passed
+    tests/test_tool_envelopes_emit_no_page_string.py         red (unclassified), 4 passed
+    tests/test_readers_emit_no_page_string.py                red (no verdict; then a helper discovered
+                                                               as a reader), 704 passed
+    tests/test_a_literal_repeats_no_member.py                19 passed
+    tests/test_next_step.py                                  10 passed
+    scripts/census_completion.py                             every headline figure matches its pin
+                                                               (branch, and both merged trees)
+    scripts/check_next_step.py, check_read_addresses.py,     GREEN on the merged tree
+      check_write_classes.py, ruling_holds.py
+    scripts/build_audit_index.py, build_rulings_index.py,    --write, then --check clean
+      build_blocker_map.py
+    pre-commit identity gate                                 226 spellings, 0 hits, every commit
+
+CI (`scripts/lane_ci.py`): see the lane's final message for the run id and
+conclusion. The first `push` was refused locally (origin/master had moved to
+`2b165fd`; merged); the second was rejected by the remote with a bare
+"(failed)" after the local gate passed (0 hits across 1125 blobs); the
+third, unchanged, created `ci/worktree-agent-a008721ba8a0553be` at
+`7a3ada1` -- a transient remote failure, recorded as such.
+
+---
+
+## 7. The live-proof spec, per moved row
+
+`M C43` -- `linkedin_read_item_text`:
+
+- TARGET: one of HIS OWN items, so no third party's words are read for a
+  proof. Its key from `linkedin_my_activity_items` (one load of his own
+  activity rail; reuse a key the session already holds and it is zero).
+- LOADS: 1 -- the item's permalink. Nothing pressed.
+- THE BAR (the cell's): `readable` true; `item` a `people_data.Post` record
+  whose author is the member the header names (his own name, read at runtime);
+  `text` non-empty and equal in substance to what the permalink shows;
+  `expanded` true, `truncated` false for an item under 3,000 characters; `why`
+  the "read" sentence; nothing of the words in any log line or error field.
+  Then `M C43` COVERED-UNFIRED -> COVERED-PROVEN.
+- INVERSE: none -- a read changes nothing on the item.
+- STOP-ALL: a landing anywhere but the permalink asked for; an auth wall or a
+  checkpoint; `readable` false on his own item (the reader's structure has
+  drifted -- record the counts the reading returns and stop that row); any
+  page string outside the record in the envelope. Never another member's
+  item for the proof unless he names it.
+
+---
+
+## 8. Questions for the orchestrator, each with its ground
+
+1. CHILDREN'S TYPE. This lane's fleet prompt says children are spawned as
+   `implementer`; the standing rules say "general-purpose (never
+   implementer)", and the user-scope rule pins every subagent to the Opus
+   family. The child ran as general-purpose. Which binds?
+2. LANE K'S LEDGER, THIRTEEN LINES. Each still says BUILD on the capture the
+   ledger named; what comes first, measured (section 4): `M M20`, `M M40`,
+   `M M51` -- CAPTURE (an opened conversation's footer); `M M26`, `M M27`,
+   `M M29`, `M M31` -- CAPTURE (the active row's or thread header's menu on
+   `/messaging/thread/<id>/`); `M C23`, `M C90` -- CAPTURE (the
+   comment-control dialog of his own item); `M C18` -- a RULING, since the
+   probe rule admits "never a composer or an editor"; `M M16` and `M C29` --
+   design (a preview that shows the chosen GIF; a single-choice sort press and
+   a comment record type); `M C97` -- a notification key a caller can pass.
+3. `M C29`'S PAYLOAD. Which comments, in which order, is other members'
+   words. `people_data` has no comment record, and a counts-only reader does
+   not deliver WHICH (`WHO-WHICH-COUNTS-ARE-NOT-DELIVERY`). Whoever owns
+   `people_data` decides a comment record before a sort is built.
+4. A PAGE'S ITEM. `people_data.Post` requires a member author, so an
+   organisation Page's item returns no words. Lane G2's new `Organisation`
+   record could carry that author; widening `Post` is that owner's call.

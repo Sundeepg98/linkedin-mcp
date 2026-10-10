@@ -11951,3 +11951,42 @@ The key is never used: the shape is the evidence, and it is printed.
 DECLARED DISPOSABLE: the two probes that counted the skeletons with the
 verb's selectors, and the mutation runner. Each answered one question once;
 the answers are in the lane record, section 5.
+
+## 91. A PAGE STRING LEAVES INSIDE THE ONE RECORD MADE FOR IT, AND A BASELINE MOVES BY THE ENTRY THAT CHANGED (lb3-messaging-build, 2026-10-10)
+
+### 91.1 THE FIRST POST RECORD IS SCOPED BY ITS CONTAINER, NOT BY ITS CLASS
+
+`linkedin_read_item_text` returns an item's own words, the first adopter of
+`people_data.Post`. On the one tracked permalink capture the generic text
+class `.update-components-text` counts EIGHT in `main` -- the item's words and
+seven comments' -- while the description's own words container counts ONE in
+the description and ONE in all of `main`. The reader requires both to be one;
+a control that weakens either to "the first match" lets a second item's words
+through.
+
+    A TEXT CLASS SAYS WHAT KIND OF WORDS; ONLY THE CONTAINER SAYS WHOSE.
+
+### 91.2 A SHARED BASELINE MOVES BY ONE ENTRY
+
+Two guards keep committed verdict files (`tests/reader_leak_baseline.json`,
+`tests/tool_envelope_baseline.json`) whose regeneration re-drives every reader
+or tool. A lane adding one reader drove ONLY that reader through the guard's
+own `drive` function and inserted its one verdict, so its diff is one line
+and a sibling lane's concurrent entry cannot conflict with a regenerated
+whole. The guard itself then re-checked the whole set (704 passed).
+
+    REGENERATE THE WHOLE ONLY WHEN THE WHOLE CHANGED.
+
+### 91.3 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `linkedin_server/item_text.py`; `tests/test_item_text.py` | RED with the module absent (`ImportError: cannot import name 'item_text'`); the plants (a comment's words, a second item, a second words container inside and outside the description, an organisation author, no description) each refused; and `test_control_each_check_weakened_lets_its_plant_through`: with both uniqueness checks weakened, a second item's words come through; with the main-wide count weakened, a container outside the description gets past |
+| `tests/test_c43_rests_on_the_feed_content_ruling.py` (re-bound) | the binding required GAP and went red on the move; it now requires COVERED-UNFIRED AND both rulings named in the cell, and still holds `feed.py`'s IN and OUT halves |
+
+### 91.4 DECLARED DISPOSABLE
+
+The lane's scratch tools: the selector-count probes over the permalink and the
+messaging captures, the one-entry baseline writers for the two guards, the
+census cell editors and the conflict resolver. Each answered one question
+once; the answers are in `_audit/2026-10-10-lane-b3-messaging-build.md`.
