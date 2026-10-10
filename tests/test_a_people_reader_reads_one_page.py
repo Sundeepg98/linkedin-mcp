@@ -160,8 +160,19 @@ PACKAGE = ROOT / "linkedin_server"
 # ---------------------------------------------------------------------------
 
 #: The record classes. A function whose body references one through
-#: ``people_data`` builds records.
-RECORD_CLASSES = frozenset({"Person", "Group", "Event"})
+#: ``people_data`` builds records. Held equal to ``people_data.RECORD_TYPES``
+#: by :func:`test_every_record_type_is_a_record_class_here`.
+RECORD_CLASSES = frozenset({"Person", "Group", "Event", "Post"})
+
+
+def test_every_record_type_is_a_record_class_here():
+    """A RECORD TYPE THIS GUARD CANNOT NAME IS A READER IT CANNOT SEE
+    (2026-10-10, lane G2, when ``people_data.Post`` was declared). The closure
+    finds record readers by these names, so a type added to the module and not
+    here would let a reader build it with no bound on how many pages it
+    reads."""
+    declared = {record.__name__ for record in people_data.RECORD_TYPES}
+    assert set(RECORD_CLASSES) == declared, sorted(declared ^ set(RECORD_CLASSES))
 
 #: A parameter by one of these names asks for a page, an offset or a cursor.
 #: Closed and exact: ``pages_loaded`` or ``max_items`` is not one.
