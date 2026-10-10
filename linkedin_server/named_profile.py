@@ -58,7 +58,7 @@ from dataclasses import dataclass
 from typing import Any, Optional
 from urllib.parse import unquote, urlsplit
 
-from linkedin_server import coerce, dom, people_seam, readonly, shape, threads
+from linkedin_server import coerce, dom, named_handles, people_seam, readonly, shape, threads
 from linkedin_server.config import logger
 from linkedin_server.errors import WriteAttemptError
 
@@ -1845,14 +1845,19 @@ def _sweep_read_grants() -> int:
     return len(stale)
 
 
-def mint_read_grant(segment: str) -> ReadGrant:
+def mint_read_grant(segment: str, *, address: Optional[str] = None) -> ReadGrant:
     """Issue a single-use grant for ONE confirmed load of the profile he named.
 
-    Only :func:`read_preview` calls this, and it loads nothing: a grant here is
-    permission for a view that has not happened, which is the ruling's point.
+    Only :func:`read_preview` calls this -- and, since 2026-10-10,
+    ``named_details.read_preview`` for one detail page of that same profile,
+    passing that page's ``address`` (ruling NAMED-PROFILE-DETAIL-PAGES): the
+    grant is then bound to THAT address, so a token minted for the profile
+    loads no detail page and the other way round. Neither loads anything: a
+    grant here is permission for a view that has not happened, which is the
+    ruling's point.
     """
     grant = ReadGrant(
-        target=profile_url(segment),
+        target=address if address is not None else profile_url(segment),
         token=secrets.token_urlsafe(24),
         minted_at=time.monotonic(),
     )
@@ -1863,8 +1868,11 @@ def mint_read_grant(segment: str) -> ReadGrant:
     return grant
 
 
-def consume_read_grant(token: Any, segment: str) -> ReadGrant:
+def consume_read_grant(token: Any, segment: str, *, address: Optional[str] = None) -> ReadGrant:
     """Redeem a token for the ONE profile it was minted against, or raise.
+
+    ``address`` is a detail page's (``named_details``), when the token was
+    minted for one; the profile's own address otherwise.
 
     Every refusal is a view he did not confirm: no token, an unknown or used
     one, an expired one, or one minted for another profile. None of the
@@ -1889,11 +1897,11 @@ def consume_read_grant(token: Any, segment: str) -> ReadGrant:
             f"this confirm token expired after {READ_GRANT_TTL_SECONDS:.0f}s. "
             "Run the preview again and read it before confirming."
         )
-    if grant.target != profile_url(segment):
+    if grant.target != (address if address is not None else profile_url(segment)):
         raise WriteAttemptError(
-            "this confirm token was minted for a different profile than the "
-            "one passed now. Nothing was loaded; run the preview for the "
-            "profile you mean."
+            "this confirm token was minted for a different profile, or a "
+            "different page of it, than the one passed now. Nothing was "
+            "loaded; run the preview for the page you mean."
         )
     grant.consumed = True
     _READ_GRANTS.pop(grant.token, None)
@@ -1906,11 +1914,13 @@ def discard_read_grants() -> None:
     _READ_GRANTS.clear()
 
 
-def check_read_token(token: Any, segment: str) -> None:
+def check_read_token(token: Any, segment: str, *, address: Optional[str] = None) -> None:
     """Raise :func:`consume_read_grant`'s refusal for a token it would refuse,
     WITHOUT consuming anything -- so the tool refuses a bad token before it
     opens a browser session (the cold check of 2026-09-28 found each refusal
-    opening one). The redeeming is still :func:`load_the_confirmed_profile`'s."""
+    opening one). The redeeming is still :func:`load_the_confirmed_profile`'s,
+    or ``named_details.load_the_confirmed_details``'s for a detail page's
+    ``address``."""
     if not isinstance(token, str) or not token.strip():
         raise WriteAttemptError(
             "no confirm token. This read loads a profile only with the token "
@@ -1929,11 +1939,11 @@ def check_read_token(token: Any, segment: str) -> None:
             f"this confirm token expired after {READ_GRANT_TTL_SECONDS:.0f}s. "
             "Run the preview again and read it before confirming."
         )
-    if grant.target != profile_url(segment):
+    if grant.target != (address if address is not None else profile_url(segment)):
         raise WriteAttemptError(
-            "this confirm token was minted for a different profile than the "
-            "one passed now. Nothing was loaded; run the preview for the "
-            "profile you mean."
+            "this confirm token was minted for a different profile, or a "
+            "different page of it, than the one passed now. Nothing was "
+            "loaded; run the preview for the page you mean."
         )
 
 
@@ -2000,6 +2010,19 @@ def read_preview(segment: str) -> dict[str, Any]:
                 "(NEEDS-CAPTURE C-P7), and a field no capture shows is not read"
             ),
             "degree": "ABSENT: no capture shows a third party's degree line",
+            "member_token": (
+                "the member's opaque token, exactly as their own topcard's "
+                "links write it, ONLY when every one of those links names the "
+                "same member and their one Message control is theirs; for you "
+                "to pass back to linkedin_people_search_shape(connections_of=...)"
+                " -- nothing here uses it"
+            ),
+            "activity_items": (
+                "the item keys of the posts their Activity section draws on "
+                "this one load, at most ten, each marked owner, another_member "
+                "or unknown; for you to pass back to linkedin_react_to_item -- "
+                "nothing here uses them"
+            ),
         },
         "confirm_token": grant.token,
         "expires_in_seconds": int(READ_GRANT_TTL_SECONDS),
@@ -2083,6 +2106,12 @@ async def read_the_confirmed_profile(
         "identity_confirmed": False,
         "person": None,
         "person_why": "",
+        # THE TWO HANDLES (lane NP, 2026-10-10; ``named_handles``): ABSENT
+        # until the page is confirmed to be the person named, and absent with
+        # the reason whenever a step of their chains does not close.
+        **named_handles.absent(
+            "not read: the page was not confirmed to be the profile you named."
+        ),
         "groups": None,
         "groups_why": (
             "ABSENT: no capture shows a member's groups on their profile, and "
@@ -2130,6 +2159,26 @@ async def read_the_confirmed_profile(
         if person
         else "the page named one person, but its topcard did not yield that "
         "name on a re-read, so no record is returned rather than a guess."
+    )
+    # THE TWO HANDLES, off the same load (lane NP, 2026-10-10): the owner's
+    # member token -- only when M M1's Message chain closes on this reading
+    # AND every topcard link that names a member names the topcard's own --
+    # and the Activity section's item keys, each with whose post it is. They
+    # leave in this answer for the CALLER to pass back as arguments; nothing
+    # in this package consumes them (``named_handles``).
+    chain_ok, chain_why = named_handles.message_chain(
+        reading,
+        _the_one_visible_and_theirs(
+            reading, "Message", "message",
+            "labelled for somebody else, or saying something other than 'Message'",
+        ),
+    )
+    out.update(
+        named_handles.declared_fields(
+            await dom.read_named_profile_handles(page),
+            message_chain=chain_ok,
+            message_chain_why=chain_why,
+        )
     )
     try:
         links = coerce.as_count(await page.locator(GROUP_LINK_SELECTOR).count())

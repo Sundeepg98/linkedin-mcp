@@ -757,6 +757,22 @@ async def _read_the_confirmed_profile_as_shipped(page: Any) -> Any:
     )
 
 
+async def _read_the_confirmed_details_as_shipped(page: Any) -> Any:
+    """One detail page of the profile he names (lane NP, ruling
+    NAMED-PROFILE-DETAIL-PAGES, 2026-10-10) as ``linkedin_read_named_profile``
+    calls it after its one load: a section of the closed vocabulary and the
+    landing the server composed, so the landing veto passes and the reader
+    reaches its counts."""
+    from linkedin_server import named_details, readonly
+
+    return await named_details.read_the_confirmed_details(
+        page,
+        segment=SYNTHETIC_ARGUMENT,
+        section="interests",
+        landed=readonly.named_profile_details_url(SYNTHETIC_ARGUMENT, "interests"),
+    )
+
+
 def _inert_observation(
     spec: Any, facts: dict[str, Any], target: Any = SYNTHETIC_ARGUMENT
 ) -> Any:
@@ -904,6 +920,9 @@ AS_SHIPPED: dict[str, Callable[..., Any]] = {
     # handed a landing that is not the named profile, vetoes on its first
     # line and reads nothing -- so it is driven as the tool calls it.
     "named_profile:read_the_confirmed_profile": _read_the_confirmed_profile_as_shipped,
+    # ONE DETAIL PAGE OF IT, 2026-10-10 (lane NP): driven by signature it is
+    # handed a section off the vocabulary and raises before any read.
+    "named_details:read_the_confirmed_details": _read_the_confirmed_details_as_shipped,
     "threads:name_the_reply_recipient": _name_the_reply_recipient_as_shipped,
     "writes:_name_the_invitation_recipient": _name_the_invitation_recipient_as_shipped,
     **shipped_drives.DRIVES,
@@ -1104,7 +1123,20 @@ WHAT_WOULD_DRIVE_IT: dict[str, str] = {
     ),
     #: ADDED 2026-10-10 (lane G2): the seventeen readers NOTHING_FROM_THE_PAGE
     #: took from clean, each read for why its planted drive comes back with
-    #: nothing the page made and what would drive it to its success path.
+    #: nothing the page made and what would drive it to its success path --
+    #: and an eighteenth, lane NP's handles reader, recorded clean under the
+    #: old rule the same day and met at this lane's merge of master 0b41978.
+    "dom:read_named_profile_handles": (
+        "SCRIPT: its reading is dom.NAMED_HANDLES_JS, which answers counts, "
+        "the named profile's member token and its activity items' keys, every "
+        "field closed again in Python. The planted page answers it with page "
+        "strings, so every count is refused and no token or key passes its "
+        "shape, and what comes back is the reader's own defaults -- the same "
+        "over a page that draws nothing. Its success path runs in a headless "
+        "browser over tests/fixtures/synthetic/named_profile_activity.html "
+        "(lane NP's skeleton): tests/test_named_profile_handles.py::"
+        "test_the_read_returns_the_owners_token_and_the_activity_items."
+    ),
     "press:_take_reading": (
         "SCRIPT: its reading is dom.read_count_lines, a declared script that "
         "answers phrase positions and integers. The planted page answers it "

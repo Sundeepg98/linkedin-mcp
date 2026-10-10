@@ -77,9 +77,10 @@ from linkedin_server.config import (
     SETTLE_MS,
     logger,
 )
-from linkedin_server.errors import BrowserUnavailableError
+from linkedin_server.errors import BrowserUnavailableError, WriteAttemptError
 from linkedin_server.readonly import (
     assert_launch_flags_permitted,
+    assert_named_profile_details_url,
     assert_named_profile_url,
     assert_read_url,
 )
@@ -539,6 +540,7 @@ class LinkedInBrowser:
         *,
         settle_ms: int = SETTLE_MS,
         named_profile: bool = False,
+        named_profile_details_of: Optional[str] = None,
     ) -> str:
         """Navigate to an allowlisted read url and let its XHRs settle.
 
@@ -557,12 +559,28 @@ class LinkedInBrowser:
         Everything after the door -- the rate slot, the navigation, the
         settle -- is the same code.
 
+        ``named_profile_details_of`` SWAPS IT FOR THE THIRD CHECK (lane NP,
+        2026-10-10, ruling NAMED-PROFILE-DETAIL-PAGES): given the segment the
+        caller NAMED, the url must be a detail page of exactly that profile
+        (``readonly.assert_named_profile_details_url``). One call site passes
+        it, ``named_profile.load_the_confirmed_profile``, after redeeming the
+        read's own token for that very address. Passing it with
+        ``named_profile`` is refused: one door per navigation.
+
         Raises:
             WriteAttemptError: url is not a permitted read surface, or, with
-                ``named_profile``, not one named profile's address.
+                ``named_profile``, not one named profile's address, or, with
+                ``named_profile_details_of``, not a detail page of that one.
             BrowserUnavailableError: the navigation itself failed.
         """
-        if named_profile is True:
+        if named_profile_details_of is not None:
+            if named_profile is True:
+                raise WriteAttemptError(
+                    "navigation blocked: one door per navigation -- a detail page "
+                    "is not the profile."
+                )
+            assert_named_profile_details_url(url, named_profile_details_of)
+        elif named_profile is True:
             assert_named_profile_url(url)
         else:
             assert_read_url(url)

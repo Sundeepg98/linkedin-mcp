@@ -11727,3 +11727,52 @@ shard job now creates a local master on every run that is not master's.
 | path | shown failing by |
 |---|---|
 | `.github/workflows/ci.yml` -- the guarded `git branch --force master origin/master` step; `tests/test_ci_fast_lane.py` local-master tests | against the workflow before the step: 2 failed (no step creates a local master; no guard off master); 36 passed after, including a reproduction that shows `master` failing to resolve in a ci/-shaped clone and resolving after the step's own script runs |
+
+## 88. A HANDLE LEAVES ONLY WHEN EVERY LINK THAT NAMES IT AGREES, AND A DOOR TAKES THE SEGMENT IT WAS ASKED FOR (lnp-named-profile-lead, 2026-10-10)
+
+**Registered 2026-10-10.** Full record: `_audit/2026-10-10-lane-np-named-profile.md`.
+Numbered 88 by the orchestrator's allocation, appended at the end; renumber
+at the merge if another lane took it.
+
+### 88.1 A VALUE THE PAGE HOLDS LEAVES FOR THE CALLER ONLY WHEN EVERY PLACE THE PAGE WRITES IT SAYS THE SAME
+
+`linkedin_read_named_profile` now returns the named member's token, which a
+caller passes back to the people search. The token is not read from ONE link:
+it is the topcard's own id, returned only when M M1's Message chain closes AND
+every topcard composer link and every connections link names that same member.
+A stranger's id in any one of them returns NO token -- not the majority's, not
+the first's. And the token leaves for the CALLER, never for a tool: one module
+composes it, that module navigates nowhere and keeps nothing, and no tool reads
+it to build an address.
+
+    A PAGE MAY VETO, NEVER SUPPLY. A HANDLE THAT LEAVES FOR THE CALLER IS
+    SUPPLIED BY NOBODY UNTIL HE PASSES IT BACK; MAKE EVERY COPY OF IT AGREE
+    BEFORE IT LEAVES.
+
+### 88.2 A DOOR FOR ONE SUB-PAGE TAKES THE SEGMENT IT WAS ASKED FOR AS AN ARGUMENT
+
+The detail pages of a profile he names (ruling NAMED-PROFILE-DETAIL-PAGES) are
+admitted by a THIRD check, `readonly.assert_named_profile_details_url(url,
+segment)`. An address-only check cannot tell the named member's page from a
+stranger's -- the anchored shape alone matches both, which a control shows --
+so the check is handed the segment the caller named and compares it.
+
+    A URL-ONLY CHECK ANSWERS "IS THIS A SHAPE WE ADMIT"; ONLY THE CALLER'S
+    ARGUMENT ANSWERS "IS THIS THE ONE HE NAMED".
+
+### 88.3 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `dom.NAMED_HANDLES_JS` / `dom.read_named_profile_handles`, `linkedin_server/named_handles.py`; `tests/test_named_profile_handles.py` | RED before the read was wired (`KeyError: 'member_token'`); then each check weakened in the script lets its plant through -- the composer check (a stranger's composer link returns the owner's token), the connections check, the actor check and the author check (a stranger's item reads `owner`), and the stop at the first permalink (the owner's own post reads `another_member`): `test_control_each_check_weakened_lets_its_plant_through` |
+| `readonly.assert_named_profile_details_url`; `tests/test_named_profile_detail_pages.py` | the anchored shape ALONE admits another member's detail page and a section off the vocabulary; only the segment comparison and the vocabulary refuse them (`test_control_the_shape_alone_admits_*`); 16 other addresses each refused and never quoted |
+| `scripts/_build_named_profile_activity_skeleton.py` (the fixture's provenance) | a planted stranger's name in a label and in a text node of a copy of its own output: `unclassified labels 1`, `unclassified text 1`, the structure digest moved, the name gone from the rebuild, the fixed point broken -- a hand edit does not survive |
+| `linkedin_server/field_restore.py`, `writes._clear_target` and the clear's click-time check (child C); `tests/test_an_empty_value_is_admitted_only_as_a_clear.py`, `tests/test_an_empty_original_is_restored_by_a_clear.py` | RED with nothing wired: 18 failed, among them `needs 'value' and got ''` with a recorded empty prior; then three one-line mutations, each reverted, each turning its test red: the click-time check skipped (a field changed since is cleared -- `DID NOT RAISE`), a `None` prior recorded, the old receipt split restored |
+| `linkedin_server/item_author.py` (child B); `tests/test_a_reaction_takes_any_item_and_names_its_author.py` | RED on the shipped gate: the author tests `assert None == 'another_member'` / `'you'` / `'unknown'`, no record, and `ImportError` against an export of the previous commit; and a docstring check that could NOT fail (the old sentence wraps across two lines) caught on the first draft and fixed |
+
+### 88.4 DECLARED DISPOSABLE
+
+The lane's scratch tools: the skeleton peekers (structure tree, topcard shapes,
+fixture grep), the targeted page-string driver for the new readers, the freeze
+attribution script, the ASCII checker, the census cell appender and the planted
+builder run. Each answered one question once; the answers are in the record.
