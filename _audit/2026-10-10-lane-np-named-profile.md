@@ -172,7 +172,7 @@ reviewed and merged here; its report is the source of the reds below.
   (`test_the_ruling_carve_out_admits_exactly_two_verbs_and_no_derivative`); the
   choice is to admit it in `_VERBS_ADMITTED_BY_RULING` (LinkedIn's own word,
   "Unreact Like") or to name the tool by an original verb
-  (`linkedin_withdraw_reaction`).
+  (a name built on `withdraw`, which the law's baseline already holds).
 
 RED FIRST (child B's runs): B1's two docstring tests failed on the shipped text
 (and a check that could not fail -- the old sentence wraps across two lines --
@@ -372,7 +372,7 @@ THE ORDER, AND EACH STEP'S LOADS (20 s or more apart, as always):
              back.
     7-8    confirm: the press (1) and the verification's fresh render  M C32
              (1); verified "reacted".
-    9      linkedin_unreact_to_item(item=<the same key>): preview (1);  M C35 (candidate)
+    9      the un-react tool on the same key: preview (1);    M C35 (candidate)
              it must read reacted.
     10-11  confirm: the press and the fresh render; verified          M C32's inverse
              "no_reaction" -- the post back as it was.
@@ -408,7 +408,7 @@ the session; a refused step is recorded and the next INDEPENDENT step runs
 (2-4 hang on 2's token; 6-11 on 2's items; 16-19 on 12-15).
 
 STEPS 6-11 WAIT ON THE INVERSE. His YES was to react AND take the reaction
-back; `linkedin_unreact_to_item` (or the name the ruling picks) is not built
+back; the un-react tool (its name is the first question below) is not built
 (B3). Until it is on master and green, steps 6-11 are NOT RUN -- a reaction
 this server cannot take back is not fired -- and the session spends 14 loads,
 2 searches.
@@ -462,7 +462,7 @@ guards green.
    refuses `unreact` by name
    (`test_the_ruling_carve_out_admits_exactly_two_verbs_and_no_derivative`).
    Admit it in `_VERBS_ADMITTED_BY_RULING` -- LinkedIn's own word, "Unreact
-   Like" -- or name the tool by an original verb (`linkedin_withdraw_reaction`).
+   Like" -- or name the tool by an original verb (`withdraw`, on the law's baseline).
    The build is ready (B); M C32's live proof waits on it (F).
 2. P A8'S TEST VALUE. The orchestrator's ruling of 2026-09-28 17:48 (the cell:
    "any value would be a statement he has not made, so no benign test value

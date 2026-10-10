@@ -356,7 +356,13 @@ async def test_the_author_reaches_no_grant_no_observation_and_no_log(
     grant's retained preview was assigned BEFORE the namer ran, the
     observation holds the reaction toggle's reading only, and the grant's
     target is the urn he gave."""
+    # THE PACKAGE LOGGER TOO, not only the root: the package logger stays at
+    # its own INFO otherwise, and an absence asserted over a DEBUG capture
+    # would pass on a build that logs the name at DEBUG
+    # (tests/test_a_debug_capture_lowers_the_package_logger.py, found by the
+    # lane's CI run 38036699018).
     caplog.set_level(logging.DEBUG)
+    caplog.set_level(logging.DEBUG, logger="linkedin")
     block = await _react_preview(browser_page, _permalink())
     assert _person(block).name == _AUTHOR_NAME
     grant = writes._GRANTS[block["to_confirm"]]
