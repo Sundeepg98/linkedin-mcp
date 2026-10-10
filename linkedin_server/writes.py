@@ -210,6 +210,7 @@ from typing import Any, Optional, Union
 from urllib.parse import urlsplit
 
 from linkedin_server import (
+    attachments,
     coerce,
     company_interest,
     dom,
@@ -5798,7 +5799,16 @@ def _render(
     # file changed between the two -- which is exactly the news worth having.
     if spec.action in UPLOAD_ACTIONS:
         upload = _file_component_of(spec, observation.target)
-        out["file"] = upload.as_block(digest=uploads.digest_of(upload))
+        # ONE READ FOR THE BLOCK (lane U, 2026-10-10): the digest printed and
+        # the type read from the bytes come from the same bytes, through the
+        # function the drain point reads with. The digest is the path
+        # guard's own algorithm, so it equals ``uploads.digest_of``.
+        previewed = attachments.read_once(upload)
+        out["file"] = upload.as_block(digest=previewed.digest)
+        # WHAT THE FILE IS, READ FROM ITS BYTES, beside the extension its
+        # name claims -- the type the hand-off declares to the browser. A
+        # disagreement is said, never refused.
+        out["file"].update(attachments.facts_of(upload, previewed))
 
     # THE VERIFICATION DISCLOSURE, printed in the preview and again in the
     # result. Ruling 1, 2026-09-01: an unverifiable outcome may ship PROVIDED
@@ -10316,7 +10326,23 @@ async def perform(
                     "action reads and prints one -- so this means the grant "
                     "was made some other way. Nothing was uploaded."
                 )
-            current = uploads.digest_of(upload_file)
+            # ONE READ, COMPARED AND HANDED OVER (lane U, 2026-10-10). This
+            # read ``uploads.digest_of`` here and then handed the browser the
+            # PATH, so a file swapped after the comparison uploaded bytes
+            # nobody compared -- measured on the node by
+            # ``tests/test_upload_hands_over_verified_bytes.py``. Now the
+            # bytes are read ONCE, with every property of the path guard
+            # re-run, and the digest compared below is of exactly the bytes
+            # the call at the bottom hands over. The guard's own refusals
+            # leave as this function's, so their words reach the receipt.
+            try:
+                verified_bytes = attachments.read_once(upload_file)
+            except WriteAttemptError as exc:
+                raise _PerformRefused(
+                    f"refusing to upload for {spec.action!r}: {exc} Nothing "
+                    "was clicked."
+                ) from exc
+            current = verified_bytes.digest
             if current != approved:
                 raise _PerformRefused(
                     f"refusing to upload for {spec.action!r}: the file at "
@@ -10380,15 +10406,18 @@ async def perform(
                     "the arm. Nothing was uploaded and nothing was clicked."
                 )
             # THE ONE CALL SITE, and the fifth entry on
-            # readonly.SANCTIONED_MUTATIONS. The path handed over is
-            # ``UploadFile.path`` -- absolute, real, checked to be a regular
-            # file inside the declared root with no link anywhere on its chain
-            # -- and not the string a caller supplied.
+            # readonly.SANCTIONED_MUTATIONS. WHAT IS HANDED OVER IS THE
+            # VERIFIED BYTES, not a path (lane U, 2026-10-10): the payload
+            # carries the bytes ``read_once`` digested above, under the file's
+            # own name and the type read from those bytes. The file they came
+            # from is ``UploadFile.path`` -- absolute, real, inside the
+            # declared root with no link on its chain, re-checked at the read
+            # -- and never the string a caller supplied.
             await page.set_input_files(
-                upload_selector, str(upload_file.path), timeout=CLICK_TIMEOUT_MS
+                upload_selector, verified_bytes.as_payload(), timeout=CLICK_TIMEOUT_MS
             )
             uploads_made += 1
-            uploaded = upload_file.as_block(digest=current)
+            uploaded = {**upload_file.as_block(digest=current), **verified_bytes.as_block()}
         while select_plan:
             select_selector, select_text = select_plan.pop(0)
             # BY THE OPTION'S OWN LABEL, never by value and never by index.

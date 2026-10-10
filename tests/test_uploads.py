@@ -622,27 +622,41 @@ def test_there_is_exactly_one_place_in_this_package_that_uploads():
     assert len(calls) == 1, [node.lineno for node in calls]
 
 
-def test_the_upload_hands_over_the_resolved_path_and_never_a_callers_string():
-    """STRUCTURAL: the path argument is ``str(<name>.path)`` off an UploadFile.
+def test_the_upload_hands_over_the_verified_bytes_and_never_a_callers_string():
+    """STRUCTURAL: the hand-off is ``<read>.as_payload()`` off the ONE verified read.
 
-    Not a string a caller supplied, not an f-string, not a join. The only way
-    an ``UploadFile`` exists is ``uploads.resolve_upload_file``, which has
-    already refused a link, a directory, a missing file and anything outside
-    the declared root -- so pinning the ARGUMENT to that object's ``.path`` is
-    what makes those refusals reach the browser call rather than merely having
-    run earlier.
+    UNTIL 2026-10-10 THIS PINNED ``str(<name>.path)``, and the path was the
+    defect: the digest was compared on one read and the browser was handed a
+    path to read again, so a file swapped in between uploaded bytes nobody
+    compared (lane U; ``tests/test_upload_hands_over_verified_bytes.py``
+    measures it on the node). What is pinned now is the property that closes
+    it: the argument is the payload of a name bound EXACTLY ONCE, to
+    ``attachments.read_once`` of the queued ``UploadFile`` -- whose only
+    constructor is ``uploads.resolve_upload_file``, re-run inside that read --
+    and the digest compared against the preview's is that same read's.
     """
     call = _set_input_files_calls()[0]
     assert len(call.args) >= 2, ast.unparse(call)
-    path_arg = call.args[1]
-    assert isinstance(path_arg, ast.Call), ast.unparse(call)
-    assert isinstance(path_arg.func, ast.Name) and path_arg.func.id == "str", (
-        ast.unparse(call)
-    )
-    inner = path_arg.args[0]
-    assert isinstance(inner, ast.Attribute) and inner.attr == "path", (
-        ast.unparse(call)
-    )
+    payload = call.args[1]
+    assert isinstance(payload, ast.Call), ast.unparse(call)
+    assert isinstance(payload.func, ast.Attribute), ast.unparse(call)
+    assert payload.func.attr == "as_payload", ast.unparse(call)
+    holder = payload.func.value
+    assert isinstance(holder, ast.Name), ast.unparse(call)
+
+    def _bound(name: str) -> list[ast.Assign]:
+        return [
+            node
+            for node in ast.walk(_WRITES_TREE)
+            if isinstance(node, ast.Assign)
+            and any(isinstance(t, ast.Name) and t.id == name for t in node.targets)
+        ]
+
+    reads = _bound(holder.id)
+    assert len(reads) == 1, [ast.unparse(node) for node in reads]
+    assert ast.unparse(reads[0].value) == "attachments.read_once(upload_file)"
+    compared = _bound("current")
+    assert [ast.unparse(node.value) for node in compared] == [f"{holder.id}.digest"]
 
     # AND THE QUEUE IT DRAINS IS FED BY THE EXTRACTOR AND BY NOTHING ELSE.
     appended = [
@@ -819,9 +833,12 @@ def test_a_second_upload_inside_perform_is_still_caught():
     from tests.test_readonly import MODULES
 
     source = pathlib.Path(writes.__file__).read_text(encoding="utf-8")
+    # THE CALL SITE AS LANE U LEFT IT, 2026-10-10: it hands over the verified
+    # bytes' payload rather than ``str(upload_file.path)``. Only the literal
+    # moved; the assertions below are unchanged.
     call_site = (
         "await page.set_input_files(\n"
-        "                upload_selector, str(upload_file.path), "
+        "                upload_selector, verified_bytes.as_payload(), "
         "timeout=CLICK_TIMEOUT_MS\n"
         "            )"
     )
