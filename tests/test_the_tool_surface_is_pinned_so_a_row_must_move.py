@@ -110,6 +110,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_message_from_profile": ("confirm_token", "profile", "text"),
     "linkedin_my_activity_items": (),
     "linkedin_my_applications": ("limit",),
+    "linkedin_my_articles": (),
     "linkedin_my_profile": ("details", "include_skills"),
     "linkedin_new_messages": (),
     "linkedin_newsletter_subscriptions": (),
@@ -118,6 +119,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_open_messaging": ("allow_unread", "include_names", "message_filter"),
     "linkedin_open_thread": ("allow_unread", "thread_id"),
     "linkedin_page_plugin_snippet": ("page_id",),
+    "linkedin_item_viewer_demographics": ("item",),
     "linkedin_people_search_shape": (
         "connections_of", "current_company_ids", "include_names", "keywords",
         "location_ids", "network", "past_company_ids",
@@ -484,8 +486,16 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: The read's two new fields (`member_token`, `activity_items`) are not
 #: parameters; `N 30`, `N 85`, `N 172`, `N 31` and `M C32` move only when proven
 #: live.
-PINNED_TOOL_COUNT = 61
-PINNED_PARAMETER_COUNT = 97
+#: **RE-PINNED 2026-10-10 AT 63 TOOLS AND 98 PARAMETERS on lane B3's child
+#: branch: two READS, one parameter -- `linkedin_my_articles()` (census `M C48`)
+#: and `linkedin_item_viewer_demographics(item)` (census `M C38`, the viewer-
+#: demographics half), each over an address the read allowlist already admits,
+#: each built and tested over a tracked skeleton of the session-1 capture.**
+#: THE CENSUS DECISION: NO ROW MOVES IN THIS COMMIT. The child does not edit
+#: census files; lane B3's LEAD banks both rows against these tools. Measured
+#: off mcp.list_tools(), not summed.
+PINNED_TOOL_COUNT = 63
+PINNED_PARAMETER_COUNT = 98
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:

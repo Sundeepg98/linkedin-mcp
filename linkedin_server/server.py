@@ -1,4 +1,11 @@
-"""The tool surface: sixty-one tools, seventeen of which write to LinkedIn.
+"""The tool surface: sixty-three tools, seventeen of which write to LinkedIn.
+
+THE SIXTY-SECOND AND SIXTY-THIRD ARE READS, 2026-10-10, lane B3's child:
+``linkedin_my_articles`` (census ``M C48``) and
+``linkedin_item_viewer_demographics`` (census ``M C38``, its demographics
+half), each over an address the read allowlist already admits, each loading
+ONE page and writing nothing. The headline read "sixty-one tools, seventeen of
+which write" until then.
 
 THE SIXTY-FIRST IS A READ, 2026-09-28, on lane L5's order of 08:06 and the
 operator's ruling of 08:01 (``NAMED-PROFILE-READ-BEHIND-A-GRANT``):
@@ -227,9 +234,10 @@ POINTER to it was dangling, so a reader who followed it found nothing and
 would reasonably conclude these numbers are unchecked. A citation is a claim
 like any other.
 The surface splits three ways and the split is the part a reader actually
-needs: FORTY-FOUR read, SEVENTEEN write, and ZERO are write-shaped,
-registered, gated and unable to act. Forty-four plus seventeen plus zero is
-sixty-one. (Thirty-eight, thirteen and fifty-one until 2026-09-24; thirty-nine,
+needs: FORTY-SIX read, SEVENTEEN write, and ZERO are write-shaped,
+registered, gated and unable to act. Forty-six plus seventeen plus zero is
+sixty-three. (Forty-four, seventeen and sixty-one until lane B3's child added
+two reads on 2026-10-10; thirty-eight, thirteen and fifty-one until 2026-09-24; thirty-nine,
 thirteen and fifty-two at the live lane's merge the same day; thirty-nine,
 fourteen and fifty-three at lane L7's; forty-one, fifteen and fifty-six at
 lane L5's; forty-one, sixteen and fifty-seven at lane L8's merge on
@@ -11420,6 +11428,97 @@ async def linkedin_page_plugin_snippet(page_id: str) -> dict[str, Any]:
     """
     try:
         return {"ok": True, **page_plugin.follow_plugin_snippet(page_id)}
+    except Exception as exc:
+        return _error(exc)
+
+
+# ---- lane B3 (child reads): M C48, M C38 ----
+# Two READS, 2026-10-10, each over an address the read allowlist already
+# admits (lane L1, 2026-09-23), each loading ONE address composed from a
+# constant or from the caller's own argument and never from a page
+# (PAGE-MAY-VETO-NEVER-SUPPLY). Readers live in their own modules; this block
+# only wires them. The census rows are banked by lane B3's lead, not here.
+from linkedin_server import own_articles, post_viewer_demographics  # noqa: E402
+
+
+@mcp.tool()
+async def linkedin_my_articles() -> dict[str, Any]:
+    """Your own ARTICLES list. One page load; nothing pressed, nothing written.
+
+    Loads ``/in/me/recent-activity/articles/`` -- a constant, which nothing a
+    page draws can change -- and reads it with ``own_articles``: each article
+    as ``{title, link}``, the title your own words sanitised and capped, the
+    link a ``/pulse/`` path only.
+
+    **READ ``readable`` AND ``empty`` BEFORE YOU BELIEVE A ZERO.** Measured on
+    the one capture of this page (2026-09-23): LinkedIn serves it as the "All
+    activity" shell -- one filter pill, and one screen slot drawn with nothing
+    in it -- and no article. ``empty`` is True only when that slot is drawn
+    holding nothing, never from a zero count; ``readable`` False means the
+    page's own structure was not found and the list is UNMEASURED.
+
+    **THE ARTICLE ENTRY IS DERIVED.** No capture has shown an article, so an
+    entry is read as a ``/pulse/`` link inside that slot -- LinkedIn's article
+    address -- and that has not yet been seen returning live. Census row
+    ``M C48``.
+    """
+    try:
+        async with BROWSER.session() as page:
+            landed = await BROWSER.goto(page, own_articles.ARTICLES_URL)
+            assert_not_authwall(landed, surface="my-articles")
+            return await own_articles.read_own_articles(page)
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_item_viewer_demographics(item: str) -> dict[str, Any]:
+    """Who viewed ONE of your items, as aggregated demographics. NUMBERS AND CATEGORY WORDS, NEVER A VIEWER.
+
+    ``item`` is an activity key YOU name -- ``urn:li:activity:<digits>``, as
+    ``linkedin_my_activity_items`` returns them. It is checked against that
+    closed shape and nothing a page draws can replace it; the per-item
+    analytics page for it is loaded ONCE and nothing on it is pressed.
+
+    Read with ``post_viewer_demographics``: the "Top demographics" card's
+    category words (Job title, Location, Seniority, Company, Industry,
+    Company size), the tab drawn as current, and each row's percentage,
+    checked against the row's own progressbar. A row's VALUE -- the job
+    title, place or company of the people who viewed it -- leaves ONLY
+    through ``shape.census_shape`` and then ``census_redact_rare`` at count
+    one: a run of two or more capitalised words comes back ``<redacted>``,
+    anything long or outside a narrow alphabet ``<opaque>``. A one-word value
+    survives, as that redactor documents of itself; it names a bucket, never a
+    viewer. The list of people the page draws beside the card is not read.
+
+    **READ ``points_found`` BEFORE YOU BELIEVE AN EMPTY LIST** -- the
+    creator-analytics semantics. 0 means UNMEASURED, never "no viewers";
+    ``labels_seen`` beside it separates a page that drew no card from one
+    whose numbers stopped parsing; ``readable`` is ``points_found > 0``.
+
+    The same item's impressions are ``linkedin_creator_analytics``'s
+    ``per_post``. Census row ``M C38``, its demographics half. Measured
+    offline on one capture's skeleton; not yet seen returning live.
+
+    Args:
+        item: one of your activity keys, ``urn:li:activity:<digits>``.
+    """
+    try:
+        address = post_viewer_demographics.address_for(item)
+        if address is None:
+            return {
+                "ok": False,
+                "refused": "not_an_activity_key",
+                "reason": (
+                    "item must be urn:li:activity: followed by one to twenty "
+                    "ASCII digits, the one form the read allowlist admits for "
+                    "this page. Nothing was loaded."
+                ),
+            }
+        async with BROWSER.session() as page:
+            landed = await BROWSER.goto(page, address)
+            assert_not_authwall(landed, surface="post-viewer-demographics")
+            return await post_viewer_demographics.read_post_viewer_demographics(page)
     except Exception as exc:
         return _error(exc)
 
