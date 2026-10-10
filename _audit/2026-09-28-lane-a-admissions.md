@@ -26,9 +26,9 @@ anything not yet landed is not described.
 **THE LANE'S COMMITS, by SUBJECT.** The short hashes beside them are this
 lane's branch's: every one is nowhere on `master` until the orchestrator
 merges the branch, and the subject is how a reader finds each after a
-rewrite. Four merges of `master` sit among them: of `53908ea`, `b10bde8`,
-`fe119de` and `f8c7392`. A commit cannot carry its own hash, so the table ends
-at the commit before the one that last edited it.
+rewrite. Five merges of `master` sit among them: of `53908ea`, `b10bde8`,
+`fe119de`, `f8c7392` and `66eb699`. A commit cannot carry its own hash, so the
+table ends at the commit before the one that last edited it.
 
 | subject | lane branch |
 |---|---|
@@ -51,6 +51,8 @@ at the commit before the one that last edited it.
 | reader: linkedin_tracker_stage defaults to interview, so the envelope guard drives it | 7f4e05c |
 | record: the commit table names the lane's four newest commits | adcbee7 |
 | merge origin/master f8c7392 into lane A: lane NP's named-profile detail pages and the CI lane follow-ups | 8713e6e |
+| record: the session-9 overlap timed to the second, and the newest hashes tabled and disclosed | b2311c7 |
+| merge origin/master 66eb699 into lane A: the live lane's session 8 | adec4b7 |
 
 ---
 
@@ -625,17 +627,22 @@ changed, enumerated, not the files one remembers.
 
 ---
 
-## 4. Past the boundary: no reader is owed yet, and the captures that come first
+## 4. Past the boundary: two readers on tracked captures, and the captures that come first
 
-**NO ADMITTED PAGE HAS A TRACKED SKELETON FROM A LIVE CAPTURE, so no reader was
-built and no row moved state.** Measured two ways: a search of `tests/fixtures/**`
+**ONE ADMITTED PAGE HAS A TRACKED SKELETON FROM A LIVE CAPTURE -- the job
+tracker, whose three further stages section 4.2 reads -- and one route runs
+through a page admitted before this lane, the notifications (section 4.1).
+For every other admitted page no reader was built and no row moved state.**
+(This paragraph was first written before 4.1 and 4.2 existed and said "no
+admitted page"; the tracker's captures were found afterwards.) Measured two
+ways: a search of `tests/fixtures/**`
 for each admitted page's own content (the fixtures draw LINKS to several of
 these pages -- the skills page's skill-insight anchors, the posting's
 resume-tailoring and Insights anchors, the notifications' AI-search anchors --
 and never the pages themselves), and a read-only child's census of the 169
 files in the raw capture store and the tracked fixtures. A reader built on
 anything else would be built on synthetic markup, which moves no row and has
-failed live once already. Every admitted row is therefore GAP with gate
+failed live once already. Every other admitted row is therefore GAP with gate
 MEASURE, and every one has a line in `_audit/_census/capture-queue-reads.tsv`.
 
 **THE QUEUE, 24 lines in Lane K's columns** (surface-id, address, presses,
@@ -964,10 +971,14 @@ it, never by adding deltas:**
                                jobs_admitted 12 -> 32     jobs_refused  34 -> 11
                                adjudicated   +3 (now 189) delivered_broad 130 -> 133
                                unfired       25 -> 28     b1_no_ruling    9 -> 12
+                               (unfired then 24 on the merge of 66eb699, below)
                                gap           -3 (now 582) gap_unknown   108 -> 105
                                jobs_gap     108 -> 105    jobs_dir_r     40 -> 37
                                PINNED_B1_ROWS: J 38, J 50, J 51 into NO_RULING
     the tool surface           61 -> 62 tools, 96 -> 98 parameters, 44 -> 45 reads
+                               (99 parameters on the merge of f8c7392: lane NP's
+                               `section` with this lane's two, measured off the
+                               merged registry)
     the census count cell      55 -> 85 read patterns (messaging-and-content.md)
     boundary digests           _ALLOWED_URL_PATTERNS 18e5958586c2c367 -> d3c96a81 03316665 (two halves, as in 3.4)
                                _FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS 14f567fd160048a8 -> 28643e7ca768b7df
@@ -977,8 +988,15 @@ it, never by adding deltas:**
     exemption count            4 -> 10 (tests/test_job_alerts_read_boundary.py)
     settings-index refusals    16 -> 14 named (both pages admitted by name)
 
-Merging master twice moved no figure: on each merged tree every headline
-figure matched its pin.
+FIVE MERGES OF `master`, and on each merged tree every headline figure matched
+its pin. Two needed a measurement, not a pick: the merge of `f8c7392` (both
+sides had re-pinned the tool surface: 62 tools and 99 parameters, measured) and
+the merge of `66eb699`, the live lane's session 8, where `unfired` stood at 28
+here and 21 there from the same 25 -- the merged tree measured 24. That merge
+also added a DELTA block to `_audit/_census/jobs.md` for `J 38`, `J 50` and
+`J 51` (COVERED-UNFIRED 2 -> 5, GAP 108 -> 105, counted by
+`scripts/count_census_states.py`), so the slice's last stated figures match its
+rows.
 
 **GATES RUN, all offline, all on this worktree, each targeted (the files a
 change touched, their direct importers, the census instruments and the
@@ -1021,6 +1039,15 @@ document guards) and, after 11:35 IST, under the orchestrator's policy:**
                                    breach of the brief's serial-only rule,
                                    recorded rather than smoothed; every later run
                                    is gated on the flag.
+    after b2311c7, serial          the identity sweep 1076 passed in 74 s (session
+                                   9's flag gone by then)
+    after the merge adec4b7        census instruments all GREEN (jobs directions
+    (66eb699, session 8)           105 of 105, next step 582, every pin); the 16
+                                   files that read the slices or carry the pins,
+                                   with the identity sweep, 2114 passed and 1
+                                   skipped in 187 s at -n 4 (no flag) -- OVER the
+                                   two-minute bound, by about a minute; the
+                                   correction scan 15 passed
 
 **CI, on GitHub's free runners via `scripts/lane_ci.py` (ci/ ref, one ubuntu
 3.13 cell, four shards):**
