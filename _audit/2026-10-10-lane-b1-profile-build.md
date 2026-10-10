@@ -195,9 +195,9 @@ preview's target, the write, its inverse, the control), 43 s.
 
 ## C. P L2b -- child lb1-followers: built, NOT merged, the row left GAP
 
-Child `lb1-followers` built in its own worktree (its branch's head at the
-stop: `2442258`): commit `f2eebf9`, the reader, and `6243de5`, the tool
-`linkedin_my_followers_list`, over the tracked session-2 skeleton -- rows,
+Child `lb1-followers` built in its own worktree, on its own branch: the
+reader, then a followers-list tool, two commits over the tracked session-2
+skeleton -- rows,
 relations and denominators only, never a name, the button's aria-label never
 read (no `get_attribute`, no evaluate, held by an AST test). Red first
 (`ImportError`), then 33 passed; every plant shown changing the verdict and
@@ -207,10 +207,10 @@ ITS FIRST QUESTION DECIDED THE ROW, and the lead ruled it: by
 `WHO-WHICH-COUNTS-ARE-NOT-DELIVERY` ("A ROW WHOSE PAYLOAD IS WHO ... IS NOT
 DELIVERED by a reader that publishes only counts") and `NAMES-AT-RUNTIME`,
 both later than this row's cell, counts do not deliver an "own follower
-LIST". The name-returning half -- people records under
-`PEOPLE-DATA-MITIGATIONS` over a fixture of declared synthetic people -- was
-ordered at about 16:55 and COMMITTED on the branch at 17:11 (`2442258`: each
-follower as a people record beside its relation). It was neither reviewed nor
+LIST". The name-returning half -- people records, under the ruling on
+people data's six mitigations, over a fixture of declared synthetic people --
+was ordered at about 16:55 and COMMITTED on the branch at 17:11 (its third
+commit: each follower as a people record beside its relation). It was neither reviewed nor
 merged here: the box's clock stood still from about 17:13 to 19:00 (both the
 lead and the child measured the jump), and the coordinator's wrap-up order of
 19:02 stopped new merges. This section first said the half was unfinished; at
@@ -516,7 +516,7 @@ probes are declared disposable there.
    come back verbatim at runtime. A stricter rule for demographics labels is
    a ruling, not a reader change.
 5. `L2b` (C): both halves -- counts and people records -- are committed on
-   the child's branch (`2442258`), unreviewed and unmerged. The next lane
+   the child's branch, unreviewed and unmerged. The next lane
    reviews and merges them, then moves the row.
 6. Children ran as general-purpose agents, per the standing rules, not
    `implementer` (the operator's model pin).
