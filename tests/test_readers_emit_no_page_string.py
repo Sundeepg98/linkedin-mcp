@@ -1946,6 +1946,10 @@ DRIVEN_TO.update({key: RETURNS_TEXT for key in ADMITTED_TEXT})
 # the plant comes back inside a record, where the rule says it may.
 DRIVEN_TO["presence:read_suggested_presence"] = RETURNS_RECORDS
 DRIVEN_TO["recruiter_views:read_recruiter_views"] = RETURNS_RECORDS
+# LANE B4'S PAGE-PROSE READER (2026-10-10, J 110, THIRD-PARTY-TEXT-AT-RUNTIME):
+# its success path returns an organisation's description inside an
+# OrganisationProse record, so the plant comes back inside a record.
+DRIVEN_TO["company_home:read_company_home"] = RETURNS_RECORDS
 
 
 @pytest.mark.parametrize("key", sorted(shipped_drives.DRIVES))
@@ -2012,6 +2016,10 @@ def test_a_reader_joins_the_text_inventory_only_by_the_ruling(key: str) -> None:
 #: i.e. inside the counter reader's own ``except Exception``, which swallowed
 #: the check, and the drive went on to its click on the broken fixture.
 FIXTURE_BREAKS: dict[str, dict[str, str]] = {
+    "company_home:read_company_home": {
+        "fixture": "live1/company_root_home_view.html",
+        "needle": "<h2>Overview</h2>", "into": "<h2>Xxxxxxxx</h2>",
+    },
     "dom:read_any_save_control_label": {
         "fixture": "job_detail_hydrated.html",
         "needle": 'aria-label="Save the job"', "into": 'aria-label="Keep the job"',

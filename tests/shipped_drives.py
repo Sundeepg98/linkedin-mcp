@@ -1633,7 +1633,68 @@ async def read_recruiter_views_as_shipped(page: Any) -> Any:
 
 #: To the success path: the guard runs each beside its reader's signature
 #: variants, and the reader's verdict is the worst of them all.
+# ---------------------------------------------------------------------------
+# company_home:read_company_home -- an organisation Page's Overview prose
+# ---------------------------------------------------------------------------
+
+#: The Home view as ``tests/fixtures/live1/company_root_home_view.html`` draws
+#: it, in the integers ``company_home.HOME_JS`` answers with: one main column;
+#: the Home tab marked current, twice; ONE ``h2`` reading Overview, its card,
+#: and ONE description box in it, of two text runs; one Page posts section
+#: of five list items; one feed-item heading. MEASURED 2026-10-10 by running
+#: the shipped script over the fixture in a local headless Chromium (lane B4,
+#: child b4-j110); ``tests/test_company_home.py`` drives the same fixture.
+HOME_VIEW_DRAWN = {
+    "main": 1, "elements": 2119, "current_tabs": 2, "view": 0, "headings": 1,
+    "cards": 1, "boxes": 1, "runs": 2, "skipped": 0, "posts_sections": 1,
+    "posts_items": 5, "feed_item_headings": 1,
+}
+
+
+class _DrawsTheHomeView(_Over):
+    async def evaluate(self, script: Any, arg: Any = None, **kwargs: Any) -> Any:
+        from linkedin_server import company_home
+
+        answer = await self._wrapped.evaluate(script, arg, **kwargs)  # the read, counted
+        if script == company_home.HOME_JS:
+            # THE TEXT IS NOT ANSWERED HERE: it stays the planted page's own,
+            # so the description the reader returns is the plant.
+            return _planted_answer_with(chars=len(PLANT), **HOME_VIEW_DRAWN)
+        return answer
+
+
+async def read_company_home_as_shipped(page: Any) -> Any:
+    """``read_company_home`` as ``linkedin_company_page_home`` calls it -- on
+    the page it was handed, no argument but the page -- over the planted page
+    drawn as the Page root's Home view.
+
+    THE SIGNATURE DRIVE reads the script and keeps nothing: the planted page
+    answers every counter with a page string, each is refused, so the reader
+    never reaches the description box -- NO_RECORD.
+
+    THE SKELETON: ``tests/fixtures/live1/company_root_home_view.html``
+    (``scripts/_build_company_home_skeleton.py --kind home``), a 2026-09-23
+    capture of a Page root that drew its Home view: the Home tab carries
+    ``aria-current="true"``, one ``h2`` reads Overview, and its card holds a
+    ``data-testid="expandable-text-box"`` description; the Page posts section
+    draws five list items. The drive answers the script with exactly those
+    integers and leaves the TEXT to the planted page, so the success path runs
+    and the plant comes back -- inside the organisation-prose record.
+    """
+    from linkedin_server import company_home
+
+    _drawn(
+        "live1/company_root_home_view.html",
+        "<h2>Overview</h2>",
+        'data-testid="expandable-text-box"',
+        'aria-current="true" href="https://www.linkedin.com/company/x/home/"',
+        "<h2>Page posts</h2>",
+    )
+    return await company_home.read_company_home(_DrawsTheHomeView(page))
+
+
 DRIVES: dict[str, Callable[..., Any]] = {
+    "company_home:read_company_home": read_company_home_as_shipped,
     "dom:read_any_save_control_label": read_any_save_control_label_as_shipped,
     "named_profile:composer_holds": named_profile_composer_holds_as_shipped,
     "people_results:read_result_people": read_result_people_as_shipped,

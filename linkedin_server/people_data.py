@@ -466,6 +466,89 @@ class Post:
         }
 
 
+#: Where an organisation's prose was read, as a closed vocabulary. One place so
+#: far: the Home view's Overview card (census row ``J 110``).
+PROSE_SOURCES = ("overview_card",)
+
+#: The cap on an organisation's prose, in characters after normalisation.
+#: LinkedIn's own limit for a Page's description is the model: 2,000
+#: characters there. Over it, the text is cut and :attr:`OrganisationProse.
+#: truncated` says so -- a cut that a caller cannot see is a silent edit.
+PROSE_CAP = 2000
+
+
+@dataclass(frozen=True, slots=True)
+class OrganisationProse:
+    """An organisation Page's own prose, as LinkedIn showed it: its words,
+    whether they were cut, and where on the Page they were read.
+
+    DECLARED 2026-10-10 (lane B4, census row ``J 110``) under the
+    orchestrator's THIRD-PARTY-TEXT-AT-RUNTIME, which returns an organisation
+    Page's prose at runtime under PEOPLE-DATA-MITIGATIONS: untrusted
+    third-party text, sanitised, bounded, never stored. It is a record of its
+    own rather than a :class:`Post` because a Page's prose has no member
+    author, and a post record without one cannot exist. A person's name can
+    sit inside the prose, which is why it travels in a record at all: the
+    page-string guards admit page text ONLY inside a record's declared text
+    field (:data:`TEXT_FIELDS`), and convict it anywhere else.
+
+    ``text`` is sanitised and capped at :data:`PROSE_CAP`; ``truncated`` is
+    ``True`` when the page held more than survived the cap (or more than the
+    reader carried out of the page); ``read_from`` is one of
+    :data:`PROSE_SOURCES`.
+    """
+
+    text: str
+    truncated: bool = False
+    read_from: str = "overview_card"
+
+    def __post_init__(self) -> None:
+        _require(isinstance(self.text, str) and self.text != "", "prose has words")
+        _require(self.text == sanitise(self.text, cap=PROSE_CAP), "text is not sanitised")
+        _require(type(self.truncated) is bool, "truncated is a boolean")
+        _require(self.read_from in PROSE_SOURCES, "read_from is not a known source")
+
+    @classmethod
+    def from_page(
+        cls,
+        *,
+        text: Any,
+        read_from: Any,
+        cut_before: bool = False,
+    ) -> Optional["OrganisationProse"]:
+        """A record from what a reader read, or ``None`` if no words survive.
+
+        ``cut_before`` is the READER's own knowledge that the page held more
+        than it carried out; this method adds the cut it makes itself.
+        """
+        if read_from not in PROSE_SOURCES:
+            return None
+        whole = sanitise(text, cap=_PROSE_MEASURE)
+        clean = sanitise(whole, cap=PROSE_CAP)
+        if not clean:
+            return None
+        return cls(
+            text=clean,
+            truncated=bool(cut_before) or len(whole) > len(clean),
+            read_from=read_from,
+        )
+
+    def envelope(self) -> dict[str, Any]:
+        """The record as a tool returns it: the three fields and the marker."""
+        return {
+            "text": self.text,
+            "truncated": self.truncated,
+            "read_from": self.read_from,
+            UNTRUSTED_KEY: UNTRUSTED_NOTE,
+        }
+
+
+#: How far :meth:`OrganisationProse.from_page` sanitises BEFORE the cap, so it
+#: can tell a cut apart from a text that merely ended. Twice the cap: a reader
+#: carries out of the page at most that much (``company_home``).
+_PROSE_MEASURE = 2 * PROSE_CAP
+
+
 #: THE TOOLS THAT RETURN PEOPLE RECORDS, by name. Declared, and held equal to
 #: the tools whose code builds one by ``tests/test_a_people_reader_reads_one_page.py``,
 #: so a tool that starts returning records joins this set in the same change,
@@ -480,8 +563,13 @@ class Post:
 #: people are those two tools' whole answer. ``linkedin_read_named_profile``
 #: joined the same day (lane L5, ruling NAMED-PROFILE-READ-BEHIND-A-GRANT): the
 #: ONE member he names, read once behind the single-use grant, is its answer.
+#: ``linkedin_company_page_home`` joined 2026-10-10 (lane B4, census row
+#: ``J 110``, ruling THIRD-PARTY-TEXT-AT-RUNTIME): its answer carries an
+#: organisation's prose in an :class:`OrganisationProse` record, read off ONE
+#: page, the Page root, with no cursor.
 PEOPLE_TOOLS: frozenset[str] = frozenset(
     {
+        "linkedin_company_page_home",
         "linkedin_who_viewed_me",
         "linkedin_list_conversations",
         "linkedin_open_messaging",
@@ -496,18 +584,22 @@ PEOPLE_TOOLS: frozenset[str] = frozenset(
 #: an event share a shape (title, link, marker). The page-string guards read
 #: these to know which strings are ALLOWED to be page text: a string in a
 #: text field of one of these shapes, and nowhere else.
-RECORD_TYPES = (Person, Group, Event, Post)
+RECORD_TYPES = (Person, Group, Event, Post, OrganisationProse)
 PERSON_SHAPE = frozenset({"name", "headline", "link", "degree", UNTRUSTED_KEY})
 TITLE_SHAPE = frozenset({"title", "link", UNTRUSTED_KEY})
 #: A post's envelope: its ``author`` is a whole PERSON_SHAPE envelope, so the
 #: author's words are a person record's, and the post's own are ``text``.
 POST_SHAPE = frozenset({"author", "link", "text", UNTRUSTED_KEY})
+#: An organisation's prose: its words, the cut flag and the closed source.
+PROSE_SHAPE = frozenset({"text", "truncated", "read_from", UNTRUSTED_KEY})
 #: The fields that carry a third party's words, by shape; the rest are a
-#: canonical link, a closed degree vocabulary, a nested record, or the marker.
+#: canonical link, a closed degree vocabulary, a nested record, a boolean, a
+#: closed source vocabulary, or the marker.
 TEXT_FIELDS: dict[frozenset[str], frozenset[str]] = {
     PERSON_SHAPE: frozenset({"name", "headline"}),
     TITLE_SHAPE: frozenset({"title"}),
     POST_SHAPE: frozenset({"text"}),
+    PROSE_SHAPE: frozenset({"text"}),
 }
 
 
@@ -546,6 +638,11 @@ def as_record(value: Any) -> Optional[Any]:
             if not isinstance(author, dict) or type(as_record(author)) is not Person:
                 return None
             return Post(author=as_record(author), link=value["link"], text=value["text"])
+        if keys == PROSE_SHAPE:
+            return OrganisationProse(
+                text=value["text"], truncated=value["truncated"],
+                read_from=value["read_from"],
+            )
     except (ValueError, TypeError):
         return None
     return None
@@ -560,4 +657,6 @@ def text_fields(value: Any) -> frozenset[str]:
         return TEXT_FIELDS[PERSON_SHAPE]
     if isinstance(record, Post):
         return TEXT_FIELDS[POST_SHAPE]
+    if isinstance(record, OrganisationProse):
+        return TEXT_FIELDS[PROSE_SHAPE]
     return TEXT_FIELDS[TITLE_SHAPE]
