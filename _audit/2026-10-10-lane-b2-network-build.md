@@ -248,7 +248,31 @@ PENDING: the child build (section 12) has not reported.
 
 ## 8. The census moves, and the pins
 
-PENDING.
+ROUND 1, `2b3a0ee`. `N 80` and `N 133` GAP -> COVERED-PROVEN under D6;
+twelve rows keep GAP with a dated note each, newest first in the cell. By
+`scripts/count_census_states.py`, the network slice: GAP 155 -> 153,
+COVERED-PROVEN 22 -> 24. `scripts/census_completion.py --check` then named
+six figures, each re-pinned on its measured value, never by a delta:
+
+    adjudicated         210 -> 212
+    delivered_broad     132 -> 134
+    delivered_strict    111 -> 113
+    gap                 561 -> 559
+    gap_read             92 -> 90
+    b3_admitted          41 -> 39
+
+THE LEDGER, by the same commit. `_audit/_census/next-step.tsv` lost `N 80`
+and `N 133`; twelve steps were rewritten: `N 37`, `N 43`, `N 51`, `N 153` and
+`N 154` to CAPTURE `feed-item-permalink-menu` (a new queue line, five rows,
+two loads), `N 200` to CAPTURE `feed-menus` (its line now two rows), `N 88`,
+`N 89` and `N 93` to CAPTURE `search-people-labels` (five rows to eight),
+`N 56` to ADMIT on lane A's `admit-newsletters-id` line (four rows to five),
+`N 103` to SIBLING lane-NP, `N 104` to RULING `Q-ORG-IDENTITY`, a question
+added to the ledger's record. `_audit/_census/read-addresses.tsv` lost the
+two rows that left GAP; `N 104`'s gate went MEASURE -> RULING, and four notes
+gained a dated line. `check_next_step` GREEN at 559 and `check_read_addresses`
+GREEN at 90 of 90; the blocker map, the audit index and the rulings register
+regenerated.
 
 ## 9. Gates, run and not run
 
@@ -260,7 +284,20 @@ PENDING.
 
 ## 11. Instruments and scratch
 
-PENDING.
+REGISTERED: `scripts/verify_fixed_labels.py` with
+`tests/test_verify_fixed_labels.py`, `_audit/INSTRUMENTS.md` section 90.
+Shown failing before it was trusted: with its keyed-shape lookup removed (a
+one-line mutation, reverted), the planted-label test fails `assert 0 == 1` on
+`Not interested`; the control reads the same planted skeleton with another
+key and counts 0 for every shaped label and 1 for the verbatim one; a
+decorated `School (3)` counts 0 for `School`. 7 passed once restored.
+
+DECLARED DISPOSABLE, in the lane's scratch folder: the first label checker
+the instrument replaced, the label locator, the markup excerpter, the open
+item's tree printer, the feed aim probe, the People-tab outline probe, and the
+census, ledger, pin and register editors. Each answered one question once;
+the answers are above, and every label reading was re-taken with the
+registered instrument.
 
 ## 12. Children
 
@@ -268,4 +305,20 @@ PENDING.
 
 ## 13. Questions for the orchestrator
 
-PENDING.
+1. `Q-ORG-IDENTITY` (`N 104`), put in the ledger's record: the cell's own bar
+   says a slug-only results page does not deliver, and the capture draws
+   slugs only. May a search return each organisation it found as its name and
+   its Page link at runtime, as the rulings `NAMES-AT-RUNTIME` and
+   `THIRD-PARTY-TEXT-AT-RUNTIME` return other content? A yes makes the row a
+   build on the tracked
+   capture `tests/fixtures/live2/n104.html`, with an organisation record
+   declared beside the group and event ones.
+2. `N 200`'s target. An ad is chosen by LinkedIn, not named by him; a tool
+   that hides "an ad in the feed" takes its target from the page unless he
+   names the ad. Is hiding the ad LinkedIn shows at the moment of the call his
+   own curation of his own feed, or does `PAGE-MAY-VETO-NEVER-SUPPLY` require a
+   named ad?
+3. Two discharges under D6 that went to COVERED-PROVEN, not to the
+   COVERED-UNFIRED the brief named: `N 80` rests on the people search's live
+   proofs and `N 133` on `N 134`'s view-switch fire. D6 says PROVEN where the
+   route is live-proven; both are the orchestrator's to override.
