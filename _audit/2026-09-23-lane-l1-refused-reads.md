@@ -236,7 +236,7 @@ whether AI resume feedback renders on an admitted job posting at all -- a
 live look at `/jobs/view/<id>/` could make this row need no carve-out.
 
 **N 183 needs:** the NAME of the preference page that holds the setting (it
-is unrecorded; the settings index draws navigation only), then -- under
+is unrecorded; the settings index draws navigation only), then -- under the ruling
 `ONE-NAMED-SETTINGS-PAGE-AT-A-TIME` -- an exact-url `_FORBIDDEN_SUBSTRING_
 EXEMPTIONS` key (the dict; the url is a constant) plus an anchored allowlist
 line. The dark-mode precedent weighs against it: that page was chosen partly

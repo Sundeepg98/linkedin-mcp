@@ -11519,3 +11519,32 @@ the class:
     A RETIREMENT IS NOT DONE WHEN ITS BRANCH IS GREEN. A LANE THAT FORKED
     BEFORE IT CAN STILL LEAN ON THE RETIRED THING, AND A CLEAN MERGE SAYS
     NOTHING ABOUT THAT. READ THE OTHER SIDE'S ADDED LINES FOR IT.
+
+## 86. AN INSTRUMENT RED FOR THREE WEEKS, MADE GREEN IN ITS RECORDS AND NOT IN ITSELF (lane-g2-debts, 2026-10-10)
+
+Record: `_audit/2026-10-10-lane-g2-debts.md`.
+
+### 86.1 THE ASSERTED-NAMES CHECK: A PIN THAT KEPT CI GREEN OVER A RED SCRIPT
+
+`scripts/check_asserted_names_resolve.py` exited 1 on eight sites from
+2026-09-23, while its test pinned exactly those eight, so the suite stayed
+green. A pinned red is a quiet red: the ninth finding would have been one
+more line under eight that nobody acted on. All eight were repaired in the
+records that made them -- five ruling ids and one state word reworded to name
+their kind, two never-minted blocker names disclosed beside the proposals
+that minted them -- and the pin was emptied. No line of the checker changed.
+
+SHOWN FAILING AFTER THE REPAIR, which is what keeps it in this register: a
+fabricated name in the `blocker` slot, and a real ruling id wrapped after a
+bare "under", appended to a tracked record and removed before any commit --
+exit 1, both named; without them, exit 0. The emptied pin was red (1 failed,
+naming all eight) against the records as they were.
+
+    A PIN THAT HOLDS A KNOWN RED IS A DEBT WITH NO DUE DATE. REPAIR THE
+    RECORDS AND EMPTY THE PIN; NEVER WIDEN THE CHECKER TO MEET THEM.
+
+### 86.9 DECLARED DISPOSABLE
+
+Scratch probes of this lane, kept in its scratch area and not committed:
+the census ASCII count, the comment-coupling measurement of item 3c, the
+search readers' planted drive, and the instrument runner.

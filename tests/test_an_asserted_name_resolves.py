@@ -15,6 +15,15 @@ below is an EXACT set, and it fails in both directions on purpose:
 GREEN HERE DOES NOT MEAN THE CORPUS IS CLEAN. It means the corpus holds exactly
 the four defects that were measured on 2026-09-20 and no others.
 
+THE PIN IS EMPTY SINCE 2026-10-10 (lane G2), AND THAT IS THE STRONGER STATE.
+The script exited 1 on eight pinned sites for three weeks, and an instrument
+that is always red hides the next red behind the ones everybody already knows.
+Every pinned site was repaired in its record, none by touching the guard: the
+five ruling ids and the one state word wrapped after "under" now name their
+kind ("under the ruling", "in the state"), and the two never-minted blocker
+names carry a disclosure beside each proposal. So `PINNED` below is the empty
+set, the script exits 0, and ANY asserted-and-absent name is a red here.
+
 THE CONTROLS ARE NOT DECORATION, and this repository has an expensive reason
 for saying so: a sibling wave measured that 56 of 88 probe files carry a control
 that is computed, printed, and never branched on. Each control below ASSERTS.
@@ -51,34 +60,42 @@ sys.path.insert(0, str(REPO / "scripts"))
 import check_asserted_names_resolve as guard  # noqa: E402
 
 
-#: (kind, name, document, occurrences) -- measured at 8b58dcb, 2026-09-20.
-#: Named in `_audit/2026-09-20-names-that-do-not-exist.md` with the evidence.
-PINNED: set[tuple[str, str, str, int]] = {
-    ("BLOCKER", "ALERTS-PAGE-UNREAD",
-     "_audit/2026-09-20-the-contingent-writeoffs.md", 1),
-    ("BLOCKER", "PROXIMITY-NOT-PARSED",
-     "_audit/2026-09-20-the-contingent-writeoffs.md", 2),
-    # SURFACED 2026-09-23 BY THE WRAP JOIN (lane L4), and pinned rather than
-    # repaired because each sits in another lane's record. Every one is a
-    # slot phrase ("under") ending one line with a backticked id opening the
-    # next -- the same shape this guard has always convicted on ONE line,
-    # where the module docstring's MEASURED table counts such other-vocabulary
-    # names as findings. Four are registered ruling ids and one is a census
-    # STATE word; none is a blocker. The repair is a one-word rewording by the
-    # record's owner ("by the ruling", "filed as the state"), and the ratchet
-    # below then demands the pin narrow. The sixth site the join found was the
-    # lane-L4 record's own, and it was reworded in the same commit instead.
-    ("BLOCKER", "EXCLUDED-RULED",
-     "_audit/2026-09-20-the-premium-block.md", 1),
-    ("BLOCKER", "ERROR-URL-ASKED-FOR-OR-NOTHING",
-     "_audit/2026-09-21-the-auth-reason-leak.md", 1),
-    ("BLOCKER", "NO-IRREVERSIBLE-WRITE-IS-FIRED",
-     "_audit/2026-09-23-bucket1-fires.md", 1),
-    ("BLOCKER", "SELF-PROFILE-EDITS-NOT-OUTWARD",
-     "_audit/2026-09-23-census-cleanup.md", 1),
-    ("BLOCKER", "ONE-NAMED-SETTINGS-PAGE-AT-A-TIME",
-     "_audit/2026-09-23-lane-l1-refused-reads.md", 1),
-}
+#: (kind, name, document, occurrences). EMPTY since 2026-10-10: every site
+#: below was repaired in its record and removed by the ratchet's own
+#: instruction (`_audit/2026-10-10-lane-g2-debts.md`, item 1).
+PINNED: set[tuple[str, str, str, int]] = set()
+
+#: REPAIRED 2026-10-10 (lane G2), the eight sites this pin carried, kept so a
+#: reader can see what the empty set replaced and how each went:
+#:
+#:     ("BLOCKER", "ALERTS-PAGE-UNREAD",
+#:      "_audit/2026-09-20-the-contingent-writeoffs.md", 1)
+#:     ("BLOCKER", "PROXIMITY-NOT-PARSED",
+#:      "_audit/2026-09-20-the-contingent-writeoffs.md", 2)
+#:
+#: measured at 8b58dcb, 2026-09-20, and named with the evidence in
+#: `_audit/2026-09-20-names-that-do-not-exist.md`. Both were proposals that
+#: were never minted. Each proposal now carries a disclosure beside it in the
+#: form `_ABSENT_OF` reads ("... does not exist in the blocker ledger") and
+#: says where the row went instead, so the three sites read MARKED-ABSENT.
+#:
+#:     ("BLOCKER", "EXCLUDED-RULED", "_audit/2026-09-20-the-premium-block.md", 1)
+#:     ("BLOCKER", "ERROR-URL-ASKED-FOR-OR-NOTHING",
+#:      "_audit/2026-09-21-the-auth-reason-leak.md", 1)
+#:     ("BLOCKER", "NO-IRREVERSIBLE-WRITE-IS-FIRED",
+#:      "_audit/2026-09-23-bucket1-fires.md", 1)
+#:     ("BLOCKER", "SELF-PROFILE-EDITS-NOT-OUTWARD",
+#:      "_audit/2026-09-23-census-cleanup.md", 1)
+#:     ("BLOCKER", "ONE-NAMED-SETTINGS-PAGE-AT-A-TIME",
+#:      "_audit/2026-09-23-lane-l1-refused-reads.md", 1)
+#:
+#: surfaced 2026-09-23 by the wrap join (lane L4): a slot phrase ("under")
+#: ending one line and a backticked id opening the next. Four were registered
+#: ruling ids and one a census STATE word; none was a blocker. Each record
+#: now names the kind before the id ("under the ruling", "in the state"), so
+#: the phrase no longer ends the line and the name is no longer in a blocker
+#: slot. THE GUARD WAS NOT TOUCHED: the planted controls below still convict
+#: the same shapes, and a ruling id wrapped after a bare "under" is still red.
 
 #: REPAIRED 2026-09-20, and removed from PINNED by the ratchet's own instruction.
 #:
