@@ -1360,14 +1360,22 @@ async def read_radio_label_binding(
     markup as a pure function of its argument, which is the property that
     file exists to hold.
     """
+    # THE IDS STAY ON THE PAGE (2026-10-10, the orchestrator's order to lane
+    # G2: a page string leaves only through a declared record). The control's
+    # id and its label's ``for`` are values the page chose; they are read and
+    # COMPARED here, and what leaves is the verdict -- whether each is drawn,
+    # and whether they match -- never either attribute, in ``observed`` or in
+    # a sentence. The aim needs nothing more: ``writes._live_control`` gates
+    # on ``bound`` and clicks the label by the caller's own word.
     out: dict[str, Any] = {
         "bound": False,
         "why": "",
         "observed": {
             "controls_named": None,
-            "input_id": None,
+            "input_id_drawn": None,
             "labels_matching": None,
-            "label_for": None,
+            "label_for_drawn": None,
+            "label_for_matches_input_id": None,
         },
     }
     try:
@@ -1388,7 +1396,7 @@ async def read_radio_label_binding(
         return out
 
     input_id = await control.get_attribute("id")
-    out["observed"]["input_id"] = input_id
+    out["observed"]["input_id_drawn"] = bool(input_id)
     if not input_id:
         out["why"] = (
             "the control has no id, so no label can be bound to it by 'for' "
@@ -1440,21 +1448,27 @@ async def read_radio_label_binding(
         return out
 
     bound_to = await labels.get_attribute("for")
-    out["observed"]["label_for"] = bound_to
-    if bound_to != input_id:
+    matches = bool(bound_to) and bound_to == input_id
+    out["observed"]["label_for_drawn"] = bool(bound_to)
+    out["observed"]["label_for_matches_input_id"] = matches
+    if not matches:
         out["why"] = (
-            f"the label carrying that text is bound to {bound_to!r} and this "
-            f"control's id is {input_id!r}. A label that NAMES a control and "
-            "does not ACTIVATE it clicks cleanly and sets nothing; one bound "
-            "elsewhere sets somebody else's radio."
+            (
+                "the label carrying that text is bound by 'for' to a control "
+                "other than this one (the two ids differ)."
+                if bound_to
+                else "the label carrying that text draws no 'for'."
+            )
+            + " A label that NAMES a control and does not ACTIVATE it clicks "
+            "cleanly and sets nothing; one bound elsewhere sets somebody else's "
+            "radio."
         )
         return out
 
     out["bound"] = True
     out["why"] = (
-        f"the label carrying that text is bound by 'for' to {bound_to!r}, "
-        "which is this control's own id -- an ACTIVATION relation, read off "
-        "the page rather than assumed."
+        "the label carrying that text is bound by 'for' to this control's own "
+        "id -- an ACTIVATION relation, read off the page rather than assumed."
     )
     return out
 
@@ -2145,8 +2159,24 @@ async def read_follow_control(page: Any) -> dict[str, Any]:
 # ``Follow `` followed by a heading the Page prints in that same column (the
 # measured page printed its own name as exactly one such heading).
 #
-# THE ON LABEL IS NOT KNOWN. The capture is of a Page the account did not
-# follow, so what the control reads once it IS followed has never been seen.
+# AND SINCE 2026-10-10 THE MAIN COLUMN HOLDS ANOTHER ENTITY'S CONTROL.
+# MEASURED live (the live lane's session 9: one read-only load of the root
+# of a Page he follows, redesigned -- no h1, the Page's name in an h2, its
+# class names generated): the one ``Follow ``-prefixed control in the main
+# column outside every aside named ANOTHER entity, and the Page's own read
+# "Following, click to unfollow <Page>". Unfollowed, the column draws two
+# (DERIVED, session 8, where the gate refused them as several). So "the ONE
+# follow control in the main column" no longer identifies the Page's: among
+# those controls the Page's is the one whose name is ``Follow `` and a
+# heading the Page prints -- EXACTLY ONE as this reader compares them
+# (whitespace folded) AND as the page's own XPath engine does
+# (:data:`COMPANY_PAGE_BOUND_FOLLOW_CONTROL`, exact) -- and the press is that
+# second, constant selector.
+#
+# THE ON LABEL IS NOT READ. The 2026-09-20 capture is of a Page the account did
+# not follow; what the control reads once it IS followed was read live once,
+# as a shape (2026-10-10, session 9: "Following, click to unfollow <Page>"),
+# and nothing here reads it.
 # Nothing here guesses it: a Page whose control reads anything but the OFF
 # shape is reported with no binding, and the gate built on this reads that as
 # UNKNOWN -- never as "following" and never as "not following".
@@ -2181,6 +2211,17 @@ COMPANY_PAGE_FOLLOW_ANYWHERE = "xpath=//button[starts-with(@aria-label, 'Follow 
 #: name; the others are section titles, which no follow control names.
 COMPANY_PAGE_HEADINGS = (
     "xpath=//main//*[self::h1 or self::h2][not(ancestor::aside)]"
+)
+
+#: THE PRESS, SINCE 2026-10-10: the main-column follow control whose name,
+#: after ``Follow ``, is the text of a heading the Page prints in that
+#: column -- compared by the PAGE'S OWN XPath engine, exactly (the label's
+#: rest against each heading's string value), so nothing the page wrote is
+#: spliced into it, and what the gate counts is what the click resolves.
+COMPANY_PAGE_BOUND_FOLLOW_CONTROL = (
+    "xpath=//main//button[starts-with(@aria-label, 'Follow ')][not(ancestor::aside)]"
+    "[substring-after(@aria-label, 'Follow ')"
+    " = //main//*[self::h1 or self::h2][not(ancestor::aside)]]"
 )
 
 #: The Page's own people-search link -- LinkedIn draws its employee count as a
@@ -2265,6 +2306,7 @@ async def read_company_page_follow(page: Any) -> dict[str, Any]:
         "follow_controls": 0,
         "follow_controls_anywhere": 0,
         "bound_controls": 0,
+        "bound_in_page": 0,
         "subject": None,
         "headings_read": 0,
         "identity_links": 0,
@@ -2306,6 +2348,11 @@ async def read_company_page_follow(page: Any) -> dict[str, Any]:
         out["bound_controls"] = len(bound)
         if len(bound) == 1:
             out["subject"] = bound[0]
+        # THE SAME BINDING IN THE PAGE'S OWN ENGINE (2026-10-10): the press
+        # selector, counted. The verdict requires it to agree with the above.
+        out["bound_in_page"] = as_count(
+            await page.locator(COMPANY_PAGE_BOUND_FOLLOW_CONTROL).count()
+        )
 
         links = page.locator(COMPANY_PAGE_IDENTITY_LINKS)
         link_count = as_count(await links.count())

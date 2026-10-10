@@ -1,8 +1,8 @@
 # Rulings, 2026-10-10: the ledger's questions
 
 Lane K's ledger (`_audit/2026-09-28-lane-k-ledger.md`, section 7) asked 17 questions and listed 14
-PURPOSE rows. Each question below is answered by the orchestrator under
-`OUTWARD-ACTS-NEED-THE-OPERATOR`: it decides every call that targets no other person and is not
+PURPOSE rows. Each question below is answered by the orchestrator under the ruling
+OUTWARD-ACTS-NEED-THE-OPERATOR: it decides every call that targets no other person and is not
 irreversible. One question is the operator's and is relayed to him, not ruled here. The operator may
 override any ruling.
 

@@ -3644,7 +3644,10 @@ def followed_page_state(query: str, parsed: dict[str, Any]) -> dict[str, Any]:
         ):
             return {
                 "state": "following",
-                "why": f"{page['name']!r} is in the rendered list",
+                # THE NAME IS NOT QUOTED (2026-10-10, the orchestrator's
+                # ruling): it is the string the Page's button carries, and it
+                # leaves only in the organisation record the reader builds.
+                "why": "the Page is in the rendered list",
                 "matched": page,
             }
     if parsed.get("complete"):

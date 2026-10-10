@@ -120,9 +120,9 @@ async def test_a_properly_bound_label_verifies(over):  # noqa: F811
     found = await _binding(over, _page(_row()))
     assert found["bound"] is True, found
     assert found["observed"]["controls_named"] == 1
-    assert found["observed"]["input_id"] == "theme__dark"
+    assert found["observed"]["input_id_drawn"] is True
     assert found["observed"]["labels_matching"] == 1
-    assert found["observed"]["label_for"] == "theme__dark"
+    assert found["observed"]["label_for_matches_input_id"] is True
     assert "ACTIVATION relation" in found["why"]
 
 
@@ -182,7 +182,8 @@ async def test_a_label_that_names_but_does_not_activate_is_refused(over):  # noq
     found = await _binding(over, _page(_row(label_for=None)))
     assert found["bound"] is False, found
     assert found["observed"]["labels_matching"] == 1
-    assert found["observed"]["label_for"] is None
+    assert found["observed"]["label_for_drawn"] is False
+    assert found["observed"]["label_for_matches_input_id"] is False
     assert "clicks cleanly and sets nothing" in found["why"], found["why"]
 
 
@@ -200,8 +201,9 @@ async def test_a_label_bound_to_a_different_control_is_refused(over):  # noqa: F
     )
     found = await _binding(over, html)
     assert found["bound"] is False, found
-    assert found["observed"]["input_id"] == "theme__dark"
-    assert found["observed"]["label_for"] == "theme__light"
+    assert found["observed"]["input_id_drawn"] is True
+    assert found["observed"]["label_for_drawn"] is True
+    assert found["observed"]["label_for_matches_input_id"] is False
     assert "sets somebody else's radio" in found["why"], found["why"]
 
 
@@ -254,8 +256,44 @@ async def test_a_control_with_no_id_is_refused(over):  # noqa: F811
     )
     found = await _binding(over, html)
     assert found["bound"] is False, found
-    assert found["observed"]["input_id"] in (None, "")
+    assert found["observed"]["input_id_drawn"] is False
     assert "no id" in found["why"], found["why"]
+
+
+# ---------------------------------------------------------------------------
+# The ids stay on the page (2026-10-10, the orchestrator's order to lane G2)
+# ---------------------------------------------------------------------------
+
+#: An id the PAGE chose, distinct from anything this package writes, so its
+#: presence anywhere in a reading is the page's string leaving.
+PAGE_ID = "example-page-chosen-id"
+OTHER_PAGE_ID = "example-page-chosen-other"
+
+
+async def test_the_binding_is_a_verdict_and_never_carries_an_id(over):  # noqa: F811
+    """PAGE STRINGS LEAVE ONLY THROUGH A DECLARED RECORD. The binding compares
+    the control's id with its label's ``for`` and returns the VERDICT -- that
+    they match, or that they do not, or that one is not drawn -- and never
+    either attribute. Driven in all three outcomes, each with ids the page
+    chose."""
+    import json
+
+    bound = await _binding(over, _page(_row(input_id=PAGE_ID, label_for=PAGE_ID)))
+    elsewhere = await _binding(over, _page(
+        _row(input_id=PAGE_ID, label_for=OTHER_PAGE_ID),
+        _row(input_id=OTHER_PAGE_ID, label_for=OTHER_PAGE_ID, text=OTHER),
+    ))
+    unbound = await _binding(over, _page(_row(input_id=PAGE_ID, label_for=None)))
+    for found in (bound, elsewhere, unbound):
+        text = json.dumps(found)
+        assert PAGE_ID not in text and OTHER_PAGE_ID not in text, text
+    assert bound["bound"] is True
+    assert bound["observed"]["label_for_matches_input_id"] is True
+    assert elsewhere["bound"] is False
+    assert elsewhere["observed"]["label_for_drawn"] is True
+    assert elsewhere["observed"]["label_for_matches_input_id"] is False
+    assert unbound["bound"] is False
+    assert unbound["observed"]["label_for_drawn"] is False
 
 
 # ---------------------------------------------------------------------------

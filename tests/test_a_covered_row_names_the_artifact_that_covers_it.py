@@ -179,6 +179,29 @@ COVERED_ROWS: dict[tuple[str, str], tuple[str, str]] = {
         "by linkedin_creator_analytics's per_post field; fired live once "
         "and returned its documented shape",
     ),
+    # THREE MESSAGING ROWS, 2026-10-10 (lane U), pinned at UNFIRED for the
+    # reason the network and jobs rows above first were: the lane that built
+    # them was offline, and an unannounced promotion is what inflates a count.
+    # One tool covers all three, linkedin_send_attachment, each row aimed at
+    # its own input on the session-8 composer capture
+    # (tests/test_send_attachment.py). A fire that promotes or demotes any of
+    # them moves its pin here in the same commit.
+    ("messaging-and-content.md", "M14"): (
+        "COVERED-UNFIRED",
+        "a photo into a conversation he names, by linkedin_send_attachment, "
+        "to the input declaring images; built behind the grant, never fired",
+    ),
+    ("messaging-and-content.md", "M15"): (
+        "COVERED-UNFIRED",
+        "a video into a conversation he names, by linkedin_send_attachment, "
+        "to the input declaring images_and_documents; never fired",
+    ),
+    ("messaging-and-content.md", "M18"): (
+        "COVERED-UNFIRED",
+        "a document into a conversation he names, by linkedin_send_attachment, "
+        "to the input declaring images_and_documents; one file per call; "
+        "never fired",
+    ),
 }
 
 
