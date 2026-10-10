@@ -12,7 +12,8 @@
      draws no input. Every name here is invented. Behaviour is chosen by
      window.__fixtureConfig: lateMs (the press lands this many ms later),
      inert (the press changes nothing), alsoFlip (the press also flips the
-     other switch), duplicateName (a second switch wears the first's name). -->
+     other switch), duplicateName (a second switch wears the first's name),
+     duplicateAsCheckbox (a checkbox wears the first switch's name). -->
 <main>
 <h1>Synthetic switches</h1>
 <ul>
@@ -34,6 +35,10 @@
   if (config.duplicateName) {
     document.getElementById("dup-slot").innerHTML =
       '<div role="switch" tabindex="0" aria-checked="false" aria-label="Synthetic alerts"></div>';
+  }
+  if (config.duplicateAsCheckbox) {
+    document.getElementById("dup-slot").innerHTML =
+      '<input type="checkbox" aria-label="Synthetic alerts">';
   }
   window.__presses = 0;
   function flip(el) {

@@ -312,8 +312,17 @@ async def test_the_switch_reader_and_a_press_on_div_switches(browser_page):
     first = await sw.read_control(page, SYN_SWITCH)
     assert (first["reading"], first["role"], first["named"], first["error"]) == ("off", "switch", 1, None)
 
-    await _set(page, world(SWITCH_MARKUP, duplicateName=True))
-    assert (await sw.read_control(page, SYN_SWITCH))["reading"] == sw.UNKNOWN
+    # TWO CONTROLS WEARING ONE NAME, in both spellings: two switches, and a
+    # switch beside a checkbox. The second is the dangerous one -- a reader
+    # that took the switch because exactly one SWITCH matched would read a
+    # state while another control answers to the same name -- so the refusal
+    # must be the name count's own, not a later step's.
+    for label, config in (("two switches", {"duplicateName": True}),
+                          ("a switch and a checkbox", {"duplicateAsCheckbox": True})):
+        await _set(page, world(SWITCH_MARKUP, **config))
+        twice = await sw.read_control(page, SYN_SWITCH)
+        assert twice["reading"] == sw.UNKNOWN, (label, twice)
+        assert twice["named"] == 2 and "where exactly one is required" in twice["why"], (label, twice)
 
     for label, config, reached, code in (
         ("clean", {}, True, None),
