@@ -1253,6 +1253,25 @@ REGISTER: tuple = (
              "D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING; overridable. A page the "
              "allowlist refuses by its silence is admitted the same way.",
     ),
+
+    # LANE NP, 2026-10-10: the orchestrator's APPLICATION of the ruling above
+    # to that same profile's own detail pages -- one address shape, for the
+    # named segment only, behind the same grant and warning. Registered in its
+    # own document, as the order said.
+    Ruling(
+        id="NAMED-PROFILE-DETAIL-PAGES",
+        claim="The read of a profile he names includes that same profile's own "
+              "detail pages (/in/<the same slug>/details/<section>/), one load "
+              "per call, behind the same single-use grant and the same preview "
+              "warning; any other slug and any non-details path stay refused.",
+        binds="read boundary -- a third-party profile he names",
+        document="_audit/2026-10-10-rulings-named-profile-detail-pages.md",
+        anchor="RULED: (orchestrator, 2026-10-10, applying the operator's 08:01 "
+               "YES to reading profiles he names)",
+        note="Orchestrator's application of NAMED-PROFILE-READ-BEHIND-A-GRANT; "
+             "overridable. Admitted for the four detail sections measured on his "
+             "own profile; N 178 and N 65 wait on the Interests page's capture.",
+    ),
     # THE OPERATOR'S UPLOAD DECISION, REGISTERED 2026-10-10 BY LANE U. It was
     # made 2026-09-04 and landed in 615a5c4, and until this entry the register
     # had no line for it. NO COMMITTED SOURCE RECORDS HIS WORDS: the commit

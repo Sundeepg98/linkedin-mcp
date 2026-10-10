@@ -214,7 +214,9 @@ from linkedin_server import (
     coerce,
     company_interest,
     dom,
+    field_restore,
     group_leave,
+    item_author,
     landing,
     named_profile,
     people_seam,
@@ -2628,7 +2630,12 @@ PERMANENTLY_FORBIDDEN: dict[str, str] = {
         "preview minted. Everything else stays forbidden on the ground above, "
         "which is unchanged -- the view spends the member's privacy, and only "
         "his confirmation of that one read may spend it -- so no probe, "
-        "census, instrument or unconfirmed read loads a third party's profile"
+        "census, instrument or unconfirmed read loads a third party's profile. "
+        "THAT READ INCLUDES ITS PROFILE'S OWN DETAIL PAGES SINCE 2026-10-10 "
+        "(lane NP, ruling NAMED-PROFILE-DETAIL-PAGES, an application of the "
+        "operator's): one detail page of the SAME profile per call, behind the "
+        "same single-use grant and the same preview warning, through a third "
+        "check that takes the segment he named; still never for a measurement"
     ),
     "mark_notifications_read": (
         "clearing his unread badge destroys signal he has not seen, and the "
@@ -2939,13 +2946,18 @@ def consume(token: str, *, action: str, target: str) -> WriteGrant:
 
 
 def discard_all() -> None:
-    """Drop every live grant AND every live reading.
+    """Drop every live grant, every live reading, AND every restore record.
 
-    Both, because they are two halves of the same permission: a receipt that
-    outlived a kill switch is a grant waiting to be minted.
+    The first two because they are two halves of the same permission: a
+    receipt that outlived a kill switch is a grant waiting to be minted. The
+    third since 2026-10-10 (census row P A8) for the same reason one step
+    earlier: a restore record is what ADMITS an empty value to be minted at
+    all (``field_restore``), and a reset that left it would leave an admission
+    standing.
     """
     _GRANTS.clear()
     _OBSERVED.clear()
+    field_restore.discard_all()
 
 
 # ---------------------------------------------------------------------------
@@ -3670,6 +3682,74 @@ def _composite_target(spec: WriteSpec, target: Any) -> str:
     )
 
 
+def _is_clear_target(spec: WriteSpec, target: Any) -> bool:
+    """Whether a CANONICAL target is a CLEAR: ``update_profile_field``'s
+    ``<field> :: `` -- one separator, and nothing after it. Only
+    :func:`_clear_target` can produce one; see :mod:`field_restore`."""
+    return (
+        spec.action == "update_profile_field"
+        and isinstance(target, str)
+        and target.count(TARGET_JOIN) == 1
+        and target.endswith(TARGET_JOIN)
+    )
+
+
+def _clear_target(spec: WriteSpec, target: Any) -> Optional[str]:
+    """THE ONE ADMISSION OF AN EMPTY VALUE (2026-10-10, census row P A8).
+
+    ``update_profile_field`` asking for EXACTLY ``""`` -- a string, empty
+    after the strip every value gets -- for a field whose live restore record
+    (:mod:`field_restore`) says this server's own verified write read the
+    field's prior value as ``""`` before typing. Then, and only then, the
+    canonical target is ``<field> :: ``: the field, the separator, and an
+    EMPTY second half.
+
+    WHY THAT SPELLING IS NOT THE AMBIGUITY ``_clean_target_part`` REFUSES.
+    Neither half may contain the separator and the field half is never empty,
+    so ``<field> :: `` partitions one way only -- into that field and the
+    empty string -- and no other field or value canonicalises to it. The
+    token binds it exactly as it binds any other target.
+
+    THREE ANSWERS. None when this is not that request at all -- another
+    action, a value that is not empty, a value that is not a string (None is
+    "absent", never "empty") -- so the ordinary path canonicalises it and
+    refuses an empty component exactly as it always has. The clear target when
+    a record admits it. And a REFUSAL when it IS that request and nothing
+    admits it: the ordinary refusal verbatim, then why the one exception does
+    not apply -- no record for this field, used, expired, or the field is the
+    Premium badge switch, which takes 'on' or 'off' and is never cleared.
+    """
+    if spec.action != "update_profile_field" or spec.target_kind != "field_and_value":
+        return None
+    first, second = _COMPOSITE_TARGET_KINDS[spec.target_kind]
+    if isinstance(target, str) and target.count(TARGET_JOIN) == 1:
+        subject, _, value = target.partition(TARGET_JOIN)
+    elif isinstance(target, dict):
+        subject, value = target.get(first), target.get(second)
+    else:
+        return None
+    if not isinstance(value, str) or value.strip():
+        return None
+    field_name = _clean_target_part(spec, first, subject)
+    if field_name == profile_editor.PREMIUM_BADGE_TITLE:
+        why: Optional[str] = (
+            repr(profile_editor.PREMIUM_BADGE_TITLE) + " is a switch and takes "
+            "'on' or 'off'; a clear empties a typed field and never a switch."
+        )
+    else:
+        why = field_restore.why_no_clear(field_name)
+    if why is not None:
+        # FAIL-CLOSED: the ordinary refusal's own words lead, in the raise --
+        # the one place this module renders an exception's text -- and the
+        # refusal is raised whether or not the ordinary check gave any.
+        try:
+            _clean_target_part(spec, second, value)
+        except WriteAttemptError as exc:
+            raise WriteAttemptError(str(exc) + " " + why) from None
+        raise WriteAttemptError(why)
+    return field_name + TARGET_JOIN
+
+
 def _target_for(spec: WriteSpec, target: Any) -> str:
     """Normalise ``target`` to the shape THIS action is addressed by, or raise.
 
@@ -3738,6 +3818,13 @@ def _target_for(spec: WriteSpec, target: Any) -> str:
     if spec.target_kind in _OPAQUE_TARGET_KINDS:
         return _opaque_target(spec, raw)
     if spec.target_kind in _COMPOSITE_TARGET_KINDS:
+        # THE CLEAR, ASKED FIRST (2026-10-10, census row P A8): the one place
+        # an empty value is admitted, and it answers None for everything that
+        # is not that request -- so every other target, and every empty value
+        # it does not admit, takes the ordinary path below unchanged.
+        cleared = _clear_target(spec, target)
+        if cleared is not None:
+            return cleared
         canonical = _composite_target(spec, target)
         if spec.action == "update_profile_field":
             # THE PREMIUM BADGE IS A SWITCH (P B9), so it takes one of two
@@ -5945,6 +6032,13 @@ def _render(
         "performed": False,
     }
 
+    # A CLEAR SAYS IT IS ONE (2026-10-10, census row P A8). The value printed
+    # above is the empty string, and an empty value next to a field reads as
+    # nothing at all -- so the block says it twice, as ``clear: True`` and in
+    # a sentence, with the terms it is admitted on. See ``field_restore``.
+    if _is_clear_target(spec, observation.target):
+        out.update(field_restore.clear_preview(observation.target.partition(TARGET_JOIN)[0]))
+
     # THE FILE BLOCK, for an action that would upload one.
     #
     # HE IS APPROVING AN UPLOAD, AND "A FILE" IS NOT SOMETHING A PERSON CAN
@@ -6089,6 +6183,18 @@ async def preview(
                 observation,
                 block,
                 segment=url_target_of(spec, observation.target),
+            )
+        # AND FOR A REACTION (lane NP, 2026-10-10): WHOSE POST the act lands
+        # on -- its author, read off the permalink this preview loaded, as a
+        # people record and an ``author_kind`` -- in a NEW dict after
+        # ``grant.preview`` was assigned, so the retained block never held it.
+        # The reader is called HERE rather than inside the namer, so it is
+        # wired from another module where the reader inventory can see it;
+        # the namer is pure. See ``linkedin_server/item_author.py`` for what
+        # is measured and what is derived.
+        if spec.action in item_author.REACTION_ACTIONS:
+            block = item_author.name_the_item_author(
+                observation, await item_author.read_item_author(page), block
             )
         return block
     finally:
@@ -8313,12 +8419,30 @@ async def _live_control(
         # has something new to say says it.
         tag = str(control.get("tag") or "").lower()
         kind = "select_option" if tag == "select" else "fill"
+        # THE CLEAR'S OWN PRECONDITION (2026-10-10, census row P A8), read
+        # HERE because this is where the control was read, on the page about
+        # to be typed into -- never at the preview. A clear types the empty
+        # string, so its control must be a typed one; its record must still
+        # be live; and the field must hold EXACTLY what this server's own
+        # write typed into it. THIS SERVER ONLY CLEARS WHAT IT WROTE: a field
+        # changed since is refused with nothing typed, and the refusal names
+        # no value. See ``field_restore.clear_verdict``.
+        cleared = ""
+        if _is_clear_target(spec, grant.target):
+            try:
+                current, _how = await _editor_value_of(page, wanted, when="before the clear")
+            except Exception:  # noqa: BLE001 - an unread field is refused, below
+                current = None
+            proceed, cleared = field_restore.clear_verdict(wanted, current, kind)
+            if not proceed:
+                return ("editor_addressed", cleared, "")
+            cleared = " " + cleared
         return (
             "editor_addressed",
             f"the editor drew exactly one control named {wanted!r}, it is "
             f"enabled, it carries an id to aim at, and it is a {tag!r} so this "
             f"write would {kind}. Read live from the page this write would act "
-            f"on, not from the preview.",
+            f"on, not from the preview.{cleared}",
             "#" + dom_id,
             kind,
         )
@@ -11336,6 +11460,36 @@ async def perform(
     else:
         performed = UNKNOWN
 
+    # THE RESTORE RECORD, WRITTEN OR SPENT, AFTER THE VERDICT AND NEVER BEFORE
+    # IT (2026-10-10, census row P A8). ``field_restore``'s two mutations, and
+    # this is the one place in the package that makes either -- a test walks
+    # every module for a second caller.
+    #
+    # WRITTEN only on the FILL path, only for a write VERIFIED stored, and only
+    # when the value it overwrote was read as EXACTLY the empty string: a
+    # string, never None -- an unread prior admits nothing. What it records is
+    # the field and what the fill typed, the slice of the grant's own target.
+    #
+    # SPENT only by a clear that was VERIFIED: its fresh render read the field
+    # empty. A clear that did not land leaves its record live, and the
+    # click-time check still holds any retry to the field holding exactly what
+    # this server typed.
+    restore_record: Optional[field_restore.RestoreRecord] = None
+    clear_spent: Optional[bool] = None
+    if spec.action == "update_profile_field" and control_kind == "fill":
+        written_field = grant.target.partition(TARGET_JOIN)[0].strip()
+        if _is_clear_target(spec, grant.target):
+            clear_spent = performed is True and field_restore.spend(written_field)
+        elif (
+            performed is True
+            and fills_made > 0
+            and isinstance(prior_value, str)
+            and prior_value == ""
+        ):
+            restore_record = field_restore.record_empty_prior(
+                written_field, _text_component_of(spec, grant.target)
+            )
+
     # WHAT THIS WRITE ACTED ON, KEYED BY ITS OWN TARGET KIND.
     #
     # THIS WAS ``job_id`` OR ELSE ``company_id`` UNTIL 2026-09-02, and the
@@ -11372,11 +11526,21 @@ async def perform(
         # owns the split; a second spelling of it here would be a second way
         # to disagree with the separator that binds a token to what the
         # preview showed.
+        #
+        # TWO-PART IS ASKED OF THE KIND AND THE SEPARATOR, NOT OF THE VALUE
+        # (2026-10-10, census row P A8). This read ``if value else ""`` and
+        # ``value or grant.target``, which took an EMPTY value for a one-part
+        # target: a clear's receipt printed subject "" and value
+        # "<field> :: ". ``destination_of`` still owns the value; whether
+        # there is a subject is a property of the kind.
         value = destination_of(spec, grant.target)
-        target_block["subject"] = (
-            grant.target[: -(len(value) + len(TARGET_JOIN))] if value else ""
+        two_part = bool(_COMPOSITE_TARGET_KINDS.get(spec.target_kind, ("", ""))[1]) and (
+            grant.target.count(TARGET_JOIN) == 1
         )
-        target_block["value"] = value or grant.target
+        target_block["subject"] = (
+            grant.target[: -(len(value) + len(TARGET_JOIN))] if two_part else ""
+        )
+        target_block["value"] = value if two_part else grant.target
         target_block["what_these_are"] = (
             "the two halves of this action's canonical target, split on the "
             "separator the confirm token was bound across. For a one-part "
@@ -11401,30 +11565,51 @@ async def perform(
     # `previous_value` IS VERBATIM AND MAY BE None. None means it could not be
     # read, never that it was empty; the two are not collapsed, because on a
     # restore that difference is the whole message.
+    #
+    # AN EMPTY ORIGINAL IS PUT BACK BY A CLEAR (2026-10-10, census row P A8).
+    # This printed ``value=''`` for one until then: a call ``_target_for``
+    # refused, offered as the way back. Now the call is offered only when a
+    # clear was RECORDED above, it says it is a CLEAR and on what terms, and
+    # where none was recorded the field is None and ``clear`` says why.
     restore_block: Optional[dict[str, Any]] = None
     if spec.action == "update_profile_field":
         restore_field, _, _ = grant.target.partition(TARGET_JOIN)
         restore_field = restore_field.strip()
-        restore_block = {
-            "previous_value": prior_value,
-            "how_it_was_read": prior_why,
-            "to_put_it_back": (
-                None
-                if prior_value is None
-                else "linkedin_update_profile_field(field="
+        if prior_value is None:
+            put_back: Optional[str] = None
+        elif prior_value == "":
+            put_back = (
+                None if restore_record is None else field_restore.clear_call(restore_field)
+            )
+        else:
+            put_back = (
+                "linkedin_update_profile_field(field="
                 + repr(restore_field)
                 + ", value="
                 + repr(prior_value)
                 + ")  # then confirm the token it returns"
-            ),
+            )
+        restore_block = {
+            "previous_value": prior_value,
+            "how_it_was_read": prior_why,
+            "to_put_it_back": put_back,
             "this_server_will_not_do_it_for_you": (
                 "Restoring is a WRITE and gets its own preview, its own token "
-                "and its own confirmation. Nothing here is queued, scheduled "
-                "or held. If the previous value reads as null it could not be "
-                "read before the change -- which is not the same as it having "
-                "been empty, and on a restore that difference is the message."
+                "and its own confirmation. Nothing here is queued or "
+                "scheduled; the one thing held, when the previous value was "
+                "empty, is the admission of ONE clear -- see 'clear' -- and it "
+                "acts only through that same preview, token and confirmation. "
+                "If the previous value reads as null it could not be read "
+                "before the change -- which is not the same as it having been "
+                "empty, and on a restore that difference is the message."
             ),
         }
+        if clear_spent is not None:
+            restore_block["clear"] = field_restore.spent_note(clear_spent, performed)
+        elif prior_value == "":
+            restore_block["clear"] = field_restore.recorded_note(
+                restore_record, performed, control_kind
+            )
 
     return {
         "action": spec.action,

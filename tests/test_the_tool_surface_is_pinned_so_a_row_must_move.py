@@ -129,7 +129,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_profile_editor_values": (),
     "linkedin_publish_post": ("confirm_token", "text"),
     "linkedin_react_to_item": ("confirm_token", "item"),
-    "linkedin_read_named_profile": ("confirm_token", "profile"),
+    "linkedin_read_named_profile": ("confirm_token", "profile", "section"),
     "linkedin_recent_job_searches": (),
     "linkedin_recruiter_insights": (),
     "linkedin_save_job": ("confirm_token", "job_id"),
@@ -476,6 +476,16 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: connections) GAP -> COVERED-UNFIRED by D6 on the orchestrator's ruling, on
 #: `connections_of`, which shipped earlier. Never fired. See
 #: `_audit/2026-09-24-lane-s-people-search.md`, "Four people-search items".
+#: **RE-PINNED 2026-10-10 AT 61 TOOLS AND 97 PARAMETERS on lane NP (ruling
+#: NAMED-PROFILE-DETAIL-PAGES): no tool, one parameter -- `section` on
+#: `linkedin_read_named_profile`, ONE detail page of the same profile he names,
+#: behind the same grant and warning.** THE CENSUS DECISION, in the same commit:
+#: NO ROW MOVES. `N 178` and `N 65` stay GAP -- no capture of the Interests
+#: detail page exists, so the load returns counts and no entry; the capture spec
+#: and the reader design are in `_audit/2026-10-10-lane-np-named-profile.md`.
+#: The read's two new fields (`member_token`, `activity_items`) are not
+#: parameters; `N 30`, `N 85`, `N 172`, `N 31` and `M C32` move only when proven
+#: live.
 #: **RE-PINNED 2026-10-10 AT 62 TOOLS AND 99 PARAMETERS on lane U's branch
 #: (ruling FILE-UPLOAD-OPENED): one WRITE,
 #: `linkedin_send_attachment(thread_id, file, confirm_token)` -- one file from
@@ -487,8 +497,13 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: the file's name rather than at markup; each row waits on its capture
 #: (U-REPLY-ATTACHMENT-SENT and -PENDING). No other row moves. See
 #: `_audit/2026-09-28-lane-u-uploads.md`, section 5.
+#: **RE-PINNED AT THE MERGE OF MASTER f8c7392 INTO LANE U, 2026-10-10: 62
+#: TOOLS AND 100 PARAMETERS.** The two re-pins above meet here: lane NP's one
+#: parameter (96 -> 97, no tool) and lane U's one tool with its three
+#: parameters (61 -> 62 tools, 96 -> 99). Neither moved the other's entry, so
+#: the sum holds: 61 + 1 tools, 96 + 1 + 3 parameters.
 PINNED_TOOL_COUNT = 62
-PINNED_PARAMETER_COUNT = 99
+PINNED_PARAMETER_COUNT = 100
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:

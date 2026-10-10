@@ -48,7 +48,6 @@ Exit: 0 clean, 1 the commit carries something, 2 the gate could not run.
 from __future__ import annotations
 
 import importlib.util
-import re
 import subprocess
 import sys
 from pathlib import Path
@@ -67,10 +66,14 @@ SWEEP_PATH = REPO / "scripts" / "sweep_tracked_for_identity.py"
 
 
 def _git(*args: str) -> subprocess.CompletedProcess:
-    return subprocess.run(
-        ["git", *args], cwd=str(REPO), capture_output=True, text=True,
-        encoding="utf-8", errors="replace",
-    )
+    """stdout through the sweep's own decoding rule, UTF-8 when valid, else
+    cp1252. It was UTF-8 with replacement until 2026-10-10, which turned a
+    cp1252 file's non-ASCII letters into U+FFFD, so a value saved by a cp1252
+    tool could never match the staged blob it sat in."""
+    proc = subprocess.run(["git", *args], cwd=str(REPO), capture_output=True)
+    return subprocess.CompletedProcess(
+        proc.args, proc.returncode, _rules().decode_text(proc.stdout),
+        proc.stderr.decode("utf-8", errors="replace"))
 
 
 def staged_paths() -> list[str]:
@@ -95,8 +98,21 @@ def staged_blob(rel: str) -> str | None:
 
 
 def redact(line: str) -> str:
-    """The line's SHAPE. A pre-commit hook prints to a terminal and a log."""
-    return re.sub(r"[A-Za-z0-9]", "x", line.strip())[:70]
+    """The line's SHAPE. A pre-commit hook prints to a terminal and a log.
+    The sweep's own ``redact`` since 2026-10-10: no letter of any script, and
+    nothing outside ASCII."""
+    return _rules().redact(line)
+
+
+_RULES = None
+
+
+def _rules():
+    """The shipped sweep, loaded once, for ``decode_text`` and ``redact``."""
+    global _RULES
+    if _RULES is None:
+        _RULES = _sweep_module()
+    return _RULES
 
 
 def _sweep_module():
