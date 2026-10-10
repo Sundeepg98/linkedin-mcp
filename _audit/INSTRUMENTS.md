@@ -11728,6 +11728,30 @@ shard job now creates a local master on every run that is not master's.
 |---|---|
 | `.github/workflows/ci.yml` -- the guarded `git branch --force master origin/master` step; `tests/test_ci_fast_lane.py` local-master tests | against the workflow before the step: 2 failed (no step creates a local master; no guard off master); 36 passed after, including a reproduction that shows `master` failing to resolve in a ci/-shaped clone and resolving after the step's own script runs |
 
+### 87.7 AN IDENTITY READER DECODES BY RULE, NEVER BY LOCALE (the 13:43 ruling)
+
+Four readers matched text against the wordlist and no two decoded it the
+same way: two used the LOCALE (cp1252 on the operator's box, where the hooks
+run), two used UTF-8 with replacement. So 9 non-ASCII needles could never
+match a UTF-8 file at commit or push time there, and none could match a
+cp1252 file in the other two. One function now decides --
+`sweep_tracked_for_identity.decode_text`, UTF-8 when valid else cp1252 --
+and all four call it; `redact` now hides letters of every script and prints
+ASCII only. A DELIBERATE behaviour change: the real tree still reads PASS.
+
+    AN ENCODING NOBODY CHOSE IS STILL A CHOICE: THE MACHINE'S. A DETECTOR
+    THAT DECODES BY LOCALE DETECTS DIFFERENT THINGS ON DIFFERENT BOXES.
+
+| path | shown failing by |
+|---|---|
+| `scripts/sweep_tracked_for_identity.py` -- `decode_text`, `redact`; its use in the tracked sweep, the blob sweep (`_as_text`), `scripts/pre_commit_identity_gate.py` (`_staged_content`, `_mask`) and `scripts/identity_gate.py` (`_git`, `redact`); `tests/test_identity_text_is_decoded_one_way.py` | against the old readers on the operator's box, with a synthetic non-ASCII needle in UTF-8 and cp1252 copies: 6 failed -- no rule; the shape kept accented letters; the blob sweep and the pre-commit gate missed the UTF-8 copy; the tracked sweep and identity_gate missed the cp1252 copy. 6 passed after |
+
+DECLARED DISPOSABLE, sections 87.5-87.7: the old-versus-new sweep
+benchmark, the UTF-8 decoding probe, the non-ASCII needle COUNT (it printed
+counts only), the run-collection read-back from junit, the timings writer
+wrapper, the fast-lane xdist replay, the shard anatomy reader, and the
+escape rewriter for a test file whose escapes a tool layer decoded.
+
 ## 88. A HANDLE LEAVES ONLY WHEN EVERY LINK THAT NAMES IT AGREES, AND A DOOR TAKES THE SEGMENT IT WAS ASKED FOR (lnp-named-profile-lead, 2026-10-10)
 
 **Registered 2026-10-10.** Full record: `_audit/2026-10-10-lane-np-named-profile.md`.
