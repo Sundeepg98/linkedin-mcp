@@ -6,8 +6,13 @@ Lane A (`la-admissions-lead`). Brief written by the orchestrator 2026-09-28
 
 **OFFLINE THROUGHOUT.** No LinkedIn page was loaded, no browser was started or
 attached to, port 9224 was never touched. While another lane's live session
-was open (session 7 until about 11:51 IST, session 8 from 13:53), every test
-run here was targeted and serial (`-p no:randomly`, no `-n`). In the gap
+was open (session 7 until about 11:51 IST, session 8 from 13:53 to before
+14:24, session 9 from 14:39 until the flag file was gone, between this lane's
+reads at 14:45:58 and 14:48:06), every test run here was targeted and serial
+(`-p no:randomly`, no `-n`) -- with ONE EXCEPTION, recorded in section 6: a
+`-n 4` run after the merge `8713e6e`, 14:40:31 to 14:41:45, inside the first
+two minutes of session 9, because the command printed the flag and did not gate
+on it. In the gaps
 between them this lane ran its targeted sets with `-n 4` or `-n 6`, in the
 background, and several ran past the orchestrator's 11:35 two-minute bound --
 three to six minutes each, and once 24 minutes, the run over every test file
@@ -21,7 +26,9 @@ anything not yet landed is not described.
 **THE LANE'S COMMITS, by SUBJECT.** The short hashes beside them are this
 lane's branch's: every one is nowhere on `master` until the orchestrator
 merges the branch, and the subject is how a reader finds each after a
-rewrite. Merges of `master` sit among them (`53908ea`, `b10bde8`, `fe119de`, and the last one below).
+rewrite. Four merges of `master` sit among them: of `53908ea`, `b10bde8`,
+`fe119de` and `f8c7392`. A commit cannot carry its own hash, so the table ends
+at the commit before the one that last edited it.
 
 | subject | lane branch |
 |---|---|
@@ -42,6 +49,8 @@ rewrite. Merges of `master` sit among them (`53908ea`, `b10bde8`, `fe119de`, and
 | merge origin/master fe119de into lane A: lane K's ledger and the CI fast lane | f3daa5d |
 | reader: the job tracker's interview, archived and clicked_apply stages -- J 50, J 51 COVERED-UNFIRED; lane K's ledger advanced | 8f2726b |
 | reader: linkedin_tracker_stage defaults to interview, so the envelope guard drives it | 7f4e05c |
+| record: the commit table names the lane's four newest commits | adcbee7 |
+| merge origin/master f8c7392 into lane A: lane NP's named-profile detail pages and the CI lane follow-ups | 8713e6e |
 
 ---
 
@@ -998,6 +1007,20 @@ document guards) and, after 11:35 IST, under the orchestrator's policy:**
                                    headline figure matches its pin; the three
                                    generators --check ok at every commit
     the pre-commit identity gate   226 spellings, 0 hits on every commit
+    after 8f2726b and 7f4e05c       505 passed, 1 failed (the envelope guard: the
+    (4.2, the tracker stages)      new tool undriven -- fixed by the default in
+                                   7f4e05c; the envelope and stage files then 25
+                                   passed); surface and prose 169 passed
+    after the merge 8713e6e        1379 passed in 70 s -- RUN WITH -n 4 WHILE
+                                   LIVE SESSION 9 WAS OPEN. The flag file's mtime
+                                   is 14:39:46; this run was issued at 14:40:31 and
+                                   returned at 14:41:45 (the lane's own tool-call
+                                   timestamps), so all 70 s of it fell inside the
+                                   session's first two minutes. The command
+                                   printed the flag and did not gate on it. A
+                                   breach of the brief's serial-only rule,
+                                   recorded rather than smoothed; every later run
+                                   is gated on the flag.
 
 **CI, on GitHub's free runners via `scripts/lane_ci.py` (ci/ ref, one ubuntu
 3.13 cell, four shards):**
@@ -1013,6 +1036,16 @@ document guards) and, after 11:35 IST, under the orchestrator's policy:**
                                  resolve only on the lane branch until the merge.
                                  Disclosed at both sites, and the commit table at
                                  the top added, in the next commit.
+    run 38038875372 at f3daa5d   (the lane branch's merge of `fe119de`, nowhere
+                                 on `master` until this lane merges) shards 1, 2,
+                                 3 green; shard 0: 2 failed, 2836
+                                 passed. Both failures were tests/test_next_step.py:
+                                 lane K's ledger still read "REFUSED: waits on lane
+                                 A" for addresses this lane had admitted. Advanced
+                                 in its own vocabulary in 8f2726b (section 4.3).
+    the final run                its id and conclusion are in this lane's final
+                                 message: a record cannot carry the verdict of the
+                                 run that certifies it.
 
 **NOT RUN, and why:** the full suite locally (the orchestrator's policy; CI
 runs it); anything live (the brief); `scripts/impact_gate.py`'s widening (a
