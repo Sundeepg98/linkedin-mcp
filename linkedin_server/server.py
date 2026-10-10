@@ -9263,18 +9263,21 @@ async def linkedin_follow_company_page(
 
     WHAT THE PREVIEW READS, on the Page root itself, at one page load. The
     Page's own follow control -- measured wearing ``Follow `` followed by the
-    Page's name -- must be the ONE such control in the page's main column
-    (LinkedIn draws the same control for every Page it recommends, in a side
-    column), its name must match a heading the Page prints, and the Page's
+    Page's name -- must be the ONE control in the page's main column whose
+    name matches a heading the Page prints, as this server compares them and
+    as the page's own engine does (LinkedIn draws the same control for other
+    Pages and people, in a side column and, measured 2026-10-10, in the main
+    column too), and the Page's
     own people-search link must name the id you asked about. That last check
     is what ties the page to the id: LinkedIn redirects ``/company/<id>/`` to
     the Page's canonical address, which this block does not print -- it is a
     slug, and a slug can be a name.
 
     A PAGE YOU ALREADY FOLLOW IS REFUSED, NOT REPORTED. The label its control
-    wears once followed has never been captured, so this reads ``unknown``
-    rather than guessing -- pressing a follow control in its other state is
-    how a follow becomes an unfollow.
+    wears once followed was read live once (2026-10-10), as a shape, and this
+    gate does not read it: it reads ``unknown`` rather than guessing --
+    pressing a follow control in its other state is how a follow becomes an
+    unfollow.
 
     After the click the result is read off a DIFFERENT surface: your followed
     companies, where the row for this id must render. That list shows about
@@ -9965,8 +9968,9 @@ async def linkedin_update_profile_field(
     intro editor: a second row carrying the title, no such row, or a UI in
     another language refuses. (Since 2026-10-10 LinkedIn draws the switch
     named on its own input -- one label shared by both switches, which names
-    neither -- so the title still aims it, and the press lands on the switch's
-    own control in either recorded shape.) Condition 1 is read BEFORE the switch is pressed, Save
+    neither -- so the title still aims it; that input draws no box, so the
+    press lands on the toggle holding it, and a press target that draws no
+    box is refused before anything is pressed.) Condition 1 is read BEFORE the switch is pressed, Save
     is pressed only if the badge and nothing else moved, and the
     verification reads both switches on a fresh render -- the other one, Open
     Profile, must not have moved. The restore is the same call with the

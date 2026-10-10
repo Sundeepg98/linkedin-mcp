@@ -31,8 +31,8 @@ are listed as `(undated)`; no date is taken from git history, because
 | of those, carrying a `YYYY-MM-DD-` date prefix | 228 |
 | distinct dates | 19 |
 | documents with no level-1 heading | 2 |
-| `CORRECTS:` marker lines | 124 |
-| `CORRECTED BY:` marker lines | 124 |
+| `CORRECTS:` marker lines | 125 |
+| `CORRECTED BY:` marker lines | 125 |
 | distinct declared correction edges | 110 |
 | documents something later corrects | 52 |
 | documents that correct something | 73 |
@@ -698,6 +698,8 @@ document is dead; it says one thing in it was overtaken and names what.
   > rows `25`, `81`, `26` and `155` moved COVERED-UNFIRED to COVERED-PROVEN in the live lane's session 7 -- a 1st-degree connection found by name, the degree facet applied to the results, his connections filtered by place, and `155` on the orchestrator's call of 2026-10-10 by D6 on `M M1`'s session-5 send -- each on its own cell's bar.
 
   > rows `48` and `46` moved COVERED-UNFIRED to COVERED-PROVEN in the live lane's session 8 -- the unfollow through its confirmation, and the follow from a posting that restored it -- each on its own cell's bar.
+
+  > rows `30`, `85`, `172` and `31` moved COVERED-UNFIRED to COVERED-PROVEN in the live lane's session 9 -- a member's connections as people, the Connections-of filter, and the connections shared with him -- on the member token lane NP's named read returned, each on its own cell's bar.
 
 - CORRECTED BY [2026-09-23-readers-four-rows.md](2026-09-23-readers-four-rows.md)
 
@@ -1498,6 +1500,8 @@ reach is visible. The quoted reason here is the CORRECTOR's own
   > rows `25`, `81`, `26` and `155` read COVERED-UNFIRED, never fired or held for a target; in session 7 the name search, the degree facet and the place filter each fired and banked, and `155` moved on the orchestrator's call of 2026-10-10 by D6 on `M M1`'s session-5 send, and each moves to COVERED-PROVEN.
 
   > rows `48` and `46` read COVERED-UNFIRED, never performed; in session 8 the unfollow landed through LinkedIn's confirmation and the follow from a posting restored it, each verified, and each moves to COVERED-PROVEN.
+
+  > rows `30`, `85`, `172` and `31` read COVERED-UNFIRED, never fired; in session 9 each fired read-only at the member he named, on the member token his named read returned, and each moves to COVERED-PROVEN.
 
 - CORRECTS [_census/profile.md](_census/profile.md)
 

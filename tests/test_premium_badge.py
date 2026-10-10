@@ -78,13 +78,15 @@ _ROW_END = "</div></div>\n" + _SAVE_BUTTON
 #: press writes both switches' states into ``window.__saved`` and closes the
 #: dialog. ``data-press-moves`` plants the two failures the write must catch:
 #: a press that moves nothing, and a press that moves the other switch too.
-#: SINCE 2026-10-10 THE PRESS MAY LAND ON THE INPUT ITSELF (the second recorded
-#: shape, below): the checkbox's own toggle moves it, a cancelled click undoes
-#: that, and the planted 'both' failure flips the other input by hand.
+#: IN THE SECOND RECORDED SHAPE THE PRESS LANDS ON THE TOGGLE (the live lane's
+#: session 8, 2026-10-10): the named input draws no box, so the toggle that
+#: holds it -- its empty label, the input and the knob -- is what a press
+#: reaches, and pressing it flips the input; the planted 'both' failure flips
+#: the other toggle too.
 _SCRIPT = (
     "<script>"
     "window.__flip = function (w) {"
-    " const input = (w.tagName === 'INPUT') ? w : w.querySelector('input[type=\"checkbox\"]');"
+    " const input = w.querySelector('input[type=\"checkbox\"]');"
     " const on = !input.checked;"
     " if (w.hasAttribute('aria-checked')) { w.setAttribute('aria-checked', on ? 'true' : 'false'); }"
     " input.checked = on; };"
@@ -95,17 +97,12 @@ _SCRIPT = (
     " window.__saved = JSON.stringify(s); };"
     "window.__press = function (event, w) {"
     " const mode = document.body.dataset.pressMoves;"
-    " if (w.tagName === 'INPUT') {"
-    "  if (mode === 'nothing') { event.preventDefault(); return; }"
-    "  if (mode === 'both') { document.querySelectorAll('input[role=\"switch\"][id^=\"intro-switch-\"]')"
-    ".forEach(function (x) { if (x !== w) { x.checked = !x.checked; } }); }"
-    " } else {"
-    "  event.preventDefault();"
-    "  if (mode === 'nothing') { return; }"
-    "  window.__flip(w);"
-    "  if (mode === 'both') { document.querySelectorAll('div[role=\"switch\"]')"
+    " event.preventDefault();"
+    " if (mode === 'nothing') { return; }"
+    " window.__flip(w);"
+    " if (mode === 'both') {"
+    " document.querySelectorAll(w.hasAttribute('role') ? 'div[role=\"switch\"]' : 'div[data-toggle]')"
     ".forEach(function (x) { if (x !== w) { window.__flip(x); } }); }"
-    " }"
     " if (document.body.dataset.commitsOnPress === 'yes') { window.__commit(); } };"
     "</script>"
 )
@@ -115,20 +112,43 @@ _SCRIPT = (
 #: role, aria-checked, tabindex or aria-label, and the checkbox input carries
 #: the label beside the role=switch it always had. The label below is the
 #: fixture's invented one; the live label was measured only as a shape.
+#: AND WHERE A PRESS CAN LAND, MEASURED THE SAME DAY (session 8, two
+#: read-only loads): the named input draws no box and is not visible; the
+#: div holding its empty label, the input and the knob is drawn, 52 x 32.
 _WRAPPER = re.compile(
     r'<div role="switch" aria-checked="(?:true|false)" tabindex="0" aria-label="Tap to toggle setting">'
 )
 _INPUT_OPEN = '<input role="switch" type="checkbox"'
+#: The toggle around the input, as the capture draws it: one div holding the
+#: empty label, the input and the knob.
+_TOGGLE_OPEN = "<div><label for="
 
 
-def _as_named_input(block: str, *, label: str = "Tap to toggle setting") -> str:
-    """One setting block redrawn in the second shape, the press on the input."""
+def _as_named_input(block: str, *, label: str = "Tap to toggle setting", toggle: str = "drawn") -> str:
+    """One setting block redrawn in the second shape, AS SESSION 8 MEASURED IT.
+
+    The input carries the label and draws no box; the toggle holding it is
+    drawn at the live size and is what a press reaches. ``toggle`` plants the
+    two ways it can fail to be a press target: ``"hidden"`` draws no box for
+    the toggle either, and ``"absent"`` draws the input's parent as a span,
+    so no div holds the label and the input together.
+    """
     assert len(_WRAPPER.findall(block)) == 1, "the block no longer draws the recorded wrapper"
     assert block.count(_INPUT_OPEN) == 1, "the block no longer draws one switch input"
+    assert block.count(_TOGGLE_OPEN) == 1, "the block no longer draws one toggle around its input"
     block = _WRAPPER.sub("<div>", block)
-    return block.replace(
-        _INPUT_OPEN, _INPUT_OPEN + ' aria-label="' + label + '" onclick="__press(event, this)"', 1
+    block = block.replace(_INPUT_OPEN, _INPUT_OPEN + ' aria-label="' + label + '" hidden=""', 1)
+    style = "display:none" if toggle == "hidden" else "display:inline-block;width:52px;height:32px"
+    tag = "span" if toggle == "absent" else "div"
+    block = block.replace(
+        _TOGGLE_OPEN,
+        "<" + tag + ' data-toggle="" style="' + style + '" onclick="__press(event, this)"><label for=',
+        1,
     )
+    if tag == "span":
+        assert block.count("<span></span></div>") == 1, "the knob no longer closes the toggle"
+        block = block.replace("<span></span></div>", "<span></span></span>", 1)
+    return block
 
 
 def _split(html: str) -> tuple[str, str, str, str]:
@@ -172,6 +192,7 @@ class _BadgeWorld:
         named_input: bool = False,
         named_other: "bool | None" = None,
         empty_label: bool = False,
+        toggle: str = "drawn",
     ):
         self.store = {OTHER_ID: other, BADGE_ID: badge}
         #: The second recorded shape (2026-10-10), on the badge's block, and on
@@ -180,6 +201,8 @@ class _BadgeWorld:
         self.named_input = named_input
         self.named_other = named_input if named_other is None else named_other
         self.empty_label = empty_label
+        #: The badge's toggle in the second shape: drawn, hidden or absent.
+        self.toggle = toggle
         self.swapped = swapped
         self.badge_title = badge_title
         self.second_titled_row = second_titled_row
@@ -197,7 +220,11 @@ class _BadgeWorld:
         block_b = _with_state(block_b, self.store[BADGE_ID])
         label = "" if self.empty_label else "Tap to toggle setting"
         block_a = _as_named_input(block_a, label=label) if self.named_other else _pressable(block_a)
-        block_b = _as_named_input(block_b, label=label) if self.named_input else _pressable(block_b)
+        block_b = (
+            _as_named_input(block_b, label=label, toggle=self.toggle)
+            if self.named_input
+            else _pressable(block_b)
+        )
         block_a = block_a.replace("Placeholder setting A", self.other_title)
         block_b = block_b.replace("Placeholder setting B", self.badge_title)
         block_b = block_b.replace("Placeholder description B", self.description)
@@ -523,7 +550,7 @@ async def test_the_reader_reads_the_switch_named_on_its_input(browser_page):
     assert reading["switch_shape"] == "named_input"
     assert reading["badge_position"] == 2
     assert reading["badge_checked"] is True and reading["other_checked"] is True
-    assert reading["selector"].endswith(profile_editor._NAMED_SWITCH_PATH)
+    assert ':text-is("' + TITLE + '")' in reading["selector"]
     assert "Plantedsecret" not in repr(reading)
 
 
@@ -578,6 +605,55 @@ async def test_a_named_input_whose_label_computes_no_name_is_refused(writes_on, 
     """The second shape is a NAMED switch: an aria-label that computes no name
     is not it, and is refused rather than read as either shape."""
     world = _BadgeWorld(named_input=True, empty_label=True)
+    message = await _refused(browser_page, world, "off")
+    assert "not in a recorded shape" in message, message
+    assert world.store == {OTHER_ID: True, BADGE_ID: True} and world.saves == 0
+
+
+# ---------------------------------------------------------------------------
+# 6. THE PRESS LANDS ON THE TOGGLE (2026-10-10, the live lane's session 8)
+# ---------------------------------------------------------------------------
+#
+# MEASURED on two read-only loads of his intro editor: the reader aimed the
+# badge -- named_input, position 2, both on -- and no press could land. The
+# named input draws no box and is not visible, and a trial click on it timed
+# out; its parent, the toggle holding the empty label, the input and the
+# knob, is drawn (52 x 32) and trial-actionable. Section 5's world now draws
+# exactly that, so its writes ran red against the press aimed at the input;
+# these were written beside them, first.
+
+
+async def test_the_press_is_aimed_at_the_drawn_toggle_holding_the_badges_input(browser_page):
+    world = _BadgeWorld(named_input=True)
+    await browser_page.set_content(world.editor_html(), wait_until="domcontentloaded")
+    assert await browser_page.locator("#" + BADGE_ID).is_visible() is False, "the world must hide the input"
+    reading = await profile_editor.read_premium_badge(browser_page)
+    assert reading["aimable"] is True, reading["why"]
+    target = browser_page.locator(reading["selector"])
+    assert await target.count() == 1
+    assert await target.is_visible(), "the press is aimed at a control that draws no box"
+    held = await target.evaluate(
+        "el => Array.from(el.querySelectorAll('input[role=\"switch\"]')).map((i) => i.id)"
+    )
+    assert held == [BADGE_ID], held
+    assert reading["press_target_drawn"] is True
+
+
+async def test_a_toggle_that_draws_no_box_is_refused_before_any_press(writes_on, browser_page):
+    """A reader that says aimable must have aimed at a control a click can
+    reach: a badge whose toggle draws no box is refused by name, before any
+    press -- never a click that times out after the token is spent."""
+    world = _BadgeWorld(named_input=True, toggle="hidden")
+    message = await _refused(browser_page, world, "off")
+    assert "draws no box" in message, message
+    assert world.store == {OTHER_ID: True, BADGE_ID: True} and world.saves == 0
+
+
+async def test_a_named_input_that_no_toggle_holds_is_refused(writes_on, browser_page):
+    """The press target is the input's own parent, a div holding its empty
+    label: drawn any other way, the block is in no recorded shape and nothing
+    is aimed."""
+    world = _BadgeWorld(named_input=True, toggle="absent")
     message = await _refused(browser_page, world, "off")
     assert "not in a recorded shape" in message, message
     assert world.store == {OTHER_ID: True, BADGE_ID: True} and world.saves == 0
