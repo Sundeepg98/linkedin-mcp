@@ -35,10 +35,15 @@ the next merge):
 | identity readers decode one way: UTF-8 when valid, else cp1252 -- a deliberate behaviour change | d8ef400 |
 | merge master fe119de into lane CI: lane K's ledger and the merged CI fixes, ahead of the timings rebuild | 66c6241 |
 | ci: shard timings rebuilt from master run 38034133514 | 54dd6c1 |
-| this record's sections 11 and 12, INSTRUMENTS 87.7 | (the commit that adds them) |
+| record: lane CI sections 11 and 12 -- the one-way decoding as a ruled behaviour change, the rebuilt timings, and run 38038508157 | ac5cb0a |
+| tests: the impact gate's real-tree tests share one reading of the tree -- 410s to 165s, no assertion touched | ef615b9 |
+| merge origin/master 66eb699 into lane CI: the CI follow-ups' merge and live session 8, ahead of the certification push | 5ca58c1 |
+| merge origin/master 1027bf8 into lane CI: lane G2's engine-run fixtures, ahead of the certification push | d7c6576 |
+| this record's section 13, INSTRUMENTS 87.8 | (the commit that adds them) |
 
 (Through 4bc1c84 the commits reached master in its merges 53908ea and
-b10bde8; 4edba7e onward wait on the next merge.)
+b10bde8, and through ac5cb0a in f8c7392; ef615b9 onward wait on the next
+merge.)
 
 ## 1. How a lane uses it -- two commands
 
@@ -66,8 +71,8 @@ sweep at 72-217 s and twice per push):
 |---|---|---|
 | `push`: the helper's checks (dirty tree, branch, hook gate, ancestry) | well under a second -- no sweep | DERIVED (git plumbing only) |
 | `push`: the hook's full check, sweep included, ONCE | 9.8 s for 3 commits / 1002 blobs; 10.4 s for 8 commits. Whole `lane_ci.py push` once master carried section 9: 14.4 s (section 12), against 104.6 s before | MEASURED on this box, sections 9, 10 and 12 |
-| CI run, one ubuntu 3.13 cell in four shards | 5m50s on the rebuilt timings (run 38038508157, section 12.3); 6m21s before them (run 38036281943) | MEASURED, sections 10 and 12 |
-| total, push to verdict | ~6 minutes (14.4 s push, 5m50s run), against 30-60 locally | MEASURED, section 12.3 |
+| CI run, one ubuntu 3.13 cell in four shards | 4m46s once the slowest test file shared its reading (run 38041688406, section 13.5); 5m50s on the rebuilt timings alone (run 38038508157); 6m21s before them (run 38036281943) | MEASURED, sections 10, 12 and 13 |
+| total, push to verdict | ~5 minutes (18.1 s push, 4m46s run), against 30-60 locally | MEASURED, section 13.5 |
 
 ## 2. The gate -- `scripts/pre_push_ref_gate.py`
 
@@ -611,6 +616,103 @@ the suite grew under the run: 12698 tests and 3030 s of ubuntu test time,
 against 2617 s in the run before. Balance is spent; what is left is that
 one file (section 8, Q6).
 
+## 13. The 14:21 ruling on Q6: the slowest file, made fast without touching an assertion
+
+### 13.1 Where its time went
+
+`tests/test_impact_gate_selects_data_dependencies.py`: 189 s on master's
+ubuntu runner (run 38034133514), 199 s in this lane's previous run, and
+410.2 s serial on the operator's box (42 passed; measured with
+`--durations=0` while a live session was running). Every one of its
+real-tree tests called `impact_set` or `G.Corpus()`, and each call built a
+FRESH `Corpus` -- reading, tokenizing and parsing the tree. Profiled on the
+box: one `impact_set` call is 12.8 s on a fresh reading and 3.5 s on a reading
+already taken, the rest being per-call regex scans the assertions need. The
+file already held a module-scoped reading for its last three tests; the other
+twenty did not use it.
+
+### 13.2 The change
+
+Those twenty tests take the file's existing `shared_reading` fixture: a
+SIGNATURE change, and nothing else in any test body -- no assertion line was
+added, removed or edited. The fixture now hands every `G.Corpus()` call a
+`_view`: a shallow copy sharing the per-file readings that derives its OWN
+floor, because the floor is the one thing a `Corpus` memoises from module
+state a test may change (`test_the_declared_floor_members_run_and_are_not_
+derivable` clears `ALWAYS_RUN_DECLARED`). The planted-repository tests, which
+point the analyser's roots at `tmp_path`, keep building their own readings.
+
+### 13.3 Before and after, per test (`--durations=0`, serial, the operator's box)
+
+| test | before | after |
+|---|---|---|
+| `test_the_observed_map_only_ever_adds_to_a_plan` | 61.37 s | 26.19 s |
+| `test_reverting_the_composed_rule_loses_those_readers_again` | 36.03 s | 9.15 s |
+| `test_turning_the_floor_off_removes_exactly_the_floor` | 31.81 s | 7.44 s |
+| `test_the_lane_l5_record_no_longer_selects_through_a_package_sentence` | 26.85 s | 14.80 s |
+| `test_a_composed_stem_reaches_the_file_that_composes_it` | 22.70 s | 6.99 s |
+| `test_a_twice_composed_stem_reaches_it_too` | 20.55 s | 4.92 s |
+| `test_a_scoped_plan_names_what_it_did_not_run` | 19.77 s | 3.17 s |
+| `test_the_composed_rule_refuses_a_shape_the_reader_enumerates` | 17.43 s | 4.41 s |
+| `test_a_script_loaded_by_path_carries_its_data_to_the_loader` | 17.12 s | 5.21 s |
+| `test_a_runner_wide_change_refuses_to_scope` | 16.92 s | 5.01 s |
+| `test_the_selection_travels_the_two_hop_chain_and_not_a_coincidence` | 16.32 s | 3.59 s |
+| `test_the_census_evidence_table_selects_it_too` | 15.27 s | 5.08 s |
+| `test_the_census_ledger_selects_the_test_that_caught_it` (now takes the first, cold reading) | 12.55 s | 11.14 s |
+| `test_an_absent_read_map_is_reported_and_never_read_as_empty` | 12.03 s | 3.18 s |
+| `test_reverting_the_import_walk_loses_the_path_loader` | 11.02 s | 3.08 s |
+| `test_the_floor_does_not_mask_an_empty_selection` | 9.95 s | 2.94 s |
+| the four `test_a_real_data_file_plan_is_identical_with_the_rule_on_and_off` cases (already shared) | 34.93 s | 39.56 s |
+| `test_the_declared_floor_members_run_and_are_not_derivable` | 6.57 s | 1.75 s |
+| `test_the_floor_runs_even_when_the_diff_couples_to_nothing` | 4.85 s | 1.25 s |
+| `test_an_unreachable_path_widens_instead_of_passing_quietly` | 4.81 s | 1.60 s |
+| `test_the_floor_is_derived_and_still_finds_the_two_proven_guards` | 3.94 s | 0.91 s |
+| `test_reverting_the_data_rule_loses_the_test_again` | 3.59 s | 0.87 s |
+| the file | 42 passed in 410.2 s | 42 passed in 165.3 s; 71.2 s with `-n 4` |
+
+Two honest qualifiers. The BEFORE run had a live LinkedIn session on the box
+and the AFTER run did not, so the box was busier for the first; the CI run in
+13.5 is the like-for-like figure. And the four already-shared cases got
+slower (34.9 s to 39.6 s): a view derives its floor per call where the shared
+object reused one -- the price of no test's floor leaking into another's.
+
+SAME COLLECTION, EVERY ASSERTION RUN: `--collect-only` reads 42 tests before
+and 42 after; both runs passed all 42, none skipped.
+
+### 13.4 Planted defects still fail
+
+Applied after collection by a scratch pytest plugin:
+
+| plant | result |
+|---|---|
+| C: the SHARED reading broken -- `Corpus.code` returns nothing for every file | 2 of 3 targeted tests red: the two-hop chain (hop 1 missing) and the floor derivation (the proven guards fall out) |
+| B: the SHARE broken -- every `G.Corpus()` handed the one shared object | `test_the_declared_floor_members_run_and_are_not_derivable` red: the floor derived before the declaration was cleared answered after it |
+| A: every file read as importing nothing | none of the three tests it was aimed at moved -- the constant rule and the observed map reach the same targets. A non-discriminating plant, recorded rather than dropped |
+
+### 13.5 The certification run
+
+Pushed with `lane_ci.py push` (18.1 s) once published master 1027bf8 was
+merged in, head = the merge "merge origin/master 1027bf8 into lane CI: lane
+G2's engine-run fixtures, ahead of the certification push"; found by
+`lane_ci.py wait` by head sha after 280.2 s.
+
+| what | measured |
+|---|---|
+| run 38041688406 | push on `ci/worktree-agent-a5475b349ebe80b87`; conclusion SUCCESS; 6 jobs, all success; wall 4m46s from the run's own timestamps |
+| the file on the ubuntu runner, from its junit | 80 s for its 42 cases, 0 failures (189 s on master's run 38034133514, 199 s in this lane's previous run) |
+| per shard, job total / Run this shard | 188 / 129 s; 267 / 188 s; 220 / 163 s; 241 / 171 s; plan 3 s; totals 10 s |
+| all shards | 12922 cases, 0 failures, 0 errors, 9 skips; the cited-SHA family 44 cases, 0 failures |
+
+THE FAST LANE AT 4m46s, against 5m50s on the rebuilt timings alone and
+6m21s before them: the ~4.5-minute target, within 16 s. What is left is
+measured too: the timings table still prices this file at its old 199 s, so
+the packer gave its shard fewer other files (ubuntu sums 440 / 672 / 558 /
+592 s), and the slowest shard is now the one WITHOUT it. Rebuilding the table
+once master has run with this change rebalances them -- the recipe of
+section 12 again, from that run's junit.
+
+## 8. Questions for the orchestrator
+
 ## 8. Questions for the orchestrator
 
 1. JOB COUNT. Ground: the brief's "at most 5 jobs, so five lane runs fit
@@ -645,7 +747,14 @@ Questions 4 and 5 were answered at 13:43: YES to both -- section 11 (the
 decoding rule, as a deliberate behaviour change) and section 12 (the
 timings).
 
-6. (added 14:15) SPLIT OR SPEED UP ONE TEST FILE? Ground: section 12 --
+7. (added 15:10) REBUILD THE TIMINGS ONCE MORE? Ground: section 13.5 -- the
+   table prices the impact-gate test file at its old 199 s where it now runs
+   80 s, so the four shards are 440 / 672 / 558 / 592 s of ubuntu test time.
+   Recommendation: rerun section 12's recipe on the first master run that
+   carries section 13's change.
+
+6. (added 14:15; answered YES at 14:21, done in section 13) SPLIT OR SPEED
+   UP ONE TEST FILE? Ground: section 12 --
    `tests/test_impact_gate_selects_data_dependencies.py` runs 189 s on
    ubuntu, about 30 % of a balanced shard on its own, and it is the floor
    of the fast lane's slowest shard. Recommendation: whoever owns the impact

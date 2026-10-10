@@ -11846,6 +11846,25 @@ counts only), the run-collection read-back from junit, the timings writer
 wrapper, the fast-lane xdist replay, the shard anatomy reader, and the
 escape rewriter for a test file whose escapes a tool layer decoded.
 
+### 87.8 A SHARED READING HANDS OUT VIEWS, AND A VIEW DERIVES ITS OWN FLOOR (the 14:21 ruling)
+
+`tests/test_impact_gate_selects_data_dependencies.py` built a fresh reading of
+the whole tree on every `impact_set` call -- 12.8 s each on the operator's
+box against 3.5 s on a reading already taken -- and was the slowest file in
+the suite. Its real-tree tests now share one module-scoped reading, but each
+`G.Corpus()` call receives a VIEW: shared per-file readings, its own floor.
+The floor is memoised from module state a test changes, so a shared floor
+would let one test's derivation answer another's. 410 s to 165 s serial; no
+assertion line touched; 42 collected before and after.
+
+    SHARE WHAT IS A PURE FUNCTION OF THE FILES; DERIVE AGAIN WHAT A TEST
+    CAN CHANGE. A CACHE THAT CROSSES THAT LINE TURNS ONE TEST'S STATE
+    INTO ANOTHER TEST'S ANSWER.
+
+| path | shown failing by |
+|---|---|
+| `tests/test_impact_gate_selects_data_dependencies.py` -- `_one_reading`, `_view`, `shared_reading`, now on all twenty real-tree tests | planted after collection: the shared reading's code text blanked turns the two-hop chain and the floor derivation red; the share broken (every call handed the one object) turns the declared-floor test red. A third plant (imports read as nothing) moved none of its three targets -- other rules reach them -- and is recorded as non-discriminating |
+
 ## 88. A HANDLE LEAVES ONLY WHEN EVERY LINK THAT NAMES IT AGREES, AND A DOOR TAKES THE SEGMENT IT WAS ASKED FOR (lnp-named-profile-lead, 2026-10-10)
 
 **Registered 2026-10-10.** Full record: `_audit/2026-10-10-lane-np-named-profile.md`.
