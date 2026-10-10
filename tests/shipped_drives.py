@@ -937,15 +937,19 @@ _EDITOR_CONTROLS: tuple[dict[str, Any], ...] = (
 )
 
 
-def _editor_reading(values: bool) -> PageAnswer:
+def _editor_reading(values: bool, *, city_label: Optional[str] = None) -> PageAnswer:
     """The editor script's answer on the fixture: one anchor, a dialog, the
     four controls -- each ONLY the keys its reader projects; every other key
-    the planted page's own."""
+    the planted page's own. ``city_label`` answers the text field's label
+    with the word the fixture draws instead of the plant (its value stays the
+    plant): the reading a caller that names the field by that word meets."""
     controls = []
     for index, control in enumerate(_EDITOR_CONTROLS):
         shown: dict[str, Any] = {
             key: control[key] for key in ("name", "name_source", "tag", "type", "role")
         }
+        if index == 0 and city_label is not None:
+            shown["name"] = city_label
         if values:
             value = control["value"]
             shown.update(
@@ -1043,6 +1047,74 @@ async def editor_values_or_refusal_as_shipped(page: Any) -> Any:
     _the_intro_editor()
     return await writes._editor_values_or_refusal(
         _TheEditorScript(page, dom.EDITOR_VALUES_JS, _editor_reading(values=True))
+    )
+
+
+#: The word the intro editor's one text field is labelled by, as the fixture
+#: draws it (``<label for="intro-city">City</label>``): LinkedIn's interface
+#: word for that field, and the word a caller names the field by.
+INTRO_TEXT_FIELD_LABEL = "City"
+
+
+async def editor_value_of_as_shipped(page: Any) -> Any:
+    """``writes._editor_value_of`` as the restore path calls it before the
+    write -- one named control's value -- on the same editor (2026-10-10,
+    lane G2).
+
+    THE SIGNATURE DRIVE: the values reader's ``no_anchor`` refusal, so
+    ``(None, its sentence)`` -- the same over a page that draws nothing, so
+    not driven since the reader guard asked for something the page made.
+
+    THE FIXTURE: the city field, labelled by the word above, holding a value.
+    The values script is answered as on the sibling drives, with that field's
+    label the drawn word -- the reading a caller naming the field meets -- and
+    its value the plant.
+
+    WHAT COMES BACK: ``(the field's value verbatim, this package's
+    sentence)`` -- what he typed into his own profile, ADMITTED by the ruling
+    of 2026-09-28 as its siblings are.
+    """
+    from linkedin_server import dom, writes
+
+    markup = _the_intro_editor()
+    if markup.count(f">{INTRO_TEXT_FIELD_LABEL}</label>") != 1:
+        raise AssertionError("intro_editor_switches.html no longer labels its text field as recorded")
+    return await writes._editor_value_of(
+        _TheEditorScript(
+            page, dom.EDITOR_VALUES_JS,
+            _editor_reading(values=True, city_label=INTRO_TEXT_FIELD_LABEL),
+        ),
+        INTRO_TEXT_FIELD_LABEL,
+        when="before the write",
+    )
+
+
+async def read_save_gate_as_shipped(page: Any) -> Any:
+    """``profile_editor.read_save_gate`` as ``writes.perform`` calls it before
+    the press, on the same editor, with his account-level share setting read
+    off (2026-10-10, lane G2).
+
+    THE SIGNATURE DRIVE: the fields reader's ``no_anchor`` refusal, so the
+    gate's own ``0_editor_not_found`` and its sentence -- the same over a page
+    that draws nothing, so not driven since the reader guard asked for
+    something the page made.
+
+    THE FIXTURE: the intro editor's one dialog -- one Save, the city field,
+    two unnamed checked switches -- as the fields reader's drive reads it;
+    ``tests/test_intro_editor_switches.py`` reads the same gate in a browser
+    (``test_with_his_account_setting_read_off_the_recognised_pair_does_not_block``).
+
+    WHAT COMES BACK: the gate's verdict -- ``proceed`` True, the Save count,
+    the notify verdict, the unnamed and recognised switches by this
+    package's own words, and its sentence of counts. No label, no value: the
+    reading's fields stay inside the gate.
+    """
+    from linkedin_server import dom, profile_editor
+
+    _the_intro_editor()
+    return await profile_editor.read_save_gate(
+        _TheEditorScript(page, dom.EDITOR_FIELDS_JS, _editor_reading(values=False)),
+        account_share_updates="off",
     )
 
 
@@ -1571,6 +1643,9 @@ DRIVES: dict[str, Callable[..., Any]] = {
     "server:_attach_recipient_ids": attach_recipient_ids_as_shipped,
     "server:_profile_views_press_counters": profile_views_press_counters_as_shipped,
     "threads:composer_holds": threads_composer_holds_as_shipped,
+    # 2026-10-10 (lane G2): the Save gate, driven to proceed over the intro
+    # editor once the reader guard stopped counting its refusal as clean.
+    "profile_editor:read_save_gate": read_save_gate_as_shipped,
     # ADMITTED BY THE RULING OF 2026-09-28: each returns page text outside a
     # record on its success path -- his own profile's, or an aggregate that
     # identifies no one -- and is named with its reason in the guard's
@@ -1579,6 +1654,7 @@ DRIVES: dict[str, Callable[..., Any]] = {
     "dom:read_self_owned_editor_fields": read_self_owned_editor_fields_as_shipped,
     "dom:read_self_owned_editor_values": read_self_owned_editor_values_as_shipped,
     "writes:_editor_values_or_refusal": editor_values_or_refusal_as_shipped,
+    "writes:_editor_value_of": editor_value_of_as_shipped,
     "profile_views_more:read_profile_views_more_insights": (
         read_profile_views_more_insights_as_shipped
     ),

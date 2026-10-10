@@ -207,7 +207,10 @@ DELIBERATELY_UNWIRED: dict[str, str] = {
 # 2026-09-27 -- its drive returned before reading the page, and the reader
 # guard stopped counting such a drive clean -- and is clean again since
 # 2026-09-28, driven to the counters over the analytics capture's headline
-# (tests/shipped_drives.py).
+# (tests/shipped_drives.py). Another, `server:_open_profile_views_filter_menus`,
+# is recorded not_driven since 2026-10-10: its planted drive stops before any
+# press with the same answer a page that draws nothing gets, and the reader
+# guard now asks for something the page made (lane G2's record, item 2).
 
 
 def _entry_points() -> list[pathlib.Path]:
