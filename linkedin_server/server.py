@@ -9111,7 +9111,8 @@ async def linkedin_unfollow_company(
     to somebody else -- and the click is anchored to the row carrying the id,
     so the thing you name and the thing that gets pressed are the same row by
     construction. The preview still prints the NAME, because an id is not
-    something a person can check.
+    something a person can check -- inside an organisation record, marked
+    as LinkedIn's words, since the name is a string the page chose.
 
     THE LIST IS NEVER COMPLETE, AND THAT IS THE IMPORTANT ONE. LinkedIn renders
     about twenty rows of however many you follow, and offers no way to page
