@@ -59,7 +59,11 @@ ALLOWLIST_SENTENCE = "not on the read-only allowlist"
 BOTH_GATES = (
     (f"{BASE}/feed/follows/", "/follow"),
     (f"{BASE}/groups/12345678/invite/", "/invite"),
-    (f"{BASE}/mynetwork/network-manager/people-follow/following/", "/follow"),
+    # The following list STOOD HERE UNTIL 2026-10-10; lane A admitted it past
+    # ``/follow`` by its own line (READ-PAST-AN-ACT-SUBSTRING). His Page's
+    # following list (census N A3) is the argued address that still trips
+    # ``/follow`` with no pattern behind it.
+    (f"{BASE}/company/placeholder-org/admin/following/", "/follow"),
 )
 
 

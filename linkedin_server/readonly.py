@@ -2280,6 +2280,52 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # returns a name unchanged, so no shape guard saves a reader here.
     re.compile(r"^https://www\.linkedin\.com/mynetwork/network-manager/people-follow/followers/?$"),
     # ======================================================================
+    # LANE A (la-admissions-lead, 2026-10-10) -- PAGES OF HIS OWN ACCOUNT READ
+    # PAST A SUBSTRING WRITTEN TO STOP AN ACT. Ruling
+    # READ-PAST-AN-ACT-SUBSTRING (orchestrator, 2026-09-28; registered in
+    # `_audit/2026-09-28-rulings-build-classes.md` section 5). Record:
+    # `_audit/2026-09-28-lane-a-admissions.md`.
+    #
+    # EACH LINE BELOW IS HALF OF A TWO-GATE ADMISSION. Its other half is the
+    # paired lane A entry in `_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS`, which
+    # excuses exactly the one forbidden substring that address carries, for
+    # exactly that anchored address. NEITHER HALF ALONE ADMITS ANYTHING, and
+    # the forbidden tuple is unchanged: every substring keeps its full reach
+    # on every other spelling and every sibling path (pinned in
+    # `tests/test_lane_a_admissions.py`, each control shown failing).
+    #
+    # THE GROUND IS RECORDED, NOT ASSUMED. "invitation" and "/follow" were in
+    # the forbidden tuple of the server's first commit (1a94cf9, 2026-08-21),
+    # whose only recorded argument is that tuple's own comment and the
+    # message "so a keyword cannot become a navigation to an action url": a
+    # fence against SENDING an invitation and FOLLOWING somebody. Ruling (b)
+    # of 2026-09-23 withdrew the read-only rule that fence served. Neither
+    # page sends or follows anything; each lists what he already manages.
+    #
+    # NO QUERY STRING AND NO SUB-PATH on any line: a query is where a filter
+    # naming a person would arrive, and nothing builds one. Every control on
+    # these pages stays refused by the press gate unless a press is
+    # separately permitted. THE PAGES LIST OTHER PEOPLE: a reader owes
+    # NAMES-AT-RUNTIME and PEOPLE-DATA-MITIGATIONS (`people_data.py`), and the
+    # pending-invitation badge a load may clear is a passive cost
+    # (D5-PASSIVE-COST-IS-NOT-A-ROW), bracketed by the reader as
+    # `linkedin_connections` brackets it.
+    #
+    # The invitation manager, received tab (census N 13, N 14, N 19). NAMED:
+    # the census and `send_invitation`'s own unverifiable block spell it; no
+    # capture draws it. If it redirects (to a `received/` leaf), the landing
+    # is recorded and that spelling gets its own line then.
+    re.compile(r"^https://www\.linkedin\.com/mynetwork/invitation-manager/?$"),
+    # The invitation manager, sent tab (census N 9, N 11). NAMED, as above.
+    re.compile(r"^https://www\.linkedin\.com/mynetwork/invitation-manager/sent/?$"),
+    # The people he follows (census N 38). NAMED: this module's own
+    # Manage-Pages entry spells it, and LinkedIn's bundle carries its i18n
+    # namespace on every capture. That entry's sentence -- "leave the people
+    # list unread, never ... shorten the forbidden list" -- is an allowlist
+    # comment, not a ruling (D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING); this
+    # line reads the list and shortens nothing.
+    re.compile(r"^https://www\.linkedin\.com/mynetwork/network-manager/people-follow/following/?$"),
+    # ======================================================================
     # REVIEW (lane L1, 2026-09-23) -- N 184, ONE EVENT BY ITS NUMERIC ID.
     # Census row N 184: "reach an event through its URL after it has been
     # shared with you". Shipped in a commit whose subject starts `REVIEW:`
@@ -2826,6 +2872,26 @@ _FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS: tuple[
         re.compile(
             r"^https://www\.linkedin\.com/mynetwork/network-manager/"
             r"people-follow/followers/?$"
+        ),
+        frozenset({"/follow"}),
+    ),
+    # LANE A (la-admissions-lead, 2026-10-10), READ-PAST-AN-ACT-SUBSTRING --
+    # the second gate of each pair whose first gate is the matching lane A
+    # line in `_ALLOWED_URL_PATTERNS`; the argument is written there. Each
+    # entry excuses exactly the substring(s) its address trips, measured with
+    # the shipped tuple, and nothing more; the tuple itself is unchanged.
+    (
+        re.compile(r"^https://www\.linkedin\.com/mynetwork/invitation-manager/?$"),
+        frozenset({"invitation"}),
+    ),
+    (
+        re.compile(r"^https://www\.linkedin\.com/mynetwork/invitation-manager/sent/?$"),
+        frozenset({"invitation"}),
+    ),
+    (
+        re.compile(
+            r"^https://www\.linkedin\.com/mynetwork/network-manager/"
+            r"people-follow/following/?$"
         ),
         frozenset({"/follow"}),
     ),

@@ -1877,7 +1877,15 @@ BLOCKED = [
     "https://www.linkedin.com/premium/my-premium/upgrade",
     "https://www.linkedin.com/premium/products/",
     "https://www.linkedin.com/article/edit/7400000000000000001/",
-    "https://www.linkedin.com/mynetwork/invitation-manager/",
+    # ``/mynetwork/invitation-manager/`` WAS HERE UNTIL 2026-10-10 and is now
+    # READABLE, with its sent tab: lane A, READ-PAST-AN-ACT-SUBSTRING, one
+    # anchored line and one exemption excusing "invitation" for each. What
+    # replaces it is what the admission must NOT have carried -- a query, an
+    # unrecorded leaf and an act-shaped sub-path
+    # (tests/test_lane_a_admissions.py holds the rest).
+    "https://www.linkedin.com/mynetwork/invitation-manager/?filterCriteria=x",
+    "https://www.linkedin.com/mynetwork/invitation-manager/received/",
+    "https://www.linkedin.com/mynetwork/invitation-manager/sent/withdraw/",
     "https://www.linkedin.com/in/someone/edit/topcard/",
     "https://www.linkedin.com/psettings/open-to-work",
     "https://www.linkedin.com/voyager/api/relationships/invitations",
@@ -2705,7 +2713,12 @@ MUST_STAY_UNREADABLE = (
     "https://www.linkedin.com/messaging/compose",
     "https://www.linkedin.com/messaging/compose/new/",
     "https://www.linkedin.com/messaging/compose/?recipient=someone",
-    "https://www.linkedin.com/mynetwork/invitation-manager/",
+    # ``https://www.linkedin.com/mynetwork/invitation-manager/`` WAS HERE
+    # UNTIL 2026-10-10 and is now READABLE (lane A, READ-PAST-AN-ACT-
+    # SUBSTRING: "invitation" was written to stop SENDING, and the page sends
+    # nothing). Recorded rather than silently dropped; its neighbours stand in.
+    "https://www.linkedin.com/mynetwork/invitation-manager/?filterCriteria=x",
+    "https://www.linkedin.com/mynetwork/invitation-manager/sent/withdraw/",
     "https://www.linkedin.com/mynetwork/",
     # ADDED 2026-09-03, in the commit admitting the CONNECTIONS list. These
     # are the addresses that must not travel with it, and the entry above --
@@ -2719,10 +2732,15 @@ MUST_STAY_UNREADABLE = (
     # not a prefix. A query is where a filter naming a person would arrive.
     "https://www.linkedin.com/mynetwork/invite-connect/connections/?foo=1",
     "https://www.linkedin.com/mynetwork/invite-connect/connections/x",
-    # THE PEOPLE HE FOLLOWS, recorded on the Manage-Pages allowlist entry as
-    # the sibling nobody may reach for. It carries ``/follow`` and the new
-    # exemption does not excuse that substring for any address.
-    "https://www.linkedin.com/mynetwork/network-manager/people-follow/following/",
+    # THE PEOPLE HE FOLLOWS WAS HERE UNTIL 2026-10-10 --
+    # ``/mynetwork/network-manager/people-follow/following/``, recorded on the
+    # Manage-Pages allowlist entry as the sibling nobody may reach for. It is
+    # READABLE now by its own line and an exemption excusing ``/follow`` for
+    # that one address (lane A, READ-PAST-AN-ACT-SUBSTRING); that entry's
+    # sentence was an allowlist comment, not a ruling (D3). What stays refused
+    # is the reach past the page: a query and a sub-path naming the write.
+    "https://www.linkedin.com/mynetwork/network-manager/people-follow/following/?x=1",
+    "https://www.linkedin.com/mynetwork/network-manager/people-follow/following/unfollow/",
     # ``https://www.linkedin.com/search/results/people/?network=%5B%22F%22%5D``
     # WAS HERE UNTIL 2026-09-20 and is now READABLE. **THIS IS THE DELIBERATE
     # EDIT THE OLD COMMENT ASKED FOR**, which read: *"pinned here so that

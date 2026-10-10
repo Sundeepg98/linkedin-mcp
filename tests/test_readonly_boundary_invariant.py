@@ -1860,14 +1860,27 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # preparation): his "Sharing profile edits" setting page, one line here and
     # one pattern exemption beside it, on the orchestrator's application of
     # ONE-NAMED-SETTINGS-PAGE-AT-A-TIME. See that ledger entry.
-    "_ALLOWED_URL_PATTERNS": "18e5958586c2c367",
+    #
+    # 18e5958586c2c367 until 2026-10-10 (lane A, READ-PAST-AN-ACT-SUBSTRING):
+    # three anchored lines -- his invitation manager's received and sent tabs
+    # and the people he follows -- each paired with one exemption below.
+    # ATTRIBUTION, with this file's ast_digest: readonly.py at the lane's base
+    # (3c8edc2 plus the rulings commits, which touched no package file) is the
+    # tree minus exactly the lane A block, and it hashes to the prior pin on
+    # all thirteen keys; only this key and the pattern-exemption key moved.
+    # Record: _audit/2026-09-28-lane-a-admissions.md.
+    "_ALLOWED_URL_PATTERNS": "c0249a5bfde871da",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     # 419e64a3cd92ec7e until the same REVIEW: commit: a third entry, excusing
     # exactly {"/follow"} for exactly the anchored follower-list address.
     # 76d7b10899530d69 until 2026-09-27: a fourth, excusing exactly
     # {"/settings/", "settings"} for exactly his "Sharing profile edits"
     # setting page (the live lane; the same ledger entry).
-    "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "14f567fd160048a8",
+    # 14f567fd160048a8 until 2026-10-10: three more (lane A), excusing exactly
+    # {"invitation"} for the invitation manager's received and sent tabs and
+    # exactly {"/follow"} for his own following list, each for exactly its
+    # anchored address; the forbidden tuple is unchanged at 33.
+    "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "6f99bceb4d139db3",
     "_FORBIDDEN_URL_SUBSTRINGS": "b0291a66ec9bd51e",
     # 23aece1483afdee9 until 2026-09-19. See the re-freeze note above: eleven
     # detector classes added, zero removed, and the direction is pinned by

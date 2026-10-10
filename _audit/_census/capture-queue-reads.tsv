@@ -1,0 +1,27 @@
+# LANE A'S CAPTURE QUEUE FOR READ PAGES: one line per page whose address the
+# read boundary now admits (or must learn) and of which no tracked skeleton
+# from a live capture exists, so no reader may be built yet.
+#
+# Written by lane A (la-admissions-lead), 2026-10-10. Method and every
+# argument: _audit/2026-09-28-lane-a-admissions.md. Lane K builds the main
+# capture queue in parallel with the same columns; the orchestrator merges
+# the two. Nothing here is loaded by this lane, and nothing here is a
+# permission: the live lane takes a line only on the orchestrator's order,
+# inside LIVE-BUDGET-40-LOADS.
+#
+# EVERY VARIABLE SEGMENT IS A PLACEHOLDER (<digits>, <slug>, <text>); the
+# value comes from the tool's arguments or the operator, never from a page.
+#
+# surface-id  a short key, unique in this file
+# address     the address to load, exactly as the boundary admits it
+# presses     none, or the presses the line needs and the ruling that
+#             permits each (a press not permitted is NOT taken)
+# save        what the capture must record. Raw captures stay in the main
+#             checkout's gitignored _state/; only a skeleton is ever committed
+# loads       page loads, counting any control loads
+# searches    searches the line types (D1-SEARCH-AS-READS caps a session at 5)
+# rows        the census rows the capture serves
+surface-id	address	presses	save	loads	searches	rows
+invitations-received	https://www.linkedin.com/mynetwork/invitation-manager/	none	the page as served and its LANDED address (a redirect to a received/ leaf is the finding, and that spelling then needs its own line); the invitation badge read on the control page before and after (dom.read_invitation_badge, as linkedin_connections brackets it); the count of invitation rows; each row's control names and whether a personal note renders inline or behind a disclosure; the type filter's controls (anchor hrefs or pills) -- counts and shapes only, no name	1 + 2 control loads for the badge bracket (shared by every mynetwork line taken in one run)	0	N 13, N 14, N 19
+invitations-sent	https://www.linkedin.com/mynetwork/invitation-manager/sent/	none	the page as served and its landed address; the count of sent rows; the Page-follow tab's spelling (an anchor href or a pill); each row's control names (withdraw stays unpressed) -- counts and shapes only	1 (badge bracket shared, as above)	0	N 9, N 11
+people-followed	https://www.linkedin.com/mynetwork/network-manager/people-follow/following/	none	the page as served and its landed address; the count of member rows and of follow controls; the list's paging shape (SCROLL-NOT-SANCTIONED: no scroll) -- counts and relations only	1 (badge bracket shared, as above)	0	N 38

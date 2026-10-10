@@ -27,8 +27,8 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 260 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 220 |
+| audit documents git tracks under `_audit` | 261 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 221 |
 | distinct dates | 18 |
 | documents with no level-1 heading | 2 |
 | `CORRECTS:` marker lines | 121 |
@@ -39,7 +39,7 @@ are listed as `(undated)`; no date is taken from git history, because
 | documents at either end of a cross-document edge | 101 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
-| documents no correction marker touches at all | 157 |
+| documents no correction marker touches at all | 158 |
 | blockquoted markers naming ANOTHER document | 0 |
 | edges missing one of their two markers | 0 |
 | edges declared a different number of times in each direction | 2 |
@@ -1802,6 +1802,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-27 | [2026-09-27-live-session-2-plan.md](2026-09-27-live-session-2-plan.md) | Live session 2 -- the plan, written offline |  |
 | 2026-09-27 | [2026-09-27-rulings-previews-and-receipts.md](2026-09-27-rulings-previews-and-receipts.md) | Ruling, 2026-09-27: a preview names whom the tool resolved |  |
 | 2026-09-27 | [2026-09-27-rulings-relation-removals-and-account-destruction.md](2026-09-27-rulings-relation-removals-and-account-destruction.md) | Rulings, 2026-09-27: removing a relation, and destroying the account |  |
+| 2026-09-28 | [2026-09-28-lane-a-admissions.md](2026-09-28-lane-a-admissions.md) | Lane A: refused reads past an act substring, and the rows a press or a ruling holds |  |
 | 2026-09-28 | [2026-09-28-rulings-build-classes.md](2026-09-28-rulings-build-classes.md) | Rulings, 2026-09-28: the classes the census still leaves undecided |  |
 | 2026-09-28 | [2026-09-28-rulings-named-profile-read.md](2026-09-28-rulings-named-profile-read.md) | Ruling, 2026-09-28: reading a profile he names |  |
 

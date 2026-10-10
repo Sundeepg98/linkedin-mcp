@@ -1540,7 +1540,11 @@ PINNED = {
     #: `N 26b` entered ADMITTED -- the people search filtered to his first
     #: degree -- gated MEASURE: the school and industry facets' spelling needs
     #: a capture first.
-    "b3_admitted": 43,
+    #: 49 ON LANE A'S ADMISSIONS OF 2026-10-10, MEASURED: `N 9`, `N 11`,
+    #: `N 13`, `N 14`, `N 19` and `N 38` REFUSED -> ADMITTED (gate MEASURE),
+    #: his invitation manager and the people he follows read past the act
+    #: substrings "invitation" and "/follow" on READ-PAST-AN-ACT-SUBSTRING.
+    "b3_admitted": 49,
     #: 38 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     #: 40 ON LANE L5'S ORDER OF 2026-09-28 12:32, MEASURED: `N 30`, `N 31`, `N 65`
@@ -1550,7 +1554,9 @@ PINNED = {
     #: 38 ON THE ORCHESTRATOR'S CALL OF 2026-09-28 17:46 (lane S), MEASURED:
     #: `N 25` and `N 26`, REFUSED on the connections page's query variants,
     #: left the table for COVERED-UNFIRED by D6 (see `adjudicated`).
-    "b3_refused": 38,
+    #: 32 ON LANE A'S ADMISSIONS OF 2026-10-10, MEASURED: the same six rows
+    #: left REFUSED (see `b3_admitted`).
+    "b3_refused": 32,
     "b3_no_address": 1,
     "b3_needs_session": 14,
     "b3_undetermined": 2,
