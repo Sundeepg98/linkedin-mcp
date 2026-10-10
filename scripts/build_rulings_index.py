@@ -1184,9 +1184,8 @@ REGISTER: tuple = (
                "BEHIND-GRANTS",
         note="Orchestrator's call applying WRITE-CLASS-B and the operator's "
              "08:11 principle; overridable. Extends "
-             "OUTWARD-CLASSES-BUILT-BEHIND-GRANTS; does not reach measured "
-             "PERMANENTLY_FORBIDDEN grounds, ACCOUNT-DESTRUCTION-STAYS-MANUAL "
-             "or purchases.",
+             "OUTWARD-CLASSES-BUILT-BEHIND-GRANTS; its document names the "
+             "three things it does not reach.",
     ),
     Ruling(
         id="HIS-OWN-SETTINGS-NOT-OUTWARD",
@@ -1234,10 +1233,10 @@ REGISTER: tuple = (
     Ruling(
         id="READ-PAST-AN-ACT-SUBSTRING",
         claim="A forbidden substring whose recorded ground is an ACT does not "
-              "bar the READ of a page of his own account that carries it; the "
-              "page is admitted by one exact, anchored pattern with a control "
-              "shown failing. It does not reach a substring whose ground is "
-              "the read itself, or a refusal resting on an operator's ruling.",
+              "bar the READ of a page of his own that carries it; the page is "
+              "admitted by one exact, anchored pattern with a control shown "
+              "failing. It does not reach a substring whose ground is the read "
+              "itself, or a refusal resting on an operator's ruling.",
         binds="read boundary -- forbidden substrings and allowlist silence",
         document="_audit/2026-09-28-rulings-build-classes.md",
         anchor="RULED: (orchestrator, 2026-09-28, applying "
@@ -1246,7 +1245,7 @@ REGISTER: tuple = (
                "READ-PAST-AN-ACT-SUBSTRING",
         note="Orchestrator's call applying OUTWARD-ACTS-NEED-THE-OPERATOR and "
              "D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING; overridable. A page "
-             "refused by allowlist silence alone is admitted the same way when "
+             "refused only by allowlist silence is admitted the same way when "
              "a row needs it and no ruling holds it.",
     ),
 )
