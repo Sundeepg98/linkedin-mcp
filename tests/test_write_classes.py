@@ -172,21 +172,30 @@ def test_the_split_is_the_one_the_lane_report_quotes():
     into; classed R3 by their act (profile-edit), queued on picking an entry.
     386 + 3 = 389 = 16 R1 + 37 R2 + 336 R3.
 
-    387 AT LANE K'S PURCHASE EXCLUSIONS (2026-10-10), MEASURED
-    (`_audit/2026-09-28-lane-k-ledger.md` s2): PURCHASES-STAY-MANUAL made
-    `P S9` (the Premium plan, act purchase) and `M C71` (a paid boost, act
-    publish) EXCLUDED-RULED, so both lines leave the table, and the act
-    purchase leaves the closed vocabulary with its one line. Both R3.
+    387 AT LANE K'S PURCHASE EXCLUSIONS (2026-10-10), MEASURED
+    (`_audit/2026-09-28-lane-k-ledger.md` s2): PURCHASES-STAY-MANUAL made
+    `P S9` (the Premium plan, act purchase) and `M C71` (a paid boost, act
+    publish) EXCLUDED-RULED, so both lines leave the table, and the act
+    purchase leaves the closed vocabulary with its one line. Both R3.
     389 - 2 = 387 = 16 R1 + 37 R2 + 334 R3.
 
-    388 AT LANE S'S MERGE OF MASTER fe119de (2026-10-10), MEASURED
+    373 AT LANE K'S APPLICATION OF THE RULINGS OF 2026-10-10, MEASURED
+    (`_audit/2026-09-28-lane-k-ledger.md` s12): fourteen W rows left GAP --
+    `N 106`, `N 108`, `P N21` (CONTACT-IMPORT-STAYS-MANUAL), `P N10`
+    (SESSION-SURFACE), `P N14` (SIGN-IN-CHALLENGES-ARE-HIS), `N 152`
+    (SAFETY-REPORTS-STAY-MANUAL), `P S10`, `P B7`, `P J1`, `P J2`, `P J3`,
+    `P L6`, `N 198` (OUTSIDE-THE-PRODUCT-PURPOSE), and `P A9`
+    (COVERED-CANNOT-DELIVER, P-A9-CANNOT-DELIVER) -- so their lines go. All R3.
+    387 - 14 = 373 = 16 R1 + 37 R2 + 320 R3.
+
+    374 AT LANE S'S MERGE OF MASTER 71d83ca (2026-10-10), MEASURED
     (`_audit/2026-09-28-lane-s-settings.md`, section 4): `P O17` split from
     `P O6-O20` and BUILT -- `built:set_admitted_setting`, COVERED-UNFIRED --
     so it keeps a line as a built row; classed R3 by its act (profile-setting).
-    `P O6-O20` stays a GAP line. 387 + 1 = 388 = 16 R1 + 37 R2 + 335 R3."""
-    rows, _ = cwc.load()
-    split = cwc.split(rows)
-    assert (split["R1"], split["R2"], split["R3"]) == (16, 37, 335)
+    `P O6-O20` stays a GAP line. 373 + 1 = 374 = 16 R1 + 37 R2 + 321 R3."""
+    rows, _ = cwc.load()
+    split = cwc.split(rows)
+    assert (split["R1"], split["R2"], split["R3"]) == (16, 37, 321)
     assert split["R1:built"] + split["R1:queued"] == split["R1"]
 
 

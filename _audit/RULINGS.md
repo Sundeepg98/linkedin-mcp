@@ -8,9 +8,9 @@
 
 **THIS REGISTER IS NOT THE CORPUS AND DOES NOT CLAIM TO BE COMPLETE.** Read section 4 before concluding a question is unruled: the scan that keeps it honest reads ONE marker, and the ruling that caused this file to be written does not carry it.
 
-    rulings registered       74
-    documents scanned        265
-    RULED: declarations      61 claimed, 7 triaged, 0 unclaimed
+    rulings registered       89
+    documents scanned        266
+    RULED: declarations      76 claimed, 7 triaged, 0 unclaimed
 
 ---
 
@@ -46,6 +46,13 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | `GROUPS-ADDRESS-BUYS-NO-WRITE` | Admitting a group address buys nothing for joining, leaving, posting, commenting or inviting. Each needs its own url, its own write sanction and its own ruling, so those rows stay GAP and no boundary change moves them. The price is three things and an admission pays one. | groups writes, and any address widening | 2026-09-19 | [2026-09-19-groups-admission.md](2026-09-19-groups-admission.md)<br>*The eight writes: the census already ruled this, TODAY, against itself* |
 | `WRITE-CLASS-B` | The package may CONNECT, MESSAGE, APPLY, POST and OPEN MESSAGING on the operator's account, behind the single-use grant model and off by default. Lifts the read-only rule, the apply/connect/InMail cut and DO-NOT-OPEN-MESSAGING. | outward writes and opening messaging | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md)<br>*The write class (b)* |
 
+### captures
+
+| id | what was ruled | binds | when | where (document / section) |
+|---|---|---|---|---|
+| `ARTICLE-COMPOSER-CAPTURE` | One capture load of the article composer is permitted, with nothing typed and nothing published; an empty draft it may leave is his, private and deletable, and the capture records whether one appeared. | the article composer | 2026-10-10 | [2026-10-10-rulings-ledger-questions.md](2026-10-10-rulings-ledger-questions.md)<br>*2. One article-composer capture* |
+| `CAPTURE-PRESS-UNDER-PROBE-RULE` | A live-lane CAPTURE may press a disclosure control (a menu, a folder, a filter panel, a list) or type into a SEARCH box, never a composer or an editor, on a surface the press gate refuses, when nothing is committed: no save, send, submit, apply or confirm, and Escape closes what was opened. A shipped tool still needs its own per-surface basis entry. | presses and typing on a surface the gate refuses | 2026-10-10 | [2026-10-10-rulings-ledger-questions.md](2026-10-10-rulings-ledger-questions.md)<br>*1. A capture may press, under the probe rule* |
+
 ### census convention
 
 | id | what was ruled | binds | when | where (document / section) |
@@ -70,6 +77,10 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | `DUPLICATE-ROW-IS-MARKED-NEVER-DELETED` | When two census rows describe one capability the duplicate STAYS in the file, marked as a duplicate and naming the row it duplicates. It is not removed and its id is never reused. | every cross-slice re-file and de-duplication | 2026-09-20 | [2026-09-20-the-deduplication-ruling.md](2026-09-20-the-deduplication-ruling.md)<br>*The ruling* |
 | `POSITIONAL-DIALECT-SHIP-THE-DETECTOR` | Ship the detector; do not rewrite the 69 cells. | the positional-dialect cells | 2026-09-20 | [2026-09-20-the-pointer-graph.md](2026-09-20-the-pointer-graph.md)<br>*4. THE DECISION ON THE POSITIONAL DIALECT* |
 | `COMPOUND-ROW-SPLITS-ONLY-ON-STATE` | When ONE census row describes TWO capabilities it is SPLIT only if the halves require different STATES. A DIRECTION divergence is repaired in the cell as `R+W`, never by a split. Two verbs, two surfaces, two addresses and mere verbosity are not grounds. A row whose halves share a state today but would not once a pending ruling is applied carries a written TRIGGER instead of being split now. | every row whose capability names two acts | 2026-09-21 | [2026-09-21-the-compound-rows.md](2026-09-21-the-compound-rows.md)<br>*THE RULING -- RULED: a compound row is split ONLY when its halves need different STATES* |
+| `CALLER-COMPOSITION-UNDER-D6` | A row is discharged under D6-CAPABILITY-OVER-AFFORDANCE when the caller can compose SHIPPED tools to deliver its payload, with no server-side derived navigation; the row's cell names the tools and their arguments, and its state is the weakest of its parts. | rows a composition of shipped tools delivers | 2026-10-10 | [2026-10-10-rulings-ledger-questions.md](2026-10-10-rulings-ledger-questions.md)<br>*4. Caller composition counts under D6* |
+| `GEOLOCATION-BY-D6` | No browser geolocation permission is granted; searching jobs near him moves under D6 on the shipped location-parameter search, by the row's own bar. | searching from his current location | 2026-10-10 | [2026-10-10-rulings-ledger-questions.md](2026-10-10-rulings-ledger-questions.md)<br>*12. Location by D6, not by geolocation* |
+| `OUTSIDE-THE-PRODUCT-PURPOSE` | A row whose capability serves neither his job search nor his professional presence is EXCLUDED-RULED, reopened when he asks for it -- unless its own cell shows it tunes his job recommendations or his search. | rows outside the product's purpose | 2026-10-10 | [2026-10-10-rulings-ledger-questions.md](2026-10-10-rulings-ledger-questions.md)<br>*17. Rows outside the product's purpose* |
+| `P-A9-CANNOT-DELIVER` | The additional name's visibility is COVERED-CANNOT-DELIVER on the P A2 / P A4 precedent: its two switches carry the same label, so no route can aim one; reopened when LinkedIn draws a distinguishing name. | P A9 | 2026-10-10 | [2026-10-10-rulings-ledger-questions.md](2026-10-10-rulings-ledger-questions.md)<br>*14. A control no route can aim* |
 | `EXCLUDED-RULED-ADMISSION` | A row is EXCLUDED-RULED only on one of FOUR written grounds: a forbidden-substring entry, a writes.PERMANENTLY_FORBIDDEN key, a WriteSpec refusing in its own words, or an audit passage measuring the capability unreachable. Anything a general mechanism merely happens to block is GAP with a NAMED BLOCKER. | the bar for EXCLUDED-RULED on every slice | ~2026-09-03 | [_census/network.md](_census/network.md)<br>*2. HOW A CAPABILITY WAS ASSIGNED A STATE* |
 
 ### decision routing
@@ -108,6 +119,7 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | `IN-ME-NO-BLANKET-BAR` | /in/me/ presses get no blanket sensitivity-basis bar; each control is judged on evidence like any other press. | /in/me/ controls | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md)<br>*Presses on /in/me/* |
 | `REVEAL-BUTTON-IS-A-DISCLOSURE` | A plain button that only reveals content (e.g. 'Show more analytics') is pressed as a disclosure, with before/after readings proving it revealed content and changed no state. | reveal-only buttons | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md)<br>*A button that only reveals* |
 | `VIEW-SWITCH-PRESS-RESTORED` | A press that changes which rows a view shows is permitted if the view is RESTORED afterwards and a before/after reading proves it. | sort and filter controls | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md)<br>*View-switch presses* |
+| `NO-INDEX-PINNED-JUDGEMENTS` | A control is judged by its own accessible name and role, never by its position; controls on his own profile go to capture first, and label-based basis entries follow from it. | how a control is judged | 2026-10-10 | [2026-10-10-rulings-ledger-questions.md](2026-10-10-rulings-ledger-questions.md)<br>*3. No position-pinned judgements* |
 
 ### read boundary
 
@@ -120,6 +132,7 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | `THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET` | A third party's profile (/in/<slug>/) may be loaded only inside an outward act whose target the operator names in that call: slug from tool arguments only, never for a measurement, the shaper name-free. Search-admission condition 5 stands. | third-party profiles inside outward acts | 2026-09-24 | [2026-09-24-rulings-notify-veto-and-who-which.md](2026-09-24-rulings-notify-veto-and-who-which.md)<br>*A third party's profile, inside his own outward act* |
 | `NAMED-PROFILE-READ-BEHIND-A-GRANT` | A read of a member's profile he names in the call -- by link or member id, never a name read off a page -- is built behind the single-use grant, its preview stating that LinkedIn may show the member the view; declared fields leave as people records; never for a measurement. | a third-party profile he names | 2026-09-28 | [2026-09-28-rulings-named-profile-read.md](2026-09-28-rulings-named-profile-read.md)<br>*His answer* |
 | `READ-PAST-AN-ACT-SUBSTRING` | A refused substring whose recorded ground is an ACT -- sending, following, applying -- does not bar the READ of his own page that carries it: one exact anchored pattern, a control shown failing, the press gate still refusing every control. Not for a GET that changes state, a credential, recovery, session or security surface, a sign-in challenge, or a refusal grounded in an operator's ruling. | substrings written to stop an act | 2026-09-28 | [2026-09-28-rulings-build-classes.md](2026-09-28-rulings-build-classes.md)<br>*5. Reading past a substring written to stop an act* |
+| `APPLY-FLOW-IS-THE-APPLICATION` | Opening the Easy Apply flow is the first step of an application, so its read stays refused; the daily-limit row waits on the limit being reached. | the Easy Apply flow | 2026-10-10 | [2026-10-10-rulings-ledger-questions.md](2026-10-10-rulings-ledger-questions.md)<br>*9. Opening the apply flow is the application* |
 | `NAMED-PROFILE-DETAIL-PAGES` | The read of a profile he names includes that same profile's own detail pages (/in/<the same slug>/details/<section>/), one load per call, behind the same single-use grant and the same preview warning; any other slug and any non-details path stay refused. | a third-party profile he names | 2026-10-10 | [2026-10-10-rulings-named-profile-detail-pages.md](2026-10-10-rulings-named-profile-detail-pages.md)<br>*The ruling* |
 
 ### read results
@@ -128,6 +141,20 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 |---|---|---|---|---|
 | `NAMES-AT-RUNTIME` | A read whose capability is people, or which items of other people's content, RETURNS them as its result -- names, and group and event titles -- with the risks mitigated at runtime. What is stored is unchanged: no third party's name in a tracked file. | people, groups and events | 2026-09-24 | [2026-09-24-rulings-names-at-runtime.md](2026-09-24-rulings-names-at-runtime.md)<br>*Names at runtime* |
 | `PEOPLE-DATA-MITIGATIONS` | People data is returned under six mitigations, each enforced by code and a test: declared fields only; sanitised and marked untrusted; never stored; bounded to one page per call; visible only (no de-anonymising); never a target by itself. | people, groups and events | 2026-09-24 | [2026-09-24-rulings-names-at-runtime.md](2026-09-24-rulings-names-at-runtime.md)<br>*How people data is returned* |
+
+### reads
+
+| id | what was ruled | binds | when | where (document / section) |
+|---|---|---|---|---|
+| `FIXED-UI-LABEL-MATCH` | The people search's Actively-hiring filter is matched by its exact LinkedIn UI label, a fixed product string, with a control showing a near-miss label is refused. | one search filter matched by its product label | 2026-10-10 | [2026-10-10-rulings-ledger-questions.md](2026-10-10-rulings-ledger-questions.md)<br>*11. One filter, matched by its fixed label* |
+| `THIRD-PARTY-TEXT-AT-RUNTIME` | A post's own text and an organisation Page's prose are returned at runtime as untrusted third-party text -- sanitised, bounded in length, never stored -- under PEOPLE-DATA-MITIGATIONS; the feed-content ruling still governs what is stored. | other people's text, returned at runtime | 2026-10-10 | [2026-10-10-rulings-ledger-questions.md](2026-10-10-rulings-ledger-questions.md)<br>*10. A post's text, and an organisation's prose, at runtime* |
+
+### reads and writes
+
+| id | what was ruled | binds | when | where (document / section) |
+|---|---|---|---|---|
+| `SESSION-SURFACE` | Reading the active-sessions list stays GAP, admissible only as ONE named settings page after a capture proves the address is the current settings page and that loading it changes nothing; never through the legacy path. Signing out of sessions is EXCLUDED-RULED, reopened when he names it. | the active-sessions surface | 2026-10-10 | [2026-10-10-rulings-ledger-questions.md](2026-10-10-rulings-ledger-questions.md)<br>*7. The sessions surface* |
+| `SIGN-IN-CHALLENGES-ARE-HIS` | This server never answers a sign-in or account-recovery challenge; password and second-factor entry are the operator's own gate. EXCLUDED-RULED, reopened never by this server -- he completes them himself. | sign-in and recovery challenges | 2026-10-10 | [2026-10-10-rulings-ledger-questions.md](2026-10-10-rulings-ledger-questions.md)<br>*8. Sign-in challenges are his* |
 
 ### session model
 
@@ -161,6 +188,9 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | `HIS-OWN-CURATION-NOT-OUTWARD` | Curating his own feed and items -- mute, hide, not interested, follow or unfollow from a feed item, save, a post's notification switch, the per-post controls on his own items -- is not an outward act: built behind the grant and proven with its inverse in the same session, read back. | curation of his own feed and items | 2026-09-28 | [2026-09-28-rulings-build-classes.md](2026-09-28-rulings-build-classes.md)<br>*3. Curating his own feed and items is not outward* |
 | `HIS-OWN-SETTINGS-NOT-OUTWARD` | A setting of his own account is not an outward act: built behind the grant, live-proven one setting at a time by read, benign write, read back, exact restore, read back; a failed restore is STOP-ALL. Credential settings, settings that cannot be put back exactly and sensitive self-identification are built and never live-proven unless he names them. | settings of his own account | 2026-09-28 | [2026-09-28-rulings-build-classes.md](2026-09-28-rulings-build-classes.md)<br>*2. His own settings are not outward* |
 | `PURCHASES-STAY-MANUAL` | A purchase -- Premium, InMail credits, ads, boosts, any paid upgrade -- is NOT built: its row is EXCLUDED-RULED, reopened when he names a purchase to automate. | purchases | 2026-09-28 | [2026-09-28-rulings-build-classes.md](2026-09-28-rulings-build-classes.md)<br>*4. Purchases stay manual* |
+| `CONTACT-IMPORT-STAYS-MANUAL` | An address-book import or sync is not built: it uploads other people's contact data and completes on another domain's consent screen. EXCLUDED-RULED, reopened when he asks to import or sync his address book. | importing or syncing his address book | 2026-10-10 | [2026-10-10-rulings-ledger-questions.md](2026-10-10-rulings-ledger-questions.md)<br>*5. Contact import stays manual* |
+| `P-D29-BUILT-BEHIND-THE-GRANT` | Adding a LinkedIn Learning certificate to his profile is built behind the grant under EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS and never live-proven unless he names a certificate to add. | P D29 | 2026-10-10 | [2026-10-10-rulings-ledger-questions.md](2026-10-10-rulings-ledger-questions.md)<br>*15. A broadcast edit, built behind the grant* |
+| `SAFETY-REPORTS-STAY-MANUAL` | A harassment or safety report, an accusation filed through an off-product Help Center form, is not built: EXCLUDED-RULED, reopened when an in-product structured report exists or he names one. | safety reports | 2026-10-10 | [2026-10-10-rulings-ledger-questions.md](2026-10-10-rulings-ledger-questions.md)<br>*16. Safety reports stay manual* |
 
 ---
 
@@ -269,11 +299,21 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 **`ACCOUNT-DESTRUCTION-STAYS-MANUAL`** -- Orchestrator's call applying the operator's 08:11 principle; overridable. Decides P N27 and P P2, and adds a capability-level ground to P N28.
 
+**`APPLY-FLOW-IS-THE-APPLICATION`** -- Orchestrator's call; overridable. Decides J 82.
+
+**`ARTICLE-COMPOSER-CAPTURE`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable.
+
 **`BOUNDARY-IS-NOT-A-REASON`** -- The application of EXCLUDED-RULED-ADMISSION that section 5.4a found. It quotes the census rule rather than restating it.
+
+**`CALLER-COMPOSITION-UNDER-D6`** -- Orchestrator's call applying D6-CAPABILITY-OVER-AFFORDANCE; overridable.
 
 **`CANONICAL-RULING-ID`** -- THIS FILE IS THAT RULING'S ARTIFACT. It is why the register prints a section heading and never a line number, and why the aliases column exists at all.
 
+**`CAPTURE-PRESS-UNDER-PROBE-RULE`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable. The capture is the evidence a tool's basis entry is built from.
+
 **`COMPOUND-ROW-SPLITS-ONLY-ON-STATE`** -- THE EXACT COMPLEMENT OF `DUPLICATE-ROW-IS-MARKED-NEVER-DELETED` above -- that one governs two rows describing one capability, this one governs one row describing two. They were filed together for that reason. The asymmetry it rests on is MEASURED rather than argued: `reader_closable_blockers.DIRECTIONS` normalises four spellings of a both-DIRECTION onto `R+W`, while `count_census_states.classify` answers a two-STATE cell by silently taking the first by textual order or by dropping the row out of the census, raising no dialect either way. Direction can be told the truth in the cell; state cannot. The corpus had already decided this eight times without naming it -- seven non-splits (`P M6` `P M9` `P M11` `M M28` `M C47` `N 125`, plus `J 71` declining in writing) and the one split, `P L2` -> `L2` + `L2b`, whose halves are BOTH reads and which therefore refutes a direction-based rule.
+
+**`CONTACT-IMPORT-STAYS-MANUAL`** -- Orchestrator's call; overridable. Decides N 106, N 108 and P N21.
 
 **`CONTAINER-EXCLUSION-PROPAGATES-ONLY-IF-UNREACHABLE`** -- Built ON `P I12` as a SOUND exclusion: *zero of 237 urls reach one* is ground four of EXCLUDED-RULED-ADMISSION. Two later documents call `P I12` a miscategorisation; see the register's DISPUTED note in the report for this wave.
 
@@ -301,6 +341,10 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 **`FEED-CONTENT-READ-RULING`** -- The ground `M C85`'s read half would rest on if that row were ever split -- see OPEN-QUESTIONS.
 
+**`FIXED-UI-LABEL-MATCH`** -- Orchestrator's call; overridable. Decides N 82.
+
+**`GEOLOCATION-BY-D6`** -- Orchestrator's call applying D6-CAPABILITY-OVER-AFFORDANCE; overridable. Decides J 17.
+
 **`GROUPS-ADDRESS-BUYS-NO-WRITE`** -- Stated in `readonly.py`'s own comment and quoted here. The companion rule that a widening is reported by what it BANKS rather than by what it UNBLOCKS sits in the same section.
 
 **`HIS-OWN-CURATION-NOT-OUTWARD`** -- Orchestrator's call applying OUTWARD-ACTS-NEED-THE-OPERATOR; overridable. An undo drawn only once proves the act only through that undo.
@@ -323,13 +367,21 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 **`NAMES-AT-RUNTIME`** -- The operator's ruling, verbatim in its document. Amends the 2026-09-05 name-free doctrine for runtime returns; answers WHO-WHICH-COUNTS-ARE-NOT-DELIVERY's question.
 
+**`NO-INDEX-PINNED-JUDGEMENTS`** -- Orchestrator's call; overridable. Session 7 saw LinkedIn move structure under a recorded position.
+
 **`NO-IRREVERSIBLE-WRITE-IS-FIRED`** -- The single widest write ruling in the corpus. It separates BUILD from FIRE, which is the distinction most re-escalations about writes collapse.
 
 **`NOTIFICATIONS-UNREAD-SPEND`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable. Registered under the id the census holds used for the open question, so the holds resolve to the answer.
 
 **`OTHER-MEMBER-IDS-AS-READS`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable. Answers the other-members question N 172 was held on.
 
+**`OUTSIDE-THE-PRODUCT-PURPOSE`** -- Orchestrator's call applying the operator's rule that every feature must serve the product's core purpose; overridable.
+
 **`OUTWARD-CLASSES-BUILT-BEHIND-GRANTS`** -- Orchestrator's call applying the operator's 08:11 principle and OUTWARD-ACTS-NEED-THE-OPERATOR; overridable.
+
+**`P-A9-CANNOT-DELIVER`** -- Orchestrator's call; overridable. Measured on session 7's editor skeleton.
+
+**`P-D29-BUILT-BEHIND-THE-GRANT`** -- Orchestrator's call; overridable.
 
 **`PAGE-MAY-VETO-NEVER-SUPPLY`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable. Reconciles the navigation guard with ownership checks; first applied to linkedin_surface_census feed_item.
 
@@ -347,15 +399,23 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 **`REVEAL-BUTTON-IS-A-DISCLOSURE`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable.
 
+**`SAFETY-REPORTS-STAY-MANUAL`** -- Orchestrator's call; overridable. Decides N 152.
+
 **`SEARCH-ADMISSION-APPROVED-FIVE-CONDITIONS`** -- Condition 2 was AMENDED the same day -- see SEARCH-CONDITION-2-CLOSED. The ruling bars FIRING, not READING; conflating the two cost a later wave a decision it did not need.
 
 **`SELF-PROFILE-EDIT-NOTIFY-CONDITION-AMENDED`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable. Measured cause: the intro editor draws no named notify control (live lane session 1, lane L7).
 
 **`SELF-PROFILE-EDITS-NOT-OUTWARD`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable. Narrows OPERATOR-NAMES-THE-TARGET to writes that target other people.
 
+**`SESSION-SURFACE`** -- Orchestrator's call applying CREDENTIAL-SETTINGS-NEED-THE-OPERATOR; overridable. Decides P N9 and P N10.
+
 **`SHARE-AND-POLL-PROOFS-OWN-POSTS`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable.
 
+**`SIGN-IN-CHALLENGES-ARE-HIS`** -- Orchestrator's call; overridable. Decides P N13 and P N14.
+
 **`THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET`** -- The orchestrator applying WRITE-CLASS-B and OPERATOR-NAMES-THE-TARGET; overridable. Unblocks N 1, N 4, N 5, M M1 and M M6 as builds.
+
+**`THIRD-PARTY-TEXT-AT-RUNTIME`** -- Orchestrator's call applying NAMES-AT-RUNTIME; overridable. Decides M C43 and J 110.
 
 **`VIEW-SWITCH-PRESS-RESTORED`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable.
 
@@ -371,10 +431,10 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 | signal NOT scanned | files | lines |
 |---|---|---|
-| a heading naming a ruling | 129 | 283 |
+| a heading naming a ruling | 130 | 285 |
 | a bold line opening on RULING/RULED | 63 | 144 |
 | the phrase THE RULING | 38 | 63 |
-| a named -RULING id | 38 | 96 |
+| a named -RULING id | 39 | 97 |
 | the phrase standing ruling | 18 | 41 |
 | a lead or operator ruling in prose | 40 | 106 |
 
@@ -448,6 +508,21 @@ Every `RULED:` line in the corpus, and what became of it. An UNCLAIMED row fails
 | [2026-09-28-rulings-build-classes.md](2026-09-28-rulings-build-classes.md) | RULED: (orchestrator, 2026-09-28, applying COST-AWARE STAKES-GATING) PURCHASES-STAY-MANUAL | `PURCHASES-STAY-MANUAL` |
 | [2026-09-28-rulings-build-classes.md](2026-09-28-rulings-build-classes.md) | RULED: (orchestrator, 2026-09-28, applying OUTWARD-ACTS-NEED-THE-OPERATOR and D3-UNREGISTE | `READ-PAST-AN-ACT-SUBSTRING` |
 | [2026-09-28-rulings-named-profile-read.md](2026-09-28-rulings-named-profile-read.md) | RULED: (operator, 2026-09-28 08:01, verbatim) "Yes, I'm giving you permission." | `NAMED-PROFILE-READ-BEHIND-A-GRANT` |
+| [2026-10-10-rulings-ledger-questions.md](2026-10-10-rulings-ledger-questions.md) | RULED: (orchestrator, 2026-10-10) CAPTURE-PRESS-UNDER-PROBE-RULE: a live-lane CAPTURE may | `CAPTURE-PRESS-UNDER-PROBE-RULE` |
+| [2026-10-10-rulings-ledger-questions.md](2026-10-10-rulings-ledger-questions.md) | RULED: (orchestrator, 2026-10-10) ARTICLE-COMPOSER-CAPTURE: one capture load of /article/n | `ARTICLE-COMPOSER-CAPTURE` |
+| [2026-10-10-rulings-ledger-questions.md](2026-10-10-rulings-ledger-questions.md) | RULED: (orchestrator, 2026-10-10) NO-INDEX-PINNED-JUDGEMENTS: a control is judged by its o | `NO-INDEX-PINNED-JUDGEMENTS` |
+| [2026-10-10-rulings-ledger-questions.md](2026-10-10-rulings-ledger-questions.md) | RULED: (orchestrator, 2026-10-10) CALLER-COMPOSITION-UNDER-D6: a row is discharged under D | `CALLER-COMPOSITION-UNDER-D6` |
+| [2026-10-10-rulings-ledger-questions.md](2026-10-10-rulings-ledger-questions.md) | RULED: (orchestrator, 2026-10-10) CONTACT-IMPORT-STAYS-MANUAL: an address-book import or s | `CONTACT-IMPORT-STAYS-MANUAL` |
+| [2026-10-10-rulings-ledger-questions.md](2026-10-10-rulings-ledger-questions.md) | RULED: (orchestrator, 2026-10-10) SESSION-SURFACE: reading the active-sessions list (P N9) | `SESSION-SURFACE` |
+| [2026-10-10-rulings-ledger-questions.md](2026-10-10-rulings-ledger-questions.md) | RULED: (orchestrator, 2026-10-10) SIGN-IN-CHALLENGES-ARE-HIS: this server never answers a | `SIGN-IN-CHALLENGES-ARE-HIS` |
+| [2026-10-10-rulings-ledger-questions.md](2026-10-10-rulings-ledger-questions.md) | RULED: (orchestrator, 2026-10-10) APPLY-FLOW-IS-THE-APPLICATION: opening the Easy Apply fl | `APPLY-FLOW-IS-THE-APPLICATION` |
+| [2026-10-10-rulings-ledger-questions.md](2026-10-10-rulings-ledger-questions.md) | RULED: (orchestrator, 2026-10-10, applying the operator's NAMES-AT-RUNTIME) THIRD-PARTY-TE | `THIRD-PARTY-TEXT-AT-RUNTIME` |
+| [2026-10-10-rulings-ledger-questions.md](2026-10-10-rulings-ledger-questions.md) | RULED: (orchestrator, 2026-10-10) FIXED-UI-LABEL-MATCH: N 82's Actively-hiring filter is m | `FIXED-UI-LABEL-MATCH` |
+| [2026-10-10-rulings-ledger-questions.md](2026-10-10-rulings-ledger-questions.md) | RULED: (orchestrator, 2026-10-10) GEOLOCATION-BY-D6: no browser geolocation permission is | `GEOLOCATION-BY-D6` |
+| [2026-10-10-rulings-ledger-questions.md](2026-10-10-rulings-ledger-questions.md) | RULED: (orchestrator, 2026-10-10) P-A9-CANNOT-DELIVER: P A9 is COVERED-CANNOT-DELIVER on t | `P-A9-CANNOT-DELIVER` |
+| [2026-10-10-rulings-ledger-questions.md](2026-10-10-rulings-ledger-questions.md) | RULED: (orchestrator, 2026-10-10) P-D29-BUILT-BEHIND-THE-GRANT: P D29 is built behind the | `P-D29-BUILT-BEHIND-THE-GRANT` |
+| [2026-10-10-rulings-ledger-questions.md](2026-10-10-rulings-ledger-questions.md) | RULED: (orchestrator, 2026-10-10) SAFETY-REPORTS-STAY-MANUAL: N 152 is EXCLUDED-RULED, wit | `SAFETY-REPORTS-STAY-MANUAL` |
+| [2026-10-10-rulings-ledger-questions.md](2026-10-10-rulings-ledger-questions.md) | RULED: (orchestrator, 2026-10-10, applying the operator's rule that every feature must ser | `OUTSIDE-THE-PRODUCT-PURPOSE` |
 | [2026-10-10-rulings-named-profile-detail-pages.md](2026-10-10-rulings-named-profile-detail-pages.md) | RULED: (orchestrator, 2026-10-10, applying the operator's 08:01 YES to reading profiles he | `NAMED-PROFILE-DETAIL-PAGES` |
 
 ### 5.1 Triaged -- a declaration hit that is not a ruling made here
