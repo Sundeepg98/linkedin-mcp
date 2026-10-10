@@ -106,20 +106,20 @@ the record.
 `next` is one of eight kinds, each with a payload:
 
     kind          rows   payload
-    SIBLING        160   lane-S 114, lane-U 23, another row 23
-    ADMIT          144   the address lane A must admit
+    ADMIT          151   the address lane A must admit
+    SIBLING        149   lane-S 105, lane-U 20, another row 24
     TARGET          99   what he must name
-    BUILD           56   the tracked fixture (or planned skeleton) to build on
-    PRECONDITION    54   what he lacks
-    RULING          30   a question id, section 7
-    CAPTURE         25   a surface id in the capture queue, section 5
-    PURPOSE         17   the doubt, section 8
+    PRECONDITION    57   what he lacks
+    BUILD           45   the tracked fixture (or planned skeleton) to build on
+    RULING          42   a question id, section 7
+    CAPTURE         28   a surface id in the capture queue, section 5
+    PURPOSE         14   the doubt, section 8
     total          585   = still-GAP in `scripts/census_completion.py`
 
-`basis` says what the step rests on: MEASURED 73 (an instrument read it on
+`basis` says what the step rests on: MEASURED 79 (an instrument read it on
 this tree: an address driven through `readonly.is_read_url`, or a control
-counted on a tracked fixture), NAMED 241 (a committed source names it: the
-row's own cell, a queue name, a capture plan, a ruling), INFERRED 271 (this
+counted on a tracked fixture), NAMED 275 (a committed source names it: the
+row's own cell, a queue name, a capture plan, a ruling), INFERRED 231 (this
 lane's judgement). `source` resolves in one of three forms: a census row id
 (`N 168`), a `path::phrase` whose phrase is in the file, or `RULING:<id>`
 registered in `_audit/RULINGS.md`.
@@ -127,47 +127,54 @@ registered in `_audit/RULINGS.md`.
 By slice and by direction:
 
     slice  ADMIT BUILD CAPTURE PRECOND PURPOSE RULING SIBLING TARGET
-    J        30     7      0      12       4      6      29      20
-    M         8    19     10       8       4     10      30      41
-    N        41    11     14      17       3     10      32      31
-    P        65    19      1      17       6      4      69       7
+    J        32     8      3      12       2      6      29      16
+    M        11    15      8       8       4     13      29      42
+    N        42    12     12      17       1     12      29      34
+    P        66    10      5      20       7     11      62       7
 
     dir    ADMIT BUILD CAPTURE PRECOND PURPOSE RULING SIBLING TARGET
-    R        58    24     10       8       4     19       1       7
-    W        79    31     15      45      12      9     157      91
-    R+W       7     1      0       1       1      2       2       1
+    R        60    17     12      10       4     20       1       7
+    W        84    28     15      46       9     20     146      91
+    R+W       7     0      1       1       1      2       2       1
 
 How the brief's assignments were applied:
-- Lane U (uploads): the 16 rows on FILE-UPLOAD-UNSANCTIONED, and 7 more
-  whose act is an upload (`P B2`, `P B3`, `P B5`, `P G3`, `P M1`, `J 63` a
-  cover-letter file, `M M19` a voice attachment), INFERRED. The brief said
-  15 rows; the blocker map holds 16 at 3c8edc2 (section 4).
+- Lane U (uploads): the 16 rows on FILE-UPLOAD-UNSANCTIONED, and 4 more
+  whose act is a file upload (`P B2`, `P B5`, `P G3`, and `M M19` a voice
+  attachment), INFERRED. The brief said 15 rows; the blocker map holds 16 at
+  3c8edc2 (section 4).
 - Lane S (settings of his own account): the P-R itemized rows that are
   writes (`P P4` to `P P23`, less the read `P P15`), the 8
   FORBIDDEN-CLASS-FIX-LANDED rows, the 5 MESSAGING-SETTINGS rows, the
   credential and verification settings (built, never live-proven unless he
   names them), and every other row whose act is a setting or a
-  notification preference -- 114 in all.
+  notification preference -- 105 in all. Lane S owns them even where their
+  page needs an admission first (the application settings, for `P M7`,
+  `P M8`, `P M10`, `J 74` to `J 76`): the brief assigns settings writes to
+  lane S by name. For lane S, from the cold review: `P N12`'s control sits
+  on the sign-in form at `/uas/login`, reachable only when signed out.
 - Lane A (read admissions): every read the boundary refuses on an act's
   substring or on allowlist silence takes `ADMIT:<its measured address>`.
-  So does every WRITE whose page the boundary refuses, because nothing can
-  be captured or built there until the page opens: the Open To Work editor,
-  the profile section editors, his recommendations, the invitation manager,
-  the application settings. The reads the boundary refuses on the read
-  itself (a session surface, a sign-in challenge, a GET that may start an
-  application) are not lane A's: they are RULING rows.
-- The 19 UNASSIGNED rows each have a step: ADMIT 8 (`J 78`, `P D24`,
-  `M C82`, `N 41`, `N 42`, `N 59`, `N 60`, `N 61`), lane S 5 (`J 83`,
-  `J 99`, `J 100`, `N 96`, and `J 81` with the credential set), TARGET 1
-  (`J 79`), SIBLING 1 (`J 80` on `J 79`), RULING 1 (`J 82`), PRECONDITION 1
-  (`J 150`), and CAPTURE 2 (`N 51`, `N 95` on the feed load).
-- SIBLING to another row (23): the jobs slice's Open To Work rows ride on
-  the profile slice's (`J 89` to `J 98` on `P I2` to `P I13`); duplicates
-  across slices (`N 149` to `N 151` on `M M38`, `N 160` on `M M6`); steps
-  inside another row's act (`N 169`, `N 187`, `J 80`, `J 85`); and five that
-  a shipped tool may already reach by D6-CAPABILITY-OVER-AFFORDANCE (`N 3` on
-  `N 1`, `M C11` on `M C1`, `M C65` on `M C25`, `M C91` on `M C32`, `J 86` on
-  `P I14`) -- a census call for the row's owner, not made here.
+  So does every WRITE whose page the boundary refuses and that is not a
+  setting, because nothing can be captured or built there until the page
+  opens: the Open To Work editor, the profile section editors, his
+  recommendations, the invitation manager, his saved posts. The reads the
+  boundary refuses on the read itself (a session surface, a sign-in
+  challenge, a GET that may start an application) are not lane A's: they
+  are RULING rows.
+- The 19 UNASSIGNED rows each have a step: ADMIT 9 (`J 78`, `P D24`,
+  `M C82`, `N 41`, `N 42`, `N 59`, `N 60`, `N 61`, `N 96`), lane S 3
+  (`J 83`, `J 100`, and `J 81` with the credential set), SIBLING 2 (`J 80`
+  on `J 79`, `J 99` on its container `P I12`), TARGET 1 (`J 79`), RULING 1
+  (`J 82`), PRECONDITION 1 (`J 150`), and CAPTURE 2 (`N 51`, `N 95` on the
+  feed load).
+- SIBLING to another row (24): the jobs slice's Open To Work rows ride on
+  the profile slice's (`J 89` to `J 98` on `P I2` to `P I13`, `J 99` on
+  `P I12`); duplicates across slices (`N 149` on `M M38`, `N 160` on
+  `M M6`); steps inside another row's act (`N 169`, `N 187`, `J 80`, `J 85`,
+  and `M C2`, which its own cell ties to `M C12`); and six a shipped tool may
+  already reach by D6-CAPABILITY-OVER-AFFORDANCE (`N 3` on `N 1`, `M C11` on
+  `M C1`, `M C65` on `M C25`, `M C91` on `M C32`, `J 86` on `P I14`, `N 50` on
+  `N 47`) -- a census call for the row's owner, not made here.
 
 Where a write needs a menu or a dialog nobody has captured, and that menu is
 drawn only inside the act at an item he names (his post, his comment, a
@@ -177,20 +184,61 @@ package's write path, not the disclosing-press gate, governs that press. A
 READ that can only be reached through a press the gate refuses is RULING
 (section 7).
 
+### 3.1 The cold review
+
+A child that did not write the table read every row's step against the row's
+own cell, the rulings and the brief's rules, and wrote 61 findings, each
+quoting its evidence. This lane checked each against the tree before
+adopting it: the addresses it named were driven through `readonly.is_read_url`
+(eleven refused, two admitted), and the controls it counted were counted
+again on the fixtures. 55 were adopted, some in a different form than
+proposed; 6 were not:
+
+    adopted                                                 rows
+    a lane-S row that is a relation act, a deletion of his  N 142, J 87, N 96, P K7, P N14,
+      own item, a credential step or an outward reply       P A24, P K5, M M39, M C52,
+                                                            P N21, P N10, J 99
+    a setting the cell names, moved INTO lane S             P D7, J 35, J 36
+    an address the row's own cell names                     P I12, P I13, P S2, P H1, P D2,
+                                                            P E2, P D27, M C36, M C37, P K1,
+                                                            J 159, P M1
+    a control a tracked fixture already holds               M C97, J 53, J 55, J 161
+    a fresh load where a skeleton cannot answer             P D25, P D26, P F1, P S8, J 115,
+                                                            J 124, J 163
+    a precondition the cell states                          P D28, P H11
+    a target inside the act, not a build on the share box   M C2, M C8, M C9, M C13, M C54,
+                                                            N 150, N 151, J 63
+    a question, not a build or a capture                    P A9, P D29, P B3, P S4, M C15,
+                                                            M C16, M C17, N 152
+    a purpose doubt the cell answers                        N 50 (D6 on N 47), J 159, J 163;
+                                                            P J4 joins the hiring family
+
+    not adopted                      why
+    P M7                             a setting: the brief assigns settings writes to lane S
+    J 32, N 49                       the Page's address still has to come from him
+    N 99, J 112                      the school's address has to come from him; the
+                                     session record plans "a school id he names"
+    P N12                            a FORBIDDEN-CLASS-FIX-LANDED row, which the brief
+                                     assigns to lane S; its point is passed to lane S above
+
+The review moved 55 of 585 rows; four more followed their neighbours
+(`P D26` and `P F1` onto the fresh profile load, `P E3` with `P E2`, `M C54`
+with `M C8`), and the INFERRED share fell from 271 to 231. Live session 7's
+record, merged from master, moved three more (section 4).
+
 ## 4. What disk said that the brief did not
 
 - SESSION 7 HAS ALREADY RUN. The brief asked for a session-7 plan first.
   The live lane's `_state/live7/` ledger records a seventh session on
-  2026-10-10 from 11:32 to 11:49: 17 loads and 2 searches (keys `signin`,
-  `s1_name`, `connections`, `s2_geo`, `named`, `edit_read`, `follow_read`,
-  an unfollow and refollow, `m10_resolve`, `notifications`, `j121`,
-  `editor_capture`), and `_state/LIVE_SESSION_ON` was gone by 11:51. So the
-  first plan here is SESSION 8. Its captures `named`, `editor` and
-  `notifications` exist as skeletons in the live lane's state and are not
-  yet tracked; the live lane's record will say what they served. Two rows
-  here lean on them and say so: `P A9`, `P A14`, `P A15`, `P A22` (the
-  editor's full read), and the `N 65` / `N 103` capture, which session 7's
-  `named` key may already have taken.
+  2026-10-10 from 11:38 to 11:49: 17 loads and 2 searches, and
+  `_state/LIVE_SESSION_ON` was gone by 11:51. Its record reached master
+  (`1170c98`) and this branch at the merge of `53908ea`. So the first plan
+  here is SESSION 8. What session 7 settled for GAP rows: C-P7 was taken on
+  the member he named and drew no Interests section on the first render, so
+  `N 65` and `N 178` wait on "a ruling for a scroll or the sub-page"
+  (Q-PROFILE-SCROLL); `N 103` builds on that capture; its editor capture was
+  taken for `P B9`, so whether it draws `P A14`, `P A15` and `P A22`'s
+  unread controls is an offline read on it.
 - FILE-UPLOAD-UNSANCTIONED holds 16 rows at 3c8edc2, not 15: `J 70`,
   `J 146` to `J 149`, `M M14`, `M M15`, `M M18`, `M C3` to `M C7`, `M C27`,
   `M C45`, `M C86`.
@@ -198,14 +246,15 @@ READ that can only be reached through a press the gate refuses is RULING
   "capture" while session 3 took all three and committed their open states
   (`tests/fixtures/live3/compose_c5-open.html`, `compose_c8-open.html`,
   `compose_c9-open.html`). Five rows build on them now (section 6).
-- The profile section editors (`/in/me/edit/about/`, `/in/me/edit/forms/...`),
-  the contact-info editor and the Open To Work editor are all refused by the
-  read boundary today; only the intro editor is admitted. Their write rows
-  wait on an admission, not on a capture.
+- The profile section editors (`/in/me/edit/forms/...`, the skills editor,
+  `/in/me/edit/secondary-language/`), the contact-info editor and the Open
+  To Work editor are all refused by the read boundary today; only the intro
+  editor is admitted. Their write rows wait on an admission, not on a
+  capture.
 
 ## 5. The capture queue and the session plans
 
-`_audit/_census/capture-queue.tsv`, one line per capture surface, 93 lines.
+`_audit/_census/capture-queue.tsv`, one line per capture surface, 103 lines.
 Columns: `rank`, `surface-id`, `session`, `needs`, `address`,
 `address_verdict` (today's `readonly.is_read_url`; a refused address names
 the admission it waits on, or the named-profile route), `presses` (each
@@ -215,10 +264,10 @@ control and the shipped press gate's verdict on it now, from
 `plan`.
 
     lines   gate                                         rows
-        8   none: schedulable now                           25
+       10   none: schedulable now                           28
        11   TARGET: he names the item                       99
-       65   ADMIT: lane A admits the page first            144
-        9   RULING: a question in section 7                 18
+       72   ADMIT: lane A admits the page first            151
+       10   RULING: a question in section 7                 23
 
 The press gate, measured per line: a press is PERMITTED before the press
 only on `/feed/`, on a post's permalink and on `/analytics/profile-views/`
@@ -233,91 +282,85 @@ profile, which only the named-profile route reaches.
 
 ### SESSION 8 -- the first 40 loads, in order
 
-Ten loads need nothing from anyone; they come first. The order is by rows
-unblocked per load, except that the thread read follows the guarded
-messaging loads it depends on.
+Twelve loads need nothing from anyone; they come first, by rows unblocked
+per load, except that the thread read follows the guarded messaging loads it
+depends on.
 
     #      surface                    loads search rows
-    1      feed-menus                     1    0   9  N 37, N 43, N 51,
-                                                      N 153, N 154, N 200,
-                                                      M C36, M C37, N 95
-    2      search-people-labels           1    1   4  N 80, N 88, N 89, N 93
-    3      named-profile-addendum         1    0   2  N 65, N 103
-    4      own-post-reactions             1    0   2  M C33, M C35
-    5      in-me-profile                  1    0   1  P K8
-    6-8    messaging-guarded              3    0   3  M M7, M M8, M M9
-    9      search-people-first-degree     1    1   1  N 26b
-    10     msg-thread-footer              1    0   3  M M20, M M40, M M51
-           subtotal                      10    2  25
+    1      feed-menus                     1    0   7  N 37, N 43, N 51, N 95,
+                                                      N 153, N 154, N 200
+    2      in-me-profile                  1    0   4  P D25, P D26, P F1, P K8
+    3      search-people-labels           1    1   4  N 80, N 88, N 89, N 93
+    4      job-posting-panels             1    0   2  J 115, J 124
+    5      own-post-reactions             1    0   2  M C33, M C35
+    6      jobs-recommended-feedback      1    0   1  J 163
+    7-9    messaging-guarded              3    0   3  M M7, M M8, M M9
+    10     premium-key-skills             1    0   1  P S8
+    11     search-people-first-degree     1    1   1  N 26b
+    12     msg-thread-footer              1    0   3  M M20, M M40, M M51
+           subtotal                      12    2  28
 
 Load 1 is one feed load with two presses the feed basis prices: one item's
-overflow menu (the curation acts: mute, hide, unfollow, save) and the global
-search box (his recent searches). Load 3 is the member he already named for
-session 6's addendum, through the named-profile route; check the live
-lane's session-7 record first, since its `named` key may be this load. The
-operator's named-profile ruling reads "never for a measurement"; this load
-stands on the orchestrator's addendum of session 6, which ordered it, and
-falls with it. Loads
-6 to 8 are the guarded pattern the live lane uses: the badge read off his
-feed, the composer's list, then `/messaging/`. Load 10 opens a conversation
-he named before, behind the badge at 0.
+overflow menu (the curation acts: mute, hide, unfollow) and the global search
+box (his recent searches). Load 2 is his own profile, fresh: it records the
+Add-section anchors' addresses, which the live probe deliberately never
+recorded, and answers whether the strength meter and the recommendations
+section render on a passive load. Load 4 is one posting from his own saved
+jobs, as session 7's `j121` load took one, kept raw because a skeleton cannot
+answer `J 124`. Loads 7 to 9 are the guarded pattern the live lane uses: the
+badge read off his feed, the composer's list, then `/messaging/`. Load 12
+opens a conversation he named before, behind the badge at 0.
 
-The other 30 loads go to TARGET lines, in rank order, each as he names its
+The other 26 loads go to TARGET lines, in rank order, each as he names its
 target (each distinct thing he names costs a load):
 
     #      surface                    loads rows  he names
-    11-12  t-non-connection               2    7  a non-connection; a member
+    13-14  t-non-connection               2    7  a non-connection; a member
                                                   to invite with a note
-    13-16  t-named-connection             4   13  1st-degree connections to
+    15-18  t-named-connection             4   13  1st-degree connections to
                                                   endorse, recommend, ask,
                                                   follow
-    17     t-named-school                 1    3  a school Page
-    18-21  t-named-event                  4   11  an event; an event to create
-    22     t-block-member                 1    2  a member to block
-    23-32  t-named-job                   10   20  postings, an alert, a tracked
-                                                  job, a draft
-    33-35  t-named-page                   3    4  Pages to invite to, report,
+    19     t-named-school                 1    3  a school Page
+    20-23  t-named-event                  4   11  an event; an event to create
+    24-32  t-named-job                    9   16  postings, an alert, a tracked
+                                                  job, a draft, a multi-step
+                                                  Easy Apply
+    33-34  t-block-member                 2    3  a member to block; one to
+                                                  unblock
+    35-37  t-named-page                   3    4  Pages to invite to, report,
                                                   follow
-    36-40  t-named-group                  5    6  a group, a fellow member,
-                                                  a pending request
-           session 8 total               40 loads, 2 searches, 91 rows
+    38     t-connection-row-menu          1    1  a connection to remove
+           session 8 total               38 loads, 2 searches, 86 rows
 
 ### SESSION 9 -- the next 40
 
     #      surface                               loads rows  gate
-    1-15   t-named-post                             15   21  TARGET: his
+    1-18   t-named-post                             18   22  TARGET: his
                                                              posts, comments,
-                                                             a poll, reposts
-    16     t-connection-row-menu                     1    1  TARGET
-    17-30  t-named-thread                           14   11  TARGET: threads
-                                                             he names (2 loads
-                                                             each, guarded)
-    31     admit-in-me-opportunities-job-opp...      1   13  after lane A
-    32     admit-in-me-details-recommendations       1   12  after lane A
-    33     admit-mynetwork-invitation-manager        1   10  after lane A
-    34     admit-jobs-application-settings           1    9  after lane A
-    35     admit-in-me-details-featured              1    6  after lane A
-    36     admit-in-me-edit-forms-position-new       1    5  after lane A
-    37     admit-mynetwork                           1    5  after lane A
-    38     admit-preload-guideoverlay-...-details    1    5  after lane A
-    39     admit-in-me-edit-contact-info             1    4  after lane A
-    40     admit-newsletters-id                      1    4  after lane A
-           session 9 total                          40  106
+                                                             a poll, reposts,
+                                                             composer modes
+    19-23  t-named-group                             5    6  TARGET
+    24     admit-in-me-details-recommendations       1   12  after lane A
+    25     admit-in-me-opportunities-job-opp...      1   11  after lane A
+    26     admit-jobs-application-settings           1   10  after lane A
+    27     admit-mynetwork-invitation-manager        1   10  after lane A
+    28-40  thirteen more admission lines            13   47  after lane A
+           session 9 total                          40  118
 
-Sessions 10 and 11 take the remaining 55 admission-gated lines (40 loads,
-then 15 loads and 2 searches), each one load for one to three rows. The
-nine RULING-gated lines are scheduled by nobody until their question is
-answered.
+Sessions 10 and 11 take the named threads (18 loads: two each, guarded, 13
+rows) and the remaining 55 admission-gated lines, each one load for one to
+three rows. The ten RULING-gated lines are scheduled by nobody until their
+question is answered.
 
 These plans cover the captures GAP rows need. The live lane's own
 carry-over -- the live proofs of rows already built (bucket 1) -- draws on the
 same 40 loads, and the orchestrator splits the budget between the two.
 
-THE YIELD CURVE IS STEEP AND THEN FLAT. The first ten loads unblock 25 rows
-(2.5 a load); a session of named targets unblocks 91; after the admissions,
-most lines are one row a load. The cheapest rows in this ledger are not
-captures at all: 56 build on captures already on disk (section 6), and 160
-belong to sibling lanes.
+THE YIELD CURVE IS STEEP AND THEN FLAT. The first twelve loads unblock 28
+rows (2.3 a load); a session of named targets unblocks 86; after the
+admissions, most lines are one row a load. The cheapest rows in this ledger
+are not captures at all: 45 build on captures already on disk (section 6),
+and 125 belong to sibling lanes.
 
 ## 6. The capture inventory
 
@@ -357,18 +400,21 @@ hold a GAP row's surface, and the rows that can be BUILT on them now:
     /feed/update/<urn>/ (his post)       tests/fixtures/live2/own_post.html          M C29
     his post's control menu              tests/fixtures/synthetic/own_post_menu.html M C18, M C23, M C90
     /jobs/search/                        tests/fixtures/live2/j107.html              J 31, J 84
-    /jobs/view/<job>/                    tests/fixtures/live2/job_detail.html        J 115, J 124
-    /jobs-tracker/                       tests/fixtures/jobs_tracker_row.html        J 56
+    /jobs/view/<job>/                    tests/fixtures/job_detail_hydrated.html     J 161
+    /jobs-tracker/                       tests/fixtures/jobs_tracker_row.html        J 53, J 55, J 56
     /jobs/alerts/ (the jobs home)        tests/fixtures/synthetic/jobs_home_recent_searches.html  J 19
     /mynetwork/.../newsletters/          tests/fixtures/synthetic/newsletter_subscriptions.html   N 56
+    /notifications/                      tests/fixtures/notifications.html           M C97
     /analytics/profile-views/            tests/fixtures/synthetic/profile_views_pill_open.html    N 133
     /in/<member>/edit/intro/             tests/fixtures/live4/editor.html            P A11, P A13, P A17
 
 Where the control a row needs was counted on the fixture, the row's basis
 is MEASURED: "Who can (comment)", "Edit post" and "Delete post" on his
 post's menu; "Most relevant" on his post; alert and dismiss controls on the
-jobs search page; "Clear" on the jobs home; "unsubscribe" on the newsletter
-list; "Join" and "invite" on the group page.
+jobs search page; "Set alert for similar jobs" on the posting; "Archive" and
+"Add note" on the tracker row; "Delete notification" on the notifications
+list; "Clear" on the jobs home; "unsubscribe" on the newsletter list; "Join"
+and "invite" on the group page.
 
 Raw captures with no tracked skeleton yet. Each line below is a PLANNED
 skeleton: a builder writes it from the raw capture, and the rows build on
@@ -380,21 +426,17 @@ fixture that is neither tracked nor planned here fails.
     PLANNED tests/fixtures/live1/overview.html <- live-lane _state/l1-overview.html (P L8)
     PLANNED tests/fixtures/live1/articles.html <- live-lane _state/l1-articles.html (M C48)
     PLANNED tests/fixtures/live1/post_summary.html <- live-lane _state/l1-post_summary.html (M C38)
-    PLANNED tests/fixtures/synthetic/sharebox.html <- _state/cap-ct-sharebox.html (M C2, M C8, M C9, M C13, M C54)
-    PLANNED tests/fixtures/synthetic/own_profile_sections.html <- _state/cap-rc-badges.html (P D25, P D26, P D27, P D28, P F1, P H11, P J4, P K1)
-    PLANNED tests/fixtures/live7/editor.html <- live-lane _state/live7/editor.skeleton.html (P A9, P A14, P A15, P A22)
-    PLANNED tests/fixtures/synthetic/job_insights_panel.html <- _state/worktree-archive/agent-a95d2a970e4a6b54b/_state/unfired-job-detail-insights-raw.json (J 124)
+    PLANNED tests/fixtures/live7/editor.html <- live-lane _state/live7/editor.skeleton.html (P A14, P A15, P A22)
+    PLANNED tests/fixtures/live7/named.html <- live-lane _state/live7/named.skeleton.html (N 103)
 
 The first five are lane L1's five pages, which session 1 captured and whose
-offline readers were never written (the session record, item 8). The sixth
-is the share box as captured 2026-09-20, which draws Post, Schedule and the
-add controls. The seventh is his own profile as captured 2026-09-20, raw,
-which answers offline whether a section renders on a passive load. The
-eighth is session 7's editor capture, named here by this lane; the live
-lane's record names the real path. The ninth is the job-detail insights
-tool output of 2026-09-23, raw: the session record says a skeleton cannot
-answer `J 124`'s question, so its builder reads the raw output offline and
-commits only the reduced shape.
+offline readers were never written (the session record, item 8). The last
+two are session 7's captures, named here by this lane; the live lane's
+record names the real paths. Two raw captures on this box were considered
+and set aside: the share box as captured 2026-09-20 draws the composer's
+labels but none of the forms behind them, so its rows take a target inside
+the act; and his own profile as captured 2026-09-20 is three weeks old where
+a fresh load is already in session 8.
 
 Other raw captures on the box that a later step can use: nine jobs-tracker
 stages, an events home, a groups list and a newsletters page, all raw under
@@ -421,30 +463,83 @@ and its ground is quoted from the record.
 
 ### Q-CAPTURE-PRESS -- a read capture needs a press or typing the gate refuses
 
-Rows (10): `J 37`, `M C14`, `M C97`, `M M28`, `M M34`, `N 86`, `N 90`, `N 91`,
-`N 92`, `N 178`. Each needs a control opened, or a box typed into, on a
-surface where `linkedin_server/press.py` refuses it today: messaging's
-folder item and search box, the people search's All-filters control, the
-composer's scheduled-posts control, a notification's menu, the jobs home's
-alert manager, the Interests tab on a named profile. The gate's words:
-"A press NEVER extends reach", and on these surfaces "no basis is declared
-for this surface, so condition 3 has no way to be satisfied here". THE
-EVIDENCE THAT A SECOND ROUTE EXISTS: session 3 opened C8, C9 and C5 on the
-composer -- a surface the gate refuses for pressing as `composer_or_editor`
--- under the probe rule, and committed the open states. The question: may
-a read capture press, or type, under the probe rule (stopping before any
-save, send or submit, closing with Escape), or must each surface first get
-its own `SENSITIVITY_BASES` or `DECIDED_REVEALS` entry, or a view-switch
-entry where the press selects?
+Rows (11): `J 37`, `M C14`, `M C15`, `M C16`, `M C17`, `M M28`, `M M34`,
+`N 86`, `N 90`, `N 91`, `N 92`. Each needs a control opened, or a box typed
+into, on a surface where `linkedin_server/press.py` refuses it today:
+messaging's folder item and search box, the people search's All-filters
+control, the composer's scheduled-posts control (the scheduled list has no
+address, so no scheduled post can be named first), the jobs home's alert
+manager. The gate's words: "A press NEVER extends reach", and on these
+surfaces "no basis is declared for this surface, so condition 3 has no way
+to be satisfied here". THE EVIDENCE THAT A SECOND ROUTE EXISTS: session 3
+opened C8, C9 and C5 on the composer -- a surface the gate refuses for
+pressing as `composer_or_editor` -- under the probe rule, and committed the
+open states. The question: may a read capture press, or type, under the
+probe rule (stopping before any save, send or submit, closing with Escape),
+or must each surface first get its own `SENSITIVITY_BASES` or
+`DECIDED_REVEALS` entry, or a view-switch entry where the press selects?
 
-### Q-IN-ME-PIN -- an index-pinned judgement of controls on his own profile
+### Q-ARTICLE-AUTOSAVE -- loading the article composer
 
-Rows (2): `N 76` (his Follow link), `P C8` (Save to PDF). Both sit behind
-his profile's overflow control. The address table: "the Open-to control, an
-[aria-expanded] button, is not judged (control_not_judged) -- it shares that
-shape with the same links, so only a position-pinned judgement could admit
-it". The question: admit the overflow control by an index-pinned judgement
-in `press.SENSITIVITY_BASES`, or keep both rows waiting?
+Rows (6): `M C44`, `M C46`, `M C50`, `M C78`, `M C81`, `P L3`. The press
+gate: "`/article/new/` is admitted for READING and opening it may autosave a
+draft **no surface here can detect**". A capture of the composer is one
+load and would unblock the six; this lane does not schedule it. The
+question: accept that a capture load may leave an empty draft he cannot
+see, or keep the composer unloaded?
+
+### Q-IN-ME-PIN -- judging controls on his own profile
+
+Rows (4): `N 76` (his Follow link), `P C8` (Save to PDF), `P B3` (the photo
+editor), `P S4` (the custom-button editor). Each sits behind a control on his
+own profile the gate has not judged. The address table: "the Open-to
+control, an [aria-expanded] button, is not judged (control_not_judged) -- it
+shares that shape with the same links, so only a position-pinned judgement
+could admit it". The question: admit these controls by index-pinned
+judgements in `press.SENSITIVITY_BASES`, or keep the rows waiting?
+
+### Q-CALLER-COMPOSES -- a caller composing shipped tools, under D6
+
+Rows (3): `J 57`, `J 131`, `N 197`. For `J 57` the address table says
+"Every piece ships and the CALLER can compose it today", while a server-side
+join "would navigate to ids read off the tracker page, a derived
+navigation"; for `N 197`, "Whether a link composed from the group id
+discharges the row is an open question under the D6 capability-over-
+affordance ruling". The question: does a caller composing shipped tools
+(or a link composed from an id) discharge these rows under
+D6-CAPABILITY-OVER-AFFORDANCE?
+
+### Q-CONTACT-IMPORT -- uploading other people's contact data
+
+Rows (3): `N 106`, `N 108`, `P N21` (contact sync). The cell: "the import
+completes on Google's OAuth consent screen, another domain", and "Importing
+uploads other people's contact data to LinkedIn, an act his to fire". The
+question: is an address-book import or sync ever built, or do the rows
+leave scope?
+
+### Q-PROFILE-SCROLL -- a scroll, or the sub-page, on a profile he names
+
+Rows (2): `N 65`, `N 178`. Session 7 took C-P7 on the member he named; the
+cell: "The section is not on the first render, so this row waits on a
+ruling for a scroll or the sub-page (C-P7 step 5)". Infinite scroll is not
+sanctioned (SCROLL-NOT-SANCTIONED), and the named-profile ruling reads
+"never for a measurement". The question: allow one bounded scroll, or a
+load of the profile's details sub-page, inside the named read he orders?
+
+### Q-SESSIONS-LIST -- the active-sessions page
+
+Rows (2): `P N9` (the list), `P N10` (signing out of sessions, on the same
+page). The class rulings, section 5: the read-past ruling does not reach
+"a credential, recovery, session or security surface". The question: is the
+sessions page readable or writable at all, or do the rows leave scope?
+
+### Q-SIGNIN-CHALLENGE -- sign-in and account-recovery surfaces
+
+Rows (2): `P N13` (the sign-in prompt, email code or CAPTCHA, at
+`/checkpoint/`), `P N14` (identity verification for account recovery, whose
+cell reads "CREDENTIAL, BLOCKED -- AND NO BUILD IS APPROPRIATE"). The class
+rulings, section 5: not reached for "a sign-in challenge". The question:
+rule both out of scope with a reopener, or keep them GAP?
 
 ### Q-APPLY-FLOW -- opening the Easy Apply flow may be a GET that changes state
 
@@ -453,19 +548,6 @@ table: "Opening it is the first step of an application". The class rulings
 of 2026-09-28, section 5, do not reach "a GET that changes state". The
 question: is opening the apply flow such a GET (the read stays refused), or
 may it be admitted read-only?
-
-### Q-SESSIONS-LIST -- the active-sessions list
-
-Row: `P N9`, refused on `/psettings/`. The class rulings, section 5: the
-read-past ruling does not reach "a credential, recovery, session or
-security surface". The question: is the sessions list readable at all, or
-does the row leave scope?
-
-### Q-SIGNIN-CHALLENGE -- a sign-in challenge
-
-Row: `P N13` (the sign-in prompt, email code or CAPTCHA, at `/checkpoint/`).
-The class rulings, section 5: not reached for "a sign-in challenge". The
-question: rule the row out of scope with a reopener, or keep it GAP?
 
 ### Q-POST-TEXT -- a post's text
 
@@ -488,17 +570,6 @@ available tells a people filter from a jobs badge without reading the
 label, which this surface forbids". The question: may this one filter be
 matched by its label?
 
-### Q-CALLER-COMPOSES -- a caller composing shipped tools, under D6
-
-Rows (3): `J 57`, `J 131`, `N 197`. For `J 57` the address table says
-"Every piece ships and the CALLER can compose it today", while a server-side
-join "would navigate to ids read off the tracker page, a derived
-navigation"; for `N 197`, "Whether a link composed from the group id
-discharges the row is an open question under the D6 capability-over-
-affordance ruling". The question: does a caller composing shipped tools
-(or a link composed from an id) discharge these rows under
-D6-CAPABILITY-OVER-AFFORDANCE?
-
 ### Q-GEOLOCATION -- his browser's geolocation permission
 
 Row: `J 17`. The address table: "Whether to grant that persistent
@@ -506,21 +577,33 @@ permission is the operator's call, not a boundary or reader question". It
 is the operator's, so the orchestrator relays it or rules the row by D6
 (the location parameter already reaches every documented result set).
 
-### Q-CONTACT-IMPORT -- uploading his address book
+### Q-AWAY-MESSAGE -- a reply in his name, composed in advance
 
-Rows (2): `N 106`, `N 108`. The cell: "the import completes on Google's
-OAuth consent screen, another domain", and "Importing uploads other people's
-contact data to LinkedIn, an act his to fire". The question: is an
-address-book import ever built, or do both rows leave scope?
+Row: `M M39` (an away message, Premium). The cell quotes the refusal it
+rests on -- "a reply in his name that he did not read is a message from a
+stranger wearing his face" -- and names its reopener: "the operator ruling
+that a message composed and approved IN ADVANCE is not a reply he did not
+read". The question is the operator's; the orchestrator relays it.
 
-### Q-ARTICLE-AUTOSAVE -- loading the article composer
+### Q-UNAIMABLE-CONTROL -- a control no route can aim
 
-Rows (6): `M C44`, `M C46`, `M C50`, `M C78`, `M C81`, `P L3`. The press
-gate: "`/article/new/` is admitted for READING and opening it may autosave a
-draft **no surface here can detect**". A capture of the composer is one
-load and would unblock the six; this lane does not schedule it. The
-question: accept that a capture load may leave an empty draft he cannot
-see, or keep the composer unloaded?
+Row: `P A9` (the additional name's visibility). The cell: "its only
+candidates are two unnamed switches ... so the control is unidentifiable by
+every non-press route", and "The A2 and A4 precedent would file it
+COVERED-CANNOT-DELIVER". The question: file it so, on that precedent?
+
+### Q-BROADCAST-EDIT -- a profile entry that broadcasts by nature
+
+Row: `P D29` (a LinkedIn Learning certificate on his profile). The cell: "A
+new section entry ... excluded from live proof by that ruling", and "No
+build." The question: build it behind the grant and leave it unproven, or
+rule it out with a reopener?
+
+### Q-SAFETY-REPORT -- a safety report through a Help Center form
+
+Row: `N 152`. The cell: "A harassment or safety report is an accusation",
+with the reopener "an in-product STRUCTURED report". The question: keep it
+GAP on that reopener, or rule it out of scope?
 
 ## 8. Preconditions and purposes
 
@@ -531,9 +614,10 @@ CHEAP AND PRIVATE -- he can make it himself, and nobody else sees it:
 - a group he owns, made private: `N A10`, `N A11`, `N A12`.
 
 CHEAP BUT PUBLIC -- his to make, but others can see it:
-- a Service Page: `P H2` to `P H10` (9);
+- a Service Page: `P H2` to `P H11` (10);
 - an article: `M C49`, `M C77`;
-- a newsletter: `M C51`, `M C83`, `P L4`; two of them: `M C84`.
+- a newsletter: `M C51`, `M C83`, `P L4`; two of them: `M C84`;
+- a secondary-language profile: `P D28` (`P D27` makes one).
 
 NOT CHEAP, or not his to make:
 - admin rights on a Company Page: `N A1` to `N A5`, `N A7` to `N A9` (8);
@@ -543,7 +627,8 @@ NOT CHEAP, or not his to make:
 - a collaborative post or article he is part of: `M C55`, `M C56`, `M C76`;
 - a job change to share: `P I16`;
 - a name-pronunciation recording, which only the mobile app records: `P A23b`;
-- a LinkedIn Learning certificate: `P D29`;
+- a completed identity verification (a verified name to show): `P A24`;
+- a company LinkedIn Learning licence: `P K5`;
 - the AI role-play feature, an experiment LinkedIn controls: `J 132`,
   `J 134` to `J 139` (7);
 - an AI interview invitation from an employer: `J 142` to `J 145`;
@@ -554,17 +639,15 @@ PURPOSE rows -- this lane doubts they serve a job-search and
 professional-presence tool for his own account. Nothing moves; the
 orchestrator rules.
 
-    row(s)                        the doubt
-    M C99                         daily games are entertainment
-    M C95                         a live video stream, nothing to read
-    M C98                         LinkedIn News is general news reading
-    M C96                         an image's provenance label
-    J 159                         a company's ads: market research
-    J 162, J 163, J 164, N 198    feedback to LinkedIn about its own product
-    N 50                          a Follow button on another website
-    N 152                         a Help Center safety form
-    P S10, P B7, P J1, P J2, P J3 hiring: posting a job, the #Hiring frame
-    P L6                          hosting an audio event, existence uncertain
+    row(s)                              the doubt
+    M C99                               daily games are entertainment
+    M C95                               a live video stream, nothing to read
+    M C98                               LinkedIn News is general news reading
+    M C96                               an image's provenance label
+    J 162, J 164, N 198                 feedback to LinkedIn about its own product
+    P S10, P B7, P J1, P J2, P J3, P J4 hiring: posting a job, the #Hiring frame
+                                        and state
+    P L6                                hosting an audio event, existence uncertain
 
 ## 9. The instrument: `scripts/check_next_step.py`
 
@@ -643,16 +726,34 @@ the full suite on CI.
     dba0bd9   the identity test, the derived views, the         1320 passed, 1 failed: the map
               register's numbers and probe controls, the        again, drifted by a table
               corpus guards, the ledger test                    regenerated after the commit
+    76ae696   the merge of master 53908ea: census_completion    every pin matches; GREEN 585;
+              --check, check_next_step, check_write_classes,    GREEN 387; 40 of 40
+              check_exclusion_basis, on the merged tree
+              CI run 38035568464 (ci/ ref, 6 jobs, 6m03s)       failure: shard 1, 14 failed --
+                                                                the cited-SHA family, which
+                                                                cannot resolve old SHAs on a
+                                                                ci/ checkout (the orchestrator
+                                                                named it at 13:23: not lane
+                                                                code); shard 3, 1 failed --
+                                                                ours, below; 2975 and 3056
+                                                                passed on those two shards
+
+CI FOUND ONE RED THE LOCAL GATES MISSED: `tests/test_probe_interaction_budget.py`
+read `cns.check(table, queue)` in `scripts/_check_next_step_can_fail.py` as
+Playwright's checkbox verb `Locator.check`. A false positive -- the scanner
+matches the verb, not the receiver -- declared as one in that file's DECLARED
+table, with its reason, in the commit after the merge; 8 passed locally.
 
 THE MAP DRIFTED TWICE FOR ONE REASON: the blocker map's reason locator reads
 the census side tables as well as the documents, so any table regenerated
 after the map makes the committed map stale. It is regenerated LAST before
 every commit here.
 
-NOT RUN, and why: the full suite (the 11:35 policy puts it on CI); the impact
-gate's widened run -- `impact_gate.py --against 3c8edc2 --plan-only` selects
-77 test files (72 by impact, 30 corpus-wide, overlapping); this lane ran the
-ones named above, and CI runs the rest. Nothing here touched a live page.
+NOT RUN LOCALLY, and why: the full suite (the 11:35 policy puts it on CI,
+where it ran as above); the impact gate's widened run --
+`impact_gate.py --against 3c8edc2 --plan-only` selects 77 test files (72 by
+impact, 30 corpus-wide, overlapping); this lane ran the ones named above, and
+CI ran the rest. Nothing here touched a live page.
 
 ## 11. Commits
 
@@ -663,3 +764,9 @@ ones named above, and CI runs the rest. Nothing here touched a live page.
              queue, and their checker
     dba0bd9  census: register check_next_step (INSTRUMENTS 82), commit the
              capture inventory, two repairs
+    b55b1eb  record: lane K's gates and commits; the queue names the
+             captures already on disk
+    76ae696  merge master 53908ea into lane K: the CI fast lane and live
+             session 7's record
+    then     the cold review's 55 rows and session 7's three, the probe
+             budget's false positive declared, this section

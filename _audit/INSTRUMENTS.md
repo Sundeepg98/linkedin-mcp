@@ -11551,7 +11551,7 @@ resolved here.
 ### 82.3 THE CHEAPEST LOAD IS THE ONE ALREADY TAKEN
 
 The census still queued five messaging rows on captures C5 and C9 after
-session 3 had committed both open states as tracked fixtures, and 51 more GAP
+session 3 had committed both open states as tracked fixtures, and 40 more GAP
 rows build on captures already on this box -- tracked skeletons, or raw
 captures a builder can skeletonise -- while nothing joined the inventory to the
 rows. A capture queue written without the inventory spends live loads on
