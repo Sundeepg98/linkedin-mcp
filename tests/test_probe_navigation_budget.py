@@ -96,6 +96,11 @@ GUARD_CALLS = frozenset({"assert_read_url", "is_read_url"})
 SECOND_DOOR_GUARDS = frozenset({
     ("writes.py", "_load_named_profile", "assert_named_profile_url"),
     ("named_profile.py", "load_the_confirmed_profile", "assert_named_profile_url"),
+    # 2026-10-10, lane NP (ruling NAMED-PROFILE-DETAIL-PAGES): the THIRD
+    # check, at its one place -- one detail page of the profile he names,
+    # checked against the segment he named. ``tests/test_named_profile_detail_pages.py``
+    # pins that this is the only function asking the browser for it.
+    ("named_details.py", "load_the_confirmed_details", "assert_named_profile_details_url"),
 })
 
 #: RAW SITES THAT EXIST TODAY WITH NO GUARD, recorded with the commit that owns

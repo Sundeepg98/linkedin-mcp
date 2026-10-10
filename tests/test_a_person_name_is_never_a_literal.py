@@ -130,6 +130,14 @@ INVENTED_NAMES = frozenset(
         # is the spelling scripts/blast_radius.py and the search-admission
         # guard already use, carrying the identity guard's sanctioned token.
         "someone-else",
+        # tests/test_named_profile_detail_pages.py's OTHER (lane NP,
+        # 2026-10-10): ANOTHER member's profile segment, used only to prove the
+        # third check REFUSES a detail page of anybody but the member named.
+        # The synthetic slug family the session-2 and session-7 fixture
+        # builders hand out to everyone who is not the owner
+        # (``someone-example-<n>``), carrying the identity guard's sanctioned
+        # tokens "someone" and "example"; no person is named this.
+        "someone-example-1",
         # tests/test_feed_tally.py's NEEDLE, declared by the wave that wrote
         # it. NOT A PERSON AND NOT A SLUG SHAPE: it carries no digit run, no
         # capitalised run and no name, and it is deliberately unlike anything
