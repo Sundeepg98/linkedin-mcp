@@ -20,15 +20,20 @@ master `3c8edc2`. Every number below was measured in this lane's worktree on
   the bytes it compared, not a path to read again. Shown on the node, red on
   the parent commit and green after (section 3).
 * The upload verb is performable for one surface, the reply form of a
-  conversation he names, aimed at markup from a real capture (section 4).
-* No row moves state. Each row that stays GAP has a capture spec in
+  conversation he names, its inputs aimed on two real captures of the
+  message composer's footer (section 4).
+* THREE ROWS MOVE, on the orchestrator's order of 14:23: `M M14`, `M M15`
+  and `M M18` GAP -> COVERED-UNFIRED, each aimed at its own input on the
+  live lane's session-8 capture (section 5). Each row that stays GAP has
+  a capture spec in
   `_audit/_census/capture-queue-uploads.tsv` (sections 5 and 6).
 * The live-proof spec is section 7. This lane took no live loads.
 
 **LANE U'S OWN COMMITS, cited below by short SHA:** `d295e6e`, `3e6b7b7`,
-`e4c6cca`, `18dd736`, `4710609`, `f4d3eeb`, `7f9caa6`, `1096eef`, `45466b8`.
-They are on lane U's branch and do not resolve on `master` until the
-orchestrator merges it. Each one's subject, which survives a rebase, is in
+`e4c6cca`, `18dd736`, `4710609`, `f4d3eeb`, `7f9caa6` -- these do not resolve
+on `master` until the orchestrator merges this branch -- and `1096eef`,
+`45466b8`, `502d868`, `c28a699`, `01e4ea2`, `2b7f9b3`, which do not resolve
+there either until then. Each one's subject, which survives a rebase, is in
 the table below.
 
 | short SHA | subject |
@@ -42,6 +47,10 @@ the table below.
 | `7f9caa6` | record + INSTRUMENTS 84: the mutations, the merge, and the hand-off's two lessons registered |
 | `1096eef` | lane U, lane CI's first run answered: the surface pin, the envelope baseline, and three citations of unmerged commits |
 | `45466b8` | merge master fe119de into lane U: lane K's ledger, the CI lane's local-master fix and one-process sweep |
+| `502d868` | record: lane U's second lane CI run green, the reconciliation with lane K, and four questions |
+| `c28a699` | merge master f8c7392 into lane U: lane NP's named-profile detail pages and the CI lane's follow-ups |
+| `01e4ea2` | tests: the session-8 composer capture as a tracked copy, and each upload row aimed at its own input on it |
+| `2b7f9b3` | census: M M14, M M15 and M M18 GAP -> COVERED-UNFIRED on linkedin_send_attachment; pins re-derived |
 
 ---
 
@@ -130,7 +139,7 @@ and `/preload/sharebox/` are admitted.
 | M C6, M C7 | C5 and C3 first: a title and alt text need an attached file | as C5 and C3 | -- |
 | M C27 | the comment box's picker, never captured | PICKER-SURFACES | 2 of 2 held |
 | M C45 | the article composer (C44) | ARTICLE-SURFACE | **5 of 6 -- one W slot open** |
-| M M14, M15, M18 | the reply form's two file inputs ARE captured; the composer holding an attachment and the sent attachment message are not | THREAD-REPLY-BOX | 2 of 2 held |
+| M M14, M15, M18 | LEFT GAP later the same day (section 5). As first written here: the reply form's two file inputs ARE captured -- CORRECTED: the capture is the new-message composer's footer, not a conversation's | THREAD-REPLY-BOX | 2 of 2 held |
 
 **WHAT WAS DONE.** `M C45` is RE-FILED to ARTICLE-SURFACE in
 `_audit/_census/blocker-assignments.tsv`, with a `RE_FILED` entry in
@@ -225,13 +234,23 @@ tool is one contiguous lane U block in `server.py`. Tests in
 
 **WHY THIS SURFACE AND NO OTHER.** It is the only one of the three the
 operator opened -- profile photo, post media, message attachments -- whose
-file input is in a real capture. The live lane's session 3 drew a
-conversation's reply form (`tests/fixtures/live3/presence.html`, and the
+file input is in a real capture. The live lane's session 3 drew the
+message composer's footer (`tests/fixtures/live3/presence.html`, and the
 same footer in `compose_c5-open.html`): two `input[type=file]`, each in its
 own `div.msg-form__upload-attachment` beside ONE button, one labelled
 "Attach an image for your draft conversation", the other "Attach a file for
 your draft conversation". The post composer draws no file input at all, and
 no profile-photo surface has been captured.
+
+**CORRECTED 2026-10-10, AFTER THE SESSION-8 CAPTURE ARRIVED.** This
+paragraph first said session 3 drew a CONVERSATION's reply form. Measured
+with the verb's own selectors, it draws the NEW-MESSAGE composer: a "New
+message" heading, one recipient box, no message list, no conversation
+title. So does session 8's `lk_thread` load, which the order of 14:23
+called a thread (section 5). An opened conversation's reply form has been
+READ live, never captured: the live lane's sessions 5 and 6 previewed a
+reply and read one form, no recipient box, and two file inputs declaring
+`images` and `images_and_documents`, as counts and closed tokens.
 
 **THE AIM.** By the label of the button the input shares its wrapper with --
 never by position, never by an id -- and cross-checked by the input's own
@@ -305,15 +324,55 @@ The instruments are registered in `_audit/INSTRUMENTS.md` section 84.
 
 | row | state | why, measured |
 |---|---|---|
-| M M14 photo | GAP | the input is aimed at a real capture and the act is built; the composer holding an attachment and the sent attachment message are not captured, and lane L5's cell names both as its bar. Capture U-REPLY-ATTACHMENT-SENT and -PENDING |
-| M M15 video | GAP | as M M14; a video goes to the file input, whose 2026-09-05 declaration lists `.mov` and `.mp4` |
-| M M18 files | GAP | as M M14. The cell's "max 5, 20 MB total" stays unsourced: `multiple` is absent on both inputs, and this server's 25 MB cap is its own |
+| M M14 photo | **COVERED-UNFIRED** (was GAP) | a PNG's bytes read as an image go to the input declaring `images`, `image/*` alone, on the session-8 copy; held until he names the conversation and the file |
+| M M15 video | **COVERED-UNFIRED** (was GAP) | an MP4's bytes read as a video go to the input declaring `images_and_documents`, which lists `.mov` and `.mp4` |
+| M M18 files | **COVERED-UNFIRED** (was GAP) | a PDF goes to the same input. One file per call: `multiple` is drawn on neither input in either capture; the cell's "max 5, 20 MB total" stays unsourced, and this server's 25 MB cap is its own |
 | M C3, C4, C5 | GAP | `/preload/sharebox/` draws no file input (live 2026-09-04, offline 2026-09-20); the media control builds one behind a press nobody has captured, and `press._COMPOSER_MARKERS` refuses composer presses for a read. Capture U-POST-MEDIA |
 | M C6, M C7 | GAP | C5 and C3 first |
 | M C27 | GAP | the comment box's picker, never captured; the same press question. Capture U-COMMENT-MEDIA |
 | M C45 | GAP | the article composer (C44) first; re-filed to ARTICLE-SURFACE. Capture U-ARTICLE-MEDIA |
 | J 70 | GAP | `/jobs/application-settings/` is refused by the `/jobs/application` substring, whose recorded ground is the apply act. Capture U-RESUME-MANAGER |
 | J 146-149 | GAP | see below. Capture U-RESUME-TAILOR |
+
+**THE THREE MOVES, AND THE BAR THEY MOVED ON.** The order of 14:23 named a
+new capture -- the live lane's session 8, `lk_thread` -- and asked for a
+tracked skeleton, each row aimed at its own input, and each moved to
+COVERED-UNFIRED by its own bar. Done, with one premise of the order
+corrected by measurement: the capture is the new-message composer, not an
+opened conversation.
+
+| measured on the session-8 skeleton, by the verb's own selectors | count |
+|---|---|
+| `main form.msg-form`; editors; Send (drawn disabled) | 1; 1; 1 |
+| upload wrappers in the form; `input[type=file]`; with `multiple` | 2; 2; 0 |
+| the input beside each label | 1 and 1 |
+| `accept` shapes (letters, digits, length) beside the image and the file label | L5 D0 n7; L52 D1 n85 |
+| recipient boxes; message events; conversation title; active row | 1; 0; 0; 0 |
+| "New message" headings in `main` | 1 |
+
+The two `accept` shapes are exactly those of the declarations recorded
+live on 2026-09-05, `image/*` and the documents list. The tracked copy,
+`tests/fixtures/live8/messaging_composer.html`, is written by
+`scripts/_build_live8_composer_fixture.py` with the shipped
+`tracked_copy`: every keyed shape becomes one `x`; the two declarations
+are put back only where the shape matches, and any other shape refuses the
+build. The keyed hash was not used.
+
+THE BAR. Lane L5's cell for these rows asked for "the conversation's own
+file inputs ... and how an attachment message draws" before the verb was
+built; the verb was built on the brief's order and the operator's
+decision. The state a built, unfired tool earns is the one lane L5 gave
+`M M10`, the reply these rows ride on: COVERED-UNFIRED, every part not
+measured DERIVED and refusing rather than guessing. Measured: the inputs
+and their labels on the composer, twice, and an opened conversation's
+inputs as counts and closed tokens. Derived, each refusing: that a
+conversation labels its buttons as the composer does (the aim refuses at
+the preview, before anything is handed over); that the form draws the
+file's name (Send is not pressed); that a sent attachment draws its name
+(the verification reads `unknown`). The same capture served behind the
+conversation's address is refused before a token, because a recipient
+box is drawn. COVERED-PROVEN is section 7's live proof, whose first
+reading -- the preview, no upload -- settles the derived labels.
 
 **J 146-J 149: DOES LINKEDIN STILL OFFER IT? YES, AS FAR AS ANY COMMITTED
 READING GOES.** The entry point is drawn on a posting in the committed job
@@ -351,6 +410,13 @@ leaves GAP is on at least one.
 Each press line intercepts the page's file chooser BEFORE the press (a
 Playwright `filechooser` listener, never answered), so no native dialog can
 open on his screen and no file can be chosen.
+
+**SINCE THE THREE MOVES (section 5):** the two U-REPLY-ATTACHMENT lines no
+longer stand between a row and COVERED-UNFIRED. They are the captures the
+live proof takes on the way to COVERED-PROVEN -- the conversation's own
+footer, its form holding the file, and the sent message -- and they replace
+the three derived readings with markup. The other five lines still hold
+GAP rows.
 
 ---
 
@@ -451,6 +517,9 @@ lane CI (below).
 | `45466b8` merge of master `fe119de` | the reconciliation of section 1.1; the three derived views regenerated with their own writers, then `--check`; seven census instruments | RULINGS 74 rulings, every anchor resolving, every declaration accounted for; INDEX 263 documents; blocker map 409 lines, every column. Exit 0 and GREEN: `census_completion` ("every headline figure matches its pin"), `check_next_step` (585 GAP rows, each once), `check_write_classes` (387 lines), `check_read_addresses` (98 of 98), `check_jobs_directions` (108 of 108), `ruling_holds`, `check_exclusion_basis` (40 of 40) |
 | `45466b8`, targeted, seven serial groups under a 115 s cap each | the surface and count pins with the envelope guard; the reader-leak guard (both sides' baseline lines); the register, asserted names, corrections, register numbering and lane K's next-step test; the writes fan-out (writes_nine, preview and click state, reaching each control); and three groups that ran past the cap: the upload files with master's unfollow and badge tests, the writes and receipt group, the committed-identity sweep | 139 passed; 683 passed; 64 passed; 212 passed. The three capped groups stopped with no failure (80 passed 3 skipped; about 100 passed; about 1000 passed) and are NOT counted as run. The pushed commits' blobs were swept for identity by the pre-push hook: 0 hits across 1104 blobs, 226 needles |
 | LANE CI, run 38038976360 on `45466b8` | the suite on four shards, every test file | SUCCESS, wall 6m16s. Shard 0: 4314 passed, 1 skipped; shard 1: 3166 passed, 2 skipped, 1 xfailed; shard 2: 2076 passed, 1 skipped; shard 3: 3214 passed, 4 skipped. 12770 passed, nothing failed: the cited-SHA family green with master's local-master step and this record's disclosure |
+| `c28a699` merge of master `f8c7392` | three conflicts resolved with both sides kept (the register's last entries, the surface pin at 62 / 100, INSTRUMENTS 87.7 and 88 before 84); the derived views regenerated and `--check`; seven census instruments; the surface pins and the register | RULINGS 75, INDEX 265, blocker map 409 lines; the seven instruments exit 0, `check_next_step` 585; 139 passed; 27 passed |
+| `01e4ea2` the session-8 copy | `tests/test_send_attachment.py`; four mutations (section 5's moves rest on them); the committed-identity sweep; the two people guards over fixtures | 25 passed; four kills -- a photo to the documents input (1 failed), the copy's declarations swapped (3), the recipient-box refusal removed (1), a keyed shape left in the copy (1) -- every restore verified by sha256; identity 1080 passed; people guards 93 passed |
+| `2b7f9b3` the three moves | the seven census instruments; every test that reads the census files the move edits, in serial groups | instruments exit 0 (`census_completion` "every headline figure matches its pin", `check_next_step` 582, `check_write_classes` 384 lines); 87, 100, 140 and 135 passed. Two groups ran past the cap and were re-run in pieces: write classes, next step and covered rows 61 passed; the blocker map 19; corrections 15; asserted names 12; pointer graph 4; and ONE RED, the messaging triage headline (`tests/test_triage_instrument.py`), which pins the slice's GAP split and was not moved with the census: re-pinned in the next commit at 127 (writes 110 - 3), measured with `scripts/triage_messaging_gap_rows.py` |
 
 **THE TWO REDS I LEFT AND THEN CLOSED, said plainly.** `d295e6e` was red on
 the correction guard and `e4c6cca` on the receipt-message pin, each because
@@ -523,19 +592,34 @@ on its `ci/` run. And the ratchet's own message advises *"say in the document
 that the SHA resolves only on a branch"*, which `_DISCLOSURE` does not read:
 measured, `disclosed_tokens` returns nothing for that wording and returns the
 token for "does not resolve on `master`". The message or the vocabulary
-should move, the owner's call.
+should move, the owner's call. A third thing, measured on this record: a
+disclosure covers a token only within two lines of its phrase, so a list of
+SHAs that grows past that window stops covering its FIRST entries, silently
+-- two of this lane's did, when the list gained a line, and the guard's own
+`disclosed_tokens` caught it before the commit.
 
-**Q9. LANE NP IS ON LOCAL MASTER AND NOT ON ORIGIN.** Local master reads
-`0b41978` (lane NP's merge); `origin/master` reads `fe119de`, which this
-branch merged as ordered. NP was not taken: a `ci/` push of it would publish
-master commits nobody has pushed. When the two meet, the tool-surface pin
-collides by text -- NP moved `PINNED_PARAMETER_COUNT` 96 to 97, this lane 96
-to 99 -- and the merged value is 100, at 62 tools. Both lanes changed
-`writes.py`.
+**Q9, ANSWERED AT THE MERGE OF MASTER `f8c7392`.** Lane NP reached
+`origin/master` and this branch merged it on the order of 14:23. The pin
+collided by text as predicted -- NP moved `PINNED_PARAMETER_COUNT` 96 to 97,
+this lane 96 to 99 -- and was resolved to 100 at 62 tools, both comments
+kept. `writes.py` merged clean; the two lanes' additions sit in different
+action branches of `perform`.
 
-**Q10. LANE K'S LEDGER NAMES THIS LANE FOR ITS 15 ROWS.** `next-step.tsv`
-carries `SIBLING:lane-U` on all fifteen, which stays true:
-`check_next_step` is GREEN on the merged tree. Folding this lane's seven
-capture lines into the ledger's ranked queue and replacing the fifteen
-SIBLING steps is an edit to lane K's judged tables; left for the
-orchestrator to assign.
+**Q10. LANE K'S LEDGER NAMES THIS LANE FOR ITS REMAINING 12 ROWS.**
+`next-step.tsv` carried `SIBLING:lane-U` on all fifteen; the three that left
+GAP left the ledger with them (its population is the GAP rows), and
+`check_next_step` is GREEN at 582. Folding this lane's capture lines into the
+ledger's ranked queue and replacing the twelve SIBLING steps is an edit to
+lane K's judged tables; left for the orchestrator to assign.
+
+**Q11. THE ORDER OF 14:23 CALLED THE SESSION-8 CAPTURE A THREAD; IT IS THE
+COMPOSER.** Ground, measured by the verb's selectors on the skeleton: one
+recipient box, no message event, no conversation title, no active row, and a
+"New message" heading -- the same reading as session 3's capture, which this
+lane's own text had also called a conversation's reply form (corrected in
+sections 2 and 4 and in the M M14 assignment note). The rows moved anyway,
+on `M M10`'s bar (section 5), because an opened conversation's inputs were
+read live in sessions 5 and 6. What stays derived is the LABELS in an opened
+conversation: if they differ from the composer's, the aim refuses at the
+preview and nothing is handed over. The live proof's preview is that
+measurement, at zero uploads; its record should say which way it went.

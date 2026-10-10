@@ -11808,3 +11808,36 @@ line break and a raw byte; the scan is how that was confirmed gone). Each
 answered one question once. `scripts/make_benign_upload_image.py` is NOT
 disposable: the live proof runs it, and its bytes are pinned by section 7 of
 the record (122 bytes, sha256 prefix `5d03126f1fd64701`).
+
+### 84.6 A CAPTURE IS NAMED FOR WHAT IT DRAWS, NOT FOR THE LOAD THAT MADE IT (the 14:23 order)
+
+The live lane's session-8 load was keyed `lk_thread`, and the order that
+handed it over called it a message thread's footer. Read with the verb's own
+selectors it draws the NEW-MESSAGE composer: one recipient box, no message
+event, no conversation title, no active row, a "New message" heading. The
+session-3 capture this lane built its aim on reads the same way, and this
+lane's own text had called it a conversation's reply form. Neither name was
+checked against the page until a second capture made the comparison cheap.
+
+    A CAPTURE'S NAME IS THE LOAD'S INTENT. WHAT IT DREW IS READ OFF IT,
+    WITH THE SELECTORS THAT WILL AIM AT IT, BEFORE ANY ROW RESTS ON IT.
+
+### 84.7 A TRACKED COPY PUTS BACK ONLY WHAT ITS SHAPE PROVES
+
+The session skeleton keeps each attribute value as a keyed shape -- letters,
+digits, length and a hash whose key stays with the live lane -- and the
+shipped `tracked_copy` turns every one into `x`. An `x` satisfies no
+`accept` declaration, so the aim's cross-check could not run on the copy.
+The builder puts back the two declarations recorded live on 2026-09-05 ONLY
+where the skeleton's shape of each matches exactly (`image/*` is L5 D0 n7;
+the documents list L52 D1 n85), and refuses the build on any other shape.
+The key is never used: the shape is the evidence, and it is printed.
+
+| path | shown failing by |
+|---|---|
+| `scripts/_build_live8_composer_fixture.py` -- the shape-gated substitution, then the shipped `tracked_copy` | its refusals: a shape matching neither declaration, a count other than one of each, a keyed shape surviving the copy |
+| `tests/test_send_attachment.py` -- the six session-8 tests: the copy holds shapes only; the composer's counts; each row aimed at its own input; the composer refused behind a conversation's address | four mutations, each alone and restored by sha256: a photo to the documents input (1 failed); the copy's declarations swapped (3 failed); the recipient-box refusal removed from the reply state (1 failed); a keyed shape left in the copy (1 failed) |
+
+DECLARED DISPOSABLE: the two probes that counted the skeletons with the
+verb's selectors, and the mutation runner. Each answered one question once;
+the answers are in the lane record, section 5.
