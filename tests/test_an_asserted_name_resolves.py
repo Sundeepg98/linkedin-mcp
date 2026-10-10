@@ -65,20 +65,13 @@ sys.path.insert(0, str(REPO / "scripts"))
 import check_asserted_names_resolve as guard  # noqa: E402
 
 
-#: (kind, name, document, occurrences). ONE SITE since lane K's registration
-#: of the rulings on its ledger's questions, 2026-10-10: every site in the
-#: history below the set was repaired in its record and removed by the
-#: ratchet's own instruction (`_audit/2026-10-10-lane-g2-debts.md`, item 1);
-#: the one inside it arrived after, and only its owner can repair it.
-PINNED: set[tuple[str, str, str, int]] = {
-    # SURFACED 2026-10-10 BY LANE K's registration of the rulings on its
-    # ledger's questions, the same shape: "answered by the orchestrator under"
-    # ending a line, the registered RULING id `OUTWARD-ACTS-NEED-THE-OPERATOR`
-    # opening the next. Pinned, not repaired: the document is the
-    # orchestrator's, copied byte-identical.
-    ("BLOCKER", "OUTWARD-ACTS-NEED-THE-OPERATOR",
-     "_audit/2026-10-10-rulings-ledger-questions.md", 1),
-}
+#: (kind, name, document, occurrences). EMPTY since 2026-10-10: every site in
+#: the history below was repaired in its record and removed by the ratchet's
+#: own instruction (`_audit/2026-10-10-lane-g2-debts.md`, item 1). The last one,
+#: "answered by the orchestrator under" ending a line before the ruling id in
+#: `_audit/2026-10-10-rulings-ledger-questions.md`, was repaired by that
+#: document's author, the orchestrator, who reworded it to "under the ruling".
+PINNED: set[tuple[str, str, str, int]] = set()
 
 #: REPAIRED 2026-10-10, LATER THE SAME DAY, ON ITS AUTHOR'S AUTHORISATION:
 #:
