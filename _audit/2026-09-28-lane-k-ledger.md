@@ -737,6 +737,15 @@ the full suite on CI.
                                                                 code); shard 3, 1 failed --
                                                                 ours, below; 2975 and 3056
                                                                 passed on those two shards
+    4d66e1c   the ledger test, the probe budget, the corpus     1188 passed
+              guards, the derived views, the committed-blob
+              identity test
+              the cited-SHA test, locally, with full history    44 passed
+              CI run 38036495914 (ci/ ref, 6 jobs, 5m51s)       failure: shard 1 only, 14 failed,
+                                                                all in test_a_cited_sha_resolves
+                                                                (the ci/-checkout family; 44 of
+                                                                44 pass locally); the other
+                                                                five jobs green
 
 CI FOUND ONE RED THE LOCAL GATES MISSED: `tests/test_probe_interaction_budget.py`
 read `cns.check(table, queue)` in `scripts/_check_next_step_can_fail.py` as
@@ -768,5 +777,6 @@ CI ran the rest. Nothing here touched a live page.
              captures already on disk
     76ae696  merge master 53908ea into lane K: the CI fast lane and live
              session 7's record
-    then     the cold review's 55 rows and session 7's three, the probe
-             budget's false positive declared, this section
+    4d66e1c  census: the next-step ledger after a cold review and live
+             session 7
+    then     this section's last gates
