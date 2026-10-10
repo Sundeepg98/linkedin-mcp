@@ -9,8 +9,8 @@
 **THIS REGISTER IS NOT THE CORPUS AND DOES NOT CLAIM TO BE COMPLETE.** Read section 4 before concluding a question is unruled: the scan that keeps it honest reads ONE marker, and the ruling that caused this file to be written does not carry it.
 
     rulings registered       69
-    documents scanned        258
-    RULED: declarations      55 claimed, 7 triaged, 0 unclaimed
+    documents scanned        261
+    RULED: declarations      56 claimed, 7 triaged, 0 unclaimed
 
 ---
 
@@ -356,7 +356,7 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 | signal NOT scanned | files | lines |
 |---|---|---|
-| a heading naming a ruling | 124 | 273 |
+| a heading naming a ruling | 126 | 276 |
 | a bold line opening on RULING/RULED | 63 | 144 |
 | the phrase THE RULING | 38 | 63 |
 | a named -RULING id | 36 | 94 |
@@ -428,6 +428,7 @@ Every `RULED:` line in the corpus, and what became of it. An UNCLAIMED row fails
 | [2026-09-27-rulings-relation-removals-and-account-destruction.md](2026-09-27-rulings-relation-removals-and-account-destruction.md) | RULED: (orchestrator, 2026-09-27, applying the operator's 08:11 principle) REMOVING A RELA | `RELATION-REMOVALS-BUILT-BEHIND-GRANTS` |
 | [2026-09-27-rulings-relation-removals-and-account-destruction.md](2026-09-27-rulings-relation-removals-and-account-destruction.md) | RULED: (orchestrator, 2026-09-27, applying the operator's 08:11 principle) ACCOUNT-LEVEL | `ACCOUNT-DESTRUCTION-STAYS-MANUAL` |
 | [2026-09-28-rulings-named-profile-read.md](2026-09-28-rulings-named-profile-read.md) | RULED: (operator, 2026-09-28 08:01, verbatim) "Yes, I'm giving you permission." | `NAMED-PROFILE-READ-BEHIND-A-GRANT` |
+| [2026-10-10-rulings-named-profile-detail-pages.md](2026-10-10-rulings-named-profile-detail-pages.md) | RULED: (orchestrator, 2026-10-10, applying the operator's 08:01 YES to reading profiles he | `NAMED-PROFILE-DETAIL-PAGES` |
 
 ### 5.1 Triaged -- a declaration hit that is not a ruling made here
 

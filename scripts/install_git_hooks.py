@@ -258,7 +258,9 @@ def install_pre_push() -> int:
     if written != "current":
         print("  REFUSED-AFTER-THE-FACT: the file on disk is not what was written.")
         return 4
-    print("  It refuses any REMOTE ref but refs/heads/master, deletes included.")
+    print("  It refuses any REMOTE ref but refs/heads/master, deletes included,")
+    print("  except a lone refs/heads/ci/<name> that descends from origin/master")
+    print("  and whose new commits sweep clean (scripts/lane_ci.py push).")
     print("  Override for one command: LINKEDIN_MCP_ALLOW_ANY_REF=1 git push ...")
     return 0
 
