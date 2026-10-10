@@ -214,7 +214,7 @@ stronger guarantee and the only one this run has.
 `linkedin_react_to_item`, which were *"UNAIMABLE: no other tool here returns an
 item key"*. It now demonstrably returns them, for his own posts. Row `M C42`
 (EXCLUDED-RULED) still reads *"no tool in this server returns one"*; that
-premise is now false for his own items. Both writes stay unfired under
+premise is now false for his own items. Both writes stay unfired under the ruling
 `NO-IRREVERSIBLE-WRITE-IS-FIRED`; the stale premise is for the owner of `C42`.
 
 ### FIRE 2 -- `J 121` and `J 122`. Direction R. **VOID: THE STOP RULE FIRED.**

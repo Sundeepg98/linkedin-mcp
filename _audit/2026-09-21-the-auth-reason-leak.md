@@ -612,7 +612,7 @@ measurement is the thing this repository keeps calling out.
 
 * **`_warm_session_cookies:148` and `_maybe_corroborate:480` (LOG).** Both
   render a `BROWSER.goto` exception. The predecessor measured navigation
-  errors quoting the address ASKED FOR (class `OURS`, publishable under
+  errors quoting the address ASKED FOR (class `OURS`, publishable under the ruling
   `ERROR-URL-ASKED-FOR-OR-NOTHING`) -- on the net-error and timeout branches,
   with the landing proven visited. **Relayed, not re-driven here.** Cheap to
   settle with the probe already on disk.
