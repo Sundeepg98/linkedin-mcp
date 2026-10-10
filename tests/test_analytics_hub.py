@@ -146,6 +146,16 @@ def test_a_card_is_judged_by_the_shape_of_its_texts_not_their_order():
     assert card == EXPECTED_METRICS["post_impressions"]
 
 
+@pytest.mark.parametrize(
+    "drawn, value",
+    [("41", 41), ("1234", 1234), ("1,234", 1234), ("12,345,678", 12345678),
+     ("1.2K", None), ("12,34", None), ("forty-one", None), ("1234567890", None)],
+)
+def test_a_value_is_ascii_digits_plain_or_grouped_and_nothing_else(drawn, value):
+    texts = [drawn, "Post impressions in 7 days", "12%", "vs. prior 7 days"]
+    assert analytics_hub.read_card("post_impressions", texts, ["caret-small"])["value"] == value
+
+
 def test_two_values_in_one_card_are_ambiguous_and_read_none():
     texts = ["41", "42", "Post impressions in 7 days", "12%", "vs. prior 7 days"]
     assert analytics_hub.read_card("post_impressions", texts, ["caret-small"])["value"] is None
