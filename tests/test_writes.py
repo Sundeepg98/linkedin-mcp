@@ -745,6 +745,10 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         # address save and follow already act on and an anchor measured on
         # three tracked captures.
         "mark_company_interest",
+        # LANE B4, 2026-10-10: the similar-jobs alert and its inverse (census
+        # J 161), sanctioned and performable in the same move.
+        "set_similar_jobs_alert",
+        "unset_similar_jobs_alert",
         # SIXTEEN FROM LANE L5'S MERGE OF MASTER 66aaa95, the same day (fifteen
         # on the lane's branch): the reply inside a conversation he names
         # (census M M10), sanctioned and performable in the same move.
@@ -880,6 +884,10 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         # live fire waits on that capture. NOTHING WAS PERMITTED TO LET IT
         # CROSS: the click is perform()'s existing one.
         "mark_company_interest",
+        # LANE B4, 2026-10-10: the similar-jobs alert and its inverse (census
+        # J 161), sanctioned and performable in the same move.
+        "set_similar_jobs_alert",
+        "unset_similar_jobs_alert",
         # THE FIFTEENTH, 2026-09-24 (the fourteenth on lane L5's branch), and
         # the first write that CONFIRMS ITSELF
         # FROM THE SURFACE A PERSON READS: a reply inside a conversation he
@@ -1416,6 +1424,11 @@ _UNMEASURED_REVERSIBILITY = {
     # ON-state control no capture holds, so nothing about undoing it has been
     # observed on this surface.
     "mark_company_interest",
+    # 2026-10-10 (lane B4). The alert pair: each is the other's inverse and
+    # both are BUILT, but the On shape has never been captured, so whether the
+    # switch returns to the state it left is unmeasured.
+    "set_similar_jobs_alert",
+    "unset_similar_jobs_alert",
     # 2026-09-24. Whether LinkedIn lets a sent reply be recalled has never
     # been observed. This comment used to add "and recalling one is
     # destruction this server may not perform at any confirm level either
@@ -1481,6 +1494,9 @@ REVERSIBILITY_CLASS = {
     # 2026-09-24. STILL-UNKNOWN: LinkedIn's Help describes removing an
     # interest, but the control that would do it has never been captured.
     "mark_company_interest": "STILL-UNKNOWN",
+    # 2026-10-10 (lane B4). STILL-UNKNOWN, both: see _UNMEASURED_REVERSIBILITY.
+    "set_similar_jobs_alert": "STILL-UNKNOWN",
+    "unset_similar_jobs_alert": "STILL-UNKNOWN",
     # 2026-09-27. STILL-UNKNOWN whether a group left can be rejoined; it
     # carries irreversible=True regardless, because no join is built here and
     # an approval-gated group needs a manager to let him back in.
@@ -1516,6 +1532,8 @@ REVERSIBILITY_MEASURED = {
     "send_invitation": False,
     "follow_company_page": True,
     "mark_company_interest": False,
+    "set_similar_jobs_alert": False,
+    "unset_similar_jobs_alert": False,
     "send_reply": False,
     "send_attachment": False,
     "withdraw_from_group": False,

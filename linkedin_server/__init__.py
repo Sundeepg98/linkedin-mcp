@@ -57,11 +57,14 @@ chosen by hand and did not include it. The instrument worked; the selection
 of instruments did not. The count is twelve now: the same lane added three
 for the copy link of the operator's own post.
 
-WHAT IS TRUE, measured rather than remembered: twenty write tools ship,
-fifteen sanctioned mutating calls exist, writes are off unless a per-process
+WHAT IS TRUE, measured rather than remembered: twenty-two write tools ship,
+sixteen sanctioned mutating calls exist (twenty and fifteen until lane B4's
+merge after lane B3's, 2026-10-10: the alert pair, and its one trial click
+declared a read), writes are off unless a per-process
 flag is set, and every write needs a single-use token from its own preview --
 a token that works once, and a redeemed grant that ``perform`` will not act on
-twice. (This read "nineteen write tools" until lane NP's
+twice. (This read "twenty write tools" until lane B4's alert pair, merged after
+lane B3's, 2026-10-10; "nineteen write tools" until lane NP's
 ``linkedin_withdraw_reaction``, merged after lane S's, 2026-10-10 -- its press is
 ``perform``'s one click, so the mutating-call count did not move; "eighteen
 write tools" until lane S's settings writer,

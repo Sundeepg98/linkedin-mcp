@@ -1,4 +1,4 @@
-"""The tool surface: seventy tools, fifty of which do not write.
+"""The tool surface: seventy-two tools, fifty of which do not write.
 
 **IT READ "sixty-five tools, forty-five of which do not write" UNTIL LANE B2'S
 SEARCH VERTICALS (2026-10-10), merged after lane NP**: two READS, ``linkedin_search_groups`` (census
@@ -140,6 +140,8 @@ SANCTIONED_WRITE_TOOLS = frozenset(SANCTIONED_WRITES) & {
     # posting. A key in writes.SANCTIONED_WRITES like the rest, so the
     # intersection still exempts nothing the write boundary has not admitted.
     "linkedin_mark_company_interest",
+    "linkedin_set_similar_jobs_alert",
+    "linkedin_unset_similar_jobs_alert",
     # THE FIFTEENTH, 2026-09-24 (census rows M M10 and, by D6, M M17; the
     # fourteenth on lane L5's branch, before lane L7's merge landed): a
     # reply inside a conversation he names by thread id. Its NAME announces
@@ -449,6 +451,8 @@ EXPECTED_TOOLS = {
     # on and adds no entry to readonly.SANCTIONED_MUTATIONS -- the click is
     # perform()'s existing one.
     "linkedin_mark_company_interest",
+    "linkedin_set_similar_jobs_alert",
+    "linkedin_unset_similar_jobs_alert",
     "linkedin_publish_post",
     "linkedin_comment_on_item",
     # THE THIRTY-SIXTH, 2026-09-03. A READ that SHIPS REFUSING: the read
@@ -655,8 +659,12 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_seventy_tools(tools):
-    """RENAMED AGAIN AT THE INTEGRATION MERGE OF LANE B3 ONTO LANE B2 (2026-10-10),
+async def test_the_surface_is_exactly_the_seventy_two_tools(tools):
+    """RENAMED AGAIN AT THE INTEGRATION MERGE OF LANE B4 ONTO LANE B3 (2026-10-10), to
+    ``..._seventy_two_tools``: lane B4's two writes beside the seventy.
+    MEASURED off the merged registry, not summed; the name moved with the pin.
+
+    RENAMED AGAIN AT THE INTEGRATION MERGE OF LANE B3 ONTO LANE B2 (2026-10-10),
     to ``..._seventy_tools``: lane B3's three reads beside the sixty-seven.
     MEASURED off the merged registry, not summed; the name moved with the pin.
 
@@ -1057,7 +1065,13 @@ async def test_the_surface_is_exactly_the_seventy_tools(tools):
     # SEVENTY AT THE INTEGRATION MERGE OF LANE B3 ONTO LANE B2 (2026-10-10): lane B3's three
     # READS beside the sixty-seven, so the split moves on its read side and the
     # write set holds. MEASURED off mcp.list_tools() on the merged tree.
-    assert len(tools) == 70
+    # SIXTY-FIVE AT LANE B4'S MERGE OF MASTER a457819, 2026-10-10: lane S's
+    # one write and lane B4's two on master's sixty-two -- measured off the
+    # merged registry, not summed, and moved with every other count site.
+    # SEVENTY-TWO AT THE INTEGRATION MERGE OF LANE B4 ONTO LANE B3 (2026-10-10): lane B4's two
+    # WRITES beside the seventy, so the split moves on its write side and the
+    # non-write count holds at fifty. MEASURED off mcp.list_tools() on the merged tree.
+    assert len(tools) == 72
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -1085,6 +1099,8 @@ async def test_the_surface_is_exactly_the_seventy_tools(tools):
         # (linkedin_send_message RETIRED 2026-09-27, lane L5: aimed by a name.)
         "linkedin_follow_company_page",
         "linkedin_mark_company_interest",
+        "linkedin_set_similar_jobs_alert",
+        "linkedin_unset_similar_jobs_alert",
         "linkedin_send_reply",
         "linkedin_withdraw_from_group",
         "linkedin_connect_from_profile",
@@ -1355,6 +1371,8 @@ async def test_the_exemption_covers_only_the_names_on_it(tools):
         # (linkedin_send_message RETIRED 2026-09-27, lane L5: aimed by a name.)
         "linkedin_follow_company_page",
         "linkedin_mark_company_interest",
+        "linkedin_set_similar_jobs_alert",
+        "linkedin_unset_similar_jobs_alert",
         "linkedin_send_reply",
         "linkedin_withdraw_from_group",
         "linkedin_connect_from_profile",
@@ -1836,8 +1854,13 @@ async def test_server_info_stops_claiming_read_only_once_writes_are_on(monkeypat
         # hand like its seventeen siblings: ONE control on ONE admitted
         # settings page, by its exact label, behind the single-use grant.
         "set_admitted_setting",
+        # THE EIGHTEENTH AND NINETEENTH, 2026-10-10 (census J 161, lane B4),
+        # typed here by hand: the similar-jobs alert switch on one posting,
+        # set and unset, each the other's inverse.
+        "set_similar_jobs_alert",
         "unfollow_company",
         "unsave_job",
+        "unset_similar_jobs_alert",
         # SIXTH, 2026-08-31. The first write here that acts on neither a job
         # nor a company Page: one named account setting, on a page measured
         # six times, by clicking the radio named for the destination.
@@ -1919,8 +1942,13 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
         # THE EIGHTEENTH, 2026-10-10 (census P O17). Typed by hand, as this
         # list requires, by the lane that built it (lane S).
         "set_admitted_setting",
+        # THE EIGHTEENTH AND NINETEENTH, 2026-10-10 (census J 161, lane B4),
+        # typed here by hand: the similar-jobs alert switch on one posting,
+        # set and unset, each the other's inverse.
+        "set_similar_jobs_alert",
         "unfollow_company",
         "unsave_job",
+        "unset_similar_jobs_alert",
         # THE TWELFTH, 2026-09-02, on his ruling "I want all capabilities".
         # It is the FIRST write here that can verify its own outcome by
         # reading the field back -- publish_post declared its outcome
@@ -2308,6 +2336,9 @@ async def test_the_server_instructions_name_every_write_that_ships():
         # TWENTY AT THE INTEGRATION MERGE OF LANE NP ONTO LANES S AND B5 (2026-10-10): set_admitted_setting
         # and withdraw_reaction each made nineteen on its own tree.
         20: "twenty",
+        # TWENTY-ONE AND TWENTY-TWO AT THE INTEGRATION MERGE OF LANE B4 ONTO LANE B3 (2026-10-10):
+        # lane B4's alert pair beside the twenty.
+        21: "twenty-one", 22: "twenty-two",
     }
     assert f"{words[len(writes.PERFORMABLE)]} write" in text
     for action in writes.PERFORMABLE:

@@ -1722,7 +1722,11 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # readonly.py minus exactly the 35 lines of those entries and their
     # argument hashes to e79a701b37ae9c39 on this key and to the prior pin
     # on all thirteen; the other twelve digests are byte-identical.
-    "SANCTIONED_MUTATIONS": "e9d953efc8ab8d0e",
+    # RE-FROZEN 2026-10-10 (lane B4, census J 161): ONE digest moved,
+    # SANCTIONED_MUTATIONS e9d953efc8ab8d0e -> c51296e034af63eb, 15 -> 16 -- the trial click of
+    # job_alert_switch.trial_press, a READ declared on the list with its
+    # argument and budget beside it in readonly.py. No refusal moved.
+    "SANCTIONED_MUTATIONS": "c51296e034af63eb",
     # PINNED FROM 2026-09-24, lane G's merge of master: the replacement scan's
     # four tables (unchanged since lane G built them; pinned late, see PINNED)
     # and the scanner's sanctioned list, born with ONE entry -- the live

@@ -45,7 +45,7 @@ import time
 from typing import Any, Optional
 from urllib.parse import parse_qs, urlsplit
 
-from linkedin_server import landing, shape
+from linkedin_server import company_panel_text, landing, shape
 from linkedin_server.coerce import as_count
 from linkedin_server.config import logger
 from linkedin_server.errors import ExtractionFailedError, WriteAttemptError
@@ -9453,6 +9453,14 @@ JOB_ALERT_HEADING_SHAPE = JOB_ALERT_HEADING_PREFIX + "<title>"
 
 #: Caps. A panel that grew a hundred rows would otherwise become the result.
 JOB_PANEL_MAX_LINES = 24
+#: THE COMPANY PANEL'S OWN CAP, 2026-10-10 (lane B4, census row J 124). On
+#: live session 8's posting the panel runs from its focus areas through its
+#: hiring summary and its figures to its tenure line -- longer than the 24 the
+#: other panels are held to, and a shared cap would have cut the tenure. It is
+#: still a cap: ``company_insights.truncated`` says when it cut.
+JOB_COMPANY_PANEL_MAX_LINES = 40
+#: Characters per company-panel line, after sanitising (company_panel_text).
+JOB_COMPANY_LINE_CAP = company_panel_text.LINE_CAP
 JOB_PANEL_MAX_HEADINGS = 40
 
 
@@ -9871,7 +9879,21 @@ async def read_job_insight_panels(page: Any) -> dict[str, Any]:
             # text and there is nothing to find without it. It is used to
             # LOCATE and is never returned: what comes back on the result is
             # JOB_COMPANY_PANEL_SHAPE.
-            lines = lines_below(section) or lines_after_heading(
+            #
+            # POSITIONAL FIRST FOR THIS PANEL, since 2026-10-10 (lane B4,
+            # census row J 124), and the order is measured on both shapes the
+            # panel has been captured in. On the August captures the
+            # structural walk returned NOTHING and the positional read below
+            # returned the whole panel. On live session 8's posting
+            # (tests/fixtures/live8/posting.html) the walk returned FIVE lines
+            # -- the focus areas and the hiring summary -- and stopped before
+            # the figures, so "structural, else positional" shipped a panel
+            # with its headcount missing and no sign of it. The positional
+            # read is bounded by the panel's own end (the next heading, or
+            # "Show Premium Insights") on both, so it is taken first and the
+            # walk is the fallback for a page whose text does not carry the
+            # heading line.
+            positional = lines_after_heading(
                 body,
                 heading,
                 # THE COLLAPSED CONTROLS BOUND THIS PANEL. "Show Premium
@@ -9880,12 +9902,20 @@ async def read_job_insight_panels(page: Any) -> dict[str, Any]:
                 # one-line bleed the education rows had, and caught the same
                 # way: by looking at what came back rather than at the code.
                 stop_headings | set(JOB_COLLAPSED_CONTROL_NAMES),
-                JOB_PANEL_MAX_LINES,
+                JOB_COMPANY_PANEL_MAX_LINES + 1,
                 ignore=(JOB_COMPANY_ATTRIBUTION,),
             )
+            lines = positional or lines_below(section)
+            run_capped = len(positional) > JOB_COMPANY_PANEL_MAX_LINES
+            # THIRD-PARTY-TEXT-AT-RUNTIME: the panel's prose is LinkedIn's AI
+            # writing about an organisation, returned marked, sanitised and
+            # bounded -- see company_panel_text.
             company = {
                 "heading": JOB_COMPANY_PANEL_SHAPE,
-                "lines": company_panel_lines(lines, heading),
+                **company_panel_text.mitigated(
+                    company_panel_lines(lines[:JOB_COMPANY_PANEL_MAX_LINES], heading),
+                    run_capped=run_capped,
+                ),
             }
             break
 

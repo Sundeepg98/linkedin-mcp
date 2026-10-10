@@ -102,6 +102,7 @@ from linkedin_server.writes import (
 from tests.test_a_reaction_can_be_withdrawn import WITHDRAW_MARKUP
 from tests.test_apply_modal_fixture import VIEWPORT, over  # noqa: F401
 from tests.test_editor_fields import TWO_DIALOG_HTML
+from tests.test_similar_jobs_alert import ON_WORLD as ALERT_ON_WORLD  # noqa: E402
 from tests.test_follow_company_page import (
     COMPANY_PAGE_FOLLOW_ID,
     COMPANY_PAGE_FOLLOW_MARKUP,
@@ -252,6 +253,20 @@ REACHED: dict[str, tuple[str, str, str]] = {
     "mark_company_interest": (
         "tests/fixtures/job_detail_hydrated.html",
         markup("job_detail_hydrated"),
+        JOB,
+    ),
+    # 2026-10-10 (census row ``J 161``, lane B4). A TRACKED capture, live
+    # session 8's posting: the switch reads Off, and the preview and the
+    # click read it through ONE verdict, ``job_alert_switch.read_state``.
+    # The inverse is reached over the DERIVED On world its own tests read.
+    "set_similar_jobs_alert": (
+        "tests/fixtures/live8/posting.html",
+        markup("live8/posting"),
+        JOB,
+    ),
+    "unset_similar_jobs_alert": (
+        "tests/test_similar_jobs_alert.py",
+        ALERT_ON_WORLD,
         JOB,
     ),
     # THE FIFTEENTH, 2026-09-24 (census row ``M M10``; the fourteenth on
@@ -453,8 +468,38 @@ async def _live(over, action, *, spec=None, anchor=None):
     # A STAR, because one arm returns a fourth element naming its mutation
     # kind. Unpacking three positionally would break the day a second arm has
     # something to say.
+    if action in _WORLDS_THAT_REACH_OUT:
+        state, why, selector, *_rest = await _over_refusing_every_request(html, work)
+        return state, why, selector
     state, why, selector, *_rest = await over(html, work)
     return state, why, selector
+
+
+#: THE WORLDS THAT ARE LIVE SKELETONS, 2026-10-10 (lane B4). A tracked copy of a
+#: live capture keeps the page's stylesheet, image and frame addresses (reduced
+#: to ``https://x/...``), and a page given one by ``set_content`` starts nine
+#: requests the network guard refuses -- MEASURED: CI run 38057068066 failed
+#: both alert cases on exactly that report and on nothing else. Served here
+#: the way ``tests/test_similar_jobs_alert.py`` serves them: every request the
+#: page starts is aborted by the page's own route, before the guard has to.
+_WORLDS_THAT_REACH_OUT = frozenset({"set_similar_jobs_alert", "unset_similar_jobs_alert"})
+
+
+async def _over_refusing_every_request(html: str, work):
+    playwright = pytest.importorskip("playwright.async_api")
+    async with playwright.async_playwright() as pw:
+        browser = await pw.chromium.launch(headless=True)
+        try:
+            page = await browser.new_page(viewport=dict(VIEWPORT))
+
+            async def _refuse(route):
+                await route.abort()
+
+            await page.route("**/*", _refuse)
+            await page.set_content(html, wait_until="domcontentloaded", timeout=60_000)
+            return await work(page)
+        finally:
+            await browser.close()
 
 
 def _assert_the_two_ends_agree(spec, state: str, selector: str, why: str) -> None:
@@ -613,8 +658,12 @@ def test_every_performable_action_is_either_reached_or_declared_unreachable():
     # 17 -> 18. MEASURED on the merged tree.
     # 19 -> 20 AT THE INTEGRATION MERGE OF LANE NP ONTO LANES S AND B5 (2026-10-10): both
     # writes, each reached over its own tests' surface. MEASURED.
-    assert len(PERFORMABLE) == 20, sorted(PERFORMABLE)
-    assert len(REACHED) == 20, sorted(REACHED)
+    # 19 -> 21 at lane B4's merge of master a457819: the similar-jobs alert
+    # pair, reached over session 8's tracked posting. MEASURED on the merged tree.
+    # 20 -> 22 AT THE INTEGRATION MERGE OF LANE B4 ONTO LANE B3 (2026-10-10): the alert
+    # pair beside the reaction pair's inverse, each reached over its own tests' surface. MEASURED.
+    assert len(PERFORMABLE) == 22, sorted(PERFORMABLE)
+    assert len(REACHED) == 22, sorted(REACHED)
     assert len(CANNOT_REACH) == 0, sorted(CANNOT_REACH)
 
 

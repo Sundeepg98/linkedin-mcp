@@ -68,10 +68,12 @@ Resolved by judgement, one line each:
 | merge 2 (NP) | 65 | 45 | 20 | 107 | 773 | 218 | 140 | 25 |
 | merge 3 (B2) | 67 | 47 | 20 | 109 | 773 | 222 | 144 | 27 |
 | merge 4 (B3) | 70 | 50 | 20 | 111 | 773 | 225 | 147 | 30 |
+| merge 6 (B4) | 72 | 50 | 22 | 115 | 773 | 227 | 149 | 32 |
 
 Other pins re-derived the same way: `gap` 555 -> 551 -> 548, `gap_read`
 89 -> 85 -> 82, `b3_admitted` 38 -> 34 -> 31, `b1_no_ruling` 9 -> 11 -> 14,
-`achievable` 712, write classes 372 = 16 R1 + 34 R2 + 322 R3.
+`achievable` 712, write classes 372 = 16 R1 + 34 R2 + 322 R3. At merge 6:
+`gap` 546, `b1_no_ruling` 16, `delivered_strict` 117.
 
 **Same row edited on both sides:** none. Every census-table hunk (merge 1's
 `network.md`, merge 4's `messaging-and-content.md` and `next-step.tsv`) was
@@ -80,6 +82,36 @@ side had moved; a row moved by both would have stopped the script.
 
 **INSTRUMENTS.md:** lanes B2 (90), B3 (91) and B5 (93) appended sections; they
 stand in that order. Master's older 88-then-84 order is untouched.
+
+## Merge 6: lane B4
+
+Lane B4's certified head 0f7e6d0 (`J 161`, the similar-jobs alert pair, and
+`J 124`; ci/ run 38058465627; merge base a457819), merged onto 4c3c001 at the
+coordinator's order of 19:59 IST. The SHA was merged, not the branch; the
+branch stood at 0f7e6d0 itself, so nothing after it exists to exclude.
+
+Measured on the merged tree: 72 tools (50 read, 22 write), 115 parameters,
+PERFORMABLE and REACHED 22, 23 sanctioned actions against 22 write tools, 16
+sanctioned mutating calls (lane B4's one trial click), 773 stated rows. The
+census pins are in section 3's table, row "merge 6".
+
+Resolved by judgement, one line each:
+- `server.py` registration: the three lanes' blocks at the file's end came
+  back interleaved across three hunks; B2's and B3's are kept whole as on
+  4c3c001, then lane B4's block whole, ending at its own end marker.
+- `server.py` actions-versus-tools note: lane B4's pair adds two to each
+  (twenty-three actions, twenty-two tools). The history clause now gives
+  each event the values BEFORE it. Merge 2 had written the values after it
+  for lanes NP and S, and that is corrected here.
+- `__init__.py`: twenty-two write tools and sixteen sanctioned mutating calls,
+  both measured. Lane B4's own "(nineteen and fifteen until ...)" became
+  "(twenty and fifteen ...)", because lane NP's write came first on this tree.
+- `writes.py`: lane NP's and lane B4's sanctioned entries and retry-unsafe
+  entries are kept as a union.
+- `test_receipt_names_its_own_action.py`: the reaction pair and the alert
+  pair are both kept as sanctioned shared places; PERFORMABLE is 22.
+- `test_server_surface.py`: the number-word map gains 21 and 22, so the
+  instructions' "TWENTY-TWO WRITE" is the word the test derives.
 
 ## 4. Gates
 

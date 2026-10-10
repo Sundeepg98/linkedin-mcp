@@ -3,10 +3,19 @@
 An MCP server that shows you your own LinkedIn account data as structured tool
 results instead of pages you have to click through.
 
-**Seventy tools ship. Fifty read. Twenty write. None is
+**Seventy-two tools ship. Fifty read. Twenty-two write. None is
 write-shaped and unable to act.**
+(Lane B4's branch: sixty-three and nineteen write until its merge, 2026-10-10: the similar-jobs
+alert, `linkedin_set_similar_jobs_alert` and its inverse.)
 
-**THAT LINE READ "Sixty-seven ... Forty-seven read. Twenty write" UNTIL
+**THAT LINE READ "Seventy ... Fifty read. Twenty write" UNTIL LANE B4,
+2026-10-10, merged after lane B3** (census `J 161`, HIS-OWN-CURATION-NOT-OUTWARD).
+Two writes arrived: `linkedin_set_similar_jobs_alert` and its inverse
+`linkedin_unset_similar_jobs_alert` turn one posting's similar-jobs alert on
+and off -- your own saved query, which nobody else sees -- each behind its
+preview and a single-use token, and each read back on a fresh render.
+
+**AND "Sixty-seven ... Forty-seven read. Twenty write" UNTIL
 LANE B3, 2026-10-10, merged after lane B2.** Three reads arrived: `linkedin_read_item_text` returns
 ONE item's own words off its permalink, inside one people record marked as
 another member's words and kept nowhere; `linkedin_my_articles` reads your
@@ -1046,7 +1055,7 @@ linkedin_server/
   cdp_bridge.py              the recovery path: attach to a running Chrome
   dom.py                     the read-only harvesters and the control readers
   shape.py                   pure parsers and the result envelope
-  server.py                  the seventy tools
+  server.py                  the seventy-two tools
   errors.py
 tests/                       1393 tests, no network, no account
   fixtures/                  frozen LinkedIn markup, scrubbed

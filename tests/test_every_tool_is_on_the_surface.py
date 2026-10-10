@@ -398,4 +398,9 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # registry, not summed, and moved with every other count site.
     # SEVENTY AT THE INTEGRATION MERGE OF LANE B3 ONTO LANE B2 (2026-10-10): lane B3's three
     # reads beside the sixty-seven, measured off the merged registry, not summed.
-    assert len(_tool_names()) == 70
+    # SIXTY-FIVE AT LANE B4'S MERGE OF MASTER a457819, 2026-10-10: lane S's
+    # one write and lane B4's two on master's sixty-two -- measured off the
+    # merged registry, not summed, and moved with every other count site.
+    # SEVENTY-TWO AT THE INTEGRATION MERGE OF LANE B4 ONTO LANE B3 (2026-10-10): lane B4's two
+    # writes beside the seventy, measured off the merged registry, not summed.
+    assert len(_tool_names()) == 72

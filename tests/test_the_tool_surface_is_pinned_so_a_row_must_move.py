@@ -108,6 +108,9 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_login_browser": ("wait_seconds",),
     "linkedin_logout": ("confirm",),
     "linkedin_mark_company_interest": ("confirm_token", "job_id"),
+    # Lane B4, 2026-10-10 (census J 161): the similar-jobs alert pair.
+    "linkedin_set_similar_jobs_alert": ("confirm_token", "job_id"),
+    "linkedin_unset_similar_jobs_alert": ("confirm_token", "job_id"),
     "linkedin_message_from_profile": ("confirm_token", "profile", "text"),
     "linkedin_my_activity_items": (),
     "linkedin_my_applications": ("limit",),
@@ -611,8 +614,16 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: **AT THE INTEGRATION MERGE OF LANE B3 ONTO LANE B2 (2026-10-10): 70 TOOLS AND
 #: 111 PARAMETERS** -- lane B3's three tools beside the sixty-seven,
 #: counted on the merged registry, never summed.
-PINNED_TOOL_COUNT = 70
-PINNED_PARAMETER_COUNT = 111
+#: **AT LANE B4'S MERGE OF MASTER a457819 (2026-10-10): 65 TOOLS AND 108
+#: PARAMETERS** -- master's 63 and 104 with lane B4's two writes,
+#: `linkedin_set_similar_jobs_alert` and `linkedin_unset_similar_jobs_alert`
+#: (`job_id`, `confirm_token` each; census `J 161` GAP -> COVERED-UNFIRED),
+#: counted on the merged tree.
+#: **AT THE INTEGRATION MERGE OF LANE B4 ONTO LANE B3 (2026-10-10): 72 TOOLS AND
+#: 115 PARAMETERS** -- lane B4's two tools and their two parameters each
+#: beside the seventy, counted on the merged registry, never summed.
+PINNED_TOOL_COUNT = 72
+PINNED_PARAMETER_COUNT = 115
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:

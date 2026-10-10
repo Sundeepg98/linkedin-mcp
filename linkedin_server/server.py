@@ -1,4 +1,14 @@
-"""The tool surface: seventy tools, twenty of which write to LinkedIn.
+"""The tool surface: seventy-two tools, twenty-two of which write to LinkedIn.
+
+THE SEVENTY-FIRST AND SEVENTY-SECOND ARE WRITES, 2026-10-10 (lane B4, census
+``J 161``, under ``HIS-OWN-CURATION-NOT-OUTWARD``):
+``linkedin_set_similar_jobs_alert`` and its inverse
+``linkedin_unset_similar_jobs_alert``, one posting's similar-jobs alert
+switch, on and off. Lane B4's branch numbered them the sixty-fourth and
+sixty-fifth at its merge of master a457819; the integration merge after
+lane B3 made them the seventy-first and seventy-second, measured off the
+merged registry. The headline read "seventy tools, twenty of which write"
+until then.
 
 THE SIXTY-EIGHTH TO SEVENTIETH ARE READS, 2026-10-10 (lane B3), at the
 integration merge after lane B2: ``linkedin_read_item_text``,
@@ -299,9 +309,9 @@ assigned to anybody -- it waits for whoever next runs the suite, and in the
 meantime the pin goes on asserting the old number with full confidence.
 
 THE NUMBERS ABOVE ARE DERIVED NOW, and that is a statement about a test rather
-than about an intention. Seventy is ``len(await mcp.list_tools())``,
+than about an intention. Seventy-two is ``len(await mcp.list_tools())``,
 pinned in ``test_server_surface.py`` by
-``test_the_surface_is_exactly_the_seventy_tools``; the split is pinned by
+``test_the_surface_is_exactly_the_seventy_two_tools``; the split is pinned by
 ``tests/test_prose_that_makes_a_claim.py::test_the_server_docstring_numbers_are_derived``,
 which reads THESE WORDS and fails if any of the three disagrees with the
 registry.
@@ -314,9 +324,9 @@ POINTER to it was dangling, so a reader who followed it found nothing and
 would reasonably conclude these numbers are unchecked. A citation is a claim
 like any other.
 The surface splits three ways and the split is the part a reader actually
-needs: FIFTY read, TWENTY write, and ZERO are write-shaped,
-registered, gated and unable to act. Fifty plus twenty plus zero is
-seventy. (Thirty-eight, thirteen and fifty-one until 2026-09-24; thirty-nine,
+needs: FIFTY read, TWENTY-TWO write, and ZERO are write-shaped,
+registered, gated and unable to act. Fifty plus twenty-two plus zero is
+seventy-two. (Thirty-eight, thirteen and fifty-one until 2026-09-24; thirty-nine,
 thirteen and fifty-two at the live lane's merge the same day; thirty-nine,
 fourteen and fifty-three at lane L7's; forty-one, fifteen and fifty-six at
 lane L5's; forty-one, sixteen and fifty-seven at lane L8's merge on
@@ -336,7 +346,9 @@ forty-five, twenty and sixty-five until lane B2's ``linkedin_search_groups``
 and ``linkedin_search_events``, merged after lane NP's the same day;
 forty-seven, twenty and sixty-seven until lane B3's three reads
 (``linkedin_read_item_text``, ``linkedin_my_articles`` and
-``linkedin_item_viewer_demographics``), merged after lane B2's the same day.)
+``linkedin_item_viewer_demographics``), merged after lane B2's the same day;
+fifty, twenty and seventy until lane B4's ``linkedin_set_similar_jobs_alert``
+and ``linkedin_unset_similar_jobs_alert``, merged after lane B3's the same day.)
 
 THE FIFTY-THIRD IS ONE WRITE, 2026-09-24 (lane L7, census row ``P I14``).
 ``linkedin_mark_company_interest`` presses "I'm interested" in the
@@ -465,13 +477,14 @@ the moment ``update_profile_field`` was given an address while still refusing.
 always meant: an address is not a permission.
 
 NOTE THE ACTION THAT HAS NO TOOL. ``writes.SANCTIONED_WRITES`` holds
-TWENTY-ONE actions where this surface registers TWENTY write-shaped tools, and
+TWENTY-THREE actions where this surface registers TWENTY-TWO write-shaped tools, and
 the missing one is ``set_open_to_work``: it is sanctioned, it is refused by
-``_refuse_unperformable``, and no tool was ever registered for it. So twenty
-counts TOOLS and twenty-one counts ACTIONS, and a reader comparing the two
+``_refuse_unperformable``, and no tool was ever registered for it. So twenty-two
+counts TOOLS and twenty-three counts ACTIONS, and a reader comparing the two
 numbers is not looking at a discrepancy. (TWENTY-ONE and TWENTY until lane
-NP's ``withdraw_reaction``, merged after lane S's, 2026-10-10, added one to
-each; TWENTY and NINETEEN until lane S's
+B4's alert pair, merged after lane B3's, 2026-10-10, added two to each;
+TWENTY and NINETEEN until lane NP's ``withdraw_reaction``, merged after lane
+S's, 2026-10-10, added one to each; NINETEEN and EIGHTEEN until lane S's
 ``set_admitted_setting``, 2026-10-10, merged after lane U's, added one to each;
 EIGHTEEN and SEVENTEEN until lane U's
 ``send_attachment``, 2026-10-10, adding one to each; NINETEEN and EIGHTEEN from lane L5's
@@ -1062,7 +1075,7 @@ mcp = FastMCP(
     instructions=(
         "A window onto the operator's OWN LinkedIn account, driven by his own "
         "signed-in browser on his own machine. Most tools read and change "
-        "nothing. TWENTY WRITE: linkedin_save_job, "
+        "nothing. TWENTY-TWO WRITE: linkedin_save_job, "
         "linkedin_unsave_job, linkedin_unfollow_company, "
         "linkedin_follow_company, linkedin_apply_job, "
         "linkedin_update_setting, linkedin_react_to_item, "
@@ -1072,7 +1085,8 @@ mcp = FastMCP(
         "linkedin_mark_company_interest, linkedin_send_reply, "
         "linkedin_withdraw_from_group, linkedin_connect_from_profile, "
         "linkedin_message_from_profile, linkedin_send_attachment, "
-        "linkedin_set_admitted_setting and linkedin_withdraw_reaction. "
+        "linkedin_set_admitted_setting, linkedin_withdraw_reaction, "
+        "linkedin_set_similar_jobs_alert and linkedin_unset_similar_jobs_alert. "
         "THE NINETEENTH, linkedin_set_admitted_setting, changes ONE control "
         "on ONE settings page of his own account that is admitted by name, "
         "one page at a time; one is admitted, Share profile updates, whose "
@@ -1096,6 +1110,10 @@ mcp = FastMCP(
         "THE FOURTEENTH, linkedin_mark_company_interest, tells one posting's "
         "employer's recruiters he is interested; this server cannot take it "
         "back, so offer it only for a company he names. "
+        "THE TWENTIETH AND TWENTY-FIRST, linkedin_set_similar_jobs_alert and "
+        "linkedin_unset_similar_jobs_alert, turn one posting's alert for "
+        "similar jobs on and off -- his own saved query, each the other's "
+        "inverse; offer the pair together, set then unset. "
         "THE SIXTEENTH, linkedin_withdraw_from_group, leaves one group he "
         "names by its NUMERIC id, never by a group's name; no join is built "
         "here, so offer it only for a group he names -- and not his last "
@@ -12145,6 +12163,76 @@ async def linkedin_item_viewer_demographics(item: str) -> dict[str, Any]:
             return await post_viewer_demographics.read_post_viewer_demographics(page)
     except Exception as exc:
         return _error(exc)
+
+
+# ---- lane B4 ----
+# The jobs build lane of 2026-10-10. Every tool lane B4 registers is in this
+# one contiguous block, so four lanes editing this file in parallel meet here
+# and nowhere else.
+
+
+@mcp.tool()
+async def linkedin_set_similar_jobs_alert(
+    job_id: str, confirm_token: str = ""
+) -> dict[str, Any]:
+    """Turn ON the alert for jobs similar to one posting -- a WRITE.
+
+    Presses the posting's own "Set alert for similar jobs" switch, which makes
+    LinkedIn send you new jobs like this one. A job alert is your own saved
+    query; nobody else sees it. Same two-step shape and the same five gates as
+    ``linkedin_save_job``: no ``confirm_token``, no action -- you get a block
+    to read and a token that works ONCE, only for this posting, only for this
+    verb, within two minutes. Census row ``J 161``.
+
+    THE PREVIEW READS the posting: exactly one block headed "Set alert for
+    similar jobs", exactly one switch in it wearing LinkedIn's label, the word
+    beside it ``Off``, and a trial press showing a click can reach the toggle.
+    A switch already ``On`` is refused -- turning it off is
+    ``linkedin_unset_similar_jobs_alert``.
+
+    AFTER THE PRESS the posting is re-rendered and the switch read again:
+    ``On`` means the alert was stored, ``Off`` that it was not
+    (``performed: false``). The ``On`` shape has never been captured, so that
+    reading is derived and the first supervised use measures it.
+
+    Args:
+        job_id: the numeric LinkedIn job id whose similar jobs you want alerts for.
+        confirm_token: leave empty to preview. Pass the token from that
+            preview to actually press the switch.
+    """
+    try:
+        return await _write_tool("set_similar_jobs_alert", job_id, confirm_token)
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_unset_similar_jobs_alert(
+    job_id: str, confirm_token: str = ""
+) -> dict[str, Any]:
+    """Turn OFF the alert for jobs similar to one posting -- a WRITE, the inverse of
+    ``linkedin_set_similar_jobs_alert``.
+
+    It will unset the alert: the same switch, pressed from ``On``. Same two
+    steps and the same gates: no
+    ``confirm_token``, no action, and the token works once, for this posting
+    and this verb, within two minutes. A switch reading ``Off`` is refused --
+    turning it on is ``linkedin_set_similar_jobs_alert``. After the press the
+    posting is re-rendered and the switch read again; ``Off`` means the alert
+    was turned off. Census row ``J 161``.
+
+    Args:
+        job_id: the numeric LinkedIn job id whose similar-jobs alert to turn off.
+        confirm_token: leave empty to preview. Pass the token from that
+            preview to actually press the switch.
+    """
+    try:
+        return await _write_tool("unset_similar_jobs_alert", job_id, confirm_token)
+    except Exception as exc:
+        return _error(exc)
+
+
+# ---- end lane B4 ----
 
 
 def main() -> None:  # pragma: no cover - process entry point

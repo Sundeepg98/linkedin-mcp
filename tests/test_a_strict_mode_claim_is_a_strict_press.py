@@ -58,6 +58,12 @@ WRITES = Path(writes.__file__)
 #: ``tests/test_an_invitation_is_aimed_by_a_link.py``.
 PINNED_STRICT_PRESS_ACTIONS = frozenset(
     {
+        # TEN since lane B4 (2026-10-10, census J 161): the similar-jobs alert
+        # pair, pressed on the toggle container of the ONE switch the reader
+        # counted in its block (job_alert_switch.TOGGLE), shown in
+        # tests/test_similar_jobs_alert.py.
+        "set_similar_jobs_alert",
+        "unset_similar_jobs_alert",
         "send_invitation",
         "connect_from_profile",
         "message_from_profile",
@@ -88,6 +94,7 @@ CLAIMS: dict[tuple[str, str], str] = {
     ("writes.py", "strict mode refuses the click if that stops being true (since"): "withdraw_from_group",
     ("writes.py", "strict mode refuses the click if that stops being true between"): "follow_company_page",
     ("writes.py", "strict mode refuses a click whose selector matches more -- so"): "follow_company",
+    ("writes.py", "strict mode holds to the one toggle"): "set_similar_jobs_alert",
 }
 
 _CLAIM = re.compile(r"strict mode (?:holds|refuses)", re.IGNORECASE)
