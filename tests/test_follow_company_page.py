@@ -93,7 +93,11 @@ _FOLLOWED_WORLD = _derive(
 _OTHER_ID_WORLD = _derive(f"%22{COMPANY_PAGE_FOLLOW_ID}%22", "%2253000012%22")
 #: DERIVED -- the Page draws no people-search link at all.
 _NO_LINK_WORLD = _derive("/search/results/people/?currentCompany", "/company/setup/?currentCompany")
-#: DERIVED -- one recommended card moved out of the aside into the main column.
+#: DERIVED -- one recommended card moved out of the aside into the main column:
+#: the shape the live lane MEASURED on 2026-10-10 (session 9: another entity's
+#: follow control in the main column). The Page's own control still binds to
+#: its heading, so since that day this is a world the gate PRESSES in -- on
+#: the bound control, never the other.
 _TWO_IN_MAIN_WORLD = _derive(
     '<section class="org-about">',
     '<div class="rec-card"><span>Otherway Example Nine</span><button type="button" '
@@ -105,6 +109,34 @@ _TWO_IN_MAIN_WORLD = _derive(
 _UNBOUND_WORLD = _derive(
     f'<h2 class="org-top-card-summary__title">{_SUBJECT}</h2>',
     '<h2 class="org-top-card-summary__title">A Different Heading</h2>',
+)
+#: DERIVED -- two in the main column and NEITHER bound to a heading.
+_TWO_IN_MAIN_NONE_BOUND_WORLD = _derive(
+    f'<h2 class="org-top-card-summary__title">{_SUBJECT}</h2>',
+    '<h2 class="org-top-card-summary__title">A Different Heading</h2>',
+    source=_TWO_IN_MAIN_WORLD,
+)
+#: DERIVED -- the Page's own control drawn a second time in the main column:
+#: two controls, BOTH bound.
+_TWO_BOUND_IN_MAIN_WORLD = _derive(
+    '<section class="org-about">',
+    f'<div class="dup"><button type="button" aria-label="Follow {_SUBJECT}">Follow</button></div>'
+    '<section class="org-about">',
+    count=1,
+)
+#: DERIVED -- AS SESSION 9 MEASURED IT: the Page FOLLOWED, its own control
+#: relabelled the way the live load read it, and another entity's follow
+#: control in the main column.
+_SESSION_9_WORLD = _derive(
+    f'aria-label="Follow {_SUBJECT}"',
+    f'aria-label="Following, click to unfollow {_SUBJECT}"',
+    source=_TWO_IN_MAIN_WORLD,
+)
+#: DERIVED -- the Page's heading padded with whitespace: this server's
+#: whitespace-folding comparison binds it; the page's exact one does not.
+_PADDED_HEADING_WORLD = _derive(
+    f'<h2 class="org-top-card-summary__title">{_SUBJECT}</h2>',
+    f'<h2 class="org-top-card-summary__title">  {_SUBJECT}  </h2>',
 )
 
 
@@ -187,17 +219,28 @@ async def test_the_reader_binds_the_one_control_to_the_pages_own_heading(over):
     assert reading["identity_malformed"] == 0
 
 
+async def _aim(page) -> tuple:
+    """What the gate presses on this page: its state, and the element its
+    returned selector resolves to -- counted, and named by componentkey."""
+    grant = writes.WriteGrant(action=_ACTION, target=COMPANY_PAGE_FOLLOW_ID, token="t", minted_at=0.0)
+    state, _why, selector = await writes._live_control(
+        page, _SPEC, grant, dom.COMPANY_PAGE_FOLLOW_PREFIX
+    )
+    if not selector:
+        return state, 0, None, selector
+    target = page.locator(selector)
+    count = await target.count()
+    key = await target.get_attribute("componentkey") if count == 1 else None
+    return state, count, key, selector
+
+
 async def test_the_click_selector_is_a_constant_that_resolves_to_the_top_card_control(over):
     """Strict mode is the last guard: the constant selector must match EXACTLY
     one element, and it must be the Page's own control, not the header's."""
-
-    async def aim(page):
-        target = page.locator(dom.COMPANY_PAGE_FOLLOW_CONTROL)
-        return await target.count(), await target.get_attribute("componentkey")
-
-    assert await over(COMPANY_PAGE_FOLLOW_MARKUP, aim) == (1, "page-a1b2c3d4-top")
-    assert dom.COMPANY_PAGE_FOLLOW_CONTROL.startswith("xpath=")
-    assert _SUBJECT not in dom.COMPANY_PAGE_FOLLOW_CONTROL
+    state, count, key, selector = await over(COMPANY_PAGE_FOLLOW_MARKUP, _aim)
+    assert (state, count, key) == ("not_following", 1, "page-a1b2c3d4-top")
+    assert selector.startswith("xpath=")
+    assert _SUBJECT not in selector
 
 
 # ---------------------------------------------------------------------------
@@ -220,11 +263,15 @@ async def test_the_measured_world_reads_not_following(over):
         (_FOLLOWED_WORLD, "never 'following'"),
         (_OTHER_ID_WORLD, "DIFFERENT organisation id"),
         (_NO_LINK_WORLD, "name 0 distinct"),
-        (_TWO_IN_MAIN_WORLD, "picking by position"),
+        (_TWO_IN_MAIN_NONE_BOUND_WORLD, "picking by position"),
+        (_TWO_BOUND_IN_MAIN_WORLD, "picking by position"),
         (_UNBOUND_WORLD, "cannot be shown to be THIS"),
+        (_SESSION_9_WORLD, "cannot be shown to be THIS"),
+        (_PADDED_HEADING_WORLD, "page's own engine"),
     ],
     ids=["already-followed", "another-organisation", "no-identity-link",
-         "two-in-the-main-column", "control-not-bound-to-heading"],
+         "two-in-the-main-column-none-bound", "two-in-the-main-column-both-bound",
+         "control-not-bound-to-heading", "as-session-9-measured", "heading-padded"],
 )
 async def test_every_derived_world_is_refused_and_says_why_without_quoting_the_page(
     over, world, fragment
@@ -298,9 +345,11 @@ async def test_the_preview_reads_the_page_it_acts_on_and_withholds_the_landing(w
 
 
 @pytest.mark.parametrize(
-    "world", [_FOLLOWED_WORLD, _OTHER_ID_WORLD, _NO_LINK_WORLD, _TWO_IN_MAIN_WORLD, _UNBOUND_WORLD],
+    "world", [_FOLLOWED_WORLD, _OTHER_ID_WORLD, _NO_LINK_WORLD, _TWO_IN_MAIN_NONE_BOUND_WORLD,
+              _TWO_BOUND_IN_MAIN_WORLD, _UNBOUND_WORLD, _SESSION_9_WORLD, _PADDED_HEADING_WORLD],
     ids=["already-followed", "another-organisation", "no-identity-link",
-         "two-in-the-main-column", "control-not-bound-to-heading"],
+         "two-in-the-main-column-none-bound", "two-in-the-main-column-both-bound",
+         "control-not-bound-to-heading", "as-session-9-measured", "heading-padded"],
 )
 async def test_the_preview_refuses_every_derived_world_and_the_refusal_quotes_nothing(
     writes_on, browser_page, world
@@ -443,7 +492,7 @@ async def test_a_follow_runs_end_to_end_and_is_verified_off_manage_pages(writes_
     act = _navigator(world, FOLLOWED_COMPANY)
     receipt = await writes.perform(act, browser_page, grant)
     assert act.gotos == [_page_url(FOLLOWED_COMPANY), writes.FOLLOWED_PAGES_URL]
-    assert receipt["clicked"]["selector"] == dom.COMPANY_PAGE_FOLLOW_CONTROL
+    assert receipt["clicked"]["selector"] == dom.COMPANY_PAGE_BOUND_FOLLOW_CONTROL
     assert receipt["clicked"]["error"] is None
     assert receipt["clicked"]["state_before"] == "not_following"
     assert receipt["clicked"]["on"] == _page_url(FOLLOWED_COMPANY)
@@ -550,3 +599,74 @@ def test_n47_claims_the_coverage_it_was_banked_with_and_the_chain_is_whole():
     assert _ACTION in writes.PERFORMABLE
     assert writes.SANCTIONED_WRITES["linkedin_follow_company_page"].action == _ACTION
     assert callable(getattr(server, "linkedin_follow_company_page", None))
+
+
+# ---------------------------------------------------------------------------
+# 9. ANOTHER FOLLOW CONTROL IN THE MAIN COLUMN (2026-10-10, the live lane's
+#    sessions 8 and 9)
+# ---------------------------------------------------------------------------
+#
+# MEASURED live. With the first-by-rule Page FOLLOWED (session 9), its own
+# control reads "Following, click to unfollow <Page>", and the one control in
+# the main column whose name opens "Follow " is ANOTHER entity's, binding to no
+# heading: refused, rightly. UNFOLLOWED (session 8), the Page's own control
+# opens "Follow " too, so the column held two and the gate refused them as
+# several (DERIVED; that load's condition was not read). Written first, and
+# run red against the gate that refused every second control: among several,
+# the ONE bound to the Page's own heading -- singled out by the page's own
+# engine as well as by this server -- is the press.
+
+
+async def test_another_follow_control_in_the_main_column_no_longer_refuses_the_pages_own(over):
+    reading = await _read(over, _TWO_IN_MAIN_WORLD)
+    facts, state, why = writes.company_page_follow_verdict(reading, COMPANY_PAGE_FOLLOW_ID)
+    assert state == "not_following", why
+    assert facts["company"] == _SUBJECT
+    assert facts["follow_controls_in_main_column"] == 2
+    assert facts["controls_bound_to_the_pages_own_heading"] == 1
+    _no_page_string(why)
+
+
+async def test_the_press_is_aimed_at_the_bound_control_among_several(over):
+    state, count, key, selector = await over(_TWO_IN_MAIN_WORLD, _aim)
+    assert (state, count, key) == ("not_following", 1, "page-a1b2c3d4-top")
+    assert _SUBJECT not in selector and "Otherway" not in selector
+
+
+class _PressRecordingNavigator(_RedirectingNavigator):
+    """Reads which control the world's own handler saw pressed, before every
+    navigation replaces the page."""
+
+    def __init__(self, pages):
+        super().__init__(pages)
+        self.pressed: list = []
+
+    async def goto(self, page, url: str) -> str:
+        try:
+            self.pressed.append(await page.evaluate("() => document.body ? document.body.dataset.pressed || null : null"))
+        except Exception:  # noqa: BLE001 -- a fresh page holds nothing
+            self.pressed.append(None)
+        return await super().goto(page, url)
+
+
+async def test_a_follow_beside_another_control_lands_on_the_pages_own(writes_on, browser_page):
+    """End to end in the measured shape: the press lands on the Page's own
+    control -- the world's handlers say which -- and the follow verifies."""
+    world = _derive(f"%22{COMPANY_PAGE_FOLLOW_ID}%22", f"%22{FOLLOWED_COMPANY}%22", source=_TWO_IN_MAIN_WORLD)
+    world = _derive('componentkey="page-a1b2c3d4-top"',
+                    'componentkey="page-a1b2c3d4-top" onclick="document.body.dataset.pressed=\'own\'"',
+                    source=world)
+    world = _derive('aria-label="Follow Otherway Example Nine"',
+                    'aria-label="Follow Otherway Example Nine" onclick="document.body.dataset.pressed=\'other\'"',
+                    source=world)
+    pages = {
+        _page_url(FOLLOWED_COMPANY): (world, _LANDED),
+        writes.FOLLOWED_PAGES_URL: (markup("manage_pages_following_hydrated"), writes.FOLLOWED_PAGES_URL),
+    }
+    block = await preview(_SPEC, target=FOLLOWED_COMPANY, navigator=_RedirectingNavigator(pages), page=browser_page)
+    grant = consume(block["to_confirm"], action=_ACTION, target=FOLLOWED_COMPANY)
+    act = _PressRecordingNavigator(pages)
+    receipt = await writes.perform(act, browser_page, grant)
+    assert receipt["clicked"]["error"] is None and receipt["clicked"]["clicks_made"] == 1
+    assert act.pressed[-1] == "own", act.pressed
+    assert receipt["performed"] is True and receipt["verified"] is True

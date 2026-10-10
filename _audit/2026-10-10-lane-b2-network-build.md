@@ -170,8 +170,11 @@ of the three is a MEASURED-ABSENT candidate on this evidence. Each goes to the
 capture queue's `search-people-labels` line, beside `N 82`, `N 86` and `N 90`
 to `N 92`: the All-filters panel opened and closed.
 
-THE PLANNED FIXTURE `tests/fixtures/live8/search_labels.html` WAS NOT BUILT:
-no row this lane holds is built on that page.
+THIS LANE BUILT NO FIXTURE FOR THE SEARCH PAGE OR THE FEED MENU: no row it
+holds is built on either. The live lane committed its own tracked copies of
+both at the paths the ledger planned, `tests/fixtures/live8/search_labels.html`
+and `tests/fixtures/live8/feed_item_menu_open.html`, which reached this
+branch with the merge of master `6c65815`.
 
 ## 4. N 133: the press it waits on was built, and fired
 
@@ -355,6 +358,12 @@ lines left, and their read-triage entries with them. Measured and re-pinned:
                                      reads no ruling holds)
 
 `N 102` does not move (section 7).
+
+THE MERGE OF ORIGIN/MASTER `6c65815` (the live lane's session 9, which
+banked four people-search rows): three pins both sides moved, re-derived on
+the merged tree, never summed -- b1_no_ruling 7, delivered_strict 117,
+unfired 22; the hold list keeps master's rows and this lane's two. The three
+derived views regenerated and checked.
 
 ## 9. Gates, run and not run
 
