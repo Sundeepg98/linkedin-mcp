@@ -15,7 +15,7 @@ below is an EXACT set, and it fails in both directions on purpose:
 GREEN HERE DOES NOT MEAN THE CORPUS IS CLEAN. It means the corpus holds exactly
 the four defects that were measured on 2026-09-20 and no others.
 
-THE PIN IS EMPTY SINCE 2026-10-10 (lane G2), AND THAT IS THE STRONGER STATE.
+THE PIN WAS EMPTIED ON 2026-10-10 (lane G2), AND EMPTY IS THE STRONGER STATE.
 The script exited 1 on eight pinned sites for three weeks, and an instrument
 that is always red hides the next red behind the ones everybody already knows.
 Every one of the eight was repaired in its record, none by touching the guard:
@@ -24,8 +24,10 @@ their kind ("under the ruling", "in the state"), and the two never-minted
 blocker names carry a disclosure beside each proposal. The same day lane K's
 registration of the orchestrator's class rulings brought the same shape back
 once, in a document no lane may reword; its author authorised the one-word
-repair, and it was made. So `PINNED` is the empty set, the script exits 0, and
-ANY asserted-and-absent name is a red here.
+repair, and it was made. Lane K's registration of the rulings on its ledger's
+questions then brought it once more, in another of the orchestrator's
+documents, and that one site is pinned until its owner repairs it. Any OTHER
+asserted-and-absent name is a red here.
 
 THE CONTROLS ARE NOT DECORATION, and this repository has an expensive reason
 for saying so: a sibling wave measured that 56 of 88 probe files carry a control
@@ -63,10 +65,20 @@ sys.path.insert(0, str(REPO / "scripts"))
 import check_asserted_names_resolve as guard  # noqa: E402
 
 
-#: (kind, name, document, occurrences). EMPTY since 2026-10-10: every site
-#: below was repaired in its record and removed by the ratchet's own
-#: instruction (`_audit/2026-10-10-lane-g2-debts.md`, item 1).
-PINNED: set[tuple[str, str, str, int]] = set()
+#: (kind, name, document, occurrences). ONE SITE since lane K's registration
+#: of the rulings on its ledger's questions, 2026-10-10: every site in the
+#: history below the set was repaired in its record and removed by the
+#: ratchet's own instruction (`_audit/2026-10-10-lane-g2-debts.md`, item 1);
+#: the one inside it arrived after, and only its owner can repair it.
+PINNED: set[tuple[str, str, str, int]] = {
+    # SURFACED 2026-10-10 BY LANE K's registration of the rulings on its
+    # ledger's questions, the same shape: "answered by the orchestrator under"
+    # ending a line, the registered RULING id `OUTWARD-ACTS-NEED-THE-OPERATOR`
+    # opening the next. Pinned, not repaired: the document is the
+    # orchestrator's, copied byte-identical.
+    ("BLOCKER", "OUTWARD-ACTS-NEED-THE-OPERATOR",
+     "_audit/2026-10-10-rulings-ledger-questions.md", 1),
+}
 
 #: REPAIRED 2026-10-10, LATER THE SAME DAY, ON ITS AUTHOR'S AUTHORISATION:
 #:
