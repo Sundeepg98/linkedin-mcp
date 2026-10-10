@@ -185,6 +185,22 @@ CORRECTION_VOCABULARY = (
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
 
+    # 2026-10-10, lane U. THE ORCHESTRATOR'S RULINGS OF 2026-09-28, copied into
+    # _audit/ byte-identical as the lane's order requires, CITE THE UPLOAD WAVE
+    # AS THEIR SOURCE -- read, not inferred from the filenames.
+    ("2026-09-28-rulings-build-classes.md", "2026-09-05-upload-sanction.md"): (
+        "A SOURCE CITED IN AGREEMENT, NOT A CLAIM CORRECTED. The section 'Not "
+        "ruled here: uploads' calls the BLOCKER LABEL `FILE-UPLOAD-UNSANCTIONED` "
+        "stale, and cites the upload wave's own finding for what the rows lack "
+        "-- 'an AIM' -- which is that document's title sentence, quoted to "
+        "agree with it. The matched word is about the census label, which "
+        "that wave had already found false. The ruling text may not be edited "
+        "by any lane. **WHAT WOULD MAKE THIS ENTRY WRONG:** the rulings "
+        "asserting something in the upload wave's record does not hold while "
+        "leaving that record unmarked, which would need a CORRECTS: / "
+        "CORRECTED BY: pair."
+    ),
+
     # 2026-09-28, the live lane's session 2. A CENSUS ROW CITES THE LANE'S
     # RECORD AS THE EVIDENCE FOR ITS OWN FIRE -- read, not inferred from the
     # filenames. The lane's real corrections run the other way and are

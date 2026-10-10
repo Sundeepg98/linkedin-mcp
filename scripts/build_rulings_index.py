@@ -1251,6 +1251,33 @@ REGISTER: tuple = (
              "the allowlist refuses by silence, with no substring, is admitted "
              "the same way.",
     ),
+    # THE OPERATOR'S UPLOAD DECISION, REGISTERED 2026-10-10 BY LANE U. It was
+    # made 2026-09-04 and landed in 615a5c4, and until this entry the register
+    # had no line for it. NO COMMITTED SOURCE RECORDS HIS WORDS: the commit
+    # and the decides document both report the decision in their authors' own
+    # words, so it is registered on that record and on nothing more. Its
+    # anchor is the decides document's section 1 heading, which is why the
+    # date column prints 2026-09-20 -- the record's date, not the decision's.
+    Ruling(
+        id="FILE-UPLOAD-OPENED",
+        claim="This server may upload a file from this machine: the operator "
+              "opened file upload on 2026-09-04, in full -- profile photo, "
+              "post media and message attachments. The browser's upload verb "
+              "joined SANCTIONED_MUTATIONS in 615a5c4. "
+              "The FILE-UPLOAD-UNSANCTIONED blocker retires and its rows do "
+              "not: each still needs a performable verb and a captured file "
+              "input on its own surface. No extension allowlist -- one would "
+              "narrow his decision.",
+        binds="writes -- uploading a file from this machine",
+        document="_audit/2026-09-20-the-decides.md",
+        anchor="DECIDED, 2026-09-04, BY THE OPERATOR. THE BLOCKER RETIRES; "
+               "THE 15 ROWS DO NOT.",
+        aliases=("FILE-UPLOAD-UNSANCTIONED", "the upload sanction"),
+        note="THE OPERATOR'S decision, made 2026-09-04. No committed source "
+             "records his words: it is recorded by 615a5c4 and "
+             "_audit/2026-09-20-the-decides.md section 1, and registered on "
+             "that record. The date shown is the record's, 2026-09-20.",
+    ),
 )
 
 
