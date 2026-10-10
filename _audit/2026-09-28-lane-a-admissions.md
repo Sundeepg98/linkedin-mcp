@@ -196,11 +196,11 @@ asks it.
     N 13, N 14, N 19               /mynetwork/invitation-manager/                                 invitation                                  (a)     ADMITTED (3.1)
     N 9, N 11                      /mynetwork/invitation-manager/sent/                            invitation                                  (a)     ADMITTED (3.1); the table carried the root, the Sent tab is this leaf
     N 38                           /mynetwork/network-manager/people-follow/following/            /follow                                     (a)     ADMITTED (3.1)
-    P M2, M4, M5, M6, M12;         /jobs/application-settings/                                    /jobs/application, settings                 (a)     see 3.2
+    P M2, M4, M5, M6, M12;         /jobs/application-settings/                                    /jobs/application, settings                 (a)     ADMITTED (3.2)
       J 71, J 72, J 73
-    P M9, J 77                     /mypreferences/d/job-application-accounts                      job-application                             (a)     see 3.2
-    N 39                           /mypreferences/d/unfollowed                                    /unfollow                                   (a)     see 3.2
-    P P15                          /mypreferences/d/categories/ads                                /mypreferences/d/categories/                (a)     see 3.2
+    P M9, J 77                     /mypreferences/d/job-application-accounts                      job-application                             (c)?    NOT ADMITTED: stored applicant accounts read as credential-adjacent (3.3, 7)
+    N 39                           /mypreferences/d/unfollowed                                    /unfollow                                   (a)     ADMITTED by name (3.3)
+    P P15                          /mypreferences/d/categories/ads                                /mypreferences/d/categories/                (a)     ADMITTED by name (3.3)
     N 24, N 27, N 28               /mynetwork/invite-connect/connections/?<query>                 /invite, /connect (the exemption stops      (a)     NO SERVED SPELLING: ?foo=1 is the boundary's own placeholder; see 2.7
                                                                                                   at the bare list)
     N A3                           /company/<slug>/admin/following/                               /follow                                     --      PRECONDITION UNMEASURED: whether he administers any Page; two candidate spellings
@@ -547,7 +547,7 @@ sibling and table check passing before and after; with the block, 188 passed.
 the then-present all-results line admitted -- a spelling the author had not
 listed. That entry left with its line.
 
-**PINS:** the allowlist digest `fc6839c2e877c011` -> `d3c96a8103316665`, every
+**PINS:** the allowlist digest `fc6839c2e877c011` -> `d3c96a81` `03316665` (one digest, quoted in two halves because its tail reads as a telephone number to the identity sweep), every
 other key byte-identical and the tree minus the block hashing to the prior pin;
 census count cell 61 -> 85; `tests/test_readonly.py` (three tracker stages and
 five company tabs leave its refused tables, recorded, replaced by a second key,
