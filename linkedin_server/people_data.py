@@ -480,6 +480,9 @@ class Post:
 #: people are those two tools' whole answer. ``linkedin_read_named_profile``
 #: joined the same day (lane L5, ruling NAMED-PROFILE-READ-BEHIND-A-GRANT): the
 #: ONE member he names, read once behind the single-use grant, is its answer.
+#: The two search verticals joined on 2026-10-10 (lane B2,
+#: ``search_vertical_results``): the groups and the events a keyword search
+#: drew, as group and event records, are those tools' whole answer.
 PEOPLE_TOOLS: frozenset[str] = frozenset(
     {
         "linkedin_who_viewed_me",
@@ -489,6 +492,8 @@ PEOPLE_TOOLS: frozenset[str] = frozenset(
         "linkedin_recruiter_insights",
         "linkedin_messaging_presence",
         "linkedin_read_named_profile",
+        "linkedin_search_groups",
+        "linkedin_search_events",
     }
 )
 

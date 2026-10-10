@@ -1,4 +1,9 @@
-"""The tool surface: sixty-one tools, forty-four of which do not write.
+"""The tool surface: sixty-three tools, forty-six of which do not write.
+
+**IT READ "sixty-one tools, forty-four of which do not write" UNTIL LANE B2'S
+SEARCH VERTICALS (2026-10-10)**: two READS, ``linkedin_search_groups`` (census
+N 161) and ``linkedin_search_events`` (census N 179), each loading one search
+results page composed from a keyword and returning what it found as records.
 
 **AND THIS LINE IS NOW DERIVED, NOT MAINTAINED, 2026-09-20.** It had gone stale
 a THIRD time -- "forty-four tools, thirty-two of which do not write" against a
@@ -227,6 +232,13 @@ EXPECTED_TOOLS = {
     # grant through the second door; its preview loads nothing. It writes
     # nothing, and it is on no write table (census N 178 stays GAP).
     "linkedin_read_named_profile",
+    # THE SIXTY-SECOND AND SIXTY-THIRD, 2026-10-10 (lane B2, the search
+    # verticals D2-SEARCH-VERTICALS-WIDENED admitted): two READS, each one
+    # search results page composed from a keyword alone, its results read as
+    # group or event records (census N 161 and N 179). Neither writes or
+    # presses; the groups page's Join control is never read.
+    "linkedin_search_groups",
+    "linkedin_search_events",
     # THE THIRTY-EIGHTH, 2026-09-05: linkedin_events_home, a READ. No
     # write was added. It is the only tool here whose whole answer can be
     # ZERO, and its reader returns that integer only when four
@@ -598,8 +610,14 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_sixty_one_tools(tools):
-    """RENAMED AGAIN ON LANE L5'S ORDER OF 2026-09-28 08:06, to
+async def test_the_surface_is_exactly_the_sixty_three_tools(tools):
+    """RENAMED AGAIN FOR LANE B2'S SEARCH VERTICALS, 2026-10-10, to
+    ``..._sixty_three_tools``: two READS, ``linkedin_search_groups`` (census
+    N 161) and ``linkedin_search_events`` (census N 179), each one search
+    results page composed from a keyword, read as group and event records.
+    MEASURED off the registry; the name moved with the pin.
+
+    RENAMED AGAIN ON LANE L5'S ORDER OF 2026-09-28 08:06, to
     ``..._sixty_one_tools``: one READ, ``linkedin_read_named_profile`` (ruling
     NAMED-PROFILE-READ-BEHIND-A-GRANT), the profile of a member he names,
     loaded once behind the single-use grant. MEASURED off the registry;
@@ -904,7 +922,11 @@ async def test_the_surface_is_exactly_the_sixty_one_tools(tools):
     # SIXTY-ONE ON LANE L5'S ORDER OF 2026-09-28 08:06: linkedin_read_named_profile,
     # a READ, so the split moves on its read side and the write set holds.
     # MEASURED off mcp.list_tools().
-    assert len(tools) == 61
+    # SIXTY-THREE FOR LANE B2'S SEARCH VERTICALS, 2026-10-10:
+    # linkedin_search_groups and linkedin_search_events, both READS, so the
+    # split moves on its read side and the write set holds. MEASURED off
+    # mcp.list_tools().
+    assert len(tools) == 63
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -1073,7 +1095,11 @@ async def test_the_surface_is_exactly_the_sixty_one_tools(tools):
     # linkedin_read_named_profile is a READ -- its preview loads nothing, its
     # confirmed call loads one profile he named through the second door and
     # presses nothing -- and the write side is unmoved.
-    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 44
+    # FORTY-SIX FOR LANE B2'S SEARCH VERTICALS, 2026-10-10:
+    # linkedin_search_groups and linkedin_search_events are READS -- each
+    # loads one admitted search page and presses nothing -- and the write
+    # side is unmoved.
+    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 46
 
 
 def test_the_read_that_was_nearly_named_a_write():

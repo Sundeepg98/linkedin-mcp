@@ -1,4 +1,14 @@
-"""The tool surface: sixty-one tools, seventeen of which write to LinkedIn.
+"""The tool surface: sixty-three tools, seventeen of which write to LinkedIn.
+
+THE SIXTY-SECOND AND SIXTY-THIRD ARE READS, 2026-10-10 (lane B2), on the
+search verticals ``D2-SEARCH-VERTICALS-WIDENED`` admitted:
+``linkedin_search_groups`` (census ``N 161``) and ``linkedin_search_events``
+(census ``N 179``). Each composes one search results page from a keyword
+alone with ``search_verticals.compose``, loads it once, presses nothing, and
+returns what the page drew as group or event records -- a title and a
+canonical link, marked as untrusted third-party text -- read by
+``search_vertical_results`` over the live captures' structure. The headline
+read "sixty-one tools, seventeen of which write" until then.
 
 THE SIXTY-FIRST IS A READ, 2026-09-28, on lane L5's order of 08:06 and the
 operator's ruling of 08:01 (``NAMED-PROFILE-READ-BEHIND-A-GRANT``):
@@ -212,9 +222,9 @@ assigned to anybody -- it waits for whoever next runs the suite, and in the
 meantime the pin goes on asserting the old number with full confidence.
 
 THE NUMBERS ABOVE ARE DERIVED NOW, and that is a statement about a test rather
-than about an intention. Sixty-one is ``len(await mcp.list_tools())``,
+than about an intention. Sixty-three is ``len(await mcp.list_tools())``,
 pinned in ``test_server_surface.py`` by
-``test_the_surface_is_exactly_the_sixty_one_tools``; the split is pinned by
+``test_the_surface_is_exactly_the_sixty_three_tools``; the split is pinned by
 ``tests/test_prose_that_makes_a_claim.py::test_the_server_docstring_numbers_are_derived``,
 which reads THESE WORDS and fails if any of the three disagrees with the
 registry.
@@ -227,9 +237,10 @@ POINTER to it was dangling, so a reader who followed it found nothing and
 would reasonably conclude these numbers are unchecked. A citation is a claim
 like any other.
 The surface splits three ways and the split is the part a reader actually
-needs: FORTY-FOUR read, SEVENTEEN write, and ZERO are write-shaped,
-registered, gated and unable to act. Forty-four plus seventeen plus zero is
-sixty-one. (Thirty-eight, thirteen and fifty-one until 2026-09-24; thirty-nine,
+needs: FORTY-SIX read, SEVENTEEN write, and ZERO are write-shaped,
+registered, gated and unable to act. Forty-six plus seventeen plus zero is
+sixty-three. (Forty-four, seventeen and sixty-one until lane B2's two search
+verticals, 2026-10-10; thirty-eight, thirteen and fifty-one until 2026-09-24; thirty-nine,
 thirteen and fifty-two at the live lane's merge the same day; thirty-nine,
 fourteen and fifty-three at lane L7's; forty-one, fifteen and fifty-six at
 lane L5's; forty-one, sixteen and fifty-seven at lane L8's merge on
@@ -504,6 +515,8 @@ from linkedin_server import (
     presence,
     recruiter_views,
     search_results,
+    search_vertical_results,
+    search_verticals,
     shape,
     threads,
     writes,
@@ -1139,7 +1152,9 @@ mcp = FastMCP(
         "linkedin_messaging_presence and linkedin_read_named_profile (the one "
         "member he names, on his confirmation), and linkedin_list_conversations, "
         "linkedin_open_messaging and linkedin_people_search_shape when "
-        "include_names is passed -- return "
+        "include_names is passed -- and the two that return what a search "
+        "found, linkedin_search_groups (groups) and linkedin_search_events "
+        "(events), return "
         "each person as a "
         "record of four fields (name, headline, link, degree), and each group "
         "or event as a title and a link; every such record carries the key "
@@ -11420,6 +11435,146 @@ async def linkedin_page_plugin_snippet(page_id: str) -> dict[str, Any]:
     """
     try:
         return {"ok": True, **page_plugin.follow_plugin_snippet(page_id)}
+    except Exception as exc:
+        return _error(exc)
+
+
+# ---- lane B2: search verticals (N 161, N 179) ----
+
+
+def _settled_on_the_vertical(landed: Any, vertical: str) -> bool:
+    """Did the browser settle on the vertical's own results page? By CLOSED
+    SEGMENT EQUALITY on LinkedIn's host, as the people search's landing
+    verdict decides it. A boolean about the address, never the address: the
+    landing is a value the site chose, and on this surface it carries the
+    query."""
+    parts = urlsplit(str(landed or ""))
+    segments = [segment for segment in parts.path.split("/") if segment]
+    return parts.netloc in ("", "www.linkedin.com") and segments == [
+        "search", "results", vertical,
+    ]
+
+
+def _vertical_not_claimed(noun: str) -> list[str]:
+    """What a search-vertical reading does not claim, in the payload."""
+    return [
+        "that every %s the search matched was read; one page, as drawn, and a "
+        "search page lazy-loads" % noun,
+        "that a title is unique; the link says which %s" % noun,
+        "that the reader's rules fit a page drawn differently from the "
+        "capture; a card they cannot place is skipped and counted",
+    ]
+
+
+@mcp.tool()
+async def linkedin_search_groups(keywords: str) -> dict[str, Any]:
+    """Search LinkedIn GROUPS by name or keyword -- and WHICH groups it found.
+
+    Census row ``N 161``. One groups search results page, loaded once from an
+    address composed from your keyword alone (``search_verticals.compose``,
+    ruling ``D2-SEARCH-VERTICALS-WIDENED``), and its results read by
+    ``search_vertical_results.read_group_results``: ``groups`` holds one
+    record per result the page draws -- the group's TITLE and its canonical
+    link, ``https://www.linkedin.com/groups/<digits>/`` -- each marked as
+    untrusted third-party text (``NAMES-AT-RUNTIME``, under the six
+    ``PEOPLE-DATA-MITIGATIONS``). ``groups_denominators`` says how many result
+    cards were seen, tried, returned, skipped (by a closed reason) and failed
+    (by exception type). Nothing else about a group crosses: not its member
+    count, its description or its privacy line.
+
+    BUILT OVER THE LIVE CAPTURE'S STRUCTURE (session 2, nine results), NOT
+    YET FIRED LIVE BY THIS TOOL.
+
+    A KEYWORD IS REQUIRED and is never quoted back; a keyword the read
+    boundary refuses is answered before any page loads, with ``pages_loaded``
+    0. NOTHING IS PRESSED: the Join control each result draws is never read
+    and never pressed. EACH CALL IS ONE SEARCH; a live test session makes at
+    most five (``D1-SEARCH-AS-READS``, carried to every vertical by D2).
+
+    Args:
+        keywords: free text, up to 200 characters, required. Never quoted
+            back.
+    """
+    try:
+        # THE ADDRESS IS COMPOSED FROM THIS TOOL'S OWN ARGUMENT AND NOTHING
+        # ELSE, and put to the read boundary before any session opens.
+        composed = search_verticals.compose("groups", keywords=keywords)
+        if not composed["built"]:
+            return people_search.refusal_envelope(composed)
+        boundary = people_search.boundary_verdict(composed["url"])
+        if not boundary["admitted"]:
+            return people_search.refusal_envelope(boundary)
+        async with BROWSER.session() as page:
+            landed = await BROWSER.goto(page, composed["url"])
+            assert_not_authwall(landed, surface="groups-search")
+            found = await search_vertical_results.read_group_results(page)
+            return {
+                "ok": True,
+                **found,
+                "landed_where_it_was_sent": (
+                    landed.rstrip("/") == composed["url"].rstrip("/")
+                ),
+                "landed_on_the_vertical": _settled_on_the_vertical(landed, "groups"),
+                "pages_loaded": 1,
+                "query_applied": composed["applied"],
+                "not_claimed": _vertical_not_claimed("group"),
+            }
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_search_events(keywords: str) -> dict[str, Any]:
+    """Search LinkedIn EVENTS by keyword, on the Events tab -- and WHICH events
+    it found.
+
+    Census row ``N 179``. "Filter results to the Events tab" IS the vertical:
+    one events search results page, loaded once from an address composed from
+    your keyword alone (``search_verticals.compose``, ruling
+    ``D2-SEARCH-VERTICALS-WIDENED``), and its results read by
+    ``search_vertical_results.read_event_results``: ``events`` holds one
+    record per event the page draws -- its TITLE and its canonical link,
+    ``https://www.linkedin.com/events/<digits>/`` -- each marked as untrusted
+    third-party text (``NAMES-AT-RUNTIME``, under the six
+    ``PEOPLE-DATA-MITIGATIONS``). ``events_denominators`` says how many result
+    cards were seen, tried, returned, skipped (by a closed reason) and failed
+    (by exception type). Nothing else about an event crosses: not its date,
+    its attendee count or its description.
+
+    BUILT OVER THE LIVE CAPTURE'S STRUCTURE (session 3, thirteen results),
+    NOT YET FIRED LIVE BY THIS TOOL.
+
+    A KEYWORD IS REQUIRED and is never quoted back; a keyword the read
+    boundary refuses is answered before any page loads, with ``pages_loaded``
+    0. NOTHING IS PRESSED. EACH CALL IS ONE SEARCH; a live test session makes
+    at most five (``D1-SEARCH-AS-READS``, carried to every vertical by D2).
+
+    Args:
+        keywords: free text, up to 200 characters, required. Never quoted
+            back.
+    """
+    try:
+        composed = search_verticals.compose("events", keywords=keywords)
+        if not composed["built"]:
+            return people_search.refusal_envelope(composed)
+        boundary = people_search.boundary_verdict(composed["url"])
+        if not boundary["admitted"]:
+            return people_search.refusal_envelope(boundary)
+        async with BROWSER.session() as page:
+            landed = await BROWSER.goto(page, composed["url"])
+            assert_not_authwall(landed, surface="events-search")
+            found = await search_vertical_results.read_event_results(page)
+            return {
+                "ok": True,
+                **found,
+                "landed_where_it_was_sent": (
+                    landed.rstrip("/") == composed["url"].rstrip("/")
+                ),
+                "landed_on_the_vertical": _settled_on_the_vertical(landed, "events"),
+                "pages_loaded": 1,
+                "query_applied": composed["applied"],
+                "not_claimed": _vertical_not_claimed("event"),
+            }
     except Exception as exc:
         return _error(exc)
 

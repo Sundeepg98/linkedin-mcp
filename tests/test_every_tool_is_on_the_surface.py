@@ -353,4 +353,8 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # linkedin_read_named_profile (ruling NAMED-PROFILE-READ-BEHIND-A-GRANT;
     # census N 178 stays GAP on its capture), measured off the registry and
     # moved with every other count site in the same commit.
-    assert len(_tool_names()) == 61
+    # SIXTY-THREE FOR LANE B2'S SEARCH VERTICALS, 2026-10-10: two READS,
+    # linkedin_search_groups (census N 161) and linkedin_search_events
+    # (census N 179), measured off the registry and moved with every other
+    # count site in the same commit.
+    assert len(_tool_names()) == 63

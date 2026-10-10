@@ -1946,6 +1946,10 @@ DRIVEN_TO.update({key: RETURNS_TEXT for key in ADMITTED_TEXT})
 # the plant comes back inside a record, where the rule says it may.
 DRIVEN_TO["presence:read_suggested_presence"] = RETURNS_RECORDS
 DRIVEN_TO["recruiter_views:read_recruiter_views"] = RETURNS_RECORDS
+# LANE B2'S TWO READERS (2026-10-10): the search verticals' success paths
+# return group and event records, so the plant comes back inside a record.
+DRIVEN_TO["search_vertical_results:read_group_results"] = RETURNS_RECORDS
+DRIVEN_TO["search_vertical_results:read_event_results"] = RETURNS_RECORDS
 
 
 @pytest.mark.parametrize("key", sorted(shipped_drives.DRIVES))
@@ -2056,6 +2060,15 @@ FIXTURE_BREAKS: dict[str, dict[str, str]] = {
     "recruiter_views:read_recruiter_views": {
         "fixture": "synthetic/recruiter_views.html",
         "needle": "<p>Viewed 2w ago</p>", "into": "<p>Seen 2w ago</p>",
+    },
+    "search_vertical_results:read_group_results": {
+        "fixture": "synthetic/search_groups_live.html",
+        "needle": '<div role="listitem">', "into": '<div role="row">',
+    },
+    "search_vertical_results:read_event_results": {
+        "fixture": "synthetic/search_events_live.html",
+        "needle": '<p><a href="/events/1000000000000000001/">',
+        "into": '<p><span href="/events/1000000000000000001/">',
     },
     "press:disclose": {
         "fixture": "profile_views_analytics.html",

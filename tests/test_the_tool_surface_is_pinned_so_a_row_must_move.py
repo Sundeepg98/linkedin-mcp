@@ -135,6 +135,10 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_save_job": ("confirm_token", "job_id"),
     "linkedin_saved_jobs": ("limit",),
     "linkedin_search_appearances": (),
+    # 2026-10-10, lane B2: census N 161 and N 179, REPORTED to the lane's lead
+    # rather than banked -- the census is the lead's to move at merge.
+    "linkedin_search_events": ("keywords",),
+    "linkedin_search_groups": ("keywords",),
     "linkedin_search_jobs": (
         "company_id", "date_posted", "easy_apply", "experience_level",
         "fair_chance_employer", "in_your_network", "job_type", "keywords",

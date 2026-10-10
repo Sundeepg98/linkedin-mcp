@@ -584,6 +584,109 @@ async def read_result_people_as_shipped(page: Any) -> Any:
 
 
 # ---------------------------------------------------------------------------
+# search_vertical_results -- the groups and events search result cards
+# (lane B2, 2026-10-10: census N 161 and N 179)
+# ---------------------------------------------------------------------------
+
+#: Each fixture's FIRST result address, as the fixture draws it: digits only,
+#: so a link carries no page text, and the title -- the planted page's text --
+#: is the plant.
+GROUP_CARD_LINK = "/groups/10001/"
+EVENT_CARD_LINK = "/events/1000000000000000001/"
+
+
+def _group_card(handle: Any) -> _Node:
+    """One group result as ``search_groups_live.html`` draws each of its nine:
+    a group link wrapping a list item whose first paragraph, the title, holds
+    no element."""
+    from linkedin_server import search_vertical_results as svr
+
+    card = _Node(handle, href=GROUP_CARD_LINK)
+    title = _Node(handle.locator(svr.GROUP_TITLE_PARAGRAPH))
+    card.one = {svr.GROUP_ENCLOSING_RESULT: None, svr.GROUP_TITLE_PARAGRAPH: title}
+    title.many = {svr.NESTED: []}
+    return card
+
+
+def _event_card(handle: Any) -> _Node:
+    """One event result as ``search_events_live.html`` draws each of its
+    thirteen: an event link holding a title link to the same event, which
+    holds no element."""
+    from linkedin_server import search_vertical_results as svr
+
+    card = _Node(handle, href=EVENT_CARD_LINK)
+    title = _Node(handle.locator(svr.EVENT_TITLE_LINK), href=EVENT_CARD_LINK)
+    card.one = {svr.EVENT_ENCLOSING_RESULT: None, svr.EVENT_TITLE_LINK: title}
+    title.many = {svr.NESTED: []}
+    return card
+
+
+class _TheVerticalCards(_Over):
+    def __init__(self, wrapped: Any, build: Callable[[Any], _Node]) -> None:
+        super().__init__(wrapped)
+        self._build = build
+
+    async def element_handles(self) -> list[_Node]:
+        return [self._build(handle) for handle in await self._wrapped.element_handles()]
+
+
+class _DrawsTheVerticalCards(_Over):
+    def __init__(self, wrapped: Any, selector: str, build: Callable[[Any], _Node]) -> None:
+        super().__init__(wrapped)
+        self._selector = selector
+        self._build = build
+
+    def locator(self, selector: Any, *args: Any, **kwargs: Any) -> Any:
+        located = self._wrapped.locator(selector, *args, **kwargs)  # the read, counted
+        return _TheVerticalCards(located, self._build) if selector == self._selector else located
+
+
+async def read_group_results_as_shipped(page: Any) -> Any:
+    """``read_group_results`` as ``linkedin_search_groups`` calls it -- on the
+    page it was handed, no argument but the page -- over the planted page
+    drawn as the groups skeleton's result list.
+
+    THE SIGNATURE DRIVE: the card's ``href`` is the plant, not a group link,
+    so the reader skips it (``no_group_link``) and returns its denominators
+    and no group -- NO_RECORD.
+
+    THE DOUBLE answers the STRUCTURE (which element each of the reader's own
+    query constants finds, or that it finds none) and each ``href``; the
+    TITLE is the plant, every visibility the planted ``True``, and the number
+    of cards the planted page's one: so the record that comes back carries
+    the plant inside the record, where the rule says it may.
+    ``tests/test_search_vertical_results.py`` runs the reader over the fixture
+    itself and asserts nine groups.
+    """
+    from linkedin_server import search_vertical_results as svr
+
+    _drawn(
+        "synthetic/search_groups_live.html",
+        'href="' + GROUP_CARD_LINK + '"', '<div role="listitem">',
+    )
+    return await svr.read_group_results(
+        _DrawsTheVerticalCards(page, svr.GROUP_RESULT_CARD, _group_card)
+    )
+
+
+async def read_event_results_as_shipped(page: Any) -> Any:
+    """``read_event_results`` as ``linkedin_search_events`` calls it, over the
+    planted page drawn as the events skeleton's result list -- on the same
+    terms as :func:`read_group_results_as_shipped`, the title link answering
+    the card's own event. ``tests/test_search_vertical_results.py`` runs the
+    reader over the fixture itself and asserts thirteen events."""
+    from linkedin_server import search_vertical_results as svr
+
+    _drawn(
+        "synthetic/search_events_live.html",
+        '<p><a href="' + EVENT_CARD_LINK + '">',
+    )
+    return await svr.read_event_results(
+        _DrawsTheVerticalCards(page, svr.EVENT_RESULT_CARD, _event_card)
+    )
+
+
+# ---------------------------------------------------------------------------
 # profile_editor:read_premium_badge -- the badge row, by counts
 # ---------------------------------------------------------------------------
 
@@ -1640,6 +1743,10 @@ DRIVES: dict[str, Callable[..., Any]] = {
     "presence:read_suggested_presence": read_suggested_presence_as_shipped,
     "profile_editor:read_premium_badge": read_premium_badge_as_shipped,
     "recruiter_views:read_recruiter_views": read_recruiter_views_as_shipped,
+    # 2026-10-10 (lane B2): the search verticals' readers, each driven to its
+    # records over its skeleton's result list.
+    "search_vertical_results:read_event_results": read_event_results_as_shipped,
+    "search_vertical_results:read_group_results": read_group_results_as_shipped,
     "server:_attach_recipient_ids": attach_recipient_ids_as_shipped,
     "server:_profile_views_press_counters": profile_views_press_counters_as_shipped,
     "threads:composer_holds": threads_composer_holds_as_shipped,

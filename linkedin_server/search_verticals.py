@@ -16,10 +16,22 @@ test searches. It serves ``N 104`` (companies), ``N 161`` and ``M C70``
 The people vertical is ``people_search.py``'s, and this module does not
 compose it.
 
-## WHY NOTHING IN THE PACKAGE CALLS THIS YET
+## WHO CALLS THIS, SINCE 2026-10-10
+
+The live lane captured a groups and an events results page (sessions 2 and
+3), and lane B2 built their reader over those captures,
+``search_vertical_results``, and the two tools that open them,
+``server.linkedin_search_groups`` (``N 161``) and
+``server.linkedin_search_events`` (``N 179``) -- reader and tools in ONE
+commit, as the condition below requires, with the orphan ruling deleted in it.
+The companies word is still opened by nothing: no companies page has been
+captured. What follows was written while nothing called this module, and
+still holds for that word.
+
+## WHY NOTHING IN THE PACKAGE CALLED THIS UNTIL THEN
 
 READERS HERE ARE BUILT AGAINST CAPTURES ONLY, AND NONE OF THESE THREE PAGES
-HAS BEEN CAPTURED. So this is the ADDRESS half of each row and nothing more:
+HAD BEEN CAPTURED. So this is the ADDRESS half of each row and nothing more:
 the exact page a capture must load, composed by the code the reader will
 later be handed, so that the capture and the reader can never disagree about
 which address they meant.
