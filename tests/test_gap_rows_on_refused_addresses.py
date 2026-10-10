@@ -144,7 +144,10 @@ SCRIPT = ROOT / "scripts" / "check_gap_rows_on_refused_addresses.py"
 #: WRITE whose upload verb is unbuilt; P P15 waits on a capture. Measured by
 #: running the shipped walk against the lane's base boundary and against this
 #: one and diffing the two row lists: exactly those two, nothing else moved.
-EXPECTED_GAP_ROWS = 76
+#: 75 ON LANE A'S APPLICATION OF THE RULINGS OF 2026-10-10, MEASURED: `P M9`
+#: (refused on "job-application") left GAP for EXCLUDED-RULED on
+#: CREDENTIAL-ADJACENT-STAYS-REFUSED.
+EXPECTED_GAP_ROWS = 75
 
 
 def _run(*args: str) -> subprocess.CompletedProcess:

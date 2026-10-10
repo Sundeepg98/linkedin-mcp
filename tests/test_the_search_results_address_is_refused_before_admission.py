@@ -126,7 +126,10 @@ _ADMITTED_BY_THE_LINE: tuple[str, ...] = _ADMITTED_NOW + _ADMITTED_BY_D2
 #: admission stayed the size it was ruled at.
 _STILL_REFUSED: tuple[str, ...] = (
     "https://www.linkedin.com/search/results/all/?keywords=x",
-    "https://www.linkedin.com/search/results/content/?keywords=%23hiring",
+    # The content vertical stood here until 2026-10-10, when
+    # CONTENT-VERTICAL-NOT-ALL-RESULTS admitted it on its own exact line;
+    # the schools vertical, which no ruling reaches, takes its place.
+    "https://www.linkedin.com/search/results/schools/?keywords=x",
 )
 
 #: Every spelling the rows named, on both sides of the line. Used where a

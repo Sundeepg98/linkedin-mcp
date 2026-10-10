@@ -2828,7 +2828,10 @@ MUST_STAY_UNREADABLE = (
     # named. The three below stay: D2 chose four words, not seven.
     "https://www.linkedin.com/search/results/all/?keywords=x",
     "https://www.linkedin.com/search/results/schools/?keywords=x",
-    "https://www.linkedin.com/search/results/content/?keywords=%23hiring",
+    # The content vertical stood here until 2026-10-10, when
+    # CONTENT-VERTICAL-NOT-ALL-RESULTS admitted it on its own line; the jobs
+    # vertical, which no ruling reaches, takes its place.
+    "https://www.linkedin.com/search/results/jobs/?keywords=x",
     # THE FAMILY ROOTS, which are what a prefix pattern would have opened.
     "https://www.linkedin.com/search/",
     "https://www.linkedin.com/search/results/",
