@@ -118,8 +118,11 @@ _RANGE = _MONTH + r" [0-9]{1,2}" + _EN_DASH + r"(?:" + _MONTH + r" )?[0-9]{1,2}"
 _DATED_LABEL = re.compile(r"^Search appearances " + _RANGE + r"$")
 _DATED_PERIOD = re.compile(r"^vs\. " + _RANGE + r"$")
 
-#: The value: ASCII digits, thousands commas allowed. Anchored both ends.
-_VALUE = re.compile(r"^[0-9]{1,3}(?:,[0-9]{3})*$")
+#: The value: ASCII digits -- a plain run, or grouped by thousands commas.
+#: Anchored both ends. MEASURED: 2 and 3 plain digits on the capture; the
+#: longer and grouped forms are LinkedIn's number format elsewhere, accepted
+#: so a larger account does not read None. An abbreviation ("1.2K") reads None.
+_VALUE = re.compile(r"^(?:[0-9]{1,9}|[0-9]{1,3}(?:,[0-9]{3}){1,3})$")
 #: The delta, as drawn: ``<n>%``, no sign (the icon carries it).
 _DELTA = re.compile(r"^(?P<n>[0-9]{1,4})%$")
 
