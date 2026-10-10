@@ -353,4 +353,8 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # linkedin_read_named_profile (ruling NAMED-PROFILE-READ-BEHIND-A-GRANT;
     # census N 178 stays GAP on its capture), measured off the registry and
     # moved with every other count site in the same commit.
-    assert len(_tool_names()) == 61
+    # SIXTY-THREE ON LANE B4, 2026-10-10: two WRITES, the similar-jobs alert
+    # pair (census J 161), linkedin_set_similar_jobs_alert and its inverse
+    # linkedin_unset_similar_jobs_alert, in server.py's lane B4 block --
+    # measured off the registry and moved with every other count site.
+    assert len(_tool_names()) == 63

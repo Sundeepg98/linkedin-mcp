@@ -107,6 +107,9 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_login_browser": ("wait_seconds",),
     "linkedin_logout": ("confirm",),
     "linkedin_mark_company_interest": ("confirm_token", "job_id"),
+    # Lane B4, 2026-10-10 (census J 161): the similar-jobs alert pair.
+    "linkedin_set_similar_jobs_alert": ("confirm_token", "job_id"),
+    "linkedin_unset_similar_jobs_alert": ("confirm_token", "job_id"),
     "linkedin_message_from_profile": ("confirm_token", "profile", "text"),
     "linkedin_my_activity_items": (),
     "linkedin_my_applications": ("limit",),
@@ -484,8 +487,11 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: The read's two new fields (`member_token`, `activity_items`) are not
 #: parameters; `N 30`, `N 85`, `N 172`, `N 31` and `M C32` move only when proven
 #: live.
-PINNED_TOOL_COUNT = 61
-PINNED_PARAMETER_COUNT = 97
+#: SIXTY-THREE AND 101 ON LANE B4, 2026-10-10: `linkedin_set_similar_jobs_alert`
+#: and `linkedin_unset_similar_jobs_alert("job_id", "confirm_token")` bank
+#: census row `J 161` GAP -> COVERED-UNFIRED in the same change.
+PINNED_TOOL_COUNT = 63
+PINNED_PARAMETER_COUNT = 101
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:

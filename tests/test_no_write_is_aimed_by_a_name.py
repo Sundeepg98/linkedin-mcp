@@ -253,6 +253,8 @@ KNOWN_WRITE_TOOLS = frozenset(
         "linkedin_follow_company",
         "linkedin_follow_company_page",
         "linkedin_mark_company_interest",
+        "linkedin_set_similar_jobs_alert",
+        "linkedin_unset_similar_jobs_alert",
         "linkedin_publish_post",
         "linkedin_comment_on_item",
         "linkedin_react_to_item",

@@ -285,6 +285,9 @@ _LEGITIMATE_SHARED_PLACES: frozenset[frozenset[str]] = frozenset(
         # profile -- settling in the one list LinkedIn keeps of every
         # invitation sent. The argument is on the "My Network" owner entry.
         frozenset({"send_invitation", "connect_from_profile"}),
+        # THE ALERT PAIR, 2026-10-10 (lane B4, J 161), by the same equality
+        # edit: one switch, both directions, settled on the same posting.
+        frozenset({"set_similar_jobs_alert", "unset_similar_jobs_alert"}),
     }
 )
 
@@ -648,8 +651,13 @@ def test_the_action_set_is_the_one_this_file_was_measured_against():
     # SEVENTEEN SINCE LANE L5'S ORDER OF 2026-09-27 23:36: ``send_message``
     # RETIRED (aimed by a name). No row was re-derived for it -- an action
     # leaving takes its rows with it -- and its two owner entries above went.
-    assert len(writes.PERFORMABLE) == 17, (
-        "writes.PERFORMABLE holds %d actions, not the 17 this file was "
+    # NINETEEN FROM LANE B4, 2026-10-10: ``set_similar_jobs_alert`` and its
+    # inverse ``unset_similar_jobs_alert``. Their four rows were read: the
+    # two ``_WHERE_TO_LOOK`` values are one place (the switch on the posting,
+    # or his job alerts), a third sanctioned shared pair above; the two
+    # ``_VERIFIED_FROM`` rows are one row (a fresh render of the posting).
+    assert len(writes.PERFORMABLE) == 19, (
+        "writes.PERFORMABLE holds %d actions, not the 19 this file was "
         "measured against: %s. Re-derive the phrase owners in this file for "
         "the new action, then update this count."
         % (len(writes.PERFORMABLE), sorted(writes.PERFORMABLE))

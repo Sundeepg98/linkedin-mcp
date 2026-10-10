@@ -101,6 +101,7 @@ from linkedin_server.writes import (
 # on each -- which is the standard this package holds every measurement to.
 from tests.test_apply_modal_fixture import VIEWPORT, over  # noqa: F401
 from tests.test_editor_fields import TWO_DIALOG_HTML
+from tests.test_similar_jobs_alert import ON_WORLD as ALERT_ON_WORLD  # noqa: E402
 from tests.test_follow_company_page import (
     COMPANY_PAGE_FOLLOW_ID,
     COMPANY_PAGE_FOLLOW_MARKUP,
@@ -248,6 +249,20 @@ REACHED: dict[str, tuple[str, str, str]] = {
     "mark_company_interest": (
         "tests/fixtures/job_detail_hydrated.html",
         markup("job_detail_hydrated"),
+        JOB,
+    ),
+    # 2026-10-10 (census row ``J 161``, lane B4). A TRACKED capture, live
+    # session 8's posting: the switch reads Off, and the preview and the
+    # click read it through ONE verdict, ``job_alert_switch.read_state``.
+    # The inverse is reached over the DERIVED On world its own tests read.
+    "set_similar_jobs_alert": (
+        "tests/fixtures/live8/posting.html",
+        markup("live8/posting"),
+        JOB,
+    ),
+    "unset_similar_jobs_alert": (
+        "tests/test_similar_jobs_alert.py::ON_WORLD",
+        ALERT_ON_WORLD,
         JOB,
     ),
     # THE FIFTEENTH, 2026-09-24 (census row ``M M10``; the fourteenth on
@@ -550,8 +565,10 @@ def test_every_performable_action_is_either_reached_or_declared_unreachable():
     # 18 -> 17 later the same day (lane L5, the orchestrator's order of 23:36):
     # ``send_message`` RETIRED -- it was aimed by a name -- and its row left
     # ``REACHED`` with it. MEASURED.
-    assert len(PERFORMABLE) == 17, sorted(PERFORMABLE)
-    assert len(REACHED) == 17, sorted(REACHED)
+    # 17 -> 19 on 2026-10-10 (lane B4): the similar-jobs alert pair shipped,
+    # reached over session 8's tracked posting and its derived On world.
+    assert len(PERFORMABLE) == 19, sorted(PERFORMABLE)
+    assert len(REACHED) == 19, sorted(REACHED)
     assert len(CANNOT_REACH) == 0, sorted(CANNOT_REACH)
 
 

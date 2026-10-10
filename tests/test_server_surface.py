@@ -135,6 +135,8 @@ SANCTIONED_WRITE_TOOLS = frozenset(SANCTIONED_WRITES) & {
     # posting. A key in writes.SANCTIONED_WRITES like the rest, so the
     # intersection still exempts nothing the write boundary has not admitted.
     "linkedin_mark_company_interest",
+    "linkedin_set_similar_jobs_alert",
+    "linkedin_unset_similar_jobs_alert",
     # THE FIFTEENTH, 2026-09-24 (census rows M M10 and, by D6, M M17; the
     # fourteenth on lane L5's branch, before lane L7's merge landed): a
     # reply inside a conversation he names by thread id. Its NAME announces
@@ -407,6 +409,8 @@ EXPECTED_TOOLS = {
     # on and adds no entry to readonly.SANCTIONED_MUTATIONS -- the click is
     # perform()'s existing one.
     "linkedin_mark_company_interest",
+    "linkedin_set_similar_jobs_alert",
+    "linkedin_unset_similar_jobs_alert",
     "linkedin_publish_post",
     "linkedin_comment_on_item",
     # THE THIRTY-SIXTH, 2026-09-03. A READ that SHIPS REFUSING: the read
@@ -904,7 +908,11 @@ async def test_the_surface_is_exactly_the_sixty_one_tools(tools):
     # SIXTY-ONE ON LANE L5'S ORDER OF 2026-09-28 08:06: linkedin_read_named_profile,
     # a READ, so the split moves on its read side and the write set holds.
     # MEASURED off mcp.list_tools().
-    assert len(tools) == 61
+    # SIXTY-THREE ON LANE B4, 2026-10-10: two WRITES, the similar-jobs alert
+    # pair (census J 161), linkedin_set_similar_jobs_alert and its inverse
+    # linkedin_unset_similar_jobs_alert, in server.py's lane B4 block --
+    # measured off the registry and moved with every other count site.
+    assert len(tools) == 63
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -932,6 +940,8 @@ async def test_the_surface_is_exactly_the_sixty_one_tools(tools):
         # (linkedin_send_message RETIRED 2026-09-27, lane L5: aimed by a name.)
         "linkedin_follow_company_page",
         "linkedin_mark_company_interest",
+        "linkedin_set_similar_jobs_alert",
+        "linkedin_unset_similar_jobs_alert",
         "linkedin_send_reply",
         "linkedin_withdraw_from_group",
         "linkedin_connect_from_profile",
@@ -1177,6 +1187,8 @@ async def test_the_exemption_covers_only_the_names_on_it(tools):
         # (linkedin_send_message RETIRED 2026-09-27, lane L5: aimed by a name.)
         "linkedin_follow_company_page",
         "linkedin_mark_company_interest",
+        "linkedin_set_similar_jobs_alert",
+        "linkedin_unset_similar_jobs_alert",
         "linkedin_send_reply",
         "linkedin_withdraw_from_group",
         "linkedin_connect_from_profile",

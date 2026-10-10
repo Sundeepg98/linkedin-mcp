@@ -11424,6 +11424,75 @@ async def linkedin_page_plugin_snippet(page_id: str) -> dict[str, Any]:
         return _error(exc)
 
 
+# ---- lane B4 ----
+# The jobs build lane of 2026-10-10. Every tool lane B4 registers is in this
+# one contiguous block, so four lanes editing this file in parallel meet here
+# and nowhere else.
+
+
+@mcp.tool()
+async def linkedin_set_similar_jobs_alert(
+    job_id: str, confirm_token: str = ""
+) -> dict[str, Any]:
+    """Turn ON the alert for jobs similar to one posting -- a WRITE.
+
+    Presses the posting's own "Set alert for similar jobs" switch, which makes
+    LinkedIn send you new jobs like this one. A job alert is your own saved
+    query; nobody else sees it. Same two-step shape and the same five gates as
+    ``linkedin_save_job``: no ``confirm_token``, no action -- you get a block
+    to read and a token that works ONCE, only for this posting, only for this
+    verb, within two minutes. Census row ``J 161``.
+
+    THE PREVIEW READS the posting: exactly one block headed "Set alert for
+    similar jobs", exactly one switch in it wearing LinkedIn's label, the word
+    beside it ``Off``, and a trial press showing a click can reach the toggle.
+    A switch already ``On`` is refused -- turning it off is
+    ``linkedin_unset_similar_jobs_alert``.
+
+    AFTER THE PRESS the posting is re-rendered and the switch read again:
+    ``On`` means the alert was stored, ``Off`` that it was not
+    (``performed: false``). The ``On`` shape has never been captured, so that
+    reading is derived and the first supervised use measures it.
+
+    Args:
+        job_id: the numeric LinkedIn job id whose similar jobs you want alerts for.
+        confirm_token: leave empty to preview. Pass the token from that
+            preview to actually press the switch.
+    """
+    try:
+        return await _write_tool("set_similar_jobs_alert", job_id, confirm_token)
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_unset_similar_jobs_alert(
+    job_id: str, confirm_token: str = ""
+) -> dict[str, Any]:
+    """Turn OFF the alert for jobs similar to one posting -- a WRITE, the inverse of
+    ``linkedin_set_similar_jobs_alert``.
+
+    Presses the same switch from ``On``. Same two steps and the same gates: no
+    ``confirm_token``, no action, and the token works once, for this posting
+    and this verb, within two minutes. A switch reading ``Off`` is refused --
+    turning it on is ``linkedin_set_similar_jobs_alert``. After the press the
+    posting is re-rendered and the switch read again; ``Off`` means the alert
+    was turned off. Census row ``J 161``.
+
+    Args:
+        job_id: the numeric LinkedIn job id whose similar-jobs alert to turn off.
+        confirm_token: leave empty to preview. Pass the token from that
+            preview to actually press the switch.
+    """
+    try:
+        return await _write_tool("unset_similar_jobs_alert", job_id, confirm_token)
+    except Exception as exc:
+        return _error(exc)
+
+
+# ---- end lane B4 ----
+
+
 def main() -> None:  # pragma: no cover - process entry point
     logging.basicConfig(level=logging.WARNING)
     mcp.run()

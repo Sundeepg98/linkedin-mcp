@@ -39,6 +39,14 @@ a label still finds its control). Four additions, made HERE only:
 5. HEADINGS -- a heading's own keyed text becomes ``SYNTHETIC_HEADING``
    rather than ``x``, so headings stay distinct from body lines as they are
    live (see the constant for the measurement that forced it).
+6. THE POSTING READER'S ANCHORS -- every posting write reads the posting's
+   title, employer and description (``dom.read_job_posting``) before a gate
+   renders, and the plain reduction erased all four anchors it uses: the
+   ``<title>`` (rewritten to ``SYNTHETIC_DOCUMENT_TITLE``), the employer
+   block's ``Company, <employer>.`` label (rewritten, as in 2), the
+   ``About the job`` heading (kept, 1) and the SDUI component names, among
+   them the description slot ``dom.JOB_DESCRIPTION_SLOT`` waits for (kept
+   whole when they match a closed code-identifier shape).
 
 THE KEY is a FIXED public one. ``tracked_copy`` drops every text hash; the only
 hashes left are id references, which name controls and never people, and a
@@ -88,7 +96,20 @@ EXTRA_KEEP: tuple[str, ...] = (
     "People you can reach out to",
     "Easy Apply",
     "Insights about this job" + RSQUO + "s applicants",
+    # The posting reader's own anchor (shape.JOB_BODY_HEADING): every posting
+    # write reads its facts through it before any gate renders.
+    "About the job",
 )
+
+#: LinkedIn's SDUI component names, CODE identifiers and never member data,
+#: kept whole: the posting reader waits on one of them
+#: (``dom.JOB_DESCRIPTION_SLOT``, the ``aboutTheJob`` component) before it
+#: reads anything. A closed shape, so nothing else rides through.
+_SDUI_COMPONENT = re.compile(r"^com\.linkedin\.sdui\.[A-Za-z0-9_.]{1,200}$")
+
+#: The document title, as LinkedIn writes it for a posting
+#: (``shape.job_title_from_document_title``): ``<title> | <employer> | LinkedIn``.
+SYNTHETIC_DOCUMENT_TITLE = "Example Job Title | Example Org | LinkedIn"
 
 #: The declared synthetic values. ``Example Org`` and ``Example Job Title``
 #: carry the token ``Example``, the fixtures' convention for invented text.
@@ -99,6 +120,9 @@ ALERT_LABEL_PREFIX = "Set alert for similar jobs as "
 SYNTHETIC_LABELS: dict[str, str] = {
     COMPANY_PANEL_PREFIX: COMPANY_PANEL_PREFIX + SYNTHETIC_EMPLOYER,
     ALERT_LABEL_PREFIX: ALERT_LABEL_PREFIX + SYNTHETIC_TITLE,
+    # The employer block's own label (``dom.COMPANY_BLOCK``), from which the
+    # posting reader takes the employer: "Company, <employer>."
+    "Company, ": "Company, " + SYNTHETIC_EMPLOYER + ".",
 }
 
 #: The prose after an anchor, replaced in order, one text node each.
@@ -130,7 +154,7 @@ def synthetic_number(text: str) -> str:
 
 
 def _rewrite_labels(raw: str) -> tuple[str, dict[str, int]]:
-    """Rewrite the two name-carrying values before shaping; count each."""
+    """Rewrite the name-carrying values before shaping; count each."""
     counts: dict[str, int] = {}
     out = raw
     for prefix, synthetic in SYNTHETIC_LABELS.items():
@@ -141,6 +165,9 @@ def _rewrite_labels(raw: str) -> tuple[str, dict[str, int]]:
         pattern_text = re.compile(r">(\s*)" + re.escape(prefix) + r"[^<]*<")
         out, n_text = pattern_text.subn(">" + r"\1" + synthetic + "<", out)
         counts[prefix.strip()] = n_attr + n_text
+    # The document title carries the posting's title and the employer.
+    out, n_title = re.subn(r"<title>[^<]*</title>", "<title>" + SYNTHETIC_DOCUMENT_TITLE + "</title>", out)
+    counts["<title>"] = n_title
     return out, counts
 
 
@@ -166,7 +193,23 @@ class PostingSkeleton(s2._Skeleton):
         self.counts = {"numbers": 0, "anchored prose": 0, "headings made synthetic": 0}
 
     def handle_starttag(self, tag, attrs) -> None:
-        super().handle_starttag(tag, attrs)
+        kept: list[tuple[str, str]] = []
+        rest = []
+        for name, value in attrs:
+            if name == "data-sdui-component" and value and _SDUI_COMPONENT.match(value):
+                kept.append((name, value))
+            else:
+                rest.append((name, value))
+        super().handle_starttag(tag, rest)
+        if kept and not self.dropping and tag not in s2._DROPPED and self.out:
+            # The parent wrote "<tag ...>"; the kept component names go in
+            # before its closing bracket, verbatim (a closed shape, escaped).
+            extra = "".join(
+                " " + name + '="' + html_escape.escape(value, quote=True) + '"'
+                for name, value in kept
+            )
+            self.out[-1] = self.out[-1][:-1] + extra + ">"
+            self.counts["sdui components kept"] = self.counts.get("sdui components kept", 0) + len(kept)
         if tag in _HEADINGS and not self.dropping:
             self.in_heading += 1
 
@@ -216,7 +259,9 @@ def build(raw: str) -> tuple[str, dict[str, object]]:
         raise SystemExit(f"refused: {len(missing)} EXTRA_KEEP word(s) not drawn in the capture")
     rewritten, label_counts = _rewrite_labels(raw)
     furniture = s2.FURNITURE
-    s2.FURNITURE = frozenset(furniture | set(EXTRA_KEEP) | set(SYNTHETIC_LABELS.values()))
+    s2.FURNITURE = frozenset(
+        furniture | set(EXTRA_KEEP) | set(SYNTHETIC_LABELS.values()) | {SYNTHETIC_DOCUMENT_TITLE}
+    )
     try:
         parser = PostingSkeleton(FIXTURE_KEY)
         parser.feed(rewritten)

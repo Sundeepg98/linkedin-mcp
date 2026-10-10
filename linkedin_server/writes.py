@@ -216,6 +216,7 @@ from linkedin_server import (
     field_restore,
     group_leave,
     item_author,
+    job_alert_switch,
     landing,
     named_profile,
     people_seam,
@@ -1055,6 +1056,116 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "section's control wears once signalled, which is the anchor the "
             "removal (P I15) needs and the only evidence that a removal exists "
             "on this surface at all."
+        ),
+    ),
+    # THE SIMILAR-JOBS ALERT, ON AND OFF, 2026-10-10 (lane B4, census row
+    # ``J 161``), each the other's inverse and built in ONE change, under
+    # ``HIS-OWN-CURATION-NOT-OUTWARD``: a job alert is his own saved query,
+    # sent to nobody. The switch, its readings and its verdicts live in
+    # ``job_alert_switch``; these entries and the arms below delegate. MEASURED
+    # on live session 8's posting (tests/fixtures/live8/posting.html): one block
+    # headed "Set alert for similar jobs", one ``input[role=switch]`` in it
+    # labelled with ``dom.JOB_ALERT_HEADING_PREFIX``, the word "Off" beside it.
+    # The ON shape is DERIVED, and so is whether a click on the toggle reaches
+    # it -- the preview measures that with a trial press. Named on ``set``,
+    # LinkedIn's own verb here ("Set alert"), which the naming law admits, and
+    # its inverse on ``unset`` (un + an original verb).
+    "linkedin_set_similar_jobs_alert": WriteSpec(
+        action="set_similar_jobs_alert",
+        tool_name="linkedin_set_similar_jobs_alert",
+        url_template="https://www.linkedin.com/jobs/view/{target}/",
+        url_pattern=re.compile(r"^https://www\.linkedin\.com/jobs/view/(\d{6,})/$"),
+        exempt_substring=None,
+        summary=(
+            "Turn on LinkedIn's alert for jobs similar to one posting, from the "
+            "posting's own switch."
+        ),
+        from_state="alert_off",
+        to_state="alert_on",
+        target_kind="job_id",
+        state_from="posting_alert_switch",
+        direction_source=(
+            "the posting's own 'Set alert for similar jobs' switch, read off the "
+            "page this action clicks on, at no extra page load: exactly one "
+            "block with that heading, exactly one input switch in it and on the "
+            "page wearing LinkedIn's label prefix, and the word beside it (Off) "
+            "agreeing with the switch's checked property. MEASURED on live "
+            "session 8's posting, 2026-10-10."
+        ),
+        wrong_state_note=(
+            "This acts only from the OFF reading. A switch already reading On is "
+            "refused, not pressed: pressing it would turn the alert OFF, which "
+            "is linkedin_unset_similar_jobs_alert's act, not this one's."
+        ),
+        reversibility="STILL-UNKNOWN whether the same switch turns it off again: the inverse is built, the On shape is not measured",
+        reversibility_measured=False,
+        reversibility_class="STILL-UNKNOWN",
+        reversibility_evidence=(
+            "DERIVED, NOT MEASURED. One control carries both states -- an input "
+            "switch, its state its checked property and the word beside it -- "
+            "and linkedin_unset_similar_jobs_alert presses the same control "
+            "from On. The On shape has never been captured."
+        ),
+        reversible_by=(
+            "this server: linkedin_unset_similar_jobs_alert, built in the same "
+            "change, presses the same switch from On."
+        ),
+        residue=(
+            "WHETHER ONE PRESS COMPLETES THE ACT is unmeasured -- LinkedIn may "
+            "draw a further step -- and whether a click on the toggle reaches "
+            "the switch at all: the same LinkedIn toggle in his profile editor "
+            "drew an input no click could reach (P B9, session 8). The preview "
+            "runs a trial press, and the fresh render after the press says "
+            "whether the alert landed."
+        ),
+        reversibility_procedure=(
+            "One supervised round trip on a posting HE names: set (preview, "
+            "press, fresh render reading On), then unset (preview, press, fresh "
+            "render reading Off) in the same session; a failed unset is STOP-ALL."
+        ),
+    ),
+    "linkedin_unset_similar_jobs_alert": WriteSpec(
+        action="unset_similar_jobs_alert",
+        tool_name="linkedin_unset_similar_jobs_alert",
+        url_template="https://www.linkedin.com/jobs/view/{target}/",
+        url_pattern=re.compile(r"^https://www\.linkedin\.com/jobs/view/(\d{6,})/$"),
+        exempt_substring=None,
+        summary=(
+            "Turn off LinkedIn's alert for jobs similar to one posting, from the "
+            "posting's own switch."
+        ),
+        from_state="alert_on",
+        to_state="alert_off",
+        target_kind="job_id",
+        state_from="posting_alert_switch",
+        direction_source=(
+            "the same switch as linkedin_set_similar_jobs_alert, read the same "
+            "way; this acts only from the On reading, which is DERIVED (no "
+            "capture holds the switch on)."
+        ),
+        wrong_state_note=(
+            "This acts only from the On reading. A switch reading Off is "
+            "refused, not pressed: pressing it would turn the alert ON, which "
+            "is linkedin_set_similar_jobs_alert's act."
+        ),
+        reversibility="STILL-UNKNOWN whether the same switch turns it on again: the inverse is built, the On shape is not measured",
+        reversibility_measured=False,
+        reversibility_class="STILL-UNKNOWN",
+        reversibility_evidence=(
+            "DERIVED, NOT MEASURED: the same control, the other direction."
+        ),
+        reversible_by=(
+            "this server: linkedin_set_similar_jobs_alert presses the same "
+            "switch from Off."
+        ),
+        residue=(
+            "the same as linkedin_set_similar_jobs_alert's: one press, and "
+            "whether the toggle can be reached, are measured on the first "
+            "supervised round trip."
+        ),
+        reversibility_procedure=(
+            "the same round trip as linkedin_set_similar_jobs_alert, this half "
+            "second."
         ),
     ),
     # LEAVING ONE GROUP, 2026-09-27 (census rows ``M C63`` and ``N 64``, one
@@ -3798,6 +3909,10 @@ NAMED_PROFILE_ACTIONS: frozenset[str] = frozenset(
 #: controls in 16 captures, so a second match at press time throws.
 STRICT_PRESS_ACTIONS: frozenset[str] = NAMED_PROFILE_ACTIONS | frozenset(
     {
+        # 2026-10-10 (lane B4, J 161): the toggle container of the one switch
+        # the reader counted in its block; a second match at press time throws.
+        "set_similar_jobs_alert",
+        "unset_similar_jobs_alert",
         "mark_company_interest",
         "follow_company_page",
         "update_profile_field",
@@ -5147,6 +5262,42 @@ async def observe(
             same_page_as_action=True,
         )
 
+    if spec.state_from == "posting_alert_switch":
+        # ONE load, of the posting the click lands on -- the ``posting_page``
+        # shape, with the similar-jobs alert switch read instead of the follow
+        # control (lane B4, J 161). The posting is identified first, as every
+        # posting write does; the switch is then read in its own block, and a
+        # TRIAL press on the toggle container -- Playwright's actionability
+        # checks, nothing dispatched -- is recorded beside the state, because
+        # the same LinkedIn toggle drew an unreachable input elsewhere (P B9).
+        url = str(spec.url_template or "").format(target=target)
+        landed = await _load(navigator, page, url, surface="job posting")
+        facts = await _read_posting_facts(page, target, navigator=navigator)
+        switch, state, why = await job_alert_switch.read_state(page)
+        trial = await job_alert_switch.trial_press(page)
+        facts["alert_switch"] = switch
+        facts["alert_switch_press"] = trial
+        if state in (job_alert_switch.ALERT_OFF, job_alert_switch.ALERT_ON) and not trial.get(
+            "actionable"
+        ):
+            state, why = (
+                UNKNOWN,
+                "the switch reads "
+                f"{state}, but its toggle did not pass a trial press "
+                f"({trial.get('toggles')} toggle(s), {trial.get('error') or 'not actionable'}): "
+                "a click could not reach it, so nothing would be pressed.",
+            )
+        return _record(
+            spec,
+            target=target,
+            facts=facts,
+            facts_url=landed,
+            state=state,
+            state_why=why,
+            state_url=landed,
+            same_page_as_action=True,
+        )
+
     if spec.state_from == "groups_memberships":
         # ONE load, of the page the click lands on, and the url is the spec's
         # CONSTANT -- the group id never enters a navigation. The reading is
@@ -6464,6 +6615,25 @@ PERFORMABLE: frozenset[str] = frozenset(
         # readonly.SANCTIONED_MUTATIONS -- so for those the missing thing is a
         # mutation class nobody has sanctioned, not a url.
         "update_setting",
+        # THE SIMILAR-JOBS ALERT PAIR, 2026-10-10 (lane B4, census row J 161),
+        # under HIS-OWN-CURATION-NOT-OUTWARD, each the other's inverse:
+        #
+        #   a measured surface   /jobs/view/<id>/, the address save, follow and
+        #                        "I'm interested" already act on
+        #   a measured anchor    one input[role=switch] labelled with
+        #                        dom.JOB_ALERT_HEADING_PREFIX in the one block
+        #                        headed "Set alert for similar jobs", the word
+        #                        "Off" beside it (live session 8)
+        #   an aimable target    the toggle container that holds that one
+        #                        switch, trial-pressed at preview and click
+        #   a real verification  a fresh render of the posting, re-reading the
+        #                        switch: one control carries both states
+        #   no new permission    the click is perform()'s existing one
+        #
+        # WHAT IT CANNOT SAY is the ON shape -- never captured -- so unset's
+        # origin is DERIVED. ENABLING IS NOT FIRING: no grant was issued.
+        "set_similar_jobs_alert",
+        "unset_similar_jobs_alert",
     }
 )
 
@@ -6895,6 +7065,11 @@ def anchor_label_for(
         # control's name carries no company; identity comes from the card it
         # sits in, checked at preview and again at click time.
         return company_interest.OFF_LABEL
+    if spec.action in ("set_similar_jobs_alert", "unset_similar_jobs_alert"):
+        # A PREFIX, as the Page follow's: LinkedIn writes the posting's title
+        # into the switch's label. The switch is found by that prefix INSIDE
+        # its one block, in the page; the title never reaches this process.
+        return dom.JOB_ALERT_HEADING_PREFIX
     if spec.action == "withdraw_from_group":
         # THE ITEM THAT PERFORMS THE LEAVE, exact, measured on all five
         # membership rows' menus. The FIRST press is the row's disclosure, and
@@ -7311,6 +7486,11 @@ _WHERE_TO_LOOK: dict[str, str] = {
     # (this server may not open it); the conversation settles a message.
     "connect_from_profile": "My Network, then Manage, then Sent",
     "message_from_profile": "your conversation with them, in your LinkedIn messages",
+    # 2026-10-10 (lane B4, J 161). The switch on the posting he named, which is
+    # also the surface the verification re-reads; his job alerts are listed on
+    # LinkedIn's alerts page too, which he can open himself.
+    "set_similar_jobs_alert": "the 'Set alert for similar jobs' switch on that posting, or your job alerts",
+    "unset_similar_jobs_alert": "the 'Set alert for similar jobs' switch on that posting, or your job alerts",
 }
 
 #: THE ACTIONS THAT ARE ACTUAL TOGGLES, for the one sentence that is only true
@@ -7326,7 +7506,10 @@ _WHERE_TO_LOOK: dict[str, str] = {
 #: applied to the receipt.
 _TOGGLE_ACTIONS: frozenset[str] = frozenset(
     {"save_job", "unsave_job", "follow_company", "unfollow_company",
-     "react_to_item", "follow_company_page"}
+     "react_to_item", "follow_company_page",
+     # 2026-10-10, lane B4: one switch, both states -- a retry on a press that
+     # did land turns the alert back the other way.
+     "set_similar_jobs_alert", "unset_similar_jobs_alert"}
 )
 
 
@@ -7428,6 +7611,14 @@ _VERIFIED_FROM["mark_company_interest"] = (
     "means the interest was not signalled -- and its positive says only that "
     "the control moved, because the label it moves to has never been captured."
 )
+_VERIFIED_FROM["set_similar_jobs_alert"] = (
+    "THE SAME POSTING, RE-RENDERED by a fresh navigation, and the same switch "
+    "read again: one control carries both states, so its reading after the "
+    "press is strong both ways -- On means the alert was stored, Off that it "
+    "was not. It is a new render from LinkedIn rather than an independent "
+    "witness; his job alerts page would be one, and he can open it himself."
+)
+_VERIFIED_FROM["unset_similar_jobs_alert"] = _VERIFIED_FROM["set_similar_jobs_alert"]
 _VERIFIED_FROM["send_reply"] = (
     "THE SAME CONVERSATION, LOADED FRESH, and there is no other surface: the "
     "conversation is the only place a reply lives. What makes it evidence "
@@ -7990,6 +8181,25 @@ async def _live_control(
         if state != company_interest.NOT_SIGNALLED:
             return (state, why, "")
         return (state, why, company_interest.OFF_CONTROL_IN_CARD)
+
+    if spec.action in ("set_similar_jobs_alert", "unset_similar_jobs_alert"):
+        # THE SAME READER THE PREVIEW USED, ON THE SAME PAGE: freshness, not a
+        # second source. The posting is re-identified, the switch re-read in
+        # its block, and the toggle trial-pressed again; the selector is the
+        # module's CONSTANT, which strict mode holds to the one toggle.
+        await _read_posting_facts(page, grant.target)
+        _switch, state, why = await job_alert_switch.read_state(page)
+        if state not in (job_alert_switch.ALERT_OFF, job_alert_switch.ALERT_ON):
+            return (state, why, "")
+        trial = await job_alert_switch.trial_press(page)
+        if not trial.get("actionable"):
+            return (
+                UNKNOWN,
+                "the switch's toggle did not pass a trial press at click time "
+                f"({trial.get('toggles')} toggle(s), {trial.get('error') or 'not actionable'}).",
+                "",
+            )
+        return (state, why, job_alert_switch.TOGGLE)
 
     if spec.action == "withdraw_from_group":
         # THE SAME READING AND THE SAME VERDICT THE PREVIEW TOOK, on the Groups
@@ -8824,6 +9034,44 @@ async def _verify_after(
             "the action a measured surface, or declare the outcome "
             "unverifiable on its spec and say why."
         )
+    if spec.action in ("set_similar_jobs_alert", "unset_similar_jobs_alert"):
+        # FIRST, WHAT THE PRESS LEFT IN PLACE -- counts, the closed word and the
+        # property only, and it decides nothing; then A FRESH RENDER of the
+        # same posting, whose switch carries both states, so its reading is
+        # strong both ways (lane B4, J 161).
+        in_place = await job_alert_switch.read_switch(page)
+        left = (
+            " Before the fresh render, the switch read "
+            f"{in_place.get('state_word')!r} beside a checked property of "
+            f"{in_place.get('checked')!r}, with "
+            f"{coerce.as_count(in_place.get('prefixed_in_block'))} switch(es) in its block."
+        )
+        url = str(spec.url_template).format(target=url_target_of(spec, grant.target))
+        landed = await _load(navigator, page, url, surface="job posting")
+        try:
+            _assert_landed_on_target(spec, grant, landed)
+        except WriteAttemptError as exc:
+            return (
+                UNKNOWN,
+                "the fresh render did not land on the posting this grant names "
+                f"({type(exc).__name__}); the landing is withheld, and what is "
+                f"safe to say about it is {landing.withheld(landed)}. So it says "
+                "nothing about this alert." + left,
+                url,
+            )
+        try:
+            await _read_posting_facts(page, grant.target, navigator=navigator)
+        except WriteAttemptError as exc:
+            return (
+                UNKNOWN,
+                "the posting could not be read back after the press "
+                f"({type(exc).__name__}), so its switch says nothing about this "
+                "alert." + left,
+                url,
+            )
+        reading = await job_alert_switch.read_switch(page)
+        state, why = job_alert_switch.verification_verdict(reading, str(spec.to_state))
+        return (state, why + left, url)
     if spec.action == "mark_company_interest":
         # FIRST, WHAT THE PRESS LEFT IN PLACE -- counts only, and it decides
         # nothing. It is the one reading that can say a further step OPENED (a
