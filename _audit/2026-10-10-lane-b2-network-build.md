@@ -231,7 +231,39 @@ orchestrator's call, put to him as `Q-ORG-IDENTITY` in the ledger's record.
 
 ## 6. N 161 and N 179: the groups and events searches
 
-PENDING: the child build (section 12) has not reported.
+THE CAPTURES, measured offline by shape (session 2's groups search, session
+3's events search; tracked copies `tests/fixtures/live2/n161.html` and
+`tests/fixtures/live3/n179.html`): the groups page draws NINE results, each a
+relative `/groups/<digits>/` link (5 to 8 digits) wrapping one
+`role=listitem`, the title its first paragraph, a Join control beside it; the
+events page draws THIRTEEN, each a `role=listitem` holding an
+`/events/<19 digits>/` link that holds a second link to the same event, the
+title that inner link's own text. Both are what `people_data.Group` and
+`people_data.Event` declare: a title and a canonical link.
+
+THE BUILD (child A, section 12): `linkedin_server/search_vertical_results.py`,
+`read_group_results` and `read_event_results`, modelled on
+`people_results.read_result_people` -- every card resolved once to a handle
+before any text is read, the title read only from the measured node, the
+link read again after the text and a moved card skipped and counted, one
+record per canonical link, visible only, at most 25 cards, failures counted
+by exception type, every skip reason a closed literal, nothing loaded,
+pressed or stored. Two tools in this lane's server block,
+`linkedin_search_groups(keywords)` and `linkedin_search_events(keywords)`,
+each composing its one page with `search_verticals.compose`, putting it to
+the read boundary before a session opens, loading it once and returning the
+records with non-text denominators; both joined `people_data.PEOPLE_TOOLS`,
+and `search_verticals`' orphan entry was deleted in the same commit, as its
+own docstring required of its first importer. The fixtures
+`tests/fixtures/synthetic/search_groups_live.html` and
+`search_events_live.html` are written from the keyed skeletons by
+`scripts/_build_search_vertical_fixtures.py`, which extends the named-profile
+builder: synthetic ids of the same length, every title reduced to shape, a
+fixed point, and a structure digest equal to the tracked copy's.
+
+RED FIRST AND THE MITIGATIONS: `tests/test_search_vertical_results.py` holds
+each behaviour and each of the six `PEOPLE-DATA-MITIGATIONS`, with a control
+that can fail beside each (section 12 has the child's red runs).
 
 ## 7. N 102: a Page's People-tab insights
 
@@ -244,7 +276,30 @@ an `h2` of 17 letters and 4 digits in 24 characters -- and one section holding
 roster's own section of 225 member links. The counts are drawn on the first
 page, which is this row's own condition.
 
-PENDING: the child build (section 12) has not reported.
+THE STRUCTURE, measured by child B on the same skeleton: the module is one
+carousel section of six list items, one per category, each an `h3` and its
+buckets; a bucket is an `a[role=checkbox]` (a facet filter of the roster,
+never pressed) holding exactly two paragraphs, the label then the count, on
+all 27 buckets -- five each under the five verified headings, two under a
+sixth heading of 18 letters that is not read. The only further control is the
+carousel's `Next`, a press, never pressed. The roster sits in another list:
+75 cards, 225 member links, in no heading's container.
+
+THE BUILD (child B, section 12): a declared record, `people_data.Aggregate`
+-- a category from a closed vocabulary of the five headings, a label
+sanitised and capped as a title, a non-negative integer count -- and
+`linkedin_server/company_people_insights.py`, whose reader finds the module by
+its exact headings, reads buckets only inside a heading's own container,
+parses a count only from a digit run, and never reads a member link; and the
+tool `linkedin_company_people_insights(organization_id)` in this lane's
+server block, composing the People tab with `member_rosters.compose` (its
+first importer; the orphan entry deleted with it) and loading one page. The
+fixture `tests/fixtures/synthetic/company_people_insights.html` is written
+from the keyed skeleton by `scripts/_build_company_people_insights_fixture.py`,
+which extends the named-profile builder: the five headings verbatim, every
+count a synthetic number of the same digit count, every label reduced to
+shape, the roster cut to three synthetic cards; a fixed point, and a source
+digest equal to the tracked copy's.
 
 ## 8. The census moves, and the pins
 

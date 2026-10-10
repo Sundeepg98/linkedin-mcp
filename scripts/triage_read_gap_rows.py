@@ -208,8 +208,9 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
                           "a personal follow link"),
     # N 79 LEFT 2026-09-27: lane S's names adoption -- the people search
     # returns WHO as people records (COVERED-UNFIRED); see the note below.
-    "N 80": ("BUILDABLE", "", "served by the shipped people-search tool's "
-                              "filter vocabulary"),
+    # N 80 LEFT 2026-10-10 (lane B2): discharged under D6-CAPABILITY-OVER-
+    # AFFORDANCE, COVERED-PROVEN on the people search's live proofs (N 79,
+    # N 194); _audit/2026-10-10-lane-b2-network-build.md section 3.
     # N 81 LEFT 2026-09-28 (lane S, the orchestrator's call of 17:02) -- see
     # LEFT THE READ-GAP SET below.
     "N 82": ("BUILDABLE", "", "served by the shipped people-search tool's "
@@ -245,8 +246,9 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
     "N 104": ("RULING", "", "the non-search half SHIPPED 2026-09-20; the "
                             "'by searching' half needs the companies vertical, "
                             "which the admission deliberately left out"),
-    "N 133": ("PRESS", "", "applying a filter SUBMITS, and the disclosing-press "
-                           "ruling refuses submits by name"),
+    # N 133 LEFT 2026-10-10 (lane B2): discharged under D6, COVERED-PROVEN on
+    # N 134's live view-switch fire, which filtered his viewer data and
+    # restored it; _audit/2026-10-10-lane-b2-network-build.md section 4.
     # "N 134" LEFT 2026-09-24: proven live by the live lane's view switch, so
     # it is no longer a read GAP row.
     "N 161":("RULING", "", "the groups vertical was deliberately left out of "
