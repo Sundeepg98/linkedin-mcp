@@ -240,8 +240,14 @@ def _sweep(rev_range: str) -> tuple[int, str]:
     return rc, ""
 
 
-def git_ci_check(sha: str) -> list[str]:
-    """Clauses 1 and 2 for one pushed commit; an empty list means both held."""
+def git_ci_check(sha: str, *, sweep: bool = True) -> list[str]:
+    """Clauses 1 and 2 for one pushed commit; an empty list means both held.
+
+    ``sweep=False`` answers clause 1 alone. ``scripts/lane_ci.py push`` asks
+    for that and nothing else: the hook asks again with the sweep, and one
+    sweep per push is the whole cost the helper exists to save. The hook path
+    (``main``) never passes it, so the gate itself always sweeps.
+    """
     rc, kind, _err = _git("cat-file", "-t", sha)
     if rc != 0 or kind != "commit":
         return [f"{sha[:12]} is not a commit here ({kind or 'unknown'})"]
@@ -259,6 +265,8 @@ def git_ci_check(sha: str) -> list[str]:
                 "(merge origin/master into the branch first)"]
     if rc != 0:
         return [f"git merge-base --is-ancestor failed (exit {rc}): {err}"]
+    if not sweep:
+        return []
     rev_range = f"{base}..{sha}"
     rc, why = _sweep(rev_range)
     if rc == 0:
@@ -320,8 +328,8 @@ def main(argv: list[str]) -> int:
     print("", file=sys.stderr)
     print("A lane that wants CI pushes its branch with scripts/lane_ci.py push, "
           "which", file=sys.stderr)
-    print("checks the same clauses first and names the ci/ ref for you.",
-          file=sys.stderr)
+    print("checks ancestry first, names the ci/ ref for you, and leaves the "
+          "sweep to this hook.", file=sys.stderr)
     print("", file=sys.stderr)
     print("If you meant it, sweep the range first and then say so for one "
           "command:", file=sys.stderr)

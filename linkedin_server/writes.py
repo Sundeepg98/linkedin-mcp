@@ -6517,6 +6517,146 @@ APPLY_MODAL_POLL_MS = 1_000
 #: unusable dictionary key.
 UNFOLLOW_ANCHOR_PREFIX = "Click to stop following "
 
+#: THE CONFIRMATION AN UNFOLLOW MAY RAISE (2026-10-10, the live lane's session
+#: 7). ONE press on a followed Page's row control, through this tool, left the
+#: row reading ``following`` on the fresh reload: ``performed`` false. Two
+#: causes fit and nothing measured either -- a confirmation LinkedIn drew and
+#: nothing pressed, or a press on a control that was not yet ready -- so the
+#: gate below MEASURES which on every press, and acts only on the first.
+#:
+#: The dialog a confirmation is drawn in, by element and role only.
+UNFOLLOW_CONFIRM_DIALOG: str = ':is(dialog[open], [role="dialog"], [role="alertdialog"])'
+
+#: The confirm control's accessible names this gate may press: a CLOSED
+#: vocabulary of ONE word, LinkedIn's own word for the inverse action. A
+#: confirmation whose control wears any other name is reported by shape and
+#: not pressed: pressing a guessed word is how a confirm becomes a cancel.
+UNFOLLOW_CONFIRM_NAMES: tuple[str, ...] = ("Unfollow",)
+
+#: How long, after the press, a confirmation is given to be drawn: a LIVENESS
+#: BOUND that decides nothing -- the reading at its end decides.
+UNFOLLOW_CONFIRM_POLLS = 15
+UNFOLLOW_CONFIRM_POLL_MS = 200
+
+
+async def _unfollow_confirm_gate(page: Any, target: str) -> dict[str, Any]:
+    """After the unfollow press, before anything navigates: did the press raise
+    a confirmation, and may its confirm control be pressed? Never raises.
+
+    Polls, bounded, until a confirmation dialog is drawn or the row's own
+    inverse-action control is gone (the press took effect in place, as the
+    capture of 2026-08-24 assumed). Counts and closed words only; a button
+    whose name is not a confirm word is reported SHAPED, never quoted.
+
+        proceed             True only when exactly one confirmation dialog is
+                            drawn and exactly one button in it is named,
+                            exactly, a word of :data:`UNFOLLOW_CONFIRM_NAMES`
+        selector            that button, inside the dialog, when it may be
+                            pressed -- through the same click call site
+        dialogs             confirmation dialogs drawn at the last poll
+        confirm_controls    buttons in them named a confirm word
+        other_buttons       buttons in them named anything else
+        other_button_names  those names, shaped by :func:`_label_shape`
+        row_control         'still_following' while the row's control still
+                            wears the inverse-action prefix; 'gone' when it
+                            does not; None when unread
+        polls               polls taken
+        code                None on proceed; else 'no_dialog_drawn',
+                            'dialogs_not_one', 'confirm_not_exactly_one' or
+                            'unreadable'
+        error               an exception's TYPE if the reading failed
+    """
+    out: dict[str, Any] = {
+        "proceed": False,
+        "selector": "",
+        "dialogs": 0,
+        "confirm_controls": 0,
+        "other_buttons": 0,
+        "other_button_names": [],
+        "row_control": None,
+        "polls": 0,
+        "code": None,
+        "why": "",
+        "error": None,
+    }
+    try:
+        dialogs = page.locator("css=" + UNFOLLOW_CONFIRM_DIALOG)
+        row = page.locator(dom.unfollow_control_selector(target))
+        for poll in range(1, UNFOLLOW_CONFIRM_POLLS + 1):
+            out["polls"] = poll
+            out["dialogs"] = coerce.as_count(await dialogs.count())
+            if out["dialogs"] or coerce.as_count(await row.count()) == 0:
+                break
+            await page.wait_for_timeout(UNFOLLOW_CONFIRM_POLL_MS)
+        out["row_control"] = (
+            "still_following" if coerce.as_count(await row.count()) == 1 else "gone"
+        )
+        if out["dialogs"] == 0:
+            out["code"] = "no_dialog_drawn"
+            out["why"] = (
+                "no confirmation was drawn after the press; the row's control "
+                + (
+                    "still wears the inverse-action prefix, so the press drew "
+                    "nothing at all -- a control that was not yet ready fits."
+                    if out["row_control"] == "still_following"
+                    else "no longer wears the inverse-action prefix."
+                )
+                + " Nothing further is pressed; the reload decides."
+            )
+            return out
+        if out["dialogs"] != 1:
+            out["code"] = "dialogs_not_one"
+            out["why"] = (
+                f"{out['dialogs']} confirmation dialogs were drawn, where one is "
+                "required; pressing inside one of several would be choosing by "
+                "position. Nothing further is pressed."
+            )
+            return out
+        dialog = dialogs.first
+        named = {
+            word: coerce.as_count(
+                await dialog.get_by_role("button", name=word, exact=True).count()
+            )
+            for word in UNFOLLOW_CONFIRM_NAMES
+        }
+        buttons = dialog.get_by_role("button")
+        total = coerce.as_count(await buttons.count())
+        out["confirm_controls"] = sum(named.values())
+        out["other_buttons"] = max(0, total - out["confirm_controls"])
+        others: list[str] = []
+        for index in range(min(total, 8)):
+            name = str(await buttons.nth(index).get_attribute("aria-label") or "").strip()
+            if not name:
+                name = str(await buttons.nth(index).inner_text() or "").strip()
+            if name not in UNFOLLOW_CONFIRM_NAMES:
+                others.append(_label_shape(name))
+        out["other_button_names"] = others
+        if out["confirm_controls"] != 1:
+            out["code"] = "confirm_not_exactly_one"
+            out["why"] = (
+                f"the confirmation draws {out['confirm_controls']} buttons named "
+                f"{list(UNFOLLOW_CONFIRM_NAMES)!r}, where exactly one is required, "
+                f"and {out['other_buttons']} others. Nothing in it is pressed."
+            )
+            return out
+        word = next(w for w, n in named.items() if n == 1)
+        out["proceed"] = True
+        out["selector"] = (
+            "css=" + UNFOLLOW_CONFIRM_DIALOG + ' >> role=button[name="' + word + '"s]'
+        )
+        out["why"] = (
+            "the press drew exactly one confirmation, and exactly one button in "
+            f"it is named {word!r}: it is pressed, through the same click call "
+            "site, and the reload decides."
+        )
+    except Exception as exc:  # noqa: BLE001 - the TYPE is the whole report
+        out["error"] = type(exc).__name__
+        out["code"] = out["code"] or "unreadable"
+        out["proceed"] = False
+        out["selector"] = ""
+        out["why"] = "the confirmation could not be read; nothing further is pressed."
+    return out
+
 
 def destination_of(spec: WriteSpec, target: str) -> str:
     """The VALUE half of a two-part target, or ``""``.
@@ -10245,6 +10385,9 @@ async def perform(
     # disclosure press, and what the item press left behind. See group_leave.
     menu_gate: Optional[dict[str, Any]] = None
     menu_after_press: Optional[dict[str, Any]] = None
+    # THE UNFOLLOW'S CONFIRMATION GATE (2026-10-10), read after its press: what
+    # the press drew, and whether the confirm control may be pressed.
+    unfollow_confirm_gate: Optional[dict[str, Any]] = None
 
     # THE TYPING PLAN, and it is a QUEUE FOR THE SAME REASON THE CLICK PLAN IS.
     #
@@ -10708,6 +10851,17 @@ async def perform(
                     menu_after_press = group_leave.after_press_note(
                         await group_leave.read_after_press(page, grant.target)
                     )
+                elif spec.action == "unfollow_company" and clicks_made == 1:
+                    # THE UNFOLLOW WAS PRESSED, AND THAT PROVED NOTHING LIVE
+                    # (2026-10-10, the live lane's session 7: one press, and the
+                    # reload read the row still following). Read what the press
+                    # drew BEFORE anything navigates; its confirmation's own
+                    # confirm control is appended to this same queue only if a
+                    # fresh read finds exactly one dialog and exactly one
+                    # control in it named the inverse action.
+                    unfollow_confirm_gate = await _unfollow_confirm_gate(page, grant.target)
+                    if unfollow_confirm_gate["proceed"]:
+                        click_plan.append(unfollow_confirm_gate["selector"])
                 continue
             fill_selector, fill_text = fill_plan.pop(0)
             await page.fill(fill_selector, fill_text, timeout=CLICK_TIMEOUT_MS, strict=fill_strictly)
@@ -11446,6 +11600,21 @@ async def perform(
                 "observed": menu_gate.get("observed"),
                 "polls": menu_gate.get("polls"),
                 "after_the_item_press": menu_after_press,
+            }
+        ),
+        # WHAT THE UNFOLLOW'S PRESS DREW (2026-10-10), for that action only:
+        # counts, closed words and shaped names, never a Page's name. Null for
+        # every other action.
+        "unfollow_confirm_gate": (
+            None
+            if unfollow_confirm_gate is None
+            else {
+                k: unfollow_confirm_gate.get(k)
+                for k in (
+                    "proceed", "code", "why", "dialogs", "confirm_controls",
+                    "other_buttons", "other_button_names", "row_control",
+                    "polls", "error",
+                )
             }
         ),
         "verified": verified,

@@ -180,6 +180,7 @@
     "writes:_read_thread_reply_box": "clean",
     "writes:_read_tracker_membership": "clean",
     "writes:_reply_send_check": "clean",
+    "writes:_unfollow_confirm_gate": "not_driven:read the page and returned an error",
     "writes:_verify_after": "clean",
     "writes:observe": "not_driven:raises WriteAttemptError",
     "writes:perform": "not_driven:raises WriteAttemptError",
