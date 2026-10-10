@@ -2,9 +2,9 @@
 
 Lane S (settings), `ls2-settings-lead`. Brief written by the orchestrator on
 2026-09-28; relaunched and run on 2026-10-10 from master `3c8edc2` (CI green,
-run 36460989178), on its own worktree branch, merged with master twice
-(`53908ea`, then `fe119de`), pushed only to its `ci/` ref by
-`scripts/lane_ci.py`. Not to be confused with the earlier lane S of 2026-09-28
+run 36460989178), on its own worktree branch, merged with master as it moved
+(`53908ea`, `fe119de`, `1027bf8`, `f93104c`, `16ee59a`), pushed only to its
+`ci/` ref by `scripts/lane_ci.py`. Not to be confused with the earlier lane S of 2026-09-28
 (people search, the offline frontier), whose record is
 `_audit/2026-09-24-lane-s-people-search.md`.
 
@@ -47,7 +47,9 @@ started closed during it; every test here ran on frozen pages.
   question 2.
 * A COLD REVIEW of the writer, fourteen findings, the first of them HIGH: the
   receipt's STOP fired for one failure shape of five. Every finding is fixed
-  or answered (section 3.4), each fix with a mutation that turns its test red.
+  or answered (section 3.4); each of the ten fixes in code comes with a
+  mutation that turns its test red, and the rest are census and record
+  changes read back by the census instruments.
 * The live-proof plan for the live lane (section 6).
 
 ## 1. The rows, enumerated
@@ -436,7 +438,7 @@ holds.
 The four `writes.py` mutations ran the same way, on the integration's own
 hooks, after it landed: all four caught, the file restored byte-identical.
 
-After the cold review (section 3.4), ten more, one per fix, the same way:
+After the cold review (section 3.4), ten more, one per fix in code, the same way:
 
 | guard broken | caught by |
 |---|---|
@@ -498,10 +500,15 @@ SKIPPED, never as caught.
 
 ### 3.4 What a cold review found, and what was done
 
-A cold reviewer read the lane at `baa2fe1` -- the record, the module, the
-integration and the census edits -- with no pytest and no browser, and ran
+A cold reviewer read the lane as it stood in `baa2fe1` ("settings: what the
+shipped guards caught in the integration, fixed") -- the record, the module,
+the integration and the census edits -- with no pytest and no browser, and ran
 pure-Python probes over an archive of that commit. Fourteen findings; every
-one is fixed or answered here, at `c4edf60` and its record commit.
+one is fixed or answered in `c4edf60` ("settings: what a cold review of the
+writer found, fixed and each shown failing") and the record commit after it.
+Both hashes, and every other hash of this lane's own commits, resolve on the
+lane's branch until it merges into master; the subjects are the key that
+survives.
 
 | # | severity | finding | done |
 |---|---|---|---|
@@ -515,7 +522,7 @@ one is fixed or answered here, at `c4edf60` and its record commit.
 | F8 | LOW | the receipt printed LinkedIn's landing | the address asked for, in both places (W7, W8) |
 | F9 | LOW | the switch named `P O6-O20`, which the record classed as the switch | `rows=("P O17",)`; `P O6-O20` VISIBLE on the Visibility line; 54 ALLOWED, 35 VISIBLE |
 | F10 | LOW | `N 96` missed; the walk not kept | `N 96` OUT with its reason, and eleven more found by lane K's ledger (section 1); the walk's rules are written in section 1 rather than kept as a script |
-| F11 | LOW | `P D7` and `P N12` named queue lines that do not exist; "93 queued" | both `classify-only` again; this lane's queued dispositions are 86. Commit `0ae7946`'s title counted IN rows, not queued lines |
+| F11 | LOW | `P D7` and `P N12` named queue lines that do not exist; "93 queued" | both `classify-only` again; this lane's queued dispositions are 86. The title of `0ae7946` ("... 93 settings rows queued on their pages") counted IN rows, not queued lines |
 | F12 | LOW | "20 loads clear" included the badge page and a page under `/mynetwork/` | the badge page left the queue with `P O5`; the syncing page's cost is named; 19 (section 5) |
 | F13 | LOW | the retry sentence and the server instructions did not hold for this action | both rewritten |
 | F14 | LOW, latent | a second admitted switch would overwrite the audiences in silence | the builder refuses a collision (R5) |
@@ -601,9 +608,11 @@ LOADS. 22 lines at one load each, of which three wait on a question (the
 Sign in & security category, the demographic page, a group's settings page),
 so **19 loads clear without a ruling** -- and one of the 19 carries a cost
 nobody has measured: the syncing page sits under `/mynetwork/`, whose root
-the boundary refused because loading it clears his pending-invitations badge.
-Whether this page does the same is unknown; the live lane loads it last, or
-asks. The category loads then name the settings pages below them: the rows
+the boundary refuses because opening it is BELIEVED to consume his
+pending-invitation badge (the boundary's own word; it was never measured).
+Whether this sub-page does is unknown; the instrument that would say is
+`dom.read_invitation_badge`, read before and after the load, as
+`linkedin_connections` does for its own sub-page. The category loads then name the settings pages below them: the rows
 behind the four category pages sit on pages not yet seen, at most one load
 each and fewer where pages are shared.
 
@@ -666,12 +675,15 @@ ONE RISK THE CAPTURE CANNOT SETTLE. The writer presses the switch's own
 in `dom.settings_radio_label_selector`) that LinkedIn covered its radio inputs
 and only the bound label took a press -- which is why this writer's radio
 path now presses the label -- and a styled switch may be covered the same way;
-a skeleton with no stylesheet cannot show it. If the press does not land, the
-bounded wait ends unreached and the check reads `the_control_did_not_move`;
-on this page, which stores on the press, that receipt carries STOP, because a
-press on a switch of his has been measured landing minutes late (the Premium
-badge, `writes.perform`'s note). So it IS STOP-ALL: the page is read by hand,
-and what received the press is the measurement for the next build.
+a skeleton with no stylesheet cannot show it. If the input is covered,
+Playwright refuses to click it and the press raises after its timeout; if it
+is clicked and the switch does not move, the bounded wait ends unreached and
+the check reads `the_control_did_not_move`. On this page, which stores on
+the press, BOTH receipts carry STOP -- a press that raised may have
+dispatched, and a press on a switch of his has been measured landing minutes
+late (the Premium badge, `writes.perform`'s note). So either is STOP-ALL:
+the page is read by hand, and what received the press is the measurement
+for the next build.
 
 ### 6.3 The order for the settings still to be built
 
@@ -720,10 +732,14 @@ he names them.
   collapse kept counting 15 after `P O17` left it. `COLLAPSED` is 14, and at
   the merge of `fe119de` (PURCHASES-STAY-MANUAL had excluded `P S9` and
   `M C71`) the figures are capabilities 785, capabilities_achievable 745,
-  achievable 732, adjudicated 187 -- `--check` green on the merged tree.
+  achievable 732, adjudicated 187 -- `--check` green on the merged tree. At
+  the merge of `1027bf8` (live session 8 banked `N 48`, `J 104`, `N 46` and
+  `J 103`), unfired is 22: master's 21 plus `P O17`, measured.
 * The write-classes split (16, 37, 336) -> (16, 37, 337) on this branch, and
   (16, 37, 335) = 388 at the merge of `fe119de`.
-* The tool surface: 61 -> 62 tools, 96 -> 100 parameters; writes.PERFORMABLE
+* The tool surface: 61 -> 62 tools, 96 -> 100 parameters on this branch; at
+  the merge of `1027bf8`, 62 tools and 101 parameters (lane NP had added one
+  parameter to master's 61 tools); writes.PERFORMABLE
   and the hand-typed write lists in `tests/test_server_surface.py`; the server
   instructions and the module docstring's counts (forty-four read, eighteen
   write, sixty-two; nineteen actions, eighteen tools); the strict-press set.
@@ -759,8 +775,11 @@ by the coordinator's resume order. Counts are pytest's own.
 | the reader-leak guard and the tool-envelope guard | the reader guard could no longer drive `snapshot` -- its planted page had no accessibility snapshot -- so the harness gained one (`tests/plantedpage.py`); then **683 passed** and **4 passed** |
 | `tests/test_writes.py`'s hand-typed tables and the receipt-ownership test | **14 passed**, **17 passed** |
 | the census instruments, after every census edit and on each merged tree | `census_completion`: *every headline figure matches its pin*; `check_write_classes` GREEN (388 lines), `check_read_addresses` GREEN (98 of 98), `check_jobs_directions` GREEN (108 of 108), `ruling_holds` GREEN (1 hold, 3 lifted, 2 releases), `check_next_step` GREEN (585 GAP rows once), `check_exclusion_basis` 0 problems; the three derived views regenerated |
-| the pre-commit identity gate, every commit | armed: *226 spellings*, 0 hits |
-| lane CI on `ci/worktree-agent-acb0f259b1e2f44e2`, the lane's head | @@CI@@ |
+| the merge of `1027bf8` (lane NP, lane G2, live session 8): the tool and parameter pins, the census pins, the count claims, the end-to-end file | **118 passed**; the reader-leak guard, in master's larger form, first failed on its blank page (the blank locator had no accessibility snapshot -- added), then ran every test to 100% with no failure before the two-minute bound cut its summary line |
+| `tests/test_no_committed_identity.py`, scoped, against master `1027bf8` | **99 passed** |
+| the pre-commit identity gate, every commit; the pre-push sweep on the `ci/` push | armed: *226 spellings*, 0 hits; the push swept *1213 blobs, 226 needles, 0 hits* |
+| lane CI, second run (`38043402778`, on `c956797`, after the merges of `1027bf8`, `f93104c` and `16ee59a`) | **failure, one test**: `test_no_new_unresolvable_citation_appears` read three of this lane's own commit hashes in this record in the guard's slot forms -- they resolve on the lane's branch, not yet on master -- and they are cited by subject now (section 3.4). Shard 0: 1 failed / 2545 passed / 5 skipped; shards 1-3 green. The cited-SHA family the coordinator named as infrastructure passed: the local-master fix had landed |
+| lane CI on the commit that carries this table | a record cannot carry its own run: the lane's final message names it |
 
 NOT RUN LOCALLY: the full suite, and the browser-heavy action tables
 (`tests/test_preview_state_and_click_state.py`,
