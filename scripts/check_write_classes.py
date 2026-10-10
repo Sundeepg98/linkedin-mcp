@@ -170,10 +170,12 @@ WRITE_CLASS_ACTS: dict[str, str] = {
     # `report` concerns content or a member, not whether a page helped. R3, the
     # residual class, so the first round's R1 is untouched.
     "feedback": "R3",
-    # Added 2026-09-24 (lane Y2) for `P S9`: changing a paid plan. It spends money,
-    # which no act above does; R3 because the operator's cut named no purchase,
-    # and the row's own cell says a live proof of it needs him.
-    "purchase": "R3",
+    # `purchase` was added 2026-09-24 (lane Y2) for `P S9`: changing a paid plan.
+    # RETIRED 2026-10-10 (lane K, `_audit/2026-09-28-lane-k-ledger.md` s2): no
+    # line holds it. PURCHASES-STAY-MANUAL made `P S9` and `M C71` (a paid boost,
+    # filed under `publish`) EXCLUDED-RULED, so a purchase is never a
+    # write-direction GAP row. Kept out of the dict so no line can use it, as
+    # `outside-the-classes` is below.
     # A request under one of the data rights LinkedIn names (a1340649) --
     # to change or correct his data, or to restrict or object to its use.
     # Added 2026-09-24 for the P-R block's itemized rows P4 and P5; no act

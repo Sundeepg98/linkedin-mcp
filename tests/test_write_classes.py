@@ -170,10 +170,17 @@ def test_the_split_is_the_one_the_lane_report_quotes():
     `P A11`, `P A13` and `P A17` returned to GAP on the orchestrator's ruling --
     each an input carrying aria-autocomplete, which the one tool can only type
     into; classed R3 by their act (profile-edit), queued on picking an entry.
-    386 + 3 = 389 = 16 R1 + 37 R2 + 336 R3."""
+    386 + 3 = 389 = 16 R1 + 37 R2 + 336 R3.
+
+    387 AT LANE K'S PURCHASE EXCLUSIONS (2026-10-10), MEASURED
+    (`_audit/2026-09-28-lane-k-ledger.md` s2): PURCHASES-STAY-MANUAL made
+    `P S9` (the Premium plan, act purchase) and `M C71` (a paid boost, act
+    publish) EXCLUDED-RULED, so both lines leave the table, and the act
+    purchase leaves the closed vocabulary with its one line. Both R3.
+    389 - 2 = 387 = 16 R1 + 37 R2 + 334 R3."""
     rows, _ = cwc.load()
     split = cwc.split(rows)
-    assert (split["R1"], split["R2"], split["R3"]) == (16, 37, 336)
+    assert (split["R1"], split["R2"], split["R3"]) == (16, 37, 334)
     assert split["R1:built"] + split["R1:queued"] == split["R1"]
 
 
