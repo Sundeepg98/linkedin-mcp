@@ -1018,6 +1018,17 @@ WHAT_WOULD_DRIVE_IT: dict[str, str] = {
         "and False. The harness types nothing, so no reply box holds anybody's "
         "words."
     ),
+    #: ADDED 2026-10-10 (the live lane, after session 7's unfollow read the row
+    #: still following): what an unfollow press drew, read before anything
+    #: navigates. Its success path is a confirmation dialog the press opened.
+    "writes:_unfollow_confirm_gate": (
+        "ACTION: an unfollow press on Manage Pages that draws a confirmation -- "
+        "tests/test_unfollow_confirmation.py drives this gate after the press, "
+        "over the tracked Manage Pages capture with an invented confirmation, "
+        "and reads proceed, each refusal and the shaped names. No capture of "
+        "LinkedIn's own confirmation exists yet: session 8's measurement takes "
+        "the first. The harness presses nothing, so no dialog is drawn."
+    ),
     "dom:read_compose_fields": (
         "CAPTURE: /messaging/compose/ as loaded -- an empty composer, nothing "
         "clicked or typed -- drawing its two send-mode radios as "

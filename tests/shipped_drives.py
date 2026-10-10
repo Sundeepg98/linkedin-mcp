@@ -629,15 +629,22 @@ class _CountsAs(_Over):
 
 
 class _TheBadgeRowDialog(_Over):
-    """The editor dialog, whose OTHER block carries no title."""
+    """The editor dialog, whose OTHER block carries no title -- and whose row
+    is drawn in the FIRST recorded switch shape, so the second shape's row
+    counts 0 (the fixture draws the wrapper shape; the second was measured on
+    2026-10-10 and is read by its own tests in ``tests/test_premium_badge.py``)."""
 
     def __init__(self, wrapped: Any, untitled: str) -> None:
         super().__init__(wrapped)
         self._untitled = untitled
 
     def locator(self, selector: Any, *args: Any, **kwargs: Any) -> Any:
+        from linkedin_server import profile_editor
+
         inner = self._wrapped.locator(selector, *args, **kwargs)
-        return _CountsAs(inner, 0) if selector == self._untitled else inner
+        if selector in (self._untitled, "css=" + profile_editor.PREMIUM_BADGE_ROW_NAMED):
+            return _CountsAs(inner, 0)
+        return inner
 
 
 class _TheIntroEditor(_Over):
@@ -659,9 +666,11 @@ async def read_premium_badge_as_shipped(page: Any) -> Any:
     nothing else -- on the intro editor
     ``tests/fixtures/synthetic/intro_editor_switches.html`` draws.
 
-    THE SIGNATURE DRIVE: every planted count is 1, so BOTH of the badge row's
-    blocks count the title, and the reader returns its
-    ``4_title_not_on_exactly_one_block`` refusal after two reads.
+    THE SIGNATURE DRIVE: every planted count is 1, so BOTH recorded switch
+    shapes claim the titled row -- one row, two shapes -- and the reader
+    returns its ``3_not_the_recorded_row`` refusal before any block is read
+    (it returned ``4_title_not_on_exactly_one_block`` until the second shape
+    was added on 2026-10-10).
 
     THE FIXTURE draws the dialog, its one Save, the one ``lazy-column`` row
     and its two setting blocks, each a checked unnamed switch in an
@@ -673,8 +682,10 @@ async def read_premium_badge_as_shipped(page: Any) -> Any:
     builds from this fixture and reads with this reader, asserting it
     aimable, the badge at position 2, both switches on.
 
-    THE DOUBLE answers one count: the title on the OTHER block, 0. Every other
-    count is the planted page's own 1, which is the fixture's. The reader asks
+    THE DOUBLE answers two counts: the title on the OTHER block, 0, and the
+    second recorded switch shape's row (2026-10-10), 0 -- the fixture draws
+    the first. Every other count is the planted page's own 1, which is the
+    fixture's. The reader asks
     counts and nothing else, so no page string can reach what it returns: the
     drive shows its success path runs and returns counts, positions, states
     and a selector built from its constants.
