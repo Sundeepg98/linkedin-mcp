@@ -370,6 +370,34 @@ def test_a_named_profile_load_through_the_second_door_is_counted(tmp_path, monke
     assert calls == [(profile, True)]
 
 
+def test_a_detail_page_load_through_the_third_door_is_counted_and_spaced(tmp_path, monkeypatch) -> None:
+    """FOUND LIVE, 2026-10-10 (session 9): lane NP's detail-page door
+    (``named_profile_details_of=``) loads an address the read door refuses,
+    and the wrapper waved it through uncounted and unspaced -- the load was
+    counted by hand. It is a load: the ledger counts it and spaces it."""
+    calls: list[tuple[str, object]] = []
+
+    class _ThirdDoor:
+        async def goto(self, page, url, **kwargs):  # noqa: ANN001 - fake
+            calls.append((url, kwargs.get("named_profile_details_of")))
+            return url
+
+    monkeypatch.setattr(harness, "BROWSER", _ThirdDoor())
+    monkeypatch.setattr(harness, "STATE", tmp_path)
+    monkeypatch.setattr(harness, "LEDGER", tmp_path / "ledger.json")
+    monkeypatch.setattr(harness, "MIN_GAP_S", 0.4)
+    harness.LEDGER.write_text(json.dumps({"loads": _loads(1, at=time.time())}), encoding="utf-8")
+    harness._install_counter()
+    details = "https://www.linkedin.com/in/" + SYNTHETIC_SLUG + "/details/interests/"
+    assert not readonly.is_read_url(details)
+    started = time.monotonic()
+    asyncio.run(harness.BROWSER.goto(None, details, named_profile_details_of=SYNTHETIC_SLUG))
+    assert time.monotonic() - started >= 0.3, "the third door was not spaced"
+    ledger = json.loads(harness.LEDGER.read_text(encoding="utf-8"))
+    assert [row["surface"] for row in ledger["loads"]] == ["feed", "in"]
+    assert calls == [(details, SYNTHETIC_SLUG)]
+
+
 def test_a_refused_address_is_not_a_load(fake) -> None:
     with pytest.raises(readonly.WriteAttemptError):
         asyncio.run(harness.BROWSER.goto(None, "https://www.linkedin.com/my-items/"))
