@@ -309,10 +309,13 @@ PENDING.
    says a slug-only results page does not deliver, and the capture draws
    slugs only. May a search return each organisation it found as its name and
    its Page link at runtime, as the rulings `NAMES-AT-RUNTIME` and
-   `THIRD-PARTY-TEXT-AT-RUNTIME` return other content? A yes makes the row a
-   build on the tracked
-   capture `tests/fixtures/live2/n104.html`, with an organisation record
-   declared beside the group and event ones.
+   `THIRD-PARTY-TEXT-AT-RUNTIME` return other content? Master gained an
+   organisation record during this lane (`people_data.Organisation`, lane G2):
+   a name and a link, and the link is the Page's NUMERIC address by design,
+   because "a slug can be a name". So the declared record already refuses
+   this capture's links, and a yes would have to say whether a slug link may
+   ride in it for a search result. The build would sit on the tracked capture
+   `tests/fixtures/live2/n104.html`.
 2. `N 200`'s target. An ad is chosen by LinkedIn, not named by him; a tool
    that hides "an ad in the feed" takes its target from the page unless he
    names the ad. Is hiding the ad LinkedIn shows at the moment of the call his

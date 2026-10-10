@@ -197,10 +197,7 @@ M M9	M	R	-	CAPTURE:messaging-guarded	NAMED	_audit/_census/read-addresses.tsv::No
 M M11	M	W	R2	TARGET:a conversation he names whose last message is his, under 60 minutes old	NAMED	_audit/2026-09-24-lane-l5-messaging.md::**C6 -- the per-message menu on his OWN message** ; RULING:OPERATOR-NAMES-THE-TARGET
 M M12	M	W	R3	TARGET:a conversation he names whose last message is his, under 60 minutes old	NAMED	_audit/2026-09-24-lane-l5-messaging.md::**C6 -- the per-message menu on his OWN message** ; RULING:OPERATOR-NAMES-THE-TARGET
 M M13	M	W	R2	TARGET:a message he names and the person to forward it to	INFERRED	RULING:OPERATOR-NAMES-THE-TARGET ; M M13
-M M14	M	W	R2	SIBLING:lane-U	NAMED	_audit/2026-09-28-rulings-build-classes.md::`FILE-UPLOAD-UNSANCTIONED` is therefore a stale label.
-M M15	M	W	R2	SIBLING:lane-U	NAMED	_audit/2026-09-28-rulings-build-classes.md::`FILE-UPLOAD-UNSANCTIONED` is therefore a stale label.
 M M16	M	W	R2	BUILD:tests/fixtures/live3/compose_c5-open.html	NAMED	_audit/2026-09-23-live-lane-session-1.md::Each open state is a tracked copy ; _audit/2026-09-24-lane-l5-messaging.md::**C5 -- the GIF picker**
-M M18	M	W	R2	SIBLING:lane-U	NAMED	_audit/2026-09-28-rulings-build-classes.md::`FILE-UPLOAD-UNSANCTIONED` is therefore a stale label.
 M M19	M	W	R2	SIBLING:lane-U	INFERRED	linkedin_server/uploads.py ; _audit/2026-09-28-rulings-build-classes.md::`FILE-UPLOAD-UNSANCTIONED` is therefore a stale label.
 M M20	M	W	R2	CAPTURE:msg-thread-footer	NAMED	_audit/2026-09-24-lane-l5-messaging.md::**C7 -- where the video-meeting control lives**
 M M21	M	W	R2	TARGET:two or more connections he names for a group chat	INFERRED	RULING:OPERATOR-NAMES-THE-TARGET ; M M21

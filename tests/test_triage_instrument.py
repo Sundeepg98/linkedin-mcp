@@ -418,7 +418,20 @@ AFTER_LANE_K_PURCHASES = (130, {"R": 16, "W": 110, "R+W": 4})
 #: 130 - 4 = 126; reads 16 - 3, read-and-writes 4 - 1.
 AFTER_LANE_K_RULINGS = (126, {"R": 13, "W": 110, "R+W": 3})
 
-EXPECTED_NOW = AFTER_LANE_K_RULINGS
+#: AT LANE U'S MOVE (2026-10-10), MEASURED with this tree's
+#: `scripts/triage_messaging_gap_rows.py`: `M14`, `M15` and `M18` left GAP,
+#: COVERED-UNFIRED on `linkedin_send_attachment`
+#: (`_audit/2026-09-28-lane-u-uploads.md` s5). Three W rows:
+#: 130 - 3 = 127, writes 110 - 3.
+AFTER_LANE_U_UPLOADS = (127, {"R": 16, "W": 107, "R+W": 4})
+
+#: AT LANE U'S MERGE OF ORIGIN/MASTER 71d83ca, MEASURED with the merged
+#: tree's `scripts/triage_messaging_gap_rows.py`: lane K's four (reads and
+#: a read-and-write) and lane U's three W rows, disjoint.
+#: 126 - 3 = 123, writes 110 - 3.
+AFTER_LANE_U_MERGE_OF_LANE_K = (123, {"R": 13, "W": 107, "R+W": 3})
+
+EXPECTED_NOW = AFTER_LANE_U_MERGE_OF_LANE_K
 
 
 def test_the_headline_split_is_the_one_the_report_quotes():
