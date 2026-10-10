@@ -5,14 +5,39 @@ Lane A (`la-admissions-lead`). Brief written by the orchestrator 2026-09-28
 36460989178) on its own worktree branch.
 
 **OFFLINE THROUGHOUT.** No LinkedIn page was loaded, no browser was started or
-attached to, port 9224 was never touched. A live session (session 7, another
-lane's) ran on this box the whole time, so every test run here was targeted and
-serial (`-p no:randomly`, no `-n`), and from 11:35 IST under the orchestrator's
-narrower gate policy: the touched tests, their direct importers and the census
-instruments, each run in the background, never the full suite.
+attached to, port 9224 was never touched. While another lane's live session
+was open (session 7 until about 11:51 IST, session 8 from 13:53), every test
+run here was targeted and serial (`-p no:randomly`, no `-n`). In the gap
+between them this lane ran its targeted sets with `-n 4` or `-n 6`, in the
+background, and several ran past the orchestrator's 11:35 two-minute bound --
+three to six minutes each, and once 24 minutes, the run over every test file
+that drives the read boundary (section 3.4), which found the 29 failures no
+narrower set had. Never the full suite. Stated because the bound was the
+orchestrator's and this lane exceeded it.
 
 WRITTEN AS THE LANE RUNS. Sections land with the commits that make them true;
 anything not yet landed is not described.
+
+**THE LANE'S COMMITS, by SUBJECT.** The short hashes beside them are this
+lane's branch's: every one is nowhere on `master` until the orchestrator
+merges the branch, and the subject is how a reader finds each after a
+rewrite. Two merges of `master` sit among them (`53908ea` and `b10bde8`).
+
+| subject | lane branch |
+|---|---|
+| rulings: register the five build-class rulings of 2026-09-28 | ec7d245 |
+| rulings: keep the founding question's two answers ranked first | 1a8d51f |
+| rulings: triage the two guard hits the verbatim rulings document raises | 2f94b79 |
+| boundary: read his invitation manager and the people he follows past the act substrings | 8a0636a |
+| boundary: read his job application settings past "/jobs/application" and "settings" | 435a133 |
+| boundary: two named settings pages of his -- what he unfollowed, his advertising data | cf8109a |
+| boundary: twenty-four pages refused by allowlist silence alone, each on its own line | d46359c |
+| identity: two shape hits the previous commit carried, cleared without a declaration | 003fc6b |
+| record: quote the new digest in two halves, and correct four outcome cells | 4ebcf70 |
+| merge origin/master 53908ea into lane A: the CI fast lane and live session 7 | 6d1f060 |
+| instruments: section 83, the lane A admission harness | 21f0d04 |
+| reader: the jobs an alert delivered, off the notifications page -- J 38 COVERED-UNFIRED by D6 | e6c7d76 |
+| merge origin/master b10bde8 into lane A: the CI lane fixes and session 7's offline follow-ups | f5e561f |
 
 ---
 
@@ -375,7 +400,9 @@ unchanged on all six (no capture, no reader). `census_completion.py`:
 values in the same commit.
 
 **GATE, after the commit** (`8a0636a`, with the triage commit `2f94b79`
-before it): the lane A file, the boundary, refusal and side-table tests, the
+before it -- both nowhere on `master` until this lane merges; the commit
+table at the top names each by subject): the lane A file, the boundary,
+refusal and side-table tests, the
 census-prose and gap-row guards, the four document guards, the three derived
 views, the identity sweep over the committed blob and the dict-literal guard --
 1667 passed in 186s.
@@ -665,8 +692,10 @@ NO_RULING), `gap` 587 -> 586, `gap_unknown` 108 -> 107, `jobs_gap` 108 -> 107,
 **D6 ROUTES named, not built here:**
 
 * `N 86`, followers of a member: the people-search facet `followerOf` is on
-  record in three tracked live fixtures; its value is a member id, which
-  OTHER-MEMBER-IDS-AS-READS permits from a tool's arguments.
+  record in three tracked live fixtures -- the KEY only, the skeletons blank
+  its value -- and its value would be a member id, which
+  OTHER-MEMBER-IDS-AS-READS permits from a tool's arguments. The value shape
+  is the `people-search-facets` line's to record first.
 * `N 24`, `N 27`, `N 28`: lane S moved `N 25` and `N 26` (the same list's
   search and filter) to COVERED-UNFIRED through the people search filtered to
   his first degree. Whether sort, Talks-about and Open-to have a people-search
@@ -728,12 +757,17 @@ the LinkedIn-written facet `followerOf` IS on record: three tracked live
 fixtures (`tests/fixtures/live2/n84.html`, `n87.html`, `n94.html`, committed
 `5f70af8` on 2026-09-28) carry it in eleven hrefs, after the side-table note,
 the census cell and lane L2 said "No people-search facet for this filter is on
-record". Its value is a member id, which `OTHER-MEMBER-IDS-AS-READS` permits
+record". Its value would be a member id, which `OTHER-MEMBER-IDS-AS-READS` permits
 from a tool's arguments, never from a page. `people_search.py` does not
-compose it. RECOMMENDATION: compose `followerOf` from a caller-supplied member
-id; the people-search reader already reads the captured results markup, so the
-row can move to COVERED-UNFIRED by D6 on that build. Not built in this lane
-(section 7).
+compose it. **BUT ONLY THE KEY IS ON RECORD:** the tracked live fixtures are
+skeletons whose query VALUES are blanked (`followerOf=x`), and no raw capture
+holding the key remains on disk (searched: the main checkout's capture store
+draws it nowhere), so its value SHAPE -- a bare token, or a JSON list as
+`connectionOf` takes -- is unrecorded. Composing it now would be a guess.
+RECOMMENDATION: the `people-search-facets` capture line records the value
+shape; then compose `followerOf` from a caller-supplied member id, and the
+row moves to COVERED-UNFIRED by D6 on the shipped people-search reader. Not
+built in this lane (section 7).
 
 **N 90, N 91, N 92 (PRESS) -- TERMINAL BY THIS ROUTE, and no facet on record.**
 The facet census over the tracked fixtures finds none for these three filters.
@@ -765,8 +799,10 @@ in "the group page's own menu" at `/groups/<id>/`; the 2026-09-05 measurement
 opened the per-row menus on the `/groups/` ROOT and never the item. D6 is the
 row's own open question: a group's address is composed from its numeric id.
 RECOMMENDATION: apply D6 -- the package composes `/groups/<id>/` from a
-caller-supplied id, which is the link the control copies -- and the row moves
-on that route's proof; the press is then unnecessary.
+caller-supplied id (`people_data.canonical_group_link`), which is the link the
+control copies -- and the row moves on that route's proof; the press is then
+unnecessary. Whether a shipped tool returns that link for a group he names is
+the one thing to check first.
 
 **M C43 (RULING) -- a post's text, shaped.** Held by FEED-CONTENT-READ-RULING
 (counts and relations only). NAMES-AT-RUNTIME (the operator's, 2026-09-24) is
@@ -818,6 +854,87 @@ already serves from mail -- unregistered. RECOMMENDATION: an orchestrator's
 call on duplication, applying the same rule to every row filed
 SERVED-BY-GMAIL-SKILL at once rather than row by row.
 
+
+---
+
+## 6. Rows moved, pins re-derived, gates run, and what was not run
+
+**ROWS.** Of the 72 refused read rows: 38 REFUSED -> ADMITTED (gate MEASURE,
+state GAP unchanged) -- 16 past an act substring (3.1-3.3) and 22 on allowlist
+silence (3.4) -- and `J 38` GAP -> COVERED-UNFIRED by D6 on the notifications
+page (4.1). The other 33 stay refused, each on a named ground (2.5-2.7). The 17
+press-or-ruling rows: one paragraph each (section 5), no gate moved.
+
+**PINS, each re-derived from the measured value by the instrument that owns
+it, never by adding deltas:**
+
+    census_completion.PINNED   b3_admitted   43 -> 59     b3_refused    38 -> 22
+                               jobs_admitted 12 -> 34     jobs_refused  34 -> 11
+                               adjudicated  184 -> 185    delivered_broad 130 -> 131
+                               unfired       25 -> 26     b1_no_ruling    9 -> 10
+                               gap          587 -> 586    gap_unknown   108 -> 107
+                               jobs_gap     108 -> 107    jobs_dir_r     40 -> 39
+                               PINNED_B1_ROWS: J 38 into NO_RULING
+    the census count cell      55 -> 85 read patterns (messaging-and-content.md)
+    boundary digests           _ALLOWED_URL_PATTERNS 18e5958586c2c367 -> d3c96a81 03316665 (two halves, as in 3.4)
+                               _FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS 14f567fd160048a8 -> 28643e7ca768b7df
+                               (every other key byte-identical at every step;
+                               the forbidden tuple unchanged at 33)
+    gap rows on refused addr.  78 -> 76 (P M1, P P15)
+    exemption count            4 -> 10 (tests/test_job_alerts_read_boundary.py)
+    settings-index refusals    16 -> 14 named (both pages admitted by name)
+
+Merging master twice moved no figure: on each merged tree every headline
+figure matched its pin.
+
+**GATES RUN, all offline, all on this worktree, each targeted (the files a
+change touched, their direct importers, the census instruments and the
+document guards) and, after 11:35 IST, under the orchestrator's policy:**
+
+    after the rulings commits      1171 passed, 1 failed (the register's founding
+                                   question, re-ranked in 1a8d51f) -> 21 passed
+    after 8a0636a (3.1)            1667 passed
+    after 435a133 (3.2)            1764 passed, 2 failed: a digest read mid-edit
+                                   (not a defect) and the gap-row pin (real,
+                                   fixed forward in cf8109a)
+    after cf8109a (3.3)            1766 passed
+    discovery, every test file     7010 passed, 29 failed -- every failure
+    driving the read boundary      answered in d46359c (section 3.4)
+    (80 files, Tier 2 in the tree)
+    after d46359c (3.4)            2269 passed, 2 failed (two identity shapes,
+                                   cleared in 003fc6b and 4ebcf70; the identity
+                                   sweep then 1047 passed)
+    after 21f0d04 (register, docs, 357 passed
+    the CI-lane tests)
+    after e6c7d76 (4.1, J 38)      2607 passed
+    side tables and registers      check_read_addresses GREEN 98 of 98;
+                                   check_jobs_directions GREEN 107 of 107;
+                                   check_write_classes GREEN, 389 lines;
+                                   ruling_holds GREEN; census_completion: every
+                                   headline figure matches its pin; the three
+                                   generators --check ok at every commit
+    the pre-commit identity gate   226 spellings, 0 hits on every commit
+
+**CI, on GitHub's free runners via `scripts/lane_ci.py` (ci/ ref, one ubuntu
+3.13 cell, four shards):**
+
+    run 38036883342 at 21f0d04   shards 0, 2, 3 green; shard 1: 14 failed, 2385
+                                 passed -- all 14 the cited-SHA family ("cannot
+                                 resolve `master`"), the known infrastructure
+                                 failure the orchestrator named at 13:23
+    run 38037756008 at f5e561f   after master's local-master fix: shards 0, 2, 3
+                                 green; shard 1: 1 failed, 3051 passed. The one
+                                 failure was REAL and this lane's: two of its own
+                                 commit hashes cited in commit slots, which
+                                 resolve only on the lane branch until the merge.
+                                 Disclosed at both sites, and the commit table at
+                                 the top added, in the next commit.
+
+**NOT RUN, and why:** the full suite locally (the orchestrator's policy; CI
+runs it); anything live (the brief); `scripts/impact_gate.py`'s widening (a
+live session was open for most of the lane, and the policy that replaced it
+bounds a local gate at two minutes).
+
 ---
 
 ## 7. Questions for the orchestrator, each with its ground
@@ -838,7 +955,8 @@ SERVED-BY-GMAIL-SKILL at once rather than row by row.
    the 2026-09-27 admission recorded as "the orchestrator's APPLICATION of the
    ruling above". Lane A applied it the same way, each page by exact address.
    The two `/mypreferences/d/` pages are commit `cf8109a` alone; the
-   application-settings page is `435a133` alone.
+   application-settings page is `435a133` alone (both nowhere on `master`
+   until this lane merges; the commit table at the top names them).
 3. **Is "stored job applicant accounts" a credential surface (`P M9`,
    `J 77`)?** Ground: the census cell, "Stored job applicant accounts" /
    "View / delete stored third-party applicant accounts", and the ruling's
@@ -877,7 +995,8 @@ SERVED-BY-GMAIL-SKILL at once rather than row by row.
    (`J 110`); duplication of skill-served rows (`J 131`); press-gate defaults
    for `/jobs-tracker/` (`J 56`) and `/jobs/view/` (`M C96`).
 9. **One D6 build named and not taken** (section 4): composing the
-   people-search facet `followerOf` (on record in three tracked live
-   fixtures) for `N 86` -- it changes an existing tool's signature in
-   `server.py`, outside any lane block, and its key order needs reading off
-   those fixtures first. (The other, `J 38`'s, was built: 4.1.)
+   people-search facet `followerOf` for `N 86`. Its KEY is on record in three
+   tracked live fixtures; its VALUE shape is not (the skeletons blank it to
+   `x`, and no raw capture holding it remains on disk), and it would change an
+   existing tool's signature in `server.py`, outside any lane block. A capture
+   first. (The other, `J 38`'s, was built: 4.1.)
