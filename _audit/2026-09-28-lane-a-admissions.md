@@ -225,7 +225,7 @@ asks it.
     M C70                          /search/results/content/                                       allowlist silence                           (b)     NO SERVED SPELLING for the row's page (search INSIDE a group)
     N 189                          /events/<digits>/attendees/?facetConnectionOf=<x>              allowlist silence                           (b)     NO SERVED SPELLING: a test fixture's, never captured
     M C93                          /search/results/all/                                           allowlist silence                           (b)     NOT ADMITTED: a fifth search vertical is D2's to grant (3.4, 7)
-    J 38                           /jobs/search-results/?...&alertAction=viewjobs&...             action= (re-addressed to the drawn alert    (a)     NOT ADMITTED: no exact address for action=; a D6 route on /notifications/ (4)
+    J 38                           /jobs/search-results/?...&alertAction=viewjobs&...             action= (re-addressed to the drawn alert    (a)     NOT ADMITTED: no exact address for action=; COVERED-UNFIRED by D6 on /notifications/ (4.1)
                                                                                                   spelling)
     P S1, P S3, N 199,             (allowlist-silence pages drawn by LinkedIn)                    allowlist silence                           (b)     ADMITTED (3.4)
       J 16, J 50-J 52, J 106,
@@ -624,15 +624,46 @@ session's LIVE-BUDGET-40-LOADS -- the orchestrator orders them.
 `M C70` and `N 189` already have capture specs (lane S, `F.4` and `F.8` in
 `_audit/2026-09-24-lane-s-people-search.md`); no second line was written.
 
-**D6 ROUTES, found on the way, none built here:**
+### 4.1 One D6 route BUILT: the jobs an alert delivered (`J 38`), COVERED-UNFIRED
 
-* `J 38`, the jobs an alert delivered: the alert notifications on the admitted
-  `/notifications/` page carry `originToLandingJobPostings`, the delivered job
-  ids (tracked `tests/fixtures/notifications.html`, four links).
-  `shape.notification_handles` already lifts `search_keywords` and
-  `company_id` out of those links and not this key; returning the ids lets
-  `linkedin_job_detail` read each. Whether the in-app list carries every
-  delivered job is unmeasured.
+The alert notifications on the admitted `/notifications/` page carry
+`originToLandingJobPostings`, the ids of the postings the alert landed -- four
+links in the tracked `tests/fixtures/notifications.html`, a sanitised capture
+of the real account (`543660c`, 2026-08-22: "All four causes were measured on
+the real account"). That is a tracked skeleton from a LIVE capture, so the
+reader was built on it:
+
+* `shape.alert_job_ids` reads the key from an alert-search link's QUERY only
+  (the path must be the AI search), keeps runs of the ten ASCII digits six to
+  twenty long, in LinkedIn's order, de-duplicated, at most 25, and drops
+  everything else silently; `shape.notification_handles` carries the result
+  as `alert_job_ids`, so `parse_notification` -- the one caller -- puts it on
+  the row `linkedin_notifications` returns, whose docstring now names it.
+  `linkedin_job_detail` takes each id.
+* RED FIRST: the new tests in `tests/test_notification_handles.py` against the
+  previous `shape.py`, 2 failed and 16 passed (the two positive tests; the
+  silence tests and the fixture check hold either way); with the reader, 19
+  passed. The file's "only the keyword escapes the query" rule is amended in
+  the open -- the landing ids now escape too -- with a test holding both halves
+  on one link: the ids reach the caller, the content urn still does not.
+* `tests/test_a_covered_row_names_the_artifact_that_covers_it.py` binds the
+  row to the chain end to end, with a control that removes the handle's
+  assignment on a copy of `shape.py` and watches the row lose the field.
+
+**THE ROW MOVES BY ITS OWN BAR:** `J 38` GAP -> COVERED-UNFIRED under
+D6-CAPABILITY-OVER-AFFORDANCE ("the row names them and rests on their proofs
+... else UNFIRED"): two sanctioned routes, code aimed at real captured markup,
+never fired. Its jobs side-table line leaves (the table holds still-GAP rows);
+the cell states the scope -- in-app alert notifications only; whether one
+notification lists every posting the alert delivered is unmeasured, and the
+`linkedin-jobs` skill still serves the e-mail set. `census_completion.py`,
+re-derived: `adjudicated` 184 -> 185, `delivered_broad` 130 -> 131, `unfired`
+25 -> 26, `b1_no_ruling` 9 -> 10 (`J 38` entered `PINNED_B1_ROWS` under
+NO_RULING), `gap` 587 -> 586, `gap_unknown` 108 -> 107, `jobs_gap` 108 -> 107,
+`jobs_dir_r` 40 -> 39, `jobs_refused` 12 -> 11.
+
+**D6 ROUTES named, not built here:**
+
 * `N 86`, followers of a member: the people-search facet `followerOf` is on
   record in three tracked live fixtures; its value is a member id, which
   OTHER-MEMBER-IDS-AS-READS permits from a tool's arguments.
@@ -845,7 +876,8 @@ SERVED-BY-GMAIL-SKILL at once rather than row by row.
    the 08:11 principle to post text (`M C43`) and organisation prose
    (`J 110`); duplication of skill-served rows (`J 131`); press-gate defaults
    for `/jobs-tracker/` (`J 56`) and `/jobs/view/` (`M C96`).
-9. **Two D6 builds this lane names but did not take** (section 4): composing
-   the people-search facet `followerOf` (on record in three tracked live
-   fixtures) for `N 86`, and returning an alert notification's
-   `originToLandingJobPostings` job ids for `J 38`.
+9. **One D6 build named and not taken** (section 4): composing the
+   people-search facet `followerOf` (on record in three tracked live
+   fixtures) for `N 86` -- it changes an existing tool's signature in
+   `server.py`, outside any lane block, and its key order needs reading off
+   those fixtures first. (The other, `J 38`'s, was built: 4.1.)

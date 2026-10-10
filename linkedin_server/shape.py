@@ -1461,6 +1461,56 @@ def parse_notification(record: dict[str, Any]) -> Optional[dict[str, Any]]:
 _ALERT_KEYWORDS = re.compile(r"[?&]keywords=([^&]+)")
 _COMPANY_LINK = re.compile(r"/company/(\d{4,})")
 
+#: THE JOBS A JOB ALERT DELIVERED -- census ``J 38``'s D6 route (lane A,
+#: 2026-10-10), and the one place a notification link DOES name postings.
+#: The paragraph above stays true of a link's PATH: no notification links to
+#: ``/jobs/view/<id>``. But a job-alert notification links into the AI job
+#: search, and that link's QUERY carries ``originToLandingJobPostings`` --
+#: the ids of the postings the alert landed, comma-separated. Read off the
+#: tracked notifications fixture, a sanitised capture of the real account
+#: (543660c, 2026-08-22), where four alert links carry it. Each id is exactly
+#: what ``linkedin_job_detail`` takes.
+#:
+#: READ NARROWLY: only from an alert-search link's query (the path must be
+#: the AI search), only runs of the ten ASCII digits six to twenty long (the
+#: posting line in the read allowlist takes six or more; twenty is the bound
+#: the package's other id segments carry), in LinkedIn's order,
+#: de-duplicated, at most ``ALERT_JOB_IDS_CAP``. Anything else in the value
+#: is dropped, never reported. The alert page itself stays shut: its link
+#: carries ``alertAction=``, which the read boundary refuses on ``action=``.
+_ALERT_SEARCH_PATH = "/jobs/search-results"
+_ALERT_LANDING_KEY = "originToLandingJobPostings"
+_POSTING_ID = re.compile(r"[0-9]{6,20}")
+#: The most landing ids one notification may hand back. An alert e-mail
+#: carries about six cards; the cap is a bound on what a page can push
+#: through this field, not a measurement of LinkedIn's own count.
+ALERT_JOB_IDS_CAP = 25
+
+
+def alert_job_ids(link: str) -> list[str]:
+    """The posting ids a job-alert notification's link says it delivered.
+
+    PURE, and silent by construction: a link that is not an alert search, or
+    carries no landing key, or carries nothing digit-shaped in it, gives an
+    empty list -- never an exception, never a partial string.
+    """
+    try:
+        parts = urlsplit(str(link or ""))
+        values = parse_qs(parts.query).get(_ALERT_LANDING_KEY, [])
+    except ValueError:
+        return []
+    if parts.path.rstrip("/") != _ALERT_SEARCH_PATH:
+        return []
+    out: list[str] = []
+    for value in values:
+        for token in value.split(","):
+            token = token.strip()
+            if _POSTING_ID.fullmatch(token) and token not in out:
+                out.append(token)
+                if len(out) >= ALERT_JOB_IDS_CAP:
+                    return out
+    return out
+
 
 def notification_handles(link: str) -> dict[str, Any]:
     """Keys from a notification url that a tool on this server will take.
@@ -1498,6 +1548,11 @@ def notification_handles(link: str) -> dict[str, Any]:
     company = _COMPANY_LINK.search(link.split("?", 1)[0])
     if company:
         out["company_id"] = company.group(1)
+    # ``alert_job_ids`` goes to ``linkedin_job_detail``, one id per call: the
+    # postings a job alert delivered (census J 38). See ``alert_job_ids``.
+    landed = alert_job_ids(link)
+    if landed:
+        out["alert_job_ids"] = landed
     return out
 
 

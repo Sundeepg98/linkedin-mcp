@@ -6542,7 +6542,9 @@ async def linkedin_notifications(
     Rows carry the notification text, how long ago it arrived, whether it was
     unread, and the link LinkedIn attaches. Screen-reader-only text ("Unread
     notification.", "Status is reachable") is stripped, so the body is what you
-    would read on screen.
+    would read on screen. A job-alert row also carries ``alert_job_ids``: the
+    ids of the postings that alert delivered, in LinkedIn's order, each one an
+    id ``linkedin_job_detail`` takes.
 
     Args:
         limit: maximum notifications to return (default 20, max 50).
