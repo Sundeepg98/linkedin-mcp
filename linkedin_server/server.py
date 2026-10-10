@@ -1,4 +1,8 @@
-"""The tool surface: sixty-one tools, seventeen of which write to LinkedIn.
+"""The tool surface: sixty-two tools, seventeen of which write to LinkedIn.
+
+THE SIXTY-SECOND IS A READ, 2026-10-10, lane B1 (census row ``P L8``):
+``linkedin_analytics_hub``, his analytics hub ``/dashboard/`` loaded once and
+its metric cards returned as integers and closed words. It presses nothing.
 
 THE SIXTY-FIRST IS A READ, 2026-09-28, on lane L5's order of 08:06 and the
 operator's ruling of 08:01 (``NAMED-PROFILE-READ-BEHIND-A-GRANT``):
@@ -227,9 +231,9 @@ POINTER to it was dangling, so a reader who followed it found nothing and
 would reasonably conclude these numbers are unchecked. A citation is a claim
 like any other.
 The surface splits three ways and the split is the part a reader actually
-needs: FORTY-FOUR read, SEVENTEEN write, and ZERO are write-shaped,
-registered, gated and unable to act. Forty-four plus seventeen plus zero is
-sixty-one. (Thirty-eight, thirteen and fifty-one until 2026-09-24; thirty-nine,
+needs: FORTY-FIVE read, SEVENTEEN write, and ZERO are write-shaped,
+registered, gated and unable to act. Forty-five plus seventeen plus zero is
+sixty-two. (Thirty-eight, thirteen and fifty-one until 2026-09-24; thirty-nine,
 thirteen and fifty-two at the live lane's merge the same day; thirty-nine,
 fourteen and fifty-three at lane L7's; forty-one, fifteen and fifty-six at
 lane L5's; forty-one, sixteen and fifty-seven at lane L8's merge on
@@ -238,7 +242,8 @@ eighteen and fifty-nine from that merge until lane L5 RETIRED
 ``linkedin_send_message`` later the same day -- aimed by a name; forty-one,
 seventeen and fifty-eight until lane S's two reads arrived at its merge of
 master 0867bda, 2026-09-28; forty-three, seventeen and sixty until lane L5's
-read of a named profile the same day.)
+read of a named profile the same day; forty-four, seventeen and sixty-one
+until lane B1's analytics hub, 2026-10-10.)
 
 THE FIFTY-THIRD IS ONE WRITE, 2026-09-24 (lane L7, census row ``P I14``).
 ``linkedin_mark_company_interest`` presses "I'm interested" in the
@@ -477,6 +482,7 @@ from urllib.parse import parse_qs, urlencode, urlsplit
 from fastmcp import FastMCP
 
 from linkedin_server import (
+    analytics_hub,
     anchors,
     buildinfo,
     cdp_bridge,
@@ -11420,6 +11426,45 @@ async def linkedin_page_plugin_snippet(page_id: str) -> dict[str, Any]:
     """
     try:
         return {"ok": True, **page_plugin.follow_plugin_snippet(page_id)}
+    except Exception as exc:
+        return _error(exc)
+
+
+# ---- lane B1 (lb1-dashboard): P L8 ----
+@mcp.tool()
+async def linkedin_analytics_hub() -> dict[str, Any]:
+    """Your analytics hub's metric cards: values and their change, NEVER A NAME.
+
+    ONE page, ``/dashboard/`` -- the address LinkedIn's own "Show all
+    analytics" link on your profile opens -- loaded once and read once. It
+    clicks nothing, types nothing and opens no other address.
+
+    WHAT COMES BACK, per metric, under ``metrics``: ``post_impressions``,
+    ``followers``, ``profile_viewers``, ``search_appearances``, each with its
+    ``value``, its ``delta`` (the percentage change LinkedIn draws, signed by
+    the card's own up or down icon), its ``direction``, the ``window`` its own
+    label names (7 days, 90 days, total, or one dated week) and the
+    comparison ``period``. Integers and fixed words only.
+
+    A CARD IS RETURNED ONLY WHEN ITS LINK AND ITS LABEL AGREE. Each card is
+    identified by the analytics address it links to AND by its label, both
+    checked against fixed lists. A card either list does not know is
+    counted (``paths_unrecognised``, ``labels_unrecognised``) and left out,
+    so page text has no field to land in.
+
+    READ ``readable`` BEFORE BELIEVING AN ABSENCE. ``cards_seen`` 0 means the
+    reader reached no card -- the page changed shape or did not render -- and
+    says nothing about your account. A delta whose direction the page does
+    not show is ``None``, never a guess.
+
+    The page also draws your profile card in a side panel; this reads only
+    the metric section and never that panel.
+    """
+    try:
+        async with BROWSER.session() as page:
+            landed = await BROWSER.goto(page, analytics_hub.HUB_URL)
+            assert_not_authwall(landed, surface="analytics-hub")
+            return await analytics_hub.read_analytics_hub(page)
     except Exception as exc:
         return _error(exc)
 

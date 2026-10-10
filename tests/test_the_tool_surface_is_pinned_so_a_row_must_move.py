@@ -84,6 +84,7 @@ from linkedin_server import server as server_module
 #: ``test_every_tool_is_on_the_surface.py`` exists for. This reads the same
 #: registry a client does.
 PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
+    "linkedin_analytics_hub": (),
     "linkedin_apply_job": ("confirm_token", "job_id"),
     "linkedin_auth_status": (),
     "linkedin_cdp_status": (),
@@ -484,7 +485,12 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: The read's two new fields (`member_token`, `activity_items`) are not
 #: parameters; `N 30`, `N 85`, `N 172`, `N 31` and `M C32` move only when proven
 #: live.
-PINNED_TOOL_COUNT = 61
+#: **RE-PINNED 2026-10-10 AT 62 TOOLS AND 97 PARAMETERS on lane B1 (child
+#: lb1-dashboard): one READ, no parameter -- `linkedin_analytics_hub()`, his
+#: analytics hub `/dashboard/` loaded once, its metric cards returned as
+#: integers and closed words.** THE CENSUS DECISION: the census row `P L8` is
+#: banked by the lane B1 lead at merge; this commit moves no row itself.
+PINNED_TOOL_COUNT = 62
 PINNED_PARAMETER_COUNT = 97
 
 
