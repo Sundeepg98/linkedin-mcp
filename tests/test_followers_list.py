@@ -32,8 +32,8 @@ from typing import Any
 
 import pytest
 
-from linkedin_server import followers_list
-from tests.plantedpage import PLANT, carries_a_plant_word
+from linkedin_server import followers_list, people_data
+from tests.plantedpage import PLANT, carries_a_plant_word, carries_the_plant_outside_records
 from tests.test_writes import browser_page  # noqa: F401 -- fixture
 
 REPO = Path(__file__).resolve().parents[1]
@@ -85,6 +85,22 @@ SKELETON_READING: dict[str, Any] = {
     "beyond_first_render": "not_read",
     "readable": True,
     "scope": followers_list.SCOPE,
+    # THE PEOPLE (added 2026-10-10, the lead's ruling on the WHO half): one
+    # record per row, the skeleton's own "x" for its name and headline and
+    # its /in/x link, beside the row's relation -- nine followed back, the
+    # sixth row not. tests/test_followers_list_people.py reads named ones.
+    "followers": [
+        {
+            "member": {
+                "name": "x", "headline": "x", "link": "https://www.linkedin.com/in/x/",
+                "degree": None, people_data.UNTRUSTED_KEY: people_data.UNTRUSTED_NOTE,
+            },
+            "he_follows_back": index != 5,
+        }
+        for index in range(10)
+    ],
+    "names_unread": 0,
+    "headlines_unread": 0,
 }
 
 #: Every string an answer may hold: the module's own closed words.
@@ -99,11 +115,19 @@ CLOSED_STRINGS = frozenset(
 def page_text_in(answer: Any, path: str = "$") -> list[str]:
     """Every place in ``answer`` holding a string the module did not write:
     a value outside :data:`CLOSED_STRINGS`, or a key outside the reading's
-    own. Empty means no field held page text."""
+    own. A people record's envelope is the declared channel and is not
+    walked (``people_data.as_record``: exact shape, marker, valid fields).
+    Empty means page text took no other path."""
     found: list[str] = []
+    if isinstance(answer, dict) and people_data.as_record(answer) is not None:
+        return found
     if isinstance(answer, dict):
         for key, value in answer.items():
-            if key not in SKELETON_READING and key not in followers_list.UNKNOWN_REASONS:
+            if (
+                key not in SKELETON_READING
+                and key not in followers_list.UNKNOWN_REASONS
+                and key != "member"
+            ):
                 found.append(f"{path} key {key!r}")
             found += page_text_in(value, f"{path}[{key!r}]")
     elif isinstance(answer, (list, tuple, set, frozenset)):
@@ -187,17 +211,27 @@ async def test_the_skeleton_reads_nine_followed_back_and_a_planted_name_changes_
     browser_page,
 ) -> None:
     """THE READING, and the name the live page draws where the skeleton draws
-    ``x``: in every button's ``aria-label``, every member link and every
-    photo -- the answer is identical and carries no word of it."""
+    ``x``. In every button's ``aria-label`` and every photo's ``alt`` it
+    appears NOWHERE in the answer. In the member links too (since the WHO
+    half, 2026-10-10) it is the record's name and link -- and appears ONLY
+    inside people records, every count unchanged."""
     answer = await _read(browser_page, _skeleton())
     assert answer == SKELETON_READING, answer
     assert page_text_in(answer) == []
 
+    labels_only = _skeleton().replace('<button aria-label="x" id="k', f'<button aria-label="{PLANT}" id="k')
+    labels_only = labels_only.replace('alt="x"', f'alt="{PLANT}"')
+    answer = await _read(browser_page, labels_only)
+    assert answer == SKELETON_READING, answer
+    assert not carries_a_plant_word(repr(answer))
+
     planted = _plant_a_name_everywhere(_skeleton())
     assert planted.count(PLANT) >= 30
     answer = await _read(browser_page, planted)
-    assert answer == SKELETON_READING, answer
-    assert not carries_a_plant_word(repr(answer))
+    counts = {k: v for k, v in answer.items() if k != "followers"}
+    assert counts == {k: v for k, v in SKELETON_READING.items() if k != "followers"}, answer
+    outside, records = carries_the_plant_outside_records(answer)
+    assert (outside, records) == ([], 10), (outside, records)
     assert page_text_in(answer) == []
 
 
@@ -342,9 +376,20 @@ _FORBIDDEN_CALLS = frozenset(
         "click", "dblclick", "tap", "press", "type", "fill", "check", "uncheck",
         "hover", "focus", "select_option", "set_input_files", "dispatch_event",
         "scroll_into_view_if_needed", "goto", "go_back", "go_forward", "reload",
-        "evaluate", "evaluate_all", "evaluate_handle", "get_attribute", "wheel",
+        "evaluate", "evaluate_all", "evaluate_handle", "wheel",
     }
 )
+
+
+def _attributes_read(source: str) -> list[Any]:
+    """The first argument of every ``get_attribute`` call in ``source``."""
+    return [
+        node.args[0].value if node.args and isinstance(node.args[0], ast.Constant) else None
+        for node in ast.walk(ast.parse(source))
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Attribute)
+        and node.func.attr == "get_attribute"
+    ]
 
 
 def _method_calls(source: str) -> set[str]:
@@ -359,11 +404,14 @@ def _method_calls(source: str) -> set[str]:
 
 def test_the_module_presses_scrolls_loads_and_evaluates_nothing() -> None:
     """ONE PAGE, FIRST RENDER, NO ACT: no call that presses, types, scrolls,
-    navigates or runs a script, and no ``get_attribute`` at all -- so the
-    button's ``aria-label``, which live is the member's name, cannot be read."""
-    called = _method_calls(MODULE.read_text(encoding="utf-8"))
+    navigates or runs a script; and ONE attribute read, ``href`` (the people
+    record's link, since 2026-10-10) -- so the button's ``aria-label``, which
+    live is the member's name, cannot be read."""
+    source = MODULE.read_text(encoding="utf-8")
+    called = _method_calls(source)
     assert not called & _FORBIDDEN_CALLS, sorted(called & _FORBIDDEN_CALLS)
     assert {"count", "inner_text", "get_by_role", "locator"} <= called
+    assert _attributes_read(source) == ["href"], _attributes_read(source)
 
 
 def test_control_the_act_check_finds_a_label_read_and_a_press() -> None:
@@ -375,4 +423,5 @@ def test_control_the_act_check_finds_a_label_read_and_a_press() -> None:
         "    await row.get_attribute('aria-label')\n"
         "    await row.locator('button').click()\n"
     )
-    assert _method_calls(planted) & _FORBIDDEN_CALLS == {"get_attribute", "click"}
+    assert _method_calls(planted) & _FORBIDDEN_CALLS == {"click"}
+    assert _attributes_read(planted) == ["aria-label"]

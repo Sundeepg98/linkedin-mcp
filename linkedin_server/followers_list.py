@@ -22,14 +22,24 @@ who follow him. The admission's own comment says what a reader of it owes:
   read refuses unless the selected tab is NOT the one LinkedIn labels
   ``Following``.
 
-NO FIELD CAN HOLD PAGE TEXT. Every value is an integer, a boolean, or a word
-from a closed tuple below. No name, member id, link, headline or button label
-is returned, logged or kept -- and live the follow-state button's
-``aria-label`` carries the member's NAME, so this module never reads it: the
-word is read from the button's visible text slot and only ever compared.
-PEOPLE-DATA-MITIGATIONS (declared fields only; bounded to one page per call;
-visible only) and MEMBER-ROSTERS-AS-BOUNDED-READS (one page per call, no
-automatic pagination, inside the live budget) are what bound it.
+THE COUNTS HOLD NO PAGE TEXT. Every count field is an integer, a boolean, or a
+word from a closed tuple below. Live, the follow-state button's ``aria-label``
+carries the member's NAME, so this module never reads it: the word is read
+from the button's visible text slot and only ever compared.
+
+AND THE PEOPLE COME BACK AS RECORDS (added 2026-10-10 on the lane B1 lead's
+ruling: the row's payload is WHO, so WHO-WHICH-COUNTS-ARE-NOT-DELIVERY and
+NAMES-AT-RUNTIME call for the names). ``followers`` holds, per row read, one
+:class:`people_data.Person` envelope -- name, headline, canonical profile link,
+no degree -- beside that row's relation (``he_follows_back``: True, False, or
+None when unknown). Under PEOPLE-DATA-MITIGATIONS: declared fields only (the
+record's four, and the relation beside it); sanitised and marked as another
+member's words (``Person.from_page``); never stored (nothing here writes,
+logs or caches); bounded to one page, the first render, at most
+:data:`MAX_ROWS_READ` rows; visible only (the name is the row's own link
+text, a "LinkedIn Member" stays that); never a target (this module acts on
+nobody). MEMBER-ROSTERS-AS-BOUNDED-READS (one page per call, no automatic
+pagination, inside the live budget) bounds the read.
 
 ONE PAGE, FIRST RENDER ONLY. No scroll and no press: SCROLL-NOT-SANCTIONED.
 Rows LinkedIn draws only after a scroll are NOT READ, so ``rows_seen`` is not
@@ -51,9 +61,10 @@ name -- which is why the word is read from the text slot.
 """
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Optional
 from urllib.parse import urlsplit
 
+from . import people_data
 from .config import BASE_URL
 
 #: THE ONE ADDRESS. Admitted in ``readonly.py`` (``P L2b``'s pair); nothing
@@ -101,14 +112,27 @@ MAX_ROWS_READ = 100
 #: the count and the read is ``unreadable``, not a thirty-second stall.
 WORD_TIMEOUT_MS = 2000
 
+#: A row's subtitle -- the member's headline -- by LinkedIn's typography
+#: classes for it. MEASURED on the session-2 skeleton: exactly one per row,
+#: under the title block.
+SUBTITLE_SELECTOR = "div.t-14.t-black.t-normal"
+
+#: A row's relation, as each follower record carries it: True, False, or
+#: None for a row whose follow state is unknown.
+FOLLOWS_BACK_OF: dict[str, Optional[bool]] = {
+    "he_follows_back": True,
+    "he_does_not_follow_back": False,
+}
+
 #: What every answer says about its own reach. A constant: no page text.
 SCOPE = (
     "His own follower list, first render only: one page, no scroll and no "
     "press (SCROLL-NOT-SANCTIONED), so rows past the first render are not read "
-    "and rows_seen is not his follower count. Counts and relations only "
-    "(PEOPLE-DATA-MITIGATIONS, MEMBER-ROSTERS-AS-BOUNDED-READS): no name, "
-    "member id, link, headline or label is returned. A zero is a reading only "
-    "when readable is true."
+    "and rows_seen is not his follower count. Each follower comes back as a "
+    "people record beside its relation (PEOPLE-DATA-MITIGATIONS, "
+    "MEMBER-ROSTERS-AS-BOUNDED-READS): declared fields only, sanitised and "
+    "marked as another member's words, never stored; no button label is read. "
+    "A zero is a reading only when readable is true."
 )
 
 
@@ -160,6 +184,9 @@ def _reading(side: str, tabs_seen: int, lists_seen: int, rows_seen: int) -> dict
         "beyond_first_render": "not_read",
         "readable": False,
         "scope": SCOPE,
+        "followers": [],
+        "names_unread": 0,
+        "headlines_unread": 0,
     }
 
 
@@ -211,6 +238,36 @@ async def _relation_of(row: Any) -> str:
     return classify_word(await slots.first.inner_text(timeout=WORD_TIMEOUT_MS))
 
 
+async def _member_of(row: Any) -> Optional[tuple[dict[str, Any], bool]]:
+    """One row's member as a people record's envelope, and whether a headline
+    was read; ``None`` when no record can be built.
+
+    THE NAME is the text of the row's ONE link the accessibility tree exposes
+    -- the picture link is ``aria-hidden`` and is not one -- and that link must
+    be a member's profile link, or no record is built. THE HEADLINE is the
+    row's one subtitle; none, or more than one, leaves it ABSENT. Both go
+    through ``people_data.Person.from_page`` (sanitised, capped, marked); the
+    link is reduced to its canonical profile form there. The button's label
+    is never read.
+    """
+    links = row.get_by_role("link")
+    if await links.count() != 1:
+        return None
+    link = links.first
+    href = people_data.canonical_profile_link(await link.get_attribute("href"))
+    if href is None:
+        return None
+    name = await link.inner_text(timeout=WORD_TIMEOUT_MS)
+    subtitles = row.locator(SUBTITLE_SELECTOR)
+    headline = None
+    if await subtitles.count() == 1:
+        headline = await subtitles.first.inner_text(timeout=WORD_TIMEOUT_MS)
+    person = people_data.Person.from_page(name=name, headline=headline, href=href)
+    if person is None:
+        return None
+    return person.envelope(), headline is not None
+
+
 async def read_followers_list(page: Any) -> dict[str, Any]:
     """His follower list on the already-open page: counts and relations.
 
@@ -236,8 +293,9 @@ async def read_followers_list(page: Any) -> dict[str, Any]:
         return out
     to_read = min(out["rows_seen"], MAX_ROWS_READ)
     for index in range(to_read):
+        row = rows.nth(index)
         try:
-            relation = await _relation_of(rows.nth(index))
+            relation = await _relation_of(row)
         except Exception:  # noqa: BLE001 -- the row is unreadable; nothing of it is kept
             relation = "unreadable"
         if relation in ("he_follows_back", "he_does_not_follow_back"):
@@ -245,6 +303,19 @@ async def read_followers_list(page: Any) -> dict[str, Any]:
         else:
             out["unknown"] += 1
             out["unknown_why"][relation] += 1
+        try:
+            member = await _member_of(row)
+        except Exception:  # noqa: BLE001 -- no record; nothing of the row is kept
+            member = None
+        if member is None:
+            out["names_unread"] += 1
+            continue
+        envelope, headline_read = member
+        if not headline_read:
+            out["headlines_unread"] += 1
+        out["followers"].append(
+            {"member": envelope, "he_follows_back": FOLLOWS_BACK_OF.get(relation)}
+        )
     out["rows_read"] = to_read
     out["readable"] = to_read > 0
     return out

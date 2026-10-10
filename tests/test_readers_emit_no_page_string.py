@@ -1946,6 +1946,10 @@ DRIVEN_TO.update({key: RETURNS_TEXT for key in ADMITTED_TEXT})
 # the plant comes back inside a record, where the rule says it may.
 DRIVEN_TO["presence:read_suggested_presence"] = RETURNS_RECORDS
 DRIVEN_TO["recruiter_views:read_recruiter_views"] = RETURNS_RECORDS
+# HIS FOLLOWER LIST (2026-10-10, lane B1, child lb1-followers): its success
+# path returns one people record per row read, beside the row's relation, so
+# the plant comes back inside a record and nowhere else.
+DRIVEN_TO["followers_list:read_followers_list"] = RETURNS_RECORDS
 
 
 @pytest.mark.parametrize("key", sorted(shipped_drives.DRIVES))
