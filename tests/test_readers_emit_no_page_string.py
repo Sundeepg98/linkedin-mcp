@@ -713,6 +713,22 @@ async def _read_the_confirmed_profile_as_shipped(page: Any) -> Any:
     )
 
 
+async def _read_the_confirmed_details_as_shipped(page: Any) -> Any:
+    """One detail page of the profile he names (lane NP, ruling
+    NAMED-PROFILE-DETAIL-PAGES, 2026-10-10) as ``linkedin_read_named_profile``
+    calls it after its one load: a section of the closed vocabulary and the
+    landing the server composed, so the landing veto passes and the reader
+    reaches its counts."""
+    from linkedin_server import named_details, readonly
+
+    return await named_details.read_the_confirmed_details(
+        page,
+        segment=SYNTHETIC_ARGUMENT,
+        section="interests",
+        landed=readonly.named_profile_details_url(SYNTHETIC_ARGUMENT, "interests"),
+    )
+
+
 def _inert_observation(
     spec: Any, facts: dict[str, Any], target: Any = SYNTHETIC_ARGUMENT
 ) -> Any:
@@ -860,6 +876,9 @@ AS_SHIPPED: dict[str, Callable[..., Any]] = {
     # handed a landing that is not the named profile, vetoes on its first
     # line and reads nothing -- so it is driven as the tool calls it.
     "named_profile:read_the_confirmed_profile": _read_the_confirmed_profile_as_shipped,
+    # ONE DETAIL PAGE OF IT, 2026-10-10 (lane NP): driven by signature it is
+    # handed a section off the vocabulary and raises before any read.
+    "named_details:read_the_confirmed_details": _read_the_confirmed_details_as_shipped,
     "threads:name_the_reply_recipient": _name_the_reply_recipient_as_shipped,
     "writes:_name_the_invitation_recipient": _name_the_invitation_recipient_as_shipped,
     **shipped_drives.DRIVES,

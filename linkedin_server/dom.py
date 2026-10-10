@@ -8518,6 +8518,355 @@ async def read_bubbles(page: Any) -> dict[str, Any]:
     return out
 
 
+# ---------------------------------------------------------------------------
+# THE NAMED PROFILE'S HANDLES -- lane NP, 2026-10-10
+# ---------------------------------------------------------------------------
+#
+# Two values a caller passes BACK, as tool arguments, after the read he names
+# (``linkedin_read_named_profile``): the PROFILE OWNER'S member token, which
+# ``linkedin_people_search_shape(connections_of=...)`` takes (census ``N 30``,
+# ``N 85``, ``N 172``, ``N 31``), and the item keys of the posts the profile's
+# first render draws in its Activity section, each with WHOSE post it is, which
+# ``linkedin_react_to_item`` takes (``M C32``). Nothing in this package
+# CONSUMES either: they leave in the answer, and a page never supplies an
+# address or a target to any tool (PAGE-MAY-VETO-NEVER-SUPPLY) -- the caller
+# chooses what to pass back. Read on the page the confirmed read already
+# loaded: no navigation, no press, no scroll.
+
+#: The Activity section's heading, as LinkedIn draws it -- MEASURED on the live
+#: lane's session-2 and session-7 skeletons of a first-degree profile (one
+#: ``h2`` reading exactly this, LinkedIn's own word, kept by both skeletons).
+NAMED_ACTIVITY_HEADING = "Activity"
+
+#: At most this many item keys come back from one read. The order's bound; the
+#: measured first render drew TWO items (five permalinks).
+NAMED_ACTIVITY_ITEMS_CAP = 10
+
+#: At most this many permalink anchors are walked; more is reported truncated.
+NAMED_ACTIVITY_ANCHORS_CAP = 200
+
+#: WHOSE POST EACH ITEM IS, as a closed token. ``owner`` -- the profile owner's
+#: own post; ``another_member`` -- the item names somebody else as its author or
+#: actor (a repost, a comment, a post the owner appears on), so reacting to it
+#: would act on a stranger's post; ``unknown`` -- the page did not say.
+NAMED_ITEM_AUTHOR_KINDS = ("owner", "another_member", "unknown")
+
+#: Why the member token is or is not returned, as a closed token: the FIRST
+#: step of the chain that did not close, or ``chain_closed``.
+NAMED_MEMBER_WHY = (
+    "chain_closed",
+    "no_profile_title",
+    "no_topcard",
+    "more_than_one_topcard",
+    "heading_is_not_the_title",
+    "topcard_id_names_no_member",
+    "no_composer_link_in_topcard",
+    "a_composer_link_names_another_member",
+    "a_connections_link_names_another_member",
+)
+
+#: A member token as ``people_search`` takes it in ``connections_of`` --
+#: ``people_search._MEMBER_TOKEN``, restated here because ``dom`` imports no
+#: reader module; ``tests/test_named_profile_handles.py`` pins the two equal.
+NAMED_MEMBER_TOKEN = re.compile(r"ACoAA[A-Za-z0-9_-]{10,59}")
+
+#: An item key as ``linkedin_my_activity_items`` returns it and
+#: ``linkedin_react_to_item`` takes it -- the anchored shape
+#: :data:`ACTIVITY_ITEMS_JS` publishes, with a bound on the digits.
+NAMED_ITEM_KEY = re.compile(r"urn:li:[A-Za-z]+:[0-9]{1,25}")
+
+#: THE SCRIPT. What it rests on, measured and derived:
+#:
+#: * THE OWNER: the document title less a leading ``(N) `` and the trailing
+#:   `` | LinkedIn`` (measured, as :data:`NAMED_PROFILE_JS` reads it), and the
+#:   ONE ``[id$="Topcard"]`` element whose first heading reads exactly that
+#:   name (the identity check every named act makes).
+#: * THE MEMBER: the topcard's own id, ``com.linkedin.sdui.profile.card.ref
+#:   <member id>Topcard`` (measured on his own profile; on the live skeletons
+#:   of 2026-09-28 and 2026-10-10 its 80-character shape fits it exactly --
+#:   DERIVED there, as :data:`CONTROL_FACTS_JS` takes it). It is returned ONLY
+#:   when every link the topcard writes that names a member names THIS one:
+#:   every composer link (``recipient`` and ``profileUrn``; the session-7
+#:   skeleton draws two, one recipient between them, of the member id's 39
+#:   characters) and every people-search link carrying ``connectionOf`` (its
+#:   JSON list exactly ``[<member>]``, raw or percent-encoded; the skeleton draws
+#:   three, of the raw 43- and encoded 51-character shapes). At least one
+#:   composer link is required: the owner's Message link is the chain M M1's
+#:   first contact rests on, and with none the chain does not close. ANY link
+#:   naming another member refuses -- the owner's own card has no reason to
+#:   draw one.
+#: * THE ITEMS: the ONE ``section`` whose first ``h2`` reads
+#:   :data:`NAMED_ACTIVITY_HEADING`; inside it each ``/feed/update/<urn>/``
+#:   anchor whose urn is the anchored shape, paired to its nearest
+#:   ``[role="listitem"]`` (measured: each card is one), first appearance
+#:   wins, at most :data:`NAMED_ACTIVITY_ITEMS_CAP`.
+#: * WHOSE ITEM: the item's overflow control -- the control whose accessible
+#:   name opens with :data:`ACTIVITY_OVERFLOW_PREFIX`, measured on his own
+#:   profile and, by shape, on the session-7 skeleton (both items' labels are
+#:   the prefix's 30 characters and a name of the topcard heading's shape) --
+#:   and the item's ACTORS: the members its ``/in/`` links name BEFORE its first
+#:   permalink, in document order (measured: each card links the owner three
+#:   times there; the people a post MENTIONS are linked inside its text, after
+#:   it). ``owner`` needs exactly one overflow control whose name and the
+#:   owner's are in a prefix relation (the rule ``linkedin_my_activity_items``
+#:   applies, the shorter at least :data:`ACTIVITY_MIN_AUTHOR_CHARS`) AND every
+#:   actor one of the topcard's own member links. ``another_member`` needs
+#:   exactly one overflow control, a non-empty author and at least one actor,
+#:   and either half failing. Anything else is ``unknown``. NO capture shows a
+#:   repost or a comment in this section: that such an item names another
+#:   actor or author is DERIVED, and the rule refuses toward ``another_member``.
+#:
+#: WHAT CROSSES: the member token (only on a closed chain), item keys of the
+#: anchored shape, one closed token per item, counts and booleans. No name,
+#: label or other address. :func:`read_named_profile_handles` re-closes all of
+#: it in Python.
+NAMED_HANDLES_JS = """
+(cfg) => {
+  const norm = (s) => String(s === null || s === undefined ? '' : s).replace(/\\s+/g, ' ').trim();
+  const out = {
+    title_shape: 'none',
+    topcards: 0,
+    heading_matches_title: false,
+    member: null,
+    member_why: 'no_profile_title',
+    composer_links: 0,
+    composer_links_owner: 0,
+    connection_links: 0,
+    connection_links_owner: 0,
+    activity_sections: 0,
+    items: [],
+    permalink_anchors: 0,
+    unrecognised: 0,
+    unpaired: 0,
+    truncated: false
+  };
+  const pathOf = (raw) => {
+    if (raw === null || raw === undefined) return null;
+    const s = String(raw);
+    if (s.charAt(0) === '/' && s.charAt(1) !== '/') return s;
+    const m = /^https:\\/\\/www\\.linkedin\\.com(\\/.*)?$/.exec(s);
+    return m ? (m[1] || '/') : null;
+  };
+  const pairsOf = (path) => {
+    const at = path.indexOf('?');
+    if (at === -1) return [];
+    const found = [];
+    for (const pair of path.slice(at + 1).split('#')[0].split('&')) {
+      const eq = pair.indexOf('=');
+      if (eq === -1) continue;
+      try {
+        found.push([pair.slice(0, eq), decodeURIComponent(pair.slice(eq + 1))]);
+      } catch (e) { return null; }
+    }
+    return found;
+  };
+  const segOf = (raw) => {
+    const m = /^(?:https:\\/\\/www\\.linkedin\\.com)?\\/in\\/([^\\/?#]+)/.exec(String(raw || ''));
+    if (!m) return null;
+    let seg = m[1];
+    try { seg = decodeURIComponent(seg); } catch (e) { return null; }
+    if (/^ACoAA[A-Za-z0-9_-]{10,80}$/.test(seg)) return seg;
+    return seg.replace(/[A-Z]/g, (c) => c.toLowerCase());
+  };
+  const title = norm(document.title).replace(/^\\(\\d+\\)\\s*/, '');
+  const suffix = ' | LinkedIn';
+  const name = title.endsWith(suffix) ? title.slice(0, title.length - suffix.length).trim() : '';
+  if (name) out.title_shape = 'profile';
+  const cards = document.querySelectorAll('[id$="Topcard"]');
+  out.topcards = cards.length;
+  const card = cards.length === 1 ? cards[0] : null;
+  const own = new Set();
+  let member = null;
+  if (card) {
+    const heads = card.querySelectorAll('h1, h2');
+    out.heading_matches_title = !!name && heads.length >= 1 && norm(heads[0].innerText) === name;
+    const idMatch = /^com\\.linkedin\\.sdui\\.profile\\.card\\.ref(ACoAA[A-Za-z0-9_-]{10,80})Topcard$/.exec(card.id || '');
+    member = idMatch ? idMatch[1] : null;
+    for (const a of card.querySelectorAll('a[href]')) {
+      const raw = a.getAttribute('href');
+      const seg = segOf(raw);
+      if (seg) own.add(seg);
+      const path = pathOf(raw);
+      if (path === null) continue;
+      const bare = path.split('?')[0].split('#')[0];
+      const pairs = pairsOf(path);
+      if (bare === '/messaging/compose/' || bare === '/messaging/compose') {
+        out.composer_links += 1;
+        if (pairs === null || member === null) continue;
+        const named = [];
+        for (const pair of pairs) {
+          if (pair[0] === 'recipient') named.push(pair[1]);
+          if (pair[0] === 'profileUrn') named.push(pair[1].replace(/^urn:li:fsd_profile:/, ''));
+        }
+        if (named.length > 0 && named.every((m) => m === member)) out.composer_links_owner += 1;
+      } else if (path.indexOf('connectionOf=') !== -1) {
+        out.connection_links += 1;
+        if (pairs === null || member === null) continue;
+        const lists = pairs.filter((pair) => pair[0] === 'connectionOf');
+        if (lists.length !== 1) continue;
+        let list = null;
+        try { list = JSON.parse(lists[0][1]); } catch (e) { list = null; }
+        if (Array.isArray(list) && list.length === 1 && list[0] === member) out.connection_links_owner += 1;
+      }
+    }
+  }
+  if (!name) out.member_why = 'no_profile_title';
+  else if (!card) out.member_why = cards.length ? 'more_than_one_topcard' : 'no_topcard';
+  else if (!out.heading_matches_title) out.member_why = 'heading_is_not_the_title';
+  else if (member === null) out.member_why = 'topcard_id_names_no_member';
+  else if (out.composer_links === 0) out.member_why = 'no_composer_link_in_topcard';
+  else if (out.composer_links_owner !== out.composer_links) out.member_why = 'a_composer_link_names_another_member';
+  else if (out.connection_links_owner !== out.connection_links) out.member_why = 'a_connections_link_names_another_member';
+  else { out.member = member; out.member_why = 'chain_closed'; }
+
+  const sections = [];
+  for (const sec of document.querySelectorAll('section')) {
+    const head = sec.querySelector('h2');
+    if (head && norm(head.innerText || head.textContent) === cfg.heading) sections.push(sec);
+  }
+  const innermost = sections.filter((sec) => !sections.some((other) => other !== sec && sec.contains(other)));
+  out.activity_sections = innermost.length;
+  if (innermost.length !== 1) return out;
+  const section = innermost[0];
+  const prefix = String(cfg.overflowPrefix);
+  const marker = '/feed/update/';
+  const urnShape = /^urn:li:[A-Za-z]+:[0-9]+$/;
+  const kindOf = (root) => {
+    const authors = [];
+    for (const el of root.querySelectorAll('button, [role="button"]')) {
+      const said = norm(el.getAttribute('aria-label'));
+      if (said.indexOf(prefix) === 0) authors.push(norm(said.slice(prefix.length)));
+    }
+    const actors = new Set();
+    for (const a of root.querySelectorAll('a[href]')) {
+      const path = pathOf(a.getAttribute('href'));
+      if (path !== null && path.indexOf(marker) === 0) break;
+      const seg = segOf(a.getAttribute('href'));
+      if (seg) actors.add(seg);
+    }
+    if (authors.length !== 1 || !authors[0] || actors.size === 0 || !name || own.size === 0) {
+      return 'unknown';
+    }
+    const author = authors[0];
+    const shorter = Math.min(author.length, name.length);
+    const related = shorter >= cfg.minAuthorChars
+      && (author.indexOf(name) === 0 || name.indexOf(author) === 0);
+    let ownActors = true;
+    for (const seg of actors) { if (!own.has(seg)) ownActors = false; }
+    return related && ownActors ? 'owner' : 'another_member';
+  };
+  const seen = [];
+  for (const a of section.querySelectorAll('a[href]')) {
+    const path = pathOf(a.getAttribute('href'));
+    if (path === null || path.indexOf(marker) !== 0) continue;
+    out.permalink_anchors += 1;
+    if (out.permalink_anchors > cfg.maxAnchors) { out.truncated = true; continue; }
+    let segment = path.slice(marker.length);
+    const stop = segment.search(/[\\/?#]/);
+    if (stop !== -1) segment = segment.slice(0, stop);
+    if (!urnShape.test(segment)) { out.unrecognised += 1; continue; }
+    const root = a.closest('[role="listitem"]');
+    if (!root || !section.contains(root)) { out.unpaired += 1; continue; }
+    if (seen.indexOf(segment) !== -1) continue;
+    if (seen.length >= cfg.maxItems) { out.truncated = true; continue; }
+    seen.push(segment);
+    out.items.push({ item: segment, author: kindOf(root) });
+  }
+  return out;
+}
+"""
+
+
+async def read_named_profile_handles(page: Any) -> dict[str, Any]:
+    """The named profile's two handles, off the page already loaded, RE-CLOSED.
+
+    Runs :data:`NAMED_HANDLES_JS` once and closes every field again in Python:
+    a member token that is not :data:`NAMED_MEMBER_TOKEN` reads as absent, an
+    item key that is not :data:`NAMED_ITEM_KEY` is dropped and counted, an
+    author kind off its vocabulary reads ``unknown``, a reason off its
+    vocabulary reads ``no_profile_title`` (the one that returns no token), and
+    a field the script did not return reads as absent. ``error`` carries an
+    exception's TYPE only. Reads; never navigates, presses or scrolls.
+    """
+    out: dict[str, Any] = {
+        "title_shape": "none",
+        "topcards": 0,
+        "heading_matches_title": False,
+        "member": None,
+        "member_why": "no_profile_title",
+        "composer_links": 0,
+        "composer_links_owner": 0,
+        "connection_links": 0,
+        "connection_links_owner": 0,
+        "activity_sections": 0,
+        "items": [],
+        "permalink_anchors": 0,
+        "unrecognised": 0,
+        "unpaired": 0,
+        "dropped": 0,
+        "truncated": False,
+        "error": None,
+    }
+    cfg = {
+        "heading": NAMED_ACTIVITY_HEADING,
+        "overflowPrefix": ACTIVITY_OVERFLOW_PREFIX,
+        "maxItems": NAMED_ACTIVITY_ITEMS_CAP,
+        "maxAnchors": NAMED_ACTIVITY_ANCHORS_CAP,
+        "minAuthorChars": ACTIVITY_MIN_AUTHOR_CHARS,
+    }
+    try:
+        raw = await page.evaluate(NAMED_HANDLES_JS, cfg)  # readonly-ok
+    except Exception as exc:  # noqa: BLE001 - reported as a type, never raised
+        out["error"] = type(exc).__name__
+        logger.debug("named profile handles unreadable: %s", type(exc).__name__)
+        return out
+    reading = raw if isinstance(raw, dict) else {}
+    for key in (
+        "topcards", "composer_links", "composer_links_owner", "connection_links",
+        "connection_links_owner", "activity_sections", "permalink_anchors",
+        "unrecognised", "unpaired",
+    ):
+        out[key] = as_count(reading.get(key))
+    out["title_shape"] = "profile" if reading.get("title_shape") == "profile" else "none"
+    out["heading_matches_title"] = reading.get("heading_matches_title") is True
+    out["truncated"] = reading.get("truncated") is True
+    why = reading.get("member_why")
+    out["member_why"] = why if why in NAMED_MEMBER_WHY else "no_profile_title"
+    member = reading.get("member")
+    if (
+        out["member_why"] == "chain_closed"
+        and isinstance(member, str)
+        and NAMED_MEMBER_TOKEN.fullmatch(member)
+    ):
+        out["member"] = member
+    elif out["member_why"] == "chain_closed":
+        # A CLOSED CHAIN WITH NO TOKEN OF THE SHAPE is not a closed chain.
+        out["member_why"] = "topcard_id_names_no_member"
+    items: list[dict[str, str]] = []
+    dropped = 0
+    listed = reading.get("items")
+    for entry in (listed if isinstance(listed, list) else [])[: NAMED_ACTIVITY_ITEMS_CAP + 1]:
+        entry = entry if isinstance(entry, dict) else {}
+        key = entry.get("item")
+        if not (isinstance(key, str) and NAMED_ITEM_KEY.fullmatch(key)):
+            dropped += 1
+            continue
+        if any(item["item"] == key for item in items):
+            dropped += 1
+            continue
+        if len(items) >= NAMED_ACTIVITY_ITEMS_CAP:
+            out["truncated"] = True
+            break
+        author = entry.get("author")
+        items.append({
+            "item": key,
+            "author": author if author in NAMED_ITEM_AUTHOR_KINDS else "unknown",
+        })
+    out["items"] = items
+    out["dropped"] = dropped
+    return out
+
+
 # ``read_messaging_badge`` STOOD HERE until 2026-09-27: the messaging nav
 # badge, read without opening messaging, for send_message's preview. That
 # action was RETIRED (lane L5, the orchestrator's order of 23:36; it was

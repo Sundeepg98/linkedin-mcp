@@ -8,7 +8,7 @@
 
 **THIS REGISTER IS NOT THE CORPUS AND DOES NOT CLAIM TO BE COMPLETE.** Read section 4 before concluding a question is unruled: the scan that keeps it honest reads ONE marker, and the ruling that caused this file to be written does not carry it.
 
-    rulings registered       68
+    rulings registered       69
     documents scanned        258
     RULED: declarations      55 claimed, 7 triaged, 0 unclaimed
 
@@ -119,6 +119,7 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | `MEMBER-ROSTERS-AS-BOUNDED-READS` | A roster the operator can open himself (a group's members, an event's attendees, a company's or school's People tab) is admitted as a bounded read: one page per call, the id from tool arguments only, no automatic pagination, no member name or id in a tracked file, inside the live budget. | member rosters | 2026-09-24 | [2026-09-24-rulings-search-verticals-rosters-passive-costs.md](2026-09-24-rulings-search-verticals-rosters-passive-costs.md)<br>*Rosters he can open himself* |
 | `THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET` | A third party's profile (/in/<slug>/) may be loaded only inside an outward act whose target the operator names in that call: slug from tool arguments only, never for a measurement, the shaper name-free. Search-admission condition 5 stands. | third-party profiles inside outward acts | 2026-09-24 | [2026-09-24-rulings-notify-veto-and-who-which.md](2026-09-24-rulings-notify-veto-and-who-which.md)<br>*A third party's profile, inside his own outward act* |
 | `NAMED-PROFILE-READ-BEHIND-A-GRANT` | A read of a member's profile he names in the call -- by link or member id, never a name read off a page -- is built behind the single-use grant, its preview stating that LinkedIn may show the member the view; declared fields leave as people records; never for a measurement. | a third-party profile he names | 2026-09-28 | [2026-09-28-rulings-named-profile-read.md](2026-09-28-rulings-named-profile-read.md)<br>*His answer* |
+| `NAMED-PROFILE-DETAIL-PAGES` | The read of a profile he names includes that same profile's own detail pages (/in/<the same slug>/details/<section>/), one load per call, behind the same single-use grant and the same preview warning; any other slug and any non-details path stay refused. | a third-party profile he names | 2026-10-10 | [2026-10-10-rulings-named-profile-detail-pages.md](2026-10-10-rulings-named-profile-detail-pages.md)<br>*The ruling* |
 
 ### read results
 
@@ -304,6 +305,8 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 **`MEMBER-ROSTERS-AS-BOUNDED-READS`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable. Decides the roster question the 2026-09-05 refusal recorded in readonly.py and census cells but never registered (D3). Rows it held: N 165, N 188, N 189, J 108, N 102, N 99, N 177.
 
 **`MESSAGING-SETTINGS-CAPABILITY-LEVEL`** -- The ruling CANONICAL-RULING-ID was written about: one sentence wearing three names across three slices. Its census twin is `_audit/_census/profile.md`.
+
+**`NAMED-PROFILE-DETAIL-PAGES`** -- Orchestrator's application of NAMED-PROFILE-READ-BEHIND-A-GRANT; overridable. Admitted for the four detail sections measured on his own profile; N 178 and N 65 wait on the Interests page's capture.
 
 **`NAMED-PROFILE-READ-BEHIND-A-GRANT`** -- The operator's ruling, verbatim in its document; mitigations as the question put them.
 
