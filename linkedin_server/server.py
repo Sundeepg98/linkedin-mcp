@@ -1,4 +1,13 @@
-"""The tool surface: seventy-three tools, twenty-two of which write to LinkedIn.
+"""The tool surface: seventy-four tools, twenty-two of which write to LinkedIn.
+
+THE SEVENTY-FOURTH IS A READ, 2026-10-26, at this integration merge (census
+row ``J 108``, lane B4, ruling THIRD-PARTY-TEXT-AT-RUNTIME):
+``linkedin_company_people_insights``, an organisation People tab's insight
+cards -- what its members do, where they live and studied, what they are
+skilled at, and how he is connected to them -- as categories and counts, with
+no person returned. It loads the one roster address
+``member_rosters.compose("company_people", <id>)`` builds, once, and presses
+nothing. Measured off the merged registry, not summed.
 
 THE SEVENTY-THIRD IS A READ, 2026-10-26, at this integration merge (census
 row ``J 110``, lane B4, ruling THIRD-PARTY-TEXT-AT-RUNTIME):
@@ -317,9 +326,9 @@ assigned to anybody -- it waits for whoever next runs the suite, and in the
 meantime the pin goes on asserting the old number with full confidence.
 
 THE NUMBERS ABOVE ARE DERIVED NOW, and that is a statement about a test rather
-than about an intention. Seventy-three is ``len(await mcp.list_tools())``,
+than about an intention. Seventy-four is ``len(await mcp.list_tools())``,
 pinned in ``test_server_surface.py`` by
-``test_the_surface_is_exactly_the_seventy_three_tools``; the split is pinned by
+``test_the_surface_is_exactly_the_seventy_four_tools``; the split is pinned by
 ``tests/test_prose_that_makes_a_claim.py::test_the_server_docstring_numbers_are_derived``,
 which reads THESE WORDS and fails if any of the three disagrees with the
 registry.
@@ -332,11 +341,13 @@ POINTER to it was dangling, so a reader who followed it found nothing and
 would reasonably conclude these numbers are unchecked. A citation is a claim
 like any other.
 The surface splits three ways and the split is the part a reader actually
-needs: FIFTY-ONE read, TWENTY-TWO write, and ZERO are write-shaped,
-registered, gated and unable to act. Fifty-one plus twenty-two plus zero is
-seventy-three. (Fifty, twenty-two and seventy-two on master at this
-integration's base; fifty-one, twenty-two and seventy-three when this merge
-added lane B4's read of an organisation Page's description.
+needs: FIFTY-TWO read, TWENTY-TWO write, and ZERO are write-shaped,
+registered, gated and unable to act. Fifty-two plus twenty-two plus zero is
+seventy-four. (Fifty, twenty-two and seventy-two on master at this
+integration's base; fifty-one, twenty-two and seventy-three when the J 110
+merge added lane B4's read of an organisation Page's description;
+fifty-two, twenty-two and seventy-four when the J 108 merge added lane B4's
+read of a People tab's insight cards.
 Thirty-eight,
 thirteen and fifty-two at the live lane's merge the same day; thirty-nine,
 fourteen and fifty-three at lane L7's; forty-one, fifteen and fifty-six at
@@ -359,7 +370,11 @@ forty-seven, twenty and sixty-seven until lane B3's three reads
 (``linkedin_read_item_text``, ``linkedin_my_articles`` and
 ``linkedin_item_viewer_demographics``), merged after lane B2's the same day;
 fifty, twenty and seventy until lane B4's ``linkedin_set_similar_jobs_alert``
-and ``linkedin_unset_similar_jobs_alert``, merged after lane B3's the same day.)
+and ``linkedin_unset_similar_jobs_alert``, merged after lane B3's the same
+day; fifty-two, twenty-two and seventy-four when this integration merged lane
+B4's two reads of an organisation Page -- its description and a People tab's
+insight cards -- beside the two writes. The J 108 branch's own history read
+until lane B4's read of a People tab's insight cards, 2026-10-10.)
 
 THE FIFTY-THIRD IS ONE WRITE, 2026-09-24 (lane L7, census row ``P I14``).
 ``linkedin_mark_company_interest`` presses "I'm interested" in the
@@ -1294,7 +1309,11 @@ mcp = FastMCP(
         "(events), return "
         "each person as a "
         "record of four fields (name, headline, link, degree), and each group "
-        "or event as a title and a link; every such record carries the key "
+        "or event as a title and a link; linkedin_company_people_insights "
+        "returns no person, and each category an organisation's People tab "
+        "counts its members by -- a place, a school, a title, a skill, a "
+        "field of study -- comes back as a record of one field, its label. "
+        "Every such record carries the key "
         "untrusted_third_party_text. A headline of null is ABSENT -- where "
         "the reading was taken, none was drawn -- which is not an empty "
         "headline. Those fields are what OTHER members wrote "
@@ -12296,7 +12315,6 @@ async def linkedin_company_page_home(organisation_id: str) -> dict[str, Any]:
     except Exception as exc:
         return _error(exc)
 
-
 @mcp.tool()
 async def linkedin_unset_similar_jobs_alert(
     job_id: str, confirm_token: str = ""
@@ -12319,6 +12337,94 @@ async def linkedin_unset_similar_jobs_alert(
     """
     try:
         return await _write_tool("unset_similar_jobs_alert", job_id, confirm_token)
+    except Exception as exc:
+        return _error(exc)
+# ---- lane B4 ----
+# Census lane B4 (jobs). Every tool this lane adds lives in this one block.
+# The two imports sit here rather than in the list at the top so the lane's
+# additions stay one contiguous block while four lanes edit this file.
+from linkedin_server import company_people_insights, member_rosters  # noqa: E402
+
+
+@mcp.tool()
+async def linkedin_company_people_insights(organisation_id: str) -> dict[str, Any]:
+    """An organisation People tab's INSIGHT CARDS: what its members do, where they
+    studied, what they are skilled at, and how you are connected -- as counts.
+
+    Census row ``J 108`` -- *Company Page People tab (titles, study areas,
+    skills, how you are connected)*. Under the WHO/WHICH rule as lane S
+    extended it on 2026-09-24, those are the tab's insight DISTRIBUTIONS, an
+    aggregate, delivered here without saying who anyone is.
+
+    WHAT COMES BACK. ``cards``: one per card LinkedIn drew whose heading is
+    one of the six measured (``company_people_insights.CARDS``), each with
+    its facet key, LinkedIn's heading and up to ten rows of a label and an
+    integer count. A row's LABEL -- a place, a school, a title, a skill, a
+    field of study -- is a record of one field marked
+    ``untrusted_third_party_text``: sanitised, capped, someone else's words.
+    THE CONNECTION CARD RETURNS ONLY DEGREES AND COUNTS (``3rd+``, ``2nd``,
+    ``1st``): a row there that is not a degree word is withheld and counted,
+    so if LinkedIn ever drew a person in that card, no name would leave. A
+    card whose heading is not in the vocabulary is counted, never returned;
+    a count that is not plain or grouped digits withholds its row and is
+    tallied by shape, never rounded. ``bounds`` and ``truncated`` say what
+    was cut.
+
+    THE ROSTER ITSELF IS NOT RETURNED. The people listed under the cards are
+    census row ``N 102``'s and nothing here reads them.
+
+    ONE LOAD, NO PRESS. The address is ``/company/<organisation_id>/people/``,
+    composed by ``member_rosters.compose`` from the id you pass and nothing
+    else, opened once through the read gate (``MEMBER-ROSTERS-AS-BOUNDED-
+    READS``). If the load lands anywhere but a People tab the page is not
+    read. No filter toggle, no carousel arrow and no scroll is touched: the
+    six cards are drawn on load.
+
+    ``organisation_id`` IS TEN ASCII DIGITS AND NOTHING ELSE, at most 20 --
+    the number ``linkedin_job_detail`` publishes in ``company_page_url``. A
+    slug is refused before any load, because a slug is a name, and the
+    refusal describes its shape rather than quoting it.
+
+    Args:
+        organisation_id: the numeric LinkedIn organisation id.
+
+    Returns:
+        The cards and their counters, ``pages_loaded`` 1 and whether the load
+        was redirected (a boolean, never the landing) -- or a refusal.
+    """
+    try:
+        # ``address``, AS linkedin_company_page_counts NAMES IT and for its
+        # reason: a template this repository authored, filled from the
+        # caller's own argument, which compose has proven is digits only.
+        address = member_rosters.compose("company_people", organisation_id)
+        if not address.get("built"):
+            return {"ok": False, **address}
+        async with BROWSER.session() as page:
+            landed = await BROWSER.goto(page, address["url"])
+            _authwall_refusal_without_the_landing(
+                landed, surface="organisation People tab"
+            )
+            if not company_people_insights.landed_on_a_people_tab(landed):
+                return {
+                    "ok": False,
+                    "pages_loaded": 1,
+                    "refused": "landed_off_the_people_tab",
+                    "why": (
+                        "the load did not land on an organisation's People "
+                        "tab, so the page was not read. The landing is "
+                        "withheld: an organisation address is canonically a "
+                        "slug, which is a name."
+                    ),
+                }
+            reading = await company_people_insights.read_people_insights(page)
+            return {
+                "ok": True,
+                "pages_loaded": 1,
+                # A BOOLEAN, NOT THE LANDING, as at linkedin_company_page_counts:
+                # LinkedIn canonicalises the number to a slug.
+                "redirected": landed.rstrip("/") != address["url"].rstrip("/"),
+                **reading,
+            }
     except Exception as exc:
         return _error(exc)
 

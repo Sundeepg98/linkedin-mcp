@@ -1,4 +1,11 @@
-"""The tool surface: seventy-three tools, fifty-one of which do not write.
+"""The tool surface: seventy-four tools, fifty-two of which do not write.
+
+**IT READ "seventy-three tools, fifty-one of which do not write" UNTIL THE
+J 108 MERGE (2026-10-26) ADDED LANE B4'S SECOND READ**:
+``linkedin_company_people_insights`` (census J 108), an organisation People
+tab's insight cards -- categories and counts, no person -- opened on the one
+roster address ``member_rosters.compose`` builds for it. One load, no press.
+The split moved on its read side only.
 
 **IT READ "seventy-two tools, fifty of which do not write" UNTIL THIS
 INTEGRATION MERGE (2026-10-26) ADDED LANE B4'S READ**: ``linkedin_company_page_home`` (census
@@ -282,6 +289,12 @@ EXPECTED_TOOLS = {
     # the root drew as counts -- on the address the boundary already admits.
     # It presses nothing and is on no write table (census J 110).
     "linkedin_company_page_home",
+    # THE SIXTY-SECOND, 2026-10-10 (lane B4, census J 108): a READ of an
+    # organisation People tab's insight cards -- categories and counts, no
+    # person -- opening the one roster address member_rosters.compose builds
+    # for it (MEMBER-ROSTERS-AS-BOUNDED-READS). One load, no press; it is on
+    # no write table.
+    "linkedin_company_people_insights",
     # THE THIRTY-EIGHTH, 2026-09-05: linkedin_events_home, a READ. No
     # write was added. It is the only tool here whose whole answer can be
     # ZERO, and its reader returns that integer only when four
@@ -670,11 +683,29 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_seventy_three_tools(tools):
-    """RENAMED AGAIN AT THIS INTEGRATION MERGE (2026-10-26), to
+async def test_the_surface_is_exactly_the_seventy_four_tools(tools):
+    """RENAMED AGAIN AT THE J 108 MERGE (2026-10-26), to
+    ``..._seventy_four_tools``: lane B4's ``linkedin_company_people_insights``
+    (census J 108, ruling THIRD-PARTY-TEXT-AT-RUNTIME) beside the
+    seventy-three. MEASURED off the merged registry, not summed; the name
+    moved with the pin.
+
+    RENAMED AGAIN AT THIS INTEGRATION MERGE (2026-10-26), to
     ``..._seventy_three_tools``: lane B4's ``linkedin_company_page_home`` (census
     J 110, ruling THIRD-PARTY-TEXT-AT-RUNTIME) beside the seventy-two. MEASURED
     off the merged registry, not summed; the name moved with the pin.
+
+    RENAMED AGAIN ON LANE B4'S BRANCH, 2026-10-10, to ``..._sixty_two_tools``:
+    one READ, ``linkedin_company_people_insights`` (census J 108), an
+    organisation People tab's insight cards as categories and counts. MEASURED
+    off the registry on this branch; the name moved with the pin. A merge that
+    brings another lane's tool re-measures it off the merged registry.
+
+    RENAMED AGAIN ON LANE B4'S BRANCH, 2026-10-10 (child b4-j110), to
+    ``..._sixty_two_tools``: one READ, ``linkedin_company_page_home`` (census
+    J 110, ruling THIRD-PARTY-TEXT-AT-RUNTIME). MEASURED off the registry; the
+    name moved with the pin. That lane's branch held the tool as its own
+    sixty-second; this merge re-derives it as the seventy-third.
 
     RENAMED AGAIN AT THE INTEGRATION MERGE OF LANE B4 ONTO LANE B3 (2026-10-10), to
     ``..._seventy_two_tools``: lane B4's two writes beside the seventy.
@@ -733,12 +764,6 @@ async def test_the_surface_is_exactly_the_seventy_three_tools(tools):
     WRITE, ``linkedin_withdraw_reaction``, the reaction's inverse (the
     orchestrator's ruling of 14:14). MEASURED off the registry; the name
     moved with the pin.
-
-    RENAMED AGAIN ON LANE B4'S BRANCH, 2026-10-10 (child b4-j110), to
-    ``..._sixty_two_tools``: one READ, ``linkedin_company_page_home`` (census
-    J 110, ruling THIRD-PARTY-TEXT-AT-RUNTIME). MEASURED off the registry; the
-    name moved with the pin. That lane's branch held the tool as its own
-    sixty-second; this merge re-derives it as the seventy-third.
 
     RENAMED AGAIN ON LANE L5'S ORDER OF 2026-09-28 08:06, to
     ``..._sixty_one_tools``: one READ, ``linkedin_read_named_profile`` (ruling
@@ -1099,7 +1124,13 @@ async def test_the_surface_is_exactly_the_seventy_three_tools(tools):
     # SEVENTY-THREE AT THIS INTEGRATION MERGE, 2026-10-26: lane B4's
     # linkedin_company_page_home beside the seventy-two, measured off the
     # merged registry, not summed.
-    assert len(tools) == 73
+    # SIXTY-TWO ON LANE B4'S BRANCH, 2026-10-10: linkedin_company_people_insights,
+    # a READ (census J 108), so the split moves on its read side and the write
+    # set holds. MEASURED off mcp.list_tools() on this branch.
+    # SEVENTY-FOUR AT THE J 108 MERGE, 2026-10-26: lane B4's
+    # linkedin_company_people_insights beside the seventy-three, measured off
+    # the merged registry, not summed.
+    assert len(tools) == 74
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -1302,8 +1333,15 @@ async def test_the_surface_is_exactly_the_seventy_three_tools(tools):
     # linkedin_company_page_home is a READ beside the fifty, so the non-write
     # count moves by one and the write side is unmoved; MEASURED on the
     # merged tree, never summed.
-    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 51
-    assert len(tools) == 73
+    # FORTY-FIVE ON LANE B4'S BRANCH, 2026-10-10:
+    # linkedin_company_people_insights is a READ -- one admitted People-tab
+    # load, no press, no scroll -- and the write side is unmoved.
+    # FIFTY-TWO AT THE J 108 MERGE, 2026-10-26: lane B4's
+    # linkedin_company_people_insights is a READ beside the fifty-one, so the
+    # non-write count moves by one and the write side is unmoved; MEASURED on
+    # the merged tree, never summed.
+    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 52
+    assert len(tools) == 74
 
 
 def test_the_read_that_was_nearly_named_a_write():

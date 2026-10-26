@@ -1979,6 +1979,10 @@ DRIVEN_TO["search_vertical_results:read_event_results"] = RETURNS_RECORDS
 # its success path returns an organisation's description inside an
 # OrganisationProse record, so the plant comes back inside a record.
 DRIVEN_TO["company_home:read_company_home"] = RETURNS_RECORDS
+# LANE B4'S AGGREGATE READER (2026-10-10, census J 108): the People tab's
+# insight cards. A category's label is third-party text, so it leaves as a
+# people_data.Category record -- the declared channel, not the text inventory.
+DRIVEN_TO["company_people_insights:read_people_insights"] = RETURNS_RECORDS
 
 
 @pytest.mark.parametrize("key", sorted(shipped_drives.DRIVES))
@@ -2102,6 +2106,11 @@ FIXTURE_BREAKS: dict[str, dict[str, str]] = {
         "fixture": "synthetic/search_events_live.html",
         "needle": '<p><a href="/events/1000000000000000001/">',
         "into": '<p><span href="/events/1000000000000000001/">',
+    },
+    # 2026-10-10 (lane B4): a measured card heading of the People tab capture.
+    "company_people_insights:read_people_insights": {
+        "fixture": "live2/company_people_insights.html",
+        "needle": "\nWhere they live\n", "into": "\nWhere they lived\n",
     },
     "press:disclose": {
         "fixture": "profile_views_analytics.html",

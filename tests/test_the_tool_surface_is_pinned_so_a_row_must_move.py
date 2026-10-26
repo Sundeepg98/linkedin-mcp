@@ -90,6 +90,8 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_comment_on_item": ("confirm_token", "item", "text"),
     "linkedin_company_page_counts": ("organisation_id",),
     "linkedin_company_page_home": ("organisation_id",),
+    # 2026-10-10 (lane B4, census J 108): the People tab's insight cards.
+    "linkedin_company_people_insights": ("organisation_id",),
     "linkedin_compose_fields": (),
     "linkedin_connect_from_profile": ("confirm_token", "profile"),
     "linkedin_connections": ("limit",),
@@ -636,8 +638,18 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: **AT THIS INTEGRATION MERGE, 2026-10-26: 73 TOOLS AND 116 PARAMETERS** --
 #: lane B4's one tool and its one parameter beside the seventy-two and 115,
 #: counted on the merged registry, never summed.
-PINNED_TOOL_COUNT = 73
-PINNED_PARAMETER_COUNT = 116
+#: **RE-PINNED 2026-10-10 AT 62 TOOLS AND 98 PARAMETERS on lane B4's branch
+#: (census J 108): one READ, `linkedin_company_people_insights(organisation_id)`
+#: -- an organisation People tab's insight cards as categories and counts, the
+#: first tool to open a roster address (MEMBER-ROSTERS-AS-BOUNDED-READS).**
+#: THE CENSUS DECISION is the lane lead's, reported rather than banked: the
+#: child's report proposes `J 108` GAP -> COVERED-UNFIRED on code aimed at the
+#: session-2 capture of a People tab; no census file moves in this commit.
+#: **AT THE J 108 MERGE, 2026-10-26: 74 TOOLS AND 117 PARAMETERS** -- lane
+#: B4's one tool and its one parameter beside the seventy-three and 116,
+#: counted on the merged registry, never summed.
+PINNED_TOOL_COUNT = 74
+PINNED_PARAMETER_COUNT = 117
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:

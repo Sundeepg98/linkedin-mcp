@@ -567,3 +567,60 @@ def test_that_naming_check_can_fail():
     assert people_tools_named_in(said) != set(pd.PEOPLE_TOOLS)
     earlier = "linkedin_auth_status comes first. " + said
     assert people_tools_named_in(earlier) == {"linkedin_who_viewed_me"}
+
+
+# ---------------------------------------------------------------------------
+# A category of an aggregate (2026-10-10, lane B4, census row J 108)
+# ---------------------------------------------------------------------------
+#
+# The People tab's insight cards draw a LABEL beside a count -- a place, a
+# school, a job function, a skill, a field of study. The label is third-party
+# text (a field of study is typed by members, a school's name by its admins),
+# so it leaves the server only as a declared record, sanitised and marked,
+# exactly as a person's name does. It is never a person: the record has one
+# field and no link.
+
+
+def test_a_category_is_its_label_sanitised_and_marked():
+    planted = " Example" + chr(0x202E) + " place" + chr(0x200B) + chr(0x07) + " 1 "
+    record = pd.Category.from_page(label=planted)
+    assert record is not None and record.label == "Example place 1"
+    assert record.envelope() == {"label": "Example place 1", pd.UNTRUSTED_KEY: pd.UNTRUSTED_NOTE}
+
+
+def test_a_category_label_is_capped_never_refused():
+    record = pd.Category.from_page(label="x" * (pd.CAPS["label"] * 3))
+    assert record is not None and len(record.label) == pd.CAPS["label"]
+
+
+def test_a_category_whose_label_sanitises_away_is_no_record():
+    assert pd.Category.from_page(label=chr(0x200B) + " \t" + chr(0x202E)) is None
+    assert pd.Category.from_page(label=None) is None
+
+
+def test_an_unsanitised_category_cannot_be_built():
+    with pytest.raises(ValueError):
+        pd.Category(label="a" + chr(0x202E) + "b")
+    with pytest.raises(ValueError):
+        pd.Category(label="")
+    with pytest.raises(ValueError):
+        pd.Category(label="x" * (pd.CAPS["label"] + 1))
+
+
+def test_a_category_envelope_is_a_record_and_its_label_is_its_only_text():
+    envelope = pd.Category.from_page(label="Example skill 1").envelope()
+    assert type(pd.as_record(envelope)) is pd.Category
+    assert pd.text_fields(envelope) == frozenset({"label"})
+    # One key too many, a missing marker, an unsanitised label: not records.
+    assert pd.as_record(dict(envelope, link=None)) is None
+    assert pd.as_record({"label": "Example skill 1"}) is None
+    assert pd.as_record(dict(envelope, label="a" + chr(0x202E) + "b")) is None
+
+
+def test_a_category_is_a_record_type_and_closed():
+    assert pd.Category in pd.RECORD_TYPES
+    record = pd.Category.from_page(label="Example field 1")
+    with pytest.raises(dataclasses.FrozenInstanceError):
+        record.label = "Changed"  # type: ignore[misc]
+    with pytest.raises((AttributeError, TypeError)):
+        record.extra = "x"  # type: ignore[attr-defined]

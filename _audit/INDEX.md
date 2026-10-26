@@ -27,9 +27,9 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 273 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 233 |
-| distinct dates | 19 |
+| audit documents git tracks under `_audit` | 274 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 234 |
+| distinct dates | 20 |
 | documents with no level-1 heading | 2 |
 | `CORRECTS:` marker lines | 126 |
 | `CORRECTED BY:` marker lines | 126 |
@@ -39,7 +39,7 @@ are listed as `(undated)`; no date is taken from git history, because
 | documents at either end of a cross-document edge | 103 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
-| documents no correction marker touches at all | 168 |
+| documents no correction marker touches at all | 169 |
 | blockquoted markers naming ANOTHER document | 0 |
 | edges missing one of their two markers | 0 |
 | edges declared a different number of times in each direction | 2 |
@@ -1849,6 +1849,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-10-10 | [2026-10-10-lane-np-named-profile.md](2026-10-10-lane-np-named-profile.md) | Lane NP, 2026-10-10: the named profile's handles, its detail pages, the reaction's inverse, and a restore that can clear |  |
 | 2026-10-10 | [2026-10-10-rulings-ledger-questions.md](2026-10-10-rulings-ledger-questions.md) | Rulings, 2026-10-10: the ledger's questions |  |
 | 2026-10-10 | [2026-10-10-rulings-named-profile-detail-pages.md](2026-10-10-rulings-named-profile-detail-pages.md) | Ruling, 2026-10-10: the detail pages of a profile he names |  |
+| 2026-10-26 | [2026-10-26-integration-2.md](2026-10-26-integration-2.md) | Integration 2, 2026-10-26: five pending lane heads onto one certified head |  |
 
 ## 6. What the scan rejected, could not join, or had to repair
 

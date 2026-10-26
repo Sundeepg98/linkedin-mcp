@@ -540,7 +540,9 @@ def test_a_roster_read_costs_one_load_and_the_budget_is_the_ruled_one():
 
 
 # ---------------------------------------------------------------------------
-# 6. One roster is opened (lane B5, 2026-10-10): the group's member list
+# 6. Two rosters are opened on the merged tree (the group's member list, lane
+#    B5, 2026-10-10; the company People tab's insight cards, J 108, 2026-10-10);
+#    the other two stay unopened until a reader lands
 # ---------------------------------------------------------------------------
 
 def _orphan_walk():
@@ -555,13 +557,27 @@ def _orphan_walk():
     return module._imported_submodules
 
 
-def test_the_one_importer_of_the_composer_is_the_group_members_tool():
-    """RENAMED AND NARROWED 2026-10-10 (lane B5), from ``test_no_package_
-    module_or_entry_point_imports_the_composer``: the first reader landed --
-    ``group_roster.read_group_members``, built over the live lane's skeleton of
-    one group's member list -- and ``linkedin_group_members`` in server.py is
-    the composer's one importer. The other three rosters stay unwired; that is
-    asserted in ``tests/test_group_members.py``, section 6."""
+def test_the_one_importer_opens_two_rosters_and_the_other_two_stay_unopened():
+    """WAS ``test_no_package_module_or_entry_point_imports_the_composer``,
+    and asserted ``importers == []`` until 2026-10-10. The orphan ruling it
+    backed said the first tool to import this module lands with its reader,
+    built against a capture, in the same commit -- and it did, on BOTH sides
+    of this merge:
+
+    - lane B5 (the groups slice): ``group_roster.read_group_members``, built
+      over the live lane's skeleton of one group's member list, wired by
+      ``linkedin_group_members``;
+    - lane B4, census J 108: ``company_people_insights.read_people_insights``,
+      built over the session-2 People-tab capture, wired by
+      ``linkedin_company_people_insights``.
+
+    SO THE ASSERTION HOLDS FOR THE MERGED TREE: one importer, ``server.py``,
+    and exactly two ``compose`` calls in it -- the group tool names the
+    roster through ``group_roster.ROSTER`` (an attribute that is
+    ``"group_members"``), and the J 108 tool names ``"company_people"`` as a
+    literal. The event and school rosters are still opened by nothing -- each
+    still needs a capture and a reader of its own
+    (``tests/test_group_members.py``, section 6)."""
     imported_by = _orphan_walk()
     importers = [
         path.name
@@ -570,6 +586,28 @@ def test_the_one_importer_of_the_composer_is_the_group_members_tool():
         and "member_rosters" in imported_by(path)
     ]
     assert importers == ["server.py"], importers
+    tree = ast.parse((PKG / "server.py").read_text(encoding="utf-8"))
+    compose_calls = [
+        node for node in ast.walk(tree)
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Attribute)
+        and node.func.attr == "compose"
+        and isinstance(node.func.value, ast.Name)
+        and node.func.value.id == "member_rosters"
+    ]
+    literal_rosters = [
+        node.args[0].value
+        for node in compose_calls
+        if isinstance(node.args[0], ast.Constant)
+    ]
+    attr_rosters = [
+        (node.args[0].value.id, node.args[0].attr)
+        for node in compose_calls
+        if isinstance(node.args[0], ast.Attribute)
+        and isinstance(node.args[0].value, ast.Name)
+    ]
+    assert literal_rosters == ["company_people"], literal_rosters
+    assert attr_rosters == [("group_roster", "ROSTER")], attr_rosters
 
 
 @pytest.mark.parametrize("line", [

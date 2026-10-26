@@ -166,8 +166,11 @@ PACKAGE = ROOT / "linkedin_server"
 #: ``OrganisationProse`` joined 2026-10-10 (lane B4, census row ``J 110``): an
 #: organisation Page's prose is third-party text returned at runtime, so the
 #: tool that builds one is a people reader and every rule here binds it.
+#: ``Category`` joined 2026-10-10 (lane B4, census row J 108): the label of one
+#: category of an insight card's aggregate. A reader building one is held to
+#: every rule here exactly as a reader building a person is.
 RECORD_CLASSES = frozenset(
-    {"Person", "Group", "Event", "Post", "Organisation", "OrganisationProse"}
+    {"Person", "Group", "Event", "Post", "Organisation", "OrganisationProse", "Category"}
 )
 
 

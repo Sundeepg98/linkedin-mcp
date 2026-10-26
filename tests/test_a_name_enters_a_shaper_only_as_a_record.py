@@ -121,8 +121,11 @@ def test_the_record_types_are_the_people_data_ones():
     # people_data.OrganisationProse joined 2026-10-10 (lane B4, J 110): an
     # organisation Page's prose, under THIRD-PARTY-TEXT-AT-RUNTIME, has no
     # member author, so it is a record of its own with ``text`` declared.
+    # people_data.Category joined the same day (lane B4, census row J 108):
+    # an insight card's category label, its one declared text field.
     assert set(RECORD_TYPES) == {
         people_data.Person, people_data.Group, people_data.Event, people_data.Post,
         people_data.Organisation,
         people_data.OrganisationProse,
+        people_data.Category,
     }

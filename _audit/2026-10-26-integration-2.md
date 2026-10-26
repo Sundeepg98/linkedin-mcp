@@ -89,6 +89,61 @@ measured never summed:
 Gate: the targeted surface + record tests ran after resolution (results in
 section 5).
 
+(merged 2, 1935c25, J 108) The J 108 branch head (62 tools on its own
+branch, off base 16ee59a) onto the post-merge-1 head (73 tools). The
+branch's only addition is one tool, `linkedin_company_people_insights`
+(J 108, the People tab's insight cards as categories and counts), and its
+new record type `people_data.Category`; the merged tool set is 73 + 1 = 74,
+measured off the merged registry (verified by `comm` against both sides:
+the branch's delta vs base is exactly `linkedin_company_people_insights`).
+
+Conflicts resolved by union, against the merge base:
+- `people_data.py`: `RECORD_TYPES` now carries all three divergent record
+  types -- ours' `Organisation` (lane G2) and `OrganisationProse` (J 110)
+  plus the branch's `Category` (J 108) -- and the `PEOPLE_TOOLS`,
+  `TEXT_FIELDS` (`CATEGORY_SHAPE`), `as_record` and `text_fields` sites all
+  union the three. The `Category` class body auto-merged.
+- `server.py` docstring: the branch's J 108 paragraph grafted as THE
+  SEVENTY-FOURTH; headline re-derived as **seventy-four tools, twenty-two
+  of which write** (74; J 108 is a read, so the write count is held at
+  22). The three-way split: **FIFTY-TWO read, TWENTY-TWO write, ZERO
+  write-shaped**; sum 52 + 22 + 0 = 74.
+- `server.py` registration: the branch's single J 108 block (its own
+  `from linkedin_server import company_people_insights, member_rosters`
+  import and tool) sits after the J 110 `company_page_home` tool, before
+  `unset_similar_jobs_alert`... i.e. the two new reads are each kept whole
+  in their own contiguous block, in merge order (J 110 block, then J 108
+  block), so no function is split. No tool dropped: 74 measured.
+- `test_every_orphan_module_is_ruled.py`: the merged tree wires BOTH
+  `search_verticals` (lane B2's search readers import it) and
+  `member_rosters` (B5's `group_roster` and J 108's
+  `company_people_insights` import it), so BOTH entries that were in the
+  base dict are deleted in the merged tree; the union's dict is empty, and
+  the note records that two entries were removed and why.
+- `test_member_rosters.py`: on the merged tree `server.py` is still the
+  sole importer of `member_rosters`, and there are exactly two
+  `compose` calls in it -- the group tool names the roster through
+  `group_roster.ROSTER` (an attribute) and J 108 names `"company_people"`
+  as a literal. The test's single-importer assertion is unchanged; the
+  compose-names assertion is re-derived to name BOTH rosters (one literal,
+  one attribute) rather than the branch's single-literal version.
+- `test_readers_emit_no_page_string.py`: the branch's
+  `company_people_insights:read_people_insights` RETURNS_RECORDS entry and
+  its drive-breaks fixture join ours' set.
+- `shipped_drives.py`: the branch's `read_people_insights_as_shipped`
+  drive joins the shipped-drives registry.
+- `tests/tool_envelope_baseline.json`: the branch's
+  `linkedin_company_people_insights` not_driven entry unions with ours'
+  `linkedin_company_page_home` entry; the tools count is 74.
+- `tests/test_server_surface.py`, `tests/test_every_tool_is_on_the_surface.py`,
+  `tests/test_the_tool_surface_is_pinned_so_a_row_must_move.py`: both sides'
+  count chains kept as evidence; the divergent `assert len(tools)` pins
+  merged to the measured 74 (non-write 52); the pinned-surface counts
+  re-derived by measurement as **74 tools, 117 parameters** (the
+  auto-merged `PINNED_TOOL_SURFACE` dict was parsed, not summed).
+
+Gate: the targeted surface + record + reader tests ran after resolution
+(results in section 5).
 
 ## 4. Pins re-derived on the merged tree
 
