@@ -170,6 +170,110 @@ def test_the_wall_clock_comes_from_the_runs_own_timestamps():
 
 
 # ---------------------------------------------------------------------------
+# The SHARPEST RED RUN THIS REPOSITORY HAS GOTTEN (2026-10-26)
+# ---------------------------------------------------------------------------
+#
+# CI runs the suite with ``-q -rs`` -- NOT ``-rf``. A real ``--log-failed``
+# dump therefore carries NO ``FAILED tests/...::test`` lines at all. The
+# failing test id rides three other lines:
+#
+#   * the sub-banner ``______ test_name ______`` that opens each FAILURES block,
+#   * the FIRST ``E       AssertionError: ...`` line -- the message --
+#   * the ``tests/file.py:NNN: Reason`` reference line that closes it.
+#
+# The shape below is the ACTUAL ``gh run view <run> --log-failed`` text of a
+# red lane run, transcribed verbatim for the classes that matter. Before the
+# fix, ``first_failing_lines`` returned exactly ONE line from this log --
+# ``##[error]Process completed with exit code 1.`` -- so a red run told
+# nobody WHICH test had failed. Those two assertions below are the red:
+# they go straight through the unpatched extractor.
+
+
+_L = "pytest (ubuntu-latest, py3.13, shard 0)\tRun this shard\t"
+_TS = "2026-10-10T14:42:45.68"
+
+
+def _gh_line(ts_suffix: str, body: str) -> str:
+    return f"{_L}{_TS}{ts_suffix}Z {body}"
+
+
+LOG_RS = "\n".join([
+    # passing progress lines -- every class must drop them
+    _gh_line("679994", "..........                                                               [100%]"),
+    _gh_line("680040", "=================================== FAILURES =================================="),
+    _gh_line("680077", "____________________ test_no_new_unresolvable_citation_appears ____________________"),
+    _gh_line("680118", "[gw2] linux -- Python 3.13.16"),
+    _gh_line("680141", ""),
+    _gh_line("680199", "measured = ([Site(token='063c9b7', doc='_audit/x.md', line=375, verdict='UNRESOLVED')])"),
+    _gh_line("680502", "    "),
+    _gh_line("680519", ">       assert not appeared, ("),
+    _gh_line("680548", "            f\"NEW unresolvable SHA citation(s): {appeared}.\""),
+    _gh_line("680905", "E       AssertionError: NEW unresolvable SHA citation(s): [('0f7e6d0', '_audit/2026-10-10-integration.md', 1)]"),
+    _gh_line("681017", "E       assert not [('0f7e6d0', '_audit/2026-10-10-integration.md', 1)]"),
+    _gh_line("681037", ""),
+    _gh_line("681049", "tests/test_a_cited_sha_resolves.py:779: AssertionError"),
+    _gh_line("681080", "=========================== short test summary info ==========================="),
+    _gh_line("681120", "SKIPPED [1] tests/test_a_verdict_earns_its_entry.py:298: got empty parameter set"),
+    _gh_line("681293", "1 failed, 3389 passed, 4 skipped in 203.96s (0:03:23)"),
+    _gh_line("924700", "##[error]Process completed with exit code 1."),
+])
+
+
+def test_the_rs_log_yields_the_failing_test_id_not_just_the_exit_banner():
+    """RED BEFORE THE FIX. The unpatched extractor finds no class in the
+    sub-banner, in the E lines or in the reference line, so of these sixteen
+    lines it prints one -- the process banner. The test name and the file
+    reference are the whole point of pulling this log at all."""
+    got = lane.first_failing_lines(LOG_RS, limit=20, width=220)
+    assert "test_no_new_unresolvable_citation_appears" in " | ".join(got), got
+    assert "tests/test_a_cited_sha_resolves.py:779" in " | ".join(got), got
+
+
+def test_the_second_failure_block_keeps_its_own_identity_lines():
+    """Two FAILURES blocks: dedup is per-text, so the second block's
+    sub-banner and reference line must still be shown even when its E line
+    repeats the first block's. Identifying WHICH test failed is the point;
+    one suppressed E line is not a loss of that."""
+    log = "\n".join([
+        _gh_line("000100", "____________________ test_alpha ____________________"),
+        _gh_line("000200", "E       AssertionError: a went wrong"),
+        _gh_line("000300", "tests/test_a.py:10: AssertionError"),
+        _gh_line("000500", "____________________ test_beta ____________________"),
+        _gh_line("000600", "E       AssertionError: a went wrong"),
+        _gh_line("000700", "tests/test_b.py:20: AssertionError"),
+        _gh_line("000800", "##[error]Process completed with exit code 1."),
+    ])
+    got = lane.first_failing_lines(log, limit=20, width=220)
+    joined = " | ".join(got)
+    assert "test_alpha" in joined and "test_beta" in joined, got
+    assert "tests/test_b.py:20" in joined, got
+    # the repeated E line collapses; both identity lines survive
+    assert got.count("E       AssertionError: a went wrong") == 1, got
+
+
+def test_a_green_log_yields_nothing_not_a_silent_banner_only_section():
+    """The negative control. A passing shard's log has no failing class at
+    all -- and the section must SAY so rather than print nothing. No
+    annotation, no E line, no reference, no FAILED id."""
+    GREEN = "\n".join([
+        _gh_line("000100", ".................................................................... [100%]"),
+        _gh_line("000200", "400 passed in 12.34s"),
+    ])
+    got = lane.first_failing_lines(GREEN, limit=20, width=220)
+    assert got == [], got
+
+
+def test_the_original_failed_line_shape_still_reads():
+    """The ``-rf``-style log the first test file was built on: classes that
+    already worked keep working. This is the non-regression half of the
+    fix -- the banner and E and reference are ADDITIONS, not replacements."""
+    got = lane.first_failing_lines(LOG, limit=20, width=220)
+    assert "FAILED tests/test_x.py::test_one" in " | ".join(got), got
+    assert "ERROR tests/test_y.py::test_two" in " | ".join(got), got
+    assert "##[error]" in " | ".join(got), got
+
+
+# ---------------------------------------------------------------------------
 # wait: the polling loop over canned gh answers
 # ---------------------------------------------------------------------------
 
@@ -250,6 +354,49 @@ def test_a_run_that_never_appears_is_no_verdict(monkeypatch, capsys):
 def test_a_superseded_run_is_no_verdict_rather_than_a_failure(monkeypatch, capsys):
     gh = FakeGh(lists=[[_r(7)]], views=[dict(DONE_OK, conclusion="cancelled")])
     assert _wait(monkeypatch, gh) == 2
+
+
+def test_a_red_run_whose_log_has_no_failing_lines_says_so(monkeypatch, capsys):
+    """The NEGATIVE CONTROL at the ``wait`` level. A red run whose
+    ``--log-failed`` dump carries none of the known failing classes must
+    print a ``no failing lines found``-style line, not a silent section.
+    A red verdict that shows no test id is the reading that costs the most:
+    it looks like the log had nothing when in fact it had something the
+    extractor could not name."""
+    gh = FakeGh(lists=[[_r(7)]], views=[DONE_RED], log="")
+    assert _wait(monkeypatch, gh) == 1
+    out = capsys.readouterr().out
+    assert "no failing lines" in out.lower(), out
+    assert "run 7: failure:failure" in out, out
+
+
+def test_a_red_run_whose_log_is_only_progress_lines_says_so(
+        monkeypatch, capsys):
+    """Same control, log NON-EMPTY but class-free: the progress line and the
+    totals line are all there is. The section must still say ``no failing
+    lines`` rather than print nothing, and must not pass the banner through
+    as though it were a test id."""
+    progress_only = "\n".join([
+        "pytest (ubuntu-latest, py3.13, shard 0)\tRun this shard\t"
+        "2026-10-10T14:42:45.0001234Z .......F......",
+        "pytest (ubuntu-latest, py3.13, shard 0)\tRun this shard\t"
+        "2026-10-10T14:42:45.0009876Z 1 failed, 3389 passed in 203.96s",
+    ])
+    gh = FakeGh(lists=[[_r(7)]], views=[DONE_RED], log=progress_only)
+    assert _wait(monkeypatch, gh) == 1
+    out = capsys.readouterr().out
+    assert "no failing lines" in out.lower(), out
+
+
+def test_the_rs_log_through_wait_prints_the_failing_test_id(monkeypatch, capsys):
+    """The end-to-end half of the fix: a red run whose log is the real
+    ``-rs`` shape prints the sub-banner, the first E line and the
+    reference line -- the test id, not only the exit-code banner."""
+    gh = FakeGh(lists=[[_r(7)]], views=[DONE_RED], log=LOG_RS)
+    assert _wait(monkeypatch, gh) == 1
+    out = capsys.readouterr().out
+    assert "test_no_new_unresolvable_citation_appears" in out, out
+    assert "tests/test_a_cited_sha_resolves.py:779" in out, out
 
 
 # ---------------------------------------------------------------------------

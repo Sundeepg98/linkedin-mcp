@@ -46,7 +46,11 @@ one. Keeps only a ``push`` run whose head branch is a ``ci/`` ref. Polls every
 20 s, bounded at 25 minutes. Reads the verdict from
 ``gh run view --json status,conclusion,jobs``, never from ``gh run watch``'s
 exit code, which is 0 on a 403. On a failure it prints the failing job names
-and the first failing test lines from ``--log-failed``, truncated.
+and the first failing test lines from ``--log-failed``, truncated -- the test
+id rides a ``FAILED tests/...::test`` line under ``-rf`` or, under the
+``-q -rs`` CI actually runs, the sub-banner, the first ``E`` line and the
+``tests/...:NNN`` reference line of each FAILURES block. When none of those
+classes is in the log it says so rather than print the exit banner alone.
 
 EXIT CODES: 0 success; 1 a refusal or a red run; 2 nothing could be
 established (no run appeared, the bound ran out, gh kept failing). 2 never
@@ -73,7 +77,25 @@ POLL_SECONDS = 20
 BOUND_SECONDS = 25 * 60
 FAILED_JOB_STATES = frozenset(
     {"failure", "cancelled", "timed_out", "action_required", "startup_failure"})
-_FAIL_LINE = re.compile(r"(FAILED|ERROR) \S|##\[error\]|REFUS")
+FAIL_LINE = re.compile(r"(FAILED|ERROR) \S|##\[error\]|REFUS")
+# The old classes above carry a failing id when the suite runs under ``-rf``
+# (a ``FAILED tests/...::test`` line) or always carry the exit banner. But CI
+# runs the suite with ``-q -rs`` -- skip summary only, NOT ``-rf`` -- so a
+# real red log carries the failing test id on THREE OTHER line classes
+# instead, none of them matched by the old pattern:
+#   * the ``______ test_name ______`` sub-banner that opens each FAILURES
+#     block,
+#   * the first ``E       ...`` line of that block -- the message,
+#   * the ``tests/file.py:NNN: Reason`` reference line that closes it.
+# A real red log on 2026-10-26 (lane run, shard 0) had the id on all three
+# and on none of the old classes, which is why ``wait`` printed only the
+# banner. ``_FALLING_LINE`` is the union of the old and the new, so a run
+# logged either way still surfaces the id.
+_FALLING_LINE = re.compile(
+    r"(FAILED|ERROR) \S|##\[error\]|REFUS"
+    r"|^_{4,}\s+\S"       # the __________ test_name __________ sub-banner
+    r"|^E\s"              # the first "E" (excerpt) line of a FAILURES block
+    r"|^tests/[\w./-]+\.py:\d+")   # the "tests/file.py:NNN: Reason" line
 
 
 # ---------------------------------------------------------------------------
@@ -146,15 +168,24 @@ def failing_jobs(view: dict) -> list[str]:
 def first_failing_lines(log: str, limit: int = 20, width: int = 220) -> list[str]:
     """The first failing-test lines of a ``--log-failed`` dump, deduplicated.
 
-    gh prefixes each line with ``<job>\\t<step>\\t<timestamp> ``; that prefix
-    is cut so the line reads as pytest wrote it.
+    gh's ``--log-failed`` prefixes each line with ``<job>\\t<step>\\t
+    <timestamp> ``; that prefix is cut so the line reads as pytest wrote it.
+    The very first annotation line of a step additionally carries a BOM
+    (``\\ufeff``) on the timestamp, so a stray BOM is stripped too.
+
+    A line is kept when it carries a failing TEST ID. That is true of the old
+    classes (a ``FAILED``/``ERROR`` id line, the ``##[error]`` process banner,
+    a ``REFUS`` refusal) AND of the three classes that carry the id when the
+    suite runs under ``-q -rs`` (the sub-banner, the first ``E`` line, the
+    ``tests/...:NNN`` reference) -- see the module-level patterns.
     """
     out: list[str] = []
     seen: set[str] = set()
     for raw in log.splitlines():
         text = raw.split("\t")[-1]
         text = re.sub(r"^\S+Z\s", "", text).strip()
-        if not _FAIL_LINE.search(text) or text in seen:
+        text = text.lstrip("﻿")
+        if not _FALLING_LINE.search(text) or text in seen:
             continue
         seen.add(text)
         out.append(text if len(text) <= width else text[:width - 3] + "...")
@@ -323,8 +354,17 @@ def _report(slug: str, run_id: str, view: dict, state: str) -> int:
     for name in failing_jobs(view):
         print(f"  failed job: {name}")
     rc, log, _err = _gh("run", "view", run_id, "-R", slug, "--log-failed")
-    for line in first_failing_lines(log if rc == 0 else ""):
-        print(f"    {line}")
+    lines = first_failing_lines(log if rc == 0 else "")
+    if lines:
+        for line in lines:
+            print(f"    {line}")
+    elif rc != 0:
+        print("    (could not fetch the failed log; no failing lines found -- "
+              "pull it yourself: gh run view "
+              f"{run_id} --log-failed)")
+    else:
+        print("    (no failing lines found in the failed log -- the run was red "
+              "but nothing named the failing test)")
     return 1
 
 
