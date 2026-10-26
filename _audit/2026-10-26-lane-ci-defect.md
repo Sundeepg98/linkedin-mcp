@@ -1,4 +1,4 @@
-# 2026-10-26 lane-ci defect — `wait` printed only the exit-code banner on a red run
+# 2026-10-26 lane-ci defect -- `wait` printed only the exit-code banner on a red run
 
 Lane: lane-ci-fix-26. Branch from `master f339459` (= origin/master).
 
@@ -7,24 +7,24 @@ Lane: lane-ci-fix-26. Branch from `master f339459` (= origin/master).
 On lane run **38060371469** (red, shard 0) `scripts/lane_ci.py wait` printed only
 `##[error]Process completed with exit code 1.` and no test id. The failing test
 was visible to a human who pulled `gh run view 38060371469 --log-failed` and
-grepped — so the data was in the log, the extractor just could not name it.
+grepped -- so the data was in the log, the extractor just could not name it.
 
 ## Fixture source: LIVE LOG
 
 `gh run view 38060371469 --log-failed` was still retrievable (97 lines) at
 2026-10-26. It was captured verbatim to scratch and transcribed into
-`tests/test_lane_ci.py` as `LOG_RS` — NOT a reconstruction. Recorded here so the
+`tests/test_lane_ci.py` as `LOG_RS` -- NOT a reconstruction. Recorded here so the
 fixture's provenance is a measurement, not an assumption.
 
 ## Why the current extractor missed it
 
-CI runs the suite with `pytest -q -rs` — **NOT** `-rf`. A `-rs` run prints a
+CI runs the suite with `pytest -q -rs` -- **NOT** `-rf`. A `-rs` run prints a
 "short test summary" that contains only SKIPPED/PASSED-by-id lines; it does NOT
 print `FAILED tests/...::test` id lines. So in a real `-rs` red log the failing
 test id rides three other line classes:
 
 - the sub-banner `______ test_name ______` that opens each FAILURES block
-- the FIRST `E       AssertionError: ...` line — the message
+- the FIRST `E       AssertionError: ...` line -- the message
 - the `tests/file.py:NNN: Reason` reference line that closes the block
 
 The shipped regex `_FAIL_LINE = (FAILED|ERROR) \S|##\[error\]|REFUS` matches NONE
@@ -71,7 +71,7 @@ say `no failing lines found` rather than print silently.
 
 Extend `first_failing_lines` to also surface the four new line classes, while
 keeping the classes it already handled (`FAILED`, `ERROR`, `##[error]`, `REFUS`)
-working — additions, not replacements. Per-text dedup stays, so the banner, the
+working -- additions, not replacements. Per-text dedup stays, so the banner, the
 totals line and repeated E lines do not flood the section. Add a
 `no failing lines found` negative control so a red verdict whose log has no
 failing class does not print silently.
