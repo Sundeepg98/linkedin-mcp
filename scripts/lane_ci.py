@@ -77,9 +77,9 @@ POLL_SECONDS = 20
 BOUND_SECONDS = 25 * 60
 FAILED_JOB_STATES = frozenset(
     {"failure", "cancelled", "timed_out", "action_required", "startup_failure"})
-FAIL_LINE = re.compile(r"(FAILED|ERROR) \S|##\[error\]|REFUS")
-# The old classes above carry a failing id when the suite runs under ``-rf``
-# (a ``FAILED tests/...::test`` line) or always carry the exit banner. But CI
+# The pre-fix pattern was ``(FAILED|ERROR) \S|##\[error\]|REFUS``. Those
+# classes carry a failing id when the suite runs under ``-rf`` (a
+# ``FAILED tests/...::test`` line) or always carry the exit banner. But CI
 # runs the suite with ``-q -rs`` -- skip summary only, NOT ``-rf`` -- so a
 # real red log carries the failing test id on THREE OTHER line classes
 # instead, none of them matched by the old pattern:
@@ -89,8 +89,8 @@ FAIL_LINE = re.compile(r"(FAILED|ERROR) \S|##\[error\]|REFUS")
 #   * the ``tests/file.py:NNN: Reason`` reference line that closes it.
 # A real red log on 2026-10-26 (lane run, shard 0) had the id on all three
 # and on none of the old classes, which is why ``wait`` printed only the
-# banner. ``_FALLING_LINE`` is the union of the old and the new, so a run
-# logged either way still surfaces the id.
+# banner. ``_FALLING_LINE`` below is the union of the old and the new, so a
+# run logged either way still surfaces the id.
 _FALLING_LINE = re.compile(
     r"(FAILED|ERROR) \S|##\[error\]|REFUS"
     r"|^_{4,}\s+\S"       # the __________ test_name __________ sub-banner
