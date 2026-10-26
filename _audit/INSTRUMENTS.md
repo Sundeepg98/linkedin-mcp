@@ -12154,3 +12154,48 @@ roles, texts), the per-row roster structure dump and the group-home control
 census by region. Each answered one question once; the answers (20 rows, 16
 degrees, 5 rail-only Join buttons, one invite control, one closed share box)
 are in the record.
+
+## 98. A RED LOG SAYS WHICH TEST FAILED, NOT THAT SOMETHING FAILED (lane-ci-fix-26, 2026-10-26)
+
+**Registered 2026-10-26.** Full record: `_audit/2026-10-26-lane-ci-defect.md`.
+Numbered 98 by the brief, appended at the end; keep heading-number order.
+
+### 98.1 THE MUTATION THAT KILLED THE GUARD
+
+`scripts/lane_ci.py wait`, on a red lane run, printed only
+`##[error]Process completed with exit code 1.` and no test id. The cause was
+measured on lane run 38060371469 (2026-10-10, red on shard 0): that
+`--log-failed` dump was retrievable live on 2026-10-26 (97 lines, fixture
+source = live log, not a reconstruction), and in it the failing test id
+(`test_no_new_unresolvable_citation_appears`) rides THREE line classes the
+shipped regex never matched, because CI runs the suite with `pytest -q -rs`
+and `-rs` prints no `FAILED tests/...::test` id lines:
+
+- the `______ test_name ______` sub-banner opening each FAILURES block
+- the first `E       ...` line of that block (the message)
+- the `tests/file.py:NNN: Reason` reference line closing it
+
+The old pattern `(FAILED|ERROR) \S|##\[error\]|REFUS` matched none of those,
+so the extractor returned exactly one line (the banner). The fix unions the
+three `-rs` classes into `_FALLING_LINE`, strips the BOM gh leaves on the
+first annotation line of a step, and makes `_report` print
+`no failing lines found` rather than a silent section when a red verdict's
+log names no test. The negative control (a green log, or a red log whose
+lines carry no failing class) must still say so out loud.
+
+### 98.2 THE ENTRY
+
+| path | shown failing by |
+|---|---|
+| `scripts/lane_ci.py` (`_FALLING_LINE`, `first_failing_lines`, `_report`) | `tests/test_lane_ci.py::test_the_rs_log_yields_the_failing_test_id_not_just_the_exit_banner` (the `LOG_RS` fixture transcribed from the live log of run 38060371469 returns only the banner pre-fix); `::test_the_rs_log_through_wait_prints_the_failing_test_id` (the end-to-end half through `_report`); `::test_a_red_run_whose_log_has_no_failing_lines_says_so` and `::test_a_red_run_whose_log_is_only_progress_lines_says_so` (the two negative controls); `::test_the_second_failure_block_keeps_its_own_identity_lines` (per-text dedup must not swallow a second block's banner or reference). Pre-fix run: 5 failed, 41 passed; post-fix: 46 passed. |
+
+### 98.3 DECLARED DISPOSABLE
+
+The two scratchpad probes (`probe_lane_ci.py` — measured the pre-fix extractor
+returning one line on the live log; `probe_fixed.py` — measured the post-fix
+extractor returning five: the sub-banner, two E lines, the reference line,
+the banner). Each answered its one question once; the answers are in the
+record. The live log capture itself lives in scratch, never in the repo:
+its last line's `##[error]Process completed with exit code 1.` plus the test
+id and the `tests/test_a_cited_sha_resolves.py:779` reference are what the
+`LOG_RS` fixture transcribes.
