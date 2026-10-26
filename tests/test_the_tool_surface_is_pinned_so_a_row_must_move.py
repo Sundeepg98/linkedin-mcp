@@ -89,6 +89,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_cdp_status": (),
     "linkedin_comment_on_item": ("confirm_token", "item", "text"),
     "linkedin_company_page_counts": ("organisation_id",),
+    "linkedin_company_page_home": ("organisation_id",),
     "linkedin_compose_fields": (),
     "linkedin_connect_from_profile": ("confirm_token", "profile"),
     "linkedin_connections": ("limit",),
@@ -622,8 +623,21 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: **AT THE INTEGRATION MERGE OF LANE B4 ONTO LANE B3 (2026-10-10): 72 TOOLS AND
 #: 115 PARAMETERS** -- lane B4's two tools and their two parameters each
 #: beside the seventy, counted on the merged registry, never summed.
-PINNED_TOOL_COUNT = 72
-PINNED_PARAMETER_COUNT = 115
+#: **RE-PINNED 2026-10-10 AT 62 TOOLS AND 98 PARAMETERS on lane B4's branch
+#: (child b4-j110, ruling THIRD-PARTY-TEXT-AT-RUNTIME): one READ,
+#: `linkedin_company_page_home(organisation_id)` -- an organisation Page's own
+#: description off its Page root, returned as an untrusted-text record, and the
+#: feed items the root drew as counts.** THE CENSUS DECISION: NO ROW MOVES IN
+#: THIS COMMIT, because a child of lane B4 does not edit the census; `J 110` is
+#: the lane lead's to move from the child's report, by its own cell's bar (the
+#: reader is aimed at a 2026-09-23 capture of the Home view, and the same root
+#: drew the Posts view on 2026-10-10 -- both are fixtures, see
+#: `tests/test_company_home.py`).
+#: **AT THIS INTEGRATION MERGE, 2026-10-26: 73 TOOLS AND 116 PARAMETERS** --
+#: lane B4's one tool and its one parameter beside the seventy-two and 115,
+#: counted on the merged registry, never summed.
+PINNED_TOOL_COUNT = 73
+PINNED_PARAMETER_COUNT = 116
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:

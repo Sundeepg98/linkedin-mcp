@@ -118,7 +118,11 @@ def test_the_record_types_are_the_people_data_ones():
     # people_data.Post joined 2026-10-10 (lane G2): a post's author is a
     # person record, and its words are the record's declared text. And
     # people_data.Organisation the same day: a followed Page's name.
+    # people_data.OrganisationProse joined 2026-10-10 (lane B4, J 110): an
+    # organisation Page's prose, under THIRD-PARTY-TEXT-AT-RUNTIME, has no
+    # member author, so it is a record of its own with ``text`` declared.
     assert set(RECORD_TYPES) == {
         people_data.Person, people_data.Group, people_data.Event, people_data.Post,
         people_data.Organisation,
+        people_data.OrganisationProse,
     }

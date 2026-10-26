@@ -1,4 +1,9 @@
-"""The tool surface: seventy-two tools, fifty of which do not write.
+"""The tool surface: seventy-three tools, fifty-one of which do not write.
+
+**IT READ "seventy-two tools, fifty of which do not write" UNTIL THIS
+INTEGRATION MERGE (2026-10-26) ADDED LANE B4'S READ**: ``linkedin_company_page_home`` (census
+J 110), an organisation Page root's own description as an untrusted-text
+record and its feed items as counts. The split moved on its read side only.
 
 **IT READ "sixty-five tools, forty-five of which do not write" UNTIL LANE B2'S
 SEARCH VERTICALS (2026-10-10), merged after lane NP**: two READS, ``linkedin_search_groups`` (census
@@ -271,6 +276,12 @@ EXPECTED_TOOLS = {
     # shaped (census M C38). Each loads one page and presses nothing.
     "linkedin_my_articles",
     "linkedin_item_viewer_demographics",
+    # THE SIXTY-SECOND, 2026-10-10 (lane B4, child b4-j110, ruling
+    # THIRD-PARTY-TEXT-AT-RUNTIME): a READ of an organisation Page root -- the
+    # Page's own description as an untrusted-text record, and the feed items
+    # the root drew as counts -- on the address the boundary already admits.
+    # It presses nothing and is on no write table (census J 110).
+    "linkedin_company_page_home",
     # THE THIRTY-EIGHTH, 2026-09-05: linkedin_events_home, a READ. No
     # write was added. It is the only tool here whose whole answer can be
     # ZERO, and its reader returns that integer only when four
@@ -659,8 +670,13 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_seventy_two_tools(tools):
-    """RENAMED AGAIN AT THE INTEGRATION MERGE OF LANE B4 ONTO LANE B3 (2026-10-10), to
+async def test_the_surface_is_exactly_the_seventy_three_tools(tools):
+    """RENAMED AGAIN AT THIS INTEGRATION MERGE (2026-10-26), to
+    ``..._seventy_three_tools``: lane B4's ``linkedin_company_page_home`` (census
+    J 110, ruling THIRD-PARTY-TEXT-AT-RUNTIME) beside the seventy-two. MEASURED
+    off the merged registry, not summed; the name moved with the pin.
+
+    RENAMED AGAIN AT THE INTEGRATION MERGE OF LANE B4 ONTO LANE B3 (2026-10-10), to
     ``..._seventy_two_tools``: lane B4's two writes beside the seventy.
     MEASURED off the merged registry, not summed; the name moved with the pin.
 
@@ -717,6 +733,12 @@ async def test_the_surface_is_exactly_the_seventy_two_tools(tools):
     WRITE, ``linkedin_withdraw_reaction``, the reaction's inverse (the
     orchestrator's ruling of 14:14). MEASURED off the registry; the name
     moved with the pin.
+
+    RENAMED AGAIN ON LANE B4'S BRANCH, 2026-10-10 (child b4-j110), to
+    ``..._sixty_two_tools``: one READ, ``linkedin_company_page_home`` (census
+    J 110, ruling THIRD-PARTY-TEXT-AT-RUNTIME). MEASURED off the registry; the
+    name moved with the pin. That lane's branch held the tool as its own
+    sixty-second; this merge re-derives it as the seventy-third.
 
     RENAMED AGAIN ON LANE L5'S ORDER OF 2026-09-28 08:06, to
     ``..._sixty_one_tools``: one READ, ``linkedin_read_named_profile`` (ruling
@@ -1071,7 +1093,13 @@ async def test_the_surface_is_exactly_the_seventy_two_tools(tools):
     # SEVENTY-TWO AT THE INTEGRATION MERGE OF LANE B4 ONTO LANE B3 (2026-10-10): lane B4's two
     # WRITES beside the seventy, so the split moves on its write side and the
     # non-write count holds at fifty. MEASURED off mcp.list_tools() on the merged tree.
-    assert len(tools) == 72
+    # SIXTY-TWO ON LANE B4'S BRANCH, 2026-10-10: linkedin_company_page_home, a
+    # READ, so the split moves on its read side and the write set holds.
+    # MEASURED off mcp.list_tools().
+    # SEVENTY-THREE AT THIS INTEGRATION MERGE, 2026-10-26: lane B4's
+    # linkedin_company_page_home beside the seventy-two, measured off the
+    # merged registry, not summed.
+    assert len(tools) == 73
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -1267,7 +1295,15 @@ async def test_the_surface_is_exactly_the_seventy_two_tools(tools):
     # FIFTY AT THE INTEGRATION MERGE OF LANE B3 ONTO LANE B2 (2026-10-10): the
     # two forty-sevens above are different reads and merged as one equal edit;
     # MEASURED on the merged tree, never summed.
-    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 50
+    # FORTY-FIVE ON LANE B4'S BRANCH, 2026-10-10: linkedin_company_page_home is
+    # a READ -- one load of the admitted Page root, nothing pressed, no entry
+    # in readonly.SANCTIONED_MUTATIONS -- and the write side is unmoved.
+    # FIFTY-ONE AT THIS INTEGRATION MERGE, 2026-10-26: lane B4's
+    # linkedin_company_page_home is a READ beside the fifty, so the non-write
+    # count moves by one and the write side is unmoved; MEASURED on the
+    # merged tree, never summed.
+    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 51
+    assert len(tools) == 73
 
 
 def test_the_read_that_was_nearly_named_a_write():

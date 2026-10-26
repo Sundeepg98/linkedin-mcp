@@ -1,0 +1,99 @@
+# Integration 2, 2026-10-26: five pending lane heads onto one certified head
+
+Integrator lane `integrator-26`, worktree branched from master f339459. Task:
+merge five local branch heads in order, each `--no-ff`, each conflict
+resolved by measurement against the merge base; pins and counts re-derived,
+never summed. One certified head at the end, certified by `lane_ci.py push`.
+
+Standing rules: `_state/LANE-STANDING-RULES.md` (main checkout, gitignored).
+Offline: no LinkedIn load, no port 9224, no Chrome. Full suite CI-only.
+
+Pattern read: `_audit/2026-10-10-integration.md`.
+
+## 1. Merged, in order
+
+| # | head | feature | merge-base | notes |
+|---|---|---|---|---|
+| 1 | becc3a7 | J 110: `linkedin_company_page_home` | 16ee59a | +2 commits |
+| 2 | 1935c25 | J 108: `linkedin_company_people_insights` (Playwright-locator reader, session-2 capture) | 16ee59a | +4 commits |
+| 3 | 3e70900 | N 102: `linkedin_company_people_insights` (record reader, synthetic fixture) | 71d83ca | +3 commits. FLAGGED UNFINISHED in the previous session; pre-merge gate check below. |
+| 4 | 53f5c3a | lane A: +32 commits, P M9 / J 77 EXCLUDED-RULED, M C70/C93 ADMITTED, M C101 GAP; carries NEW `_audit/2026-10-10-rulings-lane-a-questions.md` | 6c65815 | UNCERTIFIED: its ci/ run 38056930283 was red and its fixes post-date that run; this lane's push certifies it. |
+| 5 | a7026d8 | lane B1: +20 commits, P A22, P L8, P L1 COVERED-UNFIRED | 6c65815 | its ci/ ref 9911b3d was red; re-certified by this push. LAST: most diverged. |
+
+## 2. Pre-merge check on head 3 (N 102)
+
+The brief flagged N 102 unfinished. Rule: merge only if the last commit is
+complete (record written + gates green at that commit); if the last commit's
+record says the item is incomplete or its last gate failed, skip it.
+
+Measured: head 3's three commits touched NO `_audit/` file and NO census
+file (`git diff --name-only 71d83ca 3e70900 -- _audit/` is empty). Its last
+commit is a child-branch commit; the census decision for N 102 was deferred
+to the lane lead ("census edits are the lane lead's" is not its own words but
+the pattern every child commit here follows -- 6b2e89f explicitly says the
+child does not move a row). Row `N 102` in `_audit/_census/network.md` still
+reads GAP on that head (line 642, checked against base 71d83ca: unchanged).
+So the branch builds the reader but the ROW never moved and no record was
+written.
+
+DECISION PENDING THE J 108 MERGE: heads 2 (J 108) and 3 (N 102) both build
+`linkedin_company_people_insights` -- two different readers of the same
+People-tab insights (J 108 reads Playwright locators over the live-2 capture
+`skeleton`; N 102 reads records over a synthetic fixture builder). Merging
+both would register TWO tools of the same name -- the registry cannot hold
+two tools with one name. This is resolved after the J 108 merge lands: the
+first head that arrives with the tool wins the name; if the second head also
+carries it, a conflict will show and it is resolved by measurement -- the
+tool the merged tree holds is whichever the merge base + first head put in.
+See section 3.
+
+## 3. Conflicts resolved by judgement
+
+(merged 1, becc3a7, J 110) The merge base 16ee59a is OLD relative to our
+worktree head: base held 61 tools, our side advanced to 72, theirs advanced a
+sibling to 62 (adding only `linkedin_company_page_home`). Resolved by union,
+measured never summed:
+- `people_data.py`: two different 5th record types -- ours'
+  `Organisation` (lane G2, a Page's name+link) and theirs' `OrganisationProse`
+  (J 110, a Page's prose) -- both kept in `RECORD_TYPES`, `TEXT_FIELDS`,
+  `as_record` and `text_fields`; `PEOPLE_TOOLS` is the union of the two
+  lists. Class bodies auto-merged.
+- `server.py` docstring: ours' full history kept; theirs' J 110 paragraph
+  grafted as the newest entry; the headline re-derived from the merged
+  registry as **seventy-three tools, twenty-two of which write** (72 + their
+  one read; their J 110 is a read, so the write count is ours' 22). The
+  three-way split line: **FIFTY-ONE read, TWENTY-TWO write, ZERO
+  write-shaped**; sum 51 + 22 + 0 = 73. The parenthetical count-chain keeps
+  the base's entry as "Fifty, twenty-two and seventy-two on master at this
+  integration's base" and adds this merge's entry.
+- `server.py` registration: the merge interleaved ours' lane B2/B3/B4
+  blocks with theirs' company_home block; rebuilt whole in merge order --
+  ours' blocks (B2 verticals, B3, B4) kept in place, theirs'
+  `company_page_home` block inserted after ours' `set_similar_jobs_alert`
+  and before `unset_similar_jobs_alert` (a single contiguous J 110 block
+  with its own `from linkedin_server import company_home` import, exactly as
+  theirs wrote it). No tool dropped: merged tool set = ours' 72 +
+  `linkedin_company_page_home` = 73, verified by `comm` against both sides.
+- Test files: record-type sets, the read-only names list, and the count
+  chains all UNIONED; the two divergent `assert len(tools)` pins merged to
+  the measured 73 (with the non-write count 51), and the pinned-surface
+  counts re-derived by measurement as **73 tools, 116 parameters**
+  (the auto-merged `PINNED_TOOL_SURFACE` dict was parsed, not summed).
+  `test_every_tool_is_on_the_surface.py`'s `assert len(_tool_names())` moved
+  72 -> 73.
+- `README.md`: headline re-derived to "Seventy-three tools ship. Fifty-one
+  read. Twenty-two write."; the module listing's count moved to
+  "the seventy-three tools"; both sides' history chains kept as evidence,
+  each entry describing its own tree.
+
+Gate: the targeted surface + record tests ran after resolution (results in
+section 5).
+
+
+## 4. Pins re-derived on the merged tree
+
+(pending)
+
+## 5. Gates and certification
+
+(pending)

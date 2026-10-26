@@ -3,10 +3,20 @@
 An MCP server that shows you your own LinkedIn account data as structured tool
 results instead of pages you have to click through.
 
-**Seventy-two tools ship. Fifty read. Twenty-two write. None is
+**Seventy-three tools ship. Fifty-one read. Twenty-two write. None is
 write-shaped and unable to act.**
 (Lane B4's branch: sixty-three and nineteen write until its merge, 2026-10-10: the similar-jobs
 alert, `linkedin_set_similar_jobs_alert` and its inverse.)
+
+**AT THIS INTEGRATION MERGE, 2026-10-26, the line read
+"Seventy-two ... Fifty read. Twenty-two write" and one read arrived** (census
+row `J 110`, the orchestrator's THIRD-PARTY-TEXT-AT-RUNTIME).
+`linkedin_company_page_home` loads an organisation's Page root by its numeric
+id and returns the Page's own description as a record marked as untrusted
+third-party text -- sanitised, cut at 2,000 characters with a flag saying so,
+never stored -- with the view the root drew and how many feed items it drew,
+as counts. A root that draws its Posts view has no description card, and the
+tool says that rather than returning an empty description.
 
 **THAT LINE READ "Seventy ... Fifty read. Twenty write" UNTIL LANE B4,
 2026-10-10, merged after lane B3** (census `J 161`, HIS-OWN-CURATION-NOT-OUTWARD).
@@ -1055,7 +1065,7 @@ linkedin_server/
   cdp_bridge.py              the recovery path: attach to a running Chrome
   dom.py                     the read-only harvesters and the control readers
   shape.py                   pure parsers and the result envelope
-  server.py                  the seventy-two tools
+  server.py                  the seventy-three tools
   errors.py
 tests/                       1393 tests, no network, no account
   fixtures/                  frozen LinkedIn markup, scrubbed

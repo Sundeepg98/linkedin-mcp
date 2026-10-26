@@ -403,4 +403,12 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # merged registry, not summed, and moved with every other count site.
     # SEVENTY-TWO AT THE INTEGRATION MERGE OF LANE B4 ONTO LANE B3 (2026-10-10): lane B4's two
     # writes beside the seventy, measured off the merged registry, not summed.
-    assert len(_tool_names()) == 72
+    # SIXTY-TWO ON LANE B4'S BRANCH, 2026-10-10 (child b4-j110): one READ,
+    # linkedin_company_page_home (census J 110, ruling
+    # THIRD-PARTY-TEXT-AT-RUNTIME), measured off the registry and moved with
+    # every other count site in the same commit. That lane's branch held the
+    # tool as its own sixty-second; it merged here as the seventy-third.
+    # SEVENTY-THREE AT THIS INTEGRATION MERGE, 2026-10-26: lane B4's
+    # linkedin_company_page_home (census J 110) beside the seventy-two,
+    # measured off the merged registry, not summed.
+    assert len(_tool_names()) == 73

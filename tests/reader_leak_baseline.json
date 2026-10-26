@@ -18,6 +18,7 @@
     "auth:session_info": "not_driven:raises BrowserUnavailableError",
     "browser:close_tab_keeping_the_window": "not_driven:returned without reading the page",
     "collections_page:read_collections": "not_driven:read the page and returned nothing the page made",
+    "company_home:read_company_home": "returns_records",
     "company_interest:read_after_press": "clean",
     "company_interest:read_interest_control": "clean",
     "company_interest:read_state": "clean",
