@@ -36,16 +36,44 @@ reads GAP on that head (line 642, checked against base 71d83ca: unchanged).
 So the branch builds the reader but the ROW never moved and no record was
 written.
 
-DECISION PENDING THE J 108 MERGE: heads 2 (J 108) and 3 (N 102) both build
-`linkedin_company_people_insights` -- two different readers of the same
-People-tab insights (J 108 reads Playwright locators over the live-2 capture
-`skeleton`; N 102 reads records over a synthetic fixture builder). Merging
-both would register TWO tools of the same name -- the registry cannot hold
-two tools with one name. This is resolved after the J 108 merge lands: the
-first head that arrives with the tool wins the name; if the second head also
-carries it, a conflict will show and it is resolved by measurement -- the
-tool the merged tree holds is whichever the merge base + first head put in.
-See section 3.
+DECISION: HEAD 3 (N 102) IS SKIPPED, NOT MERGED. Three grounds, each
+measured against the merge base or the merged tree:
+
+1. THE TOOL NAME IS TAKEN. Head 2 (J 108) is already merged at this tree and
+   owns `linkedin_company_people_insights`, with a Playwright-locator reader
+   over the session-2 capture. Head 3 (N 102) registers the SAME tool name
+   but through a different module body (a record reader over a synthetic
+   fixture builder). A trial merge of head 3 onto the post-J-108 tree hit an
+   ADD/ADD conflict on `linkedin_server/company_people_insights.py` and
+   `tests/test_company_people_insights.py` (the two files carry two distinct
+   implementations, their git blobs do not match), plus content conflicts
+   across every count/record/test file. Merging it would register two
+   functions under one tool name in the same registry -- impossible -- and
+   would have to pick one reader and discard the other's tests, fixtures and
+   baselines. That pick is the lane lead's or the orchestrator's, not an
+   integrator's: it is a census decision (row N 102 vs row J 108) and this
+   lane has no authority to bank either.
+
+2. THE COMPLETION BAR WAS NOT MET. The brief's skip rule: merge only if the
+   last commit is complete (a record written + the last gate green at that
+   commit). Head 3's last commit (3e70900) touches NO `_audit/` file
+   (`git diff --name-only 71d83ca 3e70900 -- _audit/` is empty), so no
+   record for N 102 was written on the branch. And the census row N 102 in
+   `_audit/_census/network.md` still reads GAP on that head (line 642; its
+   own text says "a reader is the owner's; no state moves on a capture" and
+   the capture is the open condition). The last commit's message describes a
+   count-prose/visibility fix, not a green gate on the item it was named for.
+
+3. THE MISSING STEP (recorded so the lane lead knows exactly what is owed, if
+   N 102 is ever re-opened): (a) a record under `_audit/` naming N 102;
+   (b) a move of the census row N 102 GAP -> COVERED-UNFIRED on the
+   evidence of its own reader; and (c) a ruling on which of the two
+   `linkedin_company_people_insights` implementations (J 108's Playwright
+   reader, now merged; N 102's record reader, skipped) the registry keeps --
+   the one that loses has its tests, fixtures and baseline entries retired.
+
+Skipped per the brief's own skip path; the branch head is left unmerged and
+no tool, record or row of N 102 is on this tree.
 
 ## 3. Conflicts resolved by judgement
 
