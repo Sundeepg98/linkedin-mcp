@@ -162,9 +162,20 @@ class FixtureNavigator:
     #: 2026-09-27 nothing answered it, and eleven tests sent a fresh Chromium
     #: to LinkedIn on every run; ``tests/network_guard.py`` now fails any test
     #: that lets a request leave. So the navigator that served the posting
-    #: answers its apply anchor too: ``204 No Content``, which a browser treats
-    #: as a navigation that lands nowhere -- the page stays on the capture, as
-    #: it does on LinkedIn -- and every answer is recorded in ``answered``.
+    #: answers its apply anchor too, with a navigation that lands nowhere --
+    #: the page stays on the capture, as it does on LinkedIn -- and every
+    #: answer is recorded in ``answered``.
+    #:
+    #: THE ANSWER IS ``abort("aborted")`` SINCE 2026-11-24, AND WAS ``204 No
+    #: Content`` BEFORE. Both land nowhere on playwright 1.63.0 and 1.65.2. On
+    #: 1.64.1 -- which CI resolved on 2026-10-26, because requirements.txt
+    #: leaves playwright unpinned -- a press whose navigation is answered 204
+    #: never resolves, and the stuck navigation holds the page's next waits to
+    #: their full bounds: four tests red on every platform, master f339459.
+    #: ``abort("failed")`` was measured too and is no answer: it replaces the
+    #: page with Chromium's error page. ``tests/test_the_apply_answer_lands_
+    #: nowhere.py`` holds the property; the fixes lane's record,
+    #: ``_audit/2026-10-26-fixes.md`` section 3, holds the measurements.
     APPLY_NAVIGATION = re.compile(r"^https://www\.linkedin\.com/jobs/view/\d+/apply/")
 
     def __init__(self, pages: dict[str, "str | list[str]"]):
@@ -200,7 +211,7 @@ class FixtureNavigator:
 
     async def _answer_locally(self, route) -> None:
         self.answered.append(route.request.url)
-        await route.fulfill(status=204)
+        await route.abort("aborted")
 
 
 def _pages(
