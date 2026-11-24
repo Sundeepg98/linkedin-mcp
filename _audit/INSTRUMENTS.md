@@ -12276,3 +12276,38 @@ roles, texts), the per-row roster structure dump and the group-home control
 census by region. Each answered one question once; the answers (20 rows, 16
 degrees, 5 rail-only Join buttons, one invite control, one closed share box)
 are in the record.
+
+## 95. A RED THAT ONLY CI SEES IS A RESOLVE UNTIL SHOWN OTHERWISE, AND A PRESS TEST IS RUN UNDER EVERY VERSION THE BOUNDS ADMIT (fixes-26, 2026-11-24)
+
+### 95.1 REPRODUCE THE RESOLVE BEFORE THEORISING ABOUT THE RUNNER
+
+Master f339459 was red on every platform of the full matrix and green on this
+box under every flag, and the working theory was runner load. The job logs
+answered it in one comparison: the last green run installed playwright 1.63.0,
+the red one 1.64.1, because `requirements.txt` leaves playwright unpinned. An
+isolated env with the red run's exact versions (browsers in a scratch path, the
+shared cache untouched) reproduced all four failures on a quiet box, serially,
+with the CI signatures; a one-capture probe then showed the mechanism -- under
+1.64.1 a press whose navigation is answered `204` never resolves and holds the
+page's next waits to their bounds -- and the same probe, run over three answers
+under three versions, chose the fix.
+
+    WHEN ONLY CI IS RED, DIFF WHAT CI INSTALLED BEFORE ANYTHING ELSE, AND
+    REPRODUCE THAT RESOLVE LOCALLY. A THEORY ABOUT LOAD CANNOT BE SHOWN
+    FAILING; A VERSION CAN.
+
+### 95.2 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `tests/test_the_apply_answer_lands_nowhere.py` -- a pressed apply anchor's navigation, as `tests.test_writes.FixtureNavigator` answers it, must land nowhere and leave the page's waits alive | with the old `204` answer under playwright 1.64.1: `Page.click: Timeout 5000ms exceeded` (it passes under 1.63.0 with either answer, which is why the box never saw the red) |
+| `tests/test_follow_company_page.py` section 10 -- the Page's own follow control drawn twice is one control, and the press is its top card | against the old verdict, 4 of 4 failed with the refusal sentence session 10 recovered ("2 controls ... and 2 of them read it followed by a heading the Page prints there, where exactly one must") |
+
+### 95.3 DECLARED DISPOSABLE
+
+The lane's scratch tools: the isolated-resolve builder (a `uv venv` plus the
+red run's pins, browsers in a scratch path), the one-capture press probe and
+its three-answers-by-three-versions grid, the top-card aim verifier over six
+worlds, and the people-card counter. Each answered one question once; the
+answers are tables in `_audit/2026-10-26-fixes.md`. The recipe in 95.1 is the
+part worth keeping, and it is kept here.

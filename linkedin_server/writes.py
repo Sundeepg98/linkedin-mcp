@@ -4226,8 +4226,10 @@ NAMED_PROFILE_ACTIONS: frozenset[str] = frozenset(
 #:
 #:   mark_company_interest  company_interest.OFF_CONTROL_IN_CARD   6 presses, 1 each
 #:   follow_company_page    dom.COMPANY_PAGE_FOLLOW_CONTROL        6 presses, 1 each
-#:                          (its press is dom.COMPANY_PAGE_BOUND_FOLLOW_CONTROL
-#:                          since 2026-10-10, required by the gate to match 1)
+#:                          (its press is dom.COMPANY_PAGE_TOPCARD_FOLLOW_CONTROL
+#:                          since 2026-10-26 and BOUND_FOLLOW_CONTROL before it,
+#:                          from 2026-10-10, required by the gate to match 1;
+#:                          the fixes lane added a 7th press, also matching 1)
 #:   update_profile_field   profile_editor.SAVE_SELECTOR          12 presses, 1 each
 #:                          and the Premium badge switch           8 presses, 1 each
 #:   withdraw_from_group    group_leave.disclosure_selector       16 presses, 1 each
@@ -4575,7 +4577,12 @@ def company_page_follow_verdict(
     controls = coerce.as_count(reading.get("follow_controls"))
     anywhere = coerce.as_count(reading.get("follow_controls_anywhere"))
     bound = coerce.as_count(reading.get("bound_controls"))
+    # MISSING READS AS ZERO, WHICH REFUSES: a reading taken before the fixes
+    # lane's N 47 repair carries neither field, and zero distinct headings or
+    # zero top-card matches is UNKNOWN below -- the safe direction.
+    bound_headings = coerce.as_count(reading.get("bound_headings"))
     bound_in_page = coerce.as_count(reading.get("bound_in_page"))
+    topcard = coerce.as_count(reading.get("topcard_in_page"))
     links = coerce.as_count(reading.get("identity_links"))
     malformed = coerce.as_count(reading.get("identity_malformed"))
     ids = [
@@ -4591,7 +4598,9 @@ def company_page_follow_verdict(
         "follow_controls_in_main_column": controls,
         "follow_controls_on_the_page": anywhere,
         "controls_bound_to_the_pages_own_heading": bound,
+        "distinct_headings_the_bound_controls_name": bound_headings,
         "controls_bound_in_the_pages_own_engine": bound_in_page,
+        "bound_controls_alone_in_their_heading_card": topcard,
         "identity_links": links,
         "identity_ids_named": len(ids),
     }
@@ -4639,21 +4648,28 @@ def company_page_follow_verdict(
             "it, so that is where a followed Page lands. UNKNOWN, never "
             "'following' and never 'not following'.",
         )
-    if controls > 1 and (bound != 1 or subject is None):
+    if controls > 1 and (bound_headings != 1 or subject is None):
         # SEVERAL ARE ADMITTED ONLY THROUGH THE BINDING (2026-10-10, the live
         # lane's sessions 8 and 9: another entity's control in the main
-        # column). Without exactly one bound, which to press is position.
+        # column). SINCE 2026-10-26 (the fixes lane's N 47 repair) several
+        # BOUND controls are admitted too, when every one of them names the
+        # SAME heading: an unfollowed Page draws its OWN control twice in the
+        # main column (session 10), and two copies of one Page's control are
+        # one control. Bound controls naming DIFFERENT headings are several
+        # logical controls, and which to press would be position.
         return (
             facts,
             UNKNOWN,
             f"{controls} controls whose name opens "
-            f"{dom.COMPANY_PAGE_FOLLOW_PREFIX!r} are in the Page's main column, "
-            f"and {bound} of them read it followed by a heading the Page prints "
-            "there, where exactly one must; LinkedIn draws OTHER entities' "
-            "follow controls beside the Page's, so pressing one of several "
-            "without that binding would be picking by position.",
+            f"{dom.COMPANY_PAGE_FOLLOW_PREFIX!r} are in the Page's main column; "
+            f"{bound} of them read it followed by a heading the Page prints "
+            f"there, naming {bound_headings} distinct heading(s), where they "
+            "must all name exactly one -- the Page's own, which an unfollowed "
+            "Page draws more than once; LinkedIn draws OTHER entities' follow "
+            "controls beside the Page's, so pressing one of several without "
+            "that binding would be picking by position.",
         )
-    if bound != 1 or subject is None:
+    if bound_headings != 1 or subject is None:
         return (
             facts,
             UNKNOWN,
@@ -4663,28 +4679,45 @@ def company_page_follow_verdict(
             "Page's control rather than a recommended one. Neither the name it "
             "wears nor the headings are repeated here.",
         )
-    if bound_in_page != 1:
+    if bound_in_page != bound:
         return (
             facts,
             UNKNOWN,
-            "one control in the Page's main column reads "
+            f"{bound} control(s) in the Page's main column read "
             f"{dom.COMPANY_PAGE_FOLLOW_PREFIX!r} followed by the Page's own "
             "heading as this server compares them, whitespace folded, but the "
             f"page's own engine, comparing them exactly, singles out {bound_in_page}; "
             "the press is aimed by that engine, so it would not land on exactly "
-            "that control.",
+            "the control(s) this server read.",
+        )
+    if topcard != 1:
+        # THE PRESS AMONG COPIES OF ONE PAGE'S CONTROL (the fixes lane's N 47
+        # repair): the copy alone among bound controls in its own heading
+        # card -- the top card. None, or several, and which copy is pressed
+        # would be position.
+        return (
+            facts,
+            UNKNOWN,
+            f"the {bound} control(s) bound to the Page's own heading are one "
+            f"Page's control, but {topcard} of them sit alone among bound "
+            "controls in their own heading card, where exactly one must; the "
+            "Page's top card is what singles out the copy to press, and "
+            "without it the choice would be by position.",
         )
     return (
         facts,
         "not_following",
-        f"exactly one of the {controls} control(s) in the Page's main column "
-        f"whose name opens {dom.COMPANY_PAGE_FOLLOW_PREFIX!r} reads, after it, the "
-        "Page's own heading -- as this server compares them and as the page's "
-        "own engine does -- the control stating what a click will do, of "
-        f"{anywhere} such controls on the page. The Page's own people-search "
-        f"link names {target}, the id this action was asked about, which is "
-        "what ties the page LinkedIn redirected to back to the grant. Read off "
-        "the very control the click would land on.",
+        f"the {bound} control(s) in the Page's main column whose name opens "
+        f"{dom.COMPANY_PAGE_FOLLOW_PREFIX!r} and reads, after it, a heading the "
+        "Page prints all name ONE heading, the Page's own -- as this server "
+        "compares them and as the page's own engine does -- so they are one "
+        "Page's control, which an unfollowed Page draws more than once: the "
+        f"control stating what a click will do, of {anywhere} such controls on "
+        "the page. The press is the copy alone in its own heading card, the "
+        "Page's top card. The Page's own people-search link names "
+        f"{target}, the id this action was asked about, which is what ties the "
+        "page LinkedIn redirected to back to the grant. Read off the very "
+        "control the click would land on.",
     )
 
 
@@ -9502,13 +9535,17 @@ async def _live_control(
         #
         # SINCE 2026-10-10 IT IS THE BOUND CONTROL'S SELECTOR, not "the one
         # follow control in the main column": the live lane measured another
-        # entity's control there (sessions 8 and 9), and the verdict now
-        # requires exactly one match of ``COMPANY_PAGE_BOUND_FOLLOW_CONTROL``.
+        # entity's control there (sessions 8 and 9). SINCE 2026-10-26 (the
+        # fixes lane's N 47 repair) IT IS THE TOP CARD'S: an unfollowed Page
+        # draws its OWN control twice, both bound (session 10), and the
+        # verdict now requires exactly one match of
+        # ``COMPANY_PAGE_TOPCARD_FOLLOW_CONTROL`` -- the bound control alone
+        # in its own heading card.
         reading = await dom.read_company_page_follow(page)
         _facts, state, why = company_page_follow_verdict(reading, grant.target)
         if state != spec.from_state:
             return (state, why, "")
-        return (state, why, dom.COMPANY_PAGE_BOUND_FOLLOW_CONTROL)
+        return (state, why, dom.COMPANY_PAGE_TOPCARD_FOLLOW_CONTROL)
 
     if spec.action == "unfollow_company":
         control = await dom.read_unfollow_control(page, grant.target)

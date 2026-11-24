@@ -19,6 +19,7 @@ Pattern read: `_audit/2026-10-10-integration.md`.
 | 3 | 3e70900 | N 102: `linkedin_company_people_insights` (record reader, synthetic fixture) | 71d83ca | +3 commits. FLAGGED UNFINISHED in the previous session; pre-merge gate check below. |
 | 4 | 53f5c3a | lane A: +32 commits, P M9 / J 77 EXCLUDED-RULED, M C70/C93 ADMITTED, M C101 GAP; carries NEW `_audit/2026-10-10-rulings-lane-a-questions.md` | 6c65815 | UNCERTIFIED: its ci/ run 38056930283 was red and its fixes post-date that run; this lane's push certifies it. |
 | 5 | a7026d8 | lane B1: +20 commits, P A22, P L8, P L1 COVERED-UNFIRED | 6c65815 | its ci/ ref 9911b3d was red; re-certified by this push. LAST: most diverged. |
+| 6 | c95c5e3 | origin/master, by the orchestrator's order of 2026-11-24: the fixes lane (N 47, the playwright fixture fix cab0ae7, INSTRUMENTS 95) | f339459 | +7 commits, certified on master. Merged because `git fetch origin` found master past f339459. |
 
 ## 2. Pre-merge check on head 3 (N 102)
 
@@ -372,11 +373,82 @@ hazard on the same key: lane B1 also wrote `"live1": 2`, for two different
 captures. Set to the `*.html` count on disk in every directory: live1 5, live2
 29, live3 14, live4 4, live5 1, live7 1, live8 7, live9 1.
 
+(merged 6, origin/master, by the orchestrator's order of 2026-11-24: fetch
+before the push, and merge master if it moved.) `git fetch origin` found master
+seven commits past f339459, at the fixes lane's certified head c95c5e3: the
+playwright fixture fix cab0ae7 that clears the red master, the N 47 follow
+reader (`dom.py`, `writes.py` and their tests), the record
+`_audit/2026-10-26-fixes.md` and INSTRUMENTS section 95. One `--no-ff` merge.
+Only the three derived views conflicted, and each was regenerated twice to a
+fixed point (the audit index over 278 documents, the fixes record added; the
+rulings register at 95; the blocker map 409 lines). Measured rather than
+trusted:
+- `dom.py` auto-merged: ours' J 110 relocation and master's N 47 change touch
+  different lines. Master adds no page script and no waiver (29 lines carrying
+  `readonly-ok` on master and on base, 31 on ours and on the merged file), so
+  the executed-script pin and the waiver budget cannot take an equal move.
+- `INSTRUMENTS.md` auto-merged in heading order: the tail reads 84, 83, 89,
+  90, 91, 93, 95.
+- Master moves no census slice and no tool. The merged registry still measures
+  77 / 119 / 22 / 55; census `--check` is clean on the merge-5 pins and every
+  table checker is green.
+
 
 ## 4. Pins re-derived on the merged tree
 
-(pending)
+Every figure below was measured on the final merged tree, never summed:
+`scripts/census_completion.py` for the census (its `--check` ends "every
+headline figure matches its pin"), `mcp.list_tools()` and `writes.PERFORMABLE`
+for the registry. The master column is master at this lane's branch point,
+f339459, read off that commit's own pins.
+
+| figure | master f339459 | merged | moved by |
+|---|---|---|---|
+| stated rows | 773 | 773 | nothing (no row added or removed) |
+| adjudicated | 227 | 235 | lane A +5, lane B1 +3 |
+| delivered, broad | 149 | 155 | lane A +3, lane B1 +3 |
+| delivered, strict | 117 | 117 | nothing (no row proven live here) |
+| GAP | 546 | 538 | lane A -5, lane B1 -3 |
+| COVERED-UNFIRED | 32 | 38 | lane A +3, lane B1 +3 |
+| achievable | 712 | 710 | lane A -2 (two rows EXCLUDED-RULED) |
+| tools | 72 | 77 | J 110, J 108, lane A, lane B1 x2 |
+| read / write | 50 / 22 | 55 / 22 | all five new tools read |
+| parameters | 115 | 119 | J 110 +1, J 108 +1, lane A +2, lane B1 +0 |
+
+J 110 and J 108 move no census row: both rows stay GAP, as their branches left
+them. Equal moves met and measured: `b1_released` (3, not 2) and
+`LIVE_FIXTURE_COUNTS["live1"]` (5, not 2); see merge 5.
 
 ## 5. Gates and certification
 
-(pending)
+After each merge commit: `census_completion.py --check`, the seven table
+checkers (`check_next_step`, `check_read_addresses`, `check_jobs_directions`,
+`check_write_classes`, `ruling_holds`, `check_exclusion_basis`,
+`check_cited_shas_resolve`), the three derived-view `--check`s, and the
+pre-commit identity gate on every commit's staged files (merge 5: 32 files,
+0 hits).
+
+Targeted local tests, each inside the 2-minute cap except the first: merges 1
+and 2 (148 s, over the cap; later runs were scoped and sharded), merge 4 (104
+s; the four reds that led to the J 110 fix), the J 110 fix (111 s). From merge
+5 on, by the orchestrator's order of 2026-11-24, the local gate is the derived
+and census checks only, plus one corpus scan over a hand-resolved file
+(`tests/test_a_correction_is_findable_from_the_claim.py`, 15 passed in 5 s).
+Every test runs on this lane's ci/ ref.
+
+CERTIFICATION: `scripts/lane_ci.py push` on the head carrying this record, the
+verdict read by sha with `gh run view` and reported to the orchestrator with its
+run id. Pass bar: green, except the shared master family
+(`test_apply_modal_fixture` 869 / 954 / 1270 and the `writes:4404`
+description-wait group, "shared master red, fixes-26 owns"), which should no
+longer occur now that cab0ae7 is merged.
+
+INSTRUMENTS: section 94 is unused. Every helper this lane built was a scratch
+script that answered one question once: the per-row three-way resolvers for
+census slices and tables, the pin re-deriver, the registration-tail rebuilder,
+the J 110 relocator, the correction-table splicer, the merged-tree three-way row
+verifier, the structural verifier and the registry measurer. DECLARED
+DISPOSABLE. One went red on a real defect (the structural verifier convicted a
+naive concatenation of the correction table as a SyntaxError), but pytest
+collection convicts the same defect, so it adds no standing guard. The row
+verifier was never shown failing, so it does not enter.
