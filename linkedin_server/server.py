@@ -12346,10 +12346,10 @@ async def linkedin_set_similar_jobs_alert(
 
 
 # ---- lane B4 ----
-# Census row J 110 (lane B4, 2026-10-10). The module is imported here rather
-# than in the import block above so every line lane B4 adds to this file sits
-# in this one block.
-from linkedin_server import company_home  # noqa: E402
+# Census row J 110 (lane B4, 2026-10-10). This block imported company_home
+# until integration 2 (2026-11-24), when the reader's one page read moved into
+# dom.py (``dom.read_company_home``): only dom.py may hold an evaluate waiver.
+# company_home is still the reader's vocabulary and shaping, imported by dom.
 
 
 @mcp.tool()
@@ -12408,7 +12408,7 @@ async def linkedin_company_page_home(organisation_id: str) -> dict[str, Any]:
             _authwall_refusal_without_the_landing(
                 landed, surface="organisation Page"
             )
-            reading = await company_home.read_company_home(page)
+            reading = await dom.read_company_home(page)
             return {
                 "ok": True,
                 "pages_loaded": 1,

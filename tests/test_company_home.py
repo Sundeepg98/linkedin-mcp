@@ -31,7 +31,7 @@ from pathlib import Path
 
 import pytest
 
-from linkedin_server import company_home, company_page, people_data, readonly, server
+from linkedin_server import company_home, company_page, dom, people_data, readonly, server
 
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO / "scripts"))
@@ -157,7 +157,7 @@ async def _take_every_reading() -> dict:
                 if name == "tool":
                     continue
                 await page.set_content(world, wait_until="domcontentloaded", timeout=60_000)
-                out[name] = await company_home.read_company_home(page)
+                out[name] = await dom.read_company_home(page)
             navigator = _Navigator(WORLDS["tool"])
             original = server.BROWSER
             server.BROWSER = _Browser(page, navigator)
@@ -322,7 +322,7 @@ def _records_text(caplog) -> str:
 
 async def test_a_failed_read_carries_no_prose_out_in_a_value_or_a_raise(caplog):
     caplog.set_level(logging.DEBUG)
-    out = await company_home.read_company_home(_RaisingPage())
+    out = await dom.read_company_home(_RaisingPage())
     assert out["error"] == "RuntimeError"
     assert out["overview"]["state"] == "reader_blind"
     assert out["overview"]["prose"] is None
@@ -391,7 +391,12 @@ async def test_a_non_numeric_id_is_refused_before_any_load(monkeypatch, organisa
 def test_the_root_is_admitted_and_the_posts_and_home_tabs_stay_refused():
     root = company_page.company_page_url(ORGANISATION)["url"]
     assert readonly.is_read_url(root) is True
-    for tab in ("posts/", "home/", "about/"):
+    # ``about/`` WAS THE THIRD NEIGHBOUR UNTIL INTEGRATION 2 (2026-11-24): lane
+    # A admitted ``/company/<x>/about/`` on its own anchored line (census
+    # ``J 106``, the allowlist-silence clause of READ-PAST-AN-ACT-SUBSTRING), so
+    # it is no longer a refused neighbour. ``jobs/`` takes its place: no ruling
+    # reaches it, and readonly.py records that ``J 107`` does not need it.
+    for tab in ("posts/", "home/", "jobs/"):
         assert readonly.is_read_url(root + tab) is False, tab
     assert readonly.is_read_url("https://www.linkedin.com/company/placeholder-org/posts/") is False
 

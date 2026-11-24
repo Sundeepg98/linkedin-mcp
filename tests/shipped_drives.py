@@ -1792,11 +1792,11 @@ async def read_people_insights_as_shipped(page: Any) -> Any:
 #: To the success path: the guard runs each beside its reader's signature
 #: variants, and the reader's verdict is the worst of them all.
 # ---------------------------------------------------------------------------
-# company_home:read_company_home -- an organisation Page's Overview prose
+# dom:read_company_home -- an organisation Page's Overview prose
 # ---------------------------------------------------------------------------
 
 #: The Home view as ``tests/fixtures/live1/company_root_home_view.html`` draws
-#: it, in the integers ``company_home.HOME_JS`` answers with: one main column;
+#: it, in the integers ``dom.COMPANY_HOME_JS`` answers with: one main column;
 #: the Home tab marked current, twice; ONE ``h2`` reading Overview, its card,
 #: and ONE description box in it, of two text runs; one Page posts section
 #: of five list items; one feed-item heading. MEASURED 2026-10-10 by running
@@ -1811,10 +1811,10 @@ HOME_VIEW_DRAWN = {
 
 class _DrawsTheHomeView(_Over):
     async def evaluate(self, script: Any, arg: Any = None, **kwargs: Any) -> Any:
-        from linkedin_server import company_home
+        from linkedin_server import dom
 
         answer = await self._wrapped.evaluate(script, arg, **kwargs)  # the read, counted
-        if script == company_home.HOME_JS:
+        if script == dom.COMPANY_HOME_JS:
             # THE TEXT IS NOT ANSWERED HERE: it stays the planted page's own,
             # so the description the reader returns is the plant.
             return _planted_answer_with(chars=len(PLANT), **HOME_VIEW_DRAWN)
@@ -1839,7 +1839,7 @@ async def read_company_home_as_shipped(page: Any) -> Any:
     integers and leaves the TEXT to the planted page, so the success path runs
     and the plant comes back -- inside the organisation-prose record.
     """
-    from linkedin_server import company_home
+    from linkedin_server import dom
 
     _drawn(
         "live1/company_root_home_view.html",
@@ -1848,11 +1848,11 @@ async def read_company_home_as_shipped(page: Any) -> Any:
         'aria-current="true" href="https://www.linkedin.com/company/x/home/"',
         "<h2>Page posts</h2>",
     )
-    return await company_home.read_company_home(_DrawsTheHomeView(page))
+    return await dom.read_company_home(_DrawsTheHomeView(page))
 
 
 DRIVES: dict[str, Callable[..., Any]] = {
-    "company_home:read_company_home": read_company_home_as_shipped,
+    "dom:read_company_home": read_company_home_as_shipped,
     "dom:read_any_save_control_label": read_any_save_control_label_as_shipped,
     "named_profile:composer_holds": named_profile_composer_holds_as_shipped,
     "people_results:read_result_people": read_result_people_as_shipped,

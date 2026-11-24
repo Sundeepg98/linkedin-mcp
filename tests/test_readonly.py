@@ -1001,7 +1001,18 @@ def test_only_dom_module_waives_evaluate():
     # return no id by design, and every named act's gate reads them; a token
     # leaving through a gate's script would make the gate's "no id crosses" a
     # flag rather than a fact.
-    assert waived_in.get("dom.py", 0) <= 24, waived_in
+    #
+    # 24 -> 25 on 2026-11-24 (integration 2, census J 110): COMPANY_HOME_JS,
+    # run from ONE call site in dom.read_company_home, moved here verbatim
+    # from company_home.py. WHY IT COULD NOT BE A LOCATOR CHAIN: the Page's
+    # description is read as its raw TEXT RUNS -- text nodes joined, a br kept
+    # as a line break, aria-hidden and hidden subtrees and the expander control
+    # stepped over and counted -- and the runs and the skips are themselves
+    # returned, so a cut text can be told from one that merely ended.
+    # Playwright's inner_text() follows CSS rendering, not aria-hidden;
+    # text_content() keeps the hidden subtrees; neither counts what it
+    # dropped; and a locator addresses elements, never text nodes.
+    assert waived_in.get("dom.py", 0) <= 25, waived_in
 
 
 # ---------------------------------------------------------------------------
@@ -1259,6 +1270,13 @@ INJECTED_SCRIPTS = {
     # returns no name, label or other address; dom.read_named_profile_handles
     # re-closes every field (a token or key off its anchored shape is dropped).
     "NAMED_HANDLES_JS": dom.NAMED_HANDLES_JS,
+    # 2026-11-24, integration 2 (census J 110, lane B4's reader): an
+    # organisation Page root's Overview prose and its feed items as counts.
+    # Moved here VERBATIM from company_home.py, which may not hold an
+    # evaluate waiver; it returns integers, one view position and ONE text
+    # box's text, which leaves only inside a people_data.OrganisationProse
+    # record.
+    "COMPANY_HOME_JS": dom.COMPANY_HOME_JS,
 }
 
 
@@ -1540,7 +1558,14 @@ def test_the_scripts_executed_are_exactly_the_ones_declared():
     # INJECTED_SCRIPTS in the same change and run from exactly ONE call site,
     # dom.read_named_profile_handles. The waiver budget moved 23 -> 24 with it;
     # the two counts stay one apart.
-    assert len(EXECUTED_SCRIPTS) == 25, sorted(EXECUTED_SCRIPTS)
+    #
+    # 25 -> 26 on 2026-11-24 (integration 2) for COMPANY_HOME_JS, declared in
+    # INJECTED_SCRIPTS in the same change and run from exactly ONE call site,
+    # dom.read_company_home. Lane B4 had run it from company_home.py, where no
+    # waiver is allowed; it moved here verbatim, so the count of call sites is
+    # the one the merged tree already measured. The waiver budget moved
+    # 24 -> 25 with it; the two counts stay one apart.
+    assert len(EXECUTED_SCRIPTS) == 26, sorted(EXECUTED_SCRIPTS)
 
 
 def test_a_script_that_replaces_page_behaviour_runs_only_from_a_sanctioned_evaluate():

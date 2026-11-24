@@ -45,7 +45,7 @@ import time
 from typing import Any, Optional
 from urllib.parse import parse_qs, urlsplit
 
-from linkedin_server import company_panel_text, landing, shape
+from linkedin_server import company_home, company_panel_text, landing, shape
 from linkedin_server.coerce import as_count
 from linkedin_server.config import logger
 from linkedin_server.errors import ExtractionFailedError, WriteAttemptError
@@ -11967,3 +11967,135 @@ async def read_search_filters(
         FILTER_PANEL_JS,
         {"phrases": phrases, "termCount": term_count, "html": html or ""},
     )
+
+
+# ===========================================================================
+# CENSUS ROW J 110 -- an organisation Page root's own prose, and its feed
+# items as counts (lane B4, 2026-10-10). RELOCATED HERE AT INTEGRATION 2
+# (2026-11-24), VERBATIM.
+#
+# Lane B4 built the script and its one ``evaluate`` in ``company_home.py``, and
+# ``tests/test_readonly.py`` refuses that twice: a ``# readonly-ok`` waiver
+# belongs to this module alone (``test_only_dom_module_waives_evaluate``),
+# and every executed script must be one declared from here
+# (``test_the_scripts_executed_are_exactly_the_ones_declared``). So the choice
+# was the one ``newsletters.py`` records: belong here, or do not inject. The
+# vocabulary handed in, the shaping of the answer into one
+# ``people_data.OrganisationProse`` record and every refusal stay in
+# ``company_home``, which :func:`read_company_home` calls.
+# ===========================================================================
+
+#: The in-page reader. It returns integers, one view POSITION, and the text of
+#: ONE text box -- the description -- sliced to ``max_chars``. A ``br`` is a
+#: line break; a skipped subtree (above), anything ``aria-hidden="true"`` and
+#: anything ``hidden`` is stepped over and COUNTED.
+COMPANY_HOME_JS = r"""
+(args) => {
+  const out = {
+    main: 0, elements: 0, current_tabs: 0, view: -1, headings: 0, cards: 0,
+    boxes: 0, text: null, chars: 0, runs: 0, skipped: 0, posts_sections: 0,
+    posts_items: 0, feed_item_headings: 0,
+  };
+  const norm = (s) => String(s == null ? '' : s).replace(/\s+/g, ' ').trim();
+  const main = document.querySelector('main');
+  if (!main) return out;
+  out.main = 1;
+  out.elements = main.getElementsByTagName('*').length;
+
+  const seen = new Set();
+  for (const anchor of document.querySelectorAll('a[aria-current="true"]')) {
+    let path = '';
+    try {
+      path = new URL(anchor.getAttribute('href') || '', 'https://www.linkedin.com').pathname;
+    } catch (e) {
+      continue;
+    }
+    const segments = path.split('/').filter(Boolean);
+    if (segments.length < 3 || segments[0] !== 'company') continue;
+    out.current_tabs += 1;
+    seen.add(args.views.indexOf(segments[2]));
+  }
+  if (out.current_tabs > 0) {
+    if (seen.size > 1) out.view = -2;
+    else {
+      const only = Array.from(seen)[0];
+      out.view = only >= 0 ? only : -3;
+    }
+  }
+
+  const nearestCard = (element) => {
+    let node = element.parentElement;
+    for (let hop = 1; node && hop <= args.hops; hop += 1) {
+      if (node.hasAttribute('componentkey')) return node;
+      node = node.parentElement;
+    }
+    return null;
+  };
+  const headed = (words) => Array.from(main.querySelectorAll('h2')).filter(
+    (h) => words.includes(norm(h.textContent)));
+
+  const headings = headed(args.overview);
+  out.headings = headings.length;
+  if (headings.length === 1) {
+    const card = nearestCard(headings[0]);
+    if (card) {
+      out.cards = 1;
+      const boxes = card.querySelectorAll('[data-testid="' + args.testid + '"]');
+      out.boxes = boxes.length;
+      if (boxes.length === 1) {
+        const parts = [];
+        const visit = (node) => {
+          for (const child of Array.from(node.childNodes)) {
+            if (child.nodeType === 3) {
+              parts.push(child.data);
+              out.runs += 1;
+            } else if (child.nodeType === 1) {
+              const tag = String(child.tagName || '').toUpperCase();
+              if (tag === 'BR') {
+                parts.push('\n');
+              } else if (args.skipped.includes(tag)
+                  || child.getAttribute('aria-hidden') === 'true'
+                  || child.hasAttribute('hidden')) {
+                out.skipped += 1;
+              } else {
+                visit(child);
+              }
+            }
+          }
+        };
+        visit(boxes[0]);
+        const whole = parts.join('');
+        out.chars = whole.length;
+        out.text = whole.slice(0, args.max_chars);
+      }
+    }
+  }
+
+  const sections = headed(args.posts_headings);
+  out.posts_sections = sections.length;
+  for (const heading of sections) {
+    const card = nearestCard(heading);
+    if (card) out.posts_items += card.querySelectorAll('[role="listitem"]').length;
+  }
+  out.feed_item_headings = headed([args.feed_heading]).length;
+  return out;
+}
+"""
+
+
+async def read_company_home(page: Any) -> dict[str, Any]:
+    """The view the Page root drew, its Overview prose as ONE untrusted
+    record, and the feed items it drew as COUNTS. THE ONLY FUNCTION THAT
+    TOUCHES A PAGE FOR ``J 110`` (lane B4; moved here from ``company_home``).
+
+    **AN EXCEPTION IS REDUCED TO ITS TYPE.** A library's message can quote the
+    page, and the prose is exactly what it would quote; every field is reset
+    and ``error`` names the type (ERROR-MESSAGE-RULED-AT-THE-RAISE).
+    """
+    try:
+        raw = await page.evaluate(  # readonly-ok
+            COMPANY_HOME_JS, company_home._arguments()
+        )
+    except Exception as exc:  # noqa: BLE001 -- the type is kept, never the message
+        return company_home._unread_home(error=type(exc).__name__)
+    return company_home._home_answer(raw if isinstance(raw, dict) else {})

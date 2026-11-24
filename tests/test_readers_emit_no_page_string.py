@@ -1978,7 +1978,7 @@ DRIVEN_TO["search_vertical_results:read_event_results"] = RETURNS_RECORDS
 # LANE B4'S PAGE-PROSE READER (2026-10-10, J 110, THIRD-PARTY-TEXT-AT-RUNTIME):
 # its success path returns an organisation's description inside an
 # OrganisationProse record, so the plant comes back inside a record.
-DRIVEN_TO["company_home:read_company_home"] = RETURNS_RECORDS
+DRIVEN_TO["dom:read_company_home"] = RETURNS_RECORDS
 # LANE B4'S AGGREGATE READER (2026-10-10, census J 108): the People tab's
 # insight cards. A category's label is third-party text, so it leaves as a
 # people_data.Category record -- the declared channel, not the text inventory.
@@ -2049,7 +2049,7 @@ def test_a_reader_joins_the_text_inventory_only_by_the_ruling(key: str) -> None:
 #: i.e. inside the counter reader's own ``except Exception``, which swallowed
 #: the check, and the drive went on to its click on the broken fixture.
 FIXTURE_BREAKS: dict[str, dict[str, str]] = {
-    "company_home:read_company_home": {
+    "dom:read_company_home": {
         "fixture": "live1/company_root_home_view.html",
         "needle": "<h2>Overview</h2>", "into": "<h2>Xxxxxxxx</h2>",
     },

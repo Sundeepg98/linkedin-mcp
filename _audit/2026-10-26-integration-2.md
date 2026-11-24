@@ -243,6 +243,72 @@ that reads a file resolved here -- 1600 passed, 4 failed, all four in
 with merge 1 (J 110), not with lane A. See "J 110's off-boundary script"
 below; the merge itself is committed first, the fix in its own commit.
 
+### J 110's off-boundary script, found at merge 4 and fixed in its own commit
+
+The merge-4 gate failed four tests in `tests/test_readonly.py`, all about
+`linkedin_server/company_home.py` (J 110, merged at merge 1):
+
+- `test_no_module_contains_an_UNSANCTIONED_mutating_call[company_home.py]`
+- `test_every_sanctioned_entry_is_actually_present`
+- `test_the_package_contains_exactly_as_many_mutating_calls_as_are_listed` (17 against 16)
+- `test_the_scripts_executed_are_exactly_the_ones_declared` (`HOME_JS` undeclared;
+  behind it, the executed-script pin read 25 where 26 call sites ran)
+
+NOT A MERGE DEFECT: J 110's own branch head runs the same unwaived
+`page.evaluate(HOME_JS, ...)` at the same line, and both guards already
+existed at its base 16ee59a, so that branch was red on these four by itself.
+It was never CI-certified, and merge 1's targeted gate did not include
+`tests/test_readonly.py`, so the four arrived unseen until merge 4.
+
+THE RULE IT BROKE, AND THE ONE WAY OUT. A `# readonly-ok` waiver is allowed in
+`dom.py` alone (`test_only_dom_module_waives_evaluate`), and every executed
+script must be declared from there. `newsletters.py` records the same refusal
+and its rule: belong in `dom.py`, or do not inject. The guard's own standard is
+that a waiver is spent only where a plain call cannot replace the script.
+`HOME_JS` qualifies: it reads the description as raw TEXT RUNS (text nodes
+joined, a `br` kept as a line break, aria-hidden and hidden subtrees and the
+expander control stepped over and counted) and returns the runs and skips so a
+cut text can be told from one that ended. `inner_text()` follows CSS rendering,
+not aria-hidden; `text_content()` keeps hidden subtrees; neither counts what it
+dropped; a locator never addresses a text node. Read-only, measured: the
+script was scanned for every state-changing operation (clicks, focus, scroll,
+events, submits, DOM, attribute and style writes, storage, cookies,
+navigation, fetch) and none occurs.
+
+THE FIX, VERBATIM, BEHAVIOUR UNCHANGED (an integrator's call, reversible):
+- `dom.COMPANY_HOME_JS` is `company_home.HOME_JS` byte for byte (sha256 and
+  the 3,022-character length measured before and after), run from ONE call
+  site, `dom.read_company_home`, with the waiver. `company_home` keeps the
+  vocabulary handed to the page and the shaping of the answer into one
+  `people_data.OrganisationProse` record; `dom` calls them. No import cycle
+  (`company_home` imports only `coerce` and `people_data`), and `dom.py`
+  already imports per-surface modules.
+- `tests/test_readonly.py`: `COMPANY_HOME_JS` declared; the executed-script
+  pin 25 -> 26 and the `dom.py` waiver budget 24 -> 25 moved TOGETHER, each
+  with its reason, as every earlier script did ("the two counts stay one
+  apart").
+- The reader's key `company_home:read_company_home` -> `dom:read_company_home`
+  in the reader-leak baseline (still `returns_records`, a line-level rename in
+  sorted position), `DRIVEN_TO`, `FIXTURE_BREAKS` and the shipped drives;
+  `server.py` and the J 110 tests call it at its new home.
+- No census row moves: `J 110` stays GAP, as its branch left it.
+
+ONE MORE CROSS-LANE FINDING ON THE SAME FILE, A SEMANTIC CONFLICT NO MERGE
+MARKER SHOWED: `tests/test_company_home.py::test_the_root_is_admitted_and_the_posts_and_home_tabs_stay_refused`
+asserted `/company/<x>/about/` refused. Lane A admitted that address on its own
+anchored line (census `J 106`), so on the merged tree it is admitted, measured
+through the shipped `is_read_url` (root, about, people, life, products,
+services and events admitted; home, posts, jobs, insights and videos refused).
+The J 110 test now names `jobs/`, which no ruling reaches, as lane A did for its
+own five neighbour tests; `posts/` and `home/` are still asserted refused.
+
+Gate for this fix (sharded, 111 s): the whole of `tests/test_readonly.py`,
+the J 110 tests, the reader-leak and tool-envelope drives, the people-reader
+closure, the orphan and outside-dom inventories and the surface and prose
+guards -- 1787 passed, 1 failed (the about/ neighbour above), then that file
+alone after its fix: 21 passed.
+
+
 ## 4. Pins re-derived on the merged tree
 
 (pending)
