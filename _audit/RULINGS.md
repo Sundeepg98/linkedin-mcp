@@ -9,7 +9,7 @@
 **THIS REGISTER IS NOT THE CORPUS AND DOES NOT CLAIM TO BE COMPLETE.** Read section 4 before concluding a question is unruled: the scan that keeps it honest reads ONE marker, and the ruling that caused this file to be written does not carry it.
 
     rulings registered       90
-    documents scanned        272
+    documents scanned        273
     RULED: declarations      76 claimed, 7 triaged, 0 unclaimed
 
 ---
