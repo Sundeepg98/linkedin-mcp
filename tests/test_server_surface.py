@@ -1,4 +1,8 @@
-"""The tool surface: seventy-two tools, fifty of which do not write.
+"""The tool surface: seventy-three tools, fifty of which do not write.
+
+**IT READ "seventy-two tools, fifty of which do not write" UNTIL LANE BUILDS-26
+(2026-11-24)**: one WRITE-SHAPED tool, ``linkedin_set_tracker_stage`` (census
+J 54), sanctioned and refusing, so the non-write count holds.
 
 **IT READ "sixty-five tools, forty-five of which do not write" UNTIL LANE B2'S
 SEARCH VERTICALS (2026-10-10), merged after lane NP**: two READS, ``linkedin_search_groups`` (census
@@ -182,6 +186,8 @@ SANCTIONED_WRITE_TOOLS = frozenset(SANCTIONED_WRITES) & {
     # docstring must describe one, so it is on both exemptions -- which are
     # one set. A key in writes.SANCTIONED_WRITES.
     "linkedin_withdraw_reaction",
+    # 2026-11-24 (lane builds-26): sanctioned and REFUSING (census J 54).
+    "linkedin_set_tracker_stage",
 }
 
 #: THE DOCSTRING EXEMPTION IS THE SAME SET AS THE NAME EXEMPTION, and it took
@@ -575,6 +581,8 @@ EXPECTED_TOOLS = {
     # sixty-second on its branch),
     # a WRITE: see SANCTIONED_WRITE_TOOLS.
     "linkedin_withdraw_reaction",
+    # 2026-11-24 (lane builds-26): a WRITE that refuses (census J 54).
+    "linkedin_set_tracker_stage",
 }
 
 #: Names a reader must never grow. Listed explicitly so that adding one is a
@@ -1071,7 +1079,10 @@ async def test_the_surface_is_exactly_the_seventy_two_tools(tools):
     # SEVENTY-TWO AT THE INTEGRATION MERGE OF LANE B4 ONTO LANE B3 (2026-10-10): lane B4's two
     # WRITES beside the seventy, so the split moves on its write side and the
     # non-write count holds at fifty. MEASURED off mcp.list_tools() on the merged tree.
-    assert len(tools) == 72
+    # SEVENTY-THREE FROM 2026-11-24 (lane builds-26): linkedin_set_tracker_stage,
+    # a WRITE that refuses, so the split moves on its write side and the
+    # non-write count holds. MEASURED off mcp.list_tools().
+    assert len(tools) == 73
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -1110,6 +1121,8 @@ async def test_the_surface_is_exactly_the_seventy_two_tools(tools):
         "linkedin_set_admitted_setting",
         # 2026-10-10 (lane NP): the reaction's inverse.
         "linkedin_withdraw_reaction",
+        # 2026-11-24 (lane builds-26): sanctioned and REFUSING (census J 54).
+        "linkedin_set_tracker_stage",
     }
     # THE NON-WRITE COUNT MOVES TO SIXTEEN, and the reason is NOT the reason
     # it moved last time. The comment here said: "THE READ COUNT MOVES OFF
@@ -1382,6 +1395,8 @@ async def test_the_exemption_covers_only_the_names_on_it(tools):
         "linkedin_set_admitted_setting",
         # 2026-10-10 (lane NP): the reaction's inverse.
         "linkedin_withdraw_reaction",
+        # 2026-11-24 (lane builds-26): sanctioned and REFUSING (census J 54).
+        "linkedin_set_tracker_stage",
     }
     # The probe has to be genuinely sanctioned for this to test the thing it
     # claims to. A name nobody ever specced would only show that made-up names
@@ -2014,7 +2029,9 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
     # Written out rather than derived, for the reason this file writes every
     # capability list out: a set that supplies its own expected value cannot
     # notice a member arriving.
-    assert set(not_performed) == {"set_open_to_work"}
+    # set_tracker_stage JOINED 2026-11-24 (lane builds-26): sanctioned and
+    # refusing for want of a capture of the control it would press.
+    assert set(not_performed) == {"set_open_to_work", "set_tracker_stage"}
     assert "update_setting" not in set(not_performed)
     # update_profile_field LEFT THIS FIELD ON 2026-09-02 by shipping, which is
     # the only way anything is meant to leave it. A shipped action still
@@ -2412,7 +2429,10 @@ async def test_the_server_instructions_name_every_write_that_ships():
     # re-populates it and must be looked at. Deleting the loop would make that
     # arrival silent, which is the permissive-skip failure this very block was
     # written about.
-    assert examined == set(), examined
+    # RE-POPULATED 2026-11-24 (lane builds-26), as foretold: the first
+    # sanctioned-and-refusing action with a registered tool since
+    # send_message, looked at and named in the instructions.
+    assert examined == {"set_tracker_stage"}, examined
     # AND THE CLAIM THAT NAMED THEM AS REFUSING HAD TO BE CORRECTED. It said
     # "none of them can act" of a set that is now empty, and a sentence
     # describing an empty set as refusing is a claim about nothing -- worse

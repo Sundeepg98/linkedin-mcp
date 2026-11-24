@@ -168,6 +168,10 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     # 2026-10-10, lane S (settings): ONE control on ONE admitted settings
     # page, behind the single-use grant. Census P O17 moves; see the pin note.
     "linkedin_set_admitted_setting": ("confirm_token", "control", "settings_page", "value"),
+    # 2026-11-24, lane builds-26: SANCTIONED AND REFUSING -- the stage move on
+    # a saved job. Census J 54 does NOT move: its control has never been
+    # captured; the cell names that capture as its held-by.
+    "linkedin_set_tracker_stage": ("confirm_token", "job_id", "stage"),
     "linkedin_surface_census": ("item", "surface"),
     "linkedin_unfollow_company": ("company_id", "confirm_token"),
     "linkedin_unsave_job": ("confirm_token", "job_id"),
@@ -622,8 +626,12 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: **AT THE INTEGRATION MERGE OF LANE B4 ONTO LANE B3 (2026-10-10): 72 TOOLS AND
 #: 115 PARAMETERS** -- lane B4's two tools and their two parameters each
 #: beside the seventy, counted on the merged registry, never summed.
-PINNED_TOOL_COUNT = 72
-PINNED_PARAMETER_COUNT = 115
+#: **AT LANE BUILDS-26 (2026-11-24): 73 TOOLS AND 118 PARAMETERS** --
+#: `linkedin_set_tracker_stage` (`job_id`, `stage`, `confirm_token`), a
+#: sanctioned write that refuses; census `J 54` keeps its state (no capture of
+#: the control). Counted off the registry, never summed.
+PINNED_TOOL_COUNT = 73
+PINNED_PARAMETER_COUNT = 118
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:

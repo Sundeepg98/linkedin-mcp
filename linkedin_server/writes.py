@@ -2862,6 +2862,66 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "second."
         ),
     ),
+    # LANE BUILDS-26, 2026-11-24 (census row ``J 54``): moving one tracked job
+    # to another stage. SANCTIONED AND NOT PERFORMABLE -- the shape
+    # ``set_open_to_work`` stands in, for the reason that action first stood
+    # there: the control it would press has never been captured. Its preview
+    # reads the Saved tab for itself (``_read_tracker_stage_row``) and prints
+    # what it saw; ``mint`` refuses it a grant at issue, and its own refusal in
+    # ``_NINE_REFUSALS`` names the capture that would lift it.
+    "linkedin_set_tracker_stage": WriteSpec(
+        action="set_tracker_stage",
+        tool_name="linkedin_set_tracker_stage",
+        url_template=None,
+        url_pattern=None,
+        exempt_substring=None,
+        summary=(
+            "Move one job on your Saved tab to another stage of your job "
+            "tracker (census J 54)."
+        ),
+        from_state="saved",
+        to_state="stage_changed",
+        target_kind="job_id",
+        state_from="tracker_saved_row",
+        direction_source=(
+            "the Saved tab of your own job tracker, /jobs-tracker/?stage=saved, "
+            "read by the reconciled reader linkedin_save_job's gate uses: the "
+            "job's row must be drawn there and LinkedIn's own per-tab count "
+            "must agree the whole list was drawn, or the reading is 'unknown'. "
+            "THE STAGE CONTROL IS NOT READ: it sits behind the row's 'Overflow "
+            "menu', whose items are not in the document while it is closed "
+            "(measured on tests/fixtures/jobs_tracker_row.html: two row copies, "
+            "each drawing one closed 'Overflow menu' and an empty item slot), "
+            "and no capture of an OPENED row menu exists."
+        ),
+        wrong_state_note=(
+            "This act starts from a job on your Saved tab. A job the tab does "
+            "not list is refused rather than looked for elsewhere: its row is "
+            "on another tab or on none, and this preview reads one tab."
+        ),
+        reversibility="STILL-UNKNOWN whether a stage change can be moved back",
+        reversibility_measured=False,
+        reversibility_class="STILL-UNKNOWN",
+        reversibility_evidence=(
+            "NOT MEASURED: no stage change has been made or watched, and the "
+            "menu that would make one has never been opened on a capture."
+        ),
+        reversible_by=(
+            "NOT this server: nothing here moves a job between stages in either "
+            "direction. By hand, in LinkedIn's own job tracker."
+        ),
+        residue=(
+            "UNMEASURED: whether moving a job out of Saved keeps it bookmarked, "
+            "whether anyone is told, and whether the move can be reversed. The "
+            "tracker is his own list, but no capture says what a moved row shows."
+        ),
+        reversibility_procedure=(
+            "Open one saved row's 'Overflow menu' on the Saved tab and read its "
+            "items WITHOUT pressing one -- the capture this act waits on. Then "
+            "one supervised move of a job he names, read back on the "
+            "destination tab, and moved back."
+        ),
+    ),
 }
 
 
@@ -5574,6 +5634,32 @@ async def _read_thread_reply_box(
     return facts, state, why
 
 
+async def _read_tracker_stage_row(
+    page: Any, spec: WriteSpec, *, target: str
+) -> tuple[dict[str, Any], str, str]:
+    """``set_tracker_stage``'s preview read: is THIS job's row on the Saved tab?
+
+    LANE BUILDS-26, 2026-11-24 (census ``J 54``). NO NEW READER: the answer is
+    the one ``save_job``'s gate already takes -- :func:`_read_saved_state`,
+    which reconciles the rows it drew against LinkedIn's own per-tab count and
+    answers ``unknown`` rather than ``not_saved`` off a partial list. Called
+    without the navigator: the navigator only supplies a settle diagnostic,
+    and this read must cost exactly the one load ``observe`` made.
+
+    THE STAGE CONTROL IS NOT READ, and ``stage_control_read`` says so in the
+    facts rather than leaving it to be inferred: it sits behind the row's
+    closed ``Overflow menu``, whose items are not in the document, and no
+    capture of the opened menu exists. That is the refusal's ground.
+    """
+    state, why = await _read_saved_state(page, target)
+    facts = {
+        "job_id": target,
+        "on_the_saved_tab": state == "saved",
+        "stage_control_read": False,
+    }
+    return facts, state, why
+
+
 #: WHICH SURFACE EACH REFUSING ACTION READS, and it is chosen by the SPEC's own
 #: ``state_from`` rather than by anything a caller passes -- the same rule the
 #: four original actions follow. Each entry is (url, surface name for the
@@ -5614,6 +5700,9 @@ _SURFACE_READS: dict[str, tuple[str, str, Any]] = {
     # was. The reader is recoverable from history: 21 lines, deleted in the
     # commit that added this note, uncalled since 2026-08-31.
     "setting_dark_mode": (DARK_MODE_URL, "settings_dark_mode", _read_dark_mode),
+    # LANE BUILDS-26, 2026-11-24: the Saved tab, for ``set_tracker_stage`` --
+    # a refusing action, so its preview reads and prints and mints nothing.
+    "tracker_saved_row": (SAVED_LIST_URL, "saved jobs", _read_tracker_stage_row),
 }
 
 
@@ -7868,8 +7957,27 @@ _NINE_REFUSALS: dict[str, str] = {
     # aiming fact. That is why the shipped gate requires a committed recipient
     # whose name carries his own needle rather than a count, and why the
     # action ships expecting to refuse.
-
-
+    #
+    # LANE BUILDS-26, 2026-11-24: THE TABLE REFILLS, by the route its own
+    # paragraphs name -- a SANCTIONED action that cannot perform, registered
+    # first. Each entry names what was measured and what would lift it.
+    "set_tracker_stage": (
+        "set_tracker_stage is sanctioned and cannot be performed: the control "
+        "it would press has never been captured. MEASURED on "
+        "tests/fixtures/jobs_tracker_row.html, the one populated tracker "
+        "capture in this repository (its own links address "
+        "/jobs-tracker/?stage=draft): the row is drawn twice, and each copy "
+        "draws exactly 1 control named 'Overflow menu', aria-expanded false, "
+        "then an EMPTY item slot -- 0 menu items are in the document while the "
+        "menu is closed, so neither whether a stage move exists nor its name "
+        "has ever been read. WHAT WOULD LIFT IT: a capture of one saved row's "
+        "OPENED overflow menu on /jobs-tracker/?stage=saved, its items read "
+        "and none pressed; then a reader requiring exactly one visible item "
+        "naming the destination inside that row, and a verification reading "
+        "the destination tab -- the interview and archived tabs are not "
+        "admitted for reading yet (census J 50, J 51), so a move to either "
+        "could not be verified until they are."
+    ),
 }
 
 

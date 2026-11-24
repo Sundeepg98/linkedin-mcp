@@ -93,6 +93,8 @@ from linkedin_server.writes import (
 from tests.test_writes import (  # noqa: F401 -- three of these are fixtures
     JOB,
     REACTED_ITEM,
+    SAVED_JOB,
+    SAVED_LIST_OF_ONE,
     FixtureNavigator,
     _bare_grant,
     browser_page,
@@ -499,6 +501,10 @@ def _nine_pages() -> dict[str, str]:
         writes.FEED_URL: FEED_MARKUP,
         writes.PROFILE_URL: PROFILE_MARKUP,
         writes.DARK_MODE_URL: DARK_MODE_MARKUP,
+        # LANE BUILDS-26, 2026-11-24: the Saved tab ``set_tracker_stage``'s
+        # preview reads -- the tracker capture with its Saved count edited
+        # 0 -> 1, DERIVED in tests/test_writes.py, so its one row reconciles.
+        writes.SAVED_LIST_URL: SAVED_LIST_OF_ONE,
     }
 
 
@@ -547,6 +553,8 @@ TARGETS: dict[str, object] = {
     # the empty string for that kind, so this is not a placeholder standing in
     # for an id. There is no id.
     "set_open_to_work": "self",
+    # LANE BUILDS-26, 2026-11-24: the one job row the tracker capture draws.
+    "set_tracker_stage": SAVED_JOB,
 }
 
 #: A clean value for every component name the five composite kinds use, so a
@@ -1515,7 +1523,9 @@ def test_every_surface_these_actions_read_is_already_on_the_read_boundary():
     # FOUR SINCE 2026-09-27: ``messaging_badge`` left with its only
     # claimant, ``send_message``, RETIRED on lane L5's order of 23:36 -- the
     # equality below would have refused it as an orphan otherwise.
-    assert len(writes._SURFACE_READS) == 4
+    # FIVE SINCE 2026-11-24 (lane builds-26): ``tracker_saved_row``, claimed
+    # by the refusing ``set_tracker_stage`` -- the equality below holds it.
+    assert len(writes._SURFACE_READS) == 5
     covered = set(REFUSING) | set(LIFTED)
     state_froms = {spec_for_action(a).state_from for a in covered}
     # THIS WAS A FLAT EQUALITY UNTIL 2026-09-02 and it could not survive

@@ -1,4 +1,12 @@
-"""The tool surface: seventy-two tools, twenty-two of which write to LinkedIn.
+"""The tool surface: seventy-three tools, twenty-two of which write to LinkedIn.
+
+THE SEVENTY-THIRD IS WRITE-SHAPED AND REFUSES, 2026-11-24 (lane builds-26,
+census ``J 54``): ``linkedin_set_tracker_stage``, the stage move on a saved
+job. It is sanctioned, gated and unable to act -- the control it would press,
+an item in the tracker row's overflow menu, has never been captured -- so it
+reads the Saved tab, prints what it saw, and mints no token. The write count
+holds at twenty-two; the write-shaped count is one. The headline read
+"seventy-two tools, twenty-two of which write" until then.
 
 THE SEVENTY-FIRST AND SEVENTY-SECOND ARE WRITES, 2026-10-10 (lane B4, census
 ``J 161``, under ``HIS-OWN-CURATION-NOT-OUTWARD``):
@@ -324,9 +332,10 @@ POINTER to it was dangling, so a reader who followed it found nothing and
 would reasonably conclude these numbers are unchecked. A citation is a claim
 like any other.
 The surface splits three ways and the split is the part a reader actually
-needs: FIFTY read, TWENTY-TWO write, and ZERO are write-shaped,
-registered, gated and unable to act. Fifty plus twenty-two plus zero is
-seventy-two. (Thirty-eight, thirteen and fifty-one until 2026-09-24; thirty-nine,
+needs: FIFTY read, TWENTY-TWO write, and ONE is write-shaped,
+registered, gated and unable to act. Fifty plus twenty-two plus one is
+seventy-three. (Fifty, twenty-two and zero, summing to seventy-two, until lane
+builds-26 registered ``linkedin_set_tracker_stage`` on 2026-11-24. Thirty-eight, thirteen and fifty-one until 2026-09-24; thirty-nine,
 thirteen and fifty-two at the live lane's merge the same day; thirty-nine,
 fourteen and fifty-three at lane L7's; forty-one, fifteen and fifty-six at
 lane L5's; forty-one, sixteen and fifty-seven at lane L8's merge on
@@ -629,6 +638,7 @@ from linkedin_server import (
     search_verticals,
     shape,
     threads,
+    tracker_stage,
     writes,
 )
 from linkedin_server.auth import (
@@ -1087,6 +1097,11 @@ mcp = FastMCP(
         "linkedin_message_from_profile, linkedin_send_attachment, "
         "linkedin_set_admitted_setting, linkedin_withdraw_reaction, "
         "linkedin_set_similar_jobs_alert and linkedin_unset_similar_jobs_alert. "
+        "ONE MORE IS WRITE-SHAPED AND REFUSES: linkedin_set_tracker_stage, the "
+        "stage move on a saved job, whose control -- an item in the tracker "
+        "row's overflow menu -- has never been captured; it reads his Saved "
+        "tab, says what it saw and why it will not act, and no token is ever "
+        "issued for it. "
         "THE NINETEENTH, linkedin_set_admitted_setting, changes ONE control "
         "on ONE settings page of his own account that is admitted by name, "
         "one page at a time; one is admitted, Share profile updates, whose "
@@ -9091,6 +9106,14 @@ _WHY_NOT_PERFORMED: dict[str, str] = {
     # ``"send_message"`` LEFT THIS TABLE ON 2026-09-27 with its action: the
     # write was RETIRED rather than re-aimed (lane L5, the orchestrator's
     # order of 23:36) -- see the note where ``linkedin_send_message`` stood.
+    # LANE BUILDS-26, 2026-11-24: sanctioned and refusing, for want of a
+    # capture of the control it would press.
+    "set_tracker_stage": (
+        "the stage move is an item in a tracker row's 'Overflow menu', and no "
+        "capture holds that menu open: on the one populated tracker capture "
+        "the menu is closed and its item slot is empty. The preview reads the "
+        "Saved tab and refuses; mint declines a grant at issue."
+    ),
 }
 
 
@@ -11032,6 +11055,62 @@ async def linkedin_withdraw_reaction(
         return await _write_tool("withdraw_reaction", item, confirm_token)
     except Exception as exc:
         return _error(exc)
+
+
+# ===========================================================================
+# lane builds-26, 2026-11-24 -- census J 54, P E4 / N 111, P E5 / N 113
+# ONE contiguous block: three SANCTIONED, REFUSING writes. Each reads its own
+# surface live, prints what it saw, and mints no token -- the controls they
+# would press have never been captured. Their refusals name the capture.
+# ===========================================================================
+
+
+@mcp.tool()
+async def linkedin_set_tracker_stage(
+    job_id: str, stage: str, confirm_token: str = ""
+) -> dict[str, Any]:
+    """Set one saved job's tracker stage -- a write, and it REFUSES today.
+
+    Census row ``J 54``. THIS TOOL CANNOT PERFORM, and it says why rather than
+    guessing: the stage change is a row-level control behind the row's
+    ``Overflow menu``, and that menu's items have never been captured -- on the
+    one populated tracker capture held here, the menu is closed and its item
+    slot is empty. A press at a control nobody has photographed is the one
+    guess this server does not make.
+
+    WHAT A CALL DOES. ``stage`` is checked first, against the five stage words
+    the tracker's own tab strip draws (Saved, Draft, Applied, Interview,
+    Archived); any other word, or Saved itself, is refused with no page
+    loaded. Then your Saved tab is read live -- the same reconciled read
+    ``linkedin_save_job``'s gate takes -- and the block says whether this job's
+    row is drawn there. NO CONFIRM TOKEN IS ISSUED, at any step: the block is a
+    warning, and its refusal names the capture that would lift it.
+
+    Args:
+        job_id: the numeric LinkedIn job id, as ``linkedin_saved_jobs`` prints
+            it.
+        stage: the destination stage, one of the tracker's tab words.
+        confirm_token: accepted for the shape every write shares; no token is
+            ever issued for this tool, so none can be redeemed.
+    """
+    destination, why = tracker_stage.checked_stage(stage)
+    if destination is None:
+        return {
+            "error": "unknown_stage",
+            "message": (
+                "No page was loaded and nothing was pressed: " + why
+            ),
+            "stages": [s for s in tracker_stage.TRACKER_STAGES if s != tracker_stage.FROM_STAGE],
+            "pages_loaded": 0,
+            "performed": False,
+        }
+    try:
+        block = await _write_tool("set_tracker_stage", job_id, confirm_token)
+    except Exception as exc:
+        return _error(exc)
+    if isinstance(block, dict) and "error" not in block:
+        block = {**block, "requested_stage": destination}
+    return block
 
 
 #: Fields that answer "what is running and what can it do". Everything else in

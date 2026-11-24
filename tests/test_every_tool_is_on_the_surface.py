@@ -403,4 +403,6 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # merged registry, not summed, and moved with every other count site.
     # SEVENTY-TWO AT THE INTEGRATION MERGE OF LANE B4 ONTO LANE B3 (2026-10-10): lane B4's two
     # writes beside the seventy, measured off the merged registry, not summed.
-    assert len(_tool_names()) == 72
+    # SEVENTY-THREE AT LANE BUILDS-26 (2026-11-24): linkedin_set_tracker_stage,
+    # a write-shaped tool that refuses -- measured off the registry.
+    assert len(_tool_names()) == 73
