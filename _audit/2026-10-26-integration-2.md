@@ -237,7 +237,7 @@ THE PENDING RULINGS DOCUMENT TRAVELLED WITH THIS MERGE:
 and never on master. It is the orchestrator's; this lane did not rule on it and
 did not edit it. Its five rulings now appear in the derived register.
 
-Gate after merge 4 (sharded, 104 s, inside the 2-minute cap): lane A's 20
+Gate after merge 4 (sharded, 103 s by pytest's clock, inside the 2-minute cap): lane A's 20
 test files, the three surface tests, the prose-count guards and every test
 that reads a file resolved here -- 1600 passed, 4 failed, all four in
 `tests/test_readonly.py` and all four about `company_home.py`, which came in
@@ -303,7 +303,7 @@ services and events admitted; home, posts, jobs, insights and videos refused).
 The J 110 test now names `jobs/`, which no ruling reaches, as lane A did for its
 own five neighbour tests; `posts/` and `home/` are still asserted refused.
 
-Gate for this fix (sharded, 111 s): the whole of `tests/test_readonly.py`,
+Gate for this fix (sharded, 109 s by pytest's clock): the whole of `tests/test_readonly.py`,
 the J 110 tests, the reader-leak and tool-envelope drives, the people-reader
 closure, the orphan and outside-dom inventories and the surface and prose
 guards -- 1787 passed, 1 failed (the about/ neighbour above), then that file
@@ -368,9 +368,9 @@ on this branch from merge 1 on. The J 110 and J 108 branches added captures
 (`live1/company_root_home_view.html`, the `live9` directory, a 29th `live2`
 copy) without moving their own pin, and merges 1 and 2 auto-merged master's pin
 beside those captures. At this branch's head before merge 5 it read `live1` 2
-and `live2` 28 with no `live9`, against 3, 29 and 1 on disk. Merge 5 then hit the equal-move
-hazard on the same key: lane B1 also wrote `"live1": 2`, for two different
-captures. Set to the `*.html` count on disk in every directory: live1 5, live2
+and `live2` 28 with no `live9`, against 3, 29 and 1 on disk. Merge 5 then hit
+the equal-move hazard on the same key: lane B1 also wrote `"live1": 2`, for two
+different captures. Set to the `*.html` count on disk in every directory: live1 5, live2
 29, live3 14, live4 4, live5 1, live7 1, live8 7, live9 1.
 
 (merged 6, origin/master, by the orchestrator's order of 2026-11-24: fetch
@@ -428,11 +428,14 @@ checkers (`check_next_step`, `check_read_addresses`, `check_jobs_directions`,
 pre-commit identity gate on every commit's staged files (merge 5: 32 files,
 0 hits).
 
-Targeted local tests, each inside the 2-minute cap except the first: merges 1
-and 2 (148 s, over the cap; later runs were scoped and sharded), merge 4 (104
-s; the four reds that led to the J 110 fix), the J 110 fix (111 s). From merge
-5 on, by the orchestrator's order of 2026-11-24, the local gate is the derived
-and census checks only, plus one corpus scan over a hand-resolved file
+Targeted local tests, pytest's own lines, all inside the 2-minute cap but one:
+merge 1, 260 passed (28 s); merge 2, 1613 passed (148 s, OVER the cap, so every
+later run was scoped and sharded); merge 4, 1600 passed and 4 failed (103 s,
+the four reds that led to the J 110 fix); `tests/test_no_committed_identity.py`
+on the merge-4 commit, 1143 passed (31 s); the J 110 fix, 1787 passed and 1
+failed (109 s, the about/ neighbour), then that file alone, 21 passed. From
+merge 5 on, by the orchestrator's order of 2026-11-24, the local gate is the
+derived and census checks only, plus one corpus scan over a hand-resolved file
 (`tests/test_a_correction_is_findable_from_the_claim.py`, 15 passed in 5 s).
 Every test runs on this lane's ci/ ref.
 
