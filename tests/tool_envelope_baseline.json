@@ -1,7 +1,9 @@
 {
   "_comment": "Verdict per mcp.tool in linkedin_server/server.py, driven against tests/plantedpage.py. 'clean' means the tool was DRIVEN and published nothing the page chose; 'returns_records' means a page string reached a published payload ONLY inside linkedin_server.people_data records, the declared channel; 'returns_text' means a page string reached a published payload outside a record -- a legacy inventory since 2026-09-24 that may shrink and may not grow; 'not_driven:<reason>' means this offline harness could not reach it, which is never a pass. There is no verdict meaning 'this leaks' -- a baseline that could record one would become a list of permitted leaks. Regenerate with: python -m tests.test_tool_envelopes_emit_no_page_string --write-baseline",
   "tools": {
+    "linkedin_analytics_hub": "clean",
     "linkedin_apply_job": "not_driven:never read the page",
+    "linkedin_audience_analytics": "clean",
     "linkedin_auth_status": "not_driven:never read the page",
     "linkedin_cdp_status": "not_driven:never read the page",
     "linkedin_comment_on_item": "not_driven:never read the page",

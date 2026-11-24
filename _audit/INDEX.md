@@ -27,8 +27,8 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 276 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 236 |
+| audit documents git tracks under `_audit` | 277 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 237 |
 | distinct dates | 20 |
 | documents with no level-1 heading | 2 |
 | `CORRECTS:` marker lines | 126 |
@@ -39,7 +39,7 @@ are listed as `(undated)`; no date is taken from git history, because
 | documents at either end of a cross-document edge | 103 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
-| documents no correction marker touches at all | 171 |
+| documents no correction marker touches at all | 172 |
 | blockquoted markers naming ANOTHER document | 0 |
 | edges missing one of their two markers | 0 |
 | edges declared a different number of times in each direction | 2 |
@@ -1841,6 +1841,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-28 | [2026-09-28-rulings-build-classes.md](2026-09-28-rulings-build-classes.md) | Rulings, 2026-09-28: the classes the census still leaves undecided |  |
 | 2026-09-28 | [2026-09-28-rulings-named-profile-read.md](2026-09-28-rulings-named-profile-read.md) | Ruling, 2026-09-28: reading a profile he names |  |
 | 2026-10-10 | [2026-10-10-integration.md](2026-10-10-integration.md) | Integration, 2026-10-10: lanes B5, NP, B2 and B3 onto master |  |
+| 2026-10-10 | [2026-10-10-lane-b1-profile-build.md](2026-10-10-lane-b1-profile-build.md) | Lane B1, 2026-10-10: fifteen profile rows on real captures -- what the captures draw, the one select that was waiting, and three readers |  |
 | 2026-10-10 | [2026-10-10-lane-b2-network-build.md](2026-10-10-lane-b2-network-build.md) | Lane B2 -- the network build: seventeen BUILD rows read against their captures | corrects x1 |
 | 2026-10-10 | [2026-10-10-lane-b3-messaging-build.md](2026-10-10-lane-b3-messaging-build.md) | Lane B3, 2026-10-10: messaging and content -- one item's words read, two session-1 pages read, and the rest held by what was measured |  |
 | 2026-10-10 | [2026-10-10-lane-b4-jobs-build.md](2026-10-10-lane-b4-jobs-build.md) | Lane B4, 2026-10-10: the jobs rows lane K's ledger marked BUILD |  |

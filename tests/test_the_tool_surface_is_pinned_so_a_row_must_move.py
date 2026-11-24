@@ -84,7 +84,9 @@ from linkedin_server import server as server_module
 #: ``test_every_tool_is_on_the_surface.py`` exists for. This reads the same
 #: registry a client does.
 PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
+    "linkedin_analytics_hub": (),
     "linkedin_apply_job": ("confirm_token", "job_id"),
+    "linkedin_audience_analytics": (),
     "linkedin_auth_status": (),
     "linkedin_cdp_status": (),
     "linkedin_comment_on_item": ("confirm_token", "item", "text"),
@@ -667,7 +669,21 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: PARAMETERS** -- lane A's one tool and its two parameters
 #: (`linkedin_tracker_stage(stage, limit)`) beside the seventy-four and 117,
 #: counted on the merged registry, never summed.
-PINNED_TOOL_COUNT = 75
+#: **RE-PINNED AT LANE B1'S MERGE OF ITS CHILD lb1-dashboard, 2026-10-10: 63
+#: TOOLS AND 100 PARAMETERS.** One READ with no parameter,
+#: `linkedin_analytics_hub()`, his analytics hub `/dashboard/` loaded once.
+#: THE CENSUS DECISION: the census row `P L8` moves GAP -> COVERED-UNFIRED in
+#: lane B1's census commit (`_audit/2026-10-10-lane-b1-profile-build.md`).
+#: **RE-PINNED AT LANE B1'S MERGE OF ITS CHILD lb1-audience, 2026-10-10: 64
+#: TOOLS AND 100 PARAMETERS.** One READ with no parameter,
+#: `linkedin_audience_analytics()`, his follower count and follower
+#: demographics off one admitted page. THE CENSUS DECISION: the census row
+#: `P L1` moves GAP -> COVERED-UNFIRED in lane B1's census commit.
+#: **AT INTEGRATION 2'S MERGE OF LANE B1, 2026-11-24: 77 TOOLS AND 119
+#: PARAMETERS** -- lane B1's two tools, `linkedin_analytics_hub()` and
+#: `linkedin_audience_analytics()`, take no parameter, beside the seventy-five
+#: and 119, counted on the merged registry, never summed.
+PINNED_TOOL_COUNT = 77
 PINNED_PARAMETER_COUNT = 119
 
 

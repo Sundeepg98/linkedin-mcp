@@ -308,6 +308,70 @@ closure, the orphan and outside-dom inventories and the surface and prose
 guards -- 1787 passed, 1 failed (the about/ neighbour above), then that file
 alone after its fix: 21 passed.
 
+(merged 5, lane B1's head, its subject "fixes from CI run 38057007301: the
+read-GAP triage loses P L1 and P L8, and the record cites no unmerged commit or
+unregistered tool"; merge base 6c65815, 20 commits.) Lane B1's branch held 64
+tools; its two new tools are reads, `linkedin_analytics_hub` (census `P L8`)
+and `linkedin_audience_analytics` (`P L1`), each a locator reader that runs no
+page script (both modules scanned: no `evaluate`, no waiver, so the J 110
+defect does not recur); its third row, `P A22`, moved on an existing write (the
+intro editor's Organization select). The merged registry measures **77 tools,
+119 parameters, 22 that write, 55 that do not**. Lane B1 was UNCERTIFIED when
+merged (its ci/ ref was red, section 1); this lane's push certifies the merged
+head.
+
+Census rows and tables: EVERY ROW OF THE MERGED TREE was checked against its
+three-way expectation (one moved side wins; an unmoved row keeps base), and NO
+row was moved by both sides:
+- `profile.md`, 237 rows: lane B1 moved 15 (A11, A13, A14, A15, A17, A22, A25,
+  D25, D26, F1, K8, L1, L2b, L8, S8), ours 66. The conflict hunks were
+  adjacent rows only (S6 and S7 from ours, S8 from lane B1), each taken whole.
+- `next-step.tsv` 539 = ours' 542 less lane B1's three deletions (P A22, P L1,
+  P L8 leave GAP); `read-addresses.tsv` 80 = 82 less two (P L1, P L8);
+  `write-classes.tsv` 373, lane B1's one edited line (P A22). Every table's own
+  checker is GREEN (section 5).
+
+`scripts/census_completion.py`: every pin SET TO THE VALUE THE SCRIPT MEASURED
+on the merged tree, both lanes' comments kept above each. adjudicated 232 ->
+235, delivered_broad 152 -> 155, unfired 35 -> 38, b1_no_ruling 19 -> 22 (the
+NO_RULING list is the union, 22 members, none twice), gap 541 -> 538, gap_read
+81 -> 79, b3_admitted 49 -> 47: lane B1's three moves (P A22, P L1, P L8 GAP ->
+COVERED-UNFIRED, two of them bucket-3 reads), and nothing else.
+
+Resolved by judgement, one line each:
+- `b1_released`, AN EQUAL MOVE: ours (lane S, `P O17`) and lane B1 (`P A22`)
+  each moved it 1 -> 2 for DIFFERENT rows, and git merged the two equal edits as
+  ONE +1 with no conflict. Measured on the merged tree: 3.
+- `server.py`: lane B1's two registration blocks placed after ours' B2, B3 and
+  B4 blocks and before `main()`, each side's blocks byte-identical to its own
+  file; the docstring gains THE SEVENTY-SIXTH AND SEVENTY-SEVENTH, headline and
+  split re-derived (55 + 22 + 0 = 77); lane B1's own paragraphs keep their
+  branch numbering and say so.
+- `README.md`: lane B1 changed only the two count lines (64 / 46 / 18); both
+  re-derived to 77 / 55 / 22, and a dated paragraph records the two reads, since
+  lane B1 wrote none.
+- `tests/test_a_correction_is_findable_from_the_claim.py`: both sides opened
+  `NOT_A_CORRECTION` at the same line; resolved as the union (216 base + 10 ours
+  + 1 lane B1 = 227 keys, none twice, base -> merged removes nothing). Its scan
+  over the merged corpus is green (15 passed): no NEW candidate pair arose where
+  the two lanes' rows now sit side by side.
+- `INSTRUMENTS.md`: lane B1's section 89 placed between ours' 83 and 90, the
+  heading order of the block both sides appended (tail: 84, 83, 89, 90, 91, 93).
+- Derived views regenerated twice to a fixed point, never hand-merged: the
+  audit index over 277 documents (276 + lane B1's record), the rulings register
+  at 95 (lane B1 adds none), the blocker map 409 lines.
+
+A FINDING ABOUT MERGES 1 AND 2, RECORDED RATHER THAN SMOOTHED OVER:
+`LIVE_FIXTURE_COUNTS` in `tests/test_live_lane_session_2_harness.py` was stale
+on this branch from merge 1 on. The J 110 and J 108 branches added captures
+(`live1/company_root_home_view.html`, the `live9` directory, a 29th `live2`
+copy) without moving their own pin, and merges 1 and 2 auto-merged master's pin
+beside those captures. At this branch's head before merge 5 it read `live1` 2
+and `live2` 28 with no `live9`, against 3, 29 and 1 on disk. Merge 5 then hit the equal-move
+hazard on the same key: lane B1 also wrote `"live1": 2`, for two different
+captures. Set to the `*.html` count on disk in every directory: live1 5, live2
+29, live3 14, live4 4, live5 1, live7 1, live8 7, live9 1.
+
 
 ## 4. Pins re-derived on the merged tree
 

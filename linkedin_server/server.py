@@ -1,4 +1,14 @@
-"""The tool surface: seventy-five tools, twenty-two of which write to LinkedIn.
+"""The tool surface: seventy-seven tools, twenty-two of which write to LinkedIn.
+
+THE SEVENTY-SIXTH AND SEVENTY-SEVENTH ARE READS, 2026-11-24, at integration
+2's merge of lane B1: ``linkedin_analytics_hub`` (census ``P L8``), his
+analytics hub's metric cards as integers and closed words, and
+``linkedin_audience_analytics`` (census ``P L1``), his follower count and
+follower demographics as census shapes, redacted when rare. Each loads ONE
+page and presses nothing. Lane B1's branch numbered them the sixty-third and
+sixty-fourth (its two paragraphs below keep those numbers). Measured off the
+merged registry, not summed. The headline read "seventy-five tools,
+twenty-two of which write" until then.
 
 THE SEVENTY-FIFTH IS A READ, 2026-11-24, at integration 2's merge of lane A
 (census ``J 50`` and ``J 51``, READ-PAST-AN-ACT-SUBSTRING):
@@ -121,6 +131,18 @@ or clicked_apply -- through the tracker's own reader, each stage admitted by
 its own anchored allowlist line (READ-PAST-AN-ACT-SUBSTRING). It presses
 nothing. Census ``J 50`` and ``J 51`` COVERED-UNFIRED on it; ``J 52`` waits
 on a capture, since no capture draws a clicked_apply tab.
+
+THE SIXTY-FOURTH IS A READ, 2026-10-10, lane B1 (census row ``P L1``):
+``linkedin_audience_analytics``, his follower count and follower demographics
+off ONE admitted page, as its first render draws them -- no press. The
+entries are other people's attributes, aggregated, and leave only as census
+shapes, redacted when rare. The headline read "sixty-three tools, eighteen of
+which write" until then.
+
+THE SIXTY-THIRD IS A READ, 2026-10-10, lane B1 (census row ``P L8``):
+``linkedin_analytics_hub``, his analytics hub ``/dashboard/`` loaded once and
+its metric cards returned as integers and closed words. It presses nothing.
+The headline read "sixty-two tools, eighteen of which write" until then.
 
 THE SIXTY-SECOND IS A WRITE, 2026-10-10, on lane U's branch, on ruling
 ``FILE-UPLOAD-OPENED`` (the operator's decision of 2026-09-04):
@@ -348,9 +370,9 @@ assigned to anybody -- it waits for whoever next runs the suite, and in the
 meantime the pin goes on asserting the old number with full confidence.
 
 THE NUMBERS ABOVE ARE DERIVED NOW, and that is a statement about a test rather
-than about an intention. Seventy-four is ``len(await mcp.list_tools())``,
+than about an intention. Seventy-seven is ``len(await mcp.list_tools())``,
 pinned in ``test_server_surface.py`` by
-``test_the_surface_is_exactly_the_seventy_four_tools``; the split is pinned by
+``test_the_surface_is_exactly_the_seventy_seven_tools``; the split is pinned by
 ``tests/test_prose_that_makes_a_claim.py::test_the_server_docstring_numbers_are_derived``,
 which reads THESE WORDS and fails if any of the three disagrees with the
 registry.
@@ -363,15 +385,16 @@ POINTER to it was dangling, so a reader who followed it found nothing and
 would reasonably conclude these numbers are unchecked. A citation is a claim
 like any other.
 The surface splits three ways and the split is the part a reader actually
-needs: FIFTY-THREE read, TWENTY-TWO write, and ZERO are write-shaped,
-registered, gated and unable to act. Fifty-three plus twenty-two plus zero is
-seventy-five. (Fifty, twenty-two and seventy-two on master at this
+needs: FIFTY-FIVE read, TWENTY-TWO write, and ZERO are write-shaped,
+registered, gated and unable to act. Fifty-five plus twenty-two plus zero is
+seventy-seven. (Fifty, twenty-two and seventy-two on master at this
 integration's base; fifty-one, twenty-two and seventy-three when the J 110
 merge added lane B4's read of an organisation Page's description;
 fifty-two, twenty-two and seventy-four when the J 108 merge added lane B4's
 read of a People tab's insight cards; fifty-three, twenty-two and
 seventy-five when the lane A merge added lane A's read of his job
-tracker's further stages.
+tracker's further stages; fifty-five, twenty-two and seventy-seven when the
+lane B1 merge added lane B1's two reads of his own analytics.
 Thirty-eight,
 thirteen and fifty-two at the live lane's merge the same day; thirty-nine,
 fourteen and fifty-three at lane L7's; forty-one, fifteen and fifty-six at
@@ -401,7 +424,9 @@ insight cards -- beside the two writes. The J 108 branch's own history read
 until lane B4's read of a People tab's insight cards, 2026-10-10; and on lane A's branch, forty-five, seventeen and sixty-two when lane
 A's tracker stages arrived, beside lane U's ``linkedin_send_attachment`` at
 forty-four, eighteen and sixty-two on its own, until the two met at lane A's
-merge of master 6c65815.)
+merge of master 6c65815; and on lane B1's branch, forty-four, eighteen and sixty-two until lane
+B1's analytics hub, and forty-five, eighteen and sixty-three until lane B1's
+audience read, the same day.)
 
 THE FIFTY-THIRD IS ONE WRITE, 2026-09-24 (lane L7, census row ``P I14``).
 ``linkedin_mark_company_interest`` presses "I'm interested" in the
@@ -646,6 +671,7 @@ from urllib.parse import parse_qs, urlencode, urlsplit
 from fastmcp import FastMCP
 
 from linkedin_server import (
+    analytics_hub,
     anchors,
     buildinfo,
     cdp_bridge,
@@ -12535,6 +12561,88 @@ async def linkedin_company_people_insights(organisation_id: str) -> dict[str, An
 
 
 # ---- end lane B4 ----
+
+
+# ---- lane B1 (lb1-dashboard): P L8 ----
+@mcp.tool()
+async def linkedin_analytics_hub() -> dict[str, Any]:
+    """Your analytics hub's metric cards: values and their change, NEVER A NAME.
+
+    ONE page, ``/dashboard/`` -- the address LinkedIn's own "Show all
+    analytics" link on your profile opens -- loaded once and read once. It
+    clicks nothing, types nothing and opens no other address.
+
+    WHAT COMES BACK, per metric, under ``metrics``: ``post_impressions``,
+    ``followers``, ``profile_viewers``, ``search_appearances``, each with its
+    ``value``, its ``delta`` (the percentage change LinkedIn draws, signed by
+    the card's own up or down icon), its ``direction``, the ``window`` its own
+    label names (7 days, 90 days, total, or one dated week) and the
+    comparison ``period``. Integers and fixed words only.
+
+    A CARD IS RETURNED ONLY WHEN ITS LINK AND ITS LABEL AGREE. Each card is
+    identified by the analytics address it links to AND by its label, both
+    checked against fixed lists. A card either list does not know is
+    counted (``paths_unrecognised``, ``labels_unrecognised``) and left out,
+    so page text has no field to land in.
+
+    READ ``readable`` BEFORE BELIEVING AN ABSENCE. ``cards_seen`` 0 means the
+    reader reached no card -- the page changed shape or did not render -- and
+    says nothing about your account. A delta whose direction the page does
+    not show is ``None``, never a guess.
+
+    The page also draws your profile card in a side panel; this reads only
+    the metric section and never that panel.
+    """
+    try:
+        async with BROWSER.session() as page:
+            landed = await BROWSER.goto(page, analytics_hub.HUB_URL)
+            assert_not_authwall(landed, surface="analytics-hub")
+            return await analytics_hub.read_analytics_hub(page)
+    except Exception as exc:
+        return _error(exc)
+
+
+# ---- lane B1 (lb1-audience): P L1 ----
+from linkedin_server import audience_analytics  # noqa: E402 -- lane B1's one block
+
+
+@mcp.tool()
+async def linkedin_audience_analytics() -> dict[str, Any]:
+    """Your follower count and follower DEMOGRAPHICS, as the audience page draws them.
+
+    ONE LOAD of LinkedIn's audience-analytics page, read as its first render
+    draws it: no press, no scroll, nothing on LinkedIn changed.
+
+    WHAT COMES BACK
+
+        total_followers   the integer beside LinkedIn's "Total followers" label
+        view              the demographics tab the page marks current ("All")
+        dimensions        the demographic tabs, in LinkedIn's words: Job title,
+                          Location, Seniority, Company, Industry, Company size
+        entries           one per dimension under "All": its dimension word,
+                          a LABEL and its percentage (``share_percent``, an
+                          integer)
+        lists_unread      every dimension whose own list needs a tab press --
+                          present, and NOT read: no press is sanctioned here
+
+    THE LABELS ARE OTHER PEOPLE'S ATTRIBUTES, AGGREGATED -- a job title, a
+    place, an employer -- so each is returned only as its census shape: a
+    capitalised run in a label drawn once comes back ``<redacted>``, one the
+    shape gate refuses ``<opaque>``. A label that is one capitalised word and
+    nothing else is the shaper's stated residual and survives. Your profile
+    card on the same page is never read.
+
+    READ ``readable`` AND ``denominators`` BEFORE BELIEVING AN EMPTY ANSWER:
+    together they say which step found nothing -- no label, no demographics
+    nav, a word this server does not know, an entry it could not pair.
+    """
+    try:
+        async with BROWSER.session() as page:
+            landed = await BROWSER.goto(page, audience_analytics.AUDIENCE_URL)
+            assert_not_authwall(landed, surface="audience-analytics")
+            return await audience_analytics.read_audience_analytics(page)
+    except Exception as exc:
+        return _error(exc)
 
 
 def main() -> None:  # pragma: no cover - process entry point

@@ -1,4 +1,12 @@
-"""The tool surface: seventy-five tools, fifty-three of which do not write.
+"""The tool surface: seventy-seven tools, fifty-five of which do not write.
+
+**IT READ "seventy-five tools, fifty-three of which do not write" UNTIL
+INTEGRATION 2'S MERGE OF LANE B1 (2026-11-24) ADDED LANE B1'S TWO READS**:
+``linkedin_analytics_hub`` (census P L8), his analytics hub's metric cards as
+integers and closed words, and ``linkedin_audience_analytics`` (census P L1),
+his follower count and demographics as census shapes. Lane B1's branch read
+"sixty-four tools, forty-six of which do not write". The split moved on its
+read side only.
 
 **IT READ "seventy-four tools, fifty-two of which do not write" UNTIL
 INTEGRATION 2'S MERGE OF LANE A (2026-11-24) ADDED LANE A'S READ**:
@@ -302,6 +310,11 @@ EXPECTED_TOOLS = {
     # for it (MEMBER-ROSTERS-AS-BOUNDED-READS). One load, no press; it is on
     # no write table.
     "linkedin_company_people_insights",
+    # THE SIXTY-SECOND, 2026-10-10 (lane B1, child lb1-dashboard, census
+    # P L8): a READ of his analytics hub, /dashboard/, loaded once; its
+    # metric cards come back as integers and closed words. It presses
+    # nothing and is on no write table.
+    "linkedin_analytics_hub",
     # THE THIRTY-EIGHTH, 2026-09-05: linkedin_events_home, a READ. No
     # write was added. It is the only tool here whose whole answer can be
     # ZERO, and its reader returns that integer only when four
@@ -611,6 +624,9 @@ EXPECTED_TOOLS = {
     # sixty-second on its branch),
     # a WRITE: see SANCTIONED_WRITE_TOOLS.
     "linkedin_withdraw_reaction",
+    # THE SIXTY-FOURTH, 2026-10-10 (lane B1, child lb1-audience), a READ:
+    # follower count and demographics off one admitted page, no press.
+    "linkedin_audience_analytics",
 }
 
 #: Names a reader must never grow. Listed explicitly so that adding one is a
@@ -695,8 +711,16 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_seventy_five_tools(tools):
-    """RENAMED AGAIN AT INTEGRATION 2'S MERGE OF LANE A (2026-11-24), to
+async def test_the_surface_is_exactly_the_seventy_seven_tools(tools):
+    """RENAMED AGAIN AT INTEGRATION 2'S MERGE OF LANE B1 (2026-11-24), to
+    ``..._seventy_seven_tools``: lane B1's ``linkedin_analytics_hub`` and
+    ``linkedin_audience_analytics`` beside the seventy-five. MEASURED off the
+    merged registry, not summed; the name moved with the pin.
+
+    RENAMED ON LANE B1'S BRANCH, 2026-10-10, to ``..._sixty_four_tools``: the
+    same two reads on that branch's sixty-two, each merged from its child.
+
+    RENAMED AGAIN AT INTEGRATION 2'S MERGE OF LANE A (2026-11-24), to
     ``..._seventy_five_tools``: lane A's ``linkedin_tracker_stage`` beside the
     seventy-four. MEASURED off the merged registry, not summed; the name
     moved with the pin.
@@ -784,7 +808,14 @@ async def test_the_surface_is_exactly_the_seventy_five_tools(tools):
     one WRITE, ``linkedin_send_attachment`` (ruling FILE-UPLOAD-OPENED), one
     file into one conversation he names. MEASURED off the registry on the
     lane's branch, counting from master's sixty-one; a merge beside other
-    lanes' tools re-derives it.
+    lanes' tools re-derives it. RENAMED AGAIN AT LANE B1'S MERGE OF ITS CHILD
+    lb1-dashboard, 2026-10-10, to ``..._sixty_three_tools``: one READ,
+    ``linkedin_analytics_hub`` (census P L8), his analytics hub loaded once.
+    MEASURED off the merged registry; the name moved with the pin.
+    RENAMED AGAIN AT LANE B1'S MERGE OF ITS CHILD lb1-audience, 2026-10-10, to
+    ``..._sixty_four_tools``: one READ, ``linkedin_audience_analytics`` (census
+    P L1), his follower count and demographics off one admitted page. MEASURED
+    off the merged registry; the name moved with the pin.
 
     RENAMED AGAIN ON LANE NP, 2026-10-10, to ``..._sixty_two_tools``: one
     WRITE, ``linkedin_withdraw_reaction``, the reaction's inverse (the
@@ -1166,7 +1197,17 @@ async def test_the_surface_is_exactly_the_seventy_five_tools(tools):
     # linkedin_tracker_stage, a READ, beside the seventy-four, so the split
     # moves on its read side and the write set holds. MEASURED off
     # mcp.list_tools() on the merged tree, not summed.
-    assert len(tools) == 75
+    # SIXTY-THREE AT LANE B1'S MERGE OF ITS CHILD lb1-dashboard, 2026-10-10:
+    # linkedin_analytics_hub, a READ, so the split moves on its read side and
+    # the write set holds. MEASURED off mcp.list_tools() on the merged tree.
+    # SIXTY-FOUR AT LANE B1'S MERGE OF ITS CHILD lb1-audience, 2026-10-10:
+    # linkedin_audience_analytics, a READ, so the split moves on its read side
+    # and the write set holds. MEASURED off mcp.list_tools() on the merged tree.
+    # SEVENTY-SEVEN AT INTEGRATION 2'S MERGE OF LANE B1, 2026-11-24: lane B1's
+    # two READS beside the seventy-five, so the split moves on its read side
+    # and the write set holds. MEASURED off mcp.list_tools() on the merged
+    # tree, not summed.
+    assert len(tools) == 77
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -1383,8 +1424,17 @@ async def test_the_surface_is_exactly_the_seventy_five_tools(tools):
     # linkedin_tracker_stage is a READ beside the fifty-two, so the non-write
     # count moves by one and the write side is unmoved; MEASURED on the
     # merged tree, never summed.
-    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 53
-    assert len(tools) == 75
+    # FORTY-FIVE ON LANE B1'S BRANCH, 2026-10-10: linkedin_analytics_hub is a
+    # READ -- it loads one admitted page and presses nothing -- and the write
+    # side is unmoved.
+    # FORTY-SIX AT LANE B1'S MERGE OF ITS CHILD lb1-audience, 2026-10-10:
+    # linkedin_audience_analytics is a READ too -- one admitted page, nothing
+    # pressed -- and the write side is unmoved.
+    # FIFTY-FIVE AT INTEGRATION 2'S MERGE OF LANE B1, 2026-11-24: lane B1's two
+    # READS beside the fifty-three, so the non-write count moves by two and the
+    # write side is unmoved; MEASURED on the merged tree, never summed.
+    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 55
+    assert len(tools) == 77
 
 
 def test_the_read_that_was_nearly_named_a_write():

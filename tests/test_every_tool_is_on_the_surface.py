@@ -97,6 +97,9 @@ EXPECTED_TOOLS = (
     # 2026-10-10, lane B4: a READ of an organisation People tab's insight
     # cards (census J 108), the first tool to open a roster address.
     "linkedin_company_people_insights",
+    # 2026-10-10, lane B1 (lb1-audience): a READ, his follower count and
+    # demographics off one admitted page; census P L1, banked at merge.
+    "linkedin_audience_analytics",
 )
 
 
@@ -429,4 +432,13 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # SEVENTY-FIVE AT INTEGRATION 2'S MERGE OF LANE A, 2026-11-24: lane A's
     # linkedin_tracker_stage beside the seventy-four, measured off the merged
     # registry, not summed.
-    assert len(_tool_names()) == 75
+    # SIXTY-THREE AT LANE B1'S MERGE OF ITS CHILD lb1-dashboard, 2026-10-10:
+    # one READ, linkedin_analytics_hub (census P L8), measured off the merged
+    # registry and moved with every other count site in the same commit.
+    # SIXTY-FOUR AT LANE B1'S MERGE OF ITS CHILD lb1-audience, 2026-10-10: one
+    # READ, linkedin_audience_analytics (census P L1), measured off the merged
+    # registry and moved with every other count site in the same commit.
+    # SEVENTY-SEVEN AT INTEGRATION 2'S MERGE OF LANE B1, 2026-11-24: lane B1's
+    # linkedin_analytics_hub and linkedin_audience_analytics, two READS, beside
+    # the seventy-five, measured off the merged registry, not summed.
+    assert len(_tool_names()) == 77

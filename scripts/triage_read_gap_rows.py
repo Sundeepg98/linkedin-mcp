@@ -142,8 +142,9 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
     "P K8": ("SERVED", "", "measured live at allowlist +0 on an instrument "
                            "shown able to disagree with itself: no such badge "
                            "is drawn on this account"),
-    "P L1": ("ADDRESS", "ABSENT", "the audience surface is unadmitted and is "
-                                  "pinned refused by a committed test"),
+    # "P L1" LEFT 2026-10-10: lane B1 built its reader over the tracked skeleton
+    # of session 1's capture (COVERED-UNFIRED), so its line goes, as a line
+    # whose row left GAP must.
     "P L2b": ("ADDRESS", "REFUSED", "every follower-list spelling carries the "
                                     "forbidden substring /follow, which no "
                                     "exemption covers"),
@@ -152,8 +153,8 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
     "P L7": ("ADDRESS", "ABSENT", "creator hub; the blocker's address is "
                                   "DISPUTED in the corpus and unadmitted "
                                   "either way"),
-    "P L8": ("ADDRESS", "ABSENT", "same hub, same dispute; the analytics tree "
-                                  "root is refused"),
+    # "P L8" LEFT 2026-10-10: lane B1 built its reader over the tracked skeleton
+    # of session 1's capture of /dashboard/ (COVERED-UNFIRED); its line goes.
     "P M12": ("ADDRESS", "REFUSED", "the application-settings address carries "
                                     "the FIRST entry on the forbidden tuple; "
                                     "reopening it is the operator's"),
