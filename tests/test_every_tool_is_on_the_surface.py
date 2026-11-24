@@ -363,6 +363,10 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # READS, linkedin_search_groups (census N 161) and linkedin_search_events
     # (census N 179), beside lane U's one write below; measured off the
     # merged registry, never summed.
+    # SIXTY-TWO ON LANE A, 2026-10-10: one READ, linkedin_tracker_stage (the
+    # tracker's interview, archived and clicked_apply stages; census J 50,
+    # J 51, J 52), measured off the registry and moved with every other count
+    # site in the same commit.
     # SIXTY-TWO ON LANE U'S BRANCH, 2026-10-10: one WRITE,
     # linkedin_send_attachment (ruling FILE-UPLOAD-OPENED; census M M14, M15,
     # M18 stayed GAP on two captures, then moved to COVERED-UNFIRED the same
@@ -420,4 +424,9 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # SEVENTY-FOUR AT THE J 108 MERGE, 2026-10-26: lane B4's
     # linkedin_company_people_insights (census J 108) beside the seventy-three,
     # measured off the merged registry, not summed.
-    assert len(_tool_names()) == 74
+    # SIXTY-THREE AT LANE A'S MERGE OF MASTER 6c65815, 2026-10-10: the two
+    # sixty-seconds above, measured off the merged registry.
+    # SEVENTY-FIVE AT INTEGRATION 2'S MERGE OF LANE A, 2026-11-24: lane A's
+    # linkedin_tracker_stage beside the seventy-four, measured off the merged
+    # registry, not summed.
+    assert len(_tool_names()) == 75

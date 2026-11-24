@@ -335,11 +335,12 @@ def test_the_refusal_reader_tells_all_three_kinds_apart() -> None:
     base = cra.HOST
     assert cra.refusal_of(base + "feed/") == "-"
     assert cra.refusal_of(base + "analytics/") == "NO-PATTERN"
-    # THE FOLLOWING LIST, not the follower list: the lane-L1 REVIEW: commit
-    # admits the follower list past `/follow`, and this control needs an
-    # address that is still refused by a substring with no pattern behind it.
+    # HIS PAGE'S FOLLOWING LIST (N A3), since 2026-10-10: lane A admitted his
+    # own following list past `/follow` as it did the follower list, and this
+    # control needs an address still refused by a substring with no pattern
+    # behind it.
     assert cra.refusal_of(
-        base + "mynetwork/network-manager/people-follow/following/"
+        base + "company/placeholder-org/admin/following/"
     ) == "FORBIDDEN[/follow]+NO-PATTERN"
     # The people-search pattern admits a query SHAPE, so a keyword that trips
     # a forbidden substring is refused by the substring ALONE.

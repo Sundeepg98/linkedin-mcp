@@ -59,7 +59,11 @@ ALLOWLIST_SENTENCE = "not on the read-only allowlist"
 BOTH_GATES = (
     (f"{BASE}/feed/follows/", "/follow"),
     (f"{BASE}/groups/12345678/invite/", "/invite"),
-    (f"{BASE}/mynetwork/network-manager/people-follow/following/", "/follow"),
+    # The following list STOOD HERE UNTIL 2026-10-10; lane A admitted it past
+    # ``/follow`` by its own line (READ-PAST-AN-ACT-SUBSTRING). His Page's
+    # following list (census N A3) is the argued address that still trips
+    # ``/follow`` with no pattern behind it.
+    (f"{BASE}/company/placeholder-org/admin/following/", "/follow"),
 )
 
 
@@ -147,8 +151,12 @@ def test_the_allowlist_refusal_still_carries_its_own_sentence():
     needle carries no forbidden substring, so a future wave that picks a
     replacement carrying one cannot silently turn this into a test of the
     OTHER gate -- which is the exact distinction this file exists to pin.
+
+    AND IT MOVED AGAIN ON 2026-10-10: lane A admitted the About tab on its own
+    line (READ-PAST-AN-ACT-SUBSTRING, allowlist silence alone). The Jobs tab,
+    which no row needs (J 107 is served by the job search), stands in.
     """
-    url = f"{BASE}/company/example/about/"
+    url = f"{BASE}/company/example/jobs/"
     assert not any(bad in url.lower() for bad in readonly._FORBIDDEN_URL_SUBSTRINGS)
     with pytest.raises(WriteAttemptError) as caught:
         readonly.assert_read_url(url)

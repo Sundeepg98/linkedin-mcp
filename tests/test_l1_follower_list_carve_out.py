@@ -4,6 +4,9 @@ REVIEW commit, lane L1, 2026-09-23 -- census ``P L2b``. The spec is
 ``_audit/2026-09-05-network-tail.md`` section 2 ("allowlist +2, exemptions +2,
 denylist UNCHANGED"), applied to ONE of its two addresses: the follower list.
 The FOLLOWING list is ``N 38``'s and stays refused, and that is pinned here.
+AMENDED 2026-10-10: lane A admitted the following list by its own pair
+(READ-PAST-AN-ACT-SUBSTRING), so the spec's second half is applied too; what
+this file pins now is that THIS pair reaches no sibling.
 
 THE TWO GATES ARE BOTH NEEDED AND THIS FILE SHOWS IT: remove the exemption and
 the address refuses on ``/follow`` (with the sentence saying a pattern WOULD
@@ -43,8 +46,13 @@ PLANTED_ACTS = (
     (f"{B}/company/placeholder-org/unfollow/", "/unfollow",
      "unfollowing a Page"),
     (f"{B}/feed/follows/", "/follow", "a read the exemption does not reach"),
-    (f"{B}/mynetwork/network-manager/people-follow/following/", "/follow",
-     "THE SIBLING -- the following list, N 38's row, not admitted here"),
+    # THE SIBLING, the following list (N 38), STOOD HERE UNTIL 2026-10-10 as
+    # "not admitted here". Lane A admitted it by its OWN line and its OWN
+    # exemption (READ-PAST-AN-ACT-SUBSTRING; tests/test_lane_a_admissions.py),
+    # so this file's claim -- that THIS pair reaches no sibling -- is now held
+    # by the sibling with a query, which neither pair admits.
+    (f"{B}/mynetwork/network-manager/people-follow/following/?x=1", "/follow",
+     "THE SIBLING with a QUERY -- no pair reaches it"),
     (FOLLOWERS + "?x=1", "/follow",
      "this address with a QUERY -- the anchor is load-bearing"),
     (FOLLOWERS + "unfollow/", "/follow",

@@ -481,6 +481,18 @@ FAMILIES: dict[str, Family] = {f.fid: f for f in (
         ("_audit/2026-10-10-rulings-ledger-questions.md",
          "is EXCLUDED-RULED with the reopener \"he asks for it\"")],
        [r"OUTSIDE-THE-PRODUCT-PURPOSE"]),
+    # Registered 2026-10-10 (lane A, `_audit/2026-09-28-lane-a-admissions.md`
+    # s8): the orchestrator's ruling on lane A's question 3. op is NO for the
+    # same reason as the ledger rulings above; the ruling names its two rows,
+    # and each row's cell cites the id.
+    _f("CREDENTIAL-ADJACENT-STAYS-REFUSED",
+       "stored applicant accounts for other sites are treated as credential-adjacent",
+       "ORCHESTRATOR", "NO",
+       [("_audit/2026-10-10-rulings-lane-a-questions.md",
+         "RULED: (orchestrator, 2026-10-10) CREDENTIAL-ADJACENT-STAYS-REFUSED"),
+        ("_audit/2026-10-10-rulings-lane-a-questions.md",
+         "with the reopener \"a capture shows the page holds no credential or account secret\"")],
+       [r"CREDENTIAL-ADJACENT-STAYS-REFUSED"]),
     # ---- the 2026-09-05 retirement families (wave-ruled; the queue was his) ----
     *_RETIREMENTS,
 )}

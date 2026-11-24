@@ -1,4 +1,14 @@
-"""The tool surface: seventy-four tools, twenty-two of which write to LinkedIn.
+"""The tool surface: seventy-five tools, twenty-two of which write to LinkedIn.
+
+THE SEVENTY-FIFTH IS A READ, 2026-11-24, at integration 2's merge of lane A
+(census ``J 50`` and ``J 51``, READ-PAST-AN-ACT-SUBSTRING):
+``linkedin_tracker_stage`` reads one of his job tracker's three further
+stages -- interview, archived or clicked_apply -- through the tracker's own
+reader, and presses nothing. Lane A's branch numbered it the sixty-second
+(the two paragraphs headed TWO SIXTY-SECONDS and THE SIXTY-SECOND IS A READ
+below are that branch's record). Measured off the merged registry, not
+summed. The headline read "seventy-four tools, twenty-two of which write"
+until then.
 
 THE SEVENTY-FOURTH IS A READ, 2026-10-26, at this integration merge (census
 row ``J 108``, lane B4, ruling THIRD-PARTY-TEXT-AT-RUNTIME):
@@ -99,6 +109,18 @@ from a real capture of it (``settings_writer.ADMITTED_PAGES``). Its press is
 The headline read "sixty-two tools, eighteen of which write" until then;
 lane S's branch had numbered it the sixty-second, on a surface that did not
 yet hold lane U's write.
+
+TWO SIXTY-SECONDS MET AT LANE A'S MERGE OF MASTER 6c65815, 2026-10-10: lane
+A's read and lane U's write were each the sixty-second on its own branch, so
+the merged surface is sixty-three, measured off the registry by the surface
+tests. Both paragraphs below keep the number their own branch gave them.
+
+THE SIXTY-SECOND IS A READ, 2026-10-10, lane A: ``linkedin_tracker_stage``
+reads one of his job tracker's three further stages -- interview, archived
+or clicked_apply -- through the tracker's own reader, each stage admitted by
+its own anchored allowlist line (READ-PAST-AN-ACT-SUBSTRING). It presses
+nothing. Census ``J 50`` and ``J 51`` COVERED-UNFIRED on it; ``J 52`` waits
+on a capture, since no capture draws a clicked_apply tab.
 
 THE SIXTY-SECOND IS A WRITE, 2026-10-10, on lane U's branch, on ruling
 ``FILE-UPLOAD-OPENED`` (the operator's decision of 2026-09-04):
@@ -341,13 +363,15 @@ POINTER to it was dangling, so a reader who followed it found nothing and
 would reasonably conclude these numbers are unchecked. A citation is a claim
 like any other.
 The surface splits three ways and the split is the part a reader actually
-needs: FIFTY-TWO read, TWENTY-TWO write, and ZERO are write-shaped,
-registered, gated and unable to act. Fifty-two plus twenty-two plus zero is
-seventy-four. (Fifty, twenty-two and seventy-two on master at this
+needs: FIFTY-THREE read, TWENTY-TWO write, and ZERO are write-shaped,
+registered, gated and unable to act. Fifty-three plus twenty-two plus zero is
+seventy-five. (Fifty, twenty-two and seventy-two on master at this
 integration's base; fifty-one, twenty-two and seventy-three when the J 110
 merge added lane B4's read of an organisation Page's description;
 fifty-two, twenty-two and seventy-four when the J 108 merge added lane B4's
-read of a People tab's insight cards.
+read of a People tab's insight cards; fifty-three, twenty-two and
+seventy-five when the lane A merge added lane A's read of his job
+tracker's further stages.
 Thirty-eight,
 thirteen and fifty-two at the live lane's merge the same day; thirty-nine,
 fourteen and fifty-three at lane L7's; forty-one, fifteen and fifty-six at
@@ -374,7 +398,10 @@ and ``linkedin_unset_similar_jobs_alert``, merged after lane B3's the same
 day; fifty-two, twenty-two and seventy-four when this integration merged lane
 B4's two reads of an organisation Page -- its description and a People tab's
 insight cards -- beside the two writes. The J 108 branch's own history read
-until lane B4's read of a People tab's insight cards, 2026-10-10.)
+until lane B4's read of a People tab's insight cards, 2026-10-10; and on lane A's branch, forty-five, seventeen and sixty-two when lane
+A's tracker stages arrived, beside lane U's ``linkedin_send_attachment`` at
+forty-four, eighteen and sixty-two on its own, until the two met at lane A's
+merge of master 6c65815.)
 
 THE FIFTY-THIRD IS ONE WRITE, 2026-09-24 (lane L7, census row ``P I14``).
 ``linkedin_mark_company_interest`` presses "I'm interested" in the
@@ -4859,6 +4886,82 @@ async def linkedin_draft_applications(limit: int = DEFAULT_LIMIT) -> dict[str, A
         return _error(exc)
 
 
+# ===========================================================================
+# LANE A (la-admissions-lead, 2026-10-10). The tools lane A registers, in ONE
+# contiguous block, as its brief asks (four lanes edit this file in
+# parallel). Record: _audit/2026-09-28-lane-a-admissions.md, section 4.2.
+# ===========================================================================
+
+#: The three further stages of his job tracker, each admitted by its OWN
+#: anchored line in ``readonly._ALLOWED_URL_PATTERNS`` (lane A, census
+#: ``J 50``, ``J 51``, ``J 52``), with the tab label the strip draws for it.
+#: The tokens are the ones LinkedIn's own payload names (readonly.py's tracker
+#: entry); the tracked live captures draw "Interview <dot> N" and "Archived"
+#: (no count) and no clicked_apply tab at all.
+TRACKER_STAGES_LANE_A: dict[str, str] = {
+    "interview": "Interview",
+    "archived": "Archived",
+    "clicked_apply": "Clicked apply",
+}
+
+
+@mcp.tool()
+async def linkedin_tracker_stage(
+    stage: str = "interview", limit: int = DEFAULT_LIMIT
+) -> dict[str, Any]:
+    """List one further stage of your own job tracker: interview, archived or clicked_apply.
+
+    ``stage`` is one of three tokens, exactly: ``interview`` (jobs LinkedIn
+    has moved to your Interview stage), ``archived`` (jobs you archived) or
+    ``clicked_apply`` (jobs whose off-site page you opened from LinkedIn).
+    Anything else is refused before any page is opened. Each row carries
+    title, company, location and how long ago, plus the job id that
+    linkedin_job_detail takes -- the same row shape as
+    linkedin_my_applications.
+
+    THE ZERO RULE IS THE TRACKER'S. A list that comes back empty is reported
+    as empty only when LinkedIn's own count for that tab says zero and the
+    page draws its empty state; otherwise it is reported as a failed read,
+    never as "you have none". LinkedIn draws the Archived tab WITHOUT a count,
+    and no clicked_apply tab at all on the captures this was built on, so an
+    empty list on either is a failure, not an answer -- the conservative
+    direction.
+
+    This tool opens one page and reads it. It presses nothing, changes no
+    stage and moves no job between lists.
+
+    Args:
+        stage: interview (the default), archived or clicked_apply.
+        limit: maximum rows to return (default 25, max 100).
+    """
+    if not isinstance(stage, str) or stage not in TRACKER_STAGES_LANE_A:
+        return {
+            "error": "bad_argument",
+            "message": (
+                "stage must be one of: "
+                + ", ".join(sorted(TRACKER_STAGES_LANE_A))
+                + ". The saved, applied and draft stages have tools of "
+                "their own (linkedin_saved_jobs, linkedin_my_applications, "
+                "linkedin_draft_applications)."
+            ),
+        }
+    limit = _clamp(limit, DEFAULT_LIMIT, MAX_LIMIT)
+    try:
+        return await _read_tracker(
+            stage,
+            tab_label=TRACKER_STAGES_LANE_A[stage],
+            limit=limit,
+            surface=f"{stage} tracker stage",
+        )
+    except Exception as exc:
+        return _error(exc)
+
+
+# ===========================================================================
+# END OF LANE A's block.
+# ===========================================================================
+
+
 @mcp.tool()
 async def linkedin_new_messages() -> dict[str, Any]:
     """Has anything ARRIVED since you last opened Messaging? Nothing is opened.
@@ -6835,7 +6938,9 @@ async def linkedin_notifications(
     Rows carry the notification text, how long ago it arrived, whether it was
     unread, and the link LinkedIn attaches. Screen-reader-only text ("Unread
     notification.", "Status is reachable") is stripped, so the body is what you
-    would read on screen.
+    would read on screen. A job-alert row also carries ``alert_job_ids``: the
+    ids of the postings that alert delivered, in LinkedIn's order, each one an
+    id ``linkedin_job_detail`` takes.
 
     Args:
         limit: maximum notifications to return (default 20, max 50).

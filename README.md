@@ -3,10 +3,19 @@
 An MCP server that shows you your own LinkedIn account data as structured tool
 results instead of pages you have to click through.
 
-**Seventy-three tools ship. Fifty-one read. Twenty-two write. None is
+**Seventy-five tools ship. Fifty-three read. Twenty-two write. None is
 write-shaped and unable to act.**
 (Lane B4's branch: sixty-three and nineteen write until its merge, 2026-10-10: the similar-jobs
 alert, `linkedin_set_similar_jobs_alert` and its inverse.)
+
+**AT INTEGRATION 2, 2026-11-24, the line read "Seventy-three ... Fifty-one
+read. Twenty-two write" and two reads arrived.** `linkedin_company_people_insights`
+(census `J 108`) reads an organisation People tab's insight cards -- what its
+members do, where they live and studied, what they are skilled at, and how
+you are connected -- as categories and counts, with no person returned.
+`linkedin_tracker_stage` (lane A, census `J 50` and `J 51`) reads one of your
+job tracker's further stages. Each loads one page and presses nothing. Lane
+A's branch read "Sixty-three ... Forty-five read. Eighteen write".
 
 **AT THIS INTEGRATION MERGE, 2026-10-26, the line read
 "Seventy-two ... Fifty read. Twenty-two write" and one read arrived** (census
@@ -75,6 +84,16 @@ call reads the page and hands you a token; it presses only on your
 confirmation, checks that nothing else on the page moved, verifies on a fresh
 load, and returns the exact call that puts the value back. Census `P O17`,
 COVERED-UNFIRED: built on the capture, never fired.
+
+**THAT LINE READ "Sixty-two" ON TWO BRANCHES AT ONCE, 2026-10-10**: lane A's
+read and lane U's write were each the sixty-second, and they met at lane A's
+merge of master 6c65815.
+
+**THAT LINE READ "Sixty-one ... Forty-four read. Seventeen write" UNTIL
+2026-10-10** (lane A). One read arrived: `linkedin_tracker_stage` reads one of
+your job tracker's three further stages -- interview, archived or
+clicked_apply -- through the tracker's own reader, each stage admitted by its
+own allowlist line. It presses nothing.
 
 **THAT LINE READ "Sixty-one ... Forty-four read. Seventeen write" UNTIL LANE
 U'S BRANCH, 2026-10-10** (ruling FILE-UPLOAD-OPENED, the operator's decision
@@ -1065,7 +1084,7 @@ linkedin_server/
   cdp_bridge.py              the recovery path: attach to a running Chrome
   dom.py                     the read-only harvesters and the control readers
   shape.py                   pure parsers and the result envelope
-  server.py                  the seventy-three tools
+  server.py                  the seventy-five tools
   errors.py
 tests/                       1393 tests, no network, no account
   fixtures/                  frozen LinkedIn markup, scrubbed

@@ -305,12 +305,25 @@ def test_the_module_navigates_nothing_and_takes_no_address():
 
 
 def test_the_home_is_admitted_and_the_route_it_lists_is_not():
-    """The reader cannot become a route to the refused search page: the tool
-    opens only the home, and the home's entries point at an address the
-    boundary refuses."""
+    """The reader cannot become a route to the search page: the tool opens
+    only the home, and nothing in it navigates to an entry.
+
+    AMENDED 2026-10-10. Until then the home's entries also pointed at an
+    address the boundary refused. Lane A admitted that page (census J 16, the
+    AI job search) on its own line under READ-PAST-AN-ACT-SUBSTRING, so the
+    boundary half of this claim is now TRUE-ADMITTED -- and the half that
+    carries the property is the one that always did: no navigation in this
+    package is aimed at an address the page chose
+    (``tests/test_navigation_is_never_derived.py``), and this module contains
+    no navigation call at all, asserted below."""
+    import inspect
+
     from linkedin_server import readonly
 
     assert readonly.is_read_url(job_home.HOME_URL) is True
     assert readonly.is_read_url(
         "https://www.linkedin.com" + job_home.SEARCH_ROUTE
-        + "?keywords=placeholder") is False
+        + "?keywords=placeholder") is True
+    source = inspect.getsource(job_home)
+    for call in (".goto(", "assert_read_url(", "navigate("):
+        assert call not in source, call

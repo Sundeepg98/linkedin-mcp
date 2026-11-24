@@ -296,7 +296,9 @@ def test_the_address_this_reading_informs_is_still_refused():
     """
     for url in (
         "https://www.linkedin.com/search/results/people/example-person-a1b2c3/",
-        "https://www.linkedin.com/search/results/content/?keywords=x",
+        # CONTENT-VERTICAL-NOT-ALL-RESULTS admitted the content vertical on it
+        # s own line 2026-10-10, so the neighbour became the schools vertical, which no ruling reaches.
+        "https://www.linkedin.com/search/results/schools/?keywords=x",
         "https://www.linkedin.com/analytics/creator/newsletters/",
     ):
         assert not _allowed(url), url

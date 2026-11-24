@@ -1454,6 +1454,77 @@ REGISTER: tuple = (
              "overridable. Admitted for the four detail sections measured on his "
              "own profile; N 178 and N 65 wait on the Interests page's capture.",
     ),
+
+    # LANE A'S QUESTIONS, RULED 2026-10-10 (registered by lane A from the
+    # orchestrator's copy, byte-identical). Five rulings, one entry per id,
+    # each anchored on its own RULED: line; the document's closing answers
+    # cite rulings already registered and declare none.
+    Ruling(
+        id="RECEIVED-INVITATIONS-READ-STAYS-ADMITTED",
+        claim="His received-invitations tab (N 13, N 14, N 19) stays admitted. "
+              "A change a read makes to an invitation's seen state is a "
+              "passive cost, recorded on those rows as UNMEASURED and reopened "
+              "when a capture shows the sender can see it.",
+        binds="read boundary -- his received invitations",
+        document="_audit/2026-10-10-rulings-lane-a-questions.md",
+        anchor="RULED: (orchestrator, 2026-10-10) "
+               "RECEIVED-INVITATIONS-READ-STAYS-ADMITTED",
+        note="Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR, applying "
+             "D5-PASSIVE-COST-IS-NOT-A-ROW; overridable.",
+    ),
+    Ruling(
+        id="NAMED-SETTINGS-PAGES-RATIFIED",
+        claim="Each settings page lane A admitted by its exact address in its "
+              "own commit -- N 39, P P15 and /jobs/application-settings/ -- is "
+              "within ONE-NAMED-SETTINGS-PAGE-AT-A-TIME; this is the second "
+              "decision that one asks for, with HIS-OWN-SETTINGS-NOT-OUTWARD, "
+              "and no pattern widens.",
+        binds="read boundary -- his named settings pages",
+        document="_audit/2026-10-10-rulings-lane-a-questions.md",
+        anchor="RULED: (orchestrator, 2026-10-10) NAMED-SETTINGS-PAGES-RATIFIED",
+        note="Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; "
+             "overridable.",
+    ),
+    Ruling(
+        id="CREDENTIAL-ADJACENT-STAYS-REFUSED",
+        claim="His stored applicant sign-ins for other sites (P M9, J 77) are "
+              "treated as credential-adjacent and stay refused -- an inference, "
+              "held on purpose to be conservative -- reopened when a capture "
+              "shows the page holds no credential or secret.",
+        binds="read boundary -- stored applicant sign-ins for other sites",
+        document="_audit/2026-10-10-rulings-lane-a-questions.md",
+        anchor="RULED: (orchestrator, 2026-10-10) CREDENTIAL-ADJACENT-STAYS-REFUSED",
+        note="Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; "
+             "overridable. Rests on inference, not measurement.",
+    ),
+    Ruling(
+        id="NAMED-ADDRESS-NEEDS-LOG-REDACTION",
+        claim="A page whose address carries a person's or a publication's name "
+              "(M C101's newsletter page) is admitted only after every log line "
+              "that records a page load writes that route's address as a shape, "
+              "never the slug; until the redaction is built and shown failing "
+              "first, the row is GAP on that blocker.",
+        binds="read boundary -- addresses that carry a name",
+        document="_audit/2026-10-10-rulings-lane-a-questions.md",
+        anchor="RULED: (orchestrator, 2026-10-10) NAMED-ADDRESS-NEEDS-LOG-REDACTION",
+        note="Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR, applying "
+             "PEOPLE-DATA-MITIGATIONS; overridable.",
+    ),
+    Ruling(
+        id="CONTENT-VERTICAL-NOT-ALL-RESULTS",
+        claim="D2-SEARCH-VERTICALS-WIDENED does not reach the mixed "
+              "/search/results/all/ page. The hashtag row M C93 is served under "
+              "D6 by the content vertical, /search/results/content/?keywords="
+              "<hashtag>, admitted by its own exact pattern under "
+              "D1-SEARCH-AS-READS's three conditions with /all/ shown still "
+              "refused; M C70 shares it, and post text returns under "
+              "THIRD-PARTY-TEXT-AT-RUNTIME.",
+        binds="read boundary -- the content search vertical",
+        document="_audit/2026-10-10-rulings-lane-a-questions.md",
+        anchor="RULED: (orchestrator, 2026-10-10) CONTENT-VERTICAL-NOT-ALL-RESULTS",
+        note="Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; "
+             "overridable.",
+    ),
     # THE OPERATOR'S UPLOAD DECISION, REGISTERED 2026-10-10 BY LANE U. It was
     # made 2026-09-04 and landed in 615a5c4, and until this entry the register
     # had no line for it. NO COMMITTED SOURCE RECORDS HIS WORDS: the commit

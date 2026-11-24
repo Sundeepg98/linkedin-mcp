@@ -173,6 +173,76 @@ Conflicts resolved by union, against the merge base:
 Gate: the targeted surface + record + reader tests ran after resolution
 (results in section 5).
 
+(merged 4, lane A's head, its subject "tests: the seven reds of CI run
+38056930283 -- neighbours that assumed the content vertical refused, and the
+gap-row pin"; merge base 6c65815, 32 commits.) Lane A's branch held 63 tools;
+its only new tool is `linkedin_tracker_stage(stage, limit)`, a read. The merged
+registry measures **75 tools, 119 parameters, 22 that write, 53 that do not**
+(`mcp.list_tools()` and `writes.PERFORMABLE` on the merged tree). Lane A was
+UNCERTIFIED when merged: its ci/ run 38056930283 was red and its fixes post-date
+that run; this lane's push certifies the merged head.
+
+Census rows (the four `.md` slices), resolved per row against the base blob,
+each row taken whole from the side that moved it; NO row was edited by both:
+- `jobs.md`: rows 71, 72, 73, 77, 156, 160 from lane A; 74, 75, 76, 161 from ours.
+- `network.md`: rows 19, 38, 39, 199 from lane A; 20, 37, 200 from ours.
+- `messaging-and-content.md`: C70, C101 from lane A; C69, C100 from ours.
+- `profile.md`: M4, M5, M6, M9, P15 from lane A; M7, M8, M10 and P4-P14,
+  P16-P23 from ours.
+
+Census tables (`next-step`, `capture-queue`, `jobs-directions`,
+`read-addresses`), a three-way merge per row key (slice + row id for the two
+side tables), deletions counted as moves: zero rows in conflict. Moved by ours
+/ lane A: next-step 29 / 54, capture-queue 4 / 27, jobs-directions 2 / 24,
+read-addresses 14 / 20. Line counts reconcile with each side's own adds and
+deletes: 559-12-5 = 542, 95+1-4 = 92, 148-2-4 = 142, 136-10-1 = 125. One
+capture-queue line (32, `admit-newsletters-id`) was edited by both sides on
+DISJOINT cells and merged cell by cell: lane A rewrote its ADMIT step (after
+the log redaction NAMED-ADDRESS-NEEDS-LOG-REDACTION requires); ours added `N 56`
+to the rows it serves with their count. Each table's own checker is GREEN.
+
+`scripts/census_completion.py`: twelve pins, each SET TO THE VALUE THE SCRIPT
+MEASURED on the merged tree (both lanes' comments kept above each); the
+NO_RULING list is the union (`P O17` from ours; `J 38`, `J 50`, `J 51` from
+lane A). The moves agree with lane A's own row moves (J 38, J 50, J 51 GAP ->
+COVERED-UNFIRED; P M9, J 77 GAP -> EXCLUDED-RULED): adjudicated +5,
+delivered_broad, unfired and b1_no_ruling +3, gap -5, achievable -2.
+
+Resolved by judgement, one line each:
+- `server.py` / `README.md` / the three surface tests: both sides' count
+  histories kept as evidence; every headline, split and pin re-derived off the
+  merged registry (75 / 53 / 22 / 119), never summed.
+- `README.md`, hunk 2: a connective only ("AND" on ours, "BEFORE THAT IT READ"
+  on lane A) on one history line; ours' wording kept, since in the merged file
+  the line follows lane U's paragraph exactly as it does on ours.
+- `INSTRUMENTS.md`: lane A's section 83 placed BEFORE ours' 90, 91 and 93,
+  ascending within the block both sides appended; the older 88-then-84 order
+  is untouched. The register's own test checks uniqueness, not order.
+- Derived views regenerated twice to a fixed point, never hand-merged: the
+  audit index over 276 documents (274 + lane A's two), the rulings register at
+  95 (90 + the five in lane A's rulings document), the blocker map 409 lines.
+
+A FINDING ABOUT MERGE 2, RECORDED RATHER THAN SMOOTHED OVER: ours' `README.md`
+still read "Seventy-three tools ship" after merge 2 although the registry held
+74. The J 108 branch never touched README, so merge 2 auto-merged a stale
+headline, and merge 2's targeted gate did not include
+`tests/test_the_other_two_count_claims_are_pinned_too.py`, the guard on that
+line. The merge-2 commit therefore carried a headline that guard would fail.
+It is corrected here by measurement (75 / 53 / 22), and that guard is in every
+later gate of this lane.
+
+THE PENDING RULINGS DOCUMENT TRAVELLED WITH THIS MERGE:
+`_audit/2026-10-10-rulings-lane-a-questions.md`, registered on lane A's branch
+and never on master. It is the orchestrator's; this lane did not rule on it and
+did not edit it. Its five rulings now appear in the derived register.
+
+Gate after merge 4 (sharded, 104 s, inside the 2-minute cap): lane A's 20
+test files, the three surface tests, the prose-count guards and every test
+that reads a file resolved here -- 1600 passed, 4 failed, all four in
+`tests/test_readonly.py` and all four about `company_home.py`, which came in
+with merge 1 (J 110), not with lane A. See "J 110's off-boundary script"
+below; the merge itself is committed first, the fix in its own commit.
+
 ## 4. Pins re-derived on the merged tree
 
 (pending)

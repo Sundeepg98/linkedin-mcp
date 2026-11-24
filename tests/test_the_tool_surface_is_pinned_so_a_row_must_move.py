@@ -97,6 +97,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_connections": ("limit",),
     "linkedin_creator_analytics": (),
     "linkedin_draft_applications": ("limit",),
+    "linkedin_tracker_stage": ("limit", "stage"),
     "linkedin_events_home": (),
     "linkedin_follow_company": ("confirm_token", "job_id"),
     "linkedin_follow_company_page": ("confirm_token", "organisation_id"),
@@ -514,6 +515,16 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: was split under COMPOUND-ROW-SPLITS-ONLY-ON-STATE -- `M C35` ("Remove a
 #: reaction") COVERED-UNFIRED on this tool, `M C35b` ("Change a reaction to
 #: another kind") GAP. The counts above did not move with it.
+#: **RE-PINNED 2026-10-10 AT 62 TOOLS AND 98 PARAMETERS (lane A): one tool,
+#: `linkedin_tracker_stage(stage, limit)`, a READ of the tracker's interview,
+#: archived and clicked_apply stages.** THE CENSUS DECISION, in the same
+#: commit: `J 50` and `J 51` GAP -> COVERED-UNFIRED (the tracker's own reader,
+#: aimed at the tracked live captures of that page, never fired); `J 52`
+#: stays GAP -- no capture draws a clicked_apply tab, so whether the stage
+#: renders a list is the capture's to learn. See
+#: `_audit/2026-09-28-lane-a-admissions.md`, section 4.2.
+#: **MERGED AT LANE A'S MERGE OF MASTER f8c7392 (2026-10-10), MEASURED off the
+#: merged registry, not summed:** lane NP's `section` and lane A's tool.
 #: **RE-PINNED 2026-10-10 AT 62 TOOLS AND 99 PARAMETERS on lane U's branch
 #: (ruling FILE-UPLOAD-OPENED): one WRITE,
 #: `linkedin_send_attachment(thread_id, file, confirm_token)` -- one file from
@@ -648,8 +659,16 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: **AT THE J 108 MERGE, 2026-10-26: 74 TOOLS AND 117 PARAMETERS** -- lane
 #: B4's one tool and its one parameter beside the seventy-three and 116,
 #: counted on the merged registry, never summed.
-PINNED_TOOL_COUNT = 74
-PINNED_PARAMETER_COUNT = 117
+#: **MERGED AT LANE A'S MERGE OF MASTER 6c65815 (2026-10-10), MEASURED off the
+#: merged registry, not summed: 63 TOOLS AND 102 PARAMETERS** -- lane A's
+#: tracker stage (two) and lane U's attachment (three) over the base with
+#: lane NP's section.
+#: **AT INTEGRATION 2'S MERGE OF LANE A, 2026-11-24: 75 TOOLS AND 119
+#: PARAMETERS** -- lane A's one tool and its two parameters
+#: (`linkedin_tracker_stage(stage, limit)`) beside the seventy-four and 117,
+#: counted on the merged registry, never summed.
+PINNED_TOOL_COUNT = 75
+PINNED_PARAMETER_COUNT = 119
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:

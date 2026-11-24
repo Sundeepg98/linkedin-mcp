@@ -1910,7 +1910,15 @@ BLOCKED = [
     "https://www.linkedin.com/premium/my-premium/upgrade",
     "https://www.linkedin.com/premium/products/",
     "https://www.linkedin.com/article/edit/7400000000000000001/",
-    "https://www.linkedin.com/mynetwork/invitation-manager/",
+    # ``/mynetwork/invitation-manager/`` WAS HERE UNTIL 2026-10-10 and is now
+    # READABLE, with its sent tab: lane A, READ-PAST-AN-ACT-SUBSTRING, one
+    # anchored line and one exemption excusing "invitation" for each. What
+    # replaces it is what the admission must NOT have carried -- a query, an
+    # unrecorded leaf and an act-shaped sub-path
+    # (tests/test_lane_a_admissions.py holds the rest).
+    "https://www.linkedin.com/mynetwork/invitation-manager/?filterCriteria=x",
+    "https://www.linkedin.com/mynetwork/invitation-manager/received/",
+    "https://www.linkedin.com/mynetwork/invitation-manager/sent/withdraw/",
     "https://www.linkedin.com/in/someone/edit/topcard/",
     "https://www.linkedin.com/psettings/open-to-work",
     "https://www.linkedin.com/voyager/api/relationships/invitations",
@@ -1944,12 +1952,15 @@ BLOCKED = [
     # A wildcard query would have let every one of these through.
     "https://www.linkedin.com/jobs-tracker/",
     "https://www.linkedin.com/jobs-tracker/?stage=withdraw",
-    "https://www.linkedin.com/jobs-tracker/?stage=archived",
-    # The stages LinkedIn's own payload names and this server still refuses,
-    # listed since 2026-08-26 because that is the day the enumeration grew and
-    # a widening is only narrow if the things it did NOT admit are asserted.
-    "https://www.linkedin.com/jobs-tracker/?stage=interview",
-    "https://www.linkedin.com/jobs-tracker/?stage=clicked_apply",
+    # ``?stage=archived``, ``?stage=interview`` and ``?stage=clicked_apply``
+    # STOOD HERE UNTIL 2026-10-10 -- the stages LinkedIn's own payload names,
+    # listed since 2026-08-26 so the enumeration's edge was asserted. Lane A
+    # admitted each by its OWN line (READ-PAST-AN-ACT-SUBSTRING, allowlist
+    # silence alone); the closed three-stage line is unchanged. What stands
+    # in is each token with a second key, and a near spelling.
+    "https://www.linkedin.com/jobs-tracker/?stage=archived&x=1",
+    "https://www.linkedin.com/jobs-tracker/?stage=interview&x=1",
+    "https://www.linkedin.com/jobs-tracker/?stage=clicked",
     "https://www.linkedin.com/jobs-tracker/?apply=1",
     "https://www.linkedin.com/jobs-tracker/?stage=saved&save=1",
     "https://www.linkedin.com/jobs-tracker/?a%63tion=delete",
@@ -2297,9 +2308,16 @@ def test_the_tracker_allowlist_admits_three_stages_and_no_more():
     """
     from linkedin_server.config import BASE_URL
 
-    permitted = {"saved", "applied", "draft"}
-    refused = {"interview", "archived", "clicked_apply", "withdraw", "in_progress"}
+    # AMENDED 2026-10-10 (lane A): interview, archived and clicked_apply are
+    # admitted now, each by its OWN anchored line rather than by widening the
+    # three-stage alternation, which this test's docstring warned against and
+    # which stays exactly three words. The enumeration's edge is still named.
+    permitted = {"saved", "applied", "draft", "interview", "archived", "clicked_apply"}
+    refused = {"withdraw", "in_progress", "archive", "clicked"}
     assert permitted & refused == set()
+    three = [p for p in readonly._ALLOWED_URL_PATTERNS
+             if "(saved|applied|draft)" in p.pattern]
+    assert len(three) == 1, three
 
     for stage in sorted(permitted):
         url = f"{BASE_URL}/jobs-tracker/?stage={stage}"
@@ -2738,7 +2756,12 @@ MUST_STAY_UNREADABLE = (
     "https://www.linkedin.com/messaging/compose",
     "https://www.linkedin.com/messaging/compose/new/",
     "https://www.linkedin.com/messaging/compose/?recipient=someone",
-    "https://www.linkedin.com/mynetwork/invitation-manager/",
+    # ``https://www.linkedin.com/mynetwork/invitation-manager/`` WAS HERE
+    # UNTIL 2026-10-10 and is now READABLE (lane A, READ-PAST-AN-ACT-
+    # SUBSTRING: "invitation" was written to stop SENDING, and the page sends
+    # nothing). Recorded rather than silently dropped; its neighbours stand in.
+    "https://www.linkedin.com/mynetwork/invitation-manager/?filterCriteria=x",
+    "https://www.linkedin.com/mynetwork/invitation-manager/sent/withdraw/",
     "https://www.linkedin.com/mynetwork/",
     # ADDED 2026-09-03, in the commit admitting the CONNECTIONS list. These
     # are the addresses that must not travel with it, and the entry above --
@@ -2752,10 +2775,15 @@ MUST_STAY_UNREADABLE = (
     # not a prefix. A query is where a filter naming a person would arrive.
     "https://www.linkedin.com/mynetwork/invite-connect/connections/?foo=1",
     "https://www.linkedin.com/mynetwork/invite-connect/connections/x",
-    # THE PEOPLE HE FOLLOWS, recorded on the Manage-Pages allowlist entry as
-    # the sibling nobody may reach for. It carries ``/follow`` and the new
-    # exemption does not excuse that substring for any address.
-    "https://www.linkedin.com/mynetwork/network-manager/people-follow/following/",
+    # THE PEOPLE HE FOLLOWS WAS HERE UNTIL 2026-10-10 --
+    # ``/mynetwork/network-manager/people-follow/following/``, recorded on the
+    # Manage-Pages allowlist entry as the sibling nobody may reach for. It is
+    # READABLE now by its own line and an exemption excusing ``/follow`` for
+    # that one address (lane A, READ-PAST-AN-ACT-SUBSTRING); that entry's
+    # sentence was an allowlist comment, not a ruling (D3). What stays refused
+    # is the reach past the page: a query and a sub-path naming the write.
+    "https://www.linkedin.com/mynetwork/network-manager/people-follow/following/?x=1",
+    "https://www.linkedin.com/mynetwork/network-manager/people-follow/following/unfollow/",
     # ``https://www.linkedin.com/search/results/people/?network=%5B%22F%22%5D``
     # WAS HERE UNTIL 2026-09-20 and is now READABLE. **THIS IS THE DELIBERATE
     # EDIT THE OLD COMMENT ASKED FOR**, which read: *"pinned here so that
@@ -2806,7 +2834,10 @@ MUST_STAY_UNREADABLE = (
     # named. The three below stay: D2 chose four words, not seven.
     "https://www.linkedin.com/search/results/all/?keywords=x",
     "https://www.linkedin.com/search/results/schools/?keywords=x",
-    "https://www.linkedin.com/search/results/content/?keywords=%23hiring",
+    # The content vertical stood here until 2026-10-10, when
+    # CONTENT-VERTICAL-NOT-ALL-RESULTS admitted it on its own line; the jobs
+    # vertical, which no ruling reaches, takes its place.
+    "https://www.linkedin.com/search/results/jobs/?keywords=x",
     # THE FAMILY ROOTS, which are what a prefix pattern would have opened.
     "https://www.linkedin.com/search/",
     "https://www.linkedin.com/search/results/",
@@ -2852,15 +2883,14 @@ MUST_STAY_UNREADABLE = (
     "https://www.linkedin.com/company/example-co/admin/dashboard/",
     # THE REST OF THE TABS, each a census row this admission deliberately did
     # not buy: About (J 106), Jobs (J 107), Life (J 109), Posts (J 110),
-    # Products and Services (J 111), Insights (J 113 / J 114).
-    "https://www.linkedin.com/company/example-co/about/",
+    # Products and Services (J 111), Insights (J 113 / J 114). About, Life,
+    # Products, Services and Insights-with-HEADCOUNT STOOD HERE UNTIL
+    # 2026-10-10, when lane A admitted each by its OWN line; what stays is the
+    # rest, and the Insights tab without its drawn key.
     "https://www.linkedin.com/company/example-co/jobs/",
-    "https://www.linkedin.com/company/example-co/life/",
     "https://www.linkedin.com/company/example-co/posts/",
-    "https://www.linkedin.com/company/example-co/products/",
-    "https://www.linkedin.com/company/example-co/services/",
     "https://www.linkedin.com/company/example-co/insights/",
-    "https://www.linkedin.com/company/example-co/insights/?insightType=HEADCOUNT",
+    "https://www.linkedin.com/company/example-co/insights/?insightType=ALUMNI",
     # A QUERY ON THE ADMITTED ROOT, which is where a filter naming a person
     # would arrive, and the product root, which is not a Page.
     "https://www.linkedin.com/company/example-co/?foo=1",

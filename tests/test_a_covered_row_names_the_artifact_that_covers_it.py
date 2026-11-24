@@ -650,3 +650,90 @@ def test_control_the_per_post_join_checks_can_fail() -> None:
     assert unjoined != server
     assert _returns_the_whole_reading(server) is True
     assert _returns_the_whole_reading(unjoined) is False
+def test_the_alert_landing_chain_is_still_whole() -> None:
+    """``J 38``'s coverage (lane A, 2026-10-10): link -> handle -> row -> tool.
+
+    ``shape.alert_job_ids`` reads the ids an alert link's query lists;
+    ``notification_handles`` carries them as ``alert_job_ids``;
+    ``parse_notification`` merges the handles into the row
+    ``linkedin_notifications`` returns; ``linkedin_job_detail`` takes each id.
+    Driven end to end through the one caller, so a link dropped anywhere on
+    the way goes red here.
+    """
+    from linkedin_server import shape
+
+    defined = _defined_names(_source("shape.py"))
+    for name in ("alert_job_ids", "notification_handles", "parse_notification"):
+        assert name in defined, (
+            f"shape.{name} is gone; census row J 38 claims COVERED-UNFIRED "
+            "against this chain")
+    row = shape.parse_notification({
+        "text": "Your job alert: 1 new job", "time": "1h", "unread": False,
+        "href": "/jobs/search-results/?keywords=a"
+                "&originToLandingJobPostings=4300000001",
+    })
+    assert row.get("alert_job_ids") == ["4300000001"], (
+        "the landing ids no longer reach the notification row; J 38's first "
+        "route is broken")
+    server_src = _source("server.py")
+    assert "async def linkedin_job_detail(job_id" in server_src, (
+        "linkedin_job_detail no longer takes a job id; J 38's second route "
+        "is gone")
+    assert "alert_job_ids" in server_src, (
+        "the notifications tool no longer tells a caller about alert_job_ids")
+
+
+def test_control_the_alert_landing_chain_convicts_a_dropped_handle() -> None:
+    """SHOWN FAILING against a MUTATED COPY: the handle's assignment removed,
+    which is the one edit that would orphan the reader while every name the
+    chain test checks stayed defined."""
+    source = _source("shape.py")
+    assignment = 'out["alert_job_ids"] = landed'
+    assert source.count(assignment) == 1
+    mutated = source.replace(assignment, "pass")
+    assert assignment not in mutated
+    namespace: dict = {}
+    exec(compile(mutated, "shape_mutated", "exec"), namespace)
+    row = namespace["parse_notification"]({
+        "text": "Your job alert: 1 new job", "time": "1h", "unread": False,
+        "href": "/jobs/search-results/?keywords=a"
+                "&originToLandingJobPostings=4300000001",
+    })
+    assert "alert_job_ids" not in row
+def _tracker_stage_calls_the_reader(server_src: str) -> bool:
+    """Does ``linkedin_tracker_stage`` hand its stage to ``_read_tracker``?"""
+    tree = ast.parse(server_src)
+    for node in ast.walk(tree):
+        if isinstance(node, ast.AsyncFunctionDef) and node.name == "linkedin_tracker_stage":
+            return any(
+                isinstance(inner, ast.Call)
+                and ast.unparse(inner.func) == "_read_tracker"
+                for inner in ast.walk(node)
+            )
+    return False
+
+
+def test_the_tracker_stage_chain_is_still_whole() -> None:
+    """``J 50`` and ``J 51`` (lane A, 2026-10-10): tool -> stage table ->
+    the tracker's own reader. Both rows claim COVERED-UNFIRED on it."""
+    from linkedin_server import server
+
+    stages = getattr(server, "TRACKER_STAGES_LANE_A", {})
+    for stage in ("interview", "archived"):
+        assert stage in stages, (
+            f"the tool no longer reads the {stage} stage; census J 50/J 51 "
+            "claim COVERED-UNFIRED on it")
+    assert _tracker_stage_calls_the_reader(_source("server.py")), (
+        "linkedin_tracker_stage no longer hands its stage to _read_tracker; "
+        "J 50 and J 51's chain is broken")
+
+
+def test_control_the_tracker_stage_chain_convicts_a_dropped_reader() -> None:
+    """SHOWN FAILING against a MUTATED COPY: the reader call renamed away."""
+    source = _source("server.py")
+    assert _tracker_stage_calls_the_reader(source)
+    start = source.index("async def linkedin_tracker_stage(")
+    mutated = (source[:start]
+               + source[start:].replace("await _read_tracker(",
+                                        "await _read_tracker_gone(", 1))
+    assert not _tracker_stage_calls_the_reader(mutated)
