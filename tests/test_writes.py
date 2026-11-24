@@ -170,8 +170,9 @@ class FixtureNavigator:
     #: Content`` BEFORE. Both land nowhere on playwright 1.63.0 and 1.65.2. On
     #: 1.64.1 -- which CI resolved on 2026-10-26, because requirements.txt
     #: leaves playwright unpinned -- a press whose navigation is answered 204
-    #: never resolves, and the stuck navigation holds the page's next waits to
-    #: their full bounds: four tests red on every platform, master f339459.
+    #: does not resolve within its 10 s bound, and the stuck navigation holds
+    #: the page's next waits to their full bounds: four tests red on every
+    #: platform, master f339459.
     #: ``abort("failed")`` was measured too and is no answer: it replaces the
     #: page with Chromium's error page. ``tests/test_the_apply_answer_lands_
     #: nowhere.py`` holds the property; the fixes lane's record,

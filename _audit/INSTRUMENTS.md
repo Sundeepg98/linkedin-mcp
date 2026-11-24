@@ -12166,8 +12166,8 @@ the red one 1.64.1, because `requirements.txt` leaves playwright unpinned. An
 isolated env with the red run's exact versions (browsers in a scratch path, the
 shared cache untouched) reproduced all four failures on a quiet box, serially,
 with the CI signatures; a one-capture probe then showed the mechanism -- under
-1.64.1 a press whose navigation is answered `204` never resolves and holds the
-page's next waits to their bounds -- and the same probe, run over three answers
+1.64.1 a press whose navigation is answered `204` does not resolve within its
+bound and holds the page's next waits to theirs -- and the same probe, run over three answers
 under three versions, chose the fix.
 
     WHEN ONLY CI IS RED, DIFF WHAT CI INSTALLED BEFORE ANYTHING ELSE, AND
