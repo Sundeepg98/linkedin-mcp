@@ -32,6 +32,7 @@ from pathlib import Path
 import pytest
 
 from linkedin_server import company_home, company_page, dom, people_data, readonly, server
+from linkedin_server.config import logger as package_logger
 
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO / "scripts"))
@@ -320,8 +321,36 @@ def _records_text(caplog) -> str:
     )
 
 
-async def test_a_failed_read_carries_no_prose_out_in_a_value_or_a_raise(caplog):
+#: Emitted on the package logger when each capture below is set, and required
+#: back out of it: the per-test proof that "no record carries the prose" is
+#: read off a channel this package can reach.
+_CHANNEL_CONTROL = "caplog control: the package logger is heard at DEBUG"
+
+
+def set_root_and_package_to_debug(caplog) -> None:
+    """``caplog`` at DEBUG on the ROOT logger AND on the package's own logger.
+
+    THE ROOT CALL ALONE NEVER HEARD A DEBUG RECORD FROM THIS PACKAGE, so the two
+    absences below passed on a build that logged the prose at DEBUG. Found by
+    ``tests/test_a_debug_capture_lowers_the_package_logger.py`` on integration
+    2's ci/ run (J 110's branch predates that guard). ``config.py`` gives the
+    ``linkedin`` logger a level of its own (INFO unless ``LINKEDIN_LOG_LEVEL``
+    says otherwise) and ``propagate = False``, and a logger with a level of its
+    own does not inherit the root's; the root call stays for any module that
+    logs through ``getLogger(__name__)``. The same helper, for the same reason,
+    as ``tests/test_a_preview_names_the_resolved_target.py``'s.
+    """
     caplog.set_level(logging.DEBUG)
+    caplog.set_level(logging.DEBUG, logger=package_logger.name)
+    package_logger.debug(_CHANNEL_CONTROL)
+    assert _CHANNEL_CONTROL in caplog.text, (
+        "caplog cannot hear the package logger at DEBUG: 'no record carries "
+        "the prose' would pass on a line that printed it"
+    )
+
+
+async def test_a_failed_read_carries_no_prose_out_in_a_value_or_a_raise(caplog):
+    set_root_and_package_to_debug(caplog)
     out = await dom.read_company_home(_RaisingPage())
     assert out["error"] == "RuntimeError"
     assert out["overview"]["state"] == "reader_blind"
@@ -331,7 +360,7 @@ async def test_a_failed_read_carries_no_prose_out_in_a_value_or_a_raise(caplog):
 
 
 async def test_the_tool_answers_a_failed_read_without_the_prose(monkeypatch, caplog):
-    caplog.set_level(logging.DEBUG)
+    set_root_and_package_to_debug(caplog)
 
     class _Raising(_Browser):
         @contextlib.asynccontextmanager

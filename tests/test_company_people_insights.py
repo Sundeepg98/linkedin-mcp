@@ -24,6 +24,7 @@ import pytest
 
 from linkedin_server import company_people_insights as cpi
 from linkedin_server import people_data
+from linkedin_server.config import logger as package_logger
 from tests.plantedpage import PlantedPage
 from tests.skeleton_page import SkeletonPage, parse
 
@@ -229,9 +230,36 @@ def test_a_row_carrying_another_cards_facet_is_withheld():
 # 3. Nothing of a label reaches a log or an exception
 # ---------------------------------------------------------------------------
 
+#: Emitted on the package logger when each capture below is set, and required
+#: back out of it: the per-test proof that "the marker is in no log" is read
+#: off a channel this package can reach.
+_CHANNEL_CONTROL = "caplog control: the package logger is heard at DEBUG"
+
+
+def set_root_and_package_to_debug(caplog) -> None:
+    """``caplog`` at DEBUG on the ROOT logger AND on the package's own logger.
+
+    THE ROOT CALL ALONE NEVER HEARD A DEBUG RECORD FROM THIS PACKAGE, so the two
+    absences below passed on a build that logged the marker at DEBUG. Found by
+    ``tests/test_a_debug_capture_lowers_the_package_logger.py`` on integration
+    2's ci/ run (J 108's branch predates that guard). ``config.py`` gives the
+    ``linkedin`` logger a level of its own (INFO unless ``LINKEDIN_LOG_LEVEL``
+    says otherwise) and ``propagate = False``, and a logger with a level of its
+    own does not inherit the root's; the root call stays for any module that
+    logs through ``getLogger(__name__)``. The same helper, for the same reason,
+    as ``tests/test_a_preview_names_the_resolved_target.py``'s.
+    """
+    caplog.set_level(logging.DEBUG)
+    caplog.set_level(logging.DEBUG, logger=package_logger.name)
+    package_logger.debug(_CHANNEL_CONTROL)
+    assert _CHANNEL_CONTROL in caplog.text, (
+        "caplog cannot hear the package logger at DEBUG: 'the marker is in no "
+        "log' would pass on a line that printed it"
+    )
+
 
 def test_a_planted_label_leaves_only_inside_a_record_and_never_in_a_log(caplog):
-    caplog.set_level(logging.DEBUG)
+    set_root_and_package_to_debug(caplog)
     markup = _replace_once(_markup(), "\nExample skill 3\n", "\n" + MARKER + "\n")
     result, _page = read(markup)
     holders = [path for path, text in strings_in(result) if MARKER in text]
@@ -268,7 +296,7 @@ class _Raising:
 
 
 def test_a_read_that_raises_quoting_the_page_is_counted_and_dropped(caplog):
-    caplog.set_level(logging.DEBUG)
+    set_root_and_package_to_debug(caplog)
     result, _page = read(page_class=_RaisingTextPage)
     assert result["cards"] == [] and result["reads_failed"] > 0
     assert not any(MARKER in text for _p, text in strings_in(result))

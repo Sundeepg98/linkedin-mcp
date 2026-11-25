@@ -446,6 +446,35 @@ run id. Pass bar: green, except the shared master family
 description-wait group, "shared master red, fixes-26 owns"), which should no
 longer occur now that cab0ae7 is merged.
 
+THE FIRST FULL RUN, ci/ run 45372923960 (2026-11-24), WAS RED in two of four
+shards, on three guards. Each was tripped by code a HEAD brought in; none came
+from a conflict resolution, and the shared master family did not occur:
+- `tests/test_the_search_shape_reading.py::test_the_shape_pass_adds_no_evaluate_waiver`
+  holds a COPY of `tests/test_readonly.py`'s `dom.py` waiver ceiling. The J 110
+  fix moved the budget 24 -> 25 and missed this copy, the THIRD time a copy of
+  this ceiling has been missed (its docstring records the other two). Moved to
+  25 with its reason.
+- `tests/test_a_debug_capture_lowers_the_package_logger.py`: four captures in
+  the J 110 and J 108 tests lowered only the root to DEBUG, so their "no record
+  carries the prose" and "the marker is in no log" absences could not hear the
+  package logger. Both branches predate the guard. Each file gains the helper
+  `tests/test_a_preview_names_the_resolved_target.py` uses: root AND package
+  logger at DEBUG, and a DEBUG control record required back.
+- `tests/test_group_members.py`: lane B5's section-6 test asserted that
+  `company_people` appears nowhere in `server.py`, and J 108 composes exactly
+  that roster (merge 2). Merge 2's gate did not hold this file, although merge
+  2's own fix to `tests/test_member_rosters.py` names it in its docstring.
+  Rewritten as `test_the_package_composes_two_rosters_and_the_other_two_stay_unopened`:
+  the compose calls are read off the AST (the docstring of `server.py` quotes
+  the J 108 call), and the event and school rosters are still asserted absent.
+  The old name was cited nowhere in the tree.
+
+Gate for the three (sharded, 93 s by pytest's clock): the debug-capture guard,
+the four edited files, `tests/test_member_rosters.py` and `tests/test_readonly.py`.
+624 passed. THE LESSON IS THE BRIEF'S OWN RULE: every one of the three sat
+outside a hand-derived gate, and the full suite on the ci/ ref found all three
+in one run.
+
 INSTRUMENTS: section 94 is unused. Every helper this lane built was a scratch
 script that answered one question once: the per-row three-way resolvers for
 census slices and tables, the pin re-deriver, the registration-tail rebuilder,
