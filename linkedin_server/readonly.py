@@ -1150,6 +1150,14 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     #                                ``N 55``, ``N 56`` and ``P L3`` all wait
     #                                here, and they wait on that, not on a
     #                                line.
+    #
+    #                                THE CONDITION, SET 2026-10-10 by
+    #                                NAMED-ADDRESS-NEEDS-LOG-REDACTION (the
+    #                                orchestrator's call): this page is
+    #                                admitted only after every log line that
+    #                                records a page load writes its address as
+    #                                a SHAPE, never the slug. Census M C101 is
+    #                                GAP on that blocker until then.
     #     /newsletters/              the product root, which is a family
     #     /newsletters/<slug>/analytics/   census ``M C83``, ``P L4``
     #
@@ -2283,6 +2291,187 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # returns a name unchanged, so no shape guard saves a reader here.
     re.compile(r"^https://www\.linkedin\.com/mynetwork/network-manager/people-follow/followers/?$"),
     # ======================================================================
+    # LANE A (la-admissions-lead, 2026-10-10) -- PAGES OF HIS OWN ACCOUNT READ
+    # PAST A SUBSTRING WRITTEN TO STOP AN ACT. Ruling
+    # READ-PAST-AN-ACT-SUBSTRING (orchestrator, 2026-09-28; registered in
+    # `_audit/2026-09-28-rulings-build-classes.md` section 5). Record:
+    # `_audit/2026-09-28-lane-a-admissions.md`.
+    #
+    # EACH LINE BELOW IS HALF OF A TWO-GATE ADMISSION. Its other half is the
+    # paired lane A entry in `_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS`, which
+    # excuses exactly the one forbidden substring that address carries, for
+    # exactly that anchored address. NEITHER HALF ALONE ADMITS ANYTHING, and
+    # the forbidden tuple is unchanged: every substring keeps its full reach
+    # on every other spelling and every sibling path (pinned in
+    # `tests/test_lane_a_admissions.py`, each control shown failing).
+    #
+    # THE GROUND IS RECORDED, NOT ASSUMED. "invitation" and "/follow" were in
+    # the forbidden tuple of the server's first commit (1a94cf9, 2026-08-21),
+    # whose only recorded argument is that tuple's own comment and the
+    # message "so a keyword cannot become a navigation to an action url": a
+    # fence against SENDING an invitation and FOLLOWING somebody. Ruling (b)
+    # of 2026-09-23 withdrew the read-only rule that fence served. Neither
+    # page sends or follows anything; each lists what he already manages.
+    #
+    # NO QUERY STRING AND NO SUB-PATH on any line: a query is where a filter
+    # naming a person would arrive, and nothing builds one. Every control on
+    # these pages stays refused by the press gate unless a press is
+    # separately permitted. THE PAGES LIST OTHER PEOPLE: a reader owes
+    # NAMES-AT-RUNTIME and PEOPLE-DATA-MITIGATIONS (`people_data.py`), and the
+    # pending-invitation badge a load may clear is a passive cost
+    # (D5-PASSIVE-COST-IS-NOT-A-ROW), bracketed by the reader as
+    # `linkedin_connections` brackets it.
+    #
+    # The invitation manager, received tab (census N 13, N 14, N 19). NAMED:
+    # the census and `send_invitation`'s own unverifiable block spell it; no
+    # capture draws it. If it redirects (to a `received/` leaf), the landing
+    # is recorded and that spelling gets its own line then. KEPT 2026-10-10
+    # by RECEIVED-INVITATIONS-READ-STAYS-ADMITTED: whatever a read changes in
+    # an invitation's seen state is a passive cost, UNMEASURED on those rows,
+    # reopened when a capture shows the sender can see it.
+    re.compile(r"^https://www\.linkedin\.com/mynetwork/invitation-manager/?$"),
+    # The invitation manager, sent tab (census N 9, N 11). NAMED, as above.
+    re.compile(r"^https://www\.linkedin\.com/mynetwork/invitation-manager/sent/?$"),
+    # The people he follows (census N 38). NAMED: this module's own
+    # Manage-Pages entry spells it, and LinkedIn's bundle carries its i18n
+    # namespace on every capture. That entry's sentence -- "leave the people
+    # list unread, never ... shorten the forbidden list" -- is an allowlist
+    # comment, not a ruling (D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING); this
+    # line reads the list and shortens nothing.
+    re.compile(r"^https://www\.linkedin\.com/mynetwork/network-manager/people-follow/following/?$"),
+    # His job application settings (census P M2, P M4, P M5, P M6, P M12,
+    # J 71, J 72, J 73): saved resumes and screening answers. DRAWN, not
+    # inferred: `tests/fixtures/synthetic/drawn_routes.txt` carries it, an
+    # anchor on a surface captured live 2026-09-20. It trips TWO substrings
+    # and the paired exemption excuses both, for this address alone:
+    # "/jobs/application", the first commit's fence against APPLYING (census
+    # P M1: "no argument recorded"), and "settings", the 2026-09-03 second
+    # gate over the toggle-bearing settings family. A settings page is
+    # admitted by name (ONE-NAMED-SETTINGS-PAGE-AT-A-TIME); this line names
+    # one. Every resume delete, upload and answer edit on it stays refused by
+    # the press gate and is a write with its own spec.
+    re.compile(r"^https://www\.linkedin\.com/jobs/application-settings/?$"),
+    # TWO MORE NAMED SETTINGS PAGES, each by its exact address and each paired
+    # with an exemption excusing the one substring it trips; a commit of their
+    # own, because how many named pages ONE-NAMED-SETTINGS-PAGE-AT-A-TIME
+    # allows at once is the orchestrator's reading (the record, section 7).
+    # RATIFIED 2026-10-10 by NAMED-SETTINGS-PAGES-RATIFIED, with the
+    # application-settings page above: each page named exactly, in its own
+    # commit, is within that ruling, and no pattern widens.
+    #
+    # The people and Pages he unfollowed (census N 39). MEASURED: the census
+    # cell records the address "found live and written down". It trips
+    # "/unfollow", the first commit's fence against UNFOLLOWING; the page
+    # unfollows nobody. Re-following from it is curation of his own feed
+    # (HIS-OWN-CURATION-NOT-OUTWARD), a write with its own spec; the press
+    # gate refuses it here. The page lists other people: NAMES-AT-RUNTIME.
+    re.compile(r"^https://www\.linkedin\.com/mypreferences/d/unfollowed/?$"),
+    # His advertising-data settings page (census P P15). MEASURED: drawn on
+    # the settings index as its "Advertising data" link (the live lane's
+    # capture, 2026-09-23). It trips "/mypreferences/d/categories/", whose
+    # recorded ground (42e90e3, 2026-08-30) is that "the category pages carry
+    # the toggles" -- a write. Reading the page presses none of them, and
+    # every other category page stays refused on that substring.
+    re.compile(r"^https://www\.linkedin\.com/mypreferences/d/categories/ads/?$"),
+    # ----------------------------------------------------------------------
+    # LANE A, CONTINUED -- PAGES REFUSED BY ALLOWLIST SILENCE ALONE, admitted
+    # on the same ruling's second clause: "A page refused by allowlist SILENCE
+    # alone, with no substring, is admitted the same way when a row needs it
+    # and no ruling holds it." Each address below is one LinkedIn DRAWS
+    # (record, section 3.4, names the capture or fixture for each), each line
+    # is exact and anchored, and none crosses a forbidden substring. No query
+    # unless the line says so, and where it does, the values come from a
+    # tool's arguments (D1-SEARCH-AS-READS), never from a page. Nothing in the
+    # package composes most of these yet; each waits on a capture
+    # (`_audit/_census/capture-queue-reads.tsv`).
+    #
+    # His own profile's Featured detail page (census P S1), drawn on his
+    # profile as the Featured card's detail link; its siblings under
+    # /in/me/details/ are read already.
+    re.compile(r"^https://www\.linkedin\.com/in/me/details/featured/?$"),
+    # One skill's insight page on his own profile (census P S3), drawn on
+    # each skill card of the tracked skills fixture with a small integer
+    # segment. The segment comes from a tool's arguments, never a page.
+    re.compile(r"^https://www\.linkedin\.com/in/me/skill-insights/[0-9]{1,4}/?$"),
+    # Premium networking suggestions for his job search (census N 199),
+    # drawn in a notification. A list of people: NAMES-AT-RUNTIME.
+    re.compile(r"^https://www\.linkedin\.com/premium/matches/?$"),
+    # His job tracker's other three stages (census J 50, J 51, J 52), the
+    # tokens LinkedIn's own payload names (the stage entry above records
+    # them); the closed list there is untouched, each stage its own line.
+    re.compile(r"^https://www\.linkedin\.com/jobs-tracker/\?stage=interview$"),
+    re.compile(r"^https://www\.linkedin\.com/jobs-tracker/\?stage=archived$"),
+    re.compile(r"^https://www\.linkedin\.com/jobs-tracker/\?stage=clicked_apply$"),
+    # LinkedIn's AI job search (census J 16), drawn by his recent-search
+    # anchors and the alert notifications. Any query, as the classic search
+    # line above takes one; the forbidden tuple still runs first, so the
+    # alert links themselves -- which carry alertAction= -- stay refused on
+    # "action=".
+    re.compile(r"^https://www\.linkedin\.com/jobs/search-results/?(\?[^#]*)?$"),
+    # Premium career insights for a role (census J 160), drawn on the
+    # search-appearances page with job_title and location keys.
+    re.compile(r"^https://www\.linkedin\.com/explore-career-insights/?(\?[^#]*)?$"),
+    # NOT HERE: the all-results search page (census M C93). A fifth search
+    # vertical is D2-SEARCH-VERTICALS-WIDENED's to grant -- its measured scope
+    # is "exactly the four" (tests/test_search_admission_blast_radius.py) --
+    # not this clause's. Named to the orchestrator in the record. ANSWERED
+    # 2026-10-10 by CONTENT-VERTICAL-NOT-ALL-RESULTS: the mixed /all/ page
+    # stays refused, and M C93 is served by the content vertical, whose own
+    # line closes this block.
+    #
+    # LinkedIn Learning: its home and catalogue (census J 152), his own
+    # library and its in-progress list (J 154), his career-journey page
+    # (J 156, the read half), each drawn in the global or the Learning nav.
+    # Not a course video (playing one records progress) and not the AI coach
+    # (its answers exist only after a typed question).
+    re.compile(r"^https://www\.linkedin\.com/learning/?$"),
+    re.compile(r"^https://www\.linkedin\.com/learning/browse/?$"),
+    re.compile(r"^https://www\.linkedin\.com/learning/browse/certifications/?$"),
+    re.compile(r"^https://www\.linkedin\.com/learning/me/my-library/?$"),
+    re.compile(r"^https://www\.linkedin\.com/learning/me/my-library/in-progress/?$"),
+    re.compile(r"^https://www\.linkedin\.com/learning/career-journey/?$"),
+    # A company Page's tabs (census J 106, J 109, J 111, J 113, J 114,
+    # J 165), each drawn by Pages and postings. The organisation segment is
+    # the roster lines' class -- no percent, no dot, so no encoded or literal
+    # dot segment reaches a traversal -- and comes from a tool's arguments.
+    # The company entry above listed these as not bought, with no ground
+    # beyond the row ids: allowlist silence (D3).
+    re.compile(r"^https://www\.linkedin\.com/company/[A-Za-z0-9\-_]{1,100}/about/?$"),
+    re.compile(r"^https://www\.linkedin\.com/company/[A-Za-z0-9\-_]{1,100}/life/?$"),
+    re.compile(r"^https://www\.linkedin\.com/company/[A-Za-z0-9\-_]{1,100}/products/?$"),
+    re.compile(r"^https://www\.linkedin\.com/company/[A-Za-z0-9\-_]{1,100}/product/?$"),
+    re.compile(r"^https://www\.linkedin\.com/company/[A-Za-z0-9\-_]{1,100}/services/?$"),
+    re.compile(r"^https://www\.linkedin\.com/company/[A-Za-z0-9\-_]{1,100}/insights/\?insightType=HEADCOUNT$"),
+    re.compile(r"^https://www\.linkedin\.com/company/[A-Za-z0-9\-_]{1,100}/events/?$"),
+    # A company's showcase Page and one product's own page (census J 167,
+    # J 166), each drawn on company Pages.
+    re.compile(r"^https://www\.linkedin\.com/showcase/[A-Za-z0-9\-_]{1,100}/?$"),
+    re.compile(r"^https://www\.linkedin\.com/products/[A-Za-z0-9\-_]{1,100}/?$"),
+    # The resume-tailoring page for one posting (census J 147, J 148, J 149),
+    # drawn on the tracked job-detail fixtures with exactly this key. Its
+    # insights exist only for an uploaded resume, which is a write.
+    re.compile(r"^https://www\.linkedin\.com/job-apply-resources/\?jobPostingId=[0-9]{1,20}$"),
+    # THE CONTENT SEARCH VERTICAL (census M C70; M C93 under D6), on
+    # CONTENT-VERTICAL-NOT-ALL-RESULTS (the orchestrator's call, 2026-10-10,
+    # `_audit/2026-10-10-rulings-lane-a-questions.md`): its own exact line,
+    # NOT a fifth word in the D2 alternation above, so the D2 line and its
+    # measured scope stay exactly what was ruled. The spelling is D2's:
+    # one CLOSED literal segment and the query admitted as a shape, so no
+    # traversal follows it and no sibling vertical rides in -- above all not
+    # the mixed /search/results/all/ page, which this ruling keeps refused
+    # (tests/test_search_admission_blast_radius.py and
+    # tests/test_lane_a_admissions.py drive both).
+    #
+    # D1-SEARCH-AS-READS'S THREE CONDITIONS, stated for this line: the
+    # keywords come from a tool's arguments only, never from a page; never an
+    # identifying value of the operator; at most five test searches a live
+    # session. NOTHING IN THE PACKAGE COMPOSES THIS ADDRESS TODAY: the first
+    # tool that opens it lands with its reader in the same commit, and the
+    # results are other people's posts, returned under
+    # THIRD-PARTY-TEXT-AT-RUNTIME. The next step is a capture
+    # (`_audit/_census/capture-queue.tsv`, admit-search-results-content).
+    re.compile(r"^https://www\.linkedin\.com/search/results/content/?(\?[^#]*)?$"),
+    # ======================================================================
     # REVIEW (lane L1, 2026-09-23) -- N 184, ONE EVENT BY ITS NUMERIC ID.
     # Census row N 184: "reach an event through its URL after it has been
     # shared with you". Shipped in a commit whose subject starts `REVIEW:`
@@ -2831,6 +3020,38 @@ _FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS: tuple[
             r"people-follow/followers/?$"
         ),
         frozenset({"/follow"}),
+    ),
+    # LANE A (la-admissions-lead, 2026-10-10), READ-PAST-AN-ACT-SUBSTRING --
+    # the second gate of each pair whose first gate is the matching lane A
+    # line in `_ALLOWED_URL_PATTERNS`; the argument is written there. Each
+    # entry excuses exactly the substring(s) its address trips, measured with
+    # the shipped tuple, and nothing more; the tuple itself is unchanged.
+    (
+        re.compile(r"^https://www\.linkedin\.com/mynetwork/invitation-manager/?$"),
+        frozenset({"invitation"}),
+    ),
+    (
+        re.compile(r"^https://www\.linkedin\.com/mynetwork/invitation-manager/sent/?$"),
+        frozenset({"invitation"}),
+    ),
+    (
+        re.compile(
+            r"^https://www\.linkedin\.com/mynetwork/network-manager/"
+            r"people-follow/following/?$"
+        ),
+        frozenset({"/follow"}),
+    ),
+    (
+        re.compile(r"^https://www\.linkedin\.com/jobs/application-settings/?$"),
+        frozenset({"/jobs/application", "settings"}),
+    ),
+    (
+        re.compile(r"^https://www\.linkedin\.com/mypreferences/d/unfollowed/?$"),
+        frozenset({"/unfollow"}),
+    ),
+    (
+        re.compile(r"^https://www\.linkedin\.com/mypreferences/d/categories/ads/?$"),
+        frozenset({"/mypreferences/d/categories/"}),
     ),
     # "SHARING PROFILE EDITS", READ ONLY -- the second gate of the pair whose
     # first gate is the matching allowlist line beside dark-mode. 2026-09-27,

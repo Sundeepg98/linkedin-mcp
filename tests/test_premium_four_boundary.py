@@ -137,7 +137,9 @@ NOT_BOUGHT = (
     # blast radius, and not by anything the premium entries reach. Replaced
     # by the content vertical, which that ruling left refused.
     f"{BASE}/search/results/people/example-person-a1b2c3/",
-    f"{BASE}/search/results/content/?keywords=x",
+    # CONTENT-VERTICAL-NOT-ALL-RESULTS admitted the content vertical on its 
+    # own line 2026-10-10, so the neighbour became the schools vertical, which no ruling reaches.
+    f"{BASE}/search/results/schools/?keywords=x",
 )
 
 

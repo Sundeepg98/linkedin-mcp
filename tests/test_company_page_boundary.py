@@ -93,6 +93,17 @@ ROSTERS_ADMITTED_BY_THEIR_OWN_LINE = (
     f"{BASE}/company/{IDENTIFIER}/people/",
 )
 
+#: Six tabs admitted 2026-10-10 by lane A, each by its OWN line and never by
+#: this file's root entry -- the roster's shape, applied to About (J 106),
+#: Life (J 109), Products and Services (J 111), Insights with exactly the
+#: drawn key (J 113, J 114) and Events (J 165).
+TABS_ADMITTED_BY_THEIR_OWN_LINE = tuple(
+    f"{BASE}/company/{seg}/{tab}"
+    for seg in (SLUG, IDENTIFIER)
+    for tab in ("about/", "life/", "products/", "services/",
+                "insights/?insightType=HEADCOUNT", "events/")
+)
+
 #: This file's entry, by its text: the ROOT, one segment deep. Since the lane S
 #: follow-up's cold verification it carries a lookahead refusing a segment of
 #: one or two ENCODED dots -- ``%2e`` and ``%2e%2e`` are ``.`` and ``..`` to the
@@ -122,16 +133,16 @@ ENCODED_DOT_ROOTS = tuple(
 #: it stay shut.
 NOT_BOUGHT = WRITE_SURFACES + ROSTERS + (
     # Every other tab, each a census row this admission did not close.
-    f"{BASE}/company/{SLUG}/about/",
+    # About, Life, Products, Services, Insights (with its drawn HEADCOUNT key)
+    # and Events STOOD HERE UNTIL 2026-10-10: lane A admitted each by its OWN
+    # line (READ-PAST-AN-ACT-SUBSTRING, allowlist silence alone) and they
+    # moved to TABS_ADMITTED_BY_THEIR_OWN_LINE below. What stays is the rest.
     f"{BASE}/company/{SLUG}/jobs/",
-    f"{BASE}/company/{SLUG}/life/",
     f"{BASE}/company/{SLUG}/posts/",
-    f"{BASE}/company/{SLUG}/products/",
-    f"{BASE}/company/{SLUG}/services/",
     f"{BASE}/company/{SLUG}/insights/",
-    f"{BASE}/company/{SLUG}/insights/?insightType=HEADCOUNT",
-    f"{BASE}/company/{SLUG}/events/",
+    f"{BASE}/company/{SLUG}/insights/?insightType=ALUMNI",
     f"{BASE}/company/{SLUG}/videos/",
+    f"{BASE}/company/{SLUG}/home/",
     # A query on the admitted root, which is where a filter naming a person
     # would arrive.
     f"{BASE}/company/{SLUG}/?foo=1",
@@ -335,6 +346,18 @@ def test_the_people_tab_is_admitted_by_its_own_line_and_not_by_this_one(url):
     assert readonly.is_read_url(url) is True
 
 
+@pytest.mark.parametrize("url", TABS_ADMITTED_BY_THEIR_OWN_LINE)
+def test_the_lane_a_tabs_are_admitted_by_their_own_line_and_not_by_this_one(url):
+    """ADDED 2026-10-10 (lane A), in the roster test's shape: no forbidden
+    substring; exactly one line admits each, and it is never this file's root
+    entry, which still refuses every tab."""
+    assert _forbidden_hits(url) == [], url
+    patterns = _matching_patterns(url)
+    assert len(patterns) == 1 and patterns[0] != ROOT_PATTERN, patterns
+    assert not re.match(ROOT_PATTERN, url)
+    assert readonly.is_read_url(url) is True
+
+
 def test_a_slug_carrying_a_forbidden_substring_refuses_at_gate_one():
     """Nothing about this entry excuses gate one, and the right response to
     a company whose slug contains ``connect`` is to leave it unread -- never
@@ -470,9 +493,10 @@ def test_the_refusal_still_names_the_url_it_refused():
     than to a remembered one.
 
     The People tab was the address here until 2026-09-24, when its roster
-    line admitted it; the About tab, still refused by this anchor alone,
-    stands in."""
-    blocked = f"{BASE}/company/{SLUG}/about/"
+    line admitted it; the About tab stood in until 2026-10-10, when lane A
+    admitted it by its own line; the Posts tab, still refused by this anchor
+    alone, stands in."""
+    blocked = f"{BASE}/company/{SLUG}/posts/"
     with pytest.raises(Exception) as caught:
         readonly.assert_read_url(blocked)
     assert blocked in str(caught.value)

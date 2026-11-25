@@ -289,6 +289,24 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "in the ledger record does not hold while leaving the record unmarked."
     ),
 
+    # 2026-10-10, lane B1. READ, not inferred from the filenames: found by the
+    # lane's CI run 38047037803 on row A13's line, and measured over every line
+    # citing the record -- no correction word stands in lane B1's own text.
+    ("profile.md", "2026-10-10-lane-b1-profile-build.md"): (
+        "A READING ADDED, NOT A CORRECTION. Lane B1's paragraphs in rows A11, "
+        "A13, A14, A15, A17, A22, A25, D25, D26, F1, K8 and S8 each ADD a dated "
+        "measurement -- what a live-lane capture draws -- and cite this "
+        "record; none says an earlier paragraph was untrue. Every matched word "
+        "sits in a cell's OLDER paragraph, on the same line (a table row is one "
+        "line) or a neighbouring row's: 'THE BLOCKER'S PREMISE IS NOW WRONG' "
+        "(A14, A15, A22, from 2026-09-19), D25's correction of 2026-09-19 "
+        "('CORRECTED ... WITHIN THE HOUR', its overturned reading), and K8's "
+        "'\"NO REASON\" IS FALSE' -- each already carrying its correction in "
+        "place. **WHAT WOULD MAKE THIS ENTRY WRONG:** a lane B1 paragraph "
+        "saying an earlier paragraph of its row was untrue while leaving it "
+        "unmarked, which would need its own CORRECTS: / CORRECTED BY: pair."
+    ),
+
     # 2026-10-10, lane K. THE CLASS RULINGS OF 2026-09-28 CITE THE UPLOAD
     # SANCTION FOR WHAT THE UPLOAD ROWS STILL LACK -- read, not inferred from
     # the filenames. The document is a byte-identical copy of the

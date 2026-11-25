@@ -84,16 +84,22 @@ from linkedin_server import server as server_module
 #: ``test_every_tool_is_on_the_surface.py`` exists for. This reads the same
 #: registry a client does.
 PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
+    "linkedin_analytics_hub": (),
     "linkedin_apply_job": ("confirm_token", "job_id"),
+    "linkedin_audience_analytics": (),
     "linkedin_auth_status": (),
     "linkedin_cdp_status": (),
     "linkedin_comment_on_item": ("confirm_token", "item", "text"),
     "linkedin_company_page_counts": ("organisation_id",),
+    "linkedin_company_page_home": ("organisation_id",),
+    # 2026-10-10 (lane B4, census J 108): the People tab's insight cards.
+    "linkedin_company_people_insights": ("organisation_id",),
     "linkedin_compose_fields": (),
     "linkedin_connect_from_profile": ("confirm_token", "profile"),
     "linkedin_connections": ("limit",),
     "linkedin_creator_analytics": (),
     "linkedin_draft_applications": ("limit",),
+    "linkedin_tracker_stage": ("limit", "stage"),
     "linkedin_events_home": (),
     "linkedin_follow_company": ("confirm_token", "job_id"),
     "linkedin_follow_company_page": ("confirm_token", "organisation_id"),
@@ -168,6 +174,15 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     # 2026-10-10, lane S (settings): ONE control on ONE admitted settings
     # page, behind the single-use grant. Census P O17 moves; see the pin note.
     "linkedin_set_admitted_setting": ("confirm_token", "control", "settings_page", "value"),
+    # 2026-11-24, lane builds-26: SANCTIONED AND REFUSING -- the stage move on
+    # a saved job. Census J 54 does NOT move: its control has never been
+    # captured; the cell names that capture as its held-by.
+    "linkedin_set_tracker_stage": ("confirm_token", "job_id", "stage"),
+    # 2026-11-24, lane builds-26: the endorsement pair, SANCTIONED AND
+    # REFUSING. Census P E4 / N 111 and P E5 / N 113 do NOT move: the
+    # per-skill control has never been captured.
+    "linkedin_endorse_skill": ("confirm_token", "profile", "skill"),
+    "linkedin_withdraw_endorsement": ("confirm_token", "profile", "skill"),
     "linkedin_surface_census": ("item", "surface"),
     "linkedin_unfollow_company": ("company_id", "confirm_token"),
     "linkedin_unsave_job": ("confirm_token", "job_id"),
@@ -511,6 +526,16 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: was split under COMPOUND-ROW-SPLITS-ONLY-ON-STATE -- `M C35` ("Remove a
 #: reaction") COVERED-UNFIRED on this tool, `M C35b` ("Change a reaction to
 #: another kind") GAP. The counts above did not move with it.
+#: **RE-PINNED 2026-10-10 AT 62 TOOLS AND 98 PARAMETERS (lane A): one tool,
+#: `linkedin_tracker_stage(stage, limit)`, a READ of the tracker's interview,
+#: archived and clicked_apply stages.** THE CENSUS DECISION, in the same
+#: commit: `J 50` and `J 51` GAP -> COVERED-UNFIRED (the tracker's own reader,
+#: aimed at the tracked live captures of that page, never fired); `J 52`
+#: stays GAP -- no capture draws a clicked_apply tab, so whether the stage
+#: renders a list is the capture's to learn. See
+#: `_audit/2026-09-28-lane-a-admissions.md`, section 4.2.
+#: **MERGED AT LANE A'S MERGE OF MASTER f8c7392 (2026-10-10), MEASURED off the
+#: merged registry, not summed:** lane NP's `section` and lane A's tool.
 #: **RE-PINNED 2026-10-10 AT 62 TOOLS AND 99 PARAMETERS on lane U's branch
 #: (ruling FILE-UPLOAD-OPENED): one WRITE,
 #: `linkedin_send_attachment(thread_id, file, confirm_token)` -- one file from
@@ -622,8 +647,63 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: **AT THE INTEGRATION MERGE OF LANE B4 ONTO LANE B3 (2026-10-10): 72 TOOLS AND
 #: 115 PARAMETERS** -- lane B4's two tools and their two parameters each
 #: beside the seventy, counted on the merged registry, never summed.
-PINNED_TOOL_COUNT = 72
-PINNED_PARAMETER_COUNT = 115
+#: **RE-PINNED 2026-10-10 AT 62 TOOLS AND 98 PARAMETERS on lane B4's branch
+#: (child b4-j110, ruling THIRD-PARTY-TEXT-AT-RUNTIME): one READ,
+#: `linkedin_company_page_home(organisation_id)` -- an organisation Page's own
+#: description off its Page root, returned as an untrusted-text record, and the
+#: feed items the root drew as counts.** THE CENSUS DECISION: NO ROW MOVES IN
+#: THIS COMMIT, because a child of lane B4 does not edit the census; `J 110` is
+#: the lane lead's to move from the child's report, by its own cell's bar (the
+#: reader is aimed at a 2026-09-23 capture of the Home view, and the same root
+#: drew the Posts view on 2026-10-10 -- both are fixtures, see
+#: `tests/test_company_home.py`).
+#: **AT THIS INTEGRATION MERGE, 2026-10-26: 73 TOOLS AND 116 PARAMETERS** --
+#: lane B4's one tool and its one parameter beside the seventy-two and 115,
+#: counted on the merged registry, never summed.
+#: **RE-PINNED 2026-10-10 AT 62 TOOLS AND 98 PARAMETERS on lane B4's branch
+#: (census J 108): one READ, `linkedin_company_people_insights(organisation_id)`
+#: -- an organisation People tab's insight cards as categories and counts, the
+#: first tool to open a roster address (MEMBER-ROSTERS-AS-BOUNDED-READS).**
+#: THE CENSUS DECISION is the lane lead's, reported rather than banked: the
+#: child's report proposes `J 108` GAP -> COVERED-UNFIRED on code aimed at the
+#: session-2 capture of a People tab; no census file moves in this commit.
+#: **AT THE J 108 MERGE, 2026-10-26: 74 TOOLS AND 117 PARAMETERS** -- lane
+#: B4's one tool and its one parameter beside the seventy-three and 116,
+#: counted on the merged registry, never summed.
+#: **MERGED AT LANE A'S MERGE OF MASTER 6c65815 (2026-10-10), MEASURED off the
+#: merged registry, not summed: 63 TOOLS AND 102 PARAMETERS** -- lane A's
+#: tracker stage (two) and lane U's attachment (three) over the base with
+#: lane NP's section.
+#: **AT INTEGRATION 2'S MERGE OF LANE A, 2026-11-24: 75 TOOLS AND 119
+#: PARAMETERS** -- lane A's one tool and its two parameters
+#: (`linkedin_tracker_stage(stage, limit)`) beside the seventy-four and 117,
+#: counted on the merged registry, never summed.
+#: **RE-PINNED AT LANE B1'S MERGE OF ITS CHILD lb1-dashboard, 2026-10-10: 63
+#: TOOLS AND 100 PARAMETERS.** One READ with no parameter,
+#: `linkedin_analytics_hub()`, his analytics hub `/dashboard/` loaded once.
+#: THE CENSUS DECISION: the census row `P L8` moves GAP -> COVERED-UNFIRED in
+#: lane B1's census commit (`_audit/2026-10-10-lane-b1-profile-build.md`).
+#: **RE-PINNED AT LANE B1'S MERGE OF ITS CHILD lb1-audience, 2026-10-10: 64
+#: TOOLS AND 100 PARAMETERS.** One READ with no parameter,
+#: `linkedin_audience_analytics()`, his follower count and follower
+#: demographics off one admitted page. THE CENSUS DECISION: the census row
+#: `P L1` moves GAP -> COVERED-UNFIRED in lane B1's census commit.
+#: **AT INTEGRATION 2'S MERGE OF LANE B1, 2026-11-24: 77 TOOLS AND 119
+#: PARAMETERS** -- lane B1's two tools, `linkedin_analytics_hub()` and
+#: `linkedin_audience_analytics()`, take no parameter, beside the seventy-five
+#: and 119, counted on the merged registry, never summed.
+#: **AT LANE BUILDS-26 (2026-11-24): 73 TOOLS AND 118 PARAMETERS** --
+#: `linkedin_set_tracker_stage` (`job_id`, `stage`, `confirm_token`), a
+#: sanctioned write that refuses; census `J 54` keeps its state (no capture of
+#: the control). Counted off the registry, never summed.
+#: **AND 75 TOOLS AND 124 PARAMETERS** at the lane's second commit: the
+#: endorsement pair (`profile`, `skill`, `confirm_token` each), refusing.
+#: **AT INTEGRATION 2'S MERGE OF LANE BUILDS-26, 2026-11-25: 80 TOOLS AND 128
+#: PARAMETERS** -- that lane's three refusing writes and their nine parameters
+#: (three each) beside the seventy-seven and 119, counted on the merged
+#: registry, never summed.
+PINNED_TOOL_COUNT = 80
+PINNED_PARAMETER_COUNT = 128
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:

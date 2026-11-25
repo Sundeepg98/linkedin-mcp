@@ -12031,6 +12031,128 @@ DECLARED DISPOSABLE: the two probes that counted the skeletons with the
 verb's selectors, and the mutation runner. Each answered one question once;
 the answers are in the lane record, section 5.
 
+## 83. ONE TABLE OF ADMISSIONS, EACH ROW PROVEN NARROW THE SAME SIX WAYS (lane-a-admissions, 2026-10-10)
+
+Record: `_audit/2026-09-28-lane-a-admissions.md`.
+
+### 83.1 `tests/test_lane_a_admissions.py` -- the admission harness
+
+WHAT IT IS. A data table, `ADMISSIONS`, one entry per admitted address: the
+census rows it serves, the substrings it crosses (empty for an
+allowlist-silence page), and its SIBLINGS, each naming the gate that must
+still refuse it. Six parametrized tests run every entry the same way:
+
+1. every own spelling is admitted through the shipped `assert_read_url`;
+2. exactly ONE allowlist line matches, anchored at both ends, with no `.*`,
+   `.+`, `\w`, `\S`, `\d` or `[^` (a search-shaped line may carry exactly the
+   classic query group and nothing else);
+3. the exemption excuses EXACTLY the substrings the address trips, measured
+   against the shipped tuple rather than copied from the table;
+4. every sibling is refused, and on the gate it names -- the refusal's own
+   sentence is checked -- and the exemption reaches none of them;
+5. EITHER GATE ALONE ADMITS NOTHING: drop the exemption and the substring
+   refuses saying a pattern would admit it; drop the line and the allowlist
+   refuses;
+6. the BLAST RADIUS of each entry, `is_read_url` before and after over
+   `blast_radius.corpus()` plus every address in the file: it newly admits
+   exactly its own spellings and refuses nothing new.
+
+SHOWN FAILING, four times, each against the `readonly.py` before its
+admission (the file restored from `HEAD`, run, then put back and compared
+byte-for-byte): 18 failed / 5 passed for the first three entries, 6 / 1 for the
+application-settings entry, 12 / 2 for the two settings pages, 96 / 92 for the
+twenty-four allowlist-silence pages. In each run the passes were exactly the
+sibling and table checks that must hold before AND after. And test 6 caught a
+real thing on its first run over a search line: `blast_radius.corpus()`
+already carried `/search/results/all/?keywords=x`, which that line admitted --
+the instrument named a spelling the author had not listed. (That line was later
+withdrawn on other grounds: a fifth search vertical is D2's to grant.)
+
+WHAT IT DOES NOT CHECK, said here so nobody reads it as more: it drives only
+the addresses in its table and the shipped corpus. A pinned refusal elsewhere
+in the suite -- a size, a needle, a coupling corpus -- is not in its view; this
+lane met five of those only when every boundary-driving test file ran
+(`tests/test_job_alerts_read_boundary.py`'s exemption count among them).
+
+WHY ONE TABLE. The precedent carve-outs (`test_l1_follower_list_carve_out.py`,
+`test_notify_setting_admission.py`) are one file per address, each re-deriving
+the same six checks by hand. Twenty-nine admissions in one lane would have been
+twenty-nine files whose checks drift apart; a table makes a missing check a
+missing COLUMN, visible to anyone adding a row.
+
+### 83.2 Declared DISPOSABLE
+
+Scratch helpers that touched no tracked file except through their output, each
+used and discarded: a digest-attribution driver (this register's own
+`ast_digest`, run against a base copy of `readonly.py`), a side-table row
+updater, a census-cell appender, a column restorer, a block inserter and a
+non-ASCII escaper (the last one exists because the file-writing tool decodes a
+backslash-u escape into the character it names -- lane L1's entry 7 recorded
+the same trap; a byte scan is the measurement).
+
+    AN ADMISSION IS NARROW ONLY IF ITS NEIGHBOURS ARE NAMED, AND A NEIGHBOUR
+    LIST WRITTEN BY HAND IS A LOWER BOUND. RUN THE BLAST RADIUS OVER THE
+    CORPUS TOO: IT KNOWS SPELLINGS THE AUTHOR DOES NOT.
+
+## 89. A SKELETON'S LINE BREAKS ARE ITS WRITER'S, AND A WORD IS PUT BACK ONLY WHERE THE SESSION'S OWN KEY SAYS IT STANDS (lb1-profile-build, 2026-10-10)
+
+**Registered 2026-10-10.** Full record: `_audit/2026-10-10-lane-b1-profile-build.md`.
+Numbered 89 by the orchestrator's allocation, appended at the end; renumber
+at the merge if another lane took it.
+
+### 89.1 A TRACKED COPY THAT DRIVES A WRITE MUST DRAW THE TEXT THE READER COMPARES
+
+The live lane's skeletons write every node on its own line. Inside an
+`option` those line breaks become part of the option's `textContent`, which the
+shipped value reader returns UNTRIMMED by design -- a value is read to be put
+back. The first drive of P A22 over session 7's tracked copy withheld Save
+(`the_field_did_not_move`): the choice never read equal to the requested text.
+The harness told the truth about a FIXTURE defect, and the fix went into the
+builder (each option's text written inline), never into the test or the
+package. LinkedIn's live options carry no such whitespace -- P A21's live proof
+read the chosen option equal at the first poll.
+
+    A SKELETON IS A FORMAT, NOT THE PAGE. WHERE A READER COMPARES TEXT
+    EXACTLY, THE COPY MUST DRAW THAT TEXT EXACTLY -- OR THE FIRST RED IS
+    ABOUT THE COPY.
+
+### 89.2 RESTORE A WORD ONLY WHERE ITS KEYED SHAPE STANDS, AND ONLY IN THE ROLE IT PLAYS THERE
+
+A tracked copy reduces every text to `x`, so a reader that aims by accessible
+name has nothing to aim at. The builders of this lane put back a CLOSED list of
+LinkedIn's words, each only where the skeleton's shape equals the word's shape
+under the session's OWN key -- equal letters, digits, length and HMAC -- so
+nothing is restored on a guess. And by role: the pronoun words are restored as
+an option's text only; the same word stands once on his top card and stays `x`
+there.
+
+    A WORD THE KEY CONFIRMS IS STILL ONLY A UI WORD IN THE PLACE IT WAS
+    CONFIRMED FOR.
+
+### 89.3 A ROW THAT NEEDS NO NEW CODE STILL NEEDS A TEST THAT CAN FAIL
+
+P A22 moved on a control the shipped write already aims at. Its test drives the
+real calls over session 7's copy AND over session 4's, where the select is not
+drawn and the same write is refused: the pass is the control's presence, not
+the harness's.
+
+### 89.4 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `scripts/_build_intro_editor_live7_fixture.py` `--check` | a one-word plant in the committed copy ("Example Organisatioz"): `the committed fixture is STALE`, exit 1; restored: current, exit 0 |
+| `tests/test_the_intro_editor_draws_his_organization_select.py` | the first drive RED on the newline-wrapped option text (`the_field_did_not_move`, Save withheld, 1 failed 4 passed); the control: the same write over session 4's editor raises `0 controls in this editor are named 'Organization'` and stores nothing |
+| `scripts/_build_dashboard_fixture.py` `--check`; `linkedin_server/analytics_hub.py`, `tests/test_analytics_hub.py` (child lb1-dashboard) | `--check` on a copy with one value changed: DIFFERS, exit 1; RED first (`ImportError`); seven mutations each turning tests red -- any href a card (8 failed), a label naming another metric (1), an unrecognised label kept (3), the card texts carried out (3), a worded value parsed (5), no icon read as increase (1), the scope reaching the aside (3); a plain `1234` value red under the first pattern (1 failed, 33 passed) |
+| `scripts/_build_audience_fixture.py` `--verify` and `--check`; `linkedin_server/audience_analytics.py`, `tests/test_audience_analytics.py` (child lb1-audience) | `--verify` REFUSED the child's first build, whose restores had all landed one line early (`HTMLParser.getpos()` in `handle_data` reports the preceding tag's line -- a round-trip `--check` cannot see it, re-deriving by the same rule); `--check` on a one-letter plant: DIFFERS, exit 1; four weakenings each turning tests red -- redaction off (5 of 11: a planted name left the reader), any drawn word accepted (2), entries read page-wide (1: the aside read), the view from the first tab (2) |
+
+### 89.5 DECLARED DISPOSABLE
+
+The lead's and the children's scratch probes: the counts-only word counter over raw captures, the
+editor-control lister, the keyed-shape matcher and locator, the scratch
+skeletoniser, the census-cell appender, the pin re-deriver, the DELTA inserter
+and the conflict resolver. Each answered one question once; the answers are in
+the record.
+
 ## 90. A FIXED LABEL READ OFF A KEYED SKELETON, FROM A CLOSED VOCABULARY, BEFORE ANYTHING IS BUILT ON IT (lb2-network-build, 2026-10-10)
 
 **Registered 2026-10-10.** Full record: `_audit/2026-10-10-lane-b2-network-build.md`.
@@ -12189,6 +12311,121 @@ its three-answers-by-three-versions grid, the top-card aim verifier over six
 worlds, and the people-card counter. Each answered one question once; the
 answers are tables in `_audit/2026-10-26-fixes.md`. The recipe in 95.1 is the
 part worth keeping, and it is kept here.
+
+## 96. A REFUSING WRITE IS SHOWN READING ITS OWN SURFACE, PRINTING WHAT IT SAW, AND MINTING NOTHING (builds-26, 2026-11-24)
+
+**Registered 2026-11-24.** Full record: `_audit/2026-10-26-builds.md`.
+Numbered 96 by the orchestrator's allocation, appended at the end; renumber at
+the merge if another lane took it.
+
+### 96.1 A TOOL THAT CANNOT ACT IS STILL TESTED AS A TOOL
+
+Three writes were owed whose controls no capture holds: the tracker row's stage
+item (behind a closed overflow menu) and the per-skill endorse control, in
+both directions. Built as sanctioned specs outside `PERFORMABLE`, the danger is
+not a wrong press -- `mint` refuses at issue -- but a refusal that reads
+nothing, or reads the wrong page, or says a fixed sentence whatever the page
+drew. So each test drives the REAL gate over a frozen world and asserts the
+three things a refusing write owes: exactly one load, of the surface its own
+`state_from` names (the Saved tab; the named profile, through the second
+door); a block that prints what that load saw (the job's row, or the counts of
+endorse-shaped buttons, and whom the profile resolved to); and no token, no
+grant, no press. And the refusal's GROUND is pinned to the capture it was
+measured on, so a capture that changes it fails the test rather than leaving a
+stale refusal standing.
+
+    A REFUSAL IS A MEASUREMENT OR IT IS A SLOGAN. DRIVE IT, PIN ITS GROUND
+    TO THE CAPTURE, AND PROVE THE PAGE IT READ WAS THE PAGE IT ACTS ON.
+
+### 96.2 THE ENTRY
+
+| path | shown failing by |
+|---|---|
+| `tests/test_tracker_stage.py`; `linkedin_server/tracker_stage.py`, `writes._read_tracker_stage_row` | on the base tree `ef5b489` the file fails at collection (`ImportError: cannot import name 'tracker_stage'`); `test_the_capture_draws_a_closed_menu_and_no_item` pins the refusal's ground (two closed `Overflow menu` controls, no stage item) to `tests/fixtures/jobs_tracker_row.html`; a job absent from a partial list reads `unknown`, never `not_saved` |
+| `tests/test_endorse_skill.py`; `linkedin_server/endorse_skill.py` | on `d7a203d` the file fails at collection (`ImportError: cannot import name 'endorse_skill'`); `test_an_endorse_shaped_button_is_counted_and_never_pressed` plants a press handler on a DERIVED endorse-shaped button and asserts the count moves to 1 and the body is never marked; a landing on another profile reads `unknown` and refuses |
+
+### 96.3 DECLARED DISPOSABLE
+
+The lane's scratch copies of the base trees (`git archive` into the scratch
+directory, used once each for the red-first runs) and its edit scripts. Each
+answered one question once; the answers are in the record.
+
+
+## 98. A RED LOG SAYS WHICH TEST FAILED, NOT THAT SOMETHING FAILED (lane-ci-fix-26, 2026-10-26)
+
+**Registered 2026-10-26.** Full record: `_audit/2026-10-26-lane-ci-defect.md`.
+Numbered 98 by the brief, appended at the end; keep heading-number order.
+
+### 98.1 THE MUTATION THAT KILLED THE GUARD
+
+`scripts/lane_ci.py wait`, on a red lane run, printed only
+`##[error]Process completed with exit code 1.` and no test id. The cause was
+measured on lane run 38060371469 (2026-10-10, red on shard 0): that
+`--log-failed` dump was retrievable live on 2026-10-26 (97 lines, fixture
+source = live log, not a reconstruction), and in it the failing test id
+(`test_no_new_unresolvable_citation_appears`) rides THREE line classes the
+shipped regex never matched, because CI runs the suite with `pytest -q -rs`
+and `-rs` prints no `FAILED tests/...::test` id lines:
+
+- the `______ test_name ______` sub-banner opening each FAILURES block
+- the first `E       ...` line of that block (the message)
+- the `tests/file.py:NNN: Reason` reference line closing it
+
+The old pattern `(FAILED|ERROR) \S|##\[error\]|REFUS` matched none of those,
+so the extractor returned exactly one line (the banner). The fix unions the
+three `-rs` classes into `_FALLING_LINE`, strips the BOM gh leaves on the
+first annotation line of a step, and makes `_report` print
+`no failing lines found` rather than a silent section when a red verdict's
+log names no test. The negative control (a green log, or a red log whose
+lines carry no failing class) must still say so out loud.
+
+### 98.2 THE ENTRY
+
+| path | shown failing by |
+|---|---|
+| `scripts/lane_ci.py` (`_FALLING_LINE`, `first_failing_lines`, `_report`) | `tests/test_lane_ci.py::test_the_rs_log_yields_the_failing_test_id_not_just_the_exit_banner` (the `LOG_RS` fixture transcribed from the live log of run 38060371469 returns only the banner pre-fix); `::test_the_rs_log_through_wait_prints_the_failing_test_id` (the end-to-end half through `_report`); `::test_a_red_run_whose_log_has_no_failing_lines_says_so` and `::test_a_red_run_whose_log_is_only_progress_lines_says_so` (the two negative controls); `::test_the_second_failure_block_keeps_its_own_identity_lines` (per-text dedup must not swallow a second block's banner or reference). Pre-fix run: 5 failed, 41 passed; post-fix: 46 passed. |
+
+### 98.3 DECLARED DISPOSABLE
+
+The two scratchpad probes (`probe_lane_ci.py` — measured the pre-fix extractor
+returning one line on the live log; `probe_fixed.py` — measured the post-fix
+extractor returning five: the sub-banner, two E lines, the reference line,
+the banner). Each answered its one question once; the answers are in the
+record. The live log capture itself lives in scratch, never in the repo:
+its last line's `##[error]Process completed with exit code 1.` plus the test
+id and the `tests/test_a_cited_sha_resolves.py:779` reference are what the
+`LOG_RS` fixture transcribes.
+
+### 98.4 SECOND PASS (2026-11-25): THE IDS ARE READ ON THEIR OWN, AND THE SHIPPED CODE IS RUN OVER THE REAL LOG
+
+The first live four-failure red run the fixed extractor read (lane run
+40371662148, two failed shards) was named three-of-four: the detail view keeps
+every `E` line and frame, and its 20-line cap ran out one block early. The ids
+are now a separate, uncapped read, `failing_test_ids`, printed first by
+`_report` as runnable node ids (a sub-banner paired with the first `tests/`
+reference inside its own block), with the count withheld past `ID_LIMIT`.
+Two shapes were measured on the way. pytest pads a name too long for the line
+with ONE underscore a side (COLUMNS=80, CI's fallback), which a four-underscore
+pattern drops; and widened to any fill, the pattern took the `_ _ _ ... _`
+frame separator for a test. The second was caught only by driving the shipped
+`_report` over the real log: the fixture transcribed from that same log had
+copied only lines the OLD pattern matched, so it never carried the separator.
+
+    A FIXTURE TRANSCRIBED THROUGH THE PATTERN UNDER TEST INHERITS THAT
+    PATTERN'S BLIND SPOTS. RUN THE SHIPPED CODE OVER THE REAL ARTIFACT
+    BEFORE TRUSTING THE TRANSCRIPTION.
+
+| path | shown failing by |
+|---|---|
+| `scripts/lane_ci.py` (`failing_test_ids`, `_node_id`, `ID_LIMIT`, `_SUBBANNER`, the any-width banner class in `_FALLING_LINE`, `_report`) | `tests/test_lane_ci.py::test_a_four_failure_log_names_every_failing_test_through_wait` (`LOG_RS4`, from run 40371662148: no node id printed, the fourth test absent), `::test_a_traceback_separator_is_neither_a_test_nor_a_detail_line` and `::test_failing_test_ids_are_node_ids_paired_inside_their_own_block` (five ids for four failures once the real separators joined the fixture), `::test_a_long_name_padded_with_one_underscore_is_still_a_failing_test` (the old pattern returned only the reference line), `::test_a_red_log_with_lines_but_no_test_id_says_no_id_was_found`, `::test_more_failing_tests_than_the_id_limit_says_how_many_it_withheld`; the fixture's own control, `::test_the_four_failure_fixture_really_crowds_the_detail_cap`. Reds: 10 failed / 47 passed, then 3 failed / 55 passed; green 58 passed. Over both real red logs: 1 of 1 and 4 of 4 named. |
+
+### 98.5 DECLARED DISPOSABLE (second pass)
+
+`old_vs_new.py` (the base and lane-head extractors, as shipped, over one real
+log), `report_on_real_logs.py` (the shipped `_report` over real logs, gh
+stubbed to return them), `resolve_instruments.py` (this register's 95/98 merge
+union) and the pytest banner-shape probe. Each answered one question once; the
+answers are in `_audit/2026-10-26-lane-ci-defect.md`, "Second pass".
 
 ## 99. A GUARD IS SHOWN FAILING BY ITS OWN MUTATION, AND THE BYTECODE GOES BEFORE EVERY RUN (apply-26, 2026-11-25)
 

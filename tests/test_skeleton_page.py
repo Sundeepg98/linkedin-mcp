@@ -60,6 +60,15 @@ URL = "https://www.linkedin.com/analytics/profile-views/"
 
 HEADINGS = "h1, h2, h3, h4, h5, h6, [role=heading]"
 OPTIONS = '[role="checkbox"][aria-label], [role="radio"][aria-label]'
+#: ``company_people_insights.CARD_PARTS`` (2026-10-10, lane B4): every card
+#: heading and every facet row of a People tab, in document order.
+INSIGHT_PARTS = 'h3, a[role="checkbox"][href*="/people/?facet"]'
+
+
+def _is_insight_part(tag: str, attrs: dict[str, str]) -> bool:
+    return tag == "h3" or (
+        tag == "a" and attrs.get("role") == "checkbox" and "/people/?facet" in attrs.get("href", "")
+    )
 
 
 def run(awaitable: Any) -> Any:
@@ -131,6 +140,11 @@ READER_SELECTORS: dict[str, str] = {
         "notify_cost.notifications_badge_selector() in "
         "notify_cost.read_notifications_badge, from server._profile_views_press_counters"
     ),
+    INSIGHT_PARTS: (
+        "company_people_insights.read_people_insights (CARD_PARTS), page-wide, "
+        "then each part by nth"
+    ),
+    "p": "on one insight part: company_people_insights._read_row (PARAGRAPHS), by nth",
 }
 
 #: The readers whose ``.locator(...)`` calls are harvested, by module.
@@ -145,6 +159,9 @@ SERVED_READERS: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("dom", ("read_invitation_badge", "read_profile_views_insights", "read_count_lines",
              "harvest_linked_cards")),
     ("notify_cost", ("read_notifications_badge",)),
+    # 2026-10-10 (lane B4): served by tests/shipped_drives.py over the
+    # People tab capture, tests/fixtures/live2/company_people_insights.html.
+    ("company_people_insights", ("read_people_insights", "_read_row")),
 )
 
 
@@ -322,6 +339,19 @@ SELECTOR_CASES: tuple[tuple[tuple[str, ...], str, list[str]], ...] = (
      '<a id="none" href="/notifications/" aria-label="Notifications">.</a>'
      '<a id="mn" href="/mynetwork" aria-label="1 new notification">.</a>',
      ["cap", "low"]),
+    ((INSIGHT_PARTS,),
+     '<h2 id="h2"></h2><h3 id="h"></h3>'
+     '<a id="r" role="checkbox" href="https://www.linkedin.com/company/x/people/?facetSkills=1">.</a>'
+     '<a id="nr" role="checkbox" href="https://www.linkedin.com/company/x/people/">.</a>'
+     '<a id="nb" href="https://www.linkedin.com/company/x/people/?facetSchool=2">.</a>'
+     '<div id="d" role="checkbox" href="/company/x/people/?facetSkills=1"></div><h3 id="h3b"></h3>',
+     ["h", "r", "h3b"]),
+    ((INSIGHT_PARTS, "p"),
+     '<p id="out"></p><h3 id="h"><p id="hp"></p></h3>'
+     '<a id="r" role="checkbox" href="/company/x/people/?facetGeoRegion=1">'
+     '<div><p id="p1"><span>a</span></p></div><p id="p2"></p></a>'
+     '<a id="o" href="/company/x/people/?facetGeoRegion=1"><p id="op"></p></a>',
+     ["hp", "p1", "p2"]),
 )
 
 
@@ -1232,6 +1262,9 @@ FLAT_MEANINGS: tuple[tuple[tuple[str, ...], Callable[..., Optional[int]]], ...] 
     (('a[href*="/notifications"][aria-label*="new notification" i]',),
      lambda n, t, a, s: n if t == "a" and "/notifications" in a.get("href", "")
      and "new notification" in a.get("aria-label", "").lower() else None),
+    ((INSIGHT_PARTS,), lambda n, t, a, s: n if _is_insight_part(t, a) else None),
+    ((INSIGHT_PARTS, "p"),
+     lambda n, t, a, s: n if t == "p" and any(_is_insight_part(tg, at) for _k, tg, at in s) else None),
 )
 
 

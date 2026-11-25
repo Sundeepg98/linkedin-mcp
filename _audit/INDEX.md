@@ -27,8 +27,8 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 276 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 236 |
+| audit documents git tracks under `_audit` | 282 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 242 |
 | distinct dates | 21 |
 | documents with no level-1 heading | 2 |
 | `CORRECTS:` marker lines | 126 |
@@ -39,7 +39,7 @@ are listed as `(undated)`; no date is taken from git history, because
 | documents at either end of a cross-document edge | 103 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
-| documents no correction marker touches at all | 171 |
+| documents no correction marker touches at all | 177 |
 | blockquoted markers naming ANOTHER document | 0 |
 | edges missing one of their two markers | 0 |
 | edges declared a different number of times in each direction | 2 |
@@ -1834,12 +1834,14 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-27 | [2026-09-27-live-session-2-plan.md](2026-09-27-live-session-2-plan.md) | Live session 2 -- the plan, written offline |  |
 | 2026-09-27 | [2026-09-27-rulings-previews-and-receipts.md](2026-09-27-rulings-previews-and-receipts.md) | Ruling, 2026-09-27: a preview names whom the tool resolved |  |
 | 2026-09-27 | [2026-09-27-rulings-relation-removals-and-account-destruction.md](2026-09-27-rulings-relation-removals-and-account-destruction.md) | Rulings, 2026-09-27: removing a relation, and destroying the account |  |
+| 2026-09-28 | [2026-09-28-lane-a-admissions.md](2026-09-28-lane-a-admissions.md) | Lane A: refused reads past an act substring, and the rows a press or a ruling holds |  |
 | 2026-09-28 | [2026-09-28-lane-k-ledger.md](2026-09-28-lane-k-ledger.md) | Lane K: the next-step ledger and the capture queue | **CORRECTED x1** |
 | 2026-09-28 | [2026-09-28-lane-s-settings.md](2026-09-28-lane-s-settings.md) | Lane S (settings): the settings of his own account, built behind the grant |  |
 | 2026-09-28 | [2026-09-28-lane-u-uploads.md](2026-09-28-lane-u-uploads.md) | Lane U: uploads -- the decision registered, the rows relabelled, the verb made performable |  |
 | 2026-09-28 | [2026-09-28-rulings-build-classes.md](2026-09-28-rulings-build-classes.md) | Rulings, 2026-09-28: the classes the census still leaves undecided |  |
 | 2026-09-28 | [2026-09-28-rulings-named-profile-read.md](2026-09-28-rulings-named-profile-read.md) | Ruling, 2026-09-28: reading a profile he names |  |
 | 2026-10-10 | [2026-10-10-integration.md](2026-10-10-integration.md) | Integration, 2026-10-10: lanes B5, NP, B2 and B3 onto master |  |
+| 2026-10-10 | [2026-10-10-lane-b1-profile-build.md](2026-10-10-lane-b1-profile-build.md) | Lane B1, 2026-10-10: fifteen profile rows on real captures -- what the captures draw, the one select that was waiting, and three readers |  |
 | 2026-10-10 | [2026-10-10-lane-b2-network-build.md](2026-10-10-lane-b2-network-build.md) | Lane B2 -- the network build: seventeen BUILD rows read against their captures | corrects x1 |
 | 2026-10-10 | [2026-10-10-lane-b3-messaging-build.md](2026-10-10-lane-b3-messaging-build.md) | Lane B3, 2026-10-10: messaging and content -- one item's words read, two session-1 pages read, and the rest held by what was measured |  |
 | 2026-10-10 | [2026-10-10-lane-b4-jobs-build.md](2026-10-10-lane-b4-jobs-build.md) | Lane B4, 2026-10-10: the jobs rows lane K's ledger marked BUILD |  |
@@ -1847,9 +1849,13 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-10-10 | [2026-10-10-lane-ci-fastlane.md](2026-10-10-lane-ci-fastlane.md) | Lane CI fast lane (lci-fastlane-lead), 2026-10-10 |  |
 | 2026-10-10 | [2026-10-10-lane-g2-debts.md](2026-10-10-lane-g2-debts.md) | Lane G2 -- queued debts: a red instrument made green in its records, a reader guard that took a refusal tally for success, a post record |  |
 | 2026-10-10 | [2026-10-10-lane-np-named-profile.md](2026-10-10-lane-np-named-profile.md) | Lane NP, 2026-10-10: the named profile's handles, its detail pages, the reaction's inverse, and a restore that can clear |  |
+| 2026-10-10 | [2026-10-10-rulings-lane-a-questions.md](2026-10-10-rulings-lane-a-questions.md) | Rulings, 2026-10-10: lane A's admission questions |  |
 | 2026-10-10 | [2026-10-10-rulings-ledger-questions.md](2026-10-10-rulings-ledger-questions.md) | Rulings, 2026-10-10: the ledger's questions |  |
 | 2026-10-10 | [2026-10-10-rulings-named-profile-detail-pages.md](2026-10-10-rulings-named-profile-detail-pages.md) | Ruling, 2026-10-10: the detail pages of a profile he names |  |
+| 2026-10-26 | [2026-10-26-builds.md](2026-10-26-builds.md) | builds-26 -- tracker-stage + endorsement tools (offline) |  |
 | 2026-10-26 | [2026-10-26-fixes.md](2026-10-26-fixes.md) | 2026-10-26 -- fixes lane (fixes-26): three measured defects |  |
+| 2026-10-26 | [2026-10-26-integration-2.md](2026-10-26-integration-2.md) | Integration 2, 2026-10-26: five pending lane heads onto one certified head |  |
+| 2026-10-26 | [2026-10-26-lane-ci-defect.md](2026-10-26-lane-ci-defect.md) | 2026-10-26 lane-ci defect -- `wait` printed only the exit-code banner on a red run |  |
 | 2026-10-26 | [2026-10-26-ledger.md](2026-10-26-ledger.md) | Ledger pass, 2026-10-26: B5's six group rows onto their captures, B3's thirteen lines onto their real next steps |  |
 | 2026-11-25 | [2026-11-25-apply.md](2026-11-25-apply.md) | Lane apply-26: multi-step Easy Apply, phase A (offline) |  |
 
@@ -1884,7 +1890,7 @@ against the same line, so a missing continuation satisfies it.
 - REASON PAST ITS LINE [2026-09-20-the-first-firing.md](2026-09-20-the-first-firing.md) line 233 -- a line-scoped reader sees 35 of 465 characters.
 - REASON PAST ITS LINE [2026-09-20-the-five-under-banked.md](2026-09-20-the-five-under-banked.md) line 3 -- a line-scoped reader sees 35 of 349 characters.
 - REASON PAST ITS LINE [2026-09-20-the-five-under-banked.md](2026-09-20-the-five-under-banked.md) line 457 -- a line-scoped reader sees 94 of 717 characters.
-- REASON PAST ITS LINE [_census/jobs.md](_census/jobs.md) line 456 -- a line-scoped reader sees 825 of 1189 characters.
+- REASON PAST ITS LINE [_census/jobs.md](_census/jobs.md) line 467 -- a line-scoped reader sees 825 of 1189 characters.
 
 - TIGHTEST ADMISSION MARGIN [2026-09-03-linkedin-gap-blockers.md](2026-09-03-linkedin-gap-blockers.md) line 272 clears the 20-character floor by 0. The floor is applied to the marker's OWN LINE, so a reason of 723 characters is admitted on the strength of 20. Reflow that paragraph by one word and a guard rejects it saying it *carries no reason after the citation*, which would not be true. Reported every regeneration rather than counted, because a count of rejections reads zero until the day it does not.
 

@@ -334,7 +334,9 @@ def test_the_address_this_reader_names_is_the_one_the_boundary_admits():
         # line, its own ruling, and not on the search-appearances entry. It is
         # replaced by the content vertical, which that ruling left refused.
         "https://www.linkedin.com/search/results/people/example-person-a1b2c3/",
-        "https://www.linkedin.com/search/results/content/?keywords=x",
+        # CONTENT-VERTICAL-NOT-ALL-RESULTS admitted the content vertical on it
+        # s own line 2026-10-10, so the neighbour became the schools vertical, which no ruling reaches.
+        "https://www.linkedin.com/search/results/schools/?keywords=x",
     ],
 )
 def test_the_neighbours_of_that_address_are_still_refused(url):

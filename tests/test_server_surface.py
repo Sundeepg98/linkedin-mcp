@@ -1,4 +1,47 @@
-"""The tool surface: seventy-two tools, fifty of which do not write.
+"""The tool surface: eighty tools, fifty-five of which do not write.
+
+**IT READ "seventy-seven tools, fifty-five of which do not write" UNTIL
+INTEGRATION 2'S MERGE OF LANE BUILDS-26 (2026-11-25) ADDED ITS THREE
+WRITE-SHAPED TOOLS**: ``linkedin_set_tracker_stage`` (census J 54) and the
+endorsement pair ``linkedin_endorse_skill`` / ``linkedin_withdraw_endorsement``
+(P E4, P E5), sanctioned and refusing, so the non-write count holds at
+fifty-five. Lane builds-26's branch read "seventy-five tools, fifty of which
+do not write" (its two paragraphs below keep that branch's counts).
+
+**IT READ "seventy-five tools, fifty-three of which do not write" UNTIL
+INTEGRATION 2'S MERGE OF LANE B1 (2026-11-24) ADDED LANE B1'S TWO READS**:
+``linkedin_analytics_hub`` (census P L8), his analytics hub's metric cards as
+integers and closed words, and ``linkedin_audience_analytics`` (census P L1),
+his follower count and demographics as census shapes. Lane B1's branch read
+"sixty-four tools, forty-six of which do not write". The split moved on its
+read side only.
+
+**IT READ "seventy-four tools, fifty-two of which do not write" UNTIL
+INTEGRATION 2'S MERGE OF LANE A (2026-11-24) ADDED LANE A'S READ**:
+``linkedin_tracker_stage``, one of his job tracker's further stages --
+interview, archived or clicked_apply -- through the tracker's own reader.
+Lane A's branch read "sixty-three tools, forty-five of which do not write".
+The split moved on its read side only.
+
+**IT READ "seventy-three tools, fifty-one of which do not write" UNTIL THE
+J 108 MERGE (2026-10-26) ADDED LANE B4'S SECOND READ**:
+``linkedin_company_people_insights`` (census J 108), an organisation People
+tab's insight cards -- categories and counts, no person -- opened on the one
+roster address ``member_rosters.compose`` builds for it. One load, no press.
+The split moved on its read side only.
+
+**IT READ "seventy-two tools, fifty of which do not write" UNTIL THIS
+INTEGRATION MERGE (2026-10-26) ADDED LANE B4'S READ**: ``linkedin_company_page_home`` (census
+J 110), an organisation Page root's own description as an untrusted-text
+record and its feed items as counts. The split moved on its read side only.
+
+**IT READ "seventy-three tools, fifty of which do not write" BETWEEN LANE
+BUILDS-26'S TWO COMMITS (2026-11-24)**: the endorsement pair arrived second,
+both write-shaped and refusing, so the non-write count holds.
+
+**IT READ "seventy-two tools, fifty of which do not write" UNTIL LANE BUILDS-26
+(2026-11-24)**: one WRITE-SHAPED tool, ``linkedin_set_tracker_stage`` (census
+J 54), sanctioned and refusing, so the non-write count holds.
 
 **IT READ "sixty-five tools, forty-five of which do not write" UNTIL LANE B2'S
 SEARCH VERTICALS (2026-10-10), merged after lane NP**: two READS, ``linkedin_search_groups`` (census
@@ -182,6 +225,11 @@ SANCTIONED_WRITE_TOOLS = frozenset(SANCTIONED_WRITES) & {
     # docstring must describe one, so it is on both exemptions -- which are
     # one set. A key in writes.SANCTIONED_WRITES.
     "linkedin_withdraw_reaction",
+    # 2026-11-24 (lane builds-26): sanctioned and REFUSING (census J 54).
+    "linkedin_set_tracker_stage",
+    # 2026-11-24 (lane builds-26): the endorsement pair, refusing.
+    "linkedin_endorse_skill",
+    "linkedin_withdraw_endorsement",
 }
 
 #: THE DOCSTRING EXEMPTION IS THE SAME SET AS THE NAME EXEMPTION, and it took
@@ -271,6 +319,23 @@ EXPECTED_TOOLS = {
     # shaped (census M C38). Each loads one page and presses nothing.
     "linkedin_my_articles",
     "linkedin_item_viewer_demographics",
+    # THE SIXTY-SECOND, 2026-10-10 (lane B4, child b4-j110, ruling
+    # THIRD-PARTY-TEXT-AT-RUNTIME): a READ of an organisation Page root -- the
+    # Page's own description as an untrusted-text record, and the feed items
+    # the root drew as counts -- on the address the boundary already admits.
+    # It presses nothing and is on no write table (census J 110).
+    "linkedin_company_page_home",
+    # THE SIXTY-SECOND, 2026-10-10 (lane B4, census J 108): a READ of an
+    # organisation People tab's insight cards -- categories and counts, no
+    # person -- opening the one roster address member_rosters.compose builds
+    # for it (MEMBER-ROSTERS-AS-BOUNDED-READS). One load, no press; it is on
+    # no write table.
+    "linkedin_company_people_insights",
+    # THE SIXTY-SECOND, 2026-10-10 (lane B1, child lb1-dashboard, census
+    # P L8): a READ of his analytics hub, /dashboard/, loaded once; its
+    # metric cards come back as integers and closed words. It presses
+    # nothing and is on no write table.
+    "linkedin_analytics_hub",
     # THE THIRTY-EIGHTH, 2026-09-05: linkedin_events_home, a READ. No
     # write was added. It is the only tool here whose whole answer can be
     # ZERO, and its reader returns that integer only when four
@@ -404,6 +469,11 @@ EXPECTED_TOOLS = {
     # ``draft`` is on no write-verb list, so nothing here is a rename dodging
     # a guard. What it reads is the tab LinkedIn labels "In Progress".
     "linkedin_draft_applications",
+    # A READ, added 2026-10-10 by lane A: the tracker's three further stages
+    # (interview, archived, clicked_apply; census J 50, J 51, J 52), one tool
+    # with a closed ``stage`` argument, each stage admitted by its own
+    # anchored allowlist line. Reads the list; presses nothing.
+    "linkedin_tracker_stage",
     # 2026-08-26. NOT A JOB-SEARCH TOOL, and the only name on this list that
     # is not: linkedin_surface_census measures what controls a page carries so
     # that the capabilities this server refuses can be costed from a reading
@@ -575,6 +645,14 @@ EXPECTED_TOOLS = {
     # sixty-second on its branch),
     # a WRITE: see SANCTIONED_WRITE_TOOLS.
     "linkedin_withdraw_reaction",
+    # THE SIXTY-FOURTH, 2026-10-10 (lane B1, child lb1-audience), a READ:
+    # follower count and demographics off one admitted page, no press.
+    "linkedin_audience_analytics",
+    # 2026-11-24 (lane builds-26): a WRITE that refuses (census J 54).
+    "linkedin_set_tracker_stage",
+    # 2026-11-24 (lane builds-26): two WRITES that refuse (P E4, P E5).
+    "linkedin_endorse_skill",
+    "linkedin_withdraw_endorsement",
 }
 
 #: Names a reader must never grow. Listed explicitly so that adding one is a
@@ -659,8 +737,50 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_seventy_two_tools(tools):
-    """RENAMED AGAIN AT THE INTEGRATION MERGE OF LANE B4 ONTO LANE B3 (2026-10-10), to
+async def test_the_surface_is_exactly_the_eighty_tools(tools):
+    """RENAMED AGAIN AT INTEGRATION 2'S MERGE OF LANE BUILDS-26 (2026-11-25), to
+    ``..._eighty_tools``: that lane's three write-shaped tools beside the
+    seventy-seven. MEASURED off the merged registry, not summed; the name moved
+    with the pin. (Lane builds-26's branch kept the base's name while its count
+    read seventy-five.)
+
+    RENAMED AGAIN AT INTEGRATION 2'S MERGE OF LANE B1 (2026-11-24), to
+    ``..._seventy_seven_tools``: lane B1's ``linkedin_analytics_hub`` and
+    ``linkedin_audience_analytics`` beside the seventy-five. MEASURED off the
+    merged registry, not summed; the name moved with the pin.
+
+    RENAMED ON LANE B1'S BRANCH, 2026-10-10, to ``..._sixty_four_tools``: the
+    same two reads on that branch's sixty-two, each merged from its child.
+
+    RENAMED AGAIN AT INTEGRATION 2'S MERGE OF LANE A (2026-11-24), to
+    ``..._seventy_five_tools``: lane A's ``linkedin_tracker_stage`` beside the
+    seventy-four. MEASURED off the merged registry, not summed; the name
+    moved with the pin.
+
+    RENAMED AGAIN AT THE J 108 MERGE (2026-10-26), to
+    ``..._seventy_four_tools``: lane B4's ``linkedin_company_people_insights``
+    (census J 108, ruling THIRD-PARTY-TEXT-AT-RUNTIME) beside the
+    seventy-three. MEASURED off the merged registry, not summed; the name
+    moved with the pin.
+
+    RENAMED AGAIN AT THIS INTEGRATION MERGE (2026-10-26), to
+    ``..._seventy_three_tools``: lane B4's ``linkedin_company_page_home`` (census
+    J 110, ruling THIRD-PARTY-TEXT-AT-RUNTIME) beside the seventy-two. MEASURED
+    off the merged registry, not summed; the name moved with the pin.
+
+    RENAMED AGAIN ON LANE B4'S BRANCH, 2026-10-10, to ``..._sixty_two_tools``:
+    one READ, ``linkedin_company_people_insights`` (census J 108), an
+    organisation People tab's insight cards as categories and counts. MEASURED
+    off the registry on this branch; the name moved with the pin. A merge that
+    brings another lane's tool re-measures it off the merged registry.
+
+    RENAMED AGAIN ON LANE B4'S BRANCH, 2026-10-10 (child b4-j110), to
+    ``..._sixty_two_tools``: one READ, ``linkedin_company_page_home`` (census
+    J 110, ruling THIRD-PARTY-TEXT-AT-RUNTIME). MEASURED off the registry; the
+    name moved with the pin. That lane's branch held the tool as its own
+    sixty-second; this merge re-derives it as the seventy-third.
+
+    RENAMED AGAIN AT THE INTEGRATION MERGE OF LANE B4 ONTO LANE B3 (2026-10-10), to
     ``..._seventy_two_tools``: lane B4's two writes beside the seventy.
     MEASURED off the merged registry, not summed; the name moved with the pin.
 
@@ -707,11 +827,27 @@ async def test_the_surface_is_exactly_the_seventy_two_tools(tools):
     ``..._sixty_two_tools`` on its own branch from master's sixty-one.
     MEASURED off the merged registry; the name moved with the pin.
 
+    RENAMED AGAIN AT LANE A'S MERGE OF MASTER 6c65815, 2026-10-10, to
+    ``..._sixty_three_tools``: the two sixty-seconds below met, lane A's read
+    and lane U's write. MEASURED off the merged registry.
+
+    RENAMED AGAIN ON LANE A, 2026-10-10, to ``..._sixty_two_tools``: one
+    READ, ``linkedin_tracker_stage``, the job tracker's interview, archived
+    and clicked_apply stages. MEASURED off the registry; the name moved with
+    the pin.
+
     RENAMED AGAIN ON LANE U'S BRANCH, 2026-10-10, to ``..._sixty_two_tools``:
     one WRITE, ``linkedin_send_attachment`` (ruling FILE-UPLOAD-OPENED), one
     file into one conversation he names. MEASURED off the registry on the
     lane's branch, counting from master's sixty-one; a merge beside other
-    lanes' tools re-derives it.
+    lanes' tools re-derives it. RENAMED AGAIN AT LANE B1'S MERGE OF ITS CHILD
+    lb1-dashboard, 2026-10-10, to ``..._sixty_three_tools``: one READ,
+    ``linkedin_analytics_hub`` (census P L8), his analytics hub loaded once.
+    MEASURED off the merged registry; the name moved with the pin.
+    RENAMED AGAIN AT LANE B1'S MERGE OF ITS CHILD lb1-audience, 2026-10-10, to
+    ``..._sixty_four_tools``: one READ, ``linkedin_audience_analytics`` (census
+    P L1), his follower count and demographics off one admitted page. MEASURED
+    off the merged registry; the name moved with the pin.
 
     RENAMED AGAIN ON LANE NP, 2026-10-10, to ``..._sixty_two_tools``: one
     WRITE, ``linkedin_withdraw_reaction``, the reaction's inverse (the
@@ -1023,6 +1159,9 @@ async def test_the_surface_is_exactly_the_seventy_two_tools(tools):
     # SIXTY-ONE ON LANE L5'S ORDER OF 2026-09-28 08:06: linkedin_read_named_profile,
     # a READ, so the split moves on its read side and the write set holds.
     # MEASURED off mcp.list_tools().
+    # SIXTY-TWO ON LANE A, 2026-10-10: linkedin_tracker_stage, a READ, so the
+    # split moves on its read side and the write set holds. MEASURED off
+    # mcp.list_tools().
     # SIXTY-TWO ON LANE U'S BRANCH, 2026-10-10: linkedin_send_attachment, a
     # WRITE, so the split moves on its write side and the non-write count
     # holds. MEASURED off mcp.list_tools() on the branch.
@@ -1071,7 +1210,44 @@ async def test_the_surface_is_exactly_the_seventy_two_tools(tools):
     # SEVENTY-TWO AT THE INTEGRATION MERGE OF LANE B4 ONTO LANE B3 (2026-10-10): lane B4's two
     # WRITES beside the seventy, so the split moves on its write side and the
     # non-write count holds at fifty. MEASURED off mcp.list_tools() on the merged tree.
-    assert len(tools) == 72
+    # SIXTY-TWO ON LANE B4'S BRANCH, 2026-10-10: linkedin_company_page_home, a
+    # READ, so the split moves on its read side and the write set holds.
+    # MEASURED off mcp.list_tools().
+    # SEVENTY-THREE AT THIS INTEGRATION MERGE, 2026-10-26: lane B4's
+    # linkedin_company_page_home beside the seventy-two, measured off the
+    # merged registry, not summed.
+    # SIXTY-TWO ON LANE B4'S BRANCH, 2026-10-10: linkedin_company_people_insights,
+    # a READ (census J 108), so the split moves on its read side and the write
+    # set holds. MEASURED off mcp.list_tools() on this branch.
+    # SEVENTY-FOUR AT THE J 108 MERGE, 2026-10-26: lane B4's
+    # linkedin_company_people_insights beside the seventy-three, measured off
+    # the merged registry, not summed.
+    # SIXTY-THREE AT LANE A'S MERGE OF MASTER 6c65815, 2026-10-10: the read
+    # and the write above, each the sixty-second on its own branch, met.
+    # MEASURED off mcp.list_tools() on the merged tree.
+    # SEVENTY-FIVE AT INTEGRATION 2'S MERGE OF LANE A, 2026-11-24: lane A's
+    # linkedin_tracker_stage, a READ, beside the seventy-four, so the split
+    # moves on its read side and the write set holds. MEASURED off
+    # mcp.list_tools() on the merged tree, not summed.
+    # SIXTY-THREE AT LANE B1'S MERGE OF ITS CHILD lb1-dashboard, 2026-10-10:
+    # linkedin_analytics_hub, a READ, so the split moves on its read side and
+    # the write set holds. MEASURED off mcp.list_tools() on the merged tree.
+    # SIXTY-FOUR AT LANE B1'S MERGE OF ITS CHILD lb1-audience, 2026-10-10:
+    # linkedin_audience_analytics, a READ, so the split moves on its read side
+    # and the write set holds. MEASURED off mcp.list_tools() on the merged tree.
+    # SEVENTY-SEVEN AT INTEGRATION 2'S MERGE OF LANE B1, 2026-11-24: lane B1's
+    # two READS beside the seventy-five, so the split moves on its read side
+    # and the write set holds. MEASURED off mcp.list_tools() on the merged
+    # tree, not summed.
+    # SEVENTY-THREE FROM 2026-11-24 (lane builds-26): linkedin_set_tracker_stage,
+    # a WRITE that refuses, so the split moves on its write side and the
+    # non-write count holds. MEASURED off mcp.list_tools().
+    # SEVENTY-FIVE FROM THE SAME LANE'S SECOND COMMIT: the endorsement pair.
+    # EIGHTY AT INTEGRATION 2'S MERGE OF LANE BUILDS-26, 2026-11-25: that
+    # lane's three write-shaped tools beside the seventy-seven, so the split
+    # moves on its write side and the non-write count holds at fifty-five.
+    # MEASURED off mcp.list_tools() on the merged tree, not summed.
+    assert len(tools) == 80
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -1110,6 +1286,11 @@ async def test_the_surface_is_exactly_the_seventy_two_tools(tools):
         "linkedin_set_admitted_setting",
         # 2026-10-10 (lane NP): the reaction's inverse.
         "linkedin_withdraw_reaction",
+        # 2026-11-24 (lane builds-26): sanctioned and REFUSING (census J 54).
+        "linkedin_set_tracker_stage",
+        # 2026-11-24 (lane builds-26): the endorsement pair, refusing.
+        "linkedin_endorse_skill",
+        "linkedin_withdraw_endorsement",
     }
     # THE NON-WRITE COUNT MOVES TO SIXTEEN, and the reason is NOT the reason
     # it moved last time. The comment here said: "THE READ COUNT MOVES OFF
@@ -1267,7 +1448,43 @@ async def test_the_surface_is_exactly_the_seventy_two_tools(tools):
     # FIFTY AT THE INTEGRATION MERGE OF LANE B3 ONTO LANE B2 (2026-10-10): the
     # two forty-sevens above are different reads and merged as one equal edit;
     # MEASURED on the merged tree, never summed.
-    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 50
+    # FORTY-FIVE ON LANE B4'S BRANCH, 2026-10-10: linkedin_company_page_home is
+    # a READ -- one load of the admitted Page root, nothing pressed, no entry
+    # in readonly.SANCTIONED_MUTATIONS -- and the write side is unmoved.
+    # FIFTY-ONE AT THIS INTEGRATION MERGE, 2026-10-26: lane B4's
+    # linkedin_company_page_home is a READ beside the fifty, so the non-write
+    # count moves by one and the write side is unmoved; MEASURED on the
+    # merged tree, never summed.
+    # FORTY-FIVE ON LANE B4'S BRANCH, 2026-10-10:
+    # linkedin_company_people_insights is a READ -- one admitted People-tab
+    # load, no press, no scroll -- and the write side is unmoved.
+    # FIFTY-TWO AT THE J 108 MERGE, 2026-10-26: lane B4's
+    # linkedin_company_people_insights is a READ beside the fifty-one, so the
+    # non-write count moves by one and the write side is unmoved; MEASURED on
+    # the merged tree, never summed.
+    # FORTY-FIVE ON LANE A, 2026-10-10: linkedin_tracker_stage is a READ --
+    # it loads one tracker stage he names and presses nothing -- and the
+    # write side is unmoved.
+    # FIFTY-THREE AT INTEGRATION 2'S MERGE OF LANE A, 2026-11-24: lane A's
+    # linkedin_tracker_stage is a READ beside the fifty-two, so the non-write
+    # count moves by one and the write side is unmoved; MEASURED on the
+    # merged tree, never summed.
+    # FORTY-FIVE ON LANE B1'S BRANCH, 2026-10-10: linkedin_analytics_hub is a
+    # READ -- it loads one admitted page and presses nothing -- and the write
+    # side is unmoved.
+    # FORTY-SIX AT LANE B1'S MERGE OF ITS CHILD lb1-audience, 2026-10-10:
+    # linkedin_audience_analytics is a READ too -- one admitted page, nothing
+    # pressed -- and the write side is unmoved.
+    # FIFTY-FIVE AT INTEGRATION 2'S MERGE OF LANE B1, 2026-11-24: lane B1's two
+    # READS beside the fifty-three, so the non-write count moves by two and the
+    # write side is unmoved; MEASURED on the merged tree, never summed.
+    # FIFTY-FIVE STILL AT INTEGRATION 2'S MERGE OF LANE BUILDS-26, 2026-11-25:
+    # its three tools are write-shaped and sanctioned, so the non-write count
+    # holds; MEASURED on the merged tree. The total below is a SECOND COPY of
+    # the first test's pin, which the merge carried at seventy-seven because
+    # only this side had it -- moved to the measured eighty with that pin.
+    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 55
+    assert len(tools) == 80
 
 
 def test_the_read_that_was_nearly_named_a_write():
@@ -1382,6 +1599,11 @@ async def test_the_exemption_covers_only_the_names_on_it(tools):
         "linkedin_set_admitted_setting",
         # 2026-10-10 (lane NP): the reaction's inverse.
         "linkedin_withdraw_reaction",
+        # 2026-11-24 (lane builds-26): sanctioned and REFUSING (census J 54).
+        "linkedin_set_tracker_stage",
+        # 2026-11-24 (lane builds-26): the endorsement pair, refusing.
+        "linkedin_endorse_skill",
+        "linkedin_withdraw_endorsement",
     }
     # The probe has to be genuinely sanctioned for this to test the thing it
     # claims to. A name nobody ever specced would only show that made-up names
@@ -2014,7 +2236,12 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
     # Written out rather than derived, for the reason this file writes every
     # capability list out: a set that supplies its own expected value cannot
     # notice a member arriving.
-    assert set(not_performed) == {"set_open_to_work"}
+    # set_tracker_stage JOINED 2026-11-24 (lane builds-26): sanctioned and
+    # refusing for want of a capture of the control it would press.
+    assert set(not_performed) == {
+        "set_open_to_work", "set_tracker_stage", "endorse_skill",
+        "withdraw_endorsement",
+    }
     assert "update_setting" not in set(not_performed)
     # update_profile_field LEFT THIS FIELD ON 2026-09-02 by shipping, which is
     # the only way anything is meant to leave it. A shipped action still
@@ -2412,7 +2639,12 @@ async def test_the_server_instructions_name_every_write_that_ships():
     # re-populates it and must be looked at. Deleting the loop would make that
     # arrival silent, which is the permissive-skip failure this very block was
     # written about.
-    assert examined == set(), examined
+    # RE-POPULATED 2026-11-24 (lane builds-26), as foretold: the first
+    # sanctioned-and-refusing action with a registered tool since
+    # send_message, looked at and named in the instructions.
+    assert examined == {
+        "set_tracker_stage", "endorse_skill", "withdraw_endorsement",
+    }, examined
     # AND THE CLAIM THAT NAMED THEM AS REFUSING HAD TO BE CORRECTED. It said
     # "none of them can act" of a set that is now empty, and a sentence
     # describing an empty set as refusing is a claim about nothing -- worse

@@ -1898,14 +1898,61 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # preparation): his "Sharing profile edits" setting page, one line here and
     # one pattern exemption beside it, on the orchestrator's application of
     # ONE-NAMED-SETTINGS-PAGE-AT-A-TIME. See that ledger entry.
-    "_ALLOWED_URL_PATTERNS": "18e5958586c2c367",
+    #
+    # 18e5958586c2c367 until 2026-10-10 (lane A, READ-PAST-AN-ACT-SUBSTRING):
+    # three anchored lines -- his invitation manager's received and sent tabs
+    # and the people he follows -- each paired with one exemption below.
+    # ATTRIBUTION, with this file's ast_digest: readonly.py at the lane's base
+    # (3c8edc2 plus the rulings commits, which touched no package file) is the
+    # tree minus exactly the lane A block, and it hashes to the prior pin on
+    # all thirteen keys; only this key and the pattern-exemption key moved.
+    # Record: _audit/2026-09-28-lane-a-admissions.md.
+    #
+    # c0249a5bfde871da until lane A's second admission the same day: his job
+    # application settings page, one line, paired with one exemption below;
+    # the tree minus that line and that entry hashes to c0249a5bfde871da and
+    # 6f99bceb4d139db3, and the other eleven keys are byte-identical.
+    #
+    # 94bf0916c1be3824 until lane A's third: two named settings pages (the
+    # people and Pages he unfollowed, his advertising-data page), one line
+    # each, each paired with one exemption below; the tree minus those two
+    # lines and two entries hashes to the prior pins on all thirteen keys.
+    #
+    # fc6839c2e877c011 until lane A's fourth: twenty-four anchored lines for
+    # pages refused by allowlist silence alone (READ-PAST-AN-ACT-SUBSTRING's
+    # second clause), no exemption among them -- the exemption table and every
+    # other key are byte-identical, and the tree minus the block hashes to
+    # fc6839c2e877c011.
+    #
+    # WRITTEN AS TWO ADJACENT LITERALS ON PURPOSE: the digest's tail is ten
+    # decimal digits, which tests/test_no_committed_identity.py reads as a
+    # telephone number. Python joins the two halves into the one string the
+    # live digest is compared with; the text simply carries no ten-digit run.
+    #
+    # d3c96a81 + 03316665 (the two halves above) until lane A's content
+    # vertical, 2026-10-10: one anchored line,
+    # `/search/results/content/?(\?[^#]*)?$`, on CONTENT-VERTICAL-NOT-ALL-
+    # RESULTS -- its own line, the D2 alternation untouched, no exemption --
+    # and every other key byte-identical. The new digest carries no long
+    # digit run, so it is one literal again.
+    "_ALLOWED_URL_PATTERNS": "b8eebaa9a90587e8",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     # 419e64a3cd92ec7e until the same REVIEW: commit: a third entry, excusing
     # exactly {"/follow"} for exactly the anchored follower-list address.
     # 76d7b10899530d69 until 2026-09-27: a fourth, excusing exactly
     # {"/settings/", "settings"} for exactly his "Sharing profile edits"
     # setting page (the live lane; the same ledger entry).
-    "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "14f567fd160048a8",
+    # 14f567fd160048a8 until 2026-10-10: three more (lane A), excusing exactly
+    # {"invitation"} for the invitation manager's received and sent tabs and
+    # exactly {"/follow"} for his own following list, each for exactly its
+    # anchored address; the forbidden tuple is unchanged at 33.
+    # 6f99bceb4d139db3 until the second: one more, excusing exactly
+    # {"/jobs/application", "settings"} -- the two substrings that address
+    # trips, measured -- for exactly /jobs/application-settings/.
+    # ffebed391e628195 until the third: two more, excusing exactly
+    # {"/unfollow"} for /mypreferences/d/unfollowed and exactly
+    # {"/mypreferences/d/categories/"} for /mypreferences/d/categories/ads.
+    "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "28643e7ca768b7df",
     "_FORBIDDEN_URL_SUBSTRINGS": "b0291a66ec9bd51e",
     # 23aece1483afdee9 until 2026-09-19. See the re-freeze note above: eleven
     # detector classes added, zero removed, and the direction is pinned by

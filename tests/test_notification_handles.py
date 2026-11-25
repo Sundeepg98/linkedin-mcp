@@ -176,12 +176,24 @@ def test_the_published_link_still_has_its_query_deleted():
     assert "?" not in row["link"]
 
 
+#: The query keys whose values a notification row MAY carry, each a key some
+#: tool here takes: the alert's keyword, and -- since 2026-10-10, lane A,
+#: census J 38 -- the ids of the postings the alert landed.
+ESCAPING_KEYS = ("keywords=", "originToLandingJobPostings=")
+
+
 def test_only_the_keyword_ever_escapes_the_query_string():
     """Nothing else in the query may appear anywhere in the emitted row.
 
     Derived from the href rather than typed as literals, so the check cannot
     drift away from the input it is about, and so no new opaque value has to
     be invented to write it.
+
+    AMENDED 2026-10-10: the keyword is no longer the ONLY value that leaves --
+    an alert's landing job ids do too (``alert_job_ids``, J 38). The rule is
+    unchanged for everything else, and the urn case below is still the one
+    that matters; ``test_the_landing_ids_escape_and_the_urn_still_does_not``
+    holds both at once.
     """
     row = shape.parse_notification(_alert_row(ALERT_HREF_WITH_URN))
     emitted = " ".join(str(value) for value in row.values())
@@ -190,7 +202,7 @@ def test_only_the_keyword_ever_escapes_the_query_string():
         part.split("=", 1)[0]
         for part in query.split("&")
         if "=" in part
-        and not part.startswith("keywords=")
+        and not part.startswith(ESCAPING_KEYS)
         and part.split("=", 1)[1]
         and part.split("=", 1)[1] in emitted
     ]
@@ -220,3 +232,83 @@ def test_a_company_id_is_read_from_the_path_and_never_from_the_query():
     assert shape.notification_handles(f"{BASE}/company/5417062") == {
         "company_id": "5417062"
     }
+
+
+# ---------------------------------------------------------------------------
+# THE JOBS AN ALERT DELIVERED (census J 38), lane A, 2026-10-10.
+# ---------------------------------------------------------------------------
+#
+# D6-CAPABILITY-OVER-AFFORDANCE: the row is named for the alert's own page,
+# whose link carries alertAction= and is refused on the forbidden word
+# action=. The same link, on the notifications page this server already
+# reads, carries originToLandingJobPostings -- the ids of the postings the
+# alert delivered. Read off the tracked notifications fixture, a sanitised
+# capture of the real account (543660c, 2026-08-22): four of its links carry
+# the key. Each id is what linkedin_job_detail takes.
+
+#: An alert link as the tracked fixture draws one, with the landing ids
+#: (invented values) and the act-shaped key that keeps the page itself shut.
+ALERT_WITH_LANDING = (
+    "/jobs/search-results/?keywords=Senior+Software+Engineer"
+    "&origin=SEMANTIC%5FSEARCH%5FJOB%5FALERT%5FIN%5FAPP%5FNOTIFICATION"
+    "&alertAction=viewjobs"
+    "&originToLandingJobPostings=4300000001%2C4300000002"
+)
+
+
+def test_an_alert_names_the_jobs_it_delivered_through_the_caller():
+    """End to end through ``parse_notification``, the only caller."""
+    row = shape.parse_notification(_alert_row(ALERT_WITH_LANDING))
+    assert row["alert_job_ids"] == ["4300000001", "4300000002"]
+    assert row["search_keywords"] == "Senior Software Engineer"
+
+
+def test_the_landing_ids_are_digits_only_deduplicated_and_capped():
+    href = (
+        "/jobs/search-results/?keywords=a&originToLandingJobPostings="
+        + "%2C".join(["4300000001", "4300000001", "43000x0001", "123",
+                      "\u0664300000001"]
+                     + [str(4300000100 + n) for n in range(40)])
+    )
+    ids = shape.notification_handles(href)["alert_job_ids"]
+    assert ids[0] == "4300000001" and ids.count("4300000001") == 1
+    assert all(i.isascii() and i.isdigit() and 6 <= len(i) <= 20 for i in ids)
+    assert len(ids) == shape.ALERT_JOB_IDS_CAP
+
+
+def test_the_landing_key_is_read_only_on_an_alert_search_link():
+    """The same key on any other path says nothing: only the alert's landing
+    link is a list of delivered postings."""
+    for href in (
+        "/feed/?originToLandingJobPostings=4300000001",
+        "/jobs/view/4300000001/?originToLandingJobPostings=4300000002",
+    ):
+        assert "alert_job_ids" not in shape.notification_handles(href), href
+
+
+def test_an_alert_without_the_key_says_nothing_about_jobs():
+    """Silence, not an empty list, when the link carries no landing ids."""
+    assert "alert_job_ids" not in shape.notification_handles(ALERT_HREF)
+
+
+def test_the_tracked_fixture_carries_the_key_this_reads():
+    """THE FIXTURE IS THE EVIDENCE the key exists: if a re-capture drops it,
+    this goes red before the reader silently returns nothing."""
+    from pathlib import Path
+
+    fixture = (Path(__file__).resolve().parent / "fixtures"
+               / "notifications.html").read_text(encoding="utf-8")
+    assert fixture.count("originToLandingJobPostings=") >= 4
+
+
+def test_the_landing_ids_escape_and_the_urn_still_does_not():
+    """The two halves of the amended rule, on ONE link: the alert's landing
+    ids reach the caller, and the content urn the query stripping exists to
+    keep back still does not."""
+    href = ALERT_WITH_LANDING + "&highlightedUpdateUrn=urn%3Ali%3Aactivity%3A7400000000000000001"
+    row = shape.parse_notification(_alert_row(href))
+    emitted = " ".join(str(value) for value in row.values())
+    assert row["alert_job_ids"] == ["4300000001", "4300000002"]
+    assert "7400000000000000001" not in emitted
+    assert "activity" not in emitted
+    assert "?" not in row["link"]

@@ -65,13 +65,23 @@ sys.path.insert(0, str(REPO / "scripts"))
 import check_asserted_names_resolve as guard  # noqa: E402
 
 
-#: (kind, name, document, occurrences). EMPTY since 2026-10-10: every site in
-#: the history below was repaired in its record and removed by the ratchet's
-#: own instruction (`_audit/2026-10-10-lane-g2-debts.md`, item 1). The last one,
-#: "answered by the orchestrator under" ending a line before the ruling id in
-#: `_audit/2026-10-10-rulings-ledger-questions.md`, was repaired by that
-#: document's author, the orchestrator, who reworded it to "under the ruling".
-PINNED: set[tuple[str, str, str, int]] = set()
+#: (kind, name, document, occurrences). ONE SITE since lane A's merge of
+#: master 6c65815 (2026-10-10). Every site master held was repaired in its
+#: record and removed by the ratchet's own instruction
+#: (`_audit/2026-10-10-lane-g2-debts.md`, item 1); the last, in
+#: `_audit/2026-10-10-rulings-ledger-questions.md`, was reworded by its
+#: author, the orchestrator, to "under the ruling". The one below is the
+#: same shape in the orchestrator's document on lane A's questions, which
+#: arrived the same day and is copied byte-identical: only its author can
+#: reword it, and the ratchet then demands this pin narrow.
+PINNED: set[tuple[str, str, str, int]] = {
+    # SURFACED 2026-10-10 BY LANE A's registration of the rulings on its own
+    # questions: "They are the orchestrator's, under
+    # `OUTWARD-ACTS-NEED-THE-OPERATOR`", a slot phrase before the registered
+    # RULING id, not a blocker.
+    ("BLOCKER", "OUTWARD-ACTS-NEED-THE-OPERATOR",
+     "_audit/2026-10-10-rulings-lane-a-questions.md", 1),
+}
 
 #: REPAIRED 2026-10-10, LATER THE SAME DAY, ON ITS AUTHOR'S AUTHORISATION:
 #:

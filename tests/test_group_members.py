@@ -734,15 +734,42 @@ def test_the_group_page_tool_withholds_the_link_on_any_other_landing(scenario):
 # ---------------------------------------------------------------------------
 
 
-def test_the_one_roster_the_package_composes_is_the_group_members_list():
-    """member_rosters composes four rosters; this lane wires ONE. The other
-    three (event attendees, company and school People tabs) have no capture
-    and no reader, and nothing in the package composes them."""
+def test_the_package_composes_two_rosters_and_the_other_two_stay_unopened():
+    """WAS ``test_the_one_roster_the_package_composes_is_the_group_members_list``
+    until integration 2 (2026-11-24), and asserted ``company_people`` appeared
+    NOWHERE in ``server.py``. member_rosters composes four rosters, and the rule
+    this section holds is that a roster is composed only once it has a capture
+    and a reader of its own. On the merged tree two have both:
+
+    - this lane's ``group_members``, named through ``group_roster.ROSTER``;
+    - census J 108's ``company_people`` (``linkedin_company_people_insights``,
+      over the session-2 People-tab capture), named as a literal.
+
+    J 108 arrived at integration 2's merge 2 from a branch that predated this
+    file, and that merge's gate did not hold it, so the stale assertion was
+    found red by the integration's ci/ run. The other two (the event attendees
+    and the school People tab) still have no capture and no reader, and nothing
+    in the package names them. ``tests/test_member_rosters.py`` holds the same
+    two calls from the importer's side.
+
+    The calls are read off the AST, not the text: the docstring of
+    ``server.py`` quotes the J 108 call, so a text match cannot tell a call
+    from a sentence about one."""
     source = SERVER_SOURCE.read_text(encoding="utf-8")
-    assert "member_rosters.compose(group_roster.ROSTER" in source
+    composed = sorted(
+        ast.unparse(node.args[0])
+        for node in ast.walk(ast.parse(source))
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Attribute)
+        and node.func.attr == "compose"
+        and isinstance(node.func.value, ast.Name)
+        and node.func.value.id == "member_rosters"
+    )
+    assert composed == ["'company_people'", "group_roster.ROSTER"], composed
     assert group_roster.ROSTER == "group_members"
-    assert group_roster.ROSTER in member_rosters.ROSTERS
-    for other in ("event_attendees", "company_people", "school_people"):
+    assert {group_roster.ROSTER, "company_people"} <= set(member_rosters.ROSTERS)
+    for other in ("event_attendees", "school_people"):
+        assert other in member_rosters.ROSTERS
         assert other not in source
 
 

@@ -3,10 +3,44 @@
 An MCP server that shows you your own LinkedIn account data as structured tool
 results instead of pages you have to click through.
 
-**Seventy-two tools ship. Fifty read. Twenty-two write. None is
-write-shaped and unable to act.**
+**Eighty tools ship. Fifty-five read. Twenty-five write. Three of those
+are write-shaped and unable to act.**
+(It read "Seventy-seven tools ship. Fifty-five read. Twenty-two write. None is
+write-shaped and unable to act" until integration 2's merge of lane builds-26,
+2026-11-25: `linkedin_set_tracker_stage`, `linkedin_endorse_skill` and
+`linkedin_withdraw_endorsement`, sanctioned writes that read their own surface
+and refuse, because the controls they would press have never been captured.
+Lane builds-26's branch read "Seventy-five tools ship. Fifty read. Twenty-five
+write".)
 (Lane B4's branch: sixty-three and nineteen write until its merge, 2026-10-10: the similar-jobs
 alert, `linkedin_set_similar_jobs_alert` and its inverse.)
+
+**AT INTEGRATION 2'S MERGE OF LANE B1, 2026-11-24, the line read
+"Seventy-five ... Fifty-three read. Twenty-two write" and two reads arrived**
+(census `P L8` and `P L1`). `linkedin_analytics_hub` reads your analytics
+hub's metric cards as integers and closed words; `linkedin_audience_analytics`
+reads your follower count and follower demographics, each value shaped and
+rare values redacted. Each loads one page and presses nothing. Lane B1's
+branch read "Sixty-four ... Forty-six read. Eighteen write".
+
+**AT INTEGRATION 2, 2026-11-24, the line read "Seventy-three ... Fifty-one
+read. Twenty-two write" and two reads arrived.** `linkedin_company_people_insights`
+(census `J 108`) reads an organisation People tab's insight cards -- what its
+members do, where they live and studied, what they are skilled at, and how
+you are connected -- as categories and counts, with no person returned.
+`linkedin_tracker_stage` (lane A, census `J 50` and `J 51`) reads one of your
+job tracker's further stages. Each loads one page and presses nothing. Lane
+A's branch read "Sixty-three ... Forty-five read. Eighteen write".
+
+**AT THIS INTEGRATION MERGE, 2026-10-26, the line read
+"Seventy-two ... Fifty read. Twenty-two write" and one read arrived** (census
+row `J 110`, the orchestrator's THIRD-PARTY-TEXT-AT-RUNTIME).
+`linkedin_company_page_home` loads an organisation's Page root by its numeric
+id and returns the Page's own description as a record marked as untrusted
+third-party text -- sanitised, cut at 2,000 characters with a flag saying so,
+never stored -- with the view the root drew and how many feed items it drew,
+as counts. A root that draws its Posts view has no description card, and the
+tool says that rather than returning an empty description.
 
 **THAT LINE READ "Seventy ... Fifty read. Twenty write" UNTIL LANE B4,
 2026-10-10, merged after lane B3** (census `J 161`, HIS-OWN-CURATION-NOT-OUTWARD).
@@ -65,6 +99,16 @@ call reads the page and hands you a token; it presses only on your
 confirmation, checks that nothing else on the page moved, verifies on a fresh
 load, and returns the exact call that puts the value back. Census `P O17`,
 COVERED-UNFIRED: built on the capture, never fired.
+
+**THAT LINE READ "Sixty-two" ON TWO BRANCHES AT ONCE, 2026-10-10**: lane A's
+read and lane U's write were each the sixty-second, and they met at lane A's
+merge of master 6c65815.
+
+**THAT LINE READ "Sixty-one ... Forty-four read. Seventeen write" UNTIL
+2026-10-10** (lane A). One read arrived: `linkedin_tracker_stage` reads one of
+your job tracker's three further stages -- interview, archived or
+clicked_apply -- through the tracker's own reader, each stage admitted by its
+own allowlist line. It presses nothing.
 
 **THAT LINE READ "Sixty-one ... Forty-four read. Seventeen write" UNTIL LANE
 U'S BRANCH, 2026-10-10** (ruling FILE-UPLOAD-OPENED, the operator's decision
@@ -1055,7 +1099,7 @@ linkedin_server/
   cdp_bridge.py              the recovery path: attach to a running Chrome
   dom.py                     the read-only harvesters and the control readers
   shape.py                   pure parsers and the result envelope
-  server.py                  the seventy-two tools
+  server.py                  the eighty tools
   errors.py
 tests/                       1393 tests, no network, no account
   fixtures/                  frozen LinkedIn markup, scrubbed

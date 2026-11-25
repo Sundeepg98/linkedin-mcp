@@ -663,7 +663,23 @@ def test_a_non_ascii_word_survives_the_copy_as_a_reference() -> None:
 #: AND live1 (lane B3, 2026-10-10): session 1's articles list and per-post
 #: analytics page, built by ``scripts/_build_live1_l1_fixtures.py`` through
 #: the same ``skeleton_of`` and ``tracked_copy`` -- two.
-LIVE_FIXTURE_COUNTS = {"live1": 2, "live2": 28, "live3": 14, "live4": 4, "live5": 1, "live8": 7}
+#: `live7` (lane B1, 2026-10-10): ONE copy, his intro editor from session 7's
+#: load, written by `scripts/_build_intro_editor_live7_fixture.py` through this
+#: harness's own `tracked_copy`, after putting back LinkedIn's labels and option
+#: words where the skeleton's shape of each matched exactly under the session's
+#: key, and inventing the organization and school options.
+#: `live1` (lane B1, 2026-10-10): session 1's analytics pages, each written by
+#: its own builder through this harness's own `skeleton_of` and `tracked_copy`:
+#: the hub (`scripts/_build_dashboard_fixture.py`) and the audience page
+#: (`scripts/_build_audience_fixture.py`).
+#: MEASURED AT INTEGRATION 2'S MERGE OF LANE B1 (2026-11-24), the *.html count
+#: of each directory on disk, never summed: `live1` 5 -- lane B3's two, lane
+#: B1's two, and J 110's Home-view skeleton (merge 1), which its branch never
+#: counted; `live2` 29 -- J 108's People-tab capture (merge 2) beside the 28;
+#: `live9` 1 -- J 110's Posts-view skeleton, a directory its branch created
+#: and never listed; `live7` 1, lane B1's. Lane B3's and lane B1's `"live1": 2`
+#: were two different pairs that git merged as one equal edit.
+LIVE_FIXTURE_COUNTS = {"live1": 5, "live2": 29, "live3": 14, "live4": 4, "live5": 1, "live7": 1, "live8": 7, "live9": 1}
 
 
 @pytest.mark.parametrize("session_dir", sorted(LIVE_FIXTURE_COUNTS))

@@ -69,11 +69,10 @@ _MEASURED_VERDICTS: tuple[tuple[str, bool, str], ...] = (
         False,
         "FORBIDDEN SUBSTRING '/mypreferences/d/categories/'",
     ),
-    (
-        "/mypreferences/d/categories/ads",
-        False,
-        "FORBIDDEN SUBSTRING '/mypreferences/d/categories/'",
-    ),
+    # ADMITTED 2026-10-10 (lane A, READ-PAST-AN-ACT-SUBSTRING): its own line
+    # plus an exemption excusing "/mypreferences/d/categories/" for this
+    # address alone; every other category page below stays refused on it.
+    ("/mypreferences/d/categories/ads", True, "allowlist match"),
     (
         "/mypreferences/d/categories/notifications",
         False,
@@ -137,7 +136,9 @@ _MEASURED_VERDICTS: tuple[tuple[str, bool, str], ...] = (
         False,
         "FORBIDDEN SUBSTRING '/settings/'",
     ),
-    ("/mypreferences/d/unfollowed", False, "FORBIDDEN SUBSTRING '/unfollow'"),
+    # ADMITTED 2026-10-10 (lane A, as categories/ads above): its own line
+    # plus an exemption excusing "/unfollow" for this address alone.
+    ("/mypreferences/d/unfollowed", True, "allowlist match"),
     ("/mypreferences/d/verifications", False, "FORBIDDEN SUBSTRING 'verification'"),
 )
 
@@ -338,12 +339,13 @@ def test_the_denylisted_addresses_survive_the_widened_allowlist(monkeypatch):
         for path, is_read, gate in _MEASURED_VERDICTS
         if not is_read and gate != "NO PATTERN MATCHES"
     ]
-    # Sanity on the fixture itself: this must be the 16 FORBIDDEN SUBSTRING
-    # rows (19 refused rows total, minus the 3 NO-PATTERN-MATCHES rows that
+    # Sanity on the fixture itself: this must be the 14 FORBIDDEN SUBSTRING
+    # rows (17 refused rows total, minus the 3 NO-PATTERN-MATCHES rows that
     # test 6 shows falling). A file that silently lost a row here would make
-    # the loop below assert nothing about it.
-    assert len(still_named_refused) == 16, (
-        f"expected 16 forbidden-substring-refused addresses in "
+    # the loop below assert nothing about it. 16 of 19 until 2026-10-10, when
+    # lane A admitted categories/ads and unfollowed by name.
+    assert len(still_named_refused) == 14, (
+        f"expected 14 forbidden-substring-refused addresses in "
         f"_MEASURED_VERDICTS, found {len(still_named_refused)}: "
         f"{sorted(still_named_refused)!r} -- a row's gate classification "
         "changed; fix _MEASURED_VERDICTS rather than this count"

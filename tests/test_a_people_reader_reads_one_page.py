@@ -162,7 +162,16 @@ PACKAGE = ROOT / "linkedin_server"
 #: The record classes. A function whose body references one through
 #: ``people_data`` builds records. Held equal to ``people_data.RECORD_TYPES``
 #: by :func:`test_every_record_type_is_a_record_class_here`.
-RECORD_CLASSES = frozenset({"Person", "Group", "Event", "Post", "Organisation"})
+#: ``Organisation`` joined 2026-10-10 (lane G2): a followed Page's name.
+#: ``OrganisationProse`` joined 2026-10-10 (lane B4, census row ``J 110``): an
+#: organisation Page's prose is third-party text returned at runtime, so the
+#: tool that builds one is a people reader and every rule here binds it.
+#: ``Category`` joined 2026-10-10 (lane B4, census row J 108): the label of one
+#: category of an insight card's aggregate. A reader building one is held to
+#: every rule here exactly as a reader building a person is.
+RECORD_CLASSES = frozenset(
+    {"Person", "Group", "Event", "Post", "Organisation", "OrganisationProse", "Category"}
+)
 
 
 def test_every_record_type_is_a_record_class_here():

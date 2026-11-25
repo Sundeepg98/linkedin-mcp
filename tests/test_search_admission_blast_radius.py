@@ -1,5 +1,15 @@
 """THE BLAST RADIUS OF THE SEARCH ADMISSION, PINNED BEFORE THE PATTERN LANDED.
 
+**A FIFTH VERTICAL 2026-10-10, ON ITS OWN LINE, AND INVERTED A THIRD TIME.**
+`CONTENT-VERTICAL-NOT-ALL-RESULTS` (the orchestrator's call on lane A's
+question) admitted the CONTENT vertical by its own exact pattern -- not a
+fifth word in the D2 alternation -- and kept the mixed `all` page refused. So
+`search-content` left `REFUSED_UNDER_THE_D2_CHOICE` for
+`ADMITTED_BY_THE_CONTENT_RULING`, asserted the other way under the same name;
+the durable set gained the traversal from `content`; the count pins FIVE and
+still goes red both ways; and `all` stays where it has been since 2026-09-19,
+predicted and not bought.
+
 **WIDENED 2026-09-24, AND INVERTED A SECOND TIME RATHER THAN EDITED DOWN.**
 `D2-SEARCH-VERTICALS-WIDENED` (the orchestrator's delegated call) widened the
 people line to four closed words, `(people|companies|groups|events)`, and
@@ -117,10 +127,21 @@ ADMITTED_BY_THE_D2_WIDENING = {
 #: they are not in the durable set below. `content` is the one a census row
 #: names (`M C70`'s own address in the address table, and `N 194`'s candidate
 #: route); `D2-SEARCH-VERTICALS-WIDENED` did not reach it.
+#:
+#: **`content` LEFT THIS BLOCK 2026-10-10** for `ADMITTED_BY_THE_CONTENT_RULING`
+#: below, on its own ruling and its own line -- the route this comment named.
 REFUSED_UNDER_THE_D2_CHOICE = {
-    "search-content": f"{BASE}/search/results/content/?keywords=x",
     "search-schools": f"{BASE}/search/results/schools/?keywords=x",
     "search-jobs-vertical": f"{BASE}/search/results/jobs/?keywords=x",
+}
+
+#: THE ONE THE 2026-10-10 RULING BOUGHT, `CONTENT-VERTICAL-NOT-ALL-RESULTS`.
+#: **UNTIL THAT DAY IT SAT IN `REFUSED_UNDER_THE_D2_CHOICE` ABOVE**, under this
+#: same name, asserting the opposite. Its own exact line, so the D2 line's
+#: scope is unchanged; the mixed `all` page stays in
+#: `PREDICTED_BUT_NOT_ADMITTED`, which the ruling says in so many words.
+ADMITTED_BY_THE_CONTENT_RULING = {
+    "search-content": f"{BASE}/search/results/content/?keywords=x",
 }
 
 #: THE DURABLE HALF. Every one of these must be refused before the admission
@@ -146,6 +167,10 @@ MUST_STAY_REFUSED = {
         f"{BASE}/search/results/groups/../../mypreferences/d/close-account"),
     "traversal-events": (
         f"{BASE}/search/results/events/../../mypreferences/d/close-account"),
+    # Added 2026-10-10 with the content vertical's own line: a closed word
+    # cannot be followed by `..`, and that holds for the fifth as well.
+    "traversal-content": (
+        f"{BASE}/search/results/content/../../mypreferences/d/close-account"),
     # Third-party identity. The admission is a READ OF A PAGE LISTING PEOPLE
     # and says nothing about reaching any of them individually.
     "third-party-profile": f"{BASE}/in/someone-else/",
@@ -216,6 +241,15 @@ def test_the_three_the_widening_bought_are_admitted(name):
     assert readonly.is_read_url(ADMITTED_BY_THE_D2_WIDENING[name]) is True
 
 
+@pytest.mark.parametrize("name", sorted(ADMITTED_BY_THE_CONTENT_RULING))
+def test_the_vertical_the_content_ruling_bought_is_admitted(name):
+    """INVERTED 2026-10-10 FROM `test_the_verticals_the_d2_choice_leaves_out_
+    are_refused`, where this name asserted refusal until the content line
+    landed. The rollback is that one line: remove it and this returns there.
+    """
+    assert readonly.is_read_url(ADMITTED_BY_THE_CONTENT_RULING[name]) is True
+
+
 @pytest.mark.parametrize("name", sorted(REFUSED_UNDER_THE_D2_CHOICE))
 def test_the_verticals_the_d2_choice_leaves_out_are_refused(name):
     """Refused because D2 chose four words, and marked as a choice.
@@ -246,20 +280,22 @@ def _admitted_verticals() -> list[str]:
     )
 
 
-def test_exactly_the_four_d2_verticals_are_admitted():
+def test_exactly_the_five_ruled_verticals_are_admitted():
     """THE SIZE OF THE ADMISSION, as a measurement rather than a claim.
 
-    REWRITTEN 2026-09-24 FROM `test_exactly_one_search_vertical_is_admitted_
-    and_it_is_people`, which pinned ONE, and before that the state was "no
-    search-results address is admitted". The number is what says how far the
-    boundary moved each time, so it is replaced rather than dropped. It goes
-    red in both directions -- a vertical added without a ruling, and any of
-    the four lost.
+    REWRITTEN 2026-10-10 FROM `test_exactly_the_four_d2_verticals_are_
+    admitted`, which pinned FOUR, itself rewritten 2026-09-24 from
+    `test_exactly_one_search_vertical_is_admitted_and_it_is_people`, which
+    pinned ONE; before that the state was "no search-results address is
+    admitted". The number is what says how far the boundary moved each time,
+    so it is replaced rather than dropped. It goes red in both directions --
+    a vertical added without a ruling, and any of the five lost.
     """
     admitted = _admitted_verticals()
-    assert admitted == ["companies", "events", "groups", "people"], (
+    assert admitted == ["companies", "content", "events", "groups", "people"], (
         f"the admitted search verticals are {admitted}. D2-SEARCH-VERTICALS-"
-        "WIDENED admitted exactly people, companies, groups and events."
+        "WIDENED admitted exactly people, companies, groups and events, and "
+        "CONTENT-VERTICAL-NOT-ALL-RESULTS added content on its own line."
     )
     people = [u for u in ADMITTED_BY_THE_LANDED_PATTERN if readonly.is_read_url(u)]
     assert len(people) == len(ADMITTED_BY_THE_LANDED_PATTERN), (
@@ -287,10 +323,11 @@ def test_a_planted_search_prefix_turns_the_count_and_the_durable_set_red():
     finally:
         readonly._ALLOWED_URL_PATTERNS = original
     assert admitted == sorted(KNOWN_VERTICALS)
-    assert len(traversals) == 4, (
-        f"the planted prefix admitted {len(traversals)} of the four traversal "
-        "spellings; it should admit all four, so the durable set is not "
+    assert len(traversals) == 5, (
+        f"the planted prefix admitted {len(traversals)} of the five traversal "
+        "spellings; it should admit all five, so the durable set is not "
         "seeing the trap it names"
     )
     # And the boundary is itself again.
-    assert _admitted_verticals() == ["companies", "events", "groups", "people"]
+    assert _admitted_verticals() == ["companies", "content", "events", "groups",
+                                     "people"]

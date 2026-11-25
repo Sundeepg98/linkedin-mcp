@@ -138,16 +138,30 @@ DELIBERATELY_UNWIRED: dict[str, str] = {
     ),
 }
 
-# THE member_rosters ENTRY WAS DELETED 2026-10-10 (lane B5), ON ITS OWN
-# INSTRUCTION: "the reader that wires it returns names held to
-# PEOPLE-DATA-MITIGATIONS ... and lands in the same commit, and this entry is
-# deleted then." It did, in one commit: the live lane captured one group's
-# member list on 2026-09-28 (tests/fixtures/live2/group_members.html), and
-# `group_roster.read_group_members` was built over that skeleton with
-# `linkedin_group_members` in server.py importing the composer -- each of the
-# six mitigations shown failing in tests/test_group_members.py. ONE roster of
-# the four is wired; the event, company and school rosters have no capture and
-# no reader, and nothing composes them (asserted in that file, section 6).
+# TWO FORMER ENTRIES ARE GONE IN THE MERGED TREE, because the two modules they
+# ruled are both wired here.
+#
+# SEARCH_VERTICALS was deleted 2026-10-10 at lane B2's search-verticals merge:
+# `search_vertical_results` (the groups and events readers) and server.py's two
+# tools, linkedin_search_groups and linkedin_search_events, import it, so it is
+# no longer an orphan.
+#
+# THE member_rosters ENTRY WAS DELETED 2026-10-10, on its own instruction:
+# "the reader that wires it ... lands in the same commit, and this entry is
+# deleted then." It did -- and it was wired BY TWO READERS, one on each side of
+# this merge: lane B5's `group_roster.read_group_members` (built over the live
+# lane's skeleton of one member list, tests/fixtures/live2/group_members.html,
+# with linkedin_group_members in server.py) and lane B4's J 108
+# `company_people_insights.read_people_insights` (built over the session-2
+# People-tab capture, tests/fixtures/live2/company_people_insights.html, with
+# linkedin_company_people_insights in server.py). The module now has importers,
+# so a kept entry would fail on its own. The J 108 reader reads the tab's
+# insight cards -- an aggregate -- whose labels leave as people_data.Category
+# records; the people listed below the cards (census row N 102) are not read.
+# The other three rosters compose() knows -- group members, event attendees, a
+# school's People tab -- are still reachable from NO tool: nothing calls
+# compose with their names, and each still needs a capture and a reader of its
+# own (tests/test_member_rosters.py, section 6).
 
 # THE cdp_download ENTRY WAS DELETED 2026-09-24, AND NOT ON ITS OWN INSTRUCTION.
 #

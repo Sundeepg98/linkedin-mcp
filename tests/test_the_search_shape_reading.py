@@ -290,6 +290,15 @@ def test_the_shape_pass_adds_no_evaluate_waiver() -> None:
     ``NAMED_HANDLES_JS``, argued in ``tests/test_readonly.py``'s budget. This
     copy of the ceiling was missed again by the lane's hand-picked gates and
     found red by its CI run; it moves with the budget it copies.
+
+    25 SINCE INTEGRATION 2 (2026-11-24), and the twenty-fifth is not this
+    pass's either: it is ``dom.read_company_home``'s run of
+    ``COMPANY_HOME_JS`` (census ``J 110``), moved into ``dom.py`` verbatim from
+    ``company_home.py`` and argued in ``tests/test_readonly.py``'s budget, which
+    moved 24 -> 25 with it. This copy was missed a THIRD time by a hand-derived
+    gate and found red by the integration's ci/ run. The twenty-fifth is RULED
+    (DOM-WAIVER-25-J110, orchestrator, 2026-11-25): admitted solely for J 110's
+    page-root read, and a twenty-sixth still needs its own ruling.
     """
     source = dom.__file__
     with open(source, encoding="utf-8") as stream:
@@ -298,7 +307,7 @@ def test_the_shape_pass_adds_no_evaluate_waiver() -> None:
             for line in stream.read().splitlines()
             if line.strip().endswith("# readonly-ok")
         )
-    assert waived <= 24, (
+    assert waived <= 25, (
         "the shape reading must extend the existing read_search_filters "
         "evaluate, never add one; waivers now %d" % waived
     )

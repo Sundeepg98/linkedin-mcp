@@ -94,6 +94,12 @@ EXPECTED_TOOLS = (
     # 2026-09-23, the live lane: a READ that presses, the share link of one of
     # his own posts; census M C72, proven live on his own post.
     "linkedin_own_item_link",
+    # 2026-10-10, lane B4: a READ of an organisation People tab's insight
+    # cards (census J 108), the first tool to open a roster address.
+    "linkedin_company_people_insights",
+    # 2026-10-10, lane B1 (lb1-audience): a READ, his follower count and
+    # demographics off one admitted page; census P L1, banked at merge.
+    "linkedin_audience_analytics",
 )
 
 
@@ -360,6 +366,10 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # READS, linkedin_search_groups (census N 161) and linkedin_search_events
     # (census N 179), beside lane U's one write below; measured off the
     # merged registry, never summed.
+    # SIXTY-TWO ON LANE A, 2026-10-10: one READ, linkedin_tracker_stage (the
+    # tracker's interview, archived and clicked_apply stages; census J 50,
+    # J 51, J 52), measured off the registry and moved with every other count
+    # site in the same commit.
     # SIXTY-TWO ON LANE U'S BRANCH, 2026-10-10: one WRITE,
     # linkedin_send_attachment (ruling FILE-UPLOAD-OPENED; census M M14, M15,
     # M18 stayed GAP on two captures, then moved to COVERED-UNFIRED the same
@@ -403,4 +413,38 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # merged registry, not summed, and moved with every other count site.
     # SEVENTY-TWO AT THE INTEGRATION MERGE OF LANE B4 ONTO LANE B3 (2026-10-10): lane B4's two
     # writes beside the seventy, measured off the merged registry, not summed.
-    assert len(_tool_names()) == 72
+    # SIXTY-TWO ON LANE B4'S BRANCH, 2026-10-10 (child b4-j110): one READ,
+    # linkedin_company_page_home (census J 110, ruling
+    # THIRD-PARTY-TEXT-AT-RUNTIME), measured off the registry and moved with
+    # every other count site in the same commit. That lane's branch held the
+    # tool as its own sixty-second; it merged here as the seventy-third.
+    # SEVENTY-THREE AT THIS INTEGRATION MERGE, 2026-10-26: lane B4's
+    # linkedin_company_page_home (census J 110) beside the seventy-two,
+    # measured off the merged registry, not summed.
+    # SIXTY-TWO ON LANE B4'S BRANCH, 2026-10-10 (J 108): one READ,
+    # linkedin_company_people_insights (census J 108), measured off the
+    # registry and moved with every other count site in the same commit.
+    # SEVENTY-FOUR AT THE J 108 MERGE, 2026-10-26: lane B4's
+    # linkedin_company_people_insights (census J 108) beside the seventy-three,
+    # measured off the merged registry, not summed.
+    # SIXTY-THREE AT LANE A'S MERGE OF MASTER 6c65815, 2026-10-10: the two
+    # sixty-seconds above, measured off the merged registry.
+    # SEVENTY-FIVE AT INTEGRATION 2'S MERGE OF LANE A, 2026-11-24: lane A's
+    # linkedin_tracker_stage beside the seventy-four, measured off the merged
+    # registry, not summed.
+    # SIXTY-THREE AT LANE B1'S MERGE OF ITS CHILD lb1-dashboard, 2026-10-10:
+    # one READ, linkedin_analytics_hub (census P L8), measured off the merged
+    # registry and moved with every other count site in the same commit.
+    # SIXTY-FOUR AT LANE B1'S MERGE OF ITS CHILD lb1-audience, 2026-10-10: one
+    # READ, linkedin_audience_analytics (census P L1), measured off the merged
+    # registry and moved with every other count site in the same commit.
+    # SEVENTY-SEVEN AT INTEGRATION 2'S MERGE OF LANE B1, 2026-11-24: lane B1's
+    # linkedin_analytics_hub and linkedin_audience_analytics, two READS, beside
+    # the seventy-five, measured off the merged registry, not summed.
+    # SEVENTY-THREE AT LANE BUILDS-26 (2026-11-24): linkedin_set_tracker_stage,
+    # a write-shaped tool that refuses -- measured off the registry.
+    # SEVENTY-FIVE at its second commit: the endorsement pair, refusing.
+    # EIGHTY AT INTEGRATION 2'S MERGE OF LANE BUILDS-26, 2026-11-25: its three
+    # write-shaped tools beside the seventy-seven, measured off the merged
+    # registry, not summed.
+    assert len(_tool_names()) == 80

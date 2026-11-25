@@ -1341,6 +1341,19 @@ WHAT_WOULD_DRIVE_IT: dict[str, str] = {
         "are states and sentences of counts and the package's words, so a "
         "drive would come back clean."
     ),
+    # LANE BUILDS-26, 2026-11-24: a thin wrapper over the reader above.
+    "writes:_read_tracker_stage_row": (
+        "WORDS: it is _read_saved_state for one job id plus three facts built "
+        "from that state and the caller's own id, so it fails to reach its "
+        "success path on the planted page for exactly _read_saved_state's "
+        "reason -- no tab count parses from the plant. Its success path runs "
+        "in a headless browser over the tracked tracker capture in "
+        "tests/test_tracker_stage.py: "
+        "test_the_preview_reads_the_saved_tab_and_issues_no_token reads saved "
+        "off the list derived from tests/fixtures/jobs_tracker_row.html. Its "
+        "answers are states, the caller's id and booleans, so a drive would "
+        "come back clean."
+    ),
     "writes:_read_tracker_membership": (
         "WORDS: it keys on a tracker tab's count in LinkedIn's tab strip, read "
         "from main's text, and its rows come from dom.harvest_linked_cards, a "
@@ -1993,6 +2006,14 @@ DRIVEN_TO["recruiter_views:read_recruiter_views"] = RETURNS_RECORDS
 # return group and event records, so the plant comes back inside a record.
 DRIVEN_TO["search_vertical_results:read_group_results"] = RETURNS_RECORDS
 DRIVEN_TO["search_vertical_results:read_event_results"] = RETURNS_RECORDS
+# LANE B4'S PAGE-PROSE READER (2026-10-10, J 110, THIRD-PARTY-TEXT-AT-RUNTIME):
+# its success path returns an organisation's description inside an
+# OrganisationProse record, so the plant comes back inside a record.
+DRIVEN_TO["dom:read_company_home"] = RETURNS_RECORDS
+# LANE B4'S AGGREGATE READER (2026-10-10, census J 108): the People tab's
+# insight cards. A category's label is third-party text, so it leaves as a
+# people_data.Category record -- the declared channel, not the text inventory.
+DRIVEN_TO["company_people_insights:read_people_insights"] = RETURNS_RECORDS
 
 
 @pytest.mark.parametrize("key", sorted(shipped_drives.DRIVES))
@@ -2059,6 +2080,10 @@ def test_a_reader_joins_the_text_inventory_only_by_the_ruling(key: str) -> None:
 #: i.e. inside the counter reader's own ``except Exception``, which swallowed
 #: the check, and the drive went on to its click on the broken fixture.
 FIXTURE_BREAKS: dict[str, dict[str, str]] = {
+    "dom:read_company_home": {
+        "fixture": "live1/company_root_home_view.html",
+        "needle": "<h2>Overview</h2>", "into": "<h2>Xxxxxxxx</h2>",
+    },
     "dom:read_any_save_control_label": {
         "fixture": "job_detail_hydrated.html",
         "needle": 'aria-label="Save the job"', "into": 'aria-label="Keep the job"',
@@ -2112,6 +2137,11 @@ FIXTURE_BREAKS: dict[str, dict[str, str]] = {
         "fixture": "synthetic/search_events_live.html",
         "needle": '<p><a href="/events/1000000000000000001/">',
         "into": '<p><span href="/events/1000000000000000001/">',
+    },
+    # 2026-10-10 (lane B4): a measured card heading of the People tab capture.
+    "company_people_insights:read_people_insights": {
+        "fixture": "live2/company_people_insights.html",
+        "needle": "\nWhere they live\n", "into": "\nWhere they lived\n",
     },
     "press:disclose": {
         "fixture": "profile_views_analytics.html",

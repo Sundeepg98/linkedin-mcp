@@ -377,7 +377,15 @@ OUTWARD_CLASS_SPECS: dict[str, OutwardClassSpec] = {
     "endorse_skill": OutwardClassSpec(
         action="endorse_skill",
         outward_class="endorse_or_recommend",
-        status="BLOCKED",
+        # BLOCKED -> NEEDS-CAPTURE, 2026-11-24 (lane builds-26). The route this
+        # record waited on now exists for THIS act: ``writes`` registers
+        # ``endorse_skill`` as a sanctioned, refusing write whose preview loads
+        # the profile he names through the named-profile door, inside the act
+        # (``writes.NAMED_PROFILE_PREVIEW_ACTIONS``), and counts the
+        # endorse-shaped buttons there. What is left is the capture below, and
+        # the preview's counts are its first reading. Still not BUILT: the
+        # write cannot perform, so its census rows stay GAP.
+        status="NEEDS-CAPTURE",
         target_kind="profile_link_and_skill",
         target=(
             "the member's profile link (/in/<slug>/) and the skill, both as "
@@ -398,7 +406,10 @@ OUTWARD_CLASS_SPECS: dict[str, OutwardClassSpec] = {
             "/in/<slug>/ yet (the read boundary refuses the third-party "
             "profile pattern, removed 2026-09-04), and the connect and "
             "message builds that ruling unblocks (N 1, M M1) are what "
-            "would build that route."
+            "would build that route. SINCE 2026-11-24 (lane builds-26) THIS "
+            "act's own preview loads it, through the named-profile door, and "
+            "counts the endorse-shaped buttons there; only the capture below "
+            "is left."
         ),
         reversible_by=(
             "removing an endorsement he gave (census P E5 / N 113), on the "
@@ -434,7 +445,61 @@ OUTWARD_CLASS_SPECS: dict[str, OutwardClassSpec] = {
                 "(load_a_third_partys_profile_to_measure_a_control stands)."
             ),
         ),
-        blocked_by=_NAMED_PROFILE_ROUTE,
+    ),
+    # THE INVERSE, 2026-11-24 (lane builds-26): built beside ``endorse_skill``
+    # so the undo exists before any forward press could (the round-trip rule).
+    # Withdrawing an endorsement HE GAVE is withdrawing one of his own items.
+    "withdraw_endorsement": OutwardClassSpec(
+        action="withdraw_endorsement",
+        outward_class="delete_or_withdraw_own",
+        status="NEEDS-CAPTURE",
+        target_kind="profile_link_and_skill",
+        target=(
+            "the member's profile link (/in/<slug>/) and the skill whose "
+            "endorsement he gave, both as he supplies them; the slug is never "
+            "read off a page"
+        ),
+        census_rows=("P E5", "N 113"),
+        summary="Withdraw one endorsement he gave a member he names.",
+        carried_facts=(
+            "No endorsement he gave has ever been seen on any surface this "
+            "server holds: zero endorse controls across the tracked corpus "
+            "(endorse_skill's carried facts). The control lives on the named "
+            "member's own profile, the same page as endorse_skill's, loaded "
+            "the same way -- through the named-profile door, inside the act "
+            "he names. writes registers withdraw_endorsement as a sanctioned, "
+            "refusing write whose preview counts the endorse-shaped buttons "
+            "there; nothing tells it an endorsed skill from one that is not."
+        ),
+        reversible_by=(
+            "giving the endorsement again (census P E4 / N 111, endorse_skill), "
+            "on the same profile, behind the same capture. The member was "
+            "notified when it was given; withdrawing does not recall that."
+        ),
+        live_proof=(
+            "HE NAMES a 1st-degree connection who carries an endorsement from "
+            "him, and that skill. The withdraw is proven FIRST under the "
+            "round-trip rule: its preview reads the endorsed label on that "
+            "member before any endorsement is pressed anywhere."
+        ),
+        capture=CaptureSpec(
+            page=_PROFILE + " -- composed from the link he names, loaded "
+            "ONLY inside the withdrawal he orders",
+            state=(
+                "the profile of a member who carries an endorsement from him, "
+                "as first rendered, with its Skills section drawn"
+            ),
+            element=(
+                "the endorsed skill's control and the label it wears because "
+                "he endorsed it, beside a skill he has not endorsed, for the "
+                "difference"
+            ),
+            why_it_cannot_fire=(
+                "loading a profile and reading its controls presses nothing, "
+                "and the capture presses nothing in the Skills section; its one "
+                "cost is the profile view, taken inside the act he names."
+            ),
+        ),
     ),
     "request_recommendation": OutwardClassSpec(
         action="request_recommendation",
