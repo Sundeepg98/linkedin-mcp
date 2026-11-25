@@ -2596,6 +2596,51 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(r"^https://www\.linkedin\.com/events/[0-9]{1,20}/attendees/?$"),
     re.compile(r"^https://www\.linkedin\.com/company/[A-Za-z0-9\-_]{1,100}/people/?$"),
     re.compile(r"^https://www\.linkedin\.com/school/[A-Za-z0-9\-_]{1,100}/people/?$"),
+    # ======================================================================
+    # LANE ADMIT26 (2026-11-25) -- PAGES OF HIS OWN ACCOUNT THE BOUNDARY
+    # REFUSED, each on a registered ruling and each in the spelling LinkedIn
+    # DRAWS. Record: `_audit/2026-11-25-admit26.md`, which names the capture
+    # or committed table that measured every spelling below. Pinned, each
+    # control shown failing, in `tests/test_admit26_admissions.py`.
+    #
+    # HIS OWN PROFILE EDITORS, past "/edit/". Ruling PROFILE-EDITOR-ADDRESSES-
+    # ALLOWED (the operator, 2026-08-31, `_audit/2026-08-31-linkedin-finish.md`
+    # #4: "/in/<member>/edit/ and the profile editors are allowed. His own
+    # profile, no third party"), read with READ-PAST-AN-ACT-SUBSTRING: "/edit/"
+    # stands on the forbidden tuple as a fence against EDITING, and loading an
+    # editor edits nothing.
+    #
+    # EACH LINE IS HALF OF A TWO-GATE ADMISSION, as lane A's are: its other
+    # half is the paired LANE ADMIT26 entry in
+    # `_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS`, excusing exactly {"/edit/"}
+    # for exactly that anchored address. NEITHER HALF ALONE ADMITS ANYTHING.
+    # "/edit/" is not narrowed: it keeps refusing every other member of the
+    # family, on his profile and on everybody else's, as the intro editor's
+    # exemption above required.
+    #
+    # THE /in/me/ SPELLING ONLY, the measured constraint the intro-editor
+    # entry records: /in/me/ resolves to whoever is signed in, so no line
+    # here can address a third party's editor.
+    #
+    # THE SPELLINGS ARE THE DRAWN ONES, NARROWED. The add-an-Experience form
+    # is drawn WITH its entry-point query, so that exact query is the line
+    # and the bare form stays refused. The contact-info editor is drawn as a
+    # forms/ page (the intro editor's dialog, `P A25`'s cell), not the
+    # `/in/me/edit/contact-info/` the ledger inferred, which stays refused.
+    # The skill form's segment is the skill's id the skills page draws,
+    # digits only, and it comes from a tool's arguments, never off a page.
+    #
+    # NOTHING IS PRESSED OR SAVED: every control on an editor stays refused by
+    # the press gate (`composer_or_editor`), a save is a write with its own
+    # spec, and SELF-PROFILE-EDITS-NOT-OUTWARD governs any live proof.
+    re.compile(
+        r"^https://www\.linkedin\.com/in/me/edit/forms/position/new/"
+        r"\?profileFormEntryPoint=identityModuleMirror$"
+    ),
+    re.compile(r"^https://www\.linkedin\.com/in/me/edit/forms/summary/new/?$"),
+    re.compile(r"^https://www\.linkedin\.com/in/me/edit/forms/contact-info/new/?$"),
+    re.compile(r"^https://www\.linkedin\.com/in/me/edit/secondary-language/?$"),
+    re.compile(r"^https://www\.linkedin\.com/in/me/details/skills/edit/forms/[0-9]{1,20}/?$"),
 )
 
 #: Substrings that must never appear in a navigation target, checked before
@@ -3070,6 +3115,39 @@ _FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS: tuple[
             r"notify-network-for-updates/?$"
         ),
         frozenset({"/settings/", "settings"}),
+    ),
+    # LANE ADMIT26 (2026-11-25) -- the second gate of each pair whose first
+    # gate is the matching LANE ADMIT26 line in `_ALLOWED_URL_PATTERNS`; the
+    # argument and the ruling are written there. Each entry excuses exactly
+    # the substring(s) its address trips, measured with the shipped tuple,
+    # and nothing more; the tuple itself is unchanged.
+    #
+    # His own profile editors, each tripping "/edit/" and nothing else.
+    (
+        re.compile(
+            r"^https://www\.linkedin\.com/in/me/edit/forms/position/new/"
+            r"\?profileFormEntryPoint=identityModuleMirror$"
+        ),
+        frozenset({"/edit/"}),
+    ),
+    (
+        re.compile(r"^https://www\.linkedin\.com/in/me/edit/forms/summary/new/?$"),
+        frozenset({"/edit/"}),
+    ),
+    (
+        re.compile(r"^https://www\.linkedin\.com/in/me/edit/forms/contact-info/new/?$"),
+        frozenset({"/edit/"}),
+    ),
+    (
+        re.compile(r"^https://www\.linkedin\.com/in/me/edit/secondary-language/?$"),
+        frozenset({"/edit/"}),
+    ),
+    (
+        re.compile(
+            r"^https://www\.linkedin\.com/in/me/details/skills/edit/forms/"
+            r"[0-9]{1,20}/?$"
+        ),
+        frozenset({"/edit/"}),
     ),
 )
 

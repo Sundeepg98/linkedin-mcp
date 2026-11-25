@@ -1935,7 +1935,18 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # RESULTS -- its own line, the D2 alternation untouched, no exemption --
     # and every other key byte-identical. The new digest carries no long
     # digit run, so it is one literal again.
-    "_ALLOWED_URL_PATTERNS": "b8eebaa9a90587e8",
+    #
+    # b8eebaa9a90587e8 until 2026-11-25 (lane admit26, its first commit): five
+    # anchored lines for his own profile editors past "/edit/", on
+    # PROFILE-EDITOR-ADDRESSES-ALLOWED with READ-PAST-AN-ACT-SUBSTRING -- the
+    # add-an-Experience form with its drawn entry-point query, the About form,
+    # the contact-info form, the secondary-language editor and one skill's
+    # form by its digit id -- each paired with one exemption below. ATTRIBUTION,
+    # with this file's ast_digest: readonly.py at the lane's base 4c62196 is
+    # the tree minus exactly the lane admit26 block and hashes to the prior pin
+    # on every key; only this key and the pattern-exemption key moved. Record:
+    # _audit/2026-11-25-admit26.md.
+    "_ALLOWED_URL_PATTERNS": "43f0f6f42005e66a",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     # 419e64a3cd92ec7e until the same REVIEW: commit: a third entry, excusing
     # exactly {"/follow"} for exactly the anchored follower-list address.
@@ -1952,7 +1963,11 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # ffebed391e628195 until the third: two more, excusing exactly
     # {"/unfollow"} for /mypreferences/d/unfollowed and exactly
     # {"/mypreferences/d/categories/"} for /mypreferences/d/categories/ads.
-    "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "28643e7ca768b7df",
+    # 28643e7ca768b7df until 2026-11-25 (lane admit26): five more, each
+    # excusing exactly {"/edit/"} -- the one substring each address trips,
+    # measured -- for exactly one of his own profile editors' anchored
+    # addresses; the forbidden tuple is unchanged at 33.
+    "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "08c29a59104b680c",
     "_FORBIDDEN_URL_SUBSTRINGS": "b0291a66ec9bd51e",
     # 23aece1483afdee9 until 2026-09-19. See the re-freeze note above: eleven
     # detector classes added, zero removed, and the direction is pinned by

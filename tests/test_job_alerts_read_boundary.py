@@ -287,7 +287,12 @@ def test_this_widening_bought_no_forbidden_substring_exemption():
     # "settings"), the people he unfollowed ("/unfollow") and his
     # advertising-data page ("/mypreferences/d/categories/"). None is an alert
     # address; the loop below still holds.
-    assert len(readonly._FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS) == 10
+    # 10 UNTIL 2026-11-25, when lane admit26 added FIVE, each excusing exactly
+    # "/edit/" for one of his own profile editors' anchored addresses (the
+    # add-an-Experience form, the About form, the contact-info form, the
+    # secondary-language editor, one skill's form), on
+    # PROFILE-EDITOR-ADDRESSES-ALLOWED. None is an alert address.
+    assert len(readonly._FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS) == 15
     for url in (CREATE_URL, DELETE_URL, FREQUENCY_URL):
         assert url not in readonly._FORBIDDEN_SUBSTRING_EXEMPTIONS
 

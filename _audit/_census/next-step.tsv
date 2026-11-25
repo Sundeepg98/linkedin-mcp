@@ -373,10 +373,10 @@ P A17	P	W	R3	BUILD:tests/fixtures/live4/editor.html	NAMED	_audit/_census/write-c
 P A23b	P	W	R3	PRECONDITION:a name-pronunciation recording (only the mobile app records one)	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::`P A23b` (a name-pronunciation recording must first exist
 P A24	P	W	R3	PRECONDITION:a completed identity verification (a verified name to show)	NAMED	_audit/_census/profile.md::no build is appropriate before he has a verified name to show
 P A25	P	R	-	BUILD:tests/fixtures/live1/contact_info.html	NAMED	_audit/2026-09-23-live-lane-session-1.md::lane L1's five NEEDS-CAPTURE pages, captured ; _audit/_census/read-addresses.tsv::https://www.linkedin.com/in/me/overlay/contact-info/
-P A26	P	W	R3	ADMIT:https://www.linkedin.com/in/me/edit/contact-info/	INFERRED	_audit/_census/write-classes.tsv::queued:CONTACT-INFO-EDITOR ; RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
-P A27	P	W	R3	ADMIT:https://www.linkedin.com/in/me/edit/contact-info/	INFERRED	_audit/_census/write-classes.tsv::queued:CONTACT-INFO-EDITOR ; RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
-P A28	P	W	R3	ADMIT:https://www.linkedin.com/in/me/edit/contact-info/	INFERRED	_audit/_census/write-classes.tsv::queued:CONTACT-INFO-EDITOR ; RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
-P A29	P	W	R3	ADMIT:https://www.linkedin.com/in/me/edit/contact-info/	INFERRED	_audit/_census/write-classes.tsv::queued:CONTACT-INFO-EDITOR ; RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
+P A26	P	W	R3	CAPTURE:admit-in-me-edit-contact-info	NAMED	_audit/_census/profile.md::/in/<me>/edit/forms/contact-info/new/ ; _audit/_census/write-classes.tsv::queued:CONTACT-INFO-EDITOR ; RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
+P A27	P	W	R3	CAPTURE:admit-in-me-edit-contact-info	NAMED	_audit/_census/profile.md::/in/<me>/edit/forms/contact-info/new/ ; _audit/_census/write-classes.tsv::queued:CONTACT-INFO-EDITOR ; RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
+P A28	P	W	R3	CAPTURE:admit-in-me-edit-contact-info	NAMED	_audit/_census/profile.md::/in/<me>/edit/forms/contact-info/new/ ; _audit/_census/write-classes.tsv::queued:CONTACT-INFO-EDITOR ; RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
+P A29	P	W	R3	CAPTURE:admit-in-me-edit-contact-info	NAMED	_audit/_census/profile.md::/in/<me>/edit/forms/contact-info/new/ ; _audit/_census/write-classes.tsv::queued:CONTACT-INFO-EDITOR ; RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
 P B2	P	W	R3	SIBLING:lane-U	INFERRED	linkedin_server/uploads.py ; _audit/2026-09-28-rulings-build-classes.md::`FILE-UPLOAD-UNSANCTIONED` is therefore a stale label.
 P B3	P	W	R3	CAPTURE:in-me-profile	NAMED	RULING:NO-INDEX-PINNED-JUDGEMENTS ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
 P B4	P	W	R3	SIBLING:lane-S	NAMED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD ; RULING:CREDENTIAL-SETTINGS-NEED-THE-OPERATOR
@@ -391,12 +391,12 @@ P C5	P	W	R3	SIBLING:lane-S	NAMED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD ; RULING:CR
 P C6	P	W	R3	SIBLING:lane-S	NAMED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD ; RULING:CREDENTIAL-SETTINGS-NEED-THE-OPERATOR
 P C7	P	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 P C8	P	R	-	CAPTURE:in-me-profile	NAMED	RULING:NO-INDEX-PINNED-JUDGEMENTS ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
-P D2	P	W	R3	ADMIT:https://www.linkedin.com/in/me/edit/forms/summary/new/	NAMED	_audit/_census/profile.md::/edit/forms/summary/new/ ; RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
-P D5	P	W	R3	ADMIT:https://www.linkedin.com/in/me/edit/forms/position/new/	INFERRED	RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
-P D6	P	W	R3	ADMIT:https://www.linkedin.com/in/me/edit/forms/position/new/	INFERRED	RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
+P D2	P	W	R3	CAPTURE:admit-in-me-edit-forms-summary-new	NAMED	_audit/_census/profile.md::/edit/forms/summary/new/ ; RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
+P D5	P	W	R3	CAPTURE:admit-in-me-edit-forms-position-new	NAMED	_audit/_census/completeness-annotations.tsv::/in/<entity>/edit/forms/position/new ; RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
+P D6	P	W	R3	CAPTURE:admit-in-me-edit-forms-position-new	INFERRED	RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
 P D7	P	W	R3	SIBLING:lane-S	NAMED	_audit/_census/profile.md::/psettings/activity-broadcast ; RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
-P D8	P	W	R3	ADMIT:https://www.linkedin.com/in/me/edit/forms/position/new/	INFERRED	RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
-P D9	P	W	R3	ADMIT:https://www.linkedin.com/in/me/edit/forms/position/new/	INFERRED	RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
+P D8	P	W	R3	CAPTURE:admit-in-me-edit-forms-position-new	INFERRED	RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
+P D9	P	W	R3	CAPTURE:admit-in-me-edit-forms-position-new	INFERRED	RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
 P D11	P	W	R3	ADMIT:https://www.linkedin.com/in/me/edit/forms/education/new/	INFERRED	RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
 P D12	P	W	R3	ADMIT:https://www.linkedin.com/in/me/edit/forms/education/new/	INFERRED	RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
 P D13	P	W	R3	ADMIT:https://www.linkedin.com/in/me/edit/forms/certification/new/	INFERRED	RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
@@ -413,11 +413,11 @@ P D23	P	W	R3	ADMIT:https://www.linkedin.com/in/me/edit/forms/cause/new/	INFERRED
 P D24	P	W	R3	ADMIT:https://www.linkedin.com/in/me/opportunities/volunteering/education/	NAMED	_audit/_census/profile.md::Lifted by capture C3 (after that exact address is admitted ; RULING:READ-PAST-AN-ACT-SUBSTRING
 P D25	P	R	-	BUILD:tests/fixtures/live8/in_me.html	NAMED	_audit/2026-09-23-live-lane-session-1.md::his profile, skeleton and raw
 P D26	P	R	-	BUILD:tests/fixtures/live8/in_me.html	NAMED	_audit/2026-09-23-live-lane-session-1.md::his profile, skeleton and raw
-P D27	P	W	R3	ADMIT:https://www.linkedin.com/in/me/edit/secondary-language/	NAMED	_audit/_census/profile.md::/edit/secondary-language/ ; RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
+P D27	P	W	R3	CAPTURE:admit-in-me-edit-secondary-language	NAMED	_audit/_census/profile.md::/edit/secondary-language/ ; RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
 P D28	P	R	-	PRECONDITION:a secondary-language profile (his own has one language)	NAMED	_audit/_census/read-addresses.tsv::the reading found distinct_langs 1
 P D29	P	W	R3	ADMIT:https://www.linkedin.com/in/me/edit/forms/certification/new/	NAMED	RULING:P-D29-BUILT-BEHIND-THE-GRANT ; _audit/_census/profile.md::Its form is the `/edit/` certifications editor
-P E2	P	W	R3	ADMIT:https://www.linkedin.com/in/me/details/skills/edit/forms/1/	NAMED	_audit/_census/profile.md::/details/skills/edit/forms/ ; RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
-P E3	P	W	R3	ADMIT:https://www.linkedin.com/in/me/details/skills/edit/forms/1/	INFERRED	P E2 ; RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
+P E2	P	W	R3	CAPTURE:admit-in-me-details-skills-edit-forms-1	NAMED	_audit/_census/profile.md::/details/skills/edit/forms/ ; RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
+P E3	P	W	R3	CAPTURE:admit-in-me-details-skills-edit-forms-1	INFERRED	P E2 ; RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
 P E4	P	W	R3	TARGET:a 1st-degree connection he names, whose skill he endorses	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::| C3 | `endorse_skill` ; RULING:OPERATOR-NAMES-THE-TARGET
 P E5	P	W	R3	TARGET:a 1st-degree connection he names, whose skill he endorses	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::| C3 | `endorse_skill` ; RULING:OPERATOR-NAMES-THE-TARGET
 P E6	P	W	R3	PRECONDITION:an endorsement he has received	NAMED	_audit/_census/write-classes.tsv::queued:NO-ENDORSEMENT-DRAWN
