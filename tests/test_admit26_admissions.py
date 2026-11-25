@@ -304,6 +304,28 @@ ADMISSIONS = (
                     "a settings page recording a sensitive attribute"),
         ),
     ),
+    Admission(
+        key="job-preferences",
+        rows=("P I12", "P I13"),
+        address=f"{B}/jobs/preferences?viewType=SEEKING_PREFERENCES",
+        excused=frozenset(),
+        twin=False,
+        siblings=(
+            Sibling(f"{B}/jobs/preferences/", None,
+                    "the bare page: never drawn, so never admitted"),
+            Sibling(f"{B}/jobs/preferences", None, "no query at all"),
+            Sibling(f"{B}/jobs/preferences?viewType=OTHER", None,
+                    "a view nothing draws"),
+            Sibling(f"{B}/jobs/preferences?viewType=seeking_preferences", None,
+                    "another case"),
+            Sibling(f"{B}/jobs/preferences?viewType=SEEKING_PREFERENCES&x=1",
+                    None, "a second key"),
+            Sibling(f"{B}/jobs/preferences/?viewType=SEEKING_PREFERENCES", None,
+                    "a slash LinkedIn does not draw before the query"),
+            Sibling(f"{B}/jobs/preferences/edit/", "/edit/",
+                    "an editor under it"),
+        ),
+    ),
 )
 
 KEYS = [a.key for a in ADMISSIONS]

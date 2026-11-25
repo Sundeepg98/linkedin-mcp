@@ -1968,7 +1968,12 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # his Premium account settings page, a named settings page in its own
     # commit refused by allowlist silence alone, no exemption -- every other
     # key byte-identical.
-    "_ALLOWED_URL_PATTERNS": "e73a1cde5ff05a90",
+    #
+    # e73a1cde5ff05a90 until lane admit26's sixth commit: one anchored line,
+    # his job-seeker preferences page in the one spelling LinkedIn draws, with
+    # its one query value, a named page in its own commit, no exemption --
+    # every other key byte-identical.
+    "_ALLOWED_URL_PATTERNS": "17f048856f525ff3",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     # 419e64a3cd92ec7e until the same REVIEW: commit: a third entry, excusing
     # exactly {"/follow"} for exactly the anchored follower-list address.

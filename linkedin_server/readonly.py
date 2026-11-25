@@ -2711,6 +2711,17 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # act, never built (PURCHASES-STAY-MANUAL), and the press gate refuses it;
     # a reader returns the plan and its dates, never a payment detail.
     re.compile(r"^https://www\.linkedin\.com/mypreferences/d/premium-manage-account/?$"),
+    # His job-seeker preferences page (census P I12, P I13: the career-
+    # interests page and its minimum-pay preference), a persisted preference
+    # admitted BY NAME (MESSAGING-SETTINGS-CAPABILITY-LEVEL: "a setting is
+    # admitted by name or not at all"), in its own commit. LinkedIn draws it
+    # in ONE spelling, the jobs nav's 'Preferences' anchor, twice on the
+    # captured jobs-alerts page: `/jobs/preferences?viewType=SEEKING_
+    # PREFERENCES`, no slash before the query. That exact spelling is the line;
+    # the bare page, any other view and any second key stay refused. It trips
+    # no substring. Editing a preference is a write with its own spec; the
+    # press gate refuses every control here.
+    re.compile(r"^https://www\.linkedin\.com/jobs/preferences\?viewType=SEEKING_PREFERENCES$"),
 )
 
 #: Substrings that must never appear in a navigation target, checked before

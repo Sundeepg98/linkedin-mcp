@@ -456,8 +456,8 @@ P I8	P	W	R3	ADMIT:https://www.linkedin.com/in/me/opportunities/job-opportunities
 P I9	P	W	R3	ADMIT:https://www.linkedin.com/in/me/opportunities/job-opportunities/edit/	INFERRED	_audit/_slice-otw-census.md::### C3 -- the "Edit" button ; RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
 P I10	P	W	R3	ADMIT:https://www.linkedin.com/in/me/opportunities/job-opportunities/edit/	INFERRED	_audit/_slice-otw-census.md::### C3 -- the "Edit" button ; RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
 P I11	P	W	R3	ADMIT:https://www.linkedin.com/in/me/opportunities/job-opportunities/edit/	INFERRED	_audit/_slice-otw-census.md::### C3 -- the "Edit" button ; RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
-P I12	P	W	R3	ADMIT:https://www.linkedin.com/jobs/preferences/	NAMED	_audit/_census/profile.md::/jobs/preferences/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
-P I13	P	W	R3	ADMIT:https://www.linkedin.com/jobs/preferences?viewType=SEEKING_PREFERENCES	NAMED	_audit/_census/profile.md::/jobs/preferences?viewType=SEEKING_PREFERENCES ; RULING:READ-PAST-AN-ACT-SUBSTRING
+P I12	P	W	R3	CAPTURE:admit-jobs-preferences-viewtype-seeking-preferences	NAMED	_audit/_census/profile.md::/jobs/preferences/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
+P I13	P	W	R3	CAPTURE:admit-jobs-preferences-viewtype-seeking-preferences	NAMED	_audit/_census/profile.md::/jobs/preferences?viewType=SEEKING_PREFERENCES ; RULING:READ-PAST-AN-ACT-SUBSTRING
 P I15	P	W	R3	TARGET:a company he has signalled interest in	NAMED	_audit/_census/write-classes.tsv::queued:INTEREST-ON-LABEL ; RULING:OPERATOR-NAMES-THE-TARGET
 P I16	P	W	R3	PRECONDITION:a job change to share	NAMED	_audit/_census/write-classes.tsv::queued:NO-JOB-CHANGE
 P K1	P	R	-	ADMIT:https://www.linkedin.com/mypreferences/d/verifications	NAMED	_audit/_census/read-addresses.tsv::the settings index draws Verifications only as a link
