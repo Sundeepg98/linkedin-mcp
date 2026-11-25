@@ -57,8 +57,11 @@ chosen by hand and did not include it. The instrument worked; the selection
 of instruments did not. The count is twelve now: the same lane added three
 for the copy link of the operator's own post.
 
-WHAT IS TRUE, measured rather than remembered: twenty-two write tools ship,
-sixteen sanctioned mutating calls exist (twenty and fifteen until lane B4's
+WHAT IS TRUE, measured rather than remembered: twenty-five write tools ship,
+sixteen sanctioned mutating calls exist (twenty-two write tools until lane
+builds-26 registered three that read their surface and refuse, 2026-11-24 --
+the mutating-call count did not move, because they press nothing; twenty and
+fifteen until lane B4's
 merge after lane B3's, 2026-10-10: the alert pair, and its one trial click
 declared a read), writes are off unless a per-process
 flag is set, and every write needs a single-use token from its own preview --

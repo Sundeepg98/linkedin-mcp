@@ -3,8 +3,13 @@
 An MCP server that shows you your own LinkedIn account data as structured tool
 results instead of pages you have to click through.
 
-**Seventy-two tools ship. Fifty read. Twenty-two write. None is
-write-shaped and unable to act.**
+**Seventy-five tools ship. Fifty read. Twenty-five write. Three of those
+are write-shaped and unable to act.**
+(It read "Seventy-two tools ship. Fifty read. Twenty-two write. None is
+write-shaped and unable to act" until lane builds-26, 2026-11-24:
+`linkedin_set_tracker_stage`, `linkedin_endorse_skill` and
+`linkedin_withdraw_endorsement`, sanctioned writes that read their own surface
+and refuse, because the controls they would press have never been captured.)
 (Lane B4's branch: sixty-three and nineteen write until its merge, 2026-10-10: the similar-jobs
 alert, `linkedin_set_similar_jobs_alert` and its inverse.)
 
@@ -1055,7 +1060,7 @@ linkedin_server/
   cdp_bridge.py              the recovery path: attach to a running Chrome
   dom.py                     the read-only harvesters and the control readers
   shape.py                   pure parsers and the result envelope
-  server.py                  the seventy-two tools
+  server.py                  the seventy-five tools
   errors.py
 tests/                       1393 tests, no network, no account
   fixtures/                  frozen LinkedIn markup, scrubbed
