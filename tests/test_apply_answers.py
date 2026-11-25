@@ -100,7 +100,7 @@ def test_no_file_is_an_empty_bank_not_an_error(tmp_path):
     QUESTION,
     "  how many years of EXPERIENCE do you have with widgets?  ",
     "How many years of\nexperience do you\thave with Widgets?",
-    "How many​ years of experience do you have with Widgets?",
+    "How many\u200b years of experience do you have with Widgets?",
 ])
 def test_whitespace_case_and_invisible_characters_do_not_make_a_new_question(drawn):
     result = parsed(entry("w", "numeric", QUESTION, confirmed="3"))
@@ -408,9 +408,10 @@ def test_the_walk_up_stops_at_its_bound(tmp_path):
 #   * a directory holding ``.jobhunt-root`` is the root, and its config is
 #     ``<root>/config/jobhunt.json``;
 #   * the walk looks at the start and at most MAX_WALK_UP (6) parents.
-# The first tests hold the bank to those words with no jobcore import, so they
-# run everywhere; the last runs jobcore's own locate where its source sits
-# beside this checkout, and says so where it does not (CI has no jobcore).
+# The first tests hold the bank to those words with no jobcore import; the
+# last runs jobcore's OWN locate, found the way the vendored-copy drift guard
+# finds jobcore (a sibling ``jobcore/src/jobcore``, which CI clones for every
+# shard), and it fails rather than skips where jobcore is missing.
 
 JOBCORE_MARKER = ".jobhunt-root"
 JOBCORE_MAX_WALK_UP = 6
@@ -464,21 +465,28 @@ def test_jobhunt_home_keeps_jobcores_meaning_and_never_moves_the_bank(tmp_path):
     assert lone.path is None, "JOBHUNT_HOME was read as the root"
 
 
-def _jobcore_config_module():
-    """jobcore's own config module, when its source is beside this checkout."""
-    here = Path(__file__).resolve()
-    for parent in [here, *here.parents][: JOBCORE_MAX_WALK_UP + 2]:
-        if (parent / JOBCORE_MARKER).is_file():
-            src = parent / "mcp-servers" / "jobcore" / "src"
-            return src if (src / "jobcore" / "config.py").is_file() else None
-    return None
+def _jobcore_src():
+    """jobcore's ``src`` directory, found EXACTLY as the vendored-copy drift
+    guard finds it -- its own ``canonical_dir``, imported rather than
+    rewritten: a walk up from the test file to a sibling
+    ``jobcore/src/jobcore``. That is the layout this box carries and the one
+    CI's workflow clones ("Check out jobcore as a sibling, so the drift guards
+    run"). A first version walked to the ``.jobhunt-root`` marker instead,
+    which CI does not have, and lane CI run 45662953454 counted the skip it
+    made as one nobody had declared."""
+    from tests.test_vendored_buildinfo import canonical_dir
+
+    canonical = canonical_dir()
+    return None if canonical is None else canonical.parent
 
 
 def test_jobcores_own_locate_finds_the_bank_s_root(tmp_path, monkeypatch):
-    src = _jobcore_config_module()
-    if src is None:
-        pytest.skip("jobcore's source is not beside this checkout (CI): the "
-                    "restated parity above ran in its place")
+    src = _jobcore_src()
+    assert src is not None and (src / "jobcore" / "config.py").is_file(), (
+        "jobcore's source is not a sibling of this checkout (../jobcore/src/jobcore), "
+        "the layout this box and CI's sibling clone both carry: the parity against "
+        "jobcore's own locate cannot run, and it is not allowed to skip"
+    )
     monkeypatch.syspath_prepend(str(src))
     import importlib
     config = importlib.import_module("jobcore.config")
