@@ -91,7 +91,7 @@ J 156	J	R+W	-	CAPTURE:admit-learning-career-journey	MEASURED	_audit/_census/jobs
 J 157	J	W	-	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 J 159	J	R	-	ADMIT:https://www.linkedin.com/ad-library/search/	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/ad-library/search/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
 J 160	J	R	-	CAPTURE:admit-explore-career-insights	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/explore-career-insights/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
-J 163	J	W	-	BUILD:tests/fixtures/live8/recommended.html	NAMED	_audit/2026-09-23-live-lane-session-1.md::J 163, if the pair
+J 163	J	W	-	RULING:Q-ONE-SHOT-FEEDBACK	MEASURED	_audit/2026-11-25-build-jmn26.md::THE PRESS IS ONE-SHOT. There is no inverse to build ; RULING:HIS-OWN-CURATION-NOT-OUTWARD ; RULING:OUTSIDE-THE-PRODUCT-PURPOSE
 J 165	J	R	-	CAPTURE:admit-company-org-events	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/company/placeholder-org/events/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
 J 166	J	R	-	CAPTURE:admit-products-product	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/products/placeholder-product/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
 J 167	J	R	-	CAPTURE:admit-showcase-showcase	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/showcase/placeholder-showcase/ ; RULING:READ-PAST-AN-ACT-SUBSTRING

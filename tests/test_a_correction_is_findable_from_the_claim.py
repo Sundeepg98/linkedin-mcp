@@ -295,7 +295,7 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
     # note (a scan of each note's text alone: zero hits).
     ("jobs.md", "2026-11-25-build-jmn26.md"): (
         "A ROW'S NEXT STEP RECORDED, NOT A CORRECTION. Rows `19`, `31`, `53`, "
-        "`55`, `56`, `84`, `108`, `110` and `115` each gained one dated note "
+        "`55`, `56`, `84`, `108`, `110`, `115` and `163` each gained one dated note "
         "citing the lane's record -- what the row's capture draws, its "
         "re-pointed step, and for `31` and `108` its move to COVERED-UNFIRED "
         "-- and none says "
