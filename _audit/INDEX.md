@@ -32,20 +32,20 @@ are listed as `(undated)`; no date is taken from git history, because
 | distinct dates | 21 |
 | documents with no level-1 heading | 2 |
 | `CORRECTS:` marker lines | 126 |
-| `CORRECTED BY:` marker lines | 126 |
-| distinct declared correction edges | 111 |
+| `CORRECTED BY:` marker lines | 127 |
+| distinct declared correction edges | 112 |
 | documents something later corrects | 53 |
-| documents that correct something | 74 |
-| documents at either end of a cross-document edge | 103 |
+| documents that correct something | 75 |
+| documents at either end of a cross-document edge | 104 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
-| documents no correction marker touches at all | 177 |
+| documents no correction marker touches at all | 176 |
 | blockquoted markers naming ANOTHER document | 0 |
-| edges missing one of their two markers | 0 |
+| edges missing one of their two markers | 1 |
 | edges declared a different number of times in each direction | 2 |
 | marker lines rejected as malformed | 0 |
 | marker-shaped lines inside a fenced code block | 0 |
-| reasons that continue past their own line (printed whole below) | 15 |
+| reasons that continue past their own line (printed whole below) | 16 |
 | tightest margin over the 20-character admission floor, in characters | 0 |
 | titles carrying a non-ASCII character | 5 |
 | quoted strings whose backticked citation had to be defused | 6 |
@@ -550,6 +550,10 @@ document is dead; it says one thing in it was overtaken and names what.
 - CORRECTED BY [2026-10-10-lane-b2-network-build.md](2026-10-10-lane-b2-network-build.md)
 
   > read against the two skeletons, the feed menu cannot be aimed at an item he names and the search page's first render draws no School, Industry or Keywords control, so `N 37`, `N 43`, `N 51`, `N 153`, `N 154`, `N 200`, `N 88`, `N 89` and `N 93` return to CAPTURE and `N 80` is discharged under D6; and section 5's "unsubscribe" on the newsletter list was counted inside the fixture's header comment, so `N 56` goes to ADMIT.
+
+- CORRECTED BY [2026-11-25-admit26.md](2026-11-25-admit26.md)
+
+  > five of those editors are admitted since 2026-11-25 (the position, About, contact-info and secondary-language forms and one skill's form, each in the spelling LinkedIn draws, two of them re-addressed), and every other ADMIT step in the ledger has moved to a capture or to a question in section 7; the Open To Work editor has no address at all, so its rows wait on Q-OPEN-TO-WORK-EDITOR.
 
 ### [INSTRUMENTS.md](INSTRUMENTS.md)
 
@@ -1565,6 +1569,14 @@ reach is visible. The quoted reason here is the CORRECTOR's own
 
   > section 12.7 moved `N 37`, `N 43`, `N 51`, `N 153`, `N 154`, `N 200`, `N 80`, `N 88`, `N 89` and `N 93` to BUILD on session 8's skeletons, and section 5 counted "unsubscribe" on the newsletter list for `N 56`; read against the captures, ten of those eleven steps had nothing to build on (sections 2, 3 and 5), and the eleventh, `N 80`'s, is discharged under D6.
 
+### [2026-11-25-admit26.md](2026-11-25-admit26.md)
+
+2026-11-25 &middot; Lane admit26: the ledger's ADMIT rows, address by address
+
+- CORRECTS [2026-09-28-lane-k-ledger.md](2026-09-28-lane-k-ledger.md)
+
+  > five of those editors are admitted since 2026-11-25 (the position, About, contact-info and secondary-language forms and one skill's form, each in the spelling LinkedIn draws, two of them re-addressed), and every other ADMIT step in the ledger has moved to a capture or to a question in section 7; the Open To Work editor has no address at all, so its rows wait on Q-OPEN-TO-WORK-EDITOR.
+
 ## 5. Every document, by date
 
 `CORRECTED` means at least one later document declares a correction of
@@ -1835,7 +1847,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-27 | [2026-09-27-rulings-previews-and-receipts.md](2026-09-27-rulings-previews-and-receipts.md) | Ruling, 2026-09-27: a preview names whom the tool resolved |  |
 | 2026-09-27 | [2026-09-27-rulings-relation-removals-and-account-destruction.md](2026-09-27-rulings-relation-removals-and-account-destruction.md) | Rulings, 2026-09-27: removing a relation, and destroying the account |  |
 | 2026-09-28 | [2026-09-28-lane-a-admissions.md](2026-09-28-lane-a-admissions.md) | Lane A: refused reads past an act substring, and the rows a press or a ruling holds |  |
-| 2026-09-28 | [2026-09-28-lane-k-ledger.md](2026-09-28-lane-k-ledger.md) | Lane K: the next-step ledger and the capture queue | **CORRECTED x1** |
+| 2026-09-28 | [2026-09-28-lane-k-ledger.md](2026-09-28-lane-k-ledger.md) | Lane K: the next-step ledger and the capture queue | **CORRECTED x2** |
 | 2026-09-28 | [2026-09-28-lane-s-settings.md](2026-09-28-lane-s-settings.md) | Lane S (settings): the settings of his own account, built behind the grant |  |
 | 2026-09-28 | [2026-09-28-lane-u-uploads.md](2026-09-28-lane-u-uploads.md) | Lane U: uploads -- the decision registered, the rows relabelled, the verb made performable |  |
 | 2026-09-28 | [2026-09-28-rulings-build-classes.md](2026-09-28-rulings-build-classes.md) | Rulings, 2026-09-28: the classes the census still leaves undecided |  |
@@ -1857,7 +1869,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-10-26 | [2026-10-26-integration-2.md](2026-10-26-integration-2.md) | Integration 2, 2026-10-26: five pending lane heads onto one certified head |  |
 | 2026-10-26 | [2026-10-26-lane-ci-defect.md](2026-10-26-lane-ci-defect.md) | 2026-10-26 lane-ci defect -- `wait` printed only the exit-code banner on a red run |  |
 | 2026-10-26 | [2026-10-26-ledger.md](2026-10-26-ledger.md) | Ledger pass, 2026-10-26: B5's six group rows onto their captures, B3's thirteen lines onto their real next steps |  |
-| 2026-11-25 | [2026-11-25-admit26.md](2026-11-25-admit26.md) | Lane admit26: the ledger's ADMIT rows, address by address |  |
+| 2026-11-25 | [2026-11-25-admit26.md](2026-11-25-admit26.md) | Lane admit26: the ledger's ADMIT rows, address by address | corrects x1 |
 
 ## 6. What the scan rejected, could not join, or had to repair
 
@@ -1890,10 +1902,12 @@ against the same line, so a missing continuation satisfies it.
 - REASON PAST ITS LINE [2026-09-20-the-first-firing.md](2026-09-20-the-first-firing.md) line 233 -- a line-scoped reader sees 35 of 465 characters.
 - REASON PAST ITS LINE [2026-09-20-the-five-under-banked.md](2026-09-20-the-five-under-banked.md) line 3 -- a line-scoped reader sees 35 of 349 characters.
 - REASON PAST ITS LINE [2026-09-20-the-five-under-banked.md](2026-09-20-the-five-under-banked.md) line 457 -- a line-scoped reader sees 94 of 717 characters.
+- REASON PAST ITS LINE [2026-09-28-lane-k-ledger.md](2026-09-28-lane-k-ledger.md) line 255 -- a line-scoped reader sees 25 of 386 characters.
 - REASON PAST ITS LINE [_census/jobs.md](_census/jobs.md) line 467 -- a line-scoped reader sees 825 of 1189 characters.
 
 - TIGHTEST ADMISSION MARGIN [2026-09-03-linkedin-gap-blockers.md](2026-09-03-linkedin-gap-blockers.md) line 272 clears the 20-character floor by 0. The floor is applied to the marker's OWN LINE, so a reason of 723 characters is admitted on the strength of 20. Reflow that paragraph by one word and a guard rejects it saying it *carries no reason after the citation*, which would not be true. Reported every regeneration rather than counted, because a count of rejections reads zero until the day it does not.
 
+- HALF-JOINED EDGE [2026-11-25-admit26.md](2026-11-25-admit26.md) -> [2026-09-28-lane-k-ledger.md](2026-09-28-lane-k-ledger.md) -- one of the two markers is missing; the correction guard fails on this.
 - LOPSIDED EDGE [2026-09-05-census-recounted.md](2026-09-05-census-recounted.md) declares 1 correction of [2026-09-05-decide-retire-rulings.md](2026-09-05-decide-retire-rulings.md), which carries 2 back-pointers to it. Two claims under one back-pointer read to the correction guard as one clean pair, because its test is over distinct pairs.
 - LOPSIDED EDGE [2026-09-19-search-admission-preconditions.md](2026-09-19-search-admission-preconditions.md) declares 2 corrections of [2026-09-05-search-results-consent.md](2026-09-05-search-results-consent.md), which carries 1 back-pointer to it. Two claims under one back-pointer read to the correction guard as one clean pair, because its test is over distinct pairs.
 - DEFUSED CITATION [2026-09-03-linkedin-gap-blockers.md](2026-09-03-linkedin-gap-blockers.md) -- its CORRECTED BY: reason quotes the spelling network.md in backticks, which the correction guard's `CITATION` pattern RESOLVES. That guard raises a candidate pair whenever correction vocabulary sits within two lines of a resolving citation, and this file is nothing but document names beside the words CORRECTED and corrects, so the quoted string would make this index raise a pair it means nothing by. **The backticks are removed here and not one character of the text is**; the quoted string still says exactly what the document says, it simply stops being a citation.

@@ -252,6 +252,13 @@ record, merged from master, moved three more (section 4).
   editor is admitted. Their write rows wait on an admission, not on a
   capture.
 
+**CORRECTED BY:** `_audit/2026-11-25-admit26.md` -- five of those editors are
+admitted since 2026-11-25 (the position, About, contact-info and
+secondary-language forms and one skill's form, each in the spelling LinkedIn
+draws, two of them re-addressed), and every other ADMIT step in the ledger has
+moved to a capture or to a question in section 7; the Open To Work editor has
+no address at all, so its rows wait on Q-OPEN-TO-WORK-EDITOR.
+
 ## 5. The capture queue and the session plans
 
 `_audit/_census/capture-queue.tsv`, one line per capture surface, 103 lines.
