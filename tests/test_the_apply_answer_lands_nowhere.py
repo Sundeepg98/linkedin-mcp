@@ -12,8 +12,8 @@ MEASURED, the fixes lane, 2026-11-24 (``_audit/2026-10-26-fixes.md``,
 section 3). The full-matrix run of master f339459 on 2026-10-26 resolved
 playwright 1.64.1, where every earlier run had 1.63.0, and four tests went red
 on every platform. The navigator answered ``204 No Content``. Under 1.64.1 a
-press whose navigation is answered 204 never resolves -- the click raised
-TimeoutError at its full bound -- and the stuck navigation then held the
+press whose navigation is answered 204 does not resolve within its bound -- the
+click raised TimeoutError at its full 10 s -- and the stuck navigation then held the
 page's next waits to THEIR full bounds: ``wait_for_job_description`` reported
 the description "NEVER ARRIVED" over a capture that carries it, and the
 confirm gate refused. Answered ``abort("aborted")``, the press resolved in
