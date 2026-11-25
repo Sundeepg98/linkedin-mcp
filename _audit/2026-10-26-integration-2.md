@@ -494,6 +494,22 @@ fifty-two", a pairing that never existed. The split guard reads only the first
 sentence, so nothing caught it. Restored here, and checked whitespace-normalised
 against master.
 
+(merged 10, lane lane-ci-fix-26's certified head 5e6d7f6, the same order;
+merge base b348ab8, 8 commits.) `scripts/lane_ci.py`'s failure extractor and
+`tests/test_lane_ci.py`, with its record and INSTRUMENTS section 98. The
+defect it fixes is one this lane met at merge 8: `lane_ci.py wait` on run
+45642506747 printed the failed job and no failing test, and the test had to be
+read out of `gh run view --log-failed` by hand. Only the two corpus views and
+the INSTRUMENTS tail conflicted. Section 98 is placed after builds-26's 96, by
+heading order (the tail reads 93, 95, 96, 98). Builds-26 and lane-ci-fix-26
+each added one `_audit` document to master's 275, and each head's index reads
+276. A text merge of those two count lines would keep ONE of the two +1s (lane
+lane-ci-fix-26's own finding). So both views are regenerated, never merged,
+and the counts are measured on the merged tree: the index over 281 documents
+and the rulings register scanning 280 (it excludes itself), against ours' 280
+and 279 before this merge. No tool, row or pin moves: the registry still
+measures 80 tools and 128 parameters, and `census --check` is clean.
+
 
 ## 4. Pins re-derived on the merged tree
 

@@ -45,8 +45,15 @@ never "the latest run" -- right after a push the latest run is the previous
 one. Keeps only a ``push`` run whose head branch is a ``ci/`` ref. Polls every
 20 s, bounded at 25 minutes. Reads the verdict from
 ``gh run view --json status,conclusion,jobs``, never from ``gh run watch``'s
-exit code, which is 0 on a 403. On a failure it prints the failing job names
-and the first failing test lines from ``--log-failed``, truncated.
+exit code, which is 0 on a 403. On a failure it prints the failing job names,
+then EVERY failing test as a node id (``tests/f.py::test_x``), then the first
+failing lines from ``--log-failed`` as detail, truncated. The id rides a
+``FAILED tests/...::test`` line under ``-rf`` or, under the ``-q -rs`` CI
+actually runs, the sub-banner opening each FAILURES block, paired with that
+block's own ``tests/...:NNN`` reference. The ids are read separately from the
+detail and are not subject to its cap; past ``ID_LIMIT`` the count of the
+rest is printed. When the log names no test it says so rather than let the
+exit banner pass for one.
 
 EXIT CODES: 0 success; 1 a refusal or a red run; 2 nothing could be
 established (no run appeared, the bound ran out, gh kept failing). 2 never
@@ -73,7 +80,54 @@ POLL_SECONDS = 20
 BOUND_SECONDS = 25 * 60
 FAILED_JOB_STATES = frozenset(
     {"failure", "cancelled", "timed_out", "action_required", "startup_failure"})
-_FAIL_LINE = re.compile(r"(FAILED|ERROR) \S|##\[error\]|REFUS")
+# The pre-fix pattern was ``(FAILED|ERROR) \S|##\[error\]|REFUS``. Those
+# classes carry a failing id when the suite runs under ``-rf`` (a
+# ``FAILED tests/...::test`` line) or always carry the exit banner. But CI
+# runs the suite with ``-q -rs`` -- skip summary only, NOT ``-rf`` -- so a
+# real red log carries the failing test id on THREE OTHER line classes
+# instead, none of them matched by the old pattern:
+#   * the ``______ test_name ______`` sub-banner that opens each FAILURES
+#     block,
+#   * the ``E       ...`` lines of that block -- the message,
+#   * the ``tests/file.py:NNN: ...`` reference lines -- the test's own frame
+#     and any frame deeper in the suite.
+# A real red log on 2026-10-26 (lane run, shard 0) had the id on all three
+# and on none of the old classes, which is why ``wait`` printed only the
+# banner. ``_FALLING_LINE`` below is the union of the old and the new, so a
+# run logged either way still surfaces the id.
+#
+# THE SUB-BANNER'S FILL IS ANY WIDTH, measured 2026-11-25 (pytest -q -rs at
+# COLUMNS=80, CI's fallback): a name too long for the line is padded with ONE
+# underscore a side, and this suite has test names past 80 characters. The
+# first version wanted four, and such a test vanished from the report. AND
+# THE TITLE IS NOT ITSELF FILL: pytest draws ``_ _ _ ... _`` between the
+# frames of a long traceback, which any-width fill alone would take for a
+# banner (it did, on the real log of a four-failure run, after the fixture
+# transcribed from that log had passed without the separator in it).
+_FALLING_LINE = re.compile(
+    r"(FAILED|ERROR) \S|##\[error\]|REFUS"
+    r"|^_+ [^_\s].*? _+$"  # the ____ test_name ____ sub-banner, any fill width
+    r"|^E\s"              # an "E" (excerpt) line of a FAILURES block
+    r"|^tests/[\w./-]+\.py:\d+")   # a "tests/file.py:NNN: ..." reference line
+
+# THE IDS ARE READ ON THEIR OWN. The lines above are the DETAIL view, capped
+# at 20 because every E line and every frame comes with it; on the first
+# live red run it read (four failing tests, 2026-10-26) the cap ran out one
+# block early and ``wait`` named three. These read only what identifies a
+# failing test, and ``_report`` prints all of them ahead of the detail.
+#: A FAILURES block's opening sub-banner; group 1 is the name pytest printed
+#: there -- ``test_x``, ``Class.test_x``, ``test_x[param]``, or a sentence
+#: such as ``ERROR at setup of test_x``.
+_SUBBANNER = re.compile(r"^_+ ([^_\s].*?) _+$")
+#: An ``-rf`` short-summary line; group 1 is the node id (or, for an error
+#: collecting a file, the file).
+_ID_LINE = re.compile(r"^(?:FAILED|ERROR) (tests/\S+?\.py(?:::.+?)?)(?: - |$)")
+#: A traceback reference into the suite; group 1 is the test file.
+_TEST_REF = re.compile(r"^(tests/[\w./-]+\.py):\d+")
+#: How many failing test ids ``wait`` prints before it says how many more
+#: there are. The most a lane run here has had is four; a run past fifty is
+#: broken wholesale, and the count says so instead of a silent cut.
+ID_LIMIT = 50
 
 
 # ---------------------------------------------------------------------------
@@ -143,24 +197,106 @@ def failing_jobs(view: dict) -> list[str]:
             if j.get("conclusion") in FAILED_JOB_STATES]
 
 
-def first_failing_lines(log: str, limit: int = 20, width: int = 220) -> list[str]:
-    """The first failing-test lines of a ``--log-failed`` dump, deduplicated.
+def _strip_gh_prefix(raw: str) -> str:
+    """One ``--log-failed`` line as pytest wrote it.
 
-    gh prefixes each line with ``<job>\\t<step>\\t<timestamp> ``; that prefix
-    is cut so the line reads as pytest wrote it.
+    gh's ``--log-failed`` prefixes each line with ``<job>\\t<step>\\t
+    <timestamp> ``; that prefix is cut. The first annotation line of a step
+    also carries a byte-order mark on its timestamp, and a stray one is
+    stripped too -- spelled ``chr(0xFEFF)`` because a literal one in this
+    file is invisible to whoever edits it next.
+    """
+    text = raw.split("\t")[-1]
+    text = re.sub(r"^\S+Z\s", "", text).strip()
+    return text.lstrip(chr(0xFEFF))
+
+
+def first_failing_lines(log: str, limit: int = 20, width: int = 220) -> list[str]:
+    """The DETAIL view of a red ``--log-failed`` dump: its first failing
+    lines, deduplicated, capped at ``limit``.
+
+    A line is kept when it belongs to a failure: the old classes (a
+    ``FAILED``/``ERROR`` id line, the ``##[error]`` process banner, a ``REFUS``
+    refusal) and the three that carry the failure under ``-q -rs`` (the
+    sub-banner, the ``E`` lines, the ``tests/...:NNN`` references) -- see the
+    module-level patterns. Because every ``E`` line and frame is kept, a run
+    with several failures can fill the cap before its last block: the ids are
+    therefore read separately, by :func:`failing_test_ids`, and never capped
+    by this.
     """
     out: list[str] = []
     seen: set[str] = set()
     for raw in log.splitlines():
-        text = raw.split("\t")[-1]
-        text = re.sub(r"^\S+Z\s", "", text).strip()
-        if not _FAIL_LINE.search(text) or text in seen:
+        text = _strip_gh_prefix(raw)
+        if not _FALLING_LINE.search(text) or text in seen:
             continue
         seen.add(text)
         out.append(text if len(text) <= width else text[:width - 3] + "...")
         if len(out) >= limit:
             break
     return out
+
+
+def _node_id(name: str, path: str | None) -> str:
+    """A sub-banner's name as a node id a reader can run.
+
+    ``Class.test_x[p]`` under ``tests/f.py`` is ``tests/f.py::Class::test_x[p]``
+    (only the part before ``[`` is split: a parameter may hold dots). A name
+    with whitespace before any ``[`` is a sentence -- ``ERROR at setup of
+    test_x`` -- and is kept as written, because pairing it with a path would
+    invent a node id that does not exist.
+    """
+    head, bracket, rest = name.partition("[")
+    if path is None or re.search(r"\s", head):
+        return name
+    return f"{path}::{head.replace('.', '::')}{bracket}{rest}"
+
+
+def failing_test_ids(log: str) -> list[str]:
+    """Every distinct failing test a ``--log-failed`` dump names, in order.
+
+    Two sources, because a local ``-rf`` run and CI's ``-q -rs`` log a failure
+    differently: the ``FAILED``/``ERROR`` short-summary lines, and the
+    sub-banner opening each FAILURES block. A sub-banner carries only the
+    name, so it is paired with the first ``tests/`` reference INSIDE ITS OWN
+    BLOCK -- the test's own frame -- and a block that ends without one keeps
+    the bare name. The same test failing in several cells is one id.
+
+    NOT CAPPED. That is the point of a second function: the detail view is
+    capped, and on a four-failure run it ran out one block early.
+    """
+    ids: list[str] = []
+    seen: set[str] = set()
+
+    def add(node: str) -> None:
+        if node not in seen:
+            seen.add(node)
+            ids.append(node)
+
+    pending: str | None = None
+    for raw in log.splitlines():
+        text = _strip_gh_prefix(raw)
+        banner = _SUBBANNER.match(text)
+        if banner:
+            if pending is not None:
+                add(_node_id(pending, None))
+            pending = banner.group(1)
+            continue
+        if pending is not None:
+            ref = _TEST_REF.match(text)
+            if ref:
+                add(_node_id(pending, ref.group(1)))
+                pending = None
+                continue
+            if text.startswith("=") and text.endswith("="):
+                add(_node_id(pending, None))   # the section ended first
+                pending = None
+        summary = _ID_LINE.match(text)
+        if summary:
+            add(summary.group(1))
+    if pending is not None:
+        add(_node_id(pending, None))
+    return ids
 
 
 def elapsed(view: dict) -> str:
@@ -323,8 +459,31 @@ def _report(slug: str, run_id: str, view: dict, state: str) -> int:
     for name in failing_jobs(view):
         print(f"  failed job: {name}")
     rc, log, _err = _gh("run", "view", run_id, "-R", slug, "--log-failed")
-    for line in first_failing_lines(log if rc == 0 else ""):
-        print(f"    {line}")
+    text = log if rc == 0 else ""
+    ids = failing_test_ids(text)
+    if ids:
+        print(f"  failing tests ({len(ids)}):")
+        for node in ids[:ID_LIMIT]:
+            print(f"    {node}")
+        if len(ids) > ID_LIMIT:
+            print(f"    ... and {len(ids) - ID_LIMIT} more -- gh run view "
+                  f"{run_id} --log-failed")
+    lines = first_failing_lines(text)
+    if lines:
+        print("  first failing lines:")
+        for line in lines:
+            print(f"    {line}")
+        if not ids:
+            print("    (no failing test id found in the failed log -- the lines "
+                  "above name no test; pull it yourself: gh run view "
+                  f"{run_id} --log-failed)")
+    elif rc != 0:
+        print("    (could not fetch the failed log; no failing lines found -- "
+              "pull it yourself: gh run view "
+              f"{run_id} --log-failed)")
+    else:
+        print("    (no failing lines found in the failed log -- the run was red "
+              "but nothing named the failing test)")
     return 1
 
 
