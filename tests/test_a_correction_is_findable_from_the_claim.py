@@ -289,6 +289,41 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "in the ledger record does not hold while leaving the record unmarked."
     ),
 
+    # 2026-11-25, lane build-jmn26. TABLE-ROW PROXIMITY, read and not inferred
+    # from the filenames: every line citing the lane's record was listed with
+    # the matched words in its two-line window, and none sits in the lane's own
+    # note (a scan of each note's text alone: zero hits).
+    ("jobs.md", "2026-11-25-build-jmn26.md"): (
+        "A ROW'S NEXT STEP RECORDED, NOT A CORRECTION. Rows `19`, `53`, `55`, "
+        "`56`, `84`, `108`, `110` and `115` each gained one dated note citing "
+        "the lane's record -- what the row's capture draws, its re-pointed "
+        "step, and for `108` its move to COVERED-UNFIRED -- and none says "
+        "anything in that record does not hold. Every matched word is older "
+        "text in a neighbouring row: `17`'s 'The impossibility half above is "
+        "false' and `18`'s 'PRICED ON THE WRONG ADDRESS' within two lines of "
+        "`19`, and `112`'s cell two lines below `110`. **WHAT WOULD MAKE THIS "
+        "ENTRY WRONG:** a jobs row saying something in the lane's record does "
+        "not hold while leaving the record unmarked."
+    ),
+    ("messaging-and-content.md", "2026-11-25-build-jmn26.md"): (
+        "A ROW'S NEXT STEP RECORDED, NOT A CORRECTION. Rows `C29` and `C97` "
+        "each gained one dated note citing the lane's record -- the capture "
+        "each still needs and its re-pointed step -- and correct nothing in "
+        "it. The matched words are row `C27`'s older text ('correction', "
+        "'stale'), two lines above `C29`; `C97`'s window holds none. **WHAT "
+        "WOULD MAKE THIS ENTRY WRONG:** a messaging row saying something in the "
+        "lane's record does not hold while leaving the record unmarked."
+    ),
+    ("network.md", "2026-11-25-build-jmn26.md"): (
+        "A ROW'S NEXT STEP RECORDED, NOT A CORRECTION. Row `102` gained one "
+        "dated note citing the lane's record -- that its capability is `J "
+        "108`'s, held GAP by the orchestrator's ruling, its step SIBLING -- and "
+        "corrects nothing in it. The matched words are older text in the two "
+        "rows above it: `100`'s 'correction' and `101`'s 'stale'. **WHAT WOULD "
+        "MAKE THIS ENTRY WRONG:** a network row saying something in the lane's "
+        "record does not hold while leaving the record unmarked."
+    ),
+
     # 2026-10-10, lane B1. READ, not inferred from the filenames: found by the
     # lane's CI run 38047037803 on row A13's line, and measured over every line
     # citing the record -- no correction word stands in lane B1's own text.

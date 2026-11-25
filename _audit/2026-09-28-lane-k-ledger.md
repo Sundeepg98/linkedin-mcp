@@ -617,6 +617,21 @@ prose returned at runtime), let a search return each organisation it found as
 its name and its Page link, held to the ruling `PEOPLE-DATA-MITIGATIONS` --
 or does the row wait on a page that draws numeric ids?
 
+### Q-NOTIFICATION-KEY -- which notification card a delete is aimed at
+
+Added 2026-11-25 by lane build-jmn26 (`_audit/2026-11-25-build-jmn26.md`,
+section 4). Row: `M C97`. Every notification card draws its own
+`Delete notification` item -- 9 of 9 cards on live session 5's capture and 10
+of 10 on session 10's, by keyed shape -- but no card carries a key a caller
+could pass back: the card and its menu nodes hold `id`, `class`, `type`, a
+position (`data-nt-card-index`) and a view name, and `linkedin_notifications`
+returns a card's text, its relative time and its link, a link shared by every
+card of one kind. A target chosen by position is the page supplying it
+(`PAGE-MAY-VETO-NEVER-SUPPLY`), and one matched on a card's words is a write
+aimed by text. The question: may a caller name one notification by what
+`linkedin_notifications` returned for it, the page vetoing unless exactly one
+card matches -- or does the row wait on a key LinkedIn draws?
+
 ## 8. Preconditions and purposes
 
 PRECONDITION rows stay GAP; each waits on something he does not hold.

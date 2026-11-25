@@ -27,19 +27,19 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 281 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 241 |
-| distinct dates | 20 |
+| audit documents git tracks under `_audit` | 282 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 242 |
+| distinct dates | 21 |
 | documents with no level-1 heading | 2 |
-| `CORRECTS:` marker lines | 126 |
-| `CORRECTED BY:` marker lines | 126 |
-| distinct declared correction edges | 111 |
-| documents something later corrects | 53 |
-| documents that correct something | 74 |
-| documents at either end of a cross-document edge | 103 |
+| `CORRECTS:` marker lines | 127 |
+| `CORRECTED BY:` marker lines | 127 |
+| distinct declared correction edges | 112 |
+| documents something later corrects | 54 |
+| documents that correct something | 75 |
+| documents at either end of a cross-document edge | 105 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
-| documents no correction marker touches at all | 176 |
+| documents no correction marker touches at all | 175 |
 | blockquoted markers naming ANOTHER document | 0 |
 | edges missing one of their two markers | 0 |
 | edges declared a different number of times in each direction | 2 |
@@ -550,6 +550,14 @@ document is dead; it says one thing in it was overtaken and names what.
 - CORRECTED BY [2026-10-10-lane-b2-network-build.md](2026-10-10-lane-b2-network-build.md)
 
   > read against the two skeletons, the feed menu cannot be aimed at an item he names and the search page's first render draws no School, Industry or Keywords control, so `N 37`, `N 43`, `N 51`, `N 153`, `N 154`, `N 200`, `N 88`, `N 89` and `N 93` return to CAPTURE and `N 80` is discharged under D6; and section 5's "unsubscribe" on the newsletter list was counted inside the fixture's header comment, so `N 56` goes to ADMIT.
+
+### [2026-10-10-lane-b3-messaging-build.md](2026-10-10-lane-b3-messaging-build.md)
+
+2026-10-10 &middot; Lane B3, 2026-10-10: messaging and content -- one item's words read, two session-1 pages read, and the rest held by what was measured
+
+- CORRECTED BY [2026-11-25-build-jmn26.md](2026-11-25-build-jmn26.md)
+
+  > `Delete notification` is word-measured on today's captures as well: the keyed skeletons of live sessions 5 and 10 match it on every card (9 of 9, 10 of 10). The blocker, a card key a caller can pass, stands.
 
 ### [INSTRUMENTS.md](INSTRUMENTS.md)
 
@@ -1565,6 +1573,14 @@ reach is visible. The quoted reason here is the CORRECTOR's own
 
   > section 12.7 moved `N 37`, `N 43`, `N 51`, `N 153`, `N 154`, `N 200`, `N 80`, `N 88`, `N 89` and `N 93` to BUILD on session 8's skeletons, and section 5 counted "unsubscribe" on the newsletter list for `N 56`; read against the captures, ten of those eleven steps had nothing to build on (sections 2, 3 and 5), and the eleventh, `N 80`'s, is discharged under D6.
 
+### [2026-11-25-build-jmn26.md](2026-11-25-build-jmn26.md)
+
+2026-11-25 &middot; build-jmn26, 2026-11-25: the J, M and N rows the ledger marked BUILD
+
+- CORRECTS [2026-10-10-lane-b3-messaging-build.md](2026-10-10-lane-b3-messaging-build.md)
+
+  > its section 4.6 has `Delete notification` word-measured only on the 2026-08-22 capture; the keyed skeletons of live sessions 5 and 10 match it on every card (9 of 9, 10 of 10). The row's blocker, no card key, is unchanged.
+
 ## 5. Every document, by date
 
 `CORRECTED` means at least one later document declares a correction of
@@ -1843,7 +1859,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-10-10 | [2026-10-10-integration.md](2026-10-10-integration.md) | Integration, 2026-10-10: lanes B5, NP, B2 and B3 onto master |  |
 | 2026-10-10 | [2026-10-10-lane-b1-profile-build.md](2026-10-10-lane-b1-profile-build.md) | Lane B1, 2026-10-10: fifteen profile rows on real captures -- what the captures draw, the one select that was waiting, and three readers |  |
 | 2026-10-10 | [2026-10-10-lane-b2-network-build.md](2026-10-10-lane-b2-network-build.md) | Lane B2 -- the network build: seventeen BUILD rows read against their captures | corrects x1 |
-| 2026-10-10 | [2026-10-10-lane-b3-messaging-build.md](2026-10-10-lane-b3-messaging-build.md) | Lane B3, 2026-10-10: messaging and content -- one item's words read, two session-1 pages read, and the rest held by what was measured |  |
+| 2026-10-10 | [2026-10-10-lane-b3-messaging-build.md](2026-10-10-lane-b3-messaging-build.md) | Lane B3, 2026-10-10: messaging and content -- one item's words read, two session-1 pages read, and the rest held by what was measured | **CORRECTED x1** |
 | 2026-10-10 | [2026-10-10-lane-b4-jobs-build.md](2026-10-10-lane-b4-jobs-build.md) | Lane B4, 2026-10-10: the jobs rows lane K's ledger marked BUILD |  |
 | 2026-10-10 | [2026-10-10-lane-b5-groups-build.md](2026-10-10-lane-b5-groups-build.md) | Lane B5, 2026-10-10: the groups build |  |
 | 2026-10-10 | [2026-10-10-lane-ci-fastlane.md](2026-10-10-lane-ci-fastlane.md) | Lane CI fast lane (lci-fastlane-lead), 2026-10-10 |  |
@@ -1857,6 +1873,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-10-26 | [2026-10-26-integration-2.md](2026-10-26-integration-2.md) | Integration 2, 2026-10-26: five pending lane heads onto one certified head |  |
 | 2026-10-26 | [2026-10-26-lane-ci-defect.md](2026-10-26-lane-ci-defect.md) | 2026-10-26 lane-ci defect -- `wait` printed only the exit-code banner on a red run |  |
 | 2026-10-26 | [2026-10-26-ledger.md](2026-10-26-ledger.md) | Ledger pass, 2026-10-26: B5's six group rows onto their captures, B3's thirteen lines onto their real next steps |  |
+| 2026-11-25 | [2026-11-25-build-jmn26.md](2026-11-25-build-jmn26.md) | build-jmn26, 2026-11-25: the J, M and N rows the ledger marked BUILD | corrects x1 |
 
 ## 6. What the scan rejected, could not join, or had to repair
 

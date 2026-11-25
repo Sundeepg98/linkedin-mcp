@@ -362,6 +362,8 @@ card carries no key: its only attributes are `aria-label`,
 notification key. A target chosen by position is the page supplying it
 (`PAGE-MAY-VETO-NEVER-SUPPLY`). First: a key a caller can pass.
 
+**CORRECTED BY:** `_audit/2026-11-25-build-jmn26.md` -- `Delete notification` is word-measured on today's captures as well: the keyed skeletons of live sessions 5 and 10 match it on every card (9 of 9, 10 of 10). The blocker, a card key a caller can pass, stands.
+
 ---
 
 ## 5. Pins re-derived, on measured values

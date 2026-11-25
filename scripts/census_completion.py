@@ -1283,7 +1283,8 @@ PINNED = {
     #: 214 AT LANE B1'S MERGE OF ORIGIN/MASTER 0103810, MEASURED: master's figure with `P A22` GAP -> COVERED-UNFIRED (the Organization select, session 7).
     #: 216 ON LANE B1 (2026-10-10), MEASURED: `P L8` and `P L1` GAP -> COVERED-UNFIRED (the analytics hub and the audience page, on session 1's captures).
     #: MEASURED AT INTEGRATION 2'S MERGE OF LANE B1 (2026-11-24) on the merged tree, never summed (the figures above are each lane's own).
-    "adjudicated": 235,
+    #: 236 ON LANE BUILD-JMN26 (2026-11-25), MEASURED: `J 108` GAP -> COVERED-UNFIRED, the People tab insight reader lane B4 built and integration 2 merged (was 235).
+    "adjudicated": 236,
     #: THE LIVE LANE'S FOUR ROWS, RE-DERIVED AT EACH OF ITS MERGES OF MASTER
     #: (2026-09-24; last over lane S): four rows fired live and banked
     #: (`_audit/2026-09-23-live-lane-session-1.md`). `P G6` COVERED-UNFIRED ->
@@ -1396,7 +1397,8 @@ PINNED = {
     #: 136 AT LANE B1'S MERGE OF ORIGIN/MASTER 0103810, MEASURED: master's figure with `P A22` GAP -> COVERED-UNFIRED (the Organization select, session 7).
     #: 138 ON LANE B1 (2026-10-10), MEASURED: `P L8` and `P L1` GAP -> COVERED-UNFIRED (the analytics hub and the audience page, on session 1's captures).
     #: MEASURED AT INTEGRATION 2'S MERGE OF LANE B1 (2026-11-24) on the merged tree, never summed (the figures above are each lane's own).
-    "delivered_broad": 155,
+    #: 156 ON LANE BUILD-JMN26 (2026-11-25), MEASURED: `J 108` GAP -> COVERED-UNFIRED, the People tab insight reader lane B4 built and integration 2 merged (was 155).
+    "delivered_broad": 156,
     #: 79 since the live lane's merge (see `adjudicated`): P G6, N 134, P O3
     #: and M C72 COVERED-PROVEN.
     #: 75 and 21 since the bucket-1 merge: `M C41` fired live and moved from
@@ -1532,7 +1534,8 @@ PINNED = {
     #: 557 AT LANE B1'S MERGE OF ORIGIN/MASTER 0103810, MEASURED: master's figure with `P A22` GAP -> COVERED-UNFIRED (the Organization select, session 7).
     #: 555 ON LANE B1 (2026-10-10), MEASURED: `P L8` and `P L1` GAP -> COVERED-UNFIRED (the analytics hub and the audience page, on session 1's captures).
     #: MEASURED AT INTEGRATION 2'S MERGE OF LANE B1 (2026-11-24) on the merged tree, never summed (the figures above are each lane's own).
-    "gap": 538,
+    #: 537 ON LANE BUILD-JMN26 (2026-11-25), MEASURED: `J 108` GAP -> COVERED-UNFIRED, the People tab insight reader lane B4 built and integration 2 merged (was 538).
+    "gap": 537,
     #: 18 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: `M M1` built (`linkedin_message_from_profile`).
     #: 16 ON LANE L5'S ORDER OF 2026-09-27 23:36, MEASURED:
     #: `linkedin_send_message` RETIRED (aimed by a name): `M M2` to GAP and `N
@@ -1660,7 +1663,8 @@ PINNED = {
     #: MEASURED AT INTEGRATION 2'S MERGE OF LANE A (2026-11-24) on the merged tree, never summed (the figures above are each lane's own).
     #: 23 AT LANE B1'S MERGE OF ORIGIN/MASTER 6c65815, MEASURED on the merged tree: master's figure (session 9) with lane B1's `P A22`, `P L8` and `P L1` COVERED-UNFIRED (+3).
     #: MEASURED AT INTEGRATION 2'S MERGE OF LANE B1 (2026-11-24) on the merged tree, never summed (the figures above are each lane's own).
-    "unfired": 38,
+    #: 39 ON LANE BUILD-JMN26 (2026-11-25), MEASURED: `J 108` GAP -> COVERED-UNFIRED, the People tab insight reader lane B4 built and integration 2 merged (was 38).
+    "unfired": 39,
     #: 104 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     #: 101 AT LANE S'S NAMES ADOPTION (2026-09-27), MEASURED: `N 79`, `N 172`
@@ -1787,7 +1791,8 @@ PINNED = {
     #: 100 ON LANE A'S APPLICATION OF THE RULINGS OF 2026-10-10, MEASURED: `J
     #: 77` left GAP.
     #: MEASURED AT INTEGRATION 2'S MERGE OF LANE A (2026-11-24) on the merged tree, never summed (the figures above are each lane's own).
-    "gap_unknown": 98,
+    #: 97 ON LANE BUILD-JMN26 (2026-11-25), MEASURED: `J 108` GAP -> COVERED-UNFIRED, the People tab insight reader lane B4 built and integration 2 merged (was 98).
+    "gap_unknown": 97,
     "gap_ambiguous": 0,
     #: BUCKET 3, MEASURED 2026-09-23 (`_audit/2026-09-23-bucket3-addresses.md`),
     #: counted off `_audit/_census/read-addresses.tsv`, whose every verdict
@@ -2213,7 +2218,8 @@ PINNED = {
     #: MEASURED AT INTEGRATION 2'S MERGE OF LANE A (2026-11-24) on the merged tree, never summed (the figures above are each lane's own).
     #: 8 AT LANE B1'S MERGE OF ORIGIN/MASTER 6c65815, MEASURED on the merged tree: master's figure (session 9) with lane B1's `P A22`, `P L8` and `P L1` COVERED-UNFIRED (+3).
     #: MEASURED AT INTEGRATION 2'S MERGE OF LANE B1 (2026-11-24) on the merged tree, never summed (the figures above are each lane's own).
-    "b1_no_ruling": 22,
+    #: 23 ON LANE BUILD-JMN26 (2026-11-25), MEASURED: `J 108` GAP -> COVERED-UNFIRED, the People tab insight reader lane B4 built and integration 2 merged (was 22).
+    "b1_no_ruling": 23,
     #: 7 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
     #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
     #: 4 AT THE LIVE LANE'S MERGE OF MASTER c2825a4 (2026-09-28), MEASURED on the
@@ -2284,7 +2290,8 @@ PINNED = {
     #: 100 ON LANE A'S APPLICATION OF THE RULINGS OF 2026-10-10, MEASURED: `J
     #: 77` left GAP.
     #: MEASURED AT INTEGRATION 2'S MERGE OF LANE A (2026-11-24) on the merged tree, never summed (the figures above are each lane's own).
-    "jobs_gap": 98,
+    #: 97 ON LANE BUILD-JMN26 (2026-11-25), MEASURED: `J 108` GAP -> COVERED-UNFIRED, the People tab insight reader lane B4 built and integration 2 merged (was 98).
+    "jobs_gap": 97,
     #: 40 AT LANE S'S OFFLINE FRONTIER (2026-09-28), MEASURED: the five rows
     #: bucket 3 called blocked on nothing, taken one by one. `M M53`, `N 195`
     #: and `P S5` (three R rows ADMITTED and gated READER) and `J 107` (the one
@@ -2303,7 +2310,8 @@ PINNED = {
     #: 34 ON LANE A'S APPLICATION OF THE RULINGS OF 2026-10-10, MEASURED: `J
     #: 77` left the jobs side table.
     #: MEASURED AT INTEGRATION 2'S MERGE OF LANE A (2026-11-24) on the merged tree, never summed (the figures above are each lane's own).
-    "jobs_dir_r": 33,
+    #: 32 ON LANE BUILD-JMN26 (2026-11-25), MEASURED: `J 108` GAP -> COVERED-UNFIRED, the People tab insight reader lane B4 built and integration 2 merged (was 33).
+    "jobs_dir_r": 32,
     #: 60 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: `J 69` and
     #: `J 87`, both W.
     #: 58 ON LANE K's APPLICATION OF THE RULINGS OF 2026-10-10, MEASURED: `J
@@ -2332,7 +2340,8 @@ PINNED = {
     #: 17` and `J 57`, both on admitted pages.
     #: 30 AT LANE A'S MERGE OF MASTER 71d83ca (2026-10-10), MEASURED on the
     #: merged tree: lane K's rulings and this branch's moves, each above.
-    "jobs_admitted": 30,
+    #: 29 ON LANE BUILD-JMN26 (2026-11-25), MEASURED: `J 108` GAP -> COVERED-UNFIRED, the People tab insight reader lane B4 built and integration 2 merged (was 30).
+    "jobs_admitted": 29,
     #: 11 ON LANE A'S J 38 BUILD (2026-10-10), MEASURED: `J 38` GAP -> COVERED-UNFIRED by D6 --
     #: an alert's delivered job ids, read off the notifications page (never fired).
     #: 11 AT LANE A'S MERGE OF MASTER 71d83ca (2026-10-10), MEASURED on the
@@ -2548,6 +2557,13 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
         #: each built offline over a tracked skeleton of a session-1 capture and
         #: never fired. Reads of pages the allowlist admits; no ruling holds them.
         "M C38", "M C48",
+        #: `J 108` entered on lane build-jmn26, 2026-11-25: an organisation
+        #: People tab's six insight cards as categories and counts
+        #: (`linkedin_company_people_insights`, lane B4's child, merged by
+        #: integration 2), built over the tracked skeleton of session 2's
+        #: capture and never fired. MEMBER-ROSTERS-AS-BOUNDED-READS bounds the
+        #: read and does not hold it; the row's bar was the reader itself.
+        "J 108",
     ),
 }
 
