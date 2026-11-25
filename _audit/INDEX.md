@@ -47,7 +47,7 @@ are listed as `(undated)`; no date is taken from git history, because
 | marker-shaped lines inside a fenced code block | 0 |
 | reasons that continue past their own line (printed whole below) | 15 |
 | tightest margin over the 20-character admission floor, in characters | 0 |
-| titles carrying a non-ASCII character | 6 |
+| titles carrying a non-ASCII character | 5 |
 | quoted strings whose backticked citation had to be defused | 6 |
 
 **THE MARKER LINES OUTNUMBER THE EDGES**, because some pairs are
@@ -1900,5 +1900,4 @@ against the same line, so a missing continuation satisfies it.
 - NON-ASCII TITLE [2026-09-19-duplicate-register.md](2026-09-19-duplicate-register.md) carries U+2014, so its title above is transliterated rather than quoted. This repository is strict-ASCII and writes an em dash as `--` everywhere else; a codepoint with no house spelling is printed as `<U+XXXX>` rather than dropped, because silently stripping it would leave a title that still looks fine and is not the one in the document.
 - NON-ASCII TITLE [2026-09-19-feasibility-self-controlling-zero-guard.md](2026-09-19-feasibility-self-controlling-zero-guard.md) carries U+2014, so its title above is transliterated rather than quoted. This repository is strict-ASCII and writes an em dash as `--` everywhere else; a codepoint with no house spelling is printed as `<U+XXXX>` rather than dropped, because silently stripping it would leave a title that still looks fine and is not the one in the document.
 - NON-ASCII TITLE [2026-09-19-scope-jobs-rw-column.md](2026-09-19-scope-jobs-rw-column.md) carries U+2014, so its title above is transliterated rather than quoted. This repository is strict-ASCII and writes an em dash as `--` everywhere else; a codepoint with no house spelling is printed as `<U+XXXX>` rather than dropped, because silently stripping it would leave a title that still looks fine and is not the one in the document.
-- NON-ASCII TITLE [2026-10-26-builds.md](2026-10-26-builds.md) carries U+2014, so its title above is transliterated rather than quoted. This repository is strict-ASCII and writes an em dash as `--` everywhere else; a codepoint with no house spelling is printed as `<U+XXXX>` rather than dropped, because silently stripping it would leave a title that still looks fine and is not the one in the document.
 
