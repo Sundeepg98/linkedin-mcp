@@ -1283,7 +1283,8 @@ PINNED = {
     #: 214 AT LANE B1'S MERGE OF ORIGIN/MASTER 0103810, MEASURED: master's figure with `P A22` GAP -> COVERED-UNFIRED (the Organization select, session 7).
     #: 216 ON LANE B1 (2026-10-10), MEASURED: `P L8` and `P L1` GAP -> COVERED-UNFIRED (the analytics hub and the audience page, on session 1's captures).
     #: MEASURED AT INTEGRATION 2'S MERGE OF LANE B1 (2026-11-24) on the merged tree, never summed (the figures above are each lane's own).
-    "adjudicated": 235,
+    #: 236 ON LANE BUILD-P26 (2026-11-25), MEASURED: `P L2b` GAP -> COVERED-UNFIRED (lane B1's child reader of his follower list, reviewed and merged; `_audit/2026-11-25-build-p26.md`).
+    "adjudicated": 236,
     #: THE LIVE LANE'S FOUR ROWS, RE-DERIVED AT EACH OF ITS MERGES OF MASTER
     #: (2026-09-24; last over lane S): four rows fired live and banked
     #: (`_audit/2026-09-23-live-lane-session-1.md`). `P G6` COVERED-UNFIRED ->
@@ -1396,7 +1397,8 @@ PINNED = {
     #: 136 AT LANE B1'S MERGE OF ORIGIN/MASTER 0103810, MEASURED: master's figure with `P A22` GAP -> COVERED-UNFIRED (the Organization select, session 7).
     #: 138 ON LANE B1 (2026-10-10), MEASURED: `P L8` and `P L1` GAP -> COVERED-UNFIRED (the analytics hub and the audience page, on session 1's captures).
     #: MEASURED AT INTEGRATION 2'S MERGE OF LANE B1 (2026-11-24) on the merged tree, never summed (the figures above are each lane's own).
-    "delivered_broad": 155,
+    #: 156 ON LANE BUILD-P26 (2026-11-25), MEASURED: `P L2b` GAP -> COVERED-UNFIRED (lane B1's child reader of his follower list, reviewed and merged; `_audit/2026-11-25-build-p26.md`).
+    "delivered_broad": 156,
     #: 79 since the live lane's merge (see `adjudicated`): P G6, N 134, P O3
     #: and M C72 COVERED-PROVEN.
     #: 75 and 21 since the bucket-1 merge: `M C41` fired live and moved from
@@ -1532,7 +1534,8 @@ PINNED = {
     #: 557 AT LANE B1'S MERGE OF ORIGIN/MASTER 0103810, MEASURED: master's figure with `P A22` GAP -> COVERED-UNFIRED (the Organization select, session 7).
     #: 555 ON LANE B1 (2026-10-10), MEASURED: `P L8` and `P L1` GAP -> COVERED-UNFIRED (the analytics hub and the audience page, on session 1's captures).
     #: MEASURED AT INTEGRATION 2'S MERGE OF LANE B1 (2026-11-24) on the merged tree, never summed (the figures above are each lane's own).
-    "gap": 538,
+    #: 537 ON LANE BUILD-P26 (2026-11-25), MEASURED: `P L2b` GAP -> COVERED-UNFIRED (lane B1's child reader of his follower list, reviewed and merged; `_audit/2026-11-25-build-p26.md`).
+    "gap": 537,
     #: 18 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: `M M1` built (`linkedin_message_from_profile`).
     #: 16 ON LANE L5'S ORDER OF 2026-09-27 23:36, MEASURED:
     #: `linkedin_send_message` RETIRED (aimed by a name): `M M2` to GAP and `N
@@ -1660,7 +1663,8 @@ PINNED = {
     #: MEASURED AT INTEGRATION 2'S MERGE OF LANE A (2026-11-24) on the merged tree, never summed (the figures above are each lane's own).
     #: 23 AT LANE B1'S MERGE OF ORIGIN/MASTER 6c65815, MEASURED on the merged tree: master's figure (session 9) with lane B1's `P A22`, `P L8` and `P L1` COVERED-UNFIRED (+3).
     #: MEASURED AT INTEGRATION 2'S MERGE OF LANE B1 (2026-11-24) on the merged tree, never summed (the figures above are each lane's own).
-    "unfired": 38,
+    #: 39 ON LANE BUILD-P26 (2026-11-25), MEASURED: `P L2b` GAP -> COVERED-UNFIRED (lane B1's child reader of his follower list, reviewed and merged; `_audit/2026-11-25-build-p26.md`).
+    "unfired": 39,
     #: 104 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     #: 101 AT LANE S'S NAMES ADOPTION (2026-09-27), MEASURED: `N 79`, `N 172`
@@ -1711,7 +1715,8 @@ PINNED = {
     #: MEASURED AT INTEGRATION 2'S MERGE OF LANE A (2026-11-24) on the merged tree, never summed (the figures above are each lane's own).
     #: 90 ON LANE B1 (2026-10-10), MEASURED: `P L8` and `P L1` GAP -> COVERED-UNFIRED (the analytics hub and the audience page, on session 1's captures).
     #: MEASURED AT INTEGRATION 2'S MERGE OF LANE B1 (2026-11-24) on the merged tree, never summed (the figures above are each lane's own).
-    "gap_read": 79,
+    #: 78 ON LANE BUILD-P26 (2026-11-25), MEASURED: `P L2b`, a read, left GAP (lane B1's child reader of his follower list, reviewed and merged; `_audit/2026-11-25-build-p26.md`).
+    "gap_read": 78,
     #: 151, not the 152 published by `_audit/2026-09-21-the-write-ceiling.md`.
     #: That document scoped itself to `profile.md`, `network.md` and
     #: `messaging-and-content.md`; measured at HEAD those three carry W 151 and
@@ -1942,7 +1947,8 @@ PINNED = {
     #: C70` and `M C93` admitted, and `P M9` left the table.
     "b3_refused": 15,
     "b3_no_address": 1,
-    "b3_needs_session": 14,
+    #: 13 ON LANE BUILD-P26 (2026-11-25), MEASURED: `P D25`'s read address measured (the three anchors' target), so its line is ADMITTED, not NEEDS-SESSION (`_audit/2026-11-25-build-p26.md`, section 2).
+    "b3_needs_session": 13,
     "b3_undetermined": 2,
     #: ITS HISTORY ON 2026-09-23 IS THE RULINGS AND THE LIVE READINGS MOVING
     #: UNDER IT, one line per move:
@@ -2213,7 +2219,8 @@ PINNED = {
     #: MEASURED AT INTEGRATION 2'S MERGE OF LANE A (2026-11-24) on the merged tree, never summed (the figures above are each lane's own).
     #: 8 AT LANE B1'S MERGE OF ORIGIN/MASTER 6c65815, MEASURED on the merged tree: master's figure (session 9) with lane B1's `P A22`, `P L8` and `P L1` COVERED-UNFIRED (+3).
     #: MEASURED AT INTEGRATION 2'S MERGE OF LANE B1 (2026-11-24) on the merged tree, never summed (the figures above are each lane's own).
-    "b1_no_ruling": 22,
+    #: 23 ON LANE BUILD-P26 (2026-11-25), MEASURED: `P L2b` entered bucket 1 held by no ruling (lane B1's child reader of his follower list, reviewed and merged; `_audit/2026-11-25-build-p26.md`).
+    "b1_no_ruling": 23,
     #: 7 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
     #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
     #: 4 AT THE LIVE LANE'S MERGE OF MASTER c2825a4 (2026-09-28), MEASURED on the
@@ -2497,6 +2504,13 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
         #: admitted page over the tracked skeleton of session 1's capture; never
         #: fired. Reads of his own analytics, which no ruling holds.
         "P L1", "P L8",
+        #: `P L2b` entered on lane build-p26 (2026-11-25): his own follower list,
+        #: each follower a people record beside whether he follows them back
+        #: (`linkedin_my_followers_list`), lane B1's child reader merged after
+        #: review, over the tracked skeleton of session 2's capture; never fired.
+        #: NAMES-AT-RUNTIME and PEOPLE-DATA-MITIGATIONS permit and shape it;
+        #: MEMBER-ROSTERS-AS-BOUNDED-READS bounds it; none holds it.
+        "P L2b",
         #: `P A22` entered on lane B1 (2026-10-10): the intro editor's
         #: Organization select, drawn since session 7, chosen and put back by
         #: `linkedin_update_profile_field` over the tracked copy of that capture;

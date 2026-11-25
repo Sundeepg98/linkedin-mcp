@@ -617,6 +617,50 @@ prose returned at runtime), let a search return each organisation it found as
 its name and its Page link, held to the ruling `PEOPLE-DATA-MITIGATIONS` --
 or does the row wait on a page that draws numeric ids?
 
+### Q-EDITOR-TYPEAHEAD -- typing into his own editor's autocomplete field, saving nothing
+
+Added 2026-11-25 by lane build-p26 (`_audit/2026-11-25-build-p26.md`, section
+4). Rows (3): `P A11`, `P A13`, `P A17`. Each is an intro-editor field drawn as
+an input carrying `aria-autocomplete="list"` and no list relation; LinkedIn
+draws the entry list only after typing, and the editor captures of sessions 1,
+4 and 7 hold 0 `role=listbox` and 0 `role=option`. The one measurement is lane
+B1's capture C-B1a (its section F.1; queue line `C-B1a`): type three
+characters into one field, keep a skeleton of the list, then Escape and the
+dialog's Dismiss, never Save, and re-read the stored value. Ruling 1 reaches
+"a SEARCH box, never a composer or an editor", and the press gate refuses
+typing on that page as `composer_or_editor`. The question: may a capture type
+into his own editor's autocomplete field when nothing is saved?
+
+### Q-ABSENT-ON-HIS-ACCOUNT -- three things no live reading of his account draws
+
+Added 2026-11-25 by lane build-p26 (`_audit/2026-11-25-build-p26.md`, section
+4). Rows (3): `P A14` (postal code), `P A15` (location display choice), `P K8`
+(Top Voice badge). Each was read on a live capture of his own account and read
+zero: session 7's intro editor holds eleven controls, every one named, none a
+postal code or a location display choice; session 8's first render of his
+profile, whose top card is where a badge is drawn, holds 0 "Top Voice" in its
+text, its labels, its attributes and its scripts. The grounds: `P A14`'s cell,
+"if C1 finds none, this row's candidate state is MEASURED-ABSENT for this
+account"; `P K8`'s cell, "the next holder of the signed-in profile can settle
+it in one re-read"; the state's definition, "no tool, and a LIVE READING of
+the surface says LinkedIn does not draw the thing". A build lane moves rows
+only to COVERED-UNFIRED. The question, lane B1's first of 2026-10-10: is each
+of the three MEASURED-ABSENT for this account?
+
+### Q-OWN-PROFILE-SCROLL -- one bounded scroll of his own profile
+
+Added 2026-11-25 by lane build-p26 (`_audit/2026-11-25-build-p26.md`, section
+4). Row: `P D26` (the profile-strength meter). Session 8's first render of
+`/in/me/` holds 0 "Profile strength", "All-Star", "Intermediate" and
+"Suggested for you" anywhere in the document, and draws no section heading
+below Activity. No sub-page of his profile draws a meter, so the details-page
+route of `NAMED-PROFILE-DETAIL-PAGES` reaches nothing here. The scroll ruling's
+reopener 3: "A surface exists that has no `start` equivalent at all. Then
+scroll is not an efficiency but the only route, and this ruling does not cover
+it." The question: one bounded scroll of his own `/in/me/` inside a capture
+that commits nothing -- or is the first render enough to put `P D26` on
+Q-ABSENT-ON-HIS-ACCOUNT beside `P K8`?
+
 ## 8. Preconditions and purposes
 
 PRECONDITION rows stay GAP; each waits on something he does not hold.
@@ -1051,6 +1095,8 @@ rulings 1 and 3 permit a capture to make, and the queue is renumbered to start
 at session 9.
 
 **CORRECTED BY:** `_audit/2026-10-10-lane-b2-network-build.md` -- read against the two skeletons, the feed menu cannot be aimed at an item he names and the search page's first render draws no School, Industry or Keywords control, so `N 37`, `N 43`, `N 51`, `N 153`, `N 154`, `N 200`, `N 88`, `N 89` and `N 93` return to CAPTURE and `N 80` is discharged under D6; and section 5's "unsubscribe" on the newsletter list was counted inside the fixture's header comment, so `N 56` goes to ADMIT.
+
+**CORRECTED BY:** `_audit/2026-11-25-build-p26.md` -- read against their captures, the eleven profile rows this ledger put on BUILD (`P A11`, `P A13`, `P A17` on `live4/editor.html`, `P A14`, `P A15` on `live7/editor.html`, `P A25` on the planned `live1/contact_info.html`, `P D25`, `P D26`, `P F1`, `P K8` and `P S8` on session 8's skeletons) have nothing to build on; they go to three questions (`Q-EDITOR-TYPEAHEAD`, `Q-ABSENT-ON-HIS-ACCOUNT`, `Q-OWN-PROFILE-SCROLL`), one admission and two captures, and `P L2b` moves to COVERED-UNFIRED on the reader built for it.
 
 THE THREAD FOOTER, as the live lane re-read it at 15:32. Its session-8
 capture `lk_thread` is the NEW-MESSAGE COMPOSER page, not a named thread's
