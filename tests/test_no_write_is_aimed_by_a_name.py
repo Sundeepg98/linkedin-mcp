@@ -183,6 +183,14 @@ TARGET_KIND_CLASS: dict[str, tuple[str, str]] = {
         "profile_link_or_member_id_and_own_text",
         "message_from_profile: the same parser for the profile half, and his own one line",
     ),
+    # 2026-11-24, lane builds-26: the endorsement pair. The person is chosen
+    # by the link, through the same parser; the skill chooses one of THEIR
+    # skills, compared in the page, and never chooses a person.
+    "profile_and_skill": (
+        "profile_link_or_member_id_and_own_text",
+        "endorse_skill / withdraw_endorsement: the same parser for the profile "
+        "half, and his own words for the skill, which picks no person",
+    ),
     # PAID 2026-09-27 (lane L5, the orchestrator's order of 23:36): the
     # ``member`` kind -- send_invitation's needle, his word for a person,
     # matched against labels -- left the registry. Its replacement is here.

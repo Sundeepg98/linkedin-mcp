@@ -12311,3 +12311,42 @@ its three-answers-by-three-versions grid, the top-card aim verifier over six
 worlds, and the people-card counter. Each answered one question once; the
 answers are tables in `_audit/2026-10-26-fixes.md`. The recipe in 95.1 is the
 part worth keeping, and it is kept here.
+
+## 96. A REFUSING WRITE IS SHOWN READING ITS OWN SURFACE, PRINTING WHAT IT SAW, AND MINTING NOTHING (builds-26, 2026-11-24)
+
+**Registered 2026-11-24.** Full record: `_audit/2026-10-26-builds.md`.
+Numbered 96 by the orchestrator's allocation, appended at the end; renumber at
+the merge if another lane took it.
+
+### 96.1 A TOOL THAT CANNOT ACT IS STILL TESTED AS A TOOL
+
+Three writes were owed whose controls no capture holds: the tracker row's stage
+item (behind a closed overflow menu) and the per-skill endorse control, in
+both directions. Built as sanctioned specs outside `PERFORMABLE`, the danger is
+not a wrong press -- `mint` refuses at issue -- but a refusal that reads
+nothing, or reads the wrong page, or says a fixed sentence whatever the page
+drew. So each test drives the REAL gate over a frozen world and asserts the
+three things a refusing write owes: exactly one load, of the surface its own
+`state_from` names (the Saved tab; the named profile, through the second
+door); a block that prints what that load saw (the job's row, or the counts of
+endorse-shaped buttons, and whom the profile resolved to); and no token, no
+grant, no press. And the refusal's GROUND is pinned to the capture it was
+measured on, so a capture that changes it fails the test rather than leaving a
+stale refusal standing.
+
+    A REFUSAL IS A MEASUREMENT OR IT IS A SLOGAN. DRIVE IT, PIN ITS GROUND
+    TO THE CAPTURE, AND PROVE THE PAGE IT READ WAS THE PAGE IT ACTS ON.
+
+### 96.2 THE ENTRY
+
+| path | shown failing by |
+|---|---|
+| `tests/test_tracker_stage.py`; `linkedin_server/tracker_stage.py`, `writes._read_tracker_stage_row` | on the base tree `ef5b489` the file fails at collection (`ImportError: cannot import name 'tracker_stage'`); `test_the_capture_draws_a_closed_menu_and_no_item` pins the refusal's ground (two closed `Overflow menu` controls, no stage item) to `tests/fixtures/jobs_tracker_row.html`; a job absent from a partial list reads `unknown`, never `not_saved` |
+| `tests/test_endorse_skill.py`; `linkedin_server/endorse_skill.py` | on `d7a203d` the file fails at collection (`ImportError: cannot import name 'endorse_skill'`); `test_an_endorse_shaped_button_is_counted_and_never_pressed` plants a press handler on a DERIVED endorse-shaped button and asserts the count moves to 1 and the body is never marked; a landing on another profile reads `unknown` and refuses |
+
+### 96.3 DECLARED DISPOSABLE
+
+The lane's scratch copies of the base trees (`git archive` into the scratch
+directory, used once each for the red-first runs) and its edit scripts. Each
+answered one question once; the answers are in the record.
+

@@ -441,4 +441,10 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # SEVENTY-SEVEN AT INTEGRATION 2'S MERGE OF LANE B1, 2026-11-24: lane B1's
     # linkedin_analytics_hub and linkedin_audience_analytics, two READS, beside
     # the seventy-five, measured off the merged registry, not summed.
-    assert len(_tool_names()) == 77
+    # SEVENTY-THREE AT LANE BUILDS-26 (2026-11-24): linkedin_set_tracker_stage,
+    # a write-shaped tool that refuses -- measured off the registry.
+    # SEVENTY-FIVE at its second commit: the endorsement pair, refusing.
+    # EIGHTY AT INTEGRATION 2'S MERGE OF LANE BUILDS-26, 2026-11-25: its three
+    # write-shaped tools beside the seventy-seven, measured off the merged
+    # registry, not summed.
+    assert len(_tool_names()) == 80

@@ -1,4 +1,16 @@
-"""The tool surface: seventy-seven tools, twenty-two of which write to LinkedIn.
+"""The tool surface: eighty tools, twenty-two of which write to LinkedIn.
+
+THE SEVENTY-EIGHTH TO EIGHTIETH ARE WRITE-SHAPED AND REFUSE, 2026-11-25, at
+integration 2's merge of lane builds-26 (census ``J 54``, ``P E4`` / ``N 111``
+and ``P E5`` / ``N 113``): ``linkedin_set_tracker_stage``, and
+``linkedin_endorse_skill`` with its inverse ``linkedin_withdraw_endorsement``.
+Each is sanctioned and gated, reads its own surface, prints what it saw and
+mints no token, because the control it would press has never been captured.
+Lane builds-26's branch numbered them the seventy-third to seventy-fifth (its
+two paragraphs, below lane B4's J 110 read, keep those numbers). Measured off
+the merged registry, not summed: the write count holds at twenty-two and the
+write-shaped count is three. The headline read "seventy-seven tools,
+twenty-two of which write" until then.
 
 THE SEVENTY-SIXTH AND SEVENTY-SEVENTH ARE READS, 2026-11-24, at integration
 2's merge of lane B1: ``linkedin_analytics_hub`` (census ``P L8``), his
@@ -36,6 +48,24 @@ returns the Page's own description as an untrusted-text record -- sanitised,
 cut at 2,000 characters with a flag, never stored -- beside the view the root
 drew and its feed items as counts. It presses nothing. Measured off the merged
 registry, not summed.
+
+THE SEVENTY-FOURTH AND SEVENTY-FIFTH ARE WRITE-SHAPED AND REFUSE, 2026-11-24
+(lane builds-26, census ``P E4`` / ``N 111`` and ``P E5`` / ``N 113``):
+``linkedin_endorse_skill`` and its inverse ``linkedin_withdraw_endorsement``,
+built in one change so the undo exists before any endorsement could be
+pressed. Each loads the profile he names through the named-profile door,
+names whom it resolved to, counts the endorse-shaped buttons there and
+mints no token: the per-skill control has never been captured. The
+headline read "seventy-three tools, twenty-two of which write" between the
+two commits of that lane.
+
+THE SEVENTY-THIRD IS WRITE-SHAPED AND REFUSES, 2026-11-24 (lane builds-26,
+census ``J 54``): ``linkedin_set_tracker_stage``, the stage move on a saved
+job. It is sanctioned, gated and unable to act -- the control it would press,
+an item in the tracker row's overflow menu, has never been captured -- so it
+reads the Saved tab, prints what it saw, and mints no token. The write count
+holds at twenty-two; the write-shaped count is one. The headline read
+"seventy-two tools, twenty-two of which write" until then.
 
 THE SEVENTY-FIRST AND SEVENTY-SECOND ARE WRITES, 2026-10-10 (lane B4, census
 ``J 161``, under ``HIS-OWN-CURATION-NOT-OUTWARD``):
@@ -370,9 +400,9 @@ assigned to anybody -- it waits for whoever next runs the suite, and in the
 meantime the pin goes on asserting the old number with full confidence.
 
 THE NUMBERS ABOVE ARE DERIVED NOW, and that is a statement about a test rather
-than about an intention. Seventy-seven is ``len(await mcp.list_tools())``,
+than about an intention. Eighty is ``len(await mcp.list_tools())``,
 pinned in ``test_server_surface.py`` by
-``test_the_surface_is_exactly_the_seventy_seven_tools``; the split is pinned by
+``test_the_surface_is_exactly_the_eighty_tools``; the split is pinned by
 ``tests/test_prose_that_makes_a_claim.py::test_the_server_docstring_numbers_are_derived``,
 which reads THESE WORDS and fails if any of the three disagrees with the
 registry.
@@ -385,17 +415,21 @@ POINTER to it was dangling, so a reader who followed it found nothing and
 would reasonably conclude these numbers are unchecked. A citation is a claim
 like any other.
 The surface splits three ways and the split is the part a reader actually
-needs: FIFTY-FIVE read, TWENTY-TWO write, and ZERO are write-shaped,
-registered, gated and unable to act. Fifty-five plus twenty-two plus zero is
-seventy-seven. (Fifty, twenty-two and seventy-two on master at this
+needs: FIFTY-FIVE read, TWENTY-TWO write, and THREE are write-shaped,
+registered, gated and unable to act. Fifty-five plus twenty-two plus three is
+eighty. (Fifty, twenty-two and seventy-two on master at this
 integration's base; fifty-one, twenty-two and seventy-three when the J 110
 merge added lane B4's read of an organisation Page's description;
 fifty-two, twenty-two and seventy-four when the J 108 merge added lane B4's
 read of a People tab's insight cards; fifty-three, twenty-two and
 seventy-five when the lane A merge added lane A's read of his job
 tracker's further stages; fifty-five, twenty-two and seventy-seven when the
-lane B1 merge added lane B1's two reads of his own analytics.
-Thirty-eight,
+lane B1 merge added lane B1's two reads of his own analytics; and
+fifty-five, twenty-two and three, summing to eighty, when the builds-26
+merge added that lane's three write-shaped tools (its branch read fifty,
+twenty-two and zero, summing to seventy-two, until it registered
+``linkedin_set_tracker_stage``, then the endorsement pair, on 2026-11-24).
+Thirty-eight, thirteen and fifty-one until 2026-09-24; thirty-nine,
 thirteen and fifty-two at the live lane's merge the same day; thirty-nine,
 fourteen and fifty-three at lane L7's; forty-one, fifteen and fifty-six at
 lane L5's; forty-one, sixteen and fifty-seven at lane L8's merge on
@@ -681,6 +715,7 @@ from linkedin_server import (
     company_root,
     creator_analytics,
     dom,
+    endorse_skill,
     events,
     group_page,
     group_roster,
@@ -708,6 +743,7 @@ from linkedin_server import (
     search_verticals,
     shape,
     threads,
+    tracker_stage,
     writes,
 )
 from linkedin_server.auth import (
@@ -1166,6 +1202,15 @@ mcp = FastMCP(
         "linkedin_message_from_profile, linkedin_send_attachment, "
         "linkedin_set_admitted_setting, linkedin_withdraw_reaction, "
         "linkedin_set_similar_jobs_alert and linkedin_unset_similar_jobs_alert. "
+        "ONE MORE IS WRITE-SHAPED AND REFUSES: linkedin_set_tracker_stage, the "
+        "stage move on a saved job, whose control -- an item in the tracker "
+        "row's overflow menu -- has never been captured; it reads his Saved "
+        "tab, says what it saw and why it will not act, and no token is ever "
+        "issued for it. AND TWO MORE: linkedin_endorse_skill and its inverse "
+        "linkedin_withdraw_endorsement, one skill of a person he names by "
+        "profile link, never a name; each loads that profile, names whom it "
+        "resolved to, counts the endorse-shaped buttons and refuses, because "
+        "the per-skill control has never been captured. "
         "THE NINETEENTH, linkedin_set_admitted_setting, changes ONE control "
         "on ONE settings page of his own account that is admitted by name, "
         "one page at a time; one is admitted, Share profile updates, whose "
@@ -9256,6 +9301,26 @@ _WHY_NOT_PERFORMED: dict[str, str] = {
     # ``"send_message"`` LEFT THIS TABLE ON 2026-09-27 with its action: the
     # write was RETIRED rather than re-aimed (lane L5, the orchestrator's
     # order of 23:36) -- see the note where ``linkedin_send_message`` stood.
+    # LANE BUILDS-26, 2026-11-24: sanctioned and refusing, for want of a
+    # capture of the control it would press.
+    "set_tracker_stage": (
+        "the stage move is an item in a tracker row's 'Overflow menu', and no "
+        "capture holds that menu open: on the one populated tracker capture "
+        "the menu is closed and its item slot is empty. The preview reads the "
+        "Saved tab and refuses; mint declines a grant at issue."
+    ),
+    "endorse_skill": (
+        "the per-skill endorse control lives only on the named member's own "
+        "profile and has never been captured -- zero endorse controls in any "
+        "capture this server holds. The preview loads that profile inside the "
+        "act he names, counts the endorse-shaped buttons, and refuses."
+    ),
+    "withdraw_endorsement": (
+        "the label a skill wears once he endorsed it has never been captured, "
+        "so nothing tells an endorsed skill from one that is not. The preview "
+        "loads the profile he names, counts the endorse-shaped buttons, and "
+        "refuses; it is the half the round-trip rule proves first."
+    ),
 }
 
 
@@ -11195,6 +11260,156 @@ async def linkedin_withdraw_reaction(
     """
     try:
         return await _write_tool("withdraw_reaction", item, confirm_token)
+    except Exception as exc:
+        return _error(exc)
+
+
+# ===========================================================================
+# lane builds-26, 2026-11-24 -- census J 54, P E4 / N 111, P E5 / N 113
+# ONE contiguous block: three SANCTIONED, REFUSING writes. Each reads its own
+# surface live, prints what it saw, and mints no token -- the controls they
+# would press have never been captured. Their refusals name the capture.
+# ===========================================================================
+
+
+@mcp.tool()
+async def linkedin_set_tracker_stage(
+    job_id: str, stage: str, confirm_token: str = ""
+) -> dict[str, Any]:
+    """Set one saved job's tracker stage -- a write, and it REFUSES today.
+
+    Census row ``J 54``. THIS TOOL CANNOT PERFORM, and it says why rather than
+    guessing: the stage change is a row-level control behind the row's
+    ``Overflow menu``, and that menu's items have never been captured -- on the
+    one populated tracker capture held here, the menu is closed and its item
+    slot is empty. A press at a control nobody has photographed is the one
+    guess this server does not make.
+
+    WHAT A CALL DOES. ``stage`` is checked first, against the five stage words
+    the tracker's own tab strip draws (Saved, Draft, Applied, Interview,
+    Archived); any other word, or Saved itself, is refused with no page
+    loaded. Then your Saved tab is read live -- the same reconciled read
+    ``linkedin_save_job``'s gate takes -- and the block says whether this job's
+    row is drawn there. NO CONFIRM TOKEN IS ISSUED, at any step: the block is a
+    warning, and its refusal names the capture that would lift it.
+
+    Args:
+        job_id: the numeric LinkedIn job id, as ``linkedin_saved_jobs`` prints
+            it.
+        stage: the destination stage, one of the tracker's tab words.
+        confirm_token: accepted for the shape every write shares; no token is
+            ever issued for this tool, so none can be redeemed.
+    """
+    destination, why = tracker_stage.checked_stage(stage)
+    if destination is None:
+        return {
+            "error": "unknown_stage",
+            "message": (
+                "No page was loaded and nothing was pressed: " + why
+            ),
+            "stages": [s for s in tracker_stage.TRACKER_STAGES if s != tracker_stage.FROM_STAGE],
+            "pages_loaded": 0,
+            "performed": False,
+        }
+    try:
+        block = await _write_tool("set_tracker_stage", job_id, confirm_token)
+    except Exception as exc:
+        return _error(exc)
+    if isinstance(block, dict) and "error" not in block:
+        block = {**block, "requested_stage": destination}
+    return block
+
+
+def _skill_refusal(skill: str) -> tuple[str, Optional[dict[str, Any]]]:
+    """``(skill, None)`` for a usable skill name, else ``("", refusal)``. The
+    refusal loads nothing and reports a SHAPE, never the value."""
+    name, why = endorse_skill.checked_skill(skill)
+    if name:
+        return name, None
+    return "", {
+        "error": "bad_skill",
+        "message": "No page was loaded and nothing was pressed: " + why,
+        "pages_loaded": 0,
+        "performed": False,
+    }
+
+
+@mcp.tool()
+async def linkedin_endorse_skill(
+    profile: str, skill: str, confirm_token: str = ""
+) -> dict[str, Any]:
+    """Endorse one skill of a person YOU NAME, on their profile. A write, and it REFUSES today.
+
+    Census rows ``P E4`` / ``N 111``. THIS TOOL CANNOT PERFORM: the per-skill
+    endorse control has never been captured -- zero endorse controls exist in
+    any capture this server holds -- so no confirm token is ever issued for it.
+    Its inverse, ``linkedin_withdraw_endorsement``, is built beside it and
+    refuses for the same reason. THE ROUND-TRIP RULE: no endorsement is pressed
+    on a member until the withdraw's anchor is measured on that same member.
+
+    WHAT A CALL DOES. The skill is checked, and the target must be their
+    profile LINK or member id, never a name -- both before any page loads.
+    Then their profile is loaded through the named-profile door, inside the act
+    you name (THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET): they may see you among
+    their profile viewers. The page must name its own owner; the block names
+    WHOM IT RESOLVED TO, as a people record, and COUNTS the buttons whose name
+    carries "endors" and those that also carry your skill -- integers, no
+    label read, nothing pressed. Those counts are the first reading this server
+    has taken of the control, and the refusal names the capture still owed.
+
+    Args:
+        profile: their profile link or member id. Never a name.
+        skill: the one skill to endorse, in your own words.
+        confirm_token: accepted for the shape every write shares; no token is
+            ever issued for this tool, so none can be redeemed.
+    """
+    name, refusal = _skill_refusal(skill)
+    if refusal is not None:
+        return refusal
+    target = {"profile": profile, "skill": name}
+    try:
+        if writes.writes_enabled():
+            # A NAME IS REFUSED BEFORE A BROWSER IS OPENED, by the same
+            # normalisation ``mint`` and ``consume`` apply (as connect does).
+            writes._target_for(writes.spec_for_action("endorse_skill"), target)
+        return await _write_tool("endorse_skill", target, confirm_token)
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_withdraw_endorsement(
+    profile: str, skill: str, confirm_token: str = ""
+) -> dict[str, Any]:
+    """Withdraw one endorsement you gave a person YOU NAME. A write, and it REFUSES today.
+
+    Census rows ``P E5`` / ``N 113``, the inverse of ``linkedin_endorse_skill``
+    and built in the same change, so the undo exists before any endorsement
+    could be pressed. THIS TOOL CANNOT PERFORM: the label a skill wears once
+    you endorsed it has never been captured, so nothing can tell an endorsed
+    skill from one that is not, and no confirm token is ever issued.
+
+    WHAT A CALL DOES is what ``linkedin_endorse_skill``'s does, on the same
+    profile: the skill and the link are checked first, the profile is loaded
+    through the named-profile door inside the act you name (a profile view
+    they may see), the block names whom it resolved to and counts the
+    endorse-shaped buttons and those carrying your skill, and nothing is
+    pressed. Under the round-trip rule this is the half to prove first.
+
+    Args:
+        profile: their profile link or member id. Never a name.
+        skill: the skill whose endorsement to withdraw, in your own words.
+        confirm_token: accepted for the shape every write shares; no token is
+            ever issued for this tool, so none can be redeemed.
+    """
+    name, refusal = _skill_refusal(skill)
+    if refusal is not None:
+        return refusal
+    target = {"profile": profile, "skill": name}
+    try:
+        if writes.writes_enabled():
+            writes._target_for(writes.spec_for_action("withdraw_endorsement"), target)
+        return await _write_tool("withdraw_endorsement", target, confirm_token)
     except Exception as exc:
         return _error(exc)
 

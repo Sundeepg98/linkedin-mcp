@@ -22,6 +22,8 @@ Pattern read: `_audit/2026-10-10-integration.md`.
 | 6 | c95c5e3 | origin/master, by the orchestrator's order of 2026-11-24: the fixes lane (N 47, the playwright fixture fix cab0ae7, INSTRUMENTS 95) | f339459 | +7 commits, certified on master. Merged because `git fetch origin` found master past f339459. |
 | 7 | 30582f4 | origin/master, by the orchestrator's order of 2026-11-25: the fixes lane's last commit, a record and comments about the 204 answer | c95c5e3 | +1 commit, certified on master. Merged because `git fetch origin` found master past c95c5e3. |
 | 8 | b348ab8 | origin/master, by the orchestrator's order of 2026-11-25: the ledger lane's certified head (B5's and B3's next steps, six B5 group captures and two B3 captures queued) | 30582f4 | +9 commits, fast-forwarded onto master. |
+| 9 | 0989642 | lane builds-26's certified head (its ci/ run 45641590587): three write-shaped tools that refuse, `linkedin_set_tracker_stage`, `linkedin_endorse_skill`, `linkedin_withdraw_endorsement` | b348ab8 | +8 commits. By the orchestrator's order of 2026-11-25: one integrator for the three heads master can take. |
+| 10 | 5e6d7f6 | lane lane-ci-fix-26's certified head (its ci/ run 45641744765): the `scripts/lane_ci.py` failure extractor, `tests/test_lane_ci.py`, INSTRUMENTS 98 | b348ab8 | +8 commits, same order. |
 
 ## 2. Pre-merge check on head 3 (N 102)
 
@@ -448,6 +450,50 @@ no longer on disk. All nine removed; every row's text unchanged (807 rows over
 the four slices, compared as a multiset); every remaining run of blank lines is
 one master also has.
 
+THE CI RUN ON MERGE 8 WAS RED, and the defect was this lane's: run
+45642506747 failed one test, `tests/test_blocker_map_is_derived.py`, on 30
+lines whose `reason_doc` column the evidence no longer derived (rows M C60,
+C61, C62 first). That column is RANKED OVER THE `_audit` CORPUS, so a record
+edit after the map's regeneration can move it, and merge 8's record section was
+written AFTER the map was regenerated, while `build_blocker_map.py --check` had
+run before that edit. From merge 9 on, the three views are regenerated LAST,
+after every record edit, and the blocker-map test runs locally before the push.
+
+(merged 9, lane builds-26's certified head 0989642, by the orchestrator's order
+of 2026-11-25; merge base b348ab8, 8 commits.) Three write-shaped tools that
+refuse: `linkedin_set_tracker_stage` (census `J 54`), and
+`linkedin_endorse_skill` with its inverse `linkedin_withdraw_endorsement`
+(`P E4` / `N 111`, `P E5` / `N 113`). Each reads its own surface and mints no
+token, because the control it would press has never been captured. Measured
+on the merged registry, with the docstring guard's own split
+(`_registered_write_tools`): **80 tools, 128 parameters, 22 performable
+writes, 3 refusing, 55 reads**. The registered set is exactly ours' 77 plus its
+three, none lost; the parameters reconcile as 119 + 3 x 3. Census: builds-26
+edited `J 54`, `N 111`, `N 113`, `P E4` and `P E5`, ours every other moved row,
+none both. No state moved, so NO PIN MOVED: `census --check` is clean with no
+pin edited.
+
+Resolved by judgement, one line each:
+- `server.py` docstring: headline "eighty tools, twenty-two of which write";
+  the split re-derived (55 + 22 + 3 = 80); builds-26's two paragraphs kept with
+  that branch's numbering, placed below lane B4's J 110 read; the DERIVED-NOW
+  line and the test it cites moved to eighty.
+- `README.md`: 80 / 55 / 25 and "Three of those are write-shaped and unable
+  to act" (its guard counts `SANCTIONED_WRITE_TOOLS`: 22 + 3 = 25 write), the
+  module listing "the eighty tools".
+- The surface tests: name lists unioned; every count pin set to the measured
+  80 and 128. One more COPY of the total, in the non-write test, existed on
+  ours alone, so the merge carried 77 there; the scoped gate found it and it
+  moved to 80. That is the fourth copy of a count this lane has met.
+- `INSTRUMENTS.md` auto-merged in heading order: 93, 95, and builds-26's 96.
+
+A FINDING ABOUT MERGE 1: the split's history chain in `server.py` lost the
+clause "thirteen and fifty-one until 2026-09-24; thirty-nine," at merge 1,
+although both its parents carried it. That left "Thirty-eight, thirteen and
+fifty-two", a pairing that never existed. The split guard reads only the first
+sentence, so nothing caught it. Restored here, and checked whitespace-normalised
+against master.
+
 
 ## 4. Pins re-derived on the merged tree
 
@@ -466,13 +512,17 @@ f339459, read off that commit's own pins.
 | GAP | 546 | 538 | lane A -5, lane B1 -3 |
 | COVERED-UNFIRED | 32 | 38 | lane A +3, lane B1 +3 |
 | achievable | 712 | 710 | lane A -2 (two rows EXCLUDED-RULED) |
-| tools | 72 | 77 | J 110, J 108, lane A, lane B1 x2 |
-| read / write | 50 / 22 | 55 / 22 | all five new tools read |
-| parameters | 115 | 119 | J 110 +1, J 108 +1, lane A +2, lane B1 +0 |
+| tools | 72 | 80 | J 110, J 108, lane A, lane B1 x2, builds-26 x3 |
+| read / write | 50 / 22 | 55 / 22, and 3 write-shaped | five new reads; builds-26's three are sanctioned and refuse |
+| parameters | 115 | 128 | J 110 +1, J 108 +1, lane A +2, lane B1 +0, builds-26 +9 |
 
 J 110 and J 108 move no census row: both rows stay GAP, as their branches left
-them. Equal moves met and measured: `b1_released` (3, not 2) and
-`LIVE_FIXTURE_COUNTS["live1"]` (5, not 2); see merge 5.
+them. Neither do the ledger (merge 8, cells only) or builds-26 (merge 9, its
+three rows keep their states), so every census figure above stands as merge 5
+left it, re-measured clean after each later merge. Equal moves met and
+measured: `b1_released` (3, not 2) and `LIVE_FIXTURE_COUNTS["live1"]` (5, not
+2); see merge 5. Master at b348ab8 still pins 72 tools and 115 parameters
+(read off that commit's own pins), the base builds-26 counted from.
 
 ## 5. Gates and certification
 

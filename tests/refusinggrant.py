@@ -128,6 +128,12 @@ SYNTHETIC_RAW_TARGETS: dict[str, Any] = {
         "profile": "https://www.linkedin.com/in/example-harness-person/",
         "text": "example-harness-message-text",
     },
+    # A NAMED PERSON AND ONE SKILL (the endorsement pair, lane builds-26,
+    # 2026-11-24): the same synthetic profile link, and a skill word.
+    "profile_and_skill": {
+        "profile": "https://www.linkedin.com/in/example-harness-person/",
+        "skill": "example-harness-skill",
+    },
     # A CONVERSATION AND A FILE (``send_attachment``, lane U, 2026-10-10).
     # The file half is checked against the DECLARED UPLOAD ROOT by every
     # property of ``uploads`` and canonicalised root-relative, so the name

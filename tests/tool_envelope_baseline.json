@@ -15,6 +15,7 @@
     "linkedin_connections": "returns_text:the plant reached a published payload",
     "linkedin_creator_analytics": "clean",
     "linkedin_draft_applications": "clean",
+    "linkedin_endorse_skill": "not_driven:never read the page",
     "linkedin_events_home": "clean",
     "linkedin_follow_company": "not_driven:never read the page",
     "linkedin_follow_company_page": "not_driven:never read the page",
@@ -68,6 +69,7 @@
     "linkedin_session_info": "not_driven:never read the page",
     "linkedin_set_admitted_setting": "not_driven:never read the page",
     "linkedin_set_similar_jobs_alert": "not_driven:never read the page",
+    "linkedin_set_tracker_stage": "not_driven:never read the page",
     "linkedin_surface_census": "not_driven:never read the page",
     "linkedin_tracker_stage": "clean",
     "linkedin_unfollow_company": "not_driven:never read the page",
@@ -76,6 +78,7 @@
     "linkedin_update_profile_field": "not_driven:never read the page",
     "linkedin_update_setting": "not_driven:never read the page",
     "linkedin_who_viewed_me": "clean",
+    "linkedin_withdraw_endorsement": "not_driven:never read the page",
     "linkedin_withdraw_from_group": "not_driven:never read the page",
     "linkedin_withdraw_reaction": "not_driven:never read the page"
   }

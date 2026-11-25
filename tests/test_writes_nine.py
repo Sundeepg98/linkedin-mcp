@@ -93,11 +93,17 @@ from linkedin_server.writes import (
 from tests.test_writes import (  # noqa: F401 -- three of these are fixtures
     JOB,
     REACTED_ITEM,
+    SAVED_JOB,
+    SAVED_LIST_OF_ONE,
     FixtureNavigator,
     _bare_grant,
     browser_page,
     writes_on,
 )
+# LANE BUILDS-26, 2026-11-24: the named-person fixture the endorsement pair's
+# refusing previews load, and its synthetic link.
+from tests.test_named_profile_route import LINK as NAMED_LINK
+from tests.test_named_profile_route import PROFILE as NAMED_PROFILE_MARKUP
 
 #: The ones that are sanctioned and STILL REFUSE, DERIVED from the registry.
 #:
@@ -499,6 +505,13 @@ def _nine_pages() -> dict[str, str]:
         writes.FEED_URL: FEED_MARKUP,
         writes.PROFILE_URL: PROFILE_MARKUP,
         writes.DARK_MODE_URL: DARK_MODE_MARKUP,
+        # LANE BUILDS-26, 2026-11-24: the Saved tab ``set_tracker_stage``'s
+        # preview reads -- the tracker capture with its Saved count edited
+        # 0 -> 1, DERIVED in tests/test_writes.py, so its one row reconciles.
+        writes.SAVED_LIST_URL: SAVED_LIST_OF_ONE,
+        # LANE BUILDS-26: the profile the endorsement pair names, through the
+        # named-profile door (FixtureNavigator accepts the door's keyword).
+        NAMED_LINK: NAMED_PROFILE_MARKUP,
     }
 
 
@@ -547,6 +560,11 @@ TARGETS: dict[str, object] = {
     # the empty string for that kind, so this is not a placeholder standing in
     # for an id. There is no id.
     "set_open_to_work": "self",
+    # LANE BUILDS-26, 2026-11-24: the one job row the tracker capture draws.
+    "set_tracker_stage": SAVED_JOB,
+    # LANE BUILDS-26: a named person's profile LINK and one skill.
+    "endorse_skill": {"profile": NAMED_LINK, "skill": "Node.js"},
+    "withdraw_endorsement": {"profile": NAMED_LINK, "skill": "Node.js"},
 }
 
 #: A clean value for every component name the five composite kinds use, so a
@@ -569,6 +587,8 @@ CLEAN_COMPONENT = {
     # ``send_attachment``'s content, 2026-10-10 (lane U): a FILE in the
     # declared upload root, which the autouse fixture below provides.
     "file": "clean-example.png",
+    # 2026-11-24, lane builds-26: the endorsement pair's content half.
+    "skill": "Node.js",
 }
 
 #: THE TWO CONTENTS OF A FILE KIND (lane U, ``thread_and_file``): two files
@@ -890,6 +910,11 @@ def _expected_surface_url(spec) -> str:
         return url
     if spec.state_from == "profile_topcard":
         return writes.PROFILE_URL
+    if spec.state_from == "named_profile":
+        # LANE BUILDS-26: the second door's address, composed from the
+        # SEGMENT of the canonical target -- the derivation the door uses.
+        target = writes._target_for(spec, TARGETS[spec.action])
+        return readonly.named_profile_url(writes.url_target_of(spec, target))
     raise AssertionError(
         "no expected surface url is known for state_from=%r (action %r). "
         "observe routes this through one of its own branches; add it here "
@@ -1515,7 +1540,9 @@ def test_every_surface_these_actions_read_is_already_on_the_read_boundary():
     # FOUR SINCE 2026-09-27: ``messaging_badge`` left with its only
     # claimant, ``send_message``, RETIRED on lane L5's order of 23:36 -- the
     # equality below would have refused it as an orphan otherwise.
-    assert len(writes._SURFACE_READS) == 4
+    # FIVE SINCE 2026-11-24 (lane builds-26): ``tracker_saved_row``, claimed
+    # by the refusing ``set_tracker_stage`` -- the equality below holds it.
+    assert len(writes._SURFACE_READS) == 5
     covered = set(REFUSING) | set(LIFTED)
     state_froms = {spec_for_action(a).state_from for a in covered}
     # THIS WAS A FLAT EQUALITY UNTIL 2026-09-02 and it could not survive
@@ -1541,6 +1568,8 @@ def test_every_surface_these_actions_read_is_already_on_the_read_boundary():
         "profile_topcard",
         "item_permalink",
         "item_comment_box",
+        # LANE BUILDS-26, 2026-11-24: the endorsement pair's refusing previews.
+        "named_profile",
     }
     # AND ``feed_item`` LEFT ``_SURFACE_READS`` WITH ITS LAST CLAIMANT on the
     # same day. The equality above already refuses an orphan -- it is what
