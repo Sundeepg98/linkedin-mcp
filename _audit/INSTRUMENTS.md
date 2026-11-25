@@ -12189,3 +12189,38 @@ its three-answers-by-three-versions grid, the top-card aim verifier over six
 worlds, and the people-card counter. Each answered one question once; the
 answers are tables in `_audit/2026-10-26-fixes.md`. The recipe in 95.1 is the
 part worth keeping, and it is kept here.
+
+## 99. A GUARD IS SHOWN FAILING BY ITS OWN MUTATION, AND THE BYTECODE GOES BEFORE EVERY RUN (apply-26, 2026-11-25)
+
+### 99.1 A MUTATION SWEEP CAN RUN THE PREVIOUS MUTATION
+
+The multi-step walker's guards were each disabled by one exact-string edit of
+their module, only their own tests run, and the module restored byte for byte.
+The first sweep reported one guard surviving, and the guard was sound: two
+consecutive mutations shortened the file by the same 17 characters inside one
+second, so the `.pyc` written for the first carried the size and the
+whole-second mtime of the second's source, and Python loaded it -- the test ran
+the PREVIOUS mutation's code and passed. Deleting the module's bytecode before
+every run, and writing none (`PYTHONDONTWRITEBYTECODE=1`), turned the survivor
+red: 40 of 40. The final sweep is 70 of 70, and one of its reds was earned the
+other way: a guard that survived its mutation because a sibling check always
+refused first, so it could never be the one to fire. It was moved, not kept.
+
+    A MUTATION RUNNER THAT LEAVES BYTECODE ON DISK MEASURES WHICHEVER
+    VERSION PYTHON BELIEVES IS CURRENT. DELETE THE MODULE'S .pyc BEFORE
+    EACH RUN; SIZE AND SECONDS ARE NOT AN IDENTITY.
+
+### 99.2 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `tests/test_apply_answers.py` -- the answer bank reads only CONFIRMED, answers only its own words, input kind, platform and option set, never serves an expired answer or lets a never-auto one fire unseen, refuses a malformed file whole with no value in the refusal, imports Naukri's cache as drafts only, and is read fresh | mutations A1-A27 of the record's section 2.6, each red on its named test |
+| `tests/test_apply_walk.py` -- the walker refuses every unmeasured shape naming what it saw, stops on any question his bank cannot answer, never presses Submit in a dry walk and presses it once on confirm, opens no flow before its inverse is measured, and reads the Draft tab on its real skeleton | mutations W1-W42, each red on its named test |
+
+### 99.3 DECLARED DISPOSABLE
+
+The lane's scratch tools: the mutation runner (its bytecode rule is kept in
+99.1), the two bank-template generators (they wrote the gitignored template, the
+second only over the first's unconfirmed copy), the baseline-line and queue-line appenders, and the
+read-only evidence sweep that inventoried every apply capture on the box. Each
+answered one question once; the answers are in `_audit/2026-11-25-apply.md`.
