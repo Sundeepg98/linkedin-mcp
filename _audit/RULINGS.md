@@ -8,9 +8,9 @@
 
 **THIS REGISTER IS NOT THE CORPUS AND DOES NOT CLAIM TO BE COMPLETE.** Read section 4 before concluding a question is unruled: the scan that keeps it honest reads ONE marker, and the ruling that caused this file to be written does not carry it.
 
-    rulings registered       95
+    rulings registered       96
     documents scanned        277
-    RULED: declarations      81 claimed, 7 triaged, 0 unclaimed
+    RULED: declarations      82 claimed, 7 triaged, 0 unclaimed
 
 ---
 
@@ -153,6 +153,7 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 |---|---|---|---|---|
 | `FIXED-UI-LABEL-MATCH` | The people search's Actively-hiring filter is matched by its exact LinkedIn UI label, a fixed product string, with a control showing a near-miss label is refused. | one search filter matched by its product label | 2026-10-10 | [2026-10-10-rulings-ledger-questions.md](2026-10-10-rulings-ledger-questions.md)<br>*11. One filter, matched by its fixed label* |
 | `THIRD-PARTY-TEXT-AT-RUNTIME` | A post's own text and an organisation Page's prose are returned at runtime as untrusted third-party text -- sanitised, bounded in length, never stored -- under PEOPLE-DATA-MITIGATIONS; the feed-content ruling still governs what is stored. | other people's text, returned at runtime | 2026-10-10 | [2026-10-10-rulings-ledger-questions.md](2026-10-10-rulings-ledger-questions.md)<br>*10. A post's text, and an organisation's prose, at runtime* |
+| `DOM-WAIVER-25-J110` | dom.py may hold a 25th waived page evaluate, solely J 110's page-root reader read (COMPANY_HOME_JS, moved verbatim from its branch), read-only and argued under THIRD-PARTY-TEXT-AT-RUNTIME; a 26th still needs its own ruling. | the dom.py waived-evaluate budget in tests/test_readonly.py, and its copy in tests/test_the_search_shape_reading.py | 2026-10-26 | [2026-10-26-integration-2.md](2026-10-26-integration-2.md)<br>*6. Orchestrator rulings, 2026-11-25* |
 
 ### reads and writes
 
@@ -343,6 +344,8 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 **`D6-CAPABILITY-OVER-AFFORDANCE`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable. Question: _audit/2026-09-21-the-read-triage.md D6. Governs N 132 and J 107.
 
+**`DOM-WAIVER-25-J110`** -- Orchestrator's call, answering integration 2's question about the budget move its J 110 fix made by commit (24 -> 25). Applies THIRD-PARTY-TEXT-AT-RUNTIME.
+
 **`ERROR-MESSAGE-RULED-AT-THE-RAISE`** -- THE SIBLING OF `ERROR-URL-ASKED-FOR-OR-NOTHING`, and it goes the OTHER WAY for a stated reason rather than by temperament. The url field could be ruled PER SITE because every value feeding it is an address this package composed or read; `$.message` cannot, because `_error` holds only `type(exc)` and `str(exc)` and the provenance of what that text QUOTES is not among them. So the ruling moves the decision to the raise, which is where the corpus had already put it three times without naming it: `coerce.py`, `press.disclose` and `landing.py`. It also DECLINES the sibling's own recommendation to make the twelve `dom.py` messages type-only -- all twelve are inside `tests/test_readers_emit_no_page_string.py`'s driven subject set and green (4 clean, 8 returns_text, 0 not_driven), so the payload class is already closed for them and type-only would delete twelve diagnoses to close a channel no needle travels. What it SHIPPED is the other end of the pipe: `tests/test_tool_envelopes_emit_no_page_string.py`, because the reader guard discovers only `async def` functions taking a `page` and the 48 tool bodies that funnel into `_error` are therefore outside it, permanently.
 
 **`ERROR-URL-ASKED-FOR-OR-NOTHING`** -- THE FAILURE-PATH COUNTERPART OF THE `source_url` SPLIT RULING in `tests/test_the_source_url_split_was_never_ruled.py`, which is NOT registered here because it lives as a test rather than as an audit passage. Same kind of value -- the address a read landed on -- in several of the SAME functions, and the two were ruled by different files that did not know about each other: `linkedin_my_profile` was declared SHAPED on its success path and published its landing raw on its failure path, in one function, for weeks. That ruling supplied the METHOD used here (a per-site declaration with a written reason, a count per site, a relay pinned as a relay, and drift failing in BOTH directions) and its prohibition is what stopped this wave wrapping all twenty: *wrapping a deliberate publication is as much a defect as leaking an accidental one.* The count each way is 12 withheld, 7 published, 1 relay.
@@ -451,7 +454,7 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 | signal NOT scanned | files | lines |
 |---|---|---|
-| a heading naming a ruling | 134 | 293 |
+| a heading naming a ruling | 135 | 294 |
 | a bold line opening on RULING/RULED | 65 | 152 |
 | the phrase THE RULING | 38 | 63 |
 | a named -RULING id | 41 | 102 |
@@ -549,6 +552,7 @@ Every `RULED:` line in the corpus, and what became of it. An UNCLAIMED row fails
 | [2026-10-10-rulings-ledger-questions.md](2026-10-10-rulings-ledger-questions.md) | RULED: (orchestrator, 2026-10-10) SAFETY-REPORTS-STAY-MANUAL: N 152 is EXCLUDED-RULED, wit | `SAFETY-REPORTS-STAY-MANUAL` |
 | [2026-10-10-rulings-ledger-questions.md](2026-10-10-rulings-ledger-questions.md) | RULED: (orchestrator, 2026-10-10, applying the operator's rule that every feature must ser | `OUTSIDE-THE-PRODUCT-PURPOSE` |
 | [2026-10-10-rulings-named-profile-detail-pages.md](2026-10-10-rulings-named-profile-detail-pages.md) | RULED: (orchestrator, 2026-10-10, applying the operator's 08:01 YES to reading profiles he | `NAMED-PROFILE-DETAIL-PAGES` |
+| [2026-10-26-integration-2.md](2026-10-26-integration-2.md) | RULED: (orchestrator, 2026-11-25) DOM-WAIVER-25-J110 -- "dom.py may hold a 25th | `DOM-WAIVER-25-J110` |
 
 ### 5.1 Triaged -- a declaration hit that is not a ruling made here
 

@@ -1012,6 +1012,8 @@ def test_only_dom_module_waives_evaluate():
     # Playwright's inner_text() follows CSS rendering, not aria-hidden;
     # text_content() keeps the hidden subtrees; neither counts what it
     # dropped; and a locator addresses elements, never text nodes.
+    # RULED 2026-11-25: DOM-WAIVER-25-J110 (orchestrator) admits this
+    # twenty-fifth, solely for J 110's page-root read; a 26th needs its own.
     assert waived_in.get("dom.py", 0) <= 25, waived_in
 
 

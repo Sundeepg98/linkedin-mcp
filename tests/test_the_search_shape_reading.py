@@ -296,7 +296,9 @@ def test_the_shape_pass_adds_no_evaluate_waiver() -> None:
     ``COMPANY_HOME_JS`` (census ``J 110``), moved into ``dom.py`` verbatim from
     ``company_home.py`` and argued in ``tests/test_readonly.py``'s budget, which
     moved 24 -> 25 with it. This copy was missed a THIRD time by a hand-derived
-    gate and found red by the integration's ci/ run.
+    gate and found red by the integration's ci/ run. The twenty-fifth is RULED
+    (DOM-WAIVER-25-J110, orchestrator, 2026-11-25): admitted solely for J 110's
+    page-root read, and a twenty-sixth still needs its own ruling.
     """
     source = dom.__file__
     with open(source, encoding="utf-8") as stream:

@@ -77,6 +77,9 @@ measured against the merge base or the merged tree:
 Skipped per the brief's own skip path; the branch head is left unmerged and
 no tool, record or row of N 102 is on this tree.
 
+The orchestrator answered the implementation question on 2026-11-25: J 108's
+reader stays and N 102 stays GAP (section 6).
+
 ## 3. Conflicts resolved by judgement
 
 (merged 1, becc3a7, J 110) The merge base 16ee59a is OLD relative to our
@@ -495,3 +498,24 @@ DISPOSABLE. One went red on a real defect (the structural verifier convicted a
 naive concatenation of the correction table as a SyntaxError), but pytest
 collection convicts the same defect, so it adds no standing guard. The row
 verifier was never shown failing, so it does not enter.
+
+## 6. Orchestrator rulings, 2026-11-25
+
+The orchestrator's answers to the two questions this lane's report put, in its
+own words where it gave them.
+
+ORCHESTRATOR RULING, 2026-11-25, on head 3: J 108's
+`linkedin_company_people_insights` STAYS. It is merged, recorded and
+certified, while N 102 (3e70900) wrote no record and met no completion bar.
+Census row `N 102` stays GAP with that reason, and if its distinct capability
+is wanted later it is rebuilt under its OWN tool name. No census row was
+edited for this ruling: the row already reads GAP, and this section is where
+the reason is written.
+
+RULED: (orchestrator, 2026-11-25) DOM-WAIVER-25-J110 -- "dom.py may hold a 25th
+waived page evaluate, solely J 110's page-root reader read, moved verbatim from
+its branch. It is read-only, passes readonly's JS scanner, and is argued under
+THIRD-PARTY-TEXT-AT-RUNTIME. A 26th still needs its own ruling." It admits the
+24 -> 25 move this lane made in its J 110 fix (section 3), and the budget in
+`tests/test_readonly.py` and its copy in `tests/test_the_search_shape_reading.py`
+both cite it.

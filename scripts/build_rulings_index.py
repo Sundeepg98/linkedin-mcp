@@ -1368,6 +1368,21 @@ REGISTER: tuple = (
              "Decides M C43 and J 110.",
     ),
     Ruling(
+        id="DOM-WAIVER-25-J110",
+        claim="dom.py may hold a 25th waived page evaluate, solely J 110's "
+              "page-root reader read (COMPANY_HOME_JS, moved verbatim from "
+              "its branch), read-only and argued under "
+              "THIRD-PARTY-TEXT-AT-RUNTIME; a 26th still needs its own ruling.",
+        binds="reads -- the dom.py waived-evaluate budget in "
+              "tests/test_readonly.py, and its copy in "
+              "tests/test_the_search_shape_reading.py",
+        document="_audit/2026-10-26-integration-2.md",
+        anchor="RULED: (orchestrator, 2026-11-25) DOM-WAIVER-25-J110",
+        note="Orchestrator's call, answering integration 2's question about "
+             "the budget move its J 110 fix made by commit (24 -> 25). "
+             "Applies THIRD-PARTY-TEXT-AT-RUNTIME.",
+    ),
+    Ruling(
         id="FIXED-UI-LABEL-MATCH",
         claim="The people search's Actively-hiring filter is matched by its "
               "exact LinkedIn UI label, a fixed product string, with a control "
