@@ -34,7 +34,7 @@ WHAT IS HERE, in the order the walk uses it:
   never decides its kind. Anything outside the known set is ``None`` and the
   plan refuses it, naming the structure it saw in a closed vocabulary.
 * THE PLAN -- :func:`plan_step` and :func:`plan_walk`, the PREVIEW: every step,
-  every field, what will be put in it and from which CONFIRMED bank row
+  every field, what will be put in it and from which CONFIRMED bank class
   (``apply_answers``), or NEEDS-OPERATOR quoting the question and its input
   kind. Values come from his confirmed bank or from LinkedIn's own prefill,
   never from anything else on the page and never from his profile or resume.
@@ -248,9 +248,15 @@ SHAPES: dict[str, Shape] = {
         + DRAFT_CAPTURE,
         "the Discard of the prompt a dismiss draws; never its Save",
     ),
+    # THE EVIDENCE IS A SENTENCE THAT CITES THE SKELETON, never the bare path:
+    # a package module naming a tracked data file in code reads as a READ to
+    # the impact gate's sentence rule (tests/test_impact_gate_selects_data_
+    # dependencies.py), which rests on the package never doing that. The
+    # registry's own test pulls the path out of the sentence and checks it is
+    # tracked. Lane CI run 45654516809 failed on the bare path.
     "verify.draft_tab": Shape(
         "verify.draft_tab", MEASURED,
-        "tests/fixtures/jobs_tracker_row.html",
+        "a skeleton of his live Draft tab, tests/fixtures/jobs_tracker_row.html",
         "the job tracker's Draft tab, ?stage=draft, read through "
         "writes._read_tracker_membership",
     ),
@@ -748,7 +754,7 @@ def step_fingerprint(step: StepReading) -> str:
 
 def plan_fingerprint(planned: Sequence[Mapping[str, Any]]) -> str:
     """The plan's identity: every step's fingerprint and every planned value's
-    bank row and digest, so a bank edit after the preview invalidates it."""
+    bank class and digest, so a bank edit after the preview invalidates it."""
     canonical = [
         [step_plan["fingerprint"],
          [[line.get("action"), line.get("bank_entry"),

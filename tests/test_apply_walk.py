@@ -23,6 +23,7 @@ from __future__ import annotations
 import dataclasses
 import datetime
 import json
+import re
 import subprocess
 from pathlib import Path
 
@@ -133,24 +134,24 @@ def walk() -> list[StepReading]:
     return [contact_step(), resume_step(), screening_step(), review_step()]
 
 
-HEADER = "\t".join(apply_answers.COLUMNS)
-
-
 def bank_line(entry_id, kind, question, confirmed, *, cls="other", platform="any",
-              draft="", expires_at="") -> str:
-    """One SYNTHETIC bank row, in the bank's own column order."""
-    cells = {
-        "id": entry_id, "class": cls, "platform": platform, "input_kind": kind,
-        "question": question, "options": "", "DRAFT_UNCONFIRMED": draft,
-        "CONFIRMED": confirmed, "confirmed_at": "2026-11-01" if confirmed else "",
-        "expires_at": expires_at, "auto": "", "source": "synthetic", "notes": "",
+              draft="", expires_at="") -> dict:
+    """One SYNTHETIC bank entry: one class, one wording on one platform."""
+    return {
+        "id": entry_id, "family": cls, "input_kind": kind,
+        "platforms": {platform: {"questions": [question], "options": [], "native_type": ""}},
+        "draft": {"value": draft, "per_platform": {}, "source": "synthetic"},
+        "confirmed": {"value": confirmed, "per_platform": {},
+                      "confirmed_at": "2026-11-01" if confirmed else "",
+                      "expires_at": expires_at, "auto": ""},
+        "notes": "",
     }
-    return "\t".join(cells[column] for column in apply_answers.COLUMNS)
 
 
-def bank_text(*lines: str) -> apply_answers.Bank:
-    return apply_answers.parse_bank("\n".join((HEADER,) + lines) + "\n",
-                                    today=datetime.date(2026, 11, 25))
+def bank_text(*entries: dict) -> apply_answers.Bank:
+    return apply_answers.parse_bank(
+        json.dumps({"schema": apply_answers.SCHEMA_ID, "entries": list(entries)}),
+        today=datetime.date(2026, 11, 25))
 
 
 def bank_of(*rows: tuple[str, str, str, str]) -> apply_answers.Bank:
@@ -190,7 +191,11 @@ def test_a_measured_shape_cites_a_tracked_skeleton():
     )
     for key, shape in SHAPES.items():
         if shape.status == MEASURED:
-            assert shape.evidence in tracked, (key, shape.evidence)
+            # A SENTENCE citing the skeleton, never the bare path: the impact
+            # gate reads a package literal naming a tracked data file as a read.
+            assert any(ch.isspace() for ch in shape.evidence), (key, shape.evidence)
+            cited = re.findall(r"tests/fixtures/[A-Za-z0-9_./-]+\.html", shape.evidence)
+            assert cited and all(path in tracked for path in cited), (key, shape.evidence)
 
 
 def test_every_proposed_shape_names_what_will_measure_it():
