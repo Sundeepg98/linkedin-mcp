@@ -21,6 +21,7 @@ Pattern read: `_audit/2026-10-10-integration.md`.
 | 5 | a7026d8 | lane B1: +20 commits, P A22, P L8, P L1 COVERED-UNFIRED | 6c65815 | its ci/ ref 9911b3d was red; re-certified by this push. LAST: most diverged. |
 | 6 | c95c5e3 | origin/master, by the orchestrator's order of 2026-11-24: the fixes lane (N 47, the playwright fixture fix cab0ae7, INSTRUMENTS 95) | f339459 | +7 commits, certified on master. Merged because `git fetch origin` found master past f339459. |
 | 7 | 30582f4 | origin/master, by the orchestrator's order of 2026-11-25: the fixes lane's last commit, a record and comments about the 204 answer | c95c5e3 | +1 commit, certified on master. Merged because `git fetch origin` found master past c95c5e3. |
+| 8 | b348ab8 | origin/master, by the orchestrator's order of 2026-11-25: the ledger lane's certified head (B5's and B3's next steps, six B5 group captures and two B3 captures queued) | 30582f4 | +9 commits, fast-forwarded onto master. |
 
 ## 2. Pre-merge check on head 3 (N 102)
 
@@ -406,6 +407,46 @@ merged with no conflict. All three derived views `--check` green without
 regeneration (the index at 278 documents, the rulings register at 95, the
 blocker map 409 lines); census `--check` clean; the INSTRUMENTS tail still
 ends 93, 95.
+
+(merged 8, origin/master at b348ab8, the ledger lane's certified head, by the
+orchestrator's order of 2026-11-25; merge base 30582f4, 9 commits.) The ledger
+moved CELLS, not states: B5's and B3's rows gained the capture or target each
+waits on, and its capture queue gained six B5 group captures and two B3 ones.
+Every census row of the merged tree was checked against its three-way
+expectation, and NO row was moved by both sides:
+- `messaging-and-content.md`, ONE hunk: C69 moved by the ledger only, C70 by
+  lane A only (merge 4); each taken whole from the side that moved it. The
+  ledger moved 3 rows here (C61, C64, C69), ours 3.
+- `next-step.tsv`, 539 lines: the ledger edited 17 rows in place (the B5 and
+  B3 cells), ours moved 57, none both.
+- Auto-merged and checked the same way: `network.md` (the ledger's N 63, N 163
+  and N 168, ours' 8) and `capture-queue.tsv`, 97 queue lines measured: ours'
+  91 plus the ledger's 6 additions (queue lines 96 to 101), with 3 more lines
+  it edited in place (11, 19, 22) and 28 ours moved, none both. The correction table's `NOT_A_CORRECTION`
+  is the exact union, 227 + 2 = 229 keys, none twice.
+- Derived views regenerated twice to a fixed point: the index over 279
+  documents (the ledger's record joins), the rulings register at 96, the
+  blocker map 409 lines.
+
+PINS: NONE MOVED, AND THAT IS A MEASUREMENT. `census_completion.py --check` ends
+"every headline figure matches its pin" on the merged tree with no pin edited,
+so every pin already equals its re-measured value: the ledger changed which
+capture a GAP row waits on, never a row's state. The seven table checkers are
+green (538 GAP rows, 79 bucket-3, 98 jobs, 372 write classes).
+
+A FINDING ABOUT MERGE 4, MY OWN, FOUND WHILE RESOLVING THE C70 HUNK: merge 4
+left NINE BLANK LINES in the four census slices, one after every hunk it
+resolved there. Six split a table in two (after jobs rows 77 and 161, network
+rows 20 and 39, messaging C70 and profile M10), so every later row rendered as
+a paragraph; three doubled a blank line that already ended a table (after
+network 200, messaging C101 and profile P23). Measured: neither merge-4 parent
+and no master has any split. The census parsers read rows by pattern, so no
+figure ever moved, which is why no check saw it. The mechanism is not md3.py:
+replayed on merge 4's recomputed conflict (`git merge-tree`), it refuses that
+file at once on its duplicate row id C59, so the hunks were resolved by a step
+no longer on disk. All nine removed; every row's text unchanged (807 rows over
+the four slices, compared as a multiset); every remaining run of blank lines is
+one master also has.
 
 
 ## 4. Pins re-derived on the merged tree

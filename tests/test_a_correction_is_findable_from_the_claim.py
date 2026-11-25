@@ -258,6 +258,36 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "THIS ENTRY WRONG:** a messaging row saying something in lane B5's "
         "record does not hold while leaving the record unmarked."
     ),
+    # 2026-10-26, the ledger-26 pass. TABLE-ROW PROXIMITY, read and not inferred
+    # from the filenames: found by the lane's CI run 45372026423. Each of the six
+    # citing lines and its two neighbours either side was listed and read; no
+    # matched word sits in a ledger note.
+    ("network.md", "2026-10-26-ledger.md"): (
+        "A LEDGER NOTE, NOT A CORRECTION. Rows `63`, `163` and `168` cite the "
+        "ledger pass's record for the one note each gained -- WAITS ON CAPTURE "
+        "C-B5-n, the ledger line's move off BUILD and, on `63` and `168`, the "
+        "orchestrator's answer to lane B5's question -- which corrects nothing "
+        "in the record. Every matched word is older text: rows `63` and "
+        "`163`'s own 2026-09-21 paragraph ('THAT ADDRESS CLAUSE IS FALSE AT "
+        "THIS TREE ... ON THE CORRECTION'), on the citing line, and row "
+        "`161`'s 'TWO CORRECTIONS 2026-09-21' two lines above `163`. Row "
+        "`168`'s window holds none. **WHAT WOULD MAKE THIS ENTRY WRONG:** a "
+        "network row saying something in the ledger record does not hold while "
+        "leaving the record unmarked."
+    ),
+    ("messaging-and-content.md", "2026-10-26-ledger.md"): (
+        "A LEDGER NOTE, NOT A CORRECTION. Rows `C61`, `C64` and `C69` cite the "
+        "ledger pass's record for the one note each gained -- WAITS ON CAPTURE "
+        "C-B5-n, the ledger line's move off BUILD and, on `C61` and `C64`, the "
+        "orchestrator's answer to lane B5's question -- and correct nothing in "
+        "it. Every matched word is older text: row `C61`'s own 2026-09-21 "
+        "paragraph ('THAT ADDRESS CLAUSE IS FALSE AT THIS TREE'), on the "
+        "citing line; `C60`'s 'BOTH HALVES OF THIS CELL WERE STALE' on the row "
+        "above it; and, beside `C69`, `C67`'s 'false of the edit half' and "
+        "`C70`'s 'TWO CORRECTIONS 2026-09-21'. Row `C64`'s window holds none. "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** a messaging row saying something "
+        "in the ledger record does not hold while leaving the record unmarked."
+    ),
 
     # 2026-10-10, lane B1. READ, not inferred from the filenames: found by the
     # lane's CI run 38047037803 on row A13's line, and measured over every line
