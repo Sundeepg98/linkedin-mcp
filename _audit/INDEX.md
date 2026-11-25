@@ -27,16 +27,16 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 281 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 241 |
-| distinct dates | 20 |
+| audit documents git tracks under `_audit` | 282 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 242 |
+| distinct dates | 21 |
 | documents with no level-1 heading | 2 |
-| `CORRECTS:` marker lines | 126 |
-| `CORRECTED BY:` marker lines | 126 |
-| distinct declared correction edges | 111 |
+| `CORRECTS:` marker lines | 127 |
+| `CORRECTED BY:` marker lines | 127 |
+| distinct declared correction edges | 112 |
 | documents something later corrects | 53 |
-| documents that correct something | 74 |
-| documents at either end of a cross-document edge | 103 |
+| documents that correct something | 75 |
+| documents at either end of a cross-document edge | 104 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
 | documents no correction marker touches at all | 176 |
@@ -550,6 +550,10 @@ document is dead; it says one thing in it was overtaken and names what.
 - CORRECTED BY [2026-10-10-lane-b2-network-build.md](2026-10-10-lane-b2-network-build.md)
 
   > read against the two skeletons, the feed menu cannot be aimed at an item he names and the search page's first render draws no School, Industry or Keywords control, so `N 37`, `N 43`, `N 51`, `N 153`, `N 154`, `N 200`, `N 88`, `N 89` and `N 93` return to CAPTURE and `N 80` is discharged under D6; and section 5's "unsubscribe" on the newsletter list was counted inside the fixture's header comment, so `N 56` goes to ADMIT.
+
+- CORRECTED BY [2026-11-25-build-p26.md](2026-11-25-build-p26.md)
+
+  > read against their captures, the eleven profile rows this ledger put on BUILD (`P A11`, `P A13`, `P A17` on `live4/editor.html`, `P A14`, `P A15` on `live7/editor.html`, `P A25` on the planned `live1/contact_info.html`, `P D25`, `P D26`, `P F1`, `P K8` and `P S8` on session 8's skeletons) have nothing to build on; they go to three questions (`Q-EDITOR-TYPEAHEAD`, `Q-ABSENT-ON-HIS-ACCOUNT`, `Q-OWN-PROFILE-SCROLL`), one admission and two captures, and `P L2b` moves to COVERED-UNFIRED on the reader built for it.
 
 ### [INSTRUMENTS.md](INSTRUMENTS.md)
 
@@ -1565,6 +1569,14 @@ reach is visible. The quoted reason here is the CORRECTOR's own
 
   > section 12.7 moved `N 37`, `N 43`, `N 51`, `N 153`, `N 154`, `N 200`, `N 80`, `N 88`, `N 89` and `N 93` to BUILD on session 8's skeletons, and section 5 counted "unsubscribe" on the newsletter list for `N 56`; read against the captures, ten of those eleven steps had nothing to build on (sections 2, 3 and 5), and the eleventh, `N 80`'s, is discharged under D6.
 
+### [2026-11-25-build-p26.md](2026-11-25-build-p26.md)
+
+2026-11-25 &middot; Lane build-p26, 2026-11-25: the profile slice's twelve BUILD rows -- one reader merged, eleven next steps re-pointed
+
+- CORRECTS [2026-09-28-lane-k-ledger.md](2026-09-28-lane-k-ledger.md)
+
+  > sections 6 and 12.7 gave eleven profile rows a BUILD step on a capture: `P A11`, `P A13`, `P A17` on `live4/editor.html`, `P A14`, `P A15` on `live7/editor.html`, `P A25` on a planned `live1/contact_info.html`, `P D25`, `P D26`, `P F1`, `P K8` on `live8/in_me.html` and `P S8` on `live8/keyskills.html`; read against those captures, none of the eleven has what its build needs (sections 2 and 4), and each takes the step its own measured reason names.
+
 ## 5. Every document, by date
 
 `CORRECTED` means at least one later document declares a correction of
@@ -1835,7 +1847,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-27 | [2026-09-27-rulings-previews-and-receipts.md](2026-09-27-rulings-previews-and-receipts.md) | Ruling, 2026-09-27: a preview names whom the tool resolved |  |
 | 2026-09-27 | [2026-09-27-rulings-relation-removals-and-account-destruction.md](2026-09-27-rulings-relation-removals-and-account-destruction.md) | Rulings, 2026-09-27: removing a relation, and destroying the account |  |
 | 2026-09-28 | [2026-09-28-lane-a-admissions.md](2026-09-28-lane-a-admissions.md) | Lane A: refused reads past an act substring, and the rows a press or a ruling holds |  |
-| 2026-09-28 | [2026-09-28-lane-k-ledger.md](2026-09-28-lane-k-ledger.md) | Lane K: the next-step ledger and the capture queue | **CORRECTED x1** |
+| 2026-09-28 | [2026-09-28-lane-k-ledger.md](2026-09-28-lane-k-ledger.md) | Lane K: the next-step ledger and the capture queue | **CORRECTED x2** |
 | 2026-09-28 | [2026-09-28-lane-s-settings.md](2026-09-28-lane-s-settings.md) | Lane S (settings): the settings of his own account, built behind the grant |  |
 | 2026-09-28 | [2026-09-28-lane-u-uploads.md](2026-09-28-lane-u-uploads.md) | Lane U: uploads -- the decision registered, the rows relabelled, the verb made performable |  |
 | 2026-09-28 | [2026-09-28-rulings-build-classes.md](2026-09-28-rulings-build-classes.md) | Rulings, 2026-09-28: the classes the census still leaves undecided |  |
@@ -1857,6 +1869,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-10-26 | [2026-10-26-integration-2.md](2026-10-26-integration-2.md) | Integration 2, 2026-10-26: five pending lane heads onto one certified head |  |
 | 2026-10-26 | [2026-10-26-lane-ci-defect.md](2026-10-26-lane-ci-defect.md) | 2026-10-26 lane-ci defect -- `wait` printed only the exit-code banner on a red run |  |
 | 2026-10-26 | [2026-10-26-ledger.md](2026-10-26-ledger.md) | Ledger pass, 2026-10-26: B5's six group rows onto their captures, B3's thirteen lines onto their real next steps |  |
+| 2026-11-25 | [2026-11-25-build-p26.md](2026-11-25-build-p26.md) | Lane build-p26, 2026-11-25: the profile slice's twelve BUILD rows -- one reader merged, eleven next steps re-pointed | corrects x1 |
 
 ## 6. What the scan rejected, could not join, or had to repair
 

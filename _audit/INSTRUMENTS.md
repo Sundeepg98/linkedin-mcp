@@ -12426,3 +12426,38 @@ log), `report_on_real_logs.py` (the shipped `_report` over real logs, gh
 stubbed to return them), `resolve_instruments.py` (this register's 95/98 merge
 union) and the pytest banner-shape probe. Each answered one question once; the
 answers are in `_audit/2026-10-26-lane-ci-defect.md`, "Second pass".
+
+## 100. A MERGED CHILD'S TESTS ARE SHOWN FAILING AGAIN ON THE TREE THEY JOIN (build-p26, 2026-11-25)
+
+**Registered 2026-11-25.** Full record: `_audit/2026-11-25-build-p26.md`.
+Numbered 100 by the brief, appended at the end; keep heading-number order.
+
+### 100.1 THE ENTRY
+
+Lane B1's child built the follower-list reader on a branch based six weeks
+behind this tree, and its reds were taken there. A test shown failing on a
+different tree is a claim about that tree, so each was mutated again here,
+after the merge, before the row moved.
+
+| path | shown failing by |
+|---|---|
+| `tests/test_followers_list.py`, `tests/test_followers_list_people.py` (built by lane B1's child `lb1-followers`, merged by this lane) | four mutations of `linkedin_server/followers_list.py`, each run against the tests that should catch it, the module restored after each: the side check removed (`test_each_side_plant_refuses_the_read`, 1 failed); the name read from the button's `aria-label` (`test_a_name_in_every_button_label_never_appears`, `test_the_module_stores_nothing_and_reads_no_attribute_but_href`, 2 failed); the per-call bound lifted (`test_each_mitigation_holds_and_fails_without_its_code`, 1 failed); "Follow back" accepted as "Follow" (`test_each_row_plant_makes_that_row_unknown`, `test_a_word_maps_to_a_relation_only_exactly`, 2 failed, 8 passed). Restored: 35 passed. |
+
+A MERGE-TIME CATCH BY A SHIPPED GUARD, recorded rather than registered (it was
+already in the register's corpus): `tests/test_people_data.py::test_the_instructions_name_exactly_the_declared_people_tools`
+went red on the merged tree, naming `linkedin_my_followers_list` -- the tool
+joined `PEOPLE_TOOLS`, and the guard postdates the child's branch -- and passed
+once the server's instructions named it.
+
+### 100.2 DECLARED DISPOSABLE
+
+`probe_p26_captures.py` and `probe_p26_followup.py` (counts-only readings of
+the raw captures and keyed skeletons behind the twelve rows; never shown
+failing, each answered its question once and the answers are in the record's
+section 2); `mutate_followers.py` (the mutation harness; it registers the
+tests above, and was never itself shown letting a mutant through); and the
+one-shot edit scripts (`resolve_union.py`, `resolve_server.py`,
+`resolve_surface_two.py`, `resolve_server_surface.py`, `edit_tables.py`,
+`edit_cells.py`, `edit_pins.py`), each asserting the exact text it replaced.
+
+---

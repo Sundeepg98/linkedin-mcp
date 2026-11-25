@@ -1786,6 +1786,121 @@ async def read_people_insights_as_shipped(page: Any) -> Any:
 
 
 # ---------------------------------------------------------------------------
+# followers_list:read_followers_list -- his own follower list (P L2b)
+# ---------------------------------------------------------------------------
+
+#: A tab of the strip on the follower list's skeleton: its selected state and
+#: its text (LinkedIn's ``Following``, or the skeleton's ``x``).
+_FOLLOWER_LIST_TAB = re.compile(
+    r'<button [^>]*aria-selected="(true|false)"[^>]*role="tab">\s*(Following|x)\s*</button>'
+)
+
+
+class _TheFollowerListMain(_Over):
+    """``main`` on the follower list, and every locator under it.
+
+    TWO answers, each what the skeleton draws: a tab named ``Following`` that
+    is selected counts 0, and a link's ``href`` is the member link the
+    skeleton draws in every row (``/in/x?miniProfileUrn=x``, the skeleton's
+    own text). Every other read -- the other counts, every text -- is the
+    planted page's own, whose 1 is what the skeleton draws for each count and
+    whose text is the plant."""
+
+    def __init__(self, wrapped: Any, href: str) -> None:
+        super().__init__(wrapped)
+        self._href = href
+
+    def _under(self, located: Any) -> "_TheFollowerListMain":
+        return _TheFollowerListMain(located, self._href)
+
+    def locator(self, *args: Any, **kwargs: Any) -> Any:
+        return self._under(self._wrapped.locator(*args, **kwargs))
+
+    def get_by_role(self, role: Any, *args: Any, **kwargs: Any) -> Any:
+        from linkedin_server import followers_list
+
+        located = self._wrapped.get_by_role(role, *args, **kwargs)  # the read, counted
+        if (
+            role == "tab"
+            and kwargs.get("name") == followers_list.FOLLOWING_TAB_WORD
+            and kwargs.get("selected") is True
+        ):
+            return _CountsAs(located, 0)
+        return self._under(located)
+
+    def nth(self, index: int) -> Any:
+        return self._under(self._wrapped.nth(index))
+
+    @property
+    def first(self) -> Any:
+        return self._under(self._wrapped.first)
+
+    async def get_attribute(self, name: str, **kwargs: Any) -> Any:
+        if name == "href":
+            return self._href
+        return await self._wrapped.get_attribute(name, **kwargs)
+
+
+class _TheFollowerListPage(_Over):
+    def __init__(self, wrapped: Any, href: str) -> None:
+        super().__init__(wrapped)
+        self._href = href
+
+    def locator(self, selector: Any, *args: Any, **kwargs: Any) -> Any:
+        located = self._wrapped.locator(selector, *args, **kwargs)  # the read, counted
+        return _TheFollowerListMain(located, self._href) if selector == "main" else located
+
+
+#: The member link every row of the session-2 skeleton draws, verbatim.
+_FOLLOWER_ROW_HREF = "https://www.linkedin.com/in/x?miniProfileUrn=x"
+
+
+async def read_followers_list_as_shipped(page: Any) -> Any:
+    """``read_followers_list`` as ``linkedin_my_followers_list`` calls it -- the
+    page and nothing else -- on the list ``tests/fixtures/live2/followers.html``
+    captures (the live lane's session 2, a skeleton).
+
+    THE SIGNATURE DRIVE: every planted count is 1, so the planted page draws
+    the tab LinkedIn labels ``Following`` as the SELECTED one, and the reader
+    refuses as not the followers side before any row is read -- a read, a
+    refusal, and no people record: not driven.
+
+    THE FIXTURE draws one tab strip of two tabs, the ``Following`` tab
+    ``aria-selected="false"`` and the other selected; ten rows by their
+    ``data-view-name``; each row's one button with its word in the
+    ``artdeco-button__text`` slot; and each row's member links at
+    ``/in/x?miniProfileUrn=x`` -- checked here at every drive.
+    ``tests/test_followers_list.py`` reads the same skeleton in an engine;
+    ``tests/test_followers_list_people.py`` reads the synthetic-people page
+    built from it.
+
+    THE DOUBLE answers the Following tab selected, 0, and a link's ``href``,
+    the skeleton's member link. Every other count and every text is the
+    planted page's, so the one row's word is the plant (another word, counted
+    ``unknown``) and its name and headline are the plant -- which comes back
+    inside ONE people record and nowhere else: ``returns_records``.
+    """
+    from linkedin_server import followers_list
+
+    markup = _drawn(
+        "live2/followers.html",
+        'role="tablist"',
+        followers_list.ROW_SELECTOR[1:-1],
+        'class="artdeco-button__text"',
+        f'href="{_FOLLOWER_ROW_HREF}"',
+    )
+    tabs = sorted(_FOLLOWER_LIST_TAB.findall(markup))
+    if tabs != [("false", "Following"), ("true", "x")]:
+        raise AssertionError(
+            "live2/followers.html no longer draws the Following tab unselected "
+            f"beside one selected tab: {tabs}"
+        )
+    return await followers_list.read_followers_list(
+        _TheFollowerListPage(page, _FOLLOWER_ROW_HREF)
+    )
+
+
+# ---------------------------------------------------------------------------
 # The tables the guard reads
 # ---------------------------------------------------------------------------
 
@@ -1894,6 +2009,11 @@ DRIVES: dict[str, Callable[..., Any]] = {
     "view_switch:_apply_positions": apply_positions_over_the_skeleton,
     "reveal:reveal": reveal_over_the_skeletons,
     "server:_profile_views_more_analytics": profile_views_more_analytics_over_the_skeletons,
+    # 2026-10-10 (lane B1, child lb1-followers): his own follower list,
+    # census P L2b, over the live lane's session-2 skeleton. Driven to its
+    # records once the double draws the Following tab unselected and answers
+    # the rows' member link.
+    "followers_list:read_followers_list": read_followers_list_as_shipped,
 }
 
 #: As far as a press. Run by the guard, so the reads before the press are

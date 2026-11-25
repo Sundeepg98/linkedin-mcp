@@ -145,9 +145,9 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
     # "P L1" LEFT 2026-10-10: lane B1 built its reader over the tracked skeleton
     # of session 1's capture (COVERED-UNFIRED), so its line goes, as a line
     # whose row left GAP must.
-    "P L2b": ("ADDRESS", "REFUSED", "every follower-list spelling carries the "
-                                    "forbidden substring /follow, which no "
-                                    "exemption covers"),
+    # "P L2b" LEFT 2026-11-25: lane build-p26 merged lane B1's child reader of
+    # his follower list over the tracked skeleton of session 2's capture
+    # (COVERED-UNFIRED), so its line goes, as a line whose row left GAP must.
     "P L4": ("ADDRESS", "ABSENT", "the newsletter analytics address is named "
                                   "in readonly.py among those NOT admitted"),
     "P L7": ("ADDRESS", "ABSENT", "creator hub; the blocker's address is "

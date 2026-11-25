@@ -306,6 +306,28 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "saying an earlier paragraph of its row was untrue while leaving it "
         "unmarked, which would need its own CORRECTS: / CORRECTED BY: pair."
     ),
+    # 2026-11-25, lane build-p26. READ, not inferred from the filenames: every
+    # one of the twelve lines citing the lane's record, and the DELTA line, was
+    # listed with the guard's own vocabulary and window, and each match placed
+    # in the line's older text or in this lane's note; none is in a note.
+    ("profile.md", "2026-11-25-build-p26.md"): (
+        "A LEDGER NOTE AND ONE MOVE, NOT A CORRECTION. Rows A11, A13, A14, "
+        "A15, A17, A25, D25, D26, F1, K8 and S8 each gained one note -- the "
+        "step their ledger line moved to off BUILD, and the re-measured reason "
+        "-- and L2b gained its COVERED-UNFIRED paragraph; each cites this "
+        "record, and none says an earlier paragraph of its row was untrue. "
+        "Every matched word is older text in a cell or a neighbour: 'THE "
+        "BLOCKER'S PREMISE IS NOW WRONG' (A14, A15, from 2026-09-19, inside "
+        "the windows of A13, A14, A15 and A17), D25's correction of 2026-09-19 "
+        "('CORRECTED ... WITHIN THE HOUR', its overturned and superseded "
+        "reading, D27's 'false' beside it), K8's '\"NO REASON\" IS FALSE' with "
+        "K10's 'false', and L3's 'false' beside L2b. The windows of A11, A25, "
+        "F1, S8 and the DELTA paragraph hold none. **WHAT WOULD MAKE THIS "
+        "ENTRY WRONG:** a note of this lane saying an earlier paragraph of its "
+        "row was untrue while leaving it unmarked; the BUILD steps this lane "
+        "moved are lane K's ledger's, and that correction is declared by a "
+        "CORRECTS: / CORRECTED BY: pair between the two records."
+    ),
 
     # 2026-10-10, lane K. THE CLASS RULINGS OF 2026-09-28 CITE THE UPLOAD
     # SANCTION FOR WHAT THE UPLOAD ROWS STILL LACK -- read, not inferred from

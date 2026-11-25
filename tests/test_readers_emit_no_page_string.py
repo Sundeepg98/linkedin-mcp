@@ -1996,6 +1996,10 @@ DRIVEN_TO["dom:read_company_home"] = RETURNS_RECORDS
 # insight cards. A category's label is third-party text, so it leaves as a
 # people_data.Category record -- the declared channel, not the text inventory.
 DRIVEN_TO["company_people_insights:read_people_insights"] = RETURNS_RECORDS
+# HIS FOLLOWER LIST (2026-10-10, lane B1, child lb1-followers): its success
+# path returns one people record per row read, beside the row's relation, so
+# the plant comes back inside a record and nowhere else.
+DRIVEN_TO["followers_list:read_followers_list"] = RETURNS_RECORDS
 
 
 @pytest.mark.parametrize("key", sorted(shipped_drives.DRIVES))
@@ -2185,6 +2189,13 @@ FIXTURE_BREAKS: dict[str, dict[str, str]] = {
     "threads:composer_holds": {
         "fixture": "synthetic/messaging_thread.html",
         "needle": 'id="reply-editor"', "into": 'id="reply-other"',
+    },
+    # 2026-10-10 (lane B1, child lb1-followers): the Following tab drawn
+    # SELECTED, the one premise the follower-list drive's double answers.
+    "followers_list:read_followers_list": {
+        "fixture": "live2/followers.html",
+        "needle": 'aria-selected="false" id="ka0515091"',
+        "into": 'aria-selected="true" id="ka0515091"',
     },
 }
 

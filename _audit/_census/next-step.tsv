@@ -365,14 +365,14 @@ N A12	N	W	R2	PRECONDITION:owner or manager of a group	NAMED	_audit/_census/block
 N A13	N	W	R2	PRECONDITION:an event he organises	NAMED	_audit/_census/write-classes.tsv::queued:EVENT-ORGANIZER-PRECONDITION
 N A14	N	W	R3	PRECONDITION:an event he organises	NAMED	_audit/_census/write-classes.tsv::queued:EVENT-ORGANIZER-PRECONDITION
 N A15	N	W	R3	PRECONDITION:an event he organises	NAMED	_audit/_census/write-classes.tsv::queued:EVENT-ORGANIZER-PRECONDITION
-P A11	P	W	R3	BUILD:tests/fixtures/live4/editor.html	NAMED	_audit/_census/write-classes.tsv::queued:AUTOCOMPLETE-ENTRY-PICK ; tests/fixtures/live4/editor.html
-P A13	P	W	R3	BUILD:tests/fixtures/live4/editor.html	NAMED	_audit/_census/write-classes.tsv::queued:AUTOCOMPLETE-ENTRY-PICK ; tests/fixtures/live4/editor.html
-P A14	P	W	R3	BUILD:tests/fixtures/live7/editor.html	INFERRED	_audit/_census/write-classes.tsv::queued:INTRO-EDITOR-FULL-READ
-P A15	P	W	R3	BUILD:tests/fixtures/live7/editor.html	INFERRED	_audit/_census/write-classes.tsv::queued:INTRO-EDITOR-FULL-READ
-P A17	P	W	R3	BUILD:tests/fixtures/live4/editor.html	NAMED	_audit/_census/write-classes.tsv::queued:AUTOCOMPLETE-ENTRY-PICK ; tests/fixtures/live4/editor.html
+P A11	P	W	R3	RULING:Q-EDITOR-TYPEAHEAD	NAMED	_audit/_census/write-classes.tsv::queued:AUTOCOMPLETE-ENTRY-PICK ; tests/fixtures/live7/editor.html ; _audit/2026-10-10-lane-b1-profile-build.md::NEEDS A SANCTION ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
+P A13	P	W	R3	RULING:Q-EDITOR-TYPEAHEAD	NAMED	_audit/_census/write-classes.tsv::queued:AUTOCOMPLETE-ENTRY-PICK ; tests/fixtures/live7/editor.html ; _audit/2026-10-10-lane-b1-profile-build.md::NEEDS A SANCTION ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
+P A14	P	W	R3	RULING:Q-ABSENT-ON-HIS-ACCOUNT	NAMED	_audit/_census/write-classes.tsv::queued:INTRO-EDITOR-FULL-READ ; tests/fixtures/live7/editor.html ; _audit/2026-10-10-lane-b1-profile-build.md::MEASURED-ABSENT FOR
+P A15	P	W	R3	RULING:Q-ABSENT-ON-HIS-ACCOUNT	NAMED	_audit/_census/write-classes.tsv::queued:INTRO-EDITOR-FULL-READ ; tests/fixtures/live7/editor.html ; _audit/2026-10-10-lane-b1-profile-build.md::MEASURED-ABSENT FOR
+P A17	P	W	R3	RULING:Q-EDITOR-TYPEAHEAD	NAMED	_audit/_census/write-classes.tsv::queued:AUTOCOMPLETE-ENTRY-PICK ; tests/fixtures/live7/editor.html ; _audit/2026-10-10-lane-b1-profile-build.md::NEEDS A SANCTION ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
 P A23b	P	W	R3	PRECONDITION:a name-pronunciation recording (only the mobile app records one)	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::`P A23b` (a name-pronunciation recording must first exist
 P A24	P	W	R3	PRECONDITION:a completed identity verification (a verified name to show)	NAMED	_audit/_census/profile.md::no build is appropriate before he has a verified name to show
-P A25	P	R	-	BUILD:tests/fixtures/live1/contact_info.html	NAMED	_audit/2026-09-23-live-lane-session-1.md::lane L1's five NEEDS-CAPTURE pages, captured ; _audit/_census/read-addresses.tsv::https://www.linkedin.com/in/me/overlay/contact-info/
+P A25	P	R	-	CAPTURE:in-me-profile	INFERRED	_audit/2026-10-10-lane-b1-profile-build.md::THE PANEL IS NOT DRAWN ; _audit/_census/read-addresses.tsv::https://www.linkedin.com/in/me/overlay/contact-info/ ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
 P A26	P	W	R3	ADMIT:https://www.linkedin.com/in/me/edit/contact-info/	INFERRED	_audit/_census/write-classes.tsv::queued:CONTACT-INFO-EDITOR ; RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
 P A27	P	W	R3	ADMIT:https://www.linkedin.com/in/me/edit/contact-info/	INFERRED	_audit/_census/write-classes.tsv::queued:CONTACT-INFO-EDITOR ; RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
 P A28	P	W	R3	ADMIT:https://www.linkedin.com/in/me/edit/contact-info/	INFERRED	_audit/_census/write-classes.tsv::queued:CONTACT-INFO-EDITOR ; RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
@@ -411,8 +411,8 @@ P D21	P	W	R3	ADMIT:https://www.linkedin.com/in/me/edit/forms/organization/new/	I
 P D22	P	W	R3	ADMIT:https://www.linkedin.com/in/me/edit/forms/volunteer-experience/new/	INFERRED	RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
 P D23	P	W	R3	ADMIT:https://www.linkedin.com/in/me/edit/forms/cause/new/	INFERRED	RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
 P D24	P	W	R3	ADMIT:https://www.linkedin.com/in/me/opportunities/volunteering/education/	NAMED	_audit/_census/profile.md::Lifted by capture C3 (after that exact address is admitted ; RULING:READ-PAST-AN-ACT-SUBSTRING
-P D25	P	R	-	BUILD:tests/fixtures/live8/in_me.html	NAMED	_audit/2026-09-23-live-lane-session-1.md::his profile, skeleton and raw
-P D26	P	R	-	BUILD:tests/fixtures/live8/in_me.html	NAMED	_audit/2026-09-23-live-lane-session-1.md::his profile, skeleton and raw
+P D25	P	R	-	CAPTURE:in-me-profile	INFERRED	_audit/2026-10-10-lane-b1-profile-build.md::(the three links) ; _audit/2026-11-25-build-p26.md::?isSelfProfile=true ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
+P D26	P	R	-	RULING:Q-OWN-PROFILE-SCROLL	INFERRED	tests/fixtures/live8/in_me.html ; _audit/2026-09-05-the-scroll-ruling.md::A surface exists that has no ; RULING:SCROLL-NOT-SANCTIONED
 P D27	P	W	R3	ADMIT:https://www.linkedin.com/in/me/edit/secondary-language/	NAMED	_audit/_census/profile.md::/edit/secondary-language/ ; RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
 P D28	P	R	-	PRECONDITION:a secondary-language profile (his own has one language)	NAMED	_audit/_census/read-addresses.tsv::the reading found distinct_langs 1
 P D29	P	W	R3	ADMIT:https://www.linkedin.com/in/me/edit/forms/certification/new/	NAMED	RULING:P-D29-BUILT-BEHIND-THE-GRANT ; _audit/_census/profile.md::Its form is the `/edit/` certifications editor
@@ -422,7 +422,7 @@ P E4	P	W	R3	TARGET:a 1st-degree connection he names, whose skill he endorses	NAM
 P E5	P	W	R3	TARGET:a 1st-degree connection he names, whose skill he endorses	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::| C3 | `endorse_skill` ; RULING:OPERATOR-NAMES-THE-TARGET
 P E6	P	W	R3	PRECONDITION:an endorsement he has received	NAMED	_audit/_census/write-classes.tsv::queued:NO-ENDORSEMENT-DRAWN
 P E8	P	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
-P F1	P	R	-	BUILD:tests/fixtures/live8/in_me.html	NAMED	_audit/2026-09-23-live-lane-session-1.md::his profile, skeleton and raw
+P F1	P	R	-	ADMIT:https://www.linkedin.com/in/me/details/recommendations/	MEASURED	_audit/2026-10-10-lane-b1-profile-build.md::/in/me/details/recommendations/ ; _audit/_census/read-addresses.tsv::https://www.linkedin.com/in/me/details/recommendations/=>False
 P F2	P	W	R3	TARGET:a 1st-degree connection he names, to ask for a recommendation	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::| C4 | `request_recommendation` ; RULING:OPERATOR-NAMES-THE-TARGET
 P F3	P	W	R3	TARGET:a 1st-degree connection he names, to recommend	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::| C5 | `give_recommendation` ; RULING:OPERATOR-NAMES-THE-TARGET
 P F4	P	W	R3	TARGET:a 1st-degree connection he names, to recommend	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::| C5 | `give_recommendation` ; RULING:OPERATOR-NAMES-THE-TARGET
@@ -467,9 +467,8 @@ P K4	P	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 P K5	P	W	R3	PRECONDITION:a company LinkedIn Learning licence	NAMED	_audit/_census/profile.md::needs a company LinkedIn Learning licence
 P K6	P	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 P K7	P	W	R3	ADMIT:https://www.linkedin.com/mypreferences/d/verifications	INFERRED	_audit/_census/profile.md::the verification management surface has never been captured
-P K8	P	R	-	BUILD:tests/fixtures/live8/in_me.html	NAMED	_audit/2026-09-23-live-lane-session-1.md::his profile, skeleton and raw
+P K8	P	R	-	RULING:Q-ABSENT-ON-HIS-ACCOUNT	NAMED	tests/fixtures/live8/in_me.html ; _audit/2026-10-10-lane-b1-profile-build.md::MEASURED-ABSENT FOR
 P K9	P	W	R3	PRECONDITION:a Top Voice badge	NAMED	_audit/_census/write-classes.tsv::queued:NO-TOP-VOICE-BADGE
-P L2b	P	R	-	BUILD:tests/fixtures/live2/followers.html	MEASURED	tests/fixtures/live2/followers.html ; _audit/_census/read-addresses.tsv::https://www.linkedin.com/mynetwork/network-manager/people-follow/followers/
 P L3	P	W	R3	CAPTURE:article-composer	NAMED	RULING:ARTICLE-COMPOSER-CAPTURE ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
 P L4	P	R	-	PRECONDITION:a newsletter he authors	INFERRED	_audit/_census/read-addresses.tsv::the page listing his newsletters links no analytics address
 P L7	P	R	-	ADMIT:https://www.linkedin.com/creator-hub/	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/creator-hub/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
@@ -536,4 +535,4 @@ P S3	P	R	-	CAPTURE:admit-in-me-skill-insights-skill	MEASURED	_audit/_census/read
 P S4	P	W	R3	CAPTURE:in-me-profile	NAMED	RULING:NO-INDEX-PINNED-JUDGEMENTS ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
 P S6	P	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 P S7	P	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
-P S8	P	W	R3	BUILD:tests/fixtures/live8/keyskills.html	NAMED	_audit/2026-09-23-live-lane-session-1.md::P S8, if the chooser
+P S8	P	W	R3	CAPTURE:C-P26-1	MEASURED	tests/fixtures/live8/keyskills.html ; _audit/2026-10-10-lane-b1-profile-build.md::THE CHOOSER IS DRAWN ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE

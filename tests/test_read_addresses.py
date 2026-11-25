@@ -478,7 +478,12 @@ def test_blocked_on_nothing_on_a_held_page_turns_it_red(
 def test_a_held_page_under_any_other_gate_turns_it_red(
         tmp_path, capsys, monkeypatch) -> None:
     lines = _lines()
-    i = _find(lines, _admitted_and_unheld)
+    # THE PLANT IS A GATE OF PRESS, so the row it lands on must not read PRESS
+    # already: on 2026-11-25 the first admitted, unheld row (P A25) was gated
+    # PRESS on its own measurement, the plant changed nothing, and _plant's
+    # own check said so. The row is found at runtime, as _find's docstring
+    # asks, and now on the one condition the plant needs.
+    i = _find(lines, lambda r: _admitted_and_unheld(r) and r["gate"] != "PRESS")
     row = _row(lines[i])
     row["gate"] = "PRESS"
     lines[i] = _line(row)

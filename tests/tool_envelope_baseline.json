@@ -36,6 +36,7 @@
     "linkedin_my_activity_items": "not_driven:never read the page",
     "linkedin_my_applications": "clean",
     "linkedin_my_articles": "clean",
+    "linkedin_my_followers_list": "clean",
     "linkedin_my_profile": "returns_text:the plant reached a published payload",
     "linkedin_new_messages": "clean",
     "linkedin_newsletter_subscriptions": "returns_text:the plant reached a published payload",
