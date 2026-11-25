@@ -370,17 +370,17 @@ def test_lookup_without_a_kind_refuses_a_question_answered_under_two():
     assert lookup("Q one?", input_kind="numeric", bank=result, today=TODAY)["entry_id"] == "n"
 
 
-def test_the_bank_is_found_by_its_own_variable_then_the_home_then_the_marker(tmp_path):
+def test_the_bank_is_found_by_its_own_variable_then_the_root_then_the_marker(tmp_path):
     root = tmp_path / "jobhunt"
     deep = root / "mcp-servers" / "linkedin" / "linkedin_server"
     deep.mkdir(parents=True)
     explicit = tmp_path / "elsewhere.json"
     found = apply_answers.locate_bank(deep, env={apply_answers.ENV_BANK: str(explicit),
-                                                 apply_answers.ENV_HOME: str(root)})
+                                                 apply_answers.ENV_ROOT: str(root)})
     assert found.path == explicit and found.how == apply_answers.ENV_BANK
-    found = apply_answers.locate_bank(deep, env={apply_answers.ENV_HOME: str(root)})
+    found = apply_answers.locate_bank(deep, env={apply_answers.ENV_ROOT: str(root)})
     assert found.path == root.joinpath(*apply_answers.BANK_PARTS)
-    assert found.how == apply_answers.ENV_HOME
+    assert found.how == apply_answers.ENV_ROOT
     assert apply_answers.locate_bank(deep, env={}).path is None
     (root / apply_answers.ROOT_MARKER).write_text("", encoding="utf-8")
     found = apply_answers.locate_bank(deep, env={})
@@ -396,6 +396,101 @@ def test_the_walk_up_stops_at_its_bound(tmp_path):
     (root / apply_answers.ROOT_MARKER).write_text("", encoding="utf-8")
     assert apply_answers.locate_bank(deep, env={}).path is None
     assert apply_answers.locate_bank(deep.parent, env={}).path is not None
+
+
+# ---------------------------------------------------------------------------
+# 6b. Parity with jobcore's config.locate: ONE root, and JOBHUNT_HOME is jobcore's
+# ---------------------------------------------------------------------------
+#
+# THE SEMANTICS HELD HERE, from jobcore/src/jobcore/config.py (``locate``):
+#   * JOBHUNT_HOME names the directory that HOLDS jobhunt.json -- it reads
+#     ``Path(home) / CONFIG_FILENAME`` -- so it is never the root;
+#   * a directory holding ``.jobhunt-root`` is the root, and its config is
+#     ``<root>/config/jobhunt.json``;
+#   * the walk looks at the start and at most MAX_WALK_UP (6) parents.
+# The first tests hold the bank to those words with no jobcore import, so they
+# run everywhere; the last runs jobcore's own locate where its source sits
+# beside this checkout, and says so where it does not (CI has no jobcore).
+
+JOBCORE_MARKER = ".jobhunt-root"
+JOBCORE_MAX_WALK_UP = 6
+
+
+def _jobcore_marker_walk(start: Path):
+    """jobcore's marker branch, restated: the config it would find, or None."""
+    for parent in [start, *start.parents][: JOBCORE_MAX_WALK_UP + 1]:
+        if (parent / JOBCORE_MARKER).is_file():
+            return parent / "config" / "jobhunt.json"
+    return None
+
+
+def _jobhunt_tree(tmp_path: Path, depth: int = 3) -> tuple[Path, Path]:
+    root = tmp_path / "jobhunt"
+    (root / "config").mkdir(parents=True)
+    (root / "config" / "jobhunt.json").write_text("{}", encoding="utf-8")
+    (root / JOBCORE_MARKER).write_text("", encoding="utf-8")
+    deep = root.joinpath(*(f"d{i}" for i in range(depth)))
+    deep.mkdir(parents=True, exist_ok=True)
+    return root.resolve(), deep
+
+
+def test_the_marker_and_the_bound_are_jobcores():
+    assert apply_answers.ROOT_MARKER == JOBCORE_MARKER
+    assert apply_answers.MAX_WALK_UP == JOBCORE_MAX_WALK_UP
+
+
+@pytest.mark.parametrize("depth", [0, 3, JOBCORE_MAX_WALK_UP, JOBCORE_MAX_WALK_UP + 1])
+def test_the_bank_and_jobcore_find_one_root_or_neither(tmp_path, depth):
+    root, deep = _jobhunt_tree(tmp_path, depth)
+    config = _jobcore_marker_walk(deep)
+    bank = apply_answers.locate_bank(deep, env={}).path
+    if config is None:
+        assert bank is None, "the bank found a root jobcore's walk would not"
+    else:
+        assert bank is not None
+        assert bank.resolve().parents[3] == config.resolve().parent.parent == root
+
+
+def test_jobhunt_home_keeps_jobcores_meaning_and_never_moves_the_bank(tmp_path):
+    """Set as jobcore means it -- the config's directory -- it changes nothing."""
+    root, deep = _jobhunt_tree(tmp_path)
+    for home in (root / "config", root, tmp_path / "anywhere"):
+        found = apply_answers.locate_bank(deep, env={apply_answers.JOBCORE_ENV_HOME: str(home)})
+        assert found.path.resolve() == root.joinpath(*apply_answers.BANK_PARTS), home
+        assert found.how.startswith("walk-up"), found.how
+    bare = tmp_path / "bare"
+    bare.mkdir()
+    lone = apply_answers.locate_bank(bare, env={apply_answers.JOBCORE_ENV_HOME: str(root)})
+    assert lone.path is None, "JOBHUNT_HOME was read as the root"
+
+
+def _jobcore_config_module():
+    """jobcore's own config module, when its source is beside this checkout."""
+    here = Path(__file__).resolve()
+    for parent in [here, *here.parents][: JOBCORE_MAX_WALK_UP + 2]:
+        if (parent / JOBCORE_MARKER).is_file():
+            src = parent / "mcp-servers" / "jobcore" / "src"
+            return src if (src / "jobcore" / "config.py").is_file() else None
+    return None
+
+
+def test_jobcores_own_locate_finds_the_bank_s_root(tmp_path, monkeypatch):
+    src = _jobcore_config_module()
+    if src is None:
+        pytest.skip("jobcore's source is not beside this checkout (CI): the "
+                    "restated parity above ran in its place")
+    monkeypatch.syspath_prepend(str(src))
+    import importlib
+    config = importlib.import_module("jobcore.config")
+    root, deep = _jobhunt_tree(tmp_path)
+    found = config.locate(start=deep, env={})
+    assert found.path is not None and found.path.parent.parent == root
+    bank = apply_answers.locate_bank(deep, env={}).path
+    assert bank.resolve().parents[3] == found.path.parent.parent
+    as_home = config.locate(start=deep, env={config.ENV_HOME: str(root / "config")})
+    assert as_home.reason == config.ENV_HOME, "jobcore no longer reads JOBHUNT_HOME as the config dir"
+    same = apply_answers.locate_bank(deep, env={config.ENV_HOME: str(root / "config")})
+    assert same.path == bank
 
 
 def test_lookup_reads_the_bank_the_order_finds(tmp_path, monkeypatch):

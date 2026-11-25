@@ -12,7 +12,9 @@ pipeline's tracker. ``mcp-servers/_audit`` is a NESTED git repository whose own
 ``.gitignore`` ignores ``*.json`` and ``*.jsonl``, so the file is ignored by the
 repository that actually contains it. The path is RESOLVED AT RUNTIME
 (:func:`locate_bank`), never written into code: the bank's own environment
-variable, then ``JOBHUNT_HOME``, then a walk up to the ``.jobhunt-root`` marker.
+variable, then ``JOBHUNT_ROOT``, then a walk up to the ``.jobhunt-root`` marker
+bounded as jobcore's is. ``JOBHUNT_HOME`` keeps jobcore's meaning -- the
+directory holding ``jobhunt.json`` -- and this module never reads it.
 It holds his personal data, so nothing here writes it; it is created only by a
 writer that has first asked git whether the path is ignored.
 
@@ -79,15 +81,20 @@ BANK_FILENAME = "answer-bank.json"
 BANK_PARTS: tuple[str, ...] = ("mcp-servers", "_audit", "job-pipeline", BANK_FILENAME)
 #: The bank's own override: a file path, used as given.
 ENV_BANK = "JOBHUNT_ANSWER_BANK"
-#: The jobhunt ROOT, as lane pipeline-26 reads it (``jp.state_dir``). Note that
-#: jobcore's ``config.locate`` reads the same variable as the directory that
-#: holds ``jobhunt.json``; the two readers differ, and this bank sides with
-#: the pipeline that shares it.
-ENV_HOME = "JOBHUNT_HOME"
+#: The jobhunt ROOT -- the directory holding the ``.jobhunt-root`` marker. A
+#: variable of the bank's own, because the obvious one is taken:
+#: ``JOBHUNT_HOME`` is jobcore's, and means the directory that holds
+#: ``jobhunt.json`` (``jobcore.config.locate`` reads ``JOBHUNT_HOME /
+#: jobhunt.json``). The orchestrator ruled, 2026-11-25, that it keeps that
+#: meaning and is never read as the root; this bank does not read it at all.
+ENV_ROOT = "JOBHUNT_ROOT"
+#: jobcore's variable, named here only so a test can hold that it is NOT read.
+JOBCORE_ENV_HOME = "JOBHUNT_HOME"
+#: jobcore's marker and jobcore's walk-up bound (``config.ROOT_MARKER``,
+#: ``config.MAX_WALK_UP``: the base and six parents), so the bank and the
+#: config layer find ONE root from the same places.
 ROOT_MARKER = ".jobhunt-root"
-#: How far up the walk goes -- lane pipeline-26's ``find_root`` bound, so the
-#: two readers find the same root from the same places.
-MAX_WALK_UP = 12
+MAX_WALK_UP = 6
 
 
 @dataclass(frozen=True)
@@ -99,16 +106,17 @@ class BankLocation:
 
 
 def locate_bank(start: Any = None, env: Optional[Mapping[str, str]] = None) -> BankLocation:
-    """The bank's path by the order: ``JOBHUNT_ANSWER_BANK``, then
-    ``JOBHUNT_HOME``, then a walk up from ``start`` (default: this module) to
-    the ``.jobhunt-root`` marker. No path is ever written into code."""
+    """The bank's path by the order: ``JOBHUNT_ANSWER_BANK`` (the file), then
+    ``JOBHUNT_ROOT`` (the root), then a walk up from ``start`` (default: this
+    module) to the ``.jobhunt-root`` marker, bounded as jobcore bounds it.
+    ``JOBHUNT_HOME`` is never read. No path is ever written into code."""
     environ = os.environ if env is None else env
     explicit = str(environ.get(ENV_BANK) or "").strip()
     if explicit:
         return BankLocation(Path(explicit).expanduser(), ENV_BANK)
-    home = str(environ.get(ENV_HOME) or "").strip()
-    if home:
-        return BankLocation(Path(home).expanduser().joinpath(*BANK_PARTS), ENV_HOME)
+    root = str(environ.get(ENV_ROOT) or "").strip()
+    if root:
+        return BankLocation(Path(root).expanduser().joinpath(*BANK_PARTS), ENV_ROOT)
     base = Path(start if start is not None else __file__).resolve()
     if base.is_file():
         base = base.parent
@@ -117,7 +125,7 @@ def locate_bank(start: Any = None, env: Optional[Mapping[str, str]] = None) -> B
             return BankLocation(parent.joinpath(*BANK_PARTS), f"walk-up to {ROOT_MARKER}")
     return BankLocation(
         None,
-        f"no {ENV_BANK}, no {ENV_HOME}, and no {ROOT_MARKER} within {MAX_WALK_UP} parents",
+        f"no {ENV_BANK}, no {ENV_ROOT}, and no {ROOT_MARKER} within {MAX_WALK_UP} parents",
     )
 
 
