@@ -1935,7 +1935,45 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # RESULTS -- its own line, the D2 alternation untouched, no exemption --
     # and every other key byte-identical. The new digest carries no long
     # digit run, so it is one literal again.
-    "_ALLOWED_URL_PATTERNS": "b8eebaa9a90587e8",
+    #
+    # b8eebaa9a90587e8 until 2026-11-25 (lane admit26, its first commit): five
+    # anchored lines for his own profile editors past "/edit/", on
+    # PROFILE-EDITOR-ADDRESSES-ALLOWED with READ-PAST-AN-ACT-SUBSTRING -- the
+    # add-an-Experience form with its drawn entry-point query, the About form,
+    # the contact-info form, the secondary-language editor and one skill's
+    # form by its digit id -- each paired with one exemption below. ATTRIBUTION,
+    # with this file's ast_digest: readonly.py at the lane's base 4c62196 is
+    # the tree minus exactly the lane admit26 block and hashes to the prior pin
+    # on every key; only this key and the pattern-exemption key moved. Record:
+    # _audit/2026-11-25-admit26.md.
+    #
+    # 43f0f6f42005e66a until lane admit26's second commit: one anchored line,
+    # his "Open to" services page, refused by allowlist silence alone
+    # (READ-PAST-AN-ACT-SUBSTRING's second clause), no exemption -- the
+    # exemption tables and every other key are byte-identical, and the tree
+    # minus that line hashes to 43f0f6f42005e66a.
+    #
+    # 24128eed2c1c5f07 until lane admit26's third commit: one anchored line,
+    # /mynetwork/ with no query and no sub-path, on READ-PAST-AN-ACT-SUBSTRING's
+    # second clause (its 2026-08-30 refusal was a wave's derived gate, and the
+    # badge is a passive cost the ruling names), no exemption -- every other
+    # key byte-identical, the tree minus that line hashing to 24128eed2c1c5f07.
+    #
+    # 95644331b7d9312a until lane admit26's fourth commit: one anchored line,
+    # his Data privacy category page, a named settings page in its own commit,
+    # paired with one exemption below; the tree minus that line and that entry
+    # hashes to the prior pins on every key.
+    #
+    # 63c43b5e8dd22259 until lane admit26's fifth commit: one anchored line,
+    # his Premium account settings page, a named settings page in its own
+    # commit refused by allowlist silence alone, no exemption -- every other
+    # key byte-identical.
+    #
+    # e73a1cde5ff05a90 until lane admit26's sixth commit: one anchored line,
+    # his job-seeker preferences page in the one spelling LinkedIn draws, with
+    # its one query value, a named page in its own commit, no exemption --
+    # every other key byte-identical.
+    "_ALLOWED_URL_PATTERNS": "17f048856f525ff3",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     # 419e64a3cd92ec7e until the same REVIEW: commit: a third entry, excusing
     # exactly {"/follow"} for exactly the anchored follower-list address.
@@ -1952,7 +1990,14 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # ffebed391e628195 until the third: two more, excusing exactly
     # {"/unfollow"} for /mypreferences/d/unfollowed and exactly
     # {"/mypreferences/d/categories/"} for /mypreferences/d/categories/ads.
-    "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "28643e7ca768b7df",
+    # 28643e7ca768b7df until 2026-11-25 (lane admit26): five more, each
+    # excusing exactly {"/edit/"} -- the one substring each address trips,
+    # measured -- for exactly one of his own profile editors' anchored
+    # addresses; the forbidden tuple is unchanged at 33.
+    # 08c29a59104b680c until lane admit26's fourth commit: one more, excusing
+    # exactly {"/mypreferences/d/categories/"} for exactly his Data privacy
+    # category page.
+    "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "56fec205ec8de3fe",
     "_FORBIDDEN_URL_SUBSTRINGS": "b0291a66ec9bd51e",
     # 23aece1483afdee9 until 2026-09-19. See the re-freeze note above: eleven
     # detector classes added, zero removed, and the direction is pinned by

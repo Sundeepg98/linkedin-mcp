@@ -9,7 +9,7 @@
 **THIS REGISTER IS NOT THE CORPUS AND DOES NOT CLAIM TO BE COMPLETE.** Read section 4 before concluding a question is unruled: the scan that keeps it honest reads ONE marker, and the ruling that caused this file to be written does not carry it.
 
     rulings registered       96
-    documents scanned        282
+    documents scanned        283
     RULED: declarations      82 claimed, 7 triaged, 0 unclaimed
 
 ---
@@ -457,9 +457,9 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | a heading naming a ruling | 136 | 295 |
 | a bold line opening on RULING/RULED | 65 | 152 |
 | the phrase THE RULING | 39 | 64 |
-| a named -RULING id | 41 | 102 |
+| a named -RULING id | 42 | 111 |
 | the phrase standing ruling | 18 | 41 |
-| a lead or operator ruling in prose | 42 | 108 |
+| a lead or operator ruling in prose | 43 | 110 |
 
 **The ruling that caused this register to be written is in the first row and not in the scan.** `BOUNDARY-IS-NOT-A-REASON` is phrased as a quoted ledger rule under a heading that carries no marker at all. It is registered because a person read it, and nothing here would have found it.
 

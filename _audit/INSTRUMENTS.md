@@ -12500,3 +12500,57 @@ counter for `J 84`, the census cell editor, the ledger and queue editor, the
 pin re-deriver and the note writer -- and the exported base tree used for the
 red-first runs. Each answered one question once; the answers are in the
 record.
+
+## 102. AN ADDRESS IS ADMITTED IN THE SPELLING LINKEDIN DRAWS, QUERY INCLUDED, OR NOT AT ALL (admit26, 2026-11-25)
+
+Record: `_audit/2026-11-25-admit26.md`.
+
+### 102.1 `tests/test_admit26_admissions.py` -- section 83.1's harness over this lane's table
+
+WHAT IT IS. Lane A's harness (83.1), its six conditions unchanged, over this
+lane's own `ADMISSIONS` table of ten entries: five of his own profile editors
+past `/edit/`, his "Open to" services page, `/mynetwork/`, his Data privacy and
+Premium account settings pages, and his job-preferences page. One field is
+added, `twin=False`, for a spelling that ends in a query value and so has no
+slash twin (the add-an-Experience form, the job-preferences page); the shape
+check then holds the exact query as part of the line.
+
+SHOWN FAILING, six times, each entry against the boundary of the commit before
+it: 30 failed / 7 passed for the five editors, 4 / 2 for the services page,
+4 / 2 for `/mynetwork/`, 6 / 1 for the privacy category, 4 / 2 for the Premium
+page, 4 / 2 for the job-preferences page. In every run the passes were exactly
+the controls an admission must not move -- the siblings, the empty exemption of
+an allowlist-silence page, the tuple size and the duplicate check.
+
+| path | shown failing by |
+|---|---|
+| `tests/test_admit26_admissions.py` (`ADMISSIONS`, the six parametrized conditions, `twin`) | each entry run against the previous commit's `readonly.py` before its line existed: 30 / 7, 4 / 2, 4 / 2, 6 / 1, 4 / 2, 4 / 2 (failed / passed); green after each, 68 passed at the last |
+
+### 102.2 What was measured on the way
+
+    A TABLE THAT NORMALISES QUERIES AWAY CANNOT SAY WHICH SPELLING WAS DRAWN.
+    READ THE CAPTURE ITSELF, FOR SHAPES ONLY, BEFORE WRITING AN EXACT LINE.
+
+`_audit/_census/completeness-annotations.tsv` records the add-an-Experience
+form as `/in/<entity>/edit/forms/position/new` and the job-preferences page as
+`/jobs/preferences`; the raw captures of that corpus draw the first only with
+`?profileFormEntryPoint=identityModuleMirror` and the second only as
+`?viewType=SEEKING_PREFERENCES`, and the volunteering page only with his own
+profile id in its query. Census cells written from the table inherit its
+normalisation (`P D5`'s and `P I12`'s both read bare). The lines admit the
+drawn spellings; the volunteering page went to a question instead.
+
+An existing guard's limit, met: the census-prose check reads only the first
+6000 characters after its section heading, so a census cell that grows can
+push a claimed surface out of the window -- record the growth in the cell
+tersely, as section 3.5 of the record did.
+
+### 102.3 DECLARED DISPOSABLE
+
+`measure_addresses.py` (every ADMIT address through the shipped gate and the
+whole forbidden tuple), `dump_cells.py` (each row's census cells, by the
+shipped walk), `shape_scan.py` (route shapes in the raw captures, member
+segments replaced), `digests.py` (the invariant test's own `ast_digest`, tree
+against base), `ledger_edit.py` (asserting edits to the two ledger tables) and
+`table68.py` (section 6's table from the ledgers on disk). Each answered one
+question once; the answers are in the record.
