@@ -31,7 +31,7 @@ are listed as `(undated)`; no date is taken from git history, because
 | of those, carrying a `YYYY-MM-DD-` date prefix | 242 |
 | distinct dates | 21 |
 | documents with no level-1 heading | 2 |
-| `CORRECTS:` marker lines | 126 |
+| `CORRECTS:` marker lines | 127 |
 | `CORRECTED BY:` marker lines | 127 |
 | distinct declared correction edges | 112 |
 | documents something later corrects | 53 |
@@ -41,11 +41,11 @@ are listed as `(undated)`; no date is taken from git history, because
 | documents that correct themselves later on | 2 |
 | documents no correction marker touches at all | 176 |
 | blockquoted markers naming ANOTHER document | 0 |
-| edges missing one of their two markers | 1 |
+| edges missing one of their two markers | 0 |
 | edges declared a different number of times in each direction | 2 |
 | marker lines rejected as malformed | 0 |
 | marker-shaped lines inside a fenced code block | 0 |
-| reasons that continue past their own line (printed whole below) | 16 |
+| reasons that continue past their own line (printed whole below) | 17 |
 | tightest margin over the 20-character admission floor, in characters | 0 |
 | titles carrying a non-ASCII character | 5 |
 | quoted strings whose backticked citation had to be defused | 6 |
@@ -1575,7 +1575,7 @@ reach is visible. The quoted reason here is the CORRECTOR's own
 
 - CORRECTS [2026-09-28-lane-k-ledger.md](2026-09-28-lane-k-ledger.md)
 
-  > five of those editors are admitted since 2026-11-25 (the position, About, contact-info and secondary-language forms and one skill's form, each in the spelling LinkedIn draws, two of them re-addressed), and every other ADMIT step in the ledger has moved to a capture or to a question in section 7; the Open To Work editor has no address at all, so its rows wait on Q-OPEN-TO-WORK-EDITOR.
+  > section 4 says the profile section editors, the contact-info editor and the Open To Work editor are all refused and "only the intro editor is admitted", and the ledger gave the contact-info, position and job-preferences rows addresses LinkedIn does not draw: five editors are admitted since this lane (section 3.1), the contact-info, position and job-preferences rows are re-addressed to the drawn spellings (3.1, 3.6), and the Open To Work editor has no address at all (section 5).
 
 ## 5. Every document, by date
 
@@ -1903,11 +1903,11 @@ against the same line, so a missing continuation satisfies it.
 - REASON PAST ITS LINE [2026-09-20-the-five-under-banked.md](2026-09-20-the-five-under-banked.md) line 3 -- a line-scoped reader sees 35 of 349 characters.
 - REASON PAST ITS LINE [2026-09-20-the-five-under-banked.md](2026-09-20-the-five-under-banked.md) line 457 -- a line-scoped reader sees 94 of 717 characters.
 - REASON PAST ITS LINE [2026-09-28-lane-k-ledger.md](2026-09-28-lane-k-ledger.md) line 255 -- a line-scoped reader sees 25 of 386 characters.
+- REASON PAST ITS LINE [2026-11-25-admit26.md](2026-11-25-admit26.md) line 15 -- a line-scoped reader sees 26 of 482 characters.
 - REASON PAST ITS LINE [_census/jobs.md](_census/jobs.md) line 467 -- a line-scoped reader sees 825 of 1189 characters.
 
 - TIGHTEST ADMISSION MARGIN [2026-09-03-linkedin-gap-blockers.md](2026-09-03-linkedin-gap-blockers.md) line 272 clears the 20-character floor by 0. The floor is applied to the marker's OWN LINE, so a reason of 723 characters is admitted on the strength of 20. Reflow that paragraph by one word and a guard rejects it saying it *carries no reason after the citation*, which would not be true. Reported every regeneration rather than counted, because a count of rejections reads zero until the day it does not.
 
-- HALF-JOINED EDGE [2026-11-25-admit26.md](2026-11-25-admit26.md) -> [2026-09-28-lane-k-ledger.md](2026-09-28-lane-k-ledger.md) -- one of the two markers is missing; the correction guard fails on this.
 - LOPSIDED EDGE [2026-09-05-census-recounted.md](2026-09-05-census-recounted.md) declares 1 correction of [2026-09-05-decide-retire-rulings.md](2026-09-05-decide-retire-rulings.md), which carries 2 back-pointers to it. Two claims under one back-pointer read to the correction guard as one clean pair, because its test is over distinct pairs.
 - LOPSIDED EDGE [2026-09-19-search-admission-preconditions.md](2026-09-19-search-admission-preconditions.md) declares 2 corrections of [2026-09-05-search-results-consent.md](2026-09-05-search-results-consent.md), which carries 1 back-pointer to it. Two claims under one back-pointer read to the correction guard as one clean pair, because its test is over distinct pairs.
 - DEFUSED CITATION [2026-09-03-linkedin-gap-blockers.md](2026-09-03-linkedin-gap-blockers.md) -- its CORRECTED BY: reason quotes the spelling network.md in backticks, which the correction guard's `CITATION` pattern RESOLVES. That guard raises a candidate pair whenever correction vocabulary sits within two lines of a resolving citation, and this file is nothing but document names beside the words CORRECTED and corrects, so the quoted string would make this index raise a pair it means nothing by. **The backticks are removed here and not one character of the text is**; the quoted string still says exactly what the document says, it simply stops being a citation.
