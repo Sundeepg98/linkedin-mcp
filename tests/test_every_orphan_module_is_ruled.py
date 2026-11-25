@@ -121,6 +121,21 @@ DELIBERATELY_UNWIRED: dict[str, str] = {
         "it was ruled unwireable, and the author should replace this reason "
         "with theirs. NOT PERMANENT."
     ),
+    # ADDED 2026-11-25 (lane apply-26); the reason is its author's.
+    "apply_walk": (
+        "PHASE A OF THE MULTI-STEP EASY APPLY WALKER, UNWIRED BECAUSE NOTHING "
+        "IT WOULD WALK HAS BEEN SEEN: no step of a multi-step apply flow has "
+        "ever been captured, so every step and field shape in its registry "
+        "is PROPOSED and its own may_open_flow() is False -- the dismiss and "
+        "discard controls of its inverse are unmeasured, and no flow is "
+        "opened before its return leg is. Wiring it now would hand "
+        "linkedin_apply_job a walker that refuses everything, or one that "
+        "walks shapes nobody has watched finish. Its readers are "
+        "tests/test_apply_walk.py and the capture C-J68-1 "
+        "(_audit/2026-11-25-apply.md section 3). NOT PERMANENT: delete this "
+        "entry in the commit that wires it into writes.perform's apply arm, "
+        "after C-J68-1 has measured its shapes."
+    ),
 }
 
 # THE member_rosters ENTRY WAS DELETED 2026-10-10 (lane B5), ON ITS OWN

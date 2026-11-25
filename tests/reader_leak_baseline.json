@@ -2,6 +2,7 @@
   "_comment": "Verdict per page reader, from tests/plantedpage.py. Regenerate with: python -m tests.test_readers_emit_no_page_string --write-baseline. 'clean' means the reader was DRIVEN -- it read the page and returned something that is not an empty shape, and something in it the page made: a value that differs from what the same call returns over a page that draws nothing and is no refusal or failure tally -- and carried nothing out; 'returns_records' means page text came back ONLY inside linkedin_server.people_data records, the declared channel; 'returns_text' means page text came back outside a record -- a legacy inventory since 2026-09-24 that may shrink and may not grow; 'not_driven:<reason>' means this offline harness could not reach it, which is never a pass.",
   "readers": {
     "anchors:read_anchors": "not_driven:read the page and returned nothing the page made",
+    "apply_walk:read_draft_state": "not_driven:returned without reading the page",
     "attachments:attachment_send_gate": "clean",
     "attachments:held_in_place": "clean",
     "attachments:read_reply_inputs": "clean",

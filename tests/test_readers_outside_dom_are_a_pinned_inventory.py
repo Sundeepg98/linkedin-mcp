@@ -185,6 +185,19 @@ KNOWN_UNWIRED: dict[str, str] = {
         "same file, which `_unwired` reads as no caller. Delete this line if "
         "and only if some other module calls `read_menu` directly."
     ),
+    # ADDED 2026-11-25 (lane apply-26). A real unwired reader, and stated so.
+    "apply_walk.read_draft_state": (
+        "UNWIRED, AND WITH ITS MODULE: the inverse's verification for the "
+        "multi-step Easy Apply walker (does a draft for THIS posting sit in "
+        "his tracker's Draft tab), the one part of tests/test_apply_walk.py "
+        "built on real markup -- tests/fixtures/jobs_tracker_row.html. Its "
+        "caller is the walker's inverse, and the walker is unwired until the "
+        "capture C-J68-1 measures the shapes it walks (the apply_walk entry "
+        "in tests/test_every_orphan_module_is_ruled.py says why). Delete this "
+        "line in the commit that wires the walker, or earlier if "
+        "writes.perform's apply arm calls it to report a draft a refused "
+        "apply left behind (_audit/2026-11-25-apply.md section 2.7)."
+    ),
 }
 
 
