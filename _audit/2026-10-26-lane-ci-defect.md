@@ -2,6 +2,11 @@
 
 Lane: lane-ci-fix-26. Branch from `master f339459` (= origin/master).
 
+**STATUS 2026-11-25: the first pass below was INCOMPLETE.** It named the
+failing test on a one-failure log; on the first live four-failure log it read,
+it named three. The second pass, and the lane's CI history read by head sha,
+are at the end of this record ("Second pass").
+
 ## The measured defect
 
 On lane run **38060371469** (red, shard 0) `scripts/lane_ci.py wait` printed only
@@ -81,3 +86,83 @@ failing class does not print silently.
 `INSTRUMENTS.md` section 98 (append at end). Admitted by the red shown above:
 the extractor demonstrably returned only the banner on a real red log, and a
 test now proves it must return the test id.
+
+## Second pass (2026-11-25): every failing test, as a node id
+
+### The lane's CI history, read by head sha
+
+| head | run | date | verdict | what failed |
+|---|---|---|---|---|
+| `cfee8d6` | 40325341840 | 2026-10-26 | failure | this lane's own: `test_the_audit_index_is_derived.py::test_a_non_ascii_title_is_declared_and_reported` (the record's H1 carried U+2014 and the committed index had not been regenerated over it), plus the shared family below |
+| `cf76014` | 40371662148 | 2026-10-26 | failure | the shared family only: `test_apply_modal_fixture.py` x3 (`test_an_apply_now_reaches_the_gate`, `test_a_proceeding_gate_appends_the_second_click`, `test_the_submit_gates_refusal_reaches_the_caller`) and `test_verification_that_could_not_read.py::test_the_two_receipts_do_not_print_the_same_place` |
+| `3db8aae` (merge of origin/master `30582f4`) | 45636341584 | 2026-11-25 | **success** | nothing |
+
+The shared family was NOT this lane's, and that is now measured rather than
+inferred: master's own run 40314801175 on this lane's base, which carries none
+of this lane's changes, failed the same four sub-banners; the fixes lane traced
+them to an unpinned playwright resolving 1.64.1 (`INSTRUMENTS.md` section 95);
+and the same lane code went green once `cab0ae7` was merged under it.
+
+### The merge, and the count git got wrong
+
+Merging origin/master (`30582f4`) conflicted in two places, both at the end of
+an append-ordered file. `INSTRUMENTS.md`: master appended section 95 and this
+lane section 98, both after 93; resolved as a pure union in heading-number
+order, 95 then 98 (+45 lines against master, +35 against the lane head, zero
+removed either way). `INDEX.md`: regenerated, never hand-merged (275
+documents). And one silent one: `RULINGS.md` merged WITHOUT a conflict,
+because both sides had made the identical edit "documents scanned 272 -> 273";
+the merged corpus derives 274. Two equal +1s merge as one.
+
+### What the first pass printed on a real four-failure run
+
+Lane run 40371662148 was the first live red run the fixed extractor read. Its
+`--log-failed` (374 lines, two failed shards) was re-fetched and both
+extractors were run over it, as shipped:
+
+| extractor | lines printed | failing tests named |
+|---|---|---|
+| base (`f339459`) | 3 | 0 of 4 -- a skip reason, the exit banner, a docstring line |
+| first pass | 20 (the cap) | 3 of 4 -- the fourth block, and shard 1's banner, fell past the cap |
+| second pass | ids first, then the capped detail | **4 of 4**, as node ids |
+
+The first pass kept every `E` line and every `tests/...:NNN` frame, so twenty
+lines ran out one block early. Its own comment said "the first E line"; the
+code took them all. The cap is right for detail and wrong for the ids, so the
+ids are now read on their own (`failing_test_ids`) and `_report` prints all of
+them first, with the count it withheld past `ID_LIMIT` (50).
+
+### Two shapes measured, one of them caught only by the real log
+
+- A LONG NAME IS PADDED WITH ONE UNDERSCORE. Measured with `pytest -q -rs`
+  and COLUMNS=80 (CI's fallback width): an 84-character test name prints as
+  `_ name _`. Both banner patterns wanted four, so such a test vanished from
+  the report entirely. Both now admit any fill width.
+- THE FRAME SEPARATOR IS NOT A BANNER. Widened, the pattern took pytest's
+  `_ _ _ ... _` (drawn between the frames of a long traceback; lines 83 and 97
+  of that log) for a failing test, and printed five ids for four failures.
+  The transcribed fixture had passed: it copied only lines the OLD pattern
+  matched, so it never carried the separator. Running the shipped `_report`
+  over the real log is what caught it. The title may no longer start with
+  fill.
+
+Red first, both rounds: 10 failed / 47 passed before the id list; 3 failed /
+55 passed once the real log's two separators joined the fixture; 58 passed
+after. Over both real red logs the shipped `_report` names 1 of 1 and 4 of 4,
+and prints no separator.
+
+### Known limit, left as found
+
+The `REFUS` class predates this lane (it is in the base's pattern) and matches
+uppercase prose: on run 40371662148 it printed a skip reason ("The REFUSAL")
+and a test's docstring ("a recorder that REFUSES"). Two noise lines in the
+detail view, none in the ids, which never read that class. Not this lane's
+defect; anchoring `REFUS` to the gate's own refusal output would be a
+separate, small change.
+
+### Also fixed in passing
+
+The prefix stripper held a literal, invisible U+FEFF inside a string; it is
+spelled `chr(0xFEFF)` now. And the OS temp cleanup had wiped this lane's
+scratch between sessions; both red logs were re-fetched, read-only, for the
+measurements above.

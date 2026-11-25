@@ -12234,3 +12234,34 @@ record. The live log capture itself lives in scratch, never in the repo:
 its last line's `##[error]Process completed with exit code 1.` plus the test
 id and the `tests/test_a_cited_sha_resolves.py:779` reference are what the
 `LOG_RS` fixture transcribes.
+
+### 98.4 SECOND PASS (2026-11-25): THE IDS ARE READ ON THEIR OWN, AND THE SHIPPED CODE IS RUN OVER THE REAL LOG
+
+The first live four-failure red run the fixed extractor read (lane run
+40371662148, two failed shards) was named three-of-four: the detail view keeps
+every `E` line and frame, and its 20-line cap ran out one block early. The ids
+are now a separate, uncapped read, `failing_test_ids`, printed first by
+`_report` as runnable node ids (a sub-banner paired with the first `tests/`
+reference inside its own block), with the count withheld past `ID_LIMIT`.
+Two shapes were measured on the way. pytest pads a name too long for the line
+with ONE underscore a side (COLUMNS=80, CI's fallback), which a four-underscore
+pattern drops; and widened to any fill, the pattern took the `_ _ _ ... _`
+frame separator for a test. The second was caught only by driving the shipped
+`_report` over the real log: the fixture transcribed from that same log had
+copied only lines the OLD pattern matched, so it never carried the separator.
+
+    A FIXTURE TRANSCRIBED THROUGH THE PATTERN UNDER TEST INHERITS THAT
+    PATTERN'S BLIND SPOTS. RUN THE SHIPPED CODE OVER THE REAL ARTIFACT
+    BEFORE TRUSTING THE TRANSCRIPTION.
+
+| path | shown failing by |
+|---|---|
+| `scripts/lane_ci.py` (`failing_test_ids`, `_node_id`, `ID_LIMIT`, `_SUBBANNER`, the any-width banner class in `_FALLING_LINE`, `_report`) | `tests/test_lane_ci.py::test_a_four_failure_log_names_every_failing_test_through_wait` (`LOG_RS4`, from run 40371662148: no node id printed, the fourth test absent), `::test_a_traceback_separator_is_neither_a_test_nor_a_detail_line` and `::test_failing_test_ids_are_node_ids_paired_inside_their_own_block` (five ids for four failures once the real separators joined the fixture), `::test_a_long_name_padded_with_one_underscore_is_still_a_failing_test` (the old pattern returned only the reference line), `::test_a_red_log_with_lines_but_no_test_id_says_no_id_was_found`, `::test_more_failing_tests_than_the_id_limit_says_how_many_it_withheld`; the fixture's own control, `::test_the_four_failure_fixture_really_crowds_the_detail_cap`. Reds: 10 failed / 47 passed, then 3 failed / 55 passed; green 58 passed. Over both real red logs: 1 of 1 and 4 of 4 named. |
+
+### 98.5 DECLARED DISPOSABLE (second pass)
+
+`old_vs_new.py` (the base and lane-head extractors, as shipped, over one real
+log), `report_on_real_logs.py` (the shipped `_report` over real logs, gh
+stubbed to return them), `resolve_instruments.py` (this register's 95/98 merge
+union) and the pytest banner-shape probe. Each answered one question once; the
+answers are in `_audit/2026-10-26-lane-ci-defect.md`, "Second pass".
