@@ -103,6 +103,8 @@ from tests.test_a_reaction_can_be_withdrawn import WITHDRAW_MARKUP
 from tests.test_apply_modal_fixture import VIEWPORT, over  # noqa: F401
 from tests.test_editor_fields import TWO_DIALOG_HTML
 from tests.test_similar_jobs_alert import ON_WORLD as ALERT_ON_WORLD  # noqa: E402
+from tests.test_search_job_alert import ON_WORLD as SEARCH_ALERT_ON_WORLD  # noqa: E402
+from tests.test_search_job_alert import QUERY as SEARCH_ALERT_QUERY  # noqa: E402
 from tests.test_follow_company_page import (
     COMPANY_PAGE_FOLLOW_ID,
     COMPANY_PAGE_FOLLOW_MARKUP,
@@ -268,6 +270,21 @@ REACHED: dict[str, tuple[str, str, str]] = {
         "tests/test_similar_jobs_alert.py",
         ALERT_ON_WORLD,
         JOB,
+    ),
+    # 2026-11-25 (census row ``J 31``, lane build-jmn26). A TRACKED capture,
+    # live session 2's classic job search with its toggle word written by
+    # keyed shape: the switch reads off, and the preview and the click read it
+    # through ONE verdict, ``search_alert_switch.read_state``. The inverse is
+    # reached over the DERIVED on world its own tests read.
+    "set_search_job_alert": (
+        "tests/fixtures/live2/j107_search_alert.html",
+        markup("live2/j107_search_alert"),
+        SEARCH_ALERT_QUERY,
+    ),
+    "unset_search_job_alert": (
+        "tests/test_search_job_alert.py",
+        SEARCH_ALERT_ON_WORLD,
+        SEARCH_ALERT_QUERY,
     ),
     # THE FIFTEENTH, 2026-09-24 (census row ``M M10``; the fourteenth on
     # lane L5's branch, before lane L7's merge landed). A SYNTHETIC
@@ -482,7 +499,10 @@ async def _live(over, action, *, spec=None, anchor=None):
 #: both alert cases on exactly that report and on nothing else. Served here
 #: the way ``tests/test_similar_jobs_alert.py`` serves them: every request the
 #: page starts is aborted by the page's own route, before the guard has to.
-_WORLDS_THAT_REACH_OUT = frozenset({"set_similar_jobs_alert", "unset_similar_jobs_alert"})
+_WORLDS_THAT_REACH_OUT = frozenset({"set_similar_jobs_alert", "unset_similar_jobs_alert",
+                                    # 2026-11-25, lane build-jmn26: session 2's search
+                                    # is a tracked copy too, its addresses https://x/...
+                                    "set_search_job_alert", "unset_search_job_alert"})
 
 
 async def _over_refusing_every_request(html: str, work):
@@ -662,8 +682,10 @@ def test_every_performable_action_is_either_reached_or_declared_unreachable():
     # pair, reached over session 8's tracked posting. MEASURED on the merged tree.
     # 20 -> 22 AT THE INTEGRATION MERGE OF LANE B4 ONTO LANE B3 (2026-10-10): the alert
     # pair beside the reaction pair's inverse, each reached over its own tests' surface. MEASURED.
-    assert len(PERFORMABLE) == 22, sorted(PERFORMABLE)
-    assert len(REACHED) == 22, sorted(REACHED)
+    # 22 -> 24 ON LANE BUILD-JMN26 (2026-11-25): the search-alert pair, reached
+    # over session 2's tracked search and its derived on world. MEASURED.
+    assert len(PERFORMABLE) == 24, sorted(PERFORMABLE)
+    assert len(REACHED) == 24, sorted(REACHED)
     assert len(CANNOT_REACH) == 0, sorted(CANNOT_REACH)
 
 

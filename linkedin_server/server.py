@@ -1,4 +1,13 @@
-"""The tool surface: eighty tools, twenty-two of which write to LinkedIn.
+"""The tool surface: eighty-two tools, twenty-four of which write to LinkedIn.
+
+THE EIGHTY-FIRST AND EIGHTY-SECOND ARE WRITES, 2026-11-25 (lane build-jmn26,
+census ``J 31``, under ``HIS-OWN-CURATION-NOT-OUTWARD``):
+``linkedin_set_search_job_alert`` and its inverse
+``linkedin_unset_search_job_alert``, one job search's own alert switch, on
+and off, the search named by the caller's keywords and location. Measured
+off this branch's registry, not summed: twenty-four write and three are
+write-shaped. The headline read "eighty tools, twenty-two of which write"
+until then.
 
 THE SEVENTY-EIGHTH TO EIGHTIETH ARE WRITE-SHAPED AND REFUSE, 2026-11-25, at
 integration 2's merge of lane builds-26 (census ``J 54``, ``P E4`` / ``N 111``
@@ -402,7 +411,7 @@ meantime the pin goes on asserting the old number with full confidence.
 THE NUMBERS ABOVE ARE DERIVED NOW, and that is a statement about a test rather
 than about an intention. Eighty is ``len(await mcp.list_tools())``,
 pinned in ``test_server_surface.py`` by
-``test_the_surface_is_exactly_the_eighty_tools``; the split is pinned by
+``test_the_surface_is_exactly_the_eighty_two_tools``; the split is pinned by
 ``tests/test_prose_that_makes_a_claim.py::test_the_server_docstring_numbers_are_derived``,
 which reads THESE WORDS and fails if any of the three disagrees with the
 registry.
@@ -415,9 +424,10 @@ POINTER to it was dangling, so a reader who followed it found nothing and
 would reasonably conclude these numbers are unchecked. A citation is a claim
 like any other.
 The surface splits three ways and the split is the part a reader actually
-needs: FIFTY-FIVE read, TWENTY-TWO write, and THREE are write-shaped,
-registered, gated and unable to act. Fifty-five plus twenty-two plus three is
-eighty. (Fifty, twenty-two and seventy-two on master at this
+needs: FIFTY-FIVE read, TWENTY-FOUR write, and THREE are write-shaped,
+registered, gated and unable to act. Fifty-five plus twenty-four plus three is
+eighty-two. (Fifty-five, twenty-two and three, summing to eighty, until lane
+build-jmn26's search-alert pair, 2026-11-25. Fifty, twenty-two and seventy-two on master at this
 integration's base; fifty-one, twenty-two and seventy-three when the J 110
 merge added lane B4's read of an organisation Page's description;
 fifty-two, twenty-two and seventy-four when the J 108 merge added lane B4's
@@ -589,11 +599,15 @@ the moment ``update_profile_field`` was given an address while still refusing.
 always meant: an address is not a permission.
 
 NOTE THE ACTION THAT HAS NO TOOL. ``writes.SANCTIONED_WRITES`` holds
-TWENTY-THREE actions where this surface registers TWENTY-TWO write-shaped tools, and
+TWENTY-EIGHT actions where this surface registers TWENTY-SEVEN write-shaped tools, and
 the missing one is ``set_open_to_work``: it is sanctioned, it is refused by
-``_refuse_unperformable``, and no tool was ever registered for it. So twenty-two
-counts TOOLS and twenty-three counts ACTIONS, and a reader comparing the two
-numbers is not looking at a discrepancy. (TWENTY-ONE and TWENTY until lane
+``_refuse_unperformable``, and no tool was ever registered for it. So twenty-seven
+counts TOOLS and twenty-eight counts ACTIONS, and a reader comparing the two
+numbers is not looking at a discrepancy. (TWENTY-SIX and TWENTY-FIVE on master
+at lane build-jmn26's base, 4c62196, measured off that tree's registry -- this
+sentence still read twenty-three and twenty-two there, three behind each, the
+three refusing tools of lane builds-26 never added to it -- until that lane's
+search-alert pair, 2026-11-25, added two to each. TWENTY-ONE and TWENTY until lane
 B4's alert pair, merged after lane B3's, 2026-10-10, added two to each;
 TWENTY and NINETEEN until lane NP's ``withdraw_reaction``, merged after lane
 S's, 2026-10-10, added one to each; NINETEEN and EIGHTEEN until lane S's
@@ -1190,7 +1204,7 @@ mcp = FastMCP(
     instructions=(
         "A window onto the operator's OWN LinkedIn account, driven by his own "
         "signed-in browser on his own machine. Most tools read and change "
-        "nothing. TWENTY-TWO WRITE: linkedin_save_job, "
+        "nothing. TWENTY-FOUR WRITE: linkedin_save_job, "
         "linkedin_unsave_job, linkedin_unfollow_company, "
         "linkedin_follow_company, linkedin_apply_job, "
         "linkedin_update_setting, linkedin_react_to_item, "
@@ -1201,7 +1215,8 @@ mcp = FastMCP(
         "linkedin_withdraw_from_group, linkedin_connect_from_profile, "
         "linkedin_message_from_profile, linkedin_send_attachment, "
         "linkedin_set_admitted_setting, linkedin_withdraw_reaction, "
-        "linkedin_set_similar_jobs_alert and linkedin_unset_similar_jobs_alert. "
+        "linkedin_set_similar_jobs_alert, linkedin_unset_similar_jobs_alert, "
+        "linkedin_set_search_job_alert and linkedin_unset_search_job_alert. "
         "ONE MORE IS WRITE-SHAPED AND REFUSES: linkedin_set_tracker_stage, the "
         "stage move on a saved job, whose control -- an item in the tracker "
         "row's overflow menu -- has never been captured; it reads his Saved "
@@ -1238,6 +1253,11 @@ mcp = FastMCP(
         "linkedin_unset_similar_jobs_alert, turn one posting's alert for "
         "similar jobs on and off -- his own saved query, each the other's "
         "inverse; offer the pair together, set then unset. "
+        "THE TWENTY-SECOND AND TWENTY-THIRD, linkedin_set_search_job_alert "
+        "and linkedin_unset_search_job_alert, turn the job alert for ONE "
+        "search on and off -- the search named by its keywords and an "
+        "optional location, his own saved search, each the other's inverse; "
+        "offer the pair together, set then unset. "
         "THE SIXTEENTH, linkedin_withdraw_from_group, leaves one group he "
         "names by its NUMERIC id, never by a group's name; no join is built "
         "here, so offer it only for a group he names -- and not his last "
@@ -12856,6 +12876,97 @@ async def linkedin_audience_analytics() -> dict[str, Any]:
             landed = await BROWSER.goto(page, audience_analytics.AUDIENCE_URL)
             assert_not_authwall(landed, surface="audience-analytics")
             return await audience_analytics.read_audience_analytics(page)
+    except Exception as exc:
+        return _error(exc)
+
+
+# ---- lane build-jmn26 ----
+# Census row J 31 (lane build-jmn26, 2026-11-25): a job search's own alert
+# switch, on and off, each the other's inverse. Every tool this lane registers
+# is in this one contiguous block.
+from linkedin_server import search_alert_switch  # noqa: E402 -- lane build-jmn26's one block
+
+
+def _search_alert_refusal(why: str) -> dict[str, Any]:
+    """A search these arguments cannot compose, refused before any page loads."""
+    return {
+        "error": "bad_argument",
+        "message": (
+            "a job alert is set on one search, composed from its keywords and "
+            f"an optional location: {why} Nothing was loaded."
+        ),
+        "performed": False,
+    }
+
+
+@mcp.tool()
+async def linkedin_set_search_job_alert(
+    keywords: str, location: str = "", confirm_token: str = ""
+) -> dict[str, Any]:
+    """Turn ON LinkedIn's job alert for one job search -- a WRITE.
+
+    Presses the "Set alert" switch at the head of that search's results, which
+    makes LinkedIn send you new jobs matching it. A job alert is your own saved
+    search; nobody else sees it. Same two-step shape and the same five gates as
+    ``linkedin_save_job``: no ``confirm_token``, no action -- you get a block to
+    read and a token that works ONCE, only for this search, only for this verb,
+    within two minutes. Census row ``J 31``.
+
+    THE SEARCH IS YOURS TO NAME: ``keywords`` and, optionally, ``location``,
+    composed into the classic job search's address the way
+    ``linkedin_search_jobs`` composes them; filters are not carried. THE
+    PREVIEW READS that search: exactly one alert toggle with LinkedIn's own
+    class and its word "Set alert", exactly one switch in it, reading off. A
+    switch already on is refused -- turning it off is
+    ``linkedin_unset_search_job_alert``. A landing on any other search is
+    refused.
+
+    AFTER THE PRESS the search is re-rendered and the switch read again: on
+    means the alert was stored, off that it was not (``performed: false``).
+    The on shape has never been captured, so that reading is derived and the
+    first supervised use measures it.
+
+    Args:
+        keywords: the search's keywords, as you would type them.
+        location: the search's location, as you would type it; empty for none.
+        confirm_token: leave empty to preview. Pass the token from that
+            preview to actually press the switch.
+    """
+    try:
+        query, why = search_alert_switch.query_for(keywords, location)
+        if query is None:
+            return _search_alert_refusal(why)
+        return await _write_tool("set_search_job_alert", query, confirm_token)
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_unset_search_job_alert(
+    keywords: str, location: str = "", confirm_token: str = ""
+) -> dict[str, Any]:
+    """Turn OFF LinkedIn's job alert for one job search -- a WRITE, the inverse of
+    ``linkedin_set_search_job_alert``.
+
+    Presses the same "Set alert" switch at the head of that search's results,
+    from on. Same two steps, same gates, a token bound to this search and this
+    verb. A switch reading off is refused -- turning it on is
+    ``linkedin_set_search_job_alert``. After the press the search is
+    re-rendered and the switch read again; off means the alert is gone. The on
+    reading this starts from is derived (no capture holds the switch on), so
+    the first supervised round trip measures it. Census row ``J 31``.
+
+    Args:
+        keywords: the same keywords the alert was set with.
+        location: the same location, or empty.
+        confirm_token: leave empty to preview. Pass the token from that
+            preview to actually press the switch.
+    """
+    try:
+        query, why = search_alert_switch.query_for(keywords, location)
+        if query is None:
+            return _search_alert_refusal(why)
+        return await _write_tool("unset_search_job_alert", query, confirm_token)
     except Exception as exc:
         return _error(exc)
 

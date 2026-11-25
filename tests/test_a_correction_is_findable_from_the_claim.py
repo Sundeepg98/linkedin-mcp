@@ -294,10 +294,11 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
     # the matched words in its two-line window, and none sits in the lane's own
     # note (a scan of each note's text alone: zero hits).
     ("jobs.md", "2026-11-25-build-jmn26.md"): (
-        "A ROW'S NEXT STEP RECORDED, NOT A CORRECTION. Rows `19`, `53`, `55`, "
-        "`56`, `84`, `108`, `110` and `115` each gained one dated note citing "
-        "the lane's record -- what the row's capture draws, its re-pointed "
-        "step, and for `108` its move to COVERED-UNFIRED -- and none says "
+        "A ROW'S NEXT STEP RECORDED, NOT A CORRECTION. Rows `19`, `31`, `53`, "
+        "`55`, `56`, `84`, `108`, `110` and `115` each gained one dated note "
+        "citing the lane's record -- what the row's capture draws, its "
+        "re-pointed step, and for `31` and `108` its move to COVERED-UNFIRED "
+        "-- and none says "
         "anything in that record does not hold. Every matched word is older "
         "text in a neighbouring row: `17`'s 'The impossibility half above is "
         "false' and `18`'s 'PRICED ON THE WRONG ADDRESS' within two lines of "

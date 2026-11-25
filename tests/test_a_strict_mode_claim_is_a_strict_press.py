@@ -64,6 +64,12 @@ PINNED_STRICT_PRESS_ACTIONS = frozenset(
         # tests/test_similar_jobs_alert.py.
         "set_similar_jobs_alert",
         "unset_similar_jobs_alert",
+        # TWELVE since lane build-jmn26 (2026-11-25, census J 31): the search
+        # alert pair, pressed on the ONE switch the reader counted in the one
+        # alert toggle (search_alert_switch.SWITCH), shown in
+        # tests/test_search_job_alert.py.
+        "set_search_job_alert",
+        "unset_search_job_alert",
         "send_invitation",
         "connect_from_profile",
         "message_from_profile",
@@ -95,6 +101,7 @@ CLAIMS: dict[tuple[str, str], str] = {
     ("writes.py", "strict mode refuses the click if that stops being true between"): "follow_company_page",
     ("writes.py", "strict mode refuses a click whose selector matches more -- so"): "follow_company",
     ("writes.py", "strict mode holds to the one toggle"): "set_similar_jobs_alert",
+    ("writes.py", "strict mode holds to the one switch"): "set_search_job_alert",
 }
 
 _CLAIM = re.compile(r"strict mode (?:holds|refuses)", re.IGNORECASE)

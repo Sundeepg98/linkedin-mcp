@@ -1,4 +1,9 @@
-"""The tool surface: eighty tools, fifty-five of which do not write.
+"""The tool surface: eighty-two tools, fifty-five of which do not write.
+
+**IT READ "eighty tools, fifty-five of which do not write" UNTIL LANE
+BUILD-JMN26 (2026-11-25) ADDED TWO WRITES**: ``linkedin_set_search_job_alert``
+and its inverse ``linkedin_unset_search_job_alert`` (census J 31), a job
+search's own alert switch, so the non-write count holds at fifty-five.
 
 **IT READ "seventy-seven tools, fifty-five of which do not write" UNTIL
 INTEGRATION 2'S MERGE OF LANE BUILDS-26 (2026-11-25) ADDED ITS THREE
@@ -185,6 +190,10 @@ SANCTIONED_WRITE_TOOLS = frozenset(SANCTIONED_WRITES) & {
     "linkedin_mark_company_interest",
     "linkedin_set_similar_jobs_alert",
     "linkedin_unset_similar_jobs_alert",
+    # 2026-11-25 (lane build-jmn26, census J 31): a job search's own
+    # alert switch, set and unset, each the other's inverse.
+    "linkedin_set_search_job_alert",
+    "linkedin_unset_search_job_alert",
     # THE FIFTEENTH, 2026-09-24 (census rows M M10 and, by D6, M M17; the
     # fourteenth on lane L5's branch, before lane L7's merge landed): a
     # reply inside a conversation he names by thread id. Its NAME announces
@@ -523,6 +532,10 @@ EXPECTED_TOOLS = {
     "linkedin_mark_company_interest",
     "linkedin_set_similar_jobs_alert",
     "linkedin_unset_similar_jobs_alert",
+    # 2026-11-25 (lane build-jmn26, census J 31): a job search's own
+    # alert switch, set and unset, each the other's inverse.
+    "linkedin_set_search_job_alert",
+    "linkedin_unset_search_job_alert",
     "linkedin_publish_post",
     "linkedin_comment_on_item",
     # THE THIRTY-SIXTH, 2026-09-03. A READ that SHIPS REFUSING: the read
@@ -737,8 +750,14 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_eighty_tools(tools):
-    """RENAMED AGAIN AT INTEGRATION 2'S MERGE OF LANE BUILDS-26 (2026-11-25), to
+async def test_the_surface_is_exactly_the_eighty_two_tools(tools):
+    """RENAMED AGAIN ON LANE BUILD-JMN26 (2026-11-25), to ``..._eighty_two_tools``:
+    two WRITES, ``linkedin_set_search_job_alert`` and its inverse
+    ``linkedin_unset_search_job_alert`` (census J 31), a job search's own alert
+    switch, beside the eighty. MEASURED off this branch's registry; the name
+    moved with the pin. A merge that brings another lane's tool re-measures it.
+
+    RENAMED AGAIN AT INTEGRATION 2'S MERGE OF LANE BUILDS-26 (2026-11-25), to
     ``..._eighty_tools``: that lane's three write-shaped tools beside the
     seventy-seven. MEASURED off the merged registry, not summed; the name moved
     with the pin. (Lane builds-26's branch kept the base's name while its count
@@ -1247,7 +1266,10 @@ async def test_the_surface_is_exactly_the_eighty_tools(tools):
     # lane's three write-shaped tools beside the seventy-seven, so the split
     # moves on its write side and the non-write count holds at fifty-five.
     # MEASURED off mcp.list_tools() on the merged tree, not summed.
-    assert len(tools) == 80
+    # EIGHTY-TWO ON LANE BUILD-JMN26 (2026-11-25): the search-alert pair, two
+    # WRITES, so the split moves on its write side and the non-write count holds
+    # at fifty-five. MEASURED off mcp.list_tools().
+    assert len(tools) == 82
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -1277,6 +1299,10 @@ async def test_the_surface_is_exactly_the_eighty_tools(tools):
         "linkedin_mark_company_interest",
         "linkedin_set_similar_jobs_alert",
         "linkedin_unset_similar_jobs_alert",
+        # 2026-11-25 (lane build-jmn26, census J 31): a job search's own
+        # alert switch, set and unset, each the other's inverse.
+        "linkedin_set_search_job_alert",
+        "linkedin_unset_search_job_alert",
         "linkedin_send_reply",
         "linkedin_withdraw_from_group",
         "linkedin_connect_from_profile",
@@ -1483,8 +1509,11 @@ async def test_the_surface_is_exactly_the_eighty_tools(tools):
     # holds; MEASURED on the merged tree. The total below is a SECOND COPY of
     # the first test's pin, which the merge carried at seventy-seven because
     # only this side had it -- moved to the measured eighty with that pin.
+    # FIFTY-FIVE STILL ON LANE BUILD-JMN26 (2026-11-25): its two tools are
+    # writes, so the non-write count holds and this second copy of the total
+    # moves to the measured eighty-two with the first test's pin.
     assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 55
-    assert len(tools) == 80
+    assert len(tools) == 82
 
 
 def test_the_read_that_was_nearly_named_a_write():
@@ -1590,6 +1619,10 @@ async def test_the_exemption_covers_only_the_names_on_it(tools):
         "linkedin_mark_company_interest",
         "linkedin_set_similar_jobs_alert",
         "linkedin_unset_similar_jobs_alert",
+        # 2026-11-25 (lane build-jmn26, census J 31): a job search's own
+        # alert switch, set and unset, each the other's inverse.
+        "linkedin_set_search_job_alert",
+        "linkedin_unset_search_job_alert",
         "linkedin_send_reply",
         "linkedin_withdraw_from_group",
         "linkedin_connect_from_profile",
@@ -2076,12 +2109,16 @@ async def test_server_info_stops_claiming_read_only_once_writes_are_on(monkeypat
         # hand like its seventeen siblings: ONE control on ONE admitted
         # settings page, by its exact label, behind the single-use grant.
         "set_admitted_setting",
+        # 2026-11-25 (census J 31, lane build-jmn26), typed here by hand: a
+        # job search's own alert switch, set and unset, each the other's inverse.
+        "set_search_job_alert",
         # THE EIGHTEENTH AND NINETEENTH, 2026-10-10 (census J 161, lane B4),
         # typed here by hand: the similar-jobs alert switch on one posting,
         # set and unset, each the other's inverse.
         "set_similar_jobs_alert",
         "unfollow_company",
         "unsave_job",
+        "unset_search_job_alert",
         "unset_similar_jobs_alert",
         # SIXTH, 2026-08-31. The first write here that acts on neither a job
         # nor a company Page: one named account setting, on a page measured
@@ -2164,12 +2201,16 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
         # THE EIGHTEENTH, 2026-10-10 (census P O17). Typed by hand, as this
         # list requires, by the lane that built it (lane S).
         "set_admitted_setting",
+        # 2026-11-25 (census J 31, lane build-jmn26), typed here by hand: a
+        # job search's own alert switch, set and unset, each the other's inverse.
+        "set_search_job_alert",
         # THE EIGHTEENTH AND NINETEENTH, 2026-10-10 (census J 161, lane B4),
         # typed here by hand: the similar-jobs alert switch on one posting,
         # set and unset, each the other's inverse.
         "set_similar_jobs_alert",
         "unfollow_company",
         "unsave_job",
+        "unset_search_job_alert",
         "unset_similar_jobs_alert",
         # THE TWELFTH, 2026-09-02, on his ruling "I want all capabilities".
         # It is the FIRST write here that can verify its own outcome by
@@ -2566,6 +2607,9 @@ async def test_the_server_instructions_name_every_write_that_ships():
         # TWENTY-ONE AND TWENTY-TWO AT THE INTEGRATION MERGE OF LANE B4 ONTO LANE B3 (2026-10-10):
         # lane B4's alert pair beside the twenty.
         21: "twenty-one", 22: "twenty-two",
+        # TWENTY-THREE AND TWENTY-FOUR ON LANE BUILD-JMN26 (2026-11-25): the
+        # search-alert pair beside the twenty-two; only twenty-four is reached.
+        23: "twenty-three", 24: "twenty-four",
     }
     assert f"{words[len(writes.PERFORMABLE)]} write" in text
     for action in writes.PERFORMABLE:

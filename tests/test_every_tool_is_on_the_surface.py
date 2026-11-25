@@ -447,4 +447,6 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # EIGHTY AT INTEGRATION 2'S MERGE OF LANE BUILDS-26, 2026-11-25: its three
     # write-shaped tools beside the seventy-seven, measured off the merged
     # registry, not summed.
-    assert len(_tool_names()) == 80
+    # EIGHTY-TWO AT LANE BUILD-JMN26 (2026-11-25): the search-alert pair, two
+    # writes, measured off this branch's registry.
+    assert len(_tool_names()) == 82
