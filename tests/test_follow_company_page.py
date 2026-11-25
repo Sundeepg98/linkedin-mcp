@@ -124,6 +124,17 @@ _TWO_BOUND_IN_MAIN_WORLD = _derive(
     '<section class="org-about">',
     count=1,
 )
+#: DERIVED -- a SECOND control in the main column bound to a DIFFERENT heading
+#: the column prints: two logical controls, not one Page's drawn twice. Still
+#: refused after the fixes lane's N 47 repair, which admits several bound
+#: controls only when they all name ONE heading.
+_DIFFERENT_HEADINGS_WORLD = _derive(
+    '<section class="org-about">',
+    '<div class="other-page"><h2>Otherway Example Ten</h2><button type="button" '
+    'aria-label="Follow Otherway Example Ten">Follow</button></div>'
+    '<section class="org-about">',
+    count=1,
+)
 #: DERIVED -- AS SESSION 9 MEASURED IT: the Page FOLLOWED, its own control
 #: relabelled the way the live load read it, and another entity's follow
 #: control in the main column.
@@ -264,13 +275,13 @@ async def test_the_measured_world_reads_not_following(over):
         (_OTHER_ID_WORLD, "DIFFERENT organisation id"),
         (_NO_LINK_WORLD, "name 0 distinct"),
         (_TWO_IN_MAIN_NONE_BOUND_WORLD, "picking by position"),
-        (_TWO_BOUND_IN_MAIN_WORLD, "picking by position"),
+        (_DIFFERENT_HEADINGS_WORLD, "picking by position"),
         (_UNBOUND_WORLD, "cannot be shown to be THIS"),
         (_SESSION_9_WORLD, "cannot be shown to be THIS"),
         (_PADDED_HEADING_WORLD, "page's own engine"),
     ],
     ids=["already-followed", "another-organisation", "no-identity-link",
-         "two-in-the-main-column-none-bound", "two-in-the-main-column-both-bound",
+         "two-in-the-main-column-none-bound", "a-second-control-bound-to-another-heading",
          "control-not-bound-to-heading", "as-session-9-measured", "heading-padded"],
 )
 async def test_every_derived_world_is_refused_and_says_why_without_quoting_the_page(
@@ -346,9 +357,9 @@ async def test_the_preview_reads_the_page_it_acts_on_and_withholds_the_landing(w
 
 @pytest.mark.parametrize(
     "world", [_FOLLOWED_WORLD, _OTHER_ID_WORLD, _NO_LINK_WORLD, _TWO_IN_MAIN_NONE_BOUND_WORLD,
-              _TWO_BOUND_IN_MAIN_WORLD, _UNBOUND_WORLD, _SESSION_9_WORLD, _PADDED_HEADING_WORLD],
+              _DIFFERENT_HEADINGS_WORLD, _UNBOUND_WORLD, _SESSION_9_WORLD, _PADDED_HEADING_WORLD],
     ids=["already-followed", "another-organisation", "no-identity-link",
-         "two-in-the-main-column-none-bound", "two-in-the-main-column-both-bound",
+         "two-in-the-main-column-none-bound", "a-second-control-bound-to-another-heading",
          "control-not-bound-to-heading", "as-session-9-measured", "heading-padded"],
 )
 async def test_the_preview_refuses_every_derived_world_and_the_refusal_quotes_nothing(
@@ -492,7 +503,7 @@ async def test_a_follow_runs_end_to_end_and_is_verified_off_manage_pages(writes_
     act = _navigator(world, FOLLOWED_COMPANY)
     receipt = await writes.perform(act, browser_page, grant)
     assert act.gotos == [_page_url(FOLLOWED_COMPANY), writes.FOLLOWED_PAGES_URL]
-    assert receipt["clicked"]["selector"] == dom.COMPANY_PAGE_BOUND_FOLLOW_CONTROL
+    assert receipt["clicked"]["selector"] == dom.COMPANY_PAGE_TOPCARD_FOLLOW_CONTROL
     assert receipt["clicked"]["error"] is None
     assert receipt["clicked"]["state_before"] == "not_following"
     assert receipt["clicked"]["on"] == _page_url(FOLLOWED_COMPANY)
@@ -658,6 +669,64 @@ async def test_a_follow_beside_another_control_lands_on_the_pages_own(writes_on,
                     source=world)
     world = _derive('aria-label="Follow Otherway Example Nine"',
                     'aria-label="Follow Otherway Example Nine" onclick="document.body.dataset.pressed=\'other\'"',
+                    source=world)
+    pages = {
+        _page_url(FOLLOWED_COMPANY): (world, _LANDED),
+        writes.FOLLOWED_PAGES_URL: (markup("manage_pages_following_hydrated"), writes.FOLLOWED_PAGES_URL),
+    }
+    block = await preview(_SPEC, target=FOLLOWED_COMPANY, navigator=_RedirectingNavigator(pages), page=browser_page)
+    grant = consume(block["to_confirm"], action=_ACTION, target=FOLLOWED_COMPANY)
+    act = _PressRecordingNavigator(pages)
+    receipt = await writes.perform(act, browser_page, grant)
+    assert receipt["clicked"]["error"] is None and receipt["clicked"]["clicks_made"] == 1
+    assert act.pressed[-1] == "own", act.pressed
+    assert receipt["performed"] is True and receipt["verified"] is True
+
+
+# ---------------------------------------------------------------------------
+# 10. THE PAGE'S OWN CONTROL DRAWN TWICE (the fixes lane, 2026-10-26)
+# ---------------------------------------------------------------------------
+#
+# MEASURED, session 10 (2026-10-10): UNFOLLOWED, the Page drew its OWN follow
+# control twice in the main column, both naming its own heading, and the gate
+# refused them as "several bound" -- recovered offline from the kept refusal
+# sentence (``_audit/2026-09-23-live-lane-session-1.md``, "After the close").
+# Several controls that all name ONE heading are one Page's control; the
+# press is the one alone in its own heading card -- the top card. Written
+# first and run red against the gate that required exactly one bound control
+# (the fixes lane's record, ``_audit/2026-10-26-fixes.md``, section 1).
+
+
+async def test_the_pages_own_control_drawn_twice_is_one_control(over):
+    reading = await _read(over, _TWO_BOUND_IN_MAIN_WORLD)
+    facts, state, why = writes.company_page_follow_verdict(reading, COMPANY_PAGE_FOLLOW_ID)
+    assert state == "not_following", why
+    assert facts["company"] == _SUBJECT
+    assert facts["follow_controls_in_main_column"] == 2
+    assert facts["controls_bound_to_the_pages_own_heading"] == 2
+    assert facts["distinct_headings_the_bound_controls_name"] == 1
+    assert facts["bound_controls_alone_in_their_heading_card"] == 1
+    _no_page_string(why)
+
+
+async def test_the_press_lands_on_the_top_card_when_the_pages_own_control_is_drawn_twice(over):
+    state, count, key, selector = await over(_TWO_BOUND_IN_MAIN_WORLD, _aim)
+    assert (state, count, key) == ("not_following", 1, "page-a1b2c3d4-top")
+    assert selector == dom.COMPANY_PAGE_TOPCARD_FOLLOW_CONTROL
+    assert _SUBJECT not in selector
+
+
+async def test_a_follow_on_the_drawn_twice_page_presses_the_top_card(writes_on, browser_page):
+    """End to end on the session-10 shape: the world's own handlers record
+    which of the two self-bound controls the press landed on."""
+    world = _derive(f"%22{COMPANY_PAGE_FOLLOW_ID}%22", f"%22{FOLLOWED_COMPANY}%22",
+                    source=_TWO_BOUND_IN_MAIN_WORLD)
+    world = _derive('componentkey="page-a1b2c3d4-top"',
+                    'componentkey="page-a1b2c3d4-top" onclick="document.body.dataset.pressed=\'own\'"',
+                    source=world)
+    world = _derive(f'<div class="dup"><button type="button" aria-label="Follow {_SUBJECT}">',
+                    f'<div class="dup"><button type="button" aria-label="Follow {_SUBJECT}" '
+                    'onclick="document.body.dataset.pressed=\'dup\'">',
                     source=world)
     pages = {
         _page_url(FOLLOWED_COMPANY): (world, _LANDED),

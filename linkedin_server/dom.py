@@ -2224,6 +2224,39 @@ COMPANY_PAGE_BOUND_FOLLOW_CONTROL = (
     " = //main//*[self::h1 or self::h2][not(ancestor::aside)]]"
 )
 
+#: THE PRESS'S AIM ON THE DUAL-DRAWING PAGE (the fixes lane's N 47 repair).
+#: Once UNFOLLOWED, the Page draws its OWN control TWICE in the main column,
+#: both bound to its own heading (DERIVED from the session-10 refusal
+#: sentence: ``2 controls ... 2 of them read it followed by a heading the
+#: Page prints there``). Several controls that are all bound to ONE heading
+#: are one logical control -- the Page's own -- and the one that is pressed
+#: is the one in the Page's TOP CARD: the bound control whose nearest
+#: ancestor holding a heading (at any depth, outside every aside) holds
+#: exactly ONE bound control. That discriminator never resolves the
+#: duplicate -- the duplicate sits outside the top card, so its nearest
+#: heading-holding ancestor is the column that holds BOTH -- and it is not a
+#: position or a "first match".
+#:
+#: MEASURED, offline, the fixes lane 2026-10-26: on the committed fixture it
+#: resolves to the top-card control (and only it) in the base world, the
+#: own-control-drawn-twice world and the another-entity-beside-it world; to
+#: nothing in the session-9 followed world and in every unbound world; to
+#: TWO controls when a second control is bound to a DIFFERENT heading, which
+#: the gate refuses. On the real Page-root capture held outside the tree
+#: (one own control in the main column, one in a header outside it, six in
+#: the aside) it resolves to exactly the one in the main column. A FIRST
+#: DRAFT tested for a heading that is a direct CHILD of the ancestor and
+#: resolved to nothing on that capture, whose Page heading sits deeper.
+COMPANY_PAGE_TOPCARD_FOLLOW_CONTROL = (
+    "xpath=//main//button[starts-with(@aria-label, 'Follow ')][not(ancestor::aside)]"
+    "[substring-after(@aria-label, 'Follow ')"
+    " = //main//*[self::h1 or self::h2][not(ancestor::aside)]]"
+    "[count(ancestor::*[.//h1 or .//h2][not(ancestor::aside)][1]"
+    "//button[starts-with(@aria-label, 'Follow ')][not(ancestor::aside)]"
+    "[substring-after(@aria-label, 'Follow ')"
+    " = //main//*[self::h1 or self::h2][not(ancestor::aside)]]) = 1]"
+)
+
 #: The Page's own people-search link -- LinkedIn draws its employee count as a
 #: link whose query names the Page by numeric id under ``currentCompany``. It
 #: is what ties the page the browser LANDED on to the numeric id a grant was
@@ -2293,11 +2326,14 @@ async def read_company_page_follow(page: Any) -> dict[str, Any]:
     """The Page root's own follow control, the name it binds to, and the id.
 
     COUNTS, ONE NAME AND DIGITS -- NOTHING ELSE CROSSES BACK. ``subject`` is the
-    Page's own name, returned only when exactly one follow control in the main
-    column binds to exactly one of the column's headings; it is the field a
-    human checks in the confirm block, as a posting's employer is. Accessible
-    names that did NOT bind are never returned: on the measured page they
-    name six other organisations.
+    Page's own name, returned only when the follow controls in the main column
+    that bind to a heading all name ONE of that column's headings -- several
+    such controls are one logical control, the Page's own, drawn more than
+    once on an unfollowed Page (the fixes lane's N 47 repair); several naming
+    DISTINCT headings are several logical controls and there is no subject.
+    It is the field a human checks in the confirm block, as a posting's
+    employer is. Accessible names that did NOT bind are never returned: on
+    the measured page they name six other organisations.
 
     A FAILED READ IS REPORTED BY ITS TYPE AND NEVER ITS MESSAGE, and nothing is
     logged but the type. A Playwright error can quote what it was looking at.
@@ -2306,7 +2342,9 @@ async def read_company_page_follow(page: Any) -> dict[str, Any]:
         "follow_controls": 0,
         "follow_controls_anywhere": 0,
         "bound_controls": 0,
+        "bound_headings": 0,
         "bound_in_page": 0,
+        "topcard_in_page": 0,
         "subject": None,
         "headings_read": 0,
         "identity_links": 0,
@@ -2346,12 +2384,25 @@ async def read_company_page_follow(page: Any) -> dict[str, Any]:
             if named and named in names:
                 bound.append(named)
         out["bound_controls"] = len(bound)
-        if len(bound) == 1:
+        out["bound_headings"] = len(set(bound))
+        # SEVERAL SELF-BOUND CONTROLS ARE ONE CONTROL (the fixes lane's N 47
+        # repair): the subject is the ONE distinct heading the bound controls
+        # all name. Zero bound -> no subject. Several DISTINCT headings ->
+        # more than one logical control, so no subject either.
+        if len(set(bound)) == 1:
             out["subject"] = bound[0]
         # THE SAME BINDING IN THE PAGE'S OWN ENGINE (2026-10-10): the press
         # selector, counted. The verdict requires it to agree with the above.
         out["bound_in_page"] = as_count(
             await page.locator(COMPANY_PAGE_BOUND_FOLLOW_CONTROL).count()
+        )
+        # THE TOP-CARD CONTROL THE PRESS LANDS ON (the fixes lane's N 47
+        # repair): the bound control whose own heading-card holds exactly one
+        # of them. Measured separately because it is a DIFFERENT aim than
+        # ``bound_in_page`` -- on a dual-drawn page ``bound_in_page`` counts
+        # two while the top-card aim resolves one.
+        out["topcard_in_page"] = as_count(
+            await page.locator(COMPANY_PAGE_TOPCARD_FOLLOW_CONTROL).count()
         )
 
         links = page.locator(COMPANY_PAGE_IDENTITY_LINKS)
