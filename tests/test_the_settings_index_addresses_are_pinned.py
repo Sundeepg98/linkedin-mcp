@@ -109,7 +109,10 @@ _MEASURED_VERDICTS: tuple[tuple[str, bool, str], ...] = (
         "FORBIDDEN SUBSTRING '/hibernate-account'",
     ),
     ("/mypreferences/d/language-for-translation", False, "NO PATTERN MATCHES"),
-    ("/mypreferences/d/premium-manage-account", False, "NO PATTERN MATCHES"),
+    # ADMITTED 2026-11-25 (lane admit26, a named settings page in its own
+    # commit, READ-PAST-AN-ACT-SUBSTRING's second clause): its own line; no
+    # substring is involved, so no exemption.
+    ("/mypreferences/d/premium-manage-account", True, "allowlist match"),
     (
         "/mypreferences/d/settings/autoplay-videos",
         False,
@@ -292,13 +295,15 @@ def test_a_settings_family_pattern_admits_exactly_these_and_no_more(monkeypatch)
     }
     newly_admitted = now_admitted - already_admitted
 
-    # THE MEASURED BLAST RADIUS -- three addresses nobody has ever ruled on,
+    # THE MEASURED BLAST RADIUS -- two addresses nobody has ever ruled on,
     # each refused today only by allowlist miss (NO PATTERN MATCHES in
-    # _MEASURED_VERDICTS above), that this one-line edit would silently open:
+    # _MEASURED_VERDICTS above), that this one-line edit would silently open.
+    # THREE until 2026-11-25: /mypreferences/d/premium-manage-account was the
+    # third, and lane admit26 admitted it by name, so it is already admitted
+    # here and the family pattern no longer opens it.
     expected_blast_radius = {
         "/mypreferences/d/demographic-info-copy",
         "/mypreferences/d/language-for-translation",
-        "/mypreferences/d/premium-manage-account",
     }
     assert newly_admitted == expected_blast_radius, (
         f"the family pattern newly admitted {sorted(newly_admitted)!r}, "
@@ -339,8 +344,9 @@ def test_the_denylisted_addresses_survive_the_widened_allowlist(monkeypatch):
         if not is_read and gate != "NO PATTERN MATCHES"
     ]
     # Sanity on the fixture itself: this must be the 13 FORBIDDEN SUBSTRING
-    # rows (16 refused rows total, minus the 3 NO-PATTERN-MATCHES rows that
-    # test 6 shows falling). A file that silently lost a row here would make
+    # rows (15 refused rows total, minus the 2 NO-PATTERN-MATCHES rows that
+    # test 6 shows falling; 3 until lane admit26 admitted the Premium account
+    # page by name). A file that silently lost a row here would make
     # the loop below assert nothing about it. 16 of 19 until 2026-10-10, when
     # lane A admitted categories/ads and unfollowed by name; 14 until
     # 2026-11-25, when lane admit26 admitted categories/privacy by name.

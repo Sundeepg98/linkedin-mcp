@@ -2702,6 +2702,15 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # own address. Each row's own settings page is the capture's to spell and
     # a later admission's, one name at a time.
     re.compile(r"^https://www\.linkedin\.com/mypreferences/d/categories/privacy/?$"),
+    # His Premium account settings page (census P N22, "Subscriptions and
+    # payments", a read), drawn on the Premium hub as 'Manage Premium account'
+    # (`completeness-annotations.tsv`, P N22's cell, captured 2026-09-23). It
+    # trips no substring -- allowlist silence alone -- and it is a page below
+    # the settings index, so it goes in by name, in its own commit. Every
+    # control on it that changes or cancels the subscription is a purchase
+    # act, never built (PURCHASES-STAY-MANUAL), and the press gate refuses it;
+    # a reader returns the plan and its dates, never a payment detail.
+    re.compile(r"^https://www\.linkedin\.com/mypreferences/d/premium-manage-account/?$"),
 )
 
 #: Substrings that must never appear in a navigation target, checked before

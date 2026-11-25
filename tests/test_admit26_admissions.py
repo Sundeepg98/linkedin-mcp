@@ -283,6 +283,27 @@ ADMISSIONS = (
                     "attribute -- the allowlist alone refuses it"),
         ),
     ),
+    Admission(
+        key="premium-manage-account",
+        rows=("P N22",),
+        address=f"{B}/mypreferences/d/premium-manage-account/",
+        excused=frozenset(),
+        siblings=(
+            Sibling(f"{B}/mypreferences/d/premium-manage-account/?x=1", None,
+                    "a QUERY"),
+            Sibling(f"{B}/mypreferences/d/premium-manage-account/cancel/", None,
+                    "a SUB-PATH naming a purchase act (PURCHASES-STAY-MANUAL)"),
+            Sibling(f"{B}/mypreferences/d/premium-manage-accountx", None,
+                    "a longer word"),
+            Sibling(f"{B}/manage/purchases-payments/purchases/", None,
+                    "his purchase history: drawn, not admitted here"),
+            Sibling(f"{B}/premium/products/", None, "a purchase page"),
+            Sibling(f"{B}/mypreferences/d/language-for-translation", None,
+                    "another settings page nothing here names"),
+            Sibling(f"{B}/mypreferences/d/demographic-info-copy", None,
+                    "a settings page recording a sensitive attribute"),
+        ),
+    ),
 )
 
 KEYS = [a.key for a in ADMISSIONS]
