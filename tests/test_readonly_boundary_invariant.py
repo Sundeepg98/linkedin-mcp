@@ -1958,7 +1958,12 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # second clause (its 2026-08-30 refusal was a wave's derived gate, and the
     # badge is a passive cost the ruling names), no exemption -- every other
     # key byte-identical, the tree minus that line hashing to 24128eed2c1c5f07.
-    "_ALLOWED_URL_PATTERNS": "95644331b7d9312a",
+    #
+    # 95644331b7d9312a until lane admit26's fourth commit: one anchored line,
+    # his Data privacy category page, a named settings page in its own commit,
+    # paired with one exemption below; the tree minus that line and that entry
+    # hashes to the prior pins on every key.
+    "_ALLOWED_URL_PATTERNS": "63c43b5e8dd22259",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     # 419e64a3cd92ec7e until the same REVIEW: commit: a third entry, excusing
     # exactly {"/follow"} for exactly the anchored follower-list address.
@@ -1979,7 +1984,10 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # excusing exactly {"/edit/"} -- the one substring each address trips,
     # measured -- for exactly one of his own profile editors' anchored
     # addresses; the forbidden tuple is unchanged at 33.
-    "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "08c29a59104b680c",
+    # 08c29a59104b680c until lane admit26's fourth commit: one more, excusing
+    # exactly {"/mypreferences/d/categories/"} for exactly his Data privacy
+    # category page.
+    "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "56fec205ec8de3fe",
     "_FORBIDDEN_URL_SUBSTRINGS": "b0291a66ec9bd51e",
     # 23aece1483afdee9 until 2026-09-19. See the re-freeze note above: eleven
     # detector classes added, zero removed, and the direction is pinned by

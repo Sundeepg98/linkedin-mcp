@@ -250,6 +250,39 @@ ADMISSIONS = (
                     "a TRAVERSAL onto a third party"),
         ),
     ),
+    # ------------------------------------------------------------------
+    # NAMED SETTINGS PAGES (ONE-NAMED-SETTINGS-PAGE-AT-A-TIME as
+    # NAMED-SETTINGS-PAGES-RATIFIED reads it: one page by its exact address,
+    # in its own commit).
+    Admission(
+        key="privacy-category",
+        rows=("J 87", "N 96", "N 143", "P O22", "P P3"),
+        address=f"{B}/mypreferences/d/categories/privacy",
+        excused=frozenset({"/mypreferences/d/categories/"}),
+        siblings=(
+            Sibling(f"{B}/mypreferences/d/categories/",
+                    "/mypreferences/d/categories/", "the category root"),
+            Sibling(f"{B}/mypreferences/d/categories/account",
+                    "/mypreferences/d/categories/", "the account category"),
+            Sibling(f"{B}/mypreferences/d/categories/sign-in-and-security",
+                    "/mypreferences/d/categories/",
+                    "the security category -- a surface the ruling excludes"),
+            Sibling(f"{B}/mypreferences/d/categories/profile-visibility",
+                    "/mypreferences/d/categories/", "the visibility category"),
+            Sibling(f"{B}/mypreferences/d/categories/notifications",
+                    "/mypreferences/d/categories/", "the notifications category"),
+            Sibling(f"{B}/mypreferences/d/categories/privacy?x=1",
+                    "/mypreferences/d/categories/", "a QUERY"),
+            Sibling(f"{B}/mypreferences/d/categories/privacy/search-history",
+                    "/mypreferences/d/categories/", "a SUB-PATH: each page the "
+                    "category lists is admitted by its own name or not at all"),
+            Sibling(f"{B}/mypreferences/d/categories/privacyx",
+                    "/mypreferences/d/categories/", "a longer leaf"),
+            Sibling(f"{B}/mypreferences/d/demographic-info-copy", None,
+                    "a page the category links that records a sensitive "
+                    "attribute -- the allowlist alone refuses it"),
+        ),
+    ),
 )
 
 KEYS = [a.key for a in ADMISSIONS]

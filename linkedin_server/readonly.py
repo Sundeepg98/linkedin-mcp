@@ -2684,6 +2684,24 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # after, as `linkedin_connections` does. Every control stays refused by the
     # press gate.
     re.compile(r"^https://www\.linkedin\.com/mynetwork/?$"),
+    # ----------------------------------------------------------------------
+    # LANE ADMIT26, NAMED SETTINGS PAGES -- each by its exact address, in its
+    # own commit, as NAMED-SETTINGS-PAGES-RATIFIED reads ONE-NAMED-SETTINGS-
+    # PAGE-AT-A-TIME ("One named settings page per commit is within the
+    # ruling"), with HIS-OWN-SETTINGS-NOT-OUTWARD ("Settings pages are still
+    # admitted one by name"). Never the family, never a wildcard.
+    #
+    # His Data privacy category page (census J 87, N 96, N 143, P O22, P P3),
+    # drawn on the settings index (`completeness-annotations.tsv`, the index
+    # captured 2026-09-23). It trips "/mypreferences/d/categories/", whose
+    # recorded ground (42e90e3, 2026-08-30) is that "the category pages carry
+    # the toggles" -- a write; reading the page presses none of them, exactly
+    # the reading lane A gave the advertising-data category. It is not the
+    # credential or security category (`/categories/sign-in-and-security`
+    # stays refused), and the sensitive pages it links stay refused by their
+    # own address. Each row's own settings page is the capture's to spell and
+    # a later admission's, one name at a time.
+    re.compile(r"^https://www\.linkedin\.com/mypreferences/d/categories/privacy/?$"),
 )
 
 #: Substrings that must never appear in a navigation target, checked before
@@ -3191,6 +3209,12 @@ _FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS: tuple[
             r"[0-9]{1,20}/?$"
         ),
         frozenset({"/edit/"}),
+    ),
+    # His Data privacy category page, a named settings page in its own commit,
+    # tripping "/mypreferences/d/categories/" and nothing else.
+    (
+        re.compile(r"^https://www\.linkedin\.com/mypreferences/d/categories/privacy/?$"),
+        frozenset({"/mypreferences/d/categories/"}),
     ),
 )
 

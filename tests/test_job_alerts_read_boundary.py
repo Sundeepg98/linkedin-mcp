@@ -292,7 +292,10 @@ def test_this_widening_bought_no_forbidden_substring_exemption():
     # add-an-Experience form, the About form, the contact-info form, the
     # secondary-language editor, one skill's form), on
     # PROFILE-EDITOR-ADDRESSES-ALLOWED. None is an alert address.
-    assert len(readonly._FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS) == 15
+    # 15 UNTIL lane admit26's fourth commit: ONE more, excusing
+    # "/mypreferences/d/categories/" for his Data privacy category page alone,
+    # a named settings page. Not an alert address.
+    assert len(readonly._FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS) == 16
     for url in (CREATE_URL, DELETE_URL, FREQUENCY_URL):
         assert url not in readonly._FORBIDDEN_SUBSTRING_EXEMPTIONS
 
