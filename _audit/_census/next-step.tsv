@@ -435,7 +435,7 @@ P G2	P	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 P G3	P	W	R3	SIBLING:lane-U	INFERRED	linkedin_server/uploads.py ; _audit/2026-09-28-rulings-build-classes.md::`FILE-UPLOAD-UNSANCTIONED` is therefore a stale label.
 P G4	P	W	R3	CAPTURE:admit-in-me-details-featured	INFERRED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/in/me/details/featured/ ; RULING:SELF-PROFILE-EDITS-NOT-OUTWARD
 P G5	P	W	R3	CAPTURE:admit-in-me-details-featured	INFERRED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/in/me/details/featured/ ; RULING:SELF-PROFILE-EDITS-NOT-OUTWARD
-P H1	P	W	R3	ADMIT:https://www.linkedin.com/in/me/opportunities/services/education/	NAMED	_audit/_census/profile.md::/opportunities/services/education/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
+P H1	P	W	R3	CAPTURE:admit-in-me-opportunities-services-education	NAMED	_audit/_census/profile.md::/opportunities/services/education/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
 P H2	P	W	R3	PRECONDITION:a Service Page	NAMED	_audit/_census/write-classes.tsv::queued:NO-SERVICE-PAGE
 P H3	P	W	R3	PRECONDITION:a Service Page	NAMED	_audit/_census/write-classes.tsv::queued:NO-SERVICE-PAGE
 P H4	P	W	R3	PRECONDITION:a Service Page	NAMED	_audit/_census/write-classes.tsv::queued:NO-SERVICE-PAGE

@@ -196,6 +196,35 @@ ADMISSIONS = (
         ),
         spellings=(f"{B}/in/me/details/skills/edit/forms/1234567890/",),
     ),
+    # ------------------------------------------------------------------
+    # ALLOWLIST SILENCE (READ-PAST-AN-ACT-SUBSTRING's second clause): no
+    # substring crossed, so `excused` is empty and the exemption table must
+    # hold nothing for any of these.
+    Admission(
+        key="open-to-services",
+        rows=("P H1",),
+        address=f"{B}/in/me/opportunities/services/education/",
+        excused=frozenset(),
+        siblings=(
+            Sibling(f"{B}/in/me/opportunities/services/education/?x=1", None,
+                    "a QUERY"),
+            Sibling(f"{B}/in/me/opportunities/services/education/next/", None,
+                    "a SUB-PATH: a step inside the flow"),
+            Sibling(f"{B}/in/me/opportunities/services/", None,
+                    "the family below it"),
+            Sibling(f"{B}/in/me/opportunities/", None, "the Open-to root"),
+            Sibling(f"{B}/in/someone-else/opportunities/services/education/",
+                    None, "another member's page"),
+            Sibling(f"{B}/in/me/opportunities/volunteering/education/", None,
+                    "the volunteering page, drawn only with his own profile "
+                    "id in its query, so not admitted here"),
+            Sibling(f"{B}/in/me/opportunities/job-opportunities/edit/",
+                    "/edit/", "the Open To Work editor's inferred address: "
+                    "the editor has no address at all"),
+            Sibling(f"{B}/in/me/opportunities/hiring/education/", None,
+                    "the #Hiring item, a broadcast by nature"),
+        ),
+    ),
 )
 
 KEYS = [a.key for a in ADMISSIONS]

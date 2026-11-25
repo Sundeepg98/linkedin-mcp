@@ -1946,7 +1946,13 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # the tree minus exactly the lane admit26 block and hashes to the prior pin
     # on every key; only this key and the pattern-exemption key moved. Record:
     # _audit/2026-11-25-admit26.md.
-    "_ALLOWED_URL_PATTERNS": "43f0f6f42005e66a",
+    #
+    # 43f0f6f42005e66a until lane admit26's second commit: one anchored line,
+    # his "Open to" services page, refused by allowlist silence alone
+    # (READ-PAST-AN-ACT-SUBSTRING's second clause), no exemption -- the
+    # exemption tables and every other key are byte-identical, and the tree
+    # minus that line hashes to 43f0f6f42005e66a.
+    "_ALLOWED_URL_PATTERNS": "24128eed2c1c5f07",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     # 419e64a3cd92ec7e until the same REVIEW: commit: a third entry, excusing
     # exactly {"/follow"} for exactly the anchored follower-list address.

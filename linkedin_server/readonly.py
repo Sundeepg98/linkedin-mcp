@@ -2641,6 +2641,21 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(r"^https://www\.linkedin\.com/in/me/edit/forms/contact-info/new/?$"),
     re.compile(r"^https://www\.linkedin\.com/in/me/edit/secondary-language/?$"),
     re.compile(r"^https://www\.linkedin\.com/in/me/details/skills/edit/forms/[0-9]{1,20}/?$"),
+    # ----------------------------------------------------------------------
+    # LANE ADMIT26, CONTINUED -- PAGES REFUSED BY ALLOWLIST SILENCE ALONE,
+    # admitted on READ-PAST-AN-ACT-SUBSTRING's second clause ("admitted the
+    # same way when a row needs it and no ruling holds it"). No substring is
+    # crossed, so no exemption is involved.
+    #
+    # His "Open to" services page (census P H1), an anchor on his own profile
+    # ('Showcase your services ... Add services', tracked
+    # `profile_topcard_hydrated.html`), drawn with no query. The flow behind
+    # it is entered by a PRESS, which the press gate refuses; the Open To Work
+    # sibling's entry fires `saveAndFetchNextStep`, so the capture stops at
+    # the first control (lane L7's capture C3). NOT HERE: the volunteering
+    # page beside it, which LinkedIn draws only with his own profile id in its
+    # query (the record, section 5).
+    re.compile(r"^https://www\.linkedin\.com/in/me/opportunities/services/education/?$"),
 )
 
 #: Substrings that must never appear in a navigation target, checked before
