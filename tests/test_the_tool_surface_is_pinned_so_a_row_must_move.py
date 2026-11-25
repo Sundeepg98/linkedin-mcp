@@ -121,6 +121,10 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_my_activity_items": (),
     "linkedin_my_applications": ("limit",),
     "linkedin_my_articles": (),
+    # 2026-10-10, lane B1 (child lb1-followers), merged by lane build-p26 on
+    # 2026-11-25: his own follower list, each follower a people record
+    # beside its relation. Census P L2b.
+    "linkedin_my_followers_list": (),
     "linkedin_my_profile": ("details", "include_skills"),
     "linkedin_new_messages": (),
     "linkedin_newsletter_subscriptions": (),
@@ -702,7 +706,20 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: PARAMETERS** -- that lane's three refusing writes and their nine parameters
 #: (three each) beside the seventy-seven and 119, counted on the merged
 #: registry, never summed.
-PINNED_TOOL_COUNT = 80
+#: **RE-PINNED 2026-10-10 AT 62 TOOLS AND 97 PARAMETERS on lane B1's branch
+#: (child lb1-followers): one READ and no parameter --
+#: `linkedin_my_followers_list()`, his own follower list loaded once at the
+#: address `readonly.py` admits for census `P L2b`, read as counts and
+#: relations only (how many of the rows he follows back) over the live lane's
+#: session-2 skeleton.** THE CENSUS DECISION is the lane lead's: the census
+#: row `P L2b` is banked by the lane B1 lead at merge, not in this commit. Never
+#: fired live.
+#: **AT LANE BUILD-P26'S MERGE OF THAT BRANCH, 2026-11-25: 81 TOOLS AND 128
+#: PARAMETERS** -- `linkedin_my_followers_list()`, one READ and no
+#: parameter, beside the eighty and 128, counted on the merged registry,
+#: never summed. THE CENSUS DECISION, in lane build-p26's census commit:
+#: `P L2b` GAP -> COVERED-UNFIRED (`_audit/2026-11-25-build-p26.md`).
+PINNED_TOOL_COUNT = 81
 PINNED_PARAMETER_COUNT = 128
 
 

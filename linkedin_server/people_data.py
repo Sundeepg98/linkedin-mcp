@@ -665,6 +665,11 @@ class Category:
 #: ``J 110``, ruling THIRD-PARTY-TEXT-AT-RUNTIME): its answer carries an
 #: organisation's prose in an :class:`OrganisationProse` record, read off ONE
 #: page, the Page root, with no cursor.
+#: ``linkedin_my_followers_list`` was built on 2026-10-10 (lane B1's child
+#: lb1-followers, census ``P L2b``, on the lane lead's ruling that the row's
+#: payload is WHO) and joined at lane build-p26's merge of that branch,
+#: 2026-11-25: the members on the first render of his own follower list, each
+#: beside whether he follows that member back, no opt-in.
 PEOPLE_TOOLS: frozenset[str] = frozenset(
     {
         "linkedin_group_members",
@@ -683,6 +688,7 @@ PEOPLE_TOOLS: frozenset[str] = frozenset(
         # insight cards, each category's label a Category record. It builds
         # records, so every rule for a people reader binds it: one page.
         "linkedin_company_people_insights",
+        "linkedin_my_followers_list",
     }
 )
 
