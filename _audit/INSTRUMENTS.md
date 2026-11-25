@@ -12451,7 +12451,7 @@ refused first, so it could never be the one to fire. It was moved, not kept.
 
 | path | shown failing by |
 |---|---|
-| `tests/test_apply_answers.py` -- the shared JSON answer bank is found by its runtime order, reads only confirmed, answers only a wording its class lists in its own kind, platform and option set, never serves an expired answer or lets a never-auto one fire unseen, refuses a malformed file whole with no value in the refusal, imports Naukri's cache as drafts only, and is read fresh | mutations A1-A35 of the record's section 2.6, each red on its named test |
+| `tests/test_apply_answers.py` -- the shared JSON answer bank is found by its runtime order (never by `JOBHUNT_HOME`, which keeps jobcore's meaning), reads only confirmed, answers only a wording its class lists in its own kind, platform and option set, never serves an expired answer or lets a never-auto one fire unseen, refuses a malformed file whole with no value in the refusal, imports Naukri's cache as drafts only, and is read fresh | mutations A1-A37 of the record's section 2.6, each red on its named test; its jobcore parity test runs jobcore's own `config.locate` wherever jobcore's source sits beside the checkout |
 | `tests/test_apply_walk.py` -- the walker refuses every unmeasured shape naming what it saw, stops on any question his bank cannot answer, never presses Submit in a dry walk and presses it once on confirm, opens no flow before its inverse is measured, and reads the Draft tab on its real skeleton | mutations W1-W43, each red on its named test |
 
 ### 99.3 DECLARED DISPOSABLE
