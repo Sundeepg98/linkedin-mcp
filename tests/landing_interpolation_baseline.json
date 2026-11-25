@@ -45,6 +45,7 @@
     "writes.py:_render:spec.url_template.format(target=url_target_of(spec, observat": "SERVER_CONSTRUCTED",
     "writes.py:assert_write_url:url": "ASKED_FOR",
     "writes.py:assert_write_url:url#2": "ASKED_FOR",
-    "writes.py:assert_write_url:url#3": "ASKED_FOR"
+    "writes.py:assert_write_url:url#3": "ASKED_FOR",
+    "writes.py:observe:landing.withheld(landed)": "WITHHELD"
   }
 }

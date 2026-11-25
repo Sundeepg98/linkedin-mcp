@@ -6167,22 +6167,23 @@ async def observe(
         # caller's own arguments named FIRST: LinkedIn may serve another search
         # (its AI search, a rewritten query), and a switch on any other search
         # would set somebody's idea of his alert, not his.
+        #
+        # THE LANDING VETOES BY RAISING, AND NOTHING DERIVED FROM IT IS BOUND
+        # TO A NAME: a name bound from the landing is tainted module-wide for
+        # ``tests/test_navigation_is_never_derived.py``, whose walk is per
+        # module and in document order -- measured on this lane's first CI
+        # run, where one such binding tainted ``url`` in ``_load``.
         url = str(spec.url_template or "").format(target=target)
         landed = await _load(navigator, page, url, surface="job search")
-        on_search = search_alert_switch.landed_on_search(landed, target)
-        switch, state, why = await search_alert_switch.read_state(page)
-        facts = {
-            "landed_on_the_search_named": on_search,
-            "alert_switch": switch,
-        }
-        if not on_search:
-            state, why = (
-                UNKNOWN,
+        if not search_alert_switch.landed_on_search(landed, target):
+            raise WriteAttemptError(
                 "the page that loaded is not the job search these keywords and "
-                "this location name, so its switch is not his alert for it. THE "
-                "LANDING IS WITHHELD rather than named; what is safe to say "
-                f"about it -- {landing.withheld(landed)}.",
+                "this location name, so its switch is not his alert for it and "
+                "nothing was minted. THE LANDING IS WITHHELD rather than named; "
+                f"what is safe to say about it -- {landing.withheld(landed)}."
             )
+        switch, state, why = await search_alert_switch.read_state(page)
+        facts = {"alert_switch": switch}
         return _record(
             spec,
             target=target,
@@ -10407,7 +10408,11 @@ async def _verify_after(
         reading = await job_alert_switch.read_switch(page)
         state, why = job_alert_switch.verification_verdict(reading, str(spec.to_state))
         return (state, why + left, url)
-    if spec.action in search_alert_switch.ACTIONS:
+    if spec.action in ("set_search_job_alert", "unset_search_job_alert"):
+        # THE TWO NAMES ARE WRITTEN OUT, as every branch here writes its
+        # own: ``tests/test_unverifiable_outcomes.py`` reads this function
+        # for literal action names, and a branch keyed on a module constant
+        # is one it cannot see (measured on this lane's first CI run).
         # FIRST, WHAT THE PRESS LEFT IN PLACE -- counts and the two closed
         # words only, and it decides nothing; then A FRESH RENDER of the same
         # search, whose switch carries both states, so its reading is strong
