@@ -173,8 +173,13 @@ class FixtureNavigator:
         self.answered: list[str] = []
         self._visits: dict[str, int] = {}
         self._routed: set[int] = set()
+        self.named: list[bool] = []
 
-    async def goto(self, page, url: str) -> str:
+    async def goto(self, page, url: str, *, named_profile: bool = False) -> str:
+        # ``named_profile`` (2026-11-24, lane builds-26): the refusing
+        # endorsement previews load a named profile through the second door,
+        # which asks the navigator for it by keyword; recorded, never routed.
+        self.named.append(named_profile)
         self.gotos.append(url)
         entry = self.pages.get(url)
         if entry is None:
@@ -782,6 +787,11 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         # set_open_to_work shape -- the stage move on a saved job (census
         # J 54), whose control has never been captured.
         "set_tracker_stage",
+        # LANE BUILDS-26, the same change: the endorsement pair (census P E4 /
+        # N 111 and P E5 / N 113), sanctioned and NOT performable -- the
+        # per-skill control has never been captured.
+        "endorse_skill",
+        "withdraw_endorsement",
     }
     # THREE UNTIL 2026-08-25, four until 2026-08-30, five since. This line read
     # ``{"save_job", "unsave_job", "unfollow_company"}``.
@@ -964,6 +974,8 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         # table names -- a sanctioned action that cannot perform, with its
         # own refusal naming the missing capture.
         "set_tracker_stage",
+        "endorse_skill",
+        "withdraw_endorsement",
     }
     # AND EVERY ONE OF THEM MUST SAY WHY, individually. The dict is keyed by
     # action, so a fourteenth spec that is not performable and writes no
@@ -990,7 +1002,9 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
     # REFILLED 2026-11-24 (lane builds-26), by exactly the arrival the
     # paragraph above says must come here and decide: a sanctioned-and-
     # refusing action, its refusal itemised by name.
-    assert set(writes._NINE_REFUSALS) == {"set_tracker_stage"}, sorted(writes._NINE_REFUSALS)
+    assert set(writes._NINE_REFUSALS) == {
+        "set_tracker_stage", "endorse_skill", "withdraw_endorsement",
+    }, sorted(writes._NINE_REFUSALS)
     for action in sanctioned_actions - writes.PERFORMABLE:
         if action == "set_open_to_work":
             continue  # its refusal predates this dict and lives inline.
@@ -1067,8 +1081,10 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
     # "unaddressed" with "unperformable" while the two happened to agree.
     assert surfaceless == {
         "set_open_to_work",
-        # LANE BUILDS-26, 2026-11-24: refusing, so it names no write surface.
+        # LANE BUILDS-26, 2026-11-24: refusing, so each names no write surface.
         "set_tracker_stage",
+        "endorse_skill",
+        "withdraw_endorsement",
     }
     # AND THE ONE THAT LEFT, asserted rather than left as an absence -- the
     # same treatment apply got when its surface was measured.
@@ -1397,7 +1413,15 @@ async def test_exactly_the_performable_writes_are_registered():
     #       refuses because the stage move -- an item in the row's 'Overflow
     #       menu' -- has never been captured: the one populated tracker
     #       capture draws that menu closed with an empty item slot.
-    assert grant_incapable == ["linkedin_set_tracker_stage"], (
+    #   linkedin_endorse_skill / linkedin_withdraw_endorsement  read the
+    #       profile he names through the named-profile door and count the
+    #       endorse-shaped buttons; refuse because no capture holds the
+    #       per-skill control in either state.
+    assert grant_incapable == [
+        "linkedin_endorse_skill",
+        "linkedin_set_tracker_stage",
+        "linkedin_withdraw_endorsement",
+    ], (
         "these write tools are registered and cannot act: %s. That is "
         "permitted -- see the 2026-08-30 argument above -- but it is no "
         "longer true of nothing, so say here which surface each one reads "
@@ -1483,8 +1507,11 @@ _UNMEASURED_REVERSIBILITY = {
     # 2026-10-10 (lane NP). Whether pressing a measured ON name gives the
     # reaction back has never been observed: the live proof reads it.
     "withdraw_reaction",
-    # 2026-11-24 (lane builds-26). No stage move has ever been made or seen.
+    # 2026-11-24 (lane builds-26). No stage move has ever been made or seen,
+    # and no endorsement given or withdrawn has ever been seen.
     "set_tracker_stage",
+    "endorse_skill",
+    "withdraw_endorsement",
 }
 
 REVERSIBILITY_CLASS = {
@@ -1536,6 +1563,8 @@ REVERSIBILITY_CLASS = {
     "withdraw_reaction": "STILL-UNKNOWN",
     # 2026-11-24 (lane builds-26): see _UNMEASURED_REVERSIBILITY.
     "set_tracker_stage": "STILL-UNKNOWN",
+    "endorse_skill": "STILL-UNKNOWN",
+    "withdraw_endorsement": "STILL-UNKNOWN",
 }
 
 #: Which actions have had their reversibility MEASURED. Split out from the
@@ -1568,6 +1597,8 @@ REVERSIBILITY_MEASURED = {
     "set_admitted_setting": False,
     "withdraw_reaction": False,
     "set_tracker_stage": False,
+    "endorse_skill": False,
+    "withdraw_endorsement": False,
 }
 
 def test_the_two_reversibility_tables_agree_with_each_other():

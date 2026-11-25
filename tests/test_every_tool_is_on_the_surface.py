@@ -405,4 +405,5 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # writes beside the seventy, measured off the merged registry, not summed.
     # SEVENTY-THREE AT LANE BUILDS-26 (2026-11-24): linkedin_set_tracker_stage,
     # a write-shaped tool that refuses -- measured off the registry.
-    assert len(_tool_names()) == 73
+    # SEVENTY-FIVE at its second commit: the endorsement pair, refusing.
+    assert len(_tool_names()) == 75

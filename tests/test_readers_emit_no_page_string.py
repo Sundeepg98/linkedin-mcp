@@ -1341,6 +1341,19 @@ WHAT_WOULD_DRIVE_IT: dict[str, str] = {
         "are states and sentences of counts and the package's words, so a "
         "drive would come back clean."
     ),
+    # LANE BUILDS-26, 2026-11-24: a thin wrapper over the reader above.
+    "writes:_read_tracker_stage_row": (
+        "WORDS: it is _read_saved_state for one job id plus three facts built "
+        "from that state and the caller's own id, so it fails to reach its "
+        "success path on the planted page for exactly _read_saved_state's "
+        "reason -- no tab count parses from the plant. Its success path runs "
+        "in a headless browser over the tracked tracker capture in "
+        "tests/test_tracker_stage.py: "
+        "test_the_preview_reads_the_saved_tab_and_issues_no_token reads saved "
+        "off the list derived from tests/fixtures/jobs_tracker_row.html. Its "
+        "answers are states, the caller's id and booleans, so a drive would "
+        "come back clean."
+    ),
     "writes:_read_tracker_membership": (
         "WORDS: it keys on a tracker tab's count in LinkedIn's tab strip, read "
         "from main's text, and its rows come from dom.harvest_linked_cards, a "

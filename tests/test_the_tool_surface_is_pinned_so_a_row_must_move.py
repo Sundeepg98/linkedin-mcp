@@ -172,6 +172,11 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     # a saved job. Census J 54 does NOT move: its control has never been
     # captured; the cell names that capture as its held-by.
     "linkedin_set_tracker_stage": ("confirm_token", "job_id", "stage"),
+    # 2026-11-24, lane builds-26: the endorsement pair, SANCTIONED AND
+    # REFUSING. Census P E4 / N 111 and P E5 / N 113 do NOT move: the
+    # per-skill control has never been captured.
+    "linkedin_endorse_skill": ("confirm_token", "profile", "skill"),
+    "linkedin_withdraw_endorsement": ("confirm_token", "profile", "skill"),
     "linkedin_surface_census": ("item", "surface"),
     "linkedin_unfollow_company": ("company_id", "confirm_token"),
     "linkedin_unsave_job": ("confirm_token", "job_id"),
@@ -630,8 +635,10 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: `linkedin_set_tracker_stage` (`job_id`, `stage`, `confirm_token`), a
 #: sanctioned write that refuses; census `J 54` keeps its state (no capture of
 #: the control). Counted off the registry, never summed.
-PINNED_TOOL_COUNT = 73
-PINNED_PARAMETER_COUNT = 118
+#: **AND 75 TOOLS AND 124 PARAMETERS** at the lane's second commit: the
+#: endorsement pair (`profile`, `skill`, `confirm_token` each), refusing.
+PINNED_TOOL_COUNT = 75
+PINNED_PARAMETER_COUNT = 124
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:

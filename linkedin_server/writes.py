@@ -214,6 +214,7 @@ from linkedin_server import (
     coerce,
     company_interest,
     dom,
+    endorse_skill,
     field_restore,
     group_leave,
     item_author,
@@ -2922,6 +2923,123 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "destination tab, and moved back."
         ),
     ),
+    # LANE BUILDS-26, 2026-11-24 (census rows ``P E4`` / ``N 111``, and the
+    # inverse ``P E5`` / ``N 113``): endorsing one skill of a member he names,
+    # and withdrawing that endorsement -- built in ONE change so the inverse
+    # exists before any forward press could. Both SANCTIONED AND NOT
+    # PERFORMABLE: the per-skill control has never been captured. Each preview
+    # loads the profile he names through the named-profile door
+    # (:data:`NAMED_PROFILE_PREVIEW_ACTIONS`), prints whom it resolved to,
+    # COUNTS the endorse-shaped buttons in the page, and mints nothing. The
+    # readings and the verdict live in ``endorse_skill``.
+    "linkedin_endorse_skill": WriteSpec(
+        action="endorse_skill",
+        tool_name="linkedin_endorse_skill",
+        url_template=None,
+        url_pattern=None,
+        exempt_substring=None,
+        summary=(
+            "Endorse one skill of a first-degree connection you name, on their "
+            "own profile."
+        ),
+        from_state=endorse_skill.PROFILE_IDENTIFIED,
+        to_state="skill_endorsed",
+        target_kind="profile_and_skill",
+        state_from="named_profile",
+        direction_source=(
+            "THE PROFILE YOU NAMED, loaded from your link or member id through "
+            "the named-profile door and nothing else, inside the endorsement "
+            "you name. The page must name its own owner -- its title, one "
+            "topcard, that topcard's first heading, compared in the page -- and "
+            "then the buttons whose accessible name carries 'endors', and those "
+            "that also carry your skill, are COUNTED in the page. No label is "
+            "read: none has ever been captured, so the count aims nothing."
+        ),
+        wrong_state_note=(
+            "A page that is not the profile you named, or not one person's "
+            "profile, is refused before anything on it is counted for the act."
+        ),
+        reversibility="STILL-UNKNOWN whether an endorsement can be withdrawn here",
+        reversibility_measured=False,
+        reversibility_class="STILL-UNKNOWN",
+        reversibility_evidence=(
+            "NOT MEASURED: no endorse control has been captured in either state "
+            "on any surface this server holds -- 0 across the tracked corpus -- "
+            "so neither the endorsed label nor its withdraw has been seen."
+        ),
+        reversible_by=(
+            "linkedin_withdraw_endorsement, built in the same change and "
+            "refusing for the same missing capture. THE ROUND-TRIP RULE: no "
+            "endorsement is pressed on a member until the withdraw's own anchor "
+            "-- the label an endorsed skill wears -- is measured on that same "
+            "member. The endorsed member is notified either way."
+        ),
+        residue=(
+            "AN ENDORSEMENT IS A STATEMENT ABOUT ANOTHER PERSON and notifies "
+            "them; a withdrawal later takes back the endorsement, not the "
+            "notification. THE PREVIEW ITSELF COSTS SOMETHING: loading their "
+            "profile shows you as a viewer on it, in the way your own "
+            "profile-viewing setting presents you."
+        ),
+        reversibility_procedure=(
+            "Take the capture the census names, inside an endorsement he "
+            "orders: on the profile of a first-degree connection he names, read "
+            "the Skills section's per-skill controls and the label one wears "
+            "once a skill is endorsed, WITHOUT pressing -- this preview's counts "
+            "are the first half of it. Then the withdraw is armed and aimed "
+            "first."
+        ),
+    ),
+    "linkedin_withdraw_endorsement": WriteSpec(
+        action="withdraw_endorsement",
+        tool_name="linkedin_withdraw_endorsement",
+        url_template=None,
+        url_pattern=None,
+        exempt_substring=None,
+        summary=(
+            "Withdraw one endorsement you gave a member you name, on their own "
+            "profile."
+        ),
+        from_state=endorse_skill.PROFILE_IDENTIFIED,
+        to_state="endorsement_withdrawn",
+        target_kind="profile_and_skill",
+        state_from="named_profile",
+        direction_source=(
+            "the same read as linkedin_endorse_skill's, on the same profile: "
+            "the page must name its own owner, and the endorse-shaped buttons "
+            "and those carrying your skill are COUNTED in the page. The label "
+            "a skill wears once YOU endorsed it has never been captured, so "
+            "nothing tells this read an endorsed skill from one that is not."
+        ),
+        wrong_state_note=(
+            "A page that is not the profile you named, or not one person's "
+            "profile, is refused before anything on it is counted for the act."
+        ),
+        reversibility="STILL-UNKNOWN whether a withdrawn endorsement can be given again",
+        reversibility_measured=False,
+        reversibility_class="STILL-UNKNOWN",
+        reversibility_evidence=(
+            "NOT MEASURED: no endorsement he gave has ever been seen on any "
+            "surface this server holds, so its withdraw has never been seen "
+            "either."
+        ),
+        reversible_by=(
+            "linkedin_endorse_skill, built in the same change and refusing for "
+            "the same missing capture. Under the round-trip rule this is the "
+            "half proven first, on the member he names."
+        ),
+        residue=(
+            "The member was notified of the endorsement when it was given, and "
+            "withdrawing it does not recall that. The preview costs a profile "
+            "view, as linkedin_endorse_skill's does."
+        ),
+        reversibility_procedure=(
+            "On a member he names who already carries an endorsement from him, "
+            "read that skill's control and its endorsed label WITHOUT pressing; "
+            "then a supervised withdraw read back on a fresh render, and the "
+            "endorsement given again."
+        ),
+    ),
 }
 
 
@@ -3622,6 +3740,11 @@ _COMPOSITE_TARGET_KINDS: dict[str, tuple[str, str]] = {
     # relative to the upload root (:func:`attachments.canonical_file`), so no
     # absolute path -- which carries a username -- is bound, printed or kept.
     "thread_and_file": ("thread", "file"),
+    # 2026-11-24, lane builds-26, ``endorse_skill`` / ``withdraw_endorsement``.
+    # The SUBJECT is the profile of the person he names, canonical as its LINK
+    # exactly as ``profile_and_text``'s is; the CONTENT is the skill, in his
+    # own words, compared in the page and never typed.
+    "profile_and_skill": ("profile", "skill"),
 }
 
 #: THE TARGET KINDS OF A NAMED PERSON'S PROFILE (2026-09-27). The one-part
@@ -3631,7 +3754,9 @@ _COMPOSITE_TARGET_KINDS: dict[str, tuple[str, str]] = {
 #: url only through :func:`url_target_of`, which hands the template the
 #: SEGMENT. A name is never a target: :func:`named_profile.profile_segment`
 #: refuses anything that is not a link or a member id.
-_PROFILE_TARGET_KINDS: frozenset[str] = frozenset({"profile", "profile_and_text"})
+_PROFILE_TARGET_KINDS: frozenset[str] = frozenset(
+    {"profile", "profile_and_text", "profile_and_skill"}
+)
 
 
 def _canonical_profile(value: Any) -> str:
@@ -4267,6 +4392,16 @@ NAMED_PROFILE_ACTIONS: frozenset[str] = frozenset(
     {"connect_from_profile", "message_from_profile"}
 )
 
+#: THE REFUSING ACTS WHOSE PREVIEW LOADS A NAMED PERSON'S PROFILE, 2026-11-24
+#: (lane builds-26). A SEPARATE closed set, and it has to be:
+#: :data:`STRICT_PRESS_ACTIONS` contains :data:`NAMED_PROFILE_ACTIONS` and may
+#: contain nothing that cannot perform, and these two perform nothing -- the
+#: per-skill control has never been captured. :func:`_load_named_profile`
+#: admits both sets, so the door is reached from the same one function; the
+#: profile is loaded inside the endorsement he names
+#: (THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET), never as a measurement.
+NAMED_PROFILE_PREVIEW_ACTIONS: frozenset[str] = frozenset(endorse_skill.ACTIONS)
+
 #: THE ACTIONS ``perform`` PRESSES STRICTLY: ``page.click(..., strict=True)``,
 #: so a selector matching two elements at the moment of the press THROWS
 #: instead of taking the first. Playwright's page-level click is NOT strict
@@ -4350,7 +4485,10 @@ async def _load_named_profile(
     from linkedin_server import readonly
     from linkedin_server.auth import assert_not_authwall
 
-    if spec.action not in NAMED_PROFILE_ACTIONS or spec.target_kind not in _PROFILE_TARGET_KINDS:
+    if (
+        spec.action not in NAMED_PROFILE_ACTIONS | NAMED_PROFILE_PREVIEW_ACTIONS
+        or spec.target_kind not in _PROFILE_TARGET_KINDS
+    ):
         raise WriteAttemptError(
             f"{spec.action!r} is not a named-person act, and a third party's "
             "profile is loaded for nothing else -- not a read, not a "
@@ -6060,6 +6198,14 @@ async def observe(
         facts["landed_on_the_named_profile"] = True
         if spec.action == "connect_from_profile":
             state, why = named_profile.connect_state(reading)
+        elif spec.action in NAMED_PROFILE_PREVIEW_ACTIONS:
+            # LANE BUILDS-26: COUNTS in the page, then a verdict that never
+            # depends on them -- no label is measured, so nothing is aimed.
+            counts = await endorse_skill.read_skill_controls(
+                page, _text_component_of(spec, target)
+            )
+            facts.update(endorse_skill.control_facts(counts))
+            state, why = endorse_skill.preview_state(reading, counts, action=spec.action)
         else:
             state, why = named_profile.message_state(reading)
         return _record(
@@ -6761,7 +6907,7 @@ async def preview(
         # AND FOR A NAMED PERSON (2026-09-27): WHOM the act resolved to --
         # PEOPLE-DATA-MITIGATIONS item 6 -- in a NEW dict after
         # ``grant.preview`` was assigned, so the retained block never held it.
-        if spec.action in NAMED_PROFILE_ACTIONS:
+        if spec.action in NAMED_PROFILE_ACTIONS | NAMED_PROFILE_PREVIEW_ACTIONS:
             block = await named_profile.name_the_profile_target(
                 page,
                 spec,
@@ -7977,6 +8123,35 @@ _NINE_REFUSALS: dict[str, str] = {
         "the destination tab -- the interview and archived tabs are not "
         "admitted for reading yet (census J 50, J 51), so a move to either "
         "could not be verified until they are."
+    ),
+    "endorse_skill": (
+        "endorse_skill is sanctioned and cannot be performed: the per-skill "
+        "control it would press has never been captured. MEASURED: 0 endorse "
+        "controls across the tracked fixture corpus (re-taken 2026-10-26 over "
+        "tests/fixtures/), and 0 on his own skills surface and among the 222 "
+        "controls read live on his own profile (2026-08-30); the named-person "
+        "acts' live third-party skeleton draws no skill card at all. You cannot "
+        "endorse yourself, so the control lives only on the named member's own "
+        "profile, /in/<segment>/. WHAT WOULD LIFT IT: a capture of that "
+        "profile's Skills section inside an endorsement he names -- the "
+        "per-skill controls, the label one wears once endorsed, and where the "
+        "skill's name sits relative to its control -- of which this preview's "
+        "counts are the first reading; then an anchor on the measured label, a "
+        "press aimed at the one control naming his skill, and a fresh render "
+        "reading the endorsed label. The inverse, withdraw_endorsement, is "
+        "armed by the same capture and is aimed first."
+    ),
+    "withdraw_endorsement": (
+        "withdraw_endorsement is sanctioned and cannot be performed: the label "
+        "a skill wears once he endorsed it has never been captured -- no "
+        "endorsement he gave has been seen on any surface this server holds "
+        "(MEASURED: 0 endorse controls across the tracked corpus, and 0 among "
+        "his own profile's 222 controls on 2026-08-30). It is endorse_skill's "
+        "inverse, on the same profile, /in/<segment>/. WHAT WOULD LIFT IT: the "
+        "same capture of the Skills section, on a member he names who carries an "
+        "endorsement from him, the endorsed label read without pressing; then "
+        "an anchor on that label and a fresh render reading it gone. Under the "
+        "round-trip rule this is the half proven first."
     ),
 }
 

@@ -1,4 +1,8 @@
-"""The tool surface: seventy-three tools, fifty of which do not write.
+"""The tool surface: seventy-five tools, fifty of which do not write.
+
+**IT READ "seventy-three tools, fifty of which do not write" BETWEEN LANE
+BUILDS-26'S TWO COMMITS (2026-11-24)**: the endorsement pair arrived second,
+both write-shaped and refusing, so the non-write count holds.
 
 **IT READ "seventy-two tools, fifty of which do not write" UNTIL LANE BUILDS-26
 (2026-11-24)**: one WRITE-SHAPED tool, ``linkedin_set_tracker_stage`` (census
@@ -188,6 +192,9 @@ SANCTIONED_WRITE_TOOLS = frozenset(SANCTIONED_WRITES) & {
     "linkedin_withdraw_reaction",
     # 2026-11-24 (lane builds-26): sanctioned and REFUSING (census J 54).
     "linkedin_set_tracker_stage",
+    # 2026-11-24 (lane builds-26): the endorsement pair, refusing.
+    "linkedin_endorse_skill",
+    "linkedin_withdraw_endorsement",
 }
 
 #: THE DOCSTRING EXEMPTION IS THE SAME SET AS THE NAME EXEMPTION, and it took
@@ -583,6 +590,9 @@ EXPECTED_TOOLS = {
     "linkedin_withdraw_reaction",
     # 2026-11-24 (lane builds-26): a WRITE that refuses (census J 54).
     "linkedin_set_tracker_stage",
+    # 2026-11-24 (lane builds-26): two WRITES that refuse (P E4, P E5).
+    "linkedin_endorse_skill",
+    "linkedin_withdraw_endorsement",
 }
 
 #: Names a reader must never grow. Listed explicitly so that adding one is a
@@ -1082,7 +1092,8 @@ async def test_the_surface_is_exactly_the_seventy_two_tools(tools):
     # SEVENTY-THREE FROM 2026-11-24 (lane builds-26): linkedin_set_tracker_stage,
     # a WRITE that refuses, so the split moves on its write side and the
     # non-write count holds. MEASURED off mcp.list_tools().
-    assert len(tools) == 73
+    # SEVENTY-FIVE FROM THE SAME LANE'S SECOND COMMIT: the endorsement pair.
+    assert len(tools) == 75
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -1123,6 +1134,9 @@ async def test_the_surface_is_exactly_the_seventy_two_tools(tools):
         "linkedin_withdraw_reaction",
         # 2026-11-24 (lane builds-26): sanctioned and REFUSING (census J 54).
         "linkedin_set_tracker_stage",
+        # 2026-11-24 (lane builds-26): the endorsement pair, refusing.
+        "linkedin_endorse_skill",
+        "linkedin_withdraw_endorsement",
     }
     # THE NON-WRITE COUNT MOVES TO SIXTEEN, and the reason is NOT the reason
     # it moved last time. The comment here said: "THE READ COUNT MOVES OFF
@@ -1397,6 +1411,9 @@ async def test_the_exemption_covers_only_the_names_on_it(tools):
         "linkedin_withdraw_reaction",
         # 2026-11-24 (lane builds-26): sanctioned and REFUSING (census J 54).
         "linkedin_set_tracker_stage",
+        # 2026-11-24 (lane builds-26): the endorsement pair, refusing.
+        "linkedin_endorse_skill",
+        "linkedin_withdraw_endorsement",
     }
     # The probe has to be genuinely sanctioned for this to test the thing it
     # claims to. A name nobody ever specced would only show that made-up names
@@ -2031,7 +2048,10 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
     # notice a member arriving.
     # set_tracker_stage JOINED 2026-11-24 (lane builds-26): sanctioned and
     # refusing for want of a capture of the control it would press.
-    assert set(not_performed) == {"set_open_to_work", "set_tracker_stage"}
+    assert set(not_performed) == {
+        "set_open_to_work", "set_tracker_stage", "endorse_skill",
+        "withdraw_endorsement",
+    }
     assert "update_setting" not in set(not_performed)
     # update_profile_field LEFT THIS FIELD ON 2026-09-02 by shipping, which is
     # the only way anything is meant to leave it. A shipped action still
@@ -2432,7 +2452,9 @@ async def test_the_server_instructions_name_every_write_that_ships():
     # RE-POPULATED 2026-11-24 (lane builds-26), as foretold: the first
     # sanctioned-and-refusing action with a registered tool since
     # send_message, looked at and named in the instructions.
-    assert examined == {"set_tracker_stage"}, examined
+    assert examined == {
+        "set_tracker_stage", "endorse_skill", "withdraw_endorsement",
+    }, examined
     # AND THE CLAIM THAT NAMED THEM AS REFUSING HAD TO BE CORRECTED. It said
     # "none of them can act" of a set that is now empty, and a sentence
     # describing an empty set as refusing is a claim about nothing -- worse

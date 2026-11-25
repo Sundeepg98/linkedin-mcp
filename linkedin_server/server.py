@@ -1,4 +1,14 @@
-"""The tool surface: seventy-three tools, twenty-two of which write to LinkedIn.
+"""The tool surface: seventy-five tools, twenty-two of which write to LinkedIn.
+
+THE SEVENTY-FOURTH AND SEVENTY-FIFTH ARE WRITE-SHAPED AND REFUSE, 2026-11-24
+(lane builds-26, census ``P E4`` / ``N 111`` and ``P E5`` / ``N 113``):
+``linkedin_endorse_skill`` and its inverse ``linkedin_withdraw_endorsement``,
+built in one change so the undo exists before any endorsement could be
+pressed. Each loads the profile he names through the named-profile door,
+names whom it resolved to, counts the endorse-shaped buttons there and
+mints no token: the per-skill control has never been captured. The
+headline read "seventy-three tools, twenty-two of which write" between the
+two commits of that lane.
 
 THE SEVENTY-THIRD IS WRITE-SHAPED AND REFUSES, 2026-11-24 (lane builds-26,
 census ``J 54``): ``linkedin_set_tracker_stage``, the stage move on a saved
@@ -332,10 +342,11 @@ POINTER to it was dangling, so a reader who followed it found nothing and
 would reasonably conclude these numbers are unchecked. A citation is a claim
 like any other.
 The surface splits three ways and the split is the part a reader actually
-needs: FIFTY read, TWENTY-TWO write, and ONE is write-shaped,
-registered, gated and unable to act. Fifty plus twenty-two plus one is
-seventy-three. (Fifty, twenty-two and zero, summing to seventy-two, until lane
-builds-26 registered ``linkedin_set_tracker_stage`` on 2026-11-24. Thirty-eight, thirteen and fifty-one until 2026-09-24; thirty-nine,
+needs: FIFTY read, TWENTY-TWO write, and THREE are write-shaped,
+registered, gated and unable to act. Fifty plus twenty-two plus three is
+seventy-five. (Fifty, twenty-two and zero, summing to seventy-two, until lane
+builds-26 registered ``linkedin_set_tracker_stage``, then the endorsement
+pair, on 2026-11-24. Thirty-eight, thirteen and fifty-one until 2026-09-24; thirty-nine,
 thirteen and fifty-two at the live lane's merge the same day; thirty-nine,
 fourteen and fifty-three at lane L7's; forty-one, fifteen and fifty-six at
 lane L5's; forty-one, sixteen and fifty-seven at lane L8's merge on
@@ -611,6 +622,7 @@ from linkedin_server import (
     company_root,
     creator_analytics,
     dom,
+    endorse_skill,
     events,
     group_page,
     group_roster,
@@ -1101,7 +1113,11 @@ mcp = FastMCP(
         "stage move on a saved job, whose control -- an item in the tracker "
         "row's overflow menu -- has never been captured; it reads his Saved "
         "tab, says what it saw and why it will not act, and no token is ever "
-        "issued for it. "
+        "issued for it. AND TWO MORE: linkedin_endorse_skill and its inverse "
+        "linkedin_withdraw_endorsement, one skill of a person he names by "
+        "profile link, never a name; each loads that profile, names whom it "
+        "resolved to, counts the endorse-shaped buttons and refuses, because "
+        "the per-skill control has never been captured. "
         "THE NINETEENTH, linkedin_set_admitted_setting, changes ONE control "
         "on ONE settings page of his own account that is admitted by name, "
         "one page at a time; one is admitted, Share profile updates, whose "
@@ -9114,6 +9130,18 @@ _WHY_NOT_PERFORMED: dict[str, str] = {
         "the menu is closed and its item slot is empty. The preview reads the "
         "Saved tab and refuses; mint declines a grant at issue."
     ),
+    "endorse_skill": (
+        "the per-skill endorse control lives only on the named member's own "
+        "profile and has never been captured -- zero endorse controls in any "
+        "capture this server holds. The preview loads that profile inside the "
+        "act he names, counts the endorse-shaped buttons, and refuses."
+    ),
+    "withdraw_endorsement": (
+        "the label a skill wears once he endorsed it has never been captured, "
+        "so nothing tells an endorsed skill from one that is not. The preview "
+        "loads the profile he names, counts the endorse-shaped buttons, and "
+        "refuses; it is the half the round-trip rule proves first."
+    ),
 }
 
 
@@ -11111,6 +11139,100 @@ async def linkedin_set_tracker_stage(
     if isinstance(block, dict) and "error" not in block:
         block = {**block, "requested_stage": destination}
     return block
+
+
+def _skill_refusal(skill: str) -> tuple[str, Optional[dict[str, Any]]]:
+    """``(skill, None)`` for a usable skill name, else ``("", refusal)``. The
+    refusal loads nothing and reports a SHAPE, never the value."""
+    name, why = endorse_skill.checked_skill(skill)
+    if name:
+        return name, None
+    return "", {
+        "error": "bad_skill",
+        "message": "No page was loaded and nothing was pressed: " + why,
+        "pages_loaded": 0,
+        "performed": False,
+    }
+
+
+@mcp.tool()
+async def linkedin_endorse_skill(
+    profile: str, skill: str, confirm_token: str = ""
+) -> dict[str, Any]:
+    """Endorse one skill of a person YOU NAME, on their profile. A write, and it REFUSES today.
+
+    Census rows ``P E4`` / ``N 111``. THIS TOOL CANNOT PERFORM: the per-skill
+    endorse control has never been captured -- zero endorse controls exist in
+    any capture this server holds -- so no confirm token is ever issued for it.
+    Its inverse, ``linkedin_withdraw_endorsement``, is built beside it and
+    refuses for the same reason. THE ROUND-TRIP RULE: no endorsement is pressed
+    on a member until the withdraw's anchor is measured on that same member.
+
+    WHAT A CALL DOES. The skill is checked, and the target must be their
+    profile LINK or member id, never a name -- both before any page loads.
+    Then their profile is loaded through the named-profile door, inside the act
+    you name (THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET): they may see you among
+    their profile viewers. The page must name its own owner; the block names
+    WHOM IT RESOLVED TO, as a people record, and COUNTS the buttons whose name
+    carries "endors" and those that also carry your skill -- integers, no
+    label read, nothing pressed. Those counts are the first reading this server
+    has taken of the control, and the refusal names the capture still owed.
+
+    Args:
+        profile: their profile link or member id. Never a name.
+        skill: the one skill to endorse, in your own words.
+        confirm_token: accepted for the shape every write shares; no token is
+            ever issued for this tool, so none can be redeemed.
+    """
+    name, refusal = _skill_refusal(skill)
+    if refusal is not None:
+        return refusal
+    target = {"profile": profile, "skill": name}
+    try:
+        if writes.writes_enabled():
+            # A NAME IS REFUSED BEFORE A BROWSER IS OPENED, by the same
+            # normalisation ``mint`` and ``consume`` apply (as connect does).
+            writes._target_for(writes.spec_for_action("endorse_skill"), target)
+        return await _write_tool("endorse_skill", target, confirm_token)
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_withdraw_endorsement(
+    profile: str, skill: str, confirm_token: str = ""
+) -> dict[str, Any]:
+    """Withdraw one endorsement you gave a person YOU NAME. A write, and it REFUSES today.
+
+    Census rows ``P E5`` / ``N 113``, the inverse of ``linkedin_endorse_skill``
+    and built in the same change, so the undo exists before any endorsement
+    could be pressed. THIS TOOL CANNOT PERFORM: the label a skill wears once
+    you endorsed it has never been captured, so nothing can tell an endorsed
+    skill from one that is not, and no confirm token is ever issued.
+
+    WHAT A CALL DOES is what ``linkedin_endorse_skill``'s does, on the same
+    profile: the skill and the link are checked first, the profile is loaded
+    through the named-profile door inside the act you name (a profile view
+    they may see), the block names whom it resolved to and counts the
+    endorse-shaped buttons and those carrying your skill, and nothing is
+    pressed. Under the round-trip rule this is the half to prove first.
+
+    Args:
+        profile: their profile link or member id. Never a name.
+        skill: the skill whose endorsement to withdraw, in your own words.
+        confirm_token: accepted for the shape every write shares; no token is
+            ever issued for this tool, so none can be redeemed.
+    """
+    name, refusal = _skill_refusal(skill)
+    if refusal is not None:
+        return refusal
+    target = {"profile": profile, "skill": name}
+    try:
+        if writes.writes_enabled():
+            writes._target_for(writes.spec_for_action("withdraw_endorsement"), target)
+        return await _write_tool("withdraw_endorsement", target, confirm_token)
+    except Exception as exc:
+        return _error(exc)
 
 
 #: Fields that answer "what is running and what can it do". Everything else in
