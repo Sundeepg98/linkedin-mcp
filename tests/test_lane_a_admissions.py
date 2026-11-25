@@ -114,9 +114,12 @@ ADMISSIONS = (
                     "/invite", "the other invitation surface"),
             Sibling(f"{B}/groups/12345678/invite/", "/invite",
                     "inviting somebody to a group"),
-            Sibling(f"{B}/mynetwork/", None,
-                    "the hub, refused on its badge cost (R1) and by nothing "
-                    "else -- the allowlist alone"),
+            # The hub, /mynetwork/, stood here until 2026-11-25, "refused on
+            # its badge cost (R1) and by nothing else"; lane admit26 admitted
+            # it (tests/test_admit26_admissions.py). Its discovery lists did
+            # not travel with it.
+            Sibling(f"{B}/mynetwork/discovery-see-all/", None,
+                    "the hub's full suggestion lists -- the allowlist alone"),
         ),
     ),
     Admission(

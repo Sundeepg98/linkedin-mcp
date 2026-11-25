@@ -1628,12 +1628,18 @@ def test_the_read_door_is_the_same_door_and_would_refuse_a_widened_surface():
     """THE CONTROL for the test above.
 
     ``is_read_url`` returning True for three urls proves nothing unless it can
-    return False. /mynetwork/ is the right probe because it is the surface
-    ``send_invitation`` would obviously have used and did not -- loading it
-    consumes the pending-invitation badge -- so this is the check that would
-    have fired had the invitation gate taken the obvious route.
+    return False. The invitation surface is the right probe because it is the
+    page ``send_invitation`` would obviously have used and did not, and the
+    forbidden substring "/invite" was written to keep it shut.
+
+    /mynetwork/ was the probe here until 2026-11-25, when lane admit26
+    admitted that hub on READ-PAST-AN-ACT-SUBSTRING (the badge a load may
+    clear is a passive cost); the invitation surface below it did not travel
+    with it, so the control keeps its meaning.
     """
-    assert readonly.is_read_url("https://www.linkedin.com/mynetwork/") is False
+    assert readonly.is_read_url(
+        "https://www.linkedin.com/mynetwork/invite-connect/invitations/"
+    ) is False
 
 
 # ---------------------------------------------------------------------------

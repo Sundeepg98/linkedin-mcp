@@ -234,13 +234,13 @@ N 17	N	W	R3	CAPTURE:admit-mynetwork-invitation-manager	INFERRED	_audit/_census/r
 N 18	N	W	R2	CAPTURE:admit-mynetwork-invitation-manager	INFERRED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/mynetwork/invitation-manager/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
 N 19	N	R	-	CAPTURE:admit-mynetwork-invitation-manager	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/mynetwork/invitation-manager/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
 N 21	N	W	R3	CAPTURE:admit-mynetwork-invitation-manager	INFERRED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/mynetwork/invitation-manager/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
-N 22	N	R	-	ADMIT:https://www.linkedin.com/mynetwork/	INFERRED	_audit/_census/read-addresses.tsv::the general R1 badge-cost ruling ; RULING:READ-PAST-AN-ACT-SUBSTRING
+N 22	N	R	-	CAPTURE:admit-mynetwork	INFERRED	_audit/_census/read-addresses.tsv::the general R1 badge-cost ruling ; RULING:READ-PAST-AN-ACT-SUBSTRING
 N 24	N	R	-	ADMIT:https://www.linkedin.com/mynetwork/invite-connect/connections/?foo=1	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/mynetwork/invite-connect/connections/?foo=1 ; RULING:READ-PAST-AN-ACT-SUBSTRING
 N 26b	N	R	-	CAPTURE:search-people-first-degree	NAMED	_audit/_census/read-addresses.tsv::so the first thing past the boundary is a capture
 N 27	N	R	-	ADMIT:https://www.linkedin.com/mynetwork/invite-connect/connections/?foo=1	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/mynetwork/invite-connect/connections/?foo=1 ; RULING:READ-PAST-AN-ACT-SUBSTRING
 N 28	N	R	-	ADMIT:https://www.linkedin.com/mynetwork/invite-connect/connections/?foo=1	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/mynetwork/invite-connect/connections/?foo=1 ; RULING:READ-PAST-AN-ACT-SUBSTRING
 N 29	N	W	R3	TARGET:a 1st-degree connection he names for removal	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::`N 29`: the row menu of one connection he names ; RULING:RELATION-REMOVALS-BUILT-BEHIND-GRANTS
-N 32	N	R	-	ADMIT:https://www.linkedin.com/mynetwork/	INFERRED	_audit/_census/read-addresses.tsv::the general R1 badge-cost ruling ; RULING:READ-PAST-AN-ACT-SUBSTRING
+N 32	N	R	-	CAPTURE:admit-mynetwork	INFERRED	_audit/_census/read-addresses.tsv::the general R1 badge-cost ruling ; RULING:READ-PAST-AN-ACT-SUBSTRING
 N 34	N	W	R1	TARGET:a member he names to follow or unfollow	INFERRED	RULING:NAMED-PROFILE-READ-BEHIND-A-GRANT ; _audit/_census/write-classes.tsv::queued:THIRD-PARTY-PROFILE-FORBIDDEN
 N 36	N	W	R1	TARGET:a member he names to follow or unfollow	INFERRED	RULING:NAMED-PROFILE-READ-BEHIND-A-GRANT ; _audit/_census/write-classes.tsv::queued:THIRD-PARTY-PROFILE-FORBIDDEN
 N 37	N	W	R1	CAPTURE:feed-item-permalink-menu	MEASURED	RULING:HIS-OWN-CURATION-NOT-OUTWARD ; _audit/2026-10-10-lane-b2-network-build.md::one anchor in all carries an activity address
@@ -259,7 +259,7 @@ N 58	N	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 N 59	N	W	R1	ADMIT:https://www.linkedin.com/feed/hashtag/placeholder/	NAMED	_audit/_census/read-addresses.tsv::/feed/hashtag/ has no pattern ; RULING:READ-PAST-AN-ACT-SUBSTRING
 N 60	N	W	R1	ADMIT:https://www.linkedin.com/feed/hashtag/placeholder/	NAMED	_audit/_census/read-addresses.tsv::/feed/hashtag/ has no pattern ; RULING:READ-PAST-AN-ACT-SUBSTRING
 N 61	N	R	-	ADMIT:https://www.linkedin.com/feed/hashtag/placeholder/	NAMED	_audit/_census/read-addresses.tsv::/feed/hashtag/ has no pattern ; RULING:READ-PAST-AN-ACT-SUBSTRING
-N 62	N	W	R1	ADMIT:https://www.linkedin.com/mynetwork/	INFERRED	_audit/_census/read-addresses.tsv::the general R1 badge-cost ruling ; RULING:READ-PAST-AN-ACT-SUBSTRING
+N 62	N	W	R1	CAPTURE:admit-mynetwork	INFERRED	_audit/_census/read-addresses.tsv::the general R1 badge-cost ruling ; RULING:READ-PAST-AN-ACT-SUBSTRING
 N 63	N	W	R3	CAPTURE:C-B5-1	NAMED	_audit/2026-10-10-lane-b5-groups-build.md::| C-B5-1 | N 63, M C61 | ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
 N 65	N	R	-	SIBLING:lane-NP	NAMED	_audit/2026-10-10-rulings-ledger-questions.md::Already answered by NAMED-PROFILE-DETAIL-PAGES (lane NP)
 N 67	N	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
@@ -284,14 +284,14 @@ N 92	N	R	-	CAPTURE:search-people-labels	NAMED	RULING:CAPTURE-PRESS-UNDER-PROBE-R
 N 93	N	R	-	CAPTURE:search-people-labels	MEASURED	RULING:CAPTURE-PRESS-UNDER-PROBE-RULE ; _audit/2026-10-10-lane-b2-network-build.md::So the first render draws no control labelled exactly
 N 95	N	R	-	CAPTURE:feed-menus	INFERRED	_audit/_census/read-addresses.tsv::where the list of recent PEOPLE searches is drawn
 N 96	N	W	R3	ADMIT:https://www.linkedin.com/mypreferences/d/categories/privacy	INFERRED	_audit/_census/network.md::awaiting admission by name ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
-N 97	N	R	-	ADMIT:https://www.linkedin.com/mynetwork/	INFERRED	_audit/_census/read-addresses.tsv::the general R1 badge-cost ruling ; RULING:READ-PAST-AN-ACT-SUBSTRING
-N 98	N	W	R3	ADMIT:https://www.linkedin.com/mynetwork/	INFERRED	_audit/_census/read-addresses.tsv::the general R1 badge-cost ruling ; RULING:READ-PAST-AN-ACT-SUBSTRING
+N 97	N	R	-	CAPTURE:admit-mynetwork	INFERRED	_audit/_census/read-addresses.tsv::the general R1 badge-cost ruling ; RULING:READ-PAST-AN-ACT-SUBSTRING
+N 98	N	W	R3	CAPTURE:admit-mynetwork	INFERRED	_audit/_census/read-addresses.tsv::the general R1 badge-cost ruling ; RULING:READ-PAST-AN-ACT-SUBSTRING
 N 99	N	R	-	TARGET:a school Page he names	NAMED	_audit/_census/read-addresses.tsv::UNDER THE WHO/WHICH RULE, EXTENDED ; RULING:OPERATOR-NAMES-THE-TARGET
 N 100	N	R	-	TARGET:a school Page he names	NAMED	_audit/_census/read-addresses.tsv::UNDER THE WHO/WHICH RULE, EXTENDED ; RULING:OPERATOR-NAMES-THE-TARGET
 N 102	N	R	-	BUILD:tests/fixtures/live2/company_people.html	MEASURED	tests/fixtures/live2/company_people.html ; _audit/_census/read-addresses.tsv::https://www.linkedin.com/company/placeholder-org/people/
 N 103	N	R	-	SIBLING:lane-NP	MEASURED	_audit/2026-10-10-lane-b2-network-build.md::A third first render without the section
 N 104	N	R	-	RULING:Q-ORG-IDENTITY	MEASURED	_audit/2026-10-10-lane-b2-network-build.md::every segment carries letters
-N 110	N	W	R3	ADMIT:https://www.linkedin.com/mynetwork/import-contacts/	INFERRED	_audit/_census/write-classes.tsv::queued:CONTACTS-MANAGER-ADMISSION ; RULING:READ-PAST-AN-ACT-SUBSTRING
+N 110	N	W	R3	CAPTURE:admit-mynetwork	INFERRED	_audit/_census/write-classes.tsv::queued:CONTACTS-MANAGER-ADMISSION ; RULING:READ-PAST-AN-ACT-SUBSTRING
 N 111	N	W	R3	TARGET:a 1st-degree connection he names, whose skill he endorses	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::| C3 | `endorse_skill` ; RULING:OPERATOR-NAMES-THE-TARGET
 N 112	N	W	R3	TARGET:a 1st-degree connection he names, whose skill he endorses	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::| C3 | `endorse_skill` ; RULING:OPERATOR-NAMES-THE-TARGET
 N 113	N	W	R3	TARGET:a 1st-degree connection he names, whose skill he endorses	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::| C3 | `endorse_skill` ; RULING:OPERATOR-NAMES-THE-TARGET

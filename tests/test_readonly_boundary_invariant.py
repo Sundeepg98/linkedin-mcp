@@ -1952,7 +1952,13 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # (READ-PAST-AN-ACT-SUBSTRING's second clause), no exemption -- the
     # exemption tables and every other key are byte-identical, and the tree
     # minus that line hashes to 43f0f6f42005e66a.
-    "_ALLOWED_URL_PATTERNS": "24128eed2c1c5f07",
+    #
+    # 24128eed2c1c5f07 until lane admit26's third commit: one anchored line,
+    # /mynetwork/ with no query and no sub-path, on READ-PAST-AN-ACT-SUBSTRING's
+    # second clause (its 2026-08-30 refusal was a wave's derived gate, and the
+    # badge is a passive cost the ruling names), no exemption -- every other
+    # key byte-identical, the tree minus that line hashing to 24128eed2c1c5f07.
+    "_ALLOWED_URL_PATTERNS": "95644331b7d9312a",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     # 419e64a3cd92ec7e until the same REVIEW: commit: a third entry, excusing
     # exactly {"/follow"} for exactly the anchored follower-list address.

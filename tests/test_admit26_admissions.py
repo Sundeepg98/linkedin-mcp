@@ -225,6 +225,31 @@ ADMISSIONS = (
                     "the #Hiring item, a broadcast by nature"),
         ),
     ),
+    Admission(
+        key="my-network",
+        rows=("N 22", "N 32", "N 62", "N 97", "N 98"),
+        address=f"{B}/mynetwork/",
+        excused=frozenset(),
+        siblings=(
+            Sibling(f"{B}/mynetwork/?x=1", None,
+                    "a QUERY -- where a filter naming a person would arrive"),
+            Sibling(f"{B}/mynetwork/discovery-see-all/", None,
+                    "the full suggestion lists: drawn, not admitted here"),
+            Sibling(f"{B}/mynetwork/discover-hub/", None,
+                    "the Discover-more hub: drawn, not admitted here"),
+            Sibling(f"{B}/mynetwork/import-contacts/", None,
+                    "the address-book import page (CONTACT-IMPORT-STAYS-MANUAL)"),
+            Sibling(f"{B}/mynetwork/network-manager/", None,
+                    "the network manager's root"),
+            Sibling(f"{B}/mynetwork/invite-connect/invitations/", "/invite",
+                    "the invitation surface the forbidden substrings exist for"),
+            Sibling(f"{B}/mynetwork/settings/manage-syncing/", "/settings/",
+                    "a syncing settings page"),
+            Sibling(f"{B}/mynetworkx/", None, "a longer word"),
+            Sibling(f"{B}/mynetwork/x/../../in/someone-else/", None,
+                    "a TRAVERSAL onto a third party"),
+        ),
+    ),
 )
 
 KEYS = [a.key for a in ADMISSIONS]

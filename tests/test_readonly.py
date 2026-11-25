@@ -2789,13 +2789,21 @@ MUST_STAY_UNREADABLE = (
     # nothing). Recorded rather than silently dropped; its neighbours stand in.
     "https://www.linkedin.com/mynetwork/invitation-manager/?filterCriteria=x",
     "https://www.linkedin.com/mynetwork/invitation-manager/sent/withdraw/",
-    "https://www.linkedin.com/mynetwork/",
+    # ``https://www.linkedin.com/mynetwork/`` WAS HERE UNTIL 2026-11-25 and is
+    # now READABLE (lane admit26, READ-PAST-AN-ACT-SUBSTRING's second clause:
+    # its 2026-08-30 refusal was a wave's DERIVED side-effect gate, not a
+    # ruling, and the badge a load may clear is a passive cost the ruling
+    # names). Recorded rather than silently dropped; the pages below it, which
+    # did not travel with it, stand in.
+    "https://www.linkedin.com/mynetwork/?x=1",
+    "https://www.linkedin.com/mynetwork/discovery-see-all/",
+    "https://www.linkedin.com/mynetwork/import-contacts/",
     # ADDED 2026-09-03, in the commit admitting the CONNECTIONS list. These
-    # are the addresses that must not travel with it, and the entry above --
-    # ``/mynetwork/`` itself -- is the load-bearing one: it was put through a
-    # written side-effect ruling on 2026-08-30 and REFUSED because it consumes
-    # the pending invitation badge. It was already here, so it doubles as the
-    # regression guard for this change at no cost.
+    # are the addresses that must not travel with it. ``/mynetwork/`` itself
+    # was the load-bearing one then -- refused on a written side-effect gate
+    # of 2026-08-30 -- and is readable since 2026-11-25 (above); the
+    # invitation surfaces below are what the forbidden substrings were written
+    # for, and they still refuse.
     "https://www.linkedin.com/mynetwork/invite-connect/",
     "https://www.linkedin.com/mynetwork/invite-connect/invitations/",
     # THE QUERY AND THE SUB-PATH, which prove the new pattern is anchored and

@@ -2656,6 +2656,34 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # page beside it, which LinkedIn draws only with his own profile id in its
     # query (the record, section 5).
     re.compile(r"^https://www\.linkedin\.com/in/me/opportunities/services/education/?$"),
+    # His My Network page (census N 22, N 32, N 62, N 97, N 98), drawn in the
+    # global nav of nearly every tracked live fixture and in the drawn-route
+    # corpus. THIS REVERSES A RECORDED REFUSAL, and the argument is the
+    # rulings', not this lane's:
+    #
+    #   * The refusal is R1 (`_audit/2026-08-30-linkedin-nine.md` section 2.2),
+    #     a wave's side-effect gate that calls itself "a DERIVED refusal" -- not
+    #     an operator's ruling and never registered (lane A's record, 2.2).
+    #     Under D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING it decides nothing.
+    #   * Its first ground, the pending-invitation badge a load may clear, is
+    #     answered in READ-PAST-AN-ACT-SUBSTRING's own words: "a badge the load
+    #     may clear is a passive cost (D5-PASSIVE-COST-IS-NOT-A-ROW), recorded
+    #     on the row". NOTIFICATIONS-UNREAD-SPEND permits clearing his own.
+    #   * Its second, whether an invitation marked seen is visible to its
+    #     SENDER, is the question RECEIVED-INVITATIONS-READ-STAYS-ADMITTED
+    #     answered for the invitation manager itself: a passive cost, recorded
+    #     on the rows as UNMEASURED, reopened when a capture shows the sender
+    #     can see it. This page shows a preview of the same invitations.
+    #
+    # The page is refused by allowlist silence alone (no substring), so this is
+    # the second clause of READ-PAST-AN-ACT-SUBSTRING: one anchored line, NO
+    # QUERY and NO SUB-PATH -- every page below it keeps its own refusal, the
+    # discovery lists, the import page and the invitation surfaces among them.
+    # THE PAGE LISTS OTHER PEOPLE: a reader owes NAMES-AT-RUNTIME and
+    # PEOPLE-DATA-MITIGATIONS, and brackets the invitation badge before and
+    # after, as `linkedin_connections` does. Every control stays refused by the
+    # press gate.
+    re.compile(r"^https://www\.linkedin\.com/mynetwork/?$"),
 )
 
 #: Substrings that must never appear in a navigation target, checked before
