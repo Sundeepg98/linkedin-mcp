@@ -20,6 +20,7 @@ Pattern read: `_audit/2026-10-10-integration.md`.
 | 4 | 53f5c3a | lane A: +32 commits, P M9 / J 77 EXCLUDED-RULED, M C70/C93 ADMITTED, M C101 GAP; carries NEW `_audit/2026-10-10-rulings-lane-a-questions.md` | 6c65815 | UNCERTIFIED: its ci/ run 38056930283 was red and its fixes post-date that run; this lane's push certifies it. |
 | 5 | a7026d8 | lane B1: +20 commits, P A22, P L8, P L1 COVERED-UNFIRED | 6c65815 | its ci/ ref 9911b3d was red; re-certified by this push. LAST: most diverged. |
 | 6 | c95c5e3 | origin/master, by the orchestrator's order of 2026-11-24: the fixes lane (N 47, the playwright fixture fix cab0ae7, INSTRUMENTS 95) | f339459 | +7 commits, certified on master. Merged because `git fetch origin` found master past f339459. |
+| 7 | 30582f4 | origin/master, by the orchestrator's order of 2026-11-25: the fixes lane's last commit, a record and comments about the 204 answer | c95c5e3 | +1 commit, certified on master. Merged because `git fetch origin` found master past c95c5e3. |
 
 ## 2. Pre-merge check on head 3 (N 102)
 
@@ -392,6 +393,16 @@ trusted:
 - Master moves no census slice and no tool. The merged registry still measures
   77 / 119 / 22 / 55; census `--check` is clean on the merge-5 pins and every
   table checker is green.
+
+(merged 7, origin/master again, by the orchestrator's order of 2026-11-25.)
+`git fetch origin` found master one commit past c95c5e3, at 30582f4: the fixes
+lane's last commit, which rewords its own record, the text of INSTRUMENTS
+section 95, and comments in two test files about what was measured of the 204
+answer. No file it touches had moved on this branch since c95c5e3, so it
+merged with no conflict. All three derived views `--check` green without
+regeneration (the index at 278 documents, the rulings register at 95, the
+blocker map 409 lines); census `--check` clean; the INSTRUMENTS tail still
+ends 93, 95.
 
 
 ## 4. Pins re-derived on the merged tree
