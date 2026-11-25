@@ -12461,3 +12461,42 @@ one-shot edit scripts (`resolve_union.py`, `resolve_server.py`,
 `edit_cells.py`, `edit_pins.py`), each asserting the exact text it replaced.
 
 ---
+
+## 101. A WRITE ADDRESSED BY HIS OWN WORDS IS COMPOSED IN ONE SPELLING, AND THE PAGE ONLY VETOES IT (build-jmn26, 2026-11-25)
+
+**Registered 2026-11-25.** Full record: `_audit/2026-11-25-build-jmn26.md`.
+Numbered 101 by the orchestrator's allocation, appended at the end; renumber
+at the merge if another lane took it.
+
+### 101.1 A SEARCH IS AN ADDRESS NOBODY MAY HAND-WRITE
+
+`J 31`'s pair is the first write whose target is not an id but a query -- his
+keywords and a location. Two dangers follow, and each has a test that fails
+without the code that answers it. A query the caller writes by hand could
+carry a filter, a second key or a different spelling that rebuilds to another
+url than the one he saw; so the tool composes it (`query_for`), the gate
+re-derives it (`canonical`, inside `writes._target_for`), and any target that
+is not that one spelling is refused before a page loads. And LinkedIn may
+answer a search with ANOTHER search -- its AI search, a rewritten query -- on
+whose switch a press would set some other alert; so the landing is compared
+with his two values at the preview, the click and the fresh render, and every
+other landing vetoes, withheld and never quoted.
+
+    WHEN THE TARGET IS HIS WORDS, ONE FUNCTION SPELLS IT, THE GATE RE-SPELLS
+    IT, AND THE PAGE MAY ONLY SAY NO.
+
+### 101.2 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `tests/test_search_job_alert.py`; `linkedin_server/search_alert_switch.py`, the `job_search` branch of `writes._target_for`, and the `search_alert_switch` arms of `observe`, `_assert_landed_on_target`, `_live_control` and `_verify_after` | on the base tree `afa8442` the file fails at collection (`ImportError: cannot import name 'search_alert_switch'`), and with the module present but `writes` unwired, `WriteAttemptError: 'set_search_job_alert' is not a sanctioned write`; green 49 passed. `test_a_target_not_in_the_one_spelling_is_refused` pins six spellings the gate refuses; `test_the_page_may_veto_the_search_and_never_supply_one` pins eight landings; `test_the_tracked_copy_with_its_word_reduced_reads_unknown` keeps the anchor word load-bearing |
+| `scripts/_build_search_alert_skeleton.py` (the provenance of `tests/fixtures/live2/j107_search_alert.html`) | refused, writing nothing, on another session-2 skeleton ("this skeleton's tracked copy is not tests/fixtures/live2/j107.html") and on the right skeleton under another session's key ("the toggle's text did not match its measured word; refusing to write it"); a fixed point on its own input (sha256 `3d7cceee5588bfba`, built twice) |
+
+### 101.3 DECLARED DISPOSABLE
+
+The lane's scratch probes -- the keyed-shape word counter, the region printer
+(a skeleton's tag structure with matched candidates only), the card-label
+counter for `J 84`, the census cell editor, the ledger and queue editor, the
+pin re-deriver and the note writer -- and the exported base tree used for the
+red-first runs. Each answered one question once; the answers are in the
+record.

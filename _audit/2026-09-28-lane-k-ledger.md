@@ -661,6 +661,39 @@ it." The question: one bounded scroll of his own `/in/me/` inside a capture
 that commits nothing -- or is the first render enough to put `P D26` on
 Q-ABSENT-ON-HIS-ACCOUNT beside `P K8`?
 
+### Q-NOTIFICATION-KEY -- which notification card a delete is aimed at
+
+Added 2026-11-25 by lane build-jmn26 (`_audit/2026-11-25-build-jmn26.md`,
+section 4). Row: `M C97`. Every notification card draws its own
+`Delete notification` item -- 9 of 9 cards on live session 5's capture and 10
+of 10 on session 10's, by keyed shape -- but no card carries a key a caller
+could pass back: the card and its menu nodes hold `id`, `class`, `type`, a
+position (`data-nt-card-index`) and a view name, and `linkedin_notifications`
+returns a card's text, its relative time and its link, a link shared by every
+card of one kind. A target chosen by position is the page supplying it
+(`PAGE-MAY-VETO-NEVER-SUPPLY`), and one matched on a card's words is a write
+aimed by text. The question: may a caller name one notification by what
+`linkedin_notifications` returned for it, the page vetoing unless exactly one
+card matches -- or does the row wait on a key LinkedIn draws?
+
+### Q-ONE-SHOT-FEEDBACK -- a press with no inverse that tunes his recommendations
+
+Added 2026-11-25 by lane build-jmn26 (`_audit/2026-11-25-build-jmn26.md`,
+section 5.2). Row: `J 163`. The control is drawn on real markup: live session
+8's recommended jobs draws, in `div[data-view-name="jobs-search-list-feedback"]`,
+the sentence `Your feedback helps us improve job recommendations.` and two
+buttons whose texts are `Are you finding what you<U+2019>re looking for? No`
+and `... Yes`, by keyed shape. OUTSIDE-THE-PRODUCT-PURPOSE keeps the row
+because it tunes his recommendations. But the press is ONE-SHOT: no inverse
+exists to build, what it leaves is unmeasured, and so nothing on the page can
+verify it. HIS-OWN-CURATION-NOT-OUTWARD builds curation with its inverse and
+proves it in one session, which this act cannot meet, and
+OUTWARD-ACTS-NEED-THE-OPERATOR sends an irreversible act to him. The
+question: is it built as his own curation whose first press, at his order,
+captures what LinkedIn leaves (an undo, if one is drawn, becoming its
+inverse) -- or as a one-shot write fired only on his order and verified by
+nothing but its receipt -- or held until he asks for it?
+
 ## 8. Preconditions and purposes
 
 PRECONDITION rows stay GAP; each waits on something he does not hold.

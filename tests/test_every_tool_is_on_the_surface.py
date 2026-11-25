@@ -457,4 +457,9 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # EIGHTY-ONE AT LANE BUILD-P26'S MERGE OF THAT BRANCH, 2026-11-25: the
     # follower list beside the eighty, measured off the merged registry, not
     # summed.
-    assert len(_tool_names()) == 81
+    # EIGHTY-TWO AT LANE BUILD-JMN26 (2026-11-25): the search-alert pair, two
+    # writes, measured off this branch's registry.
+    # EIGHTY-THREE AT INTEGRATION 3'S MERGE OF LANE BUILD-JMN26, 2026-11-26: the
+    # search-alert pair beside the eighty-one, measured off the merged registry,
+    # not summed.
+    assert len(_tool_names()) == 83

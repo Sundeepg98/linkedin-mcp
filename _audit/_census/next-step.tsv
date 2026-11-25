@@ -1,8 +1,7 @@
 row	slice	dir	class	next	basis	source
 J 16	J	R	-	CAPTURE:admit-jobs-search-results-keywords	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/jobs/search-results/?keywords=placeholder ; RULING:READ-PAST-AN-ACT-SUBSTRING
-J 19	J	W	-	BUILD:tests/fixtures/synthetic/jobs_home_recent_searches.html	MEASURED	tests/fixtures/synthetic/jobs_home_recent_searches.html ; RULING:OUTWARD-CLASSES-BUILT-BEHIND-GRANTS
+J 19	J	W	-	BUILD:tests/fixtures/live2/j18.html	MEASURED	_audit/2026-11-25-build-jmn26.md::What the press opens -- a confirmation, or nothing ; RULING:OUTWARD-CLASSES-BUILT-BEHIND-GRANTS
 J 28	J	W	-	TARGET:a job posting he names to report as closed	NAMED	_audit/2026-09-28-rulings-build-classes.md::a report is never fired for a proof unless he names a real item to report
-J 31	J	W	-	BUILD:tests/fixtures/live2/j107.html	MEASURED	tests/fixtures/live2/j107.html ; RULING:HIS-OWN-CURATION-NOT-OUTWARD
 J 32	J	W	-	TARGET:a company Page he names, to create a job alert from	INFERRED	RULING:OPERATOR-NAMES-THE-TARGET ; J 32
 J 33	J	W	-	TARGET:a job alert of his he names	INFERRED	RULING:HIS-OWN-CURATION-NOT-OUTWARD ; J 33
 J 34	J	W	-	TARGET:a job alert of his he names	INFERRED	RULING:HIS-OWN-CURATION-NOT-OUTWARD ; J 33
@@ -11,10 +10,10 @@ J 36	J	W	-	SIBLING:lane-S	NAMED	_audit/_census/jobs-directions.tsv::Alert delive
 J 37	J	R+W	-	CAPTURE:jobs-alerts-manager	NAMED	RULING:CAPTURE-PRESS-UNDER-PROBE-RULE ; _audit/_census/jobs-directions.tsv::whether that list carries EVERY alert is unmeasured
 J 41	J	W	-	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 J 52	J	R	-	CAPTURE:admit-jobs-tracker-stage-clicked-apply	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/jobs-tracker/?stage=clicked_apply ; RULING:READ-PAST-AN-ACT-SUBSTRING
-J 53	J	W	-	BUILD:tests/fixtures/jobs_tracker_row.html	MEASURED	tests/fixtures/jobs_tracker_row.html ; RULING:HIS-OWN-CURATION-NOT-OUTWARD
+J 53	J	W	-	CAPTURE:C-JMN-1	MEASURED	_audit/2026-11-25-build-jmn26.md::No capture of the Archived tab with a row exists ; RULING:HIS-OWN-CURATION-NOT-OUTWARD
 J 54	J	W	-	TARGET:a tracked job of his he names	INFERRED	RULING:HIS-OWN-CURATION-NOT-OUTWARD ; J 54
-J 55	J	W	-	BUILD:tests/fixtures/jobs_tracker_row.html	MEASURED	tests/fixtures/jobs_tracker_row.html ; RULING:HIS-OWN-CURATION-NOT-OUTWARD
-J 56	J	R	-	BUILD:tests/fixtures/jobs_tracker_row.html	NAMED	_audit/_census/jobs-directions.tsv::twice on the committed jobs_tracker_row.html ; RULING:VIEW-SWITCH-PRESS-RESTORED
+J 55	J	W	-	TARGET:a tracked job of his he names	MEASURED	_audit/2026-11-25-build-jmn26.md::CAPTURE-PRESS-UNDER-PROBE-RULE never opens ; RULING:HIS-OWN-CURATION-NOT-OUTWARD
+J 56	J	R	-	CAPTURE:C-JMN-2	MEASURED	_audit/2026-11-25-build-jmn26.md::options have never been drawn open ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE ; RULING:VIEW-SWITCH-PRESS-RESTORED
 J 60	J	W	-	TARGET:a job with a multi-step Easy Apply he names to apply to	NAMED	_audit/_census/jobs.md::Easy Apply, MULTI-STEP form (a posting that draws Next) ; RULING:OPERATOR-NAMES-THE-TARGET
 J 61	J	W	-	TARGET:a job with a multi-step Easy Apply he names to apply to	NAMED	_audit/_census/jobs.md::Easy Apply, MULTI-STEP form (a posting that draws Next) ; RULING:OPERATOR-NAMES-THE-TARGET
 J 62	J	W	-	TARGET:a job with a multi-step Easy Apply he names to apply to	NAMED	_audit/_census/jobs.md::Easy Apply, MULTI-STEP form (a posting that draws Next) ; RULING:OPERATOR-NAMES-THE-TARGET
@@ -36,7 +35,7 @@ J 80	J	W	-	SIBLING:J 79	INFERRED	J 79
 J 81	J	W	-	SIBLING:lane-S	NAMED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD ; RULING:CREDENTIAL-SETTINGS-NEED-THE-OPERATOR
 J 82	J	R	-	PRECONDITION:his Easy Apply daily limit reached (observable only then)	NAMED	RULING:APPLY-FLOW-IS-THE-APPLICATION
 J 83	J	W	-	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
-J 84	J	W	-	BUILD:tests/fixtures/live2/j107.html	MEASURED	tests/fixtures/live2/j107.html ; RULING:HIS-OWN-CURATION-NOT-OUTWARD
+J 84	J	W	-	TARGET:a job in a search of his he names to hide	MEASURED	_audit/2026-11-25-build-jmn26.md::on 7 of 7 cards its aria-label is that card's own title ; RULING:HIS-OWN-CURATION-NOT-OUTWARD
 J 85	J	W	-	SIBLING:J 84	NAMED	_audit/2026-09-28-rulings-build-classes.md::the act is proven only through that undo
 J 86	J	W	-	SIBLING:P I14	INFERRED	RULING:D6-CAPABILITY-OVER-AFFORDANCE ; P I14
 J 87	J	W	-	ADMIT:https://www.linkedin.com/mypreferences/d/categories/privacy	INFERRED	_audit/_census/jobs.md::awaiting admission by name: the settings page that holds the record ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
@@ -53,14 +52,13 @@ J 98	J	W	-	SIBLING:P I13	INFERRED	P I13
 J 99	J	W	-	SIBLING:P I12	NAMED	_audit/_census/jobs.md::Container: `P I12`
 J 100	J	W	-	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 J 106	J	R	-	CAPTURE:admit-company-org-about	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/company/placeholder-org/about/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
-J 108	J	R	-	BUILD:tests/fixtures/live2/company_people.html	MEASURED	tests/fixtures/live2/company_people.html ; _audit/_census/read-addresses.tsv::https://www.linkedin.com/company/placeholder-org/people/
 J 109	J	R	-	CAPTURE:admit-company-org-life	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/company/placeholder-org/life/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
-J 110	J	R	-	BUILD:tests/fixtures/synthetic/company_page_follow.html	INFERRED	RULING:THIRD-PARTY-TEXT-AT-RUNTIME ; _audit/_census/jobs-directions.tsv::Home IS the Page root
+J 110	J	R	-	BUILD:tests/fixtures/live9/company_root_posts_view.html	MEASURED	_audit/2026-11-25-build-jmn26.md::So the Home half is delivered unfired ; RULING:THIRD-PARTY-TEXT-AT-RUNTIME
 J 111	J	R	-	CAPTURE:admit-company-org-products	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/company/placeholder-org/products/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
 J 112	J	R	-	TARGET:a school Page he names	NAMED	_audit/_census/read-addresses.tsv::UNDER THE WHO/WHICH RULE, EXTENDED ; RULING:OPERATOR-NAMES-THE-TARGET
 J 113	J	R	-	CAPTURE:admit-company-org-insights-insighttype-headcount	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/company/placeholder-org/insights/?insightType=HEADCOUNT ; RULING:READ-PAST-AN-ACT-SUBSTRING
 J 114	J	R	-	CAPTURE:admit-company-org-insights-insighttype-headcount	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/company/placeholder-org/insights/?insightType=HEADCOUNT ; RULING:READ-PAST-AN-ACT-SUBSTRING
-J 115	J	R+W	-	BUILD:tests/fixtures/live8/posting.html	NAMED	_audit/2026-09-23-live-lane-session-1.md::one posting, raw and skeleton
+J 115	J	R+W	-	CAPTURE:C-JMN-3	MEASURED	_audit/2026-11-25-build-jmn26.md::NEITHER CAPTURED POSTING DRAWS ONE ; RULING:OPERATOR-NAMES-THE-TARGET
 J 116	J	R	-	ADMIT:https://www.linkedin.com/preload/guideOverlay/?interop=guideOverlay&query=Show+match+details	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/preload/guideOverlay/?interop=guideOverlay&query=Show+match+details ; RULING:READ-PAST-AN-ACT-SUBSTRING
 J 117	J	R	-	ADMIT:https://www.linkedin.com/preload/guideOverlay/?interop=guideOverlay&query=Show+match+details	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/preload/guideOverlay/?interop=guideOverlay&query=Show+match+details ; RULING:READ-PAST-AN-ACT-SUBSTRING
 J 118	J	R	-	ADMIT:https://www.linkedin.com/preload/guideOverlay/?interop=guideOverlay&query=Show+match+details	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/preload/guideOverlay/?interop=guideOverlay&query=Show+match+details ; RULING:READ-PAST-AN-ACT-SUBSTRING
@@ -93,7 +91,7 @@ J 156	J	R+W	-	CAPTURE:admit-learning-career-journey	MEASURED	_audit/_census/jobs
 J 157	J	W	-	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 J 159	J	R	-	ADMIT:https://www.linkedin.com/ad-library/search/	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/ad-library/search/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
 J 160	J	R	-	CAPTURE:admit-explore-career-insights	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/explore-career-insights/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
-J 163	J	W	-	BUILD:tests/fixtures/live8/recommended.html	NAMED	_audit/2026-09-23-live-lane-session-1.md::J 163, if the pair
+J 163	J	W	-	RULING:Q-ONE-SHOT-FEEDBACK	MEASURED	_audit/2026-11-25-build-jmn26.md::THE PRESS IS ONE-SHOT. There is no inverse to build ; RULING:HIS-OWN-CURATION-NOT-OUTWARD ; RULING:OUTSIDE-THE-PRODUCT-PURPOSE
 J 165	J	R	-	CAPTURE:admit-company-org-events	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/company/placeholder-org/events/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
 J 166	J	R	-	CAPTURE:admit-products-product	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/products/placeholder-product/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
 J 167	J	R	-	CAPTURE:admit-showcase-showcase	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/showcase/placeholder-showcase/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
@@ -123,7 +121,7 @@ M C24	M	W	R3	TARGET:a comment on one of his posts, named by him	INFERRED	RULING:
 M C26	M	W	R3	TARGET:a comment he names	INFERRED	RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS ; M C26
 M C27	M	W	R3	SIBLING:lane-U	NAMED	_audit/2026-09-28-rulings-build-classes.md::`FILE-UPLOAD-UNSANCTIONED` is therefore a stale label.
 M C28	M	W	R3	TARGET:a member he names to mention	INFERRED	RULING:MENTION-COMPOSITION-RULING ; RULING:OPERATOR-NAMES-THE-TARGET
-M C29	M	R	-	BUILD:tests/fixtures/live2/own_post.html	MEASURED	tests/fixtures/live2/own_post.html ; RULING:VIEW-SWITCH-PRESS-RESTORED
+M C29	M	R	-	CAPTURE:C-JMN-4	MEASURED	_audit/2026-10-10-lane-b3-messaging-build.md::the options render only on open ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE ; RULING:VIEW-SWITCH-PRESS-RESTORED
 M C30	M	W	R3	TARGET:a comment of his he names to edit	INFERRED	RULING:OPERATOR-NAMES-THE-TARGET ; M C30
 M C31	M	W	R3	TARGET:a comment of his he names for deletion	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::| C7 | `delete_own_comment` ; RULING:OPERATOR-NAMES-THE-TARGET
 M C33	M	W	R3	CAPTURE:own-post-reactions	INFERRED	linkedin_server/press.py::"/feed/update/", ; RULING:OUTWARD-CLASSES-BUILT-BEHIND-GRANTS
@@ -175,7 +173,7 @@ M C91	M	W	R3	SIBLING:M C32	INFERRED	RULING:D6-CAPABILITY-OVER-AFFORDANCE ; M C32
 M C92	M	W	R3	TARGET:an event he names	NAMED	_audit/_census/read-addresses.tsv::ADMITTED 2026-09-23 BY A REVIEW: COMMIT (lane L1): one event by its NUMERIC id ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
 M C93	M	R	-	CAPTURE:admit-search-results-content	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/search/results/content/?keywords=placeholder ; RULING:CONTENT-VERTICAL-NOT-ALL-RESULTS
 M C94	M	W	R2	TARGET:a post and a connection he names	INFERRED	RULING:OPERATOR-NAMES-THE-TARGET ; M C94
-M C97	M	W	R3	BUILD:tests/fixtures/notifications.html	MEASURED	tests/fixtures/notifications.html ; RULING:HIS-OWN-CURATION-NOT-OUTWARD
+M C97	M	W	R3	RULING:Q-NOTIFICATION-KEY	MEASURED	_audit/2026-11-25-build-jmn26.md::WORD-MEASURED ON TODAY'S CAPTURES ; RULING:PAGE-MAY-VETO-NEVER-SUPPLY
 M C100	M	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 M C101	M	R	-	ADMIT:https://www.linkedin.com/newsletters/1234567890/	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/newsletters/1234567890/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
 M M2	M	W	R2	TARGET:a non-connection he names (the act stops at the composer)	NAMED	_audit/2026-09-24-lane-l5-messaging.md::| C-P5 | the composer a NON-connection gets ; RULING:OPERATOR-NAMES-THE-TARGET
@@ -288,7 +286,7 @@ N 97	N	R	-	ADMIT:https://www.linkedin.com/mynetwork/	INFERRED	_audit/_census/rea
 N 98	N	W	R3	ADMIT:https://www.linkedin.com/mynetwork/	INFERRED	_audit/_census/read-addresses.tsv::the general R1 badge-cost ruling ; RULING:READ-PAST-AN-ACT-SUBSTRING
 N 99	N	R	-	TARGET:a school Page he names	NAMED	_audit/_census/read-addresses.tsv::UNDER THE WHO/WHICH RULE, EXTENDED ; RULING:OPERATOR-NAMES-THE-TARGET
 N 100	N	R	-	TARGET:a school Page he names	NAMED	_audit/_census/read-addresses.tsv::UNDER THE WHO/WHICH RULE, EXTENDED ; RULING:OPERATOR-NAMES-THE-TARGET
-N 102	N	R	-	BUILD:tests/fixtures/live2/company_people.html	MEASURED	tests/fixtures/live2/company_people.html ; _audit/_census/read-addresses.tsv::https://www.linkedin.com/company/placeholder-org/people/
+N 102	N	R	-	SIBLING:J 108	MEASURED	J 108 ; _audit/2026-11-25-build-jmn26.md::THE TWO BRANCHES BUILT ONE CAPABILITY
 N 103	N	R	-	SIBLING:lane-NP	MEASURED	_audit/2026-10-10-lane-b2-network-build.md::A third first render without the section
 N 104	N	R	-	RULING:Q-ORG-IDENTITY	MEASURED	_audit/2026-10-10-lane-b2-network-build.md::every segment carries letters
 N 110	N	W	R3	ADMIT:https://www.linkedin.com/mynetwork/import-contacts/	INFERRED	_audit/_census/write-classes.tsv::queued:CONTACTS-MANAGER-ADMISSION ; RULING:READ-PAST-AN-ACT-SUBSTRING

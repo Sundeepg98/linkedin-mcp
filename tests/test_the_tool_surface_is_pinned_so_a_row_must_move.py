@@ -117,6 +117,9 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     # Lane B4, 2026-10-10 (census J 161): the similar-jobs alert pair.
     "linkedin_set_similar_jobs_alert": ("confirm_token", "job_id"),
     "linkedin_unset_similar_jobs_alert": ("confirm_token", "job_id"),
+    # Lane build-jmn26, 2026-11-25 (census J 31): the search-alert pair.
+    "linkedin_set_search_job_alert": ("confirm_token", "keywords", "location"),
+    "linkedin_unset_search_job_alert": ("confirm_token", "keywords", "location"),
     "linkedin_message_from_profile": ("confirm_token", "profile", "text"),
     "linkedin_my_activity_items": (),
     "linkedin_my_applications": ("limit",),
@@ -719,8 +722,18 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: parameter, beside the eighty and 128, counted on the merged registry,
 #: never summed. THE CENSUS DECISION, in lane build-p26's census commit:
 #: `P L2b` GAP -> COVERED-UNFIRED (`_audit/2026-11-25-build-p26.md`).
-PINNED_TOOL_COUNT = 81
-PINNED_PARAMETER_COUNT = 128
+#: **AT LANE BUILD-JMN26 (2026-11-25): 82 TOOLS AND 134 PARAMETERS** --
+#: `linkedin_set_search_job_alert` and `linkedin_unset_search_job_alert`
+#: (`keywords`, `location`, `confirm_token` each) beside the eighty and 128,
+#: counted off `mcp.list_tools()`, never summed. THE CENSUS DECISION, IN THE
+#: SAME COMMIT: `J 31` GAP -> COVERED-UNFIRED on them, never fired. See
+#: `_audit/2026-11-25-build-jmn26.md`.
+#: **AT INTEGRATION 3'S MERGE OF LANE BUILD-JMN26, 2026-11-26: 83 TOOLS AND 134
+#: PARAMETERS** -- the search-alert pair (three parameters each) beside
+#: build-p26's eighty-one tools and 128 parameters (its follower list takes
+#: none), counted on the merged registry, never summed.
+PINNED_TOOL_COUNT = 83
+PINNED_PARAMETER_COUNT = 134
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:
