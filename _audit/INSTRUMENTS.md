@@ -12427,6 +12427,43 @@ stubbed to return them), `resolve_instruments.py` (this register's 95/98 merge
 union) and the pytest banner-shape probe. Each answered one question once; the
 answers are in `_audit/2026-10-26-lane-ci-defect.md`, "Second pass".
 
+## 99. A GUARD IS SHOWN FAILING BY ITS OWN MUTATION, AND THE BYTECODE GOES BEFORE EVERY RUN (apply-26, 2026-11-25)
+
+### 99.1 A MUTATION SWEEP CAN RUN THE PREVIOUS MUTATION
+
+The multi-step walker's guards were each disabled by one exact-string edit of
+their module, only their own tests run, and the module restored byte for byte.
+The first sweep reported one guard surviving, and the guard was sound: two
+consecutive mutations shortened the file by the same 17 characters inside one
+second, so the `.pyc` written for the first carried the size and the
+whole-second mtime of the second's source, and Python loaded it -- the test ran
+the PREVIOUS mutation's code and passed. Deleting the module's bytecode before
+every run, and writing none (`PYTHONDONTWRITEBYTECODE=1`), turned the survivor
+red: 40 of 40. The final sweep is 79 of 79, and one of its reds was earned the
+other way: a guard that survived its mutation because a sibling check always
+refused first, so it could never be the one to fire. It was moved, not kept.
+
+    A MUTATION RUNNER THAT LEAVES BYTECODE ON DISK MEASURES WHICHEVER
+    VERSION PYTHON BELIEVES IS CURRENT. DELETE THE MODULE'S .pyc BEFORE
+    EACH RUN; SIZE AND SECONDS ARE NOT AN IDENTITY.
+
+### 99.2 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `tests/test_apply_answers.py` -- the shared JSON answer bank is found by its runtime order (never by `JOBHUNT_HOME`, which keeps jobcore's meaning), reads only confirmed, answers only a wording its class lists in its own kind, platform and option set, never serves an expired answer or lets a never-auto one fire unseen, refuses a malformed file whole with no value in the refusal, imports Naukri's cache as drafts only, and is read fresh | mutations A1-A37 of the record's section 2.6, each red on its named test; its jobcore parity test runs jobcore's own `config.locate`, found as the vendored-copy drift guard finds jobcore, and fails rather than skips without it (T1) |
+| `tests/test_apply_walk.py` -- the walker refuses every unmeasured shape naming what it saw, stops on any question his bank cannot answer, never presses Submit in a dry walk and presses it once on confirm, opens no flow before its inverse is measured, and reads the Draft tab on its real skeleton | mutations W1-W43, each red on its named test |
+
+### 99.3 DECLARED DISPOSABLE
+
+The lane's scratch tools: the mutation runner (its bytecode rule is kept in
+99.1), the two bank-template generators and the move to the ruled location (each
+wrote only over the lane's own unconfirmed copy; the move asked pipeline-26's
+guard first and removed the old copy only after a byte-for-byte check),
+the baseline-line and queue-line appenders, and the
+read-only evidence sweep that inventoried every apply capture on the box. Each
+answered one question once; the answers are in `_audit/2026-11-25-apply.md`.
+
 ## 100. A MERGED CHILD'S TESTS ARE SHOWN FAILING AGAIN ON THE TREE THEY JOIN (build-p26, 2026-11-25)
 
 **Registered 2026-11-25.** Full record: `_audit/2026-11-25-build-p26.md`.

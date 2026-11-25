@@ -27,8 +27,8 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 284 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 244 |
+| audit documents git tracks under `_audit` | 285 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 245 |
 | distinct dates | 21 |
 | documents with no level-1 heading | 2 |
 | `CORRECTS:` marker lines | 129 |
@@ -39,7 +39,7 @@ are listed as `(undated)`; no date is taken from git history, because
 | documents at either end of a cross-document edge | 107 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
-| documents no correction marker touches at all | 175 |
+| documents no correction marker touches at all | 176 |
 | blockquoted markers naming ANOTHER document | 0 |
 | edges missing one of their two markers | 0 |
 | edges declared a different number of times in each direction | 2 |
@@ -1898,6 +1898,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-10-26 | [2026-10-26-lane-ci-defect.md](2026-10-26-lane-ci-defect.md) | 2026-10-26 lane-ci defect -- `wait` printed only the exit-code banner on a red run |  |
 | 2026-10-26 | [2026-10-26-ledger.md](2026-10-26-ledger.md) | Ledger pass, 2026-10-26: B5's six group rows onto their captures, B3's thirteen lines onto their real next steps |  |
 | 2026-11-25 | [2026-11-25-admit26.md](2026-11-25-admit26.md) | Lane admit26: the ledger's ADMIT rows, address by address | corrects x1 |
+| 2026-11-25 | [2026-11-25-apply.md](2026-11-25-apply.md) | Lane apply-26: multi-step Easy Apply, phase A (offline) |  |
 | 2026-11-25 | [2026-11-25-build-jmn26.md](2026-11-25-build-jmn26.md) | build-jmn26, 2026-11-25: the J, M and N rows the ledger marked BUILD | corrects x1 |
 | 2026-11-25 | [2026-11-25-build-p26.md](2026-11-25-build-p26.md) | Lane build-p26, 2026-11-25: the profile slice's twelve BUILD rows -- one reader merged, eleven next steps re-pointed | corrects x1 |
 

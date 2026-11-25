@@ -3,6 +3,7 @@
   "readers": {
     "analytics_hub:read_analytics_hub": "clean",
     "anchors:read_anchors": "not_driven:read the page and returned nothing the page made",
+    "apply_walk:read_draft_state": "not_driven:returned without reading the page",
     "attachments:attachment_send_gate": "clean",
     "attachments:held_in_place": "clean",
     "attachments:read_reply_inputs": "clean",
