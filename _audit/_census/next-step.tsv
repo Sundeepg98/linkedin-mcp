@@ -295,14 +295,14 @@ N 116	N	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 N 117	N	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 N 119	N	W	R3	TARGET:a 1st-degree connection he names, to ask for a recommendation	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::| C4 | `request_recommendation` ; RULING:OPERATOR-NAMES-THE-TARGET
 N 120	N	W	R3	TARGET:a 1st-degree connection he names, to recommend	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::| C5 | `give_recommendation` ; RULING:OPERATOR-NAMES-THE-TARGET
-N 121	N	W	R3	ADMIT:https://www.linkedin.com/in/me/details/recommendations/	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::(his recommendations section, refused by allowlist silence until admitted) ; RULING:READ-PAST-AN-ACT-SUBSTRING
-N 122	N	W	R3	ADMIT:https://www.linkedin.com/in/me/details/recommendations/	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::(his recommendations section, refused by allowlist silence until admitted) ; RULING:READ-PAST-AN-ACT-SUBSTRING
-N 123	N	W	R3	ADMIT:https://www.linkedin.com/in/me/details/recommendations/	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::(his recommendations section, refused by allowlist silence until admitted) ; RULING:READ-PAST-AN-ACT-SUBSTRING
+N 121	N	W	R3	CAPTURE:admit-in-me-details-recommendations	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::(his recommendations section, refused by allowlist silence until admitted) ; RULING:READ-PAST-AN-ACT-SUBSTRING
+N 122	N	W	R3	CAPTURE:admit-in-me-details-recommendations	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::(his recommendations section, refused by allowlist silence until admitted) ; RULING:READ-PAST-AN-ACT-SUBSTRING
+N 123	N	W	R3	CAPTURE:admit-in-me-details-recommendations	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::(his recommendations section, refused by allowlist silence until admitted) ; RULING:READ-PAST-AN-ACT-SUBSTRING
 N 124	N	W	R3	TARGET:a 1st-degree connection he names, to recommend	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::| C5 | `give_recommendation` ; RULING:OPERATOR-NAMES-THE-TARGET
-N 125	N	W	R3	ADMIT:https://www.linkedin.com/in/me/details/recommendations/	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::(his recommendations section, refused by allowlist silence until admitted) ; RULING:READ-PAST-AN-ACT-SUBSTRING
-N 126	N	W	R3	ADMIT:https://www.linkedin.com/in/me/details/recommendations/	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::(his recommendations section, refused by allowlist silence until admitted) ; RULING:READ-PAST-AN-ACT-SUBSTRING
-N 127	N	W	R3	ADMIT:https://www.linkedin.com/in/me/details/recommendations/	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::(his recommendations section, refused by allowlist silence until admitted) ; RULING:READ-PAST-AN-ACT-SUBSTRING
-N 128	N	W	R3	ADMIT:https://www.linkedin.com/in/me/details/recommendations/	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::(his recommendations section, refused by allowlist silence until admitted) ; RULING:READ-PAST-AN-ACT-SUBSTRING
+N 125	N	W	R3	CAPTURE:admit-in-me-details-recommendations	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::(his recommendations section, refused by allowlist silence until admitted) ; RULING:READ-PAST-AN-ACT-SUBSTRING
+N 126	N	W	R3	CAPTURE:admit-in-me-details-recommendations	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::(his recommendations section, refused by allowlist silence until admitted) ; RULING:READ-PAST-AN-ACT-SUBSTRING
+N 127	N	W	R3	CAPTURE:admit-in-me-details-recommendations	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::(his recommendations section, refused by allowlist silence until admitted) ; RULING:READ-PAST-AN-ACT-SUBSTRING
+N 128	N	W	R3	CAPTURE:admit-in-me-details-recommendations	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::(his recommendations section, refused by allowlist silence until admitted) ; RULING:READ-PAST-AN-ACT-SUBSTRING
 N 137	N	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 N 138	N	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 N 139	N	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
@@ -414,15 +414,15 @@ P E4	P	W	R3	TARGET:a 1st-degree connection he names, whose skill he endorses	NAM
 P E5	P	W	R3	TARGET:a 1st-degree connection he names, whose skill he endorses	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::| C3 | `endorse_skill` ; RULING:OPERATOR-NAMES-THE-TARGET
 P E6	P	W	R3	PRECONDITION:an endorsement he has received	NAMED	_audit/_census/write-classes.tsv::queued:NO-ENDORSEMENT-DRAWN
 P E8	P	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
-P F1	P	R	-	ADMIT:https://www.linkedin.com/in/me/details/recommendations/	MEASURED	_audit/2026-10-10-lane-b1-profile-build.md::/in/me/details/recommendations/ ; _audit/_census/read-addresses.tsv::https://www.linkedin.com/in/me/details/recommendations/=>False
+P F1	P	R	-	CAPTURE:admit-in-me-details-recommendations	MEASURED	_audit/2026-10-10-lane-b1-profile-build.md::/in/me/details/recommendations/ ; _audit/_census/read-addresses.tsv::https://www.linkedin.com/in/me/details/recommendations/=>True
 P F2	P	W	R3	TARGET:a 1st-degree connection he names, to ask for a recommendation	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::| C4 | `request_recommendation` ; RULING:OPERATOR-NAMES-THE-TARGET
 P F3	P	W	R3	TARGET:a 1st-degree connection he names, to recommend	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::| C5 | `give_recommendation` ; RULING:OPERATOR-NAMES-THE-TARGET
 P F4	P	W	R3	TARGET:a 1st-degree connection he names, to recommend	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::| C5 | `give_recommendation` ; RULING:OPERATOR-NAMES-THE-TARGET
-P F5	P	W	R3	ADMIT:https://www.linkedin.com/in/me/details/recommendations/	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::(his recommendations section, refused by allowlist silence until admitted) ; RULING:READ-PAST-AN-ACT-SUBSTRING
-P F6	P	W	R3	ADMIT:https://www.linkedin.com/in/me/details/recommendations/	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::(his recommendations section, refused by allowlist silence until admitted) ; RULING:READ-PAST-AN-ACT-SUBSTRING
-P F7	P	W	R3	ADMIT:https://www.linkedin.com/in/me/details/recommendations/	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::(his recommendations section, refused by allowlist silence until admitted) ; RULING:READ-PAST-AN-ACT-SUBSTRING
-P F8	P	W	R3	ADMIT:https://www.linkedin.com/in/me/details/recommendations/	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::(his recommendations section, refused by allowlist silence until admitted) ; RULING:READ-PAST-AN-ACT-SUBSTRING
-P F9	P	W	R3	ADMIT:https://www.linkedin.com/in/me/details/recommendations/	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::(his recommendations section, refused by allowlist silence until admitted) ; RULING:READ-PAST-AN-ACT-SUBSTRING
+P F5	P	W	R3	CAPTURE:admit-in-me-details-recommendations	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::(his recommendations section, refused by allowlist silence until admitted) ; RULING:READ-PAST-AN-ACT-SUBSTRING
+P F6	P	W	R3	CAPTURE:admit-in-me-details-recommendations	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::(his recommendations section, refused by allowlist silence until admitted) ; RULING:READ-PAST-AN-ACT-SUBSTRING
+P F7	P	W	R3	CAPTURE:admit-in-me-details-recommendations	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::(his recommendations section, refused by allowlist silence until admitted) ; RULING:READ-PAST-AN-ACT-SUBSTRING
+P F8	P	W	R3	CAPTURE:admit-in-me-details-recommendations	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::(his recommendations section, refused by allowlist silence until admitted) ; RULING:READ-PAST-AN-ACT-SUBSTRING
+P F9	P	W	R3	CAPTURE:admit-in-me-details-recommendations	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::(his recommendations section, refused by allowlist silence until admitted) ; RULING:READ-PAST-AN-ACT-SUBSTRING
 P G2	P	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 P G3	P	W	R3	SIBLING:lane-U	INFERRED	linkedin_server/uploads.py ; _audit/2026-09-28-rulings-build-classes.md::`FILE-UPLOAD-UNSANCTIONED` is therefore a stale label.
 P G4	P	W	R3	CAPTURE:admit-in-me-details-featured	INFERRED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/in/me/details/featured/ ; RULING:SELF-PROFILE-EDITS-NOT-OUTWARD

@@ -2722,6 +2722,37 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # no substring. Editing a preference is a write with its own spec; the
     # press gate refuses every control here.
     re.compile(r"^https://www\.linkedin\.com/jobs/preferences\?viewType=SEEKING_PREFERENCES$"),
+    # ======================================================================
+    # LANE ADMIT5-26 (2026-11-26) -- FIVE PAGES OF HIS OWN ACCOUNT, EACH ON A
+    # RULING THE ORCHESTRATOR HAS ALREADY MADE; this lane implements them and
+    # decides none. Record: `_audit/2026-11-26-admit5-26.md`, which carries
+    # each line's red-before and green-after evidence. Pinned, every control
+    # shown failing, in `tests/test_admit5_26_admissions.py` (lane admit26's
+    # harness, applied unchanged). Every line is exact and anchored; any
+    # paired exemption sits in a LANE ADMIT5-26 block at the end of
+    # `_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS`; the forbidden tuple is
+    # unchanged. Nothing in the package composes any of these addresses yet:
+    # each line decides what MAY be opened, and the first load is a capture's.
+    #
+    # His recommendations detail page (census N 121 to N 123, N 125 to N 128,
+    # P F1, P F5 to P F9). RULED: RECOMMENDATIONS-DETAIL-PAGE-ADMITTED (the
+    # orchestrator, 2026-11-25): "ADMIT the named /in/me/details/
+    # recommendations/ line (interests-page precedent); the capture records
+    # the landing." The spelling is NAMED, never drawn (session 8's first
+    # render of /in/me/ holds no Recommendations section), so this is the
+    # interests page's case exactly: its OWN line, never a fourth word in the
+    # measured skills|experience|education alternation above, the /in/me/
+    # form only, and a redirect on the first load is a finding the capture
+    # records, not a reason to drop the line. It trips no forbidden
+    # substring: refused by allowlist silence alone until now
+    # (READ-PAST-AN-ACT-SUBSTRING's second clause). NO QUERY: a received or
+    # given tab spelled as a query is a later admission, once a capture
+    # draws it. The page lists other people, so a reader owes
+    # NAMES-AT-RUNTIME and PEOPLE-DATA-MITIGATIONS (`recommendations.py`, the
+    # name-free shaper, ships unwired); writing, requesting or hiding a
+    # recommendation is a write with its own row, and the press gate refuses
+    # every control here.
+    re.compile(r"^https://www\.linkedin\.com/in/me/details/recommendations/?$"),
 )
 
 #: Substrings that must never appear in a navigation target, checked before

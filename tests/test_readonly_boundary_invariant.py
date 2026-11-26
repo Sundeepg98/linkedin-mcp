@@ -1973,7 +1973,15 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # his job-seeker preferences page in the one spelling LinkedIn draws, with
     # its one query value, a named page in its own commit, no exemption --
     # every other key byte-identical.
-    "_ALLOWED_URL_PATTERNS": "17f048856f525ff3",
+    #
+    # 17f048856f525ff3 until 2026-11-26 (lane admit5-26, its first commit):
+    # one anchored line, his recommendations detail page in the /in/me/ form,
+    # on RECOMMENDATIONS-DETAIL-PAGE-ADMITTED (allowlist silence alone, no
+    # exemption). ATTRIBUTION, with this file's ast_digest: readonly.py at the
+    # lane's base 091f7d3 hashes to the prior pin on every key, and only this
+    # key moved (17 of 18 byte-identical). Record:
+    # _audit/2026-11-26-admit5-26.md.
+    "_ALLOWED_URL_PATTERNS": "2e7f989cb033beb7",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     # 419e64a3cd92ec7e until the same REVIEW: commit: a third entry, excusing
     # exactly {"/follow"} for exactly the anchored follower-list address.
