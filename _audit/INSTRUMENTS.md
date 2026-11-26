@@ -12915,17 +12915,26 @@ package passing, and an extra root read. Its deletion assertion was red on
 
 ### 109.2 The per-call navigation ceiling
 
-`linkedin_server/call_ceiling.py`: a fastmcp middleware arms a per-call
-budget for every `tools/call`. `LinkedInBrowser.goto` counts each load
-against it (`count_load`) after its doors and before its rate slot, and it
-refuses the fourth load unmade,
-naming the count, the ceiling and the page family. The one declared fan-out
-is the search's places, capped at `jobfilter.MAX_LOCATIONS`; its single call
-site is pinned. Outside a tool call nothing is counted: the live runner loads
-many pages in one browser session, which is why the scope is the tool call
-and not the session. `tests/test_navigation_ceiling.py` drives a planted tool
-through a real fastmcp `Client`. On the tree before `goto` spent, its fourth
-load reached the page, and 7 of 12 tests failed.
+`linkedin_server/call_ceiling.py` (ruled NAVIGATION-CEILING-PER-TOOL-CALL):
+a fastmcp middleware arms a per-call budget for every `tools/call`.
+`LinkedInBrowser.goto` counts each load against it (`count_load`) after its
+doors and before its rate slot, and it refuses the fourth load unmade,
+naming the tool, the count, the ceiling and the page family.
+
+* The one declared fan-out is the search's places, capped at
+  `jobfilter.MAX_LOCATIONS`. Its single call site is pinned, and the pin is
+  shown failing by a planted second caller in three spellings.
+* Outside a tool call nothing is counted. The live runner loads many pages
+  in one browser session, which is why the scope is the tool call and not
+  the session.
+* `tests/test_navigation_ceiling.py` drives a planted tool through a real
+  fastmcp `Client`. On the tree before `goto` counted, its fourth load
+  reached the page, and 7 of 12 tests failed.
+* EVERY REGISTERED TOOL is then called through the middleware with a
+  recording probe. A server without the middleware is the control: its tool
+  is listed and never reached. A second `FastMCP` in the package is the
+  registration path the census could not list, and it is caught
+  structurally, with its own planted control.
 
     A CEILING NOTHING COUNTS IS A SENTENCE. COUNT IT WHERE EVERY LOAD
     PASSES, SCOPE IT TO WHAT THE RULING BOUNDS, AND NAME THE ONE EXCEPTION.
