@@ -1734,7 +1734,32 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # readonly.py minus exactly the 16 lines of those entries and their
     # argument hashes to c51296e034af63eb; every other digest is unchanged.
     # A PERMISSION was declared; no refusal moved.
-    "SANCTIONED_MUTATIONS": "b7ef8ab795d32162",
+    # RE-FROZEN 2026-11-26 (lane build-msg2, census M M26, M M27, M M29,
+    # M M31): ONE digest moved, SANCTIONED_MUTATIONS c51296e034af63eb ->
+    # 7671871060412a70, 16 -> 18 -- conversation_menu's preview press, its one
+    # click (``_open``) and its one Escape (``_close``), a READ declared on
+    # CONVERSATION-MENU-PREVIEW-PRESS with its argument beside the entries.
+    # ATTRIBUTION, with this file's ast_digest: readonly.py minus exactly those
+    # two entry lines hashes to c51296e034af63eb on this key, and the other
+    # seventeen pinned digests are byte-identical to master 3c656df's. No
+    # refusal moved.
+    # RE-FROZEN AGAIN 2026-11-26, the same lane (census M M28's view half and
+    # M C14): ONE digest moved, SANCTIONED_MUTATIONS 7671871060412a70 ->
+    # eafe00fa647db768, 18 -> 20 -- messaging_folders._activate (the folder
+    # switch, VIEW-SWITCH-PRESS-RESTORED) and scheduled_posts._press (the
+    # scheduled list, SCHEDULED-LIST-AS-A-SHIPPED-READ), two reads declared
+    # with their argument beside the entries. ATTRIBUTION, with this file's
+    # ast_digest: readonly.py minus exactly those two entry lines hashes to
+    # 7671871060412a70 on this key, and no other pinned digest moved. No
+    # refusal moved.
+    # RE-FROZEN AT INTEGRATION 6'S MERGE OF LANE BUILD-MSG2 (2026-11-26): the
+    # two lanes' entries together, SANCTIONED_MUTATIONS 16 -> 22, the digest
+    # a6f158bd7b033419. ATTRIBUTION, with this file's ast_digest on the merged
+    # readonly.py: minus build-msg2's four entry lines it hashes to build-net2's
+    # b7ef8ab795d32162, minus build-net2's two to build-msg2's
+    # eafe00fa647db768, and minus all six to the base c51296e034af63eb.
+    # No refusal moved; every other pinned digest is untouched by the merge.
+    "SANCTIONED_MUTATIONS": "a6f158bd7b033419",
     # PINNED FROM 2026-09-24, lane G's merge of master: the replacement scan's
     # four tables (unchanged since lane G built them; pinned late, see PINNED)
     # and the scanner's sanctioned list, born with ONE entry -- the live

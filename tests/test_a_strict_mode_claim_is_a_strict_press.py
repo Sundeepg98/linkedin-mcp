@@ -101,6 +101,20 @@ PINNED_STRICT_PRESS_ACTIONS = frozenset(
         # one reply form and one Send before appending the press, so a second
         # match at the press is something drawn since; strict, it throws.
         "send_attachment",
+        # SEVENTEEN since lane build-msg2 (2026-11-26, census M M26, M M27,
+        # M M29, M M31): the active row's one options trigger, then the one
+        # item its gate re-read by its exact word (conversation_menu), shown
+        # in tests/test_conversation_menu.py.
+        "set_conversation_muted",
+        "unset_conversation_muted",
+        "mark_conversation_unread",
+        "set_conversation_archived",
+        "set_conversation_deleted",
+        # EIGHTEEN on the same lane (census M C64): the group's share-box
+        # trigger, then Post inside the one composer it opened, each counted
+        # once by its gate (group_composer), shown in
+        # tests/test_group_composer.py.
+        "publish_group_post",
     }
 )
 

@@ -213,11 +213,14 @@ from linkedin_server import (
     attachments,
     coerce,
     company_interest,
+    conversation_menu,
     dom,
     endorse_skill,
     feed_curation,
     field_restore,
+    group_composer,
     group_leave,
+    group_page,
     invitation_acts,
     item_author,
     job_alert_switch,
@@ -3601,6 +3604,413 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "endorsement given again."
         ),
     ),
+    # ---------------------------------------------------------- lane build-msg2
+    # ONE CONVERSATION'S OWN OPTIONS MENU (lane build-msg2, 2026-11-26; census
+    # rows M M26, M M27, M M29, M M31), on ruling CONVERSATION-MENU-PREVIEW-
+    # PRESS: the preview opens the one menu bound to the named conversation by
+    # its active marker, reads the item's word, presses nothing inside and
+    # closes on Escape, verified; the confirmed press re-reads the word and
+    # refuses on the inverse. Mute, unmute, the read mark and archive are HIS
+    # OWN CURATION (HIS-OWN-CURATION-NOT-OUTWARD); delete has no inverse and is
+    # RECEIPT-ONLY behind the grant (J-163-RECEIPT-ONLY-WRITE), fired only on
+    # his explicit order for a conversation he names. The menu's selectors,
+    # readings and verdicts live in ``conversation_menu``; these specs and the
+    # arms below delegate. MEASURED on live session 11's load 40
+    # (tests/fixtures/live11/msg_thread.html closed, c_b3_1_menu_open.html
+    # open); every inverse word is DERIVED, and each spec says which.
+    "linkedin_set_conversation_muted": WriteSpec(
+        action="set_conversation_muted",
+        tool_name="linkedin_set_conversation_muted",
+        url_template="https://www.linkedin.com/messaging/thread/{target}/",
+        url_pattern=re.compile(
+            r"^https://www\.linkedin\.com/messaging/thread/"
+            r"[0-9][A-Za-z0-9%\-_=]{0,199}/$"
+        ),
+        exempt_substring=None,
+        summary=(
+            "Mute one LinkedIn conversation you name by its thread id, from its "
+            "own options menu."
+        ),
+        from_state=conversation_menu.NOT_MUTED,
+        to_state=conversation_menu.MUTED,
+        not_performed_state=conversation_menu.NOT_CHANGED,
+        click_from_state=conversation_menu.MENU_CLOSED,
+        target_kind="thread_id",
+        state_from=conversation_menu.STATE_FROM,
+        direction_source=(
+            "THE CONVERSATION YOU NAMED, opened by its thread id behind the "
+            "receipt guard -- your conversation list is read first and nothing "
+            "is opened while any rendered row reads unread -- and then its own "
+            "options menu, opened by the sanctioned preview press: the one "
+            "menu in the list row wearing the active marker, its words counted "
+            "in the page, nothing inside it pressed, closed on Escape and read "
+            "closed. 'Mute' drawn there is MEASURED (live session 11); "
+            "'Unmute', the word a muted conversation's menu would draw, is "
+            "DERIVED."
+        ),
+        wrong_state_note=(
+            "This acts only on a menu drawing 'Mute'. One drawing 'Unmute' is "
+            "already muted and is refused, not pressed: pressing it would "
+            "unmute, which is linkedin_unset_conversation_muted's act."
+        ),
+        reversibility="STILL-UNKNOWN whether the same menu unmutes it again: the inverse is built, the muted menu is not measured",
+        reversibility_measured=False,
+        reversibility_class="STILL-UNKNOWN",
+        reversibility_evidence=(
+            "DERIVED, NOT MEASURED. One item carries both directions "
+            "(data-view-name message-toolbar-dropdown-toggle-mute, measured) and "
+            "linkedin_unset_conversation_muted presses it from 'Unmute'. No capture "
+            "holds a muted conversation's menu."
+        ),
+        reversible_by=(
+            "this server: linkedin_unset_conversation_muted, built in the same "
+            "change, presses the same item from 'Unmute'. By hand: the same "
+            "menu, in your LinkedIn messages."
+        ),
+        residue=(
+            "Muting silences YOUR notifications for this conversation; nobody "
+            "else is told (the Help Center's own account, census M M29). WHAT "
+            "THE PRESS DRAWS is unmeasured -- the receipt counts it and nothing "
+            "further is pressed. THE PREVIEW OPENS THE CONVERSATION, which can "
+            "show its sender a 'seen' if it holds a message you have not read: "
+            "the receipt guard refuses while any rendered row of your list reads "
+            "unread, and cannot see placeholder rows or other folders."
+        ),
+        reversibility_procedure=(
+            "One supervised round trip on a conversation HE names, already "
+            "read: mute (preview, press, a fresh render's menu reading "
+            "'Unmute' -- the first capture of that word), then unmute (the "
+            "same, reading 'Mute') in the same session; a failed unmute is "
+            "STOP-ALL."
+        ),
+    ),
+    "linkedin_unset_conversation_muted": WriteSpec(
+        action="unset_conversation_muted",
+        tool_name="linkedin_unset_conversation_muted",
+        url_template="https://www.linkedin.com/messaging/thread/{target}/",
+        url_pattern=re.compile(
+            r"^https://www\.linkedin\.com/messaging/thread/"
+            r"[0-9][A-Za-z0-9%\-_=]{0,199}/$"
+        ),
+        exempt_substring=None,
+        summary=(
+            "Unmute one LinkedIn conversation you name by its thread id, from "
+            "its own options menu."
+        ),
+        from_state=conversation_menu.MUTED,
+        to_state=conversation_menu.NOT_MUTED,
+        not_performed_state=conversation_menu.NOT_CHANGED,
+        click_from_state=conversation_menu.MENU_CLOSED,
+        target_kind="thread_id",
+        state_from=conversation_menu.STATE_FROM,
+        direction_source=(
+            "the same conversation menu as linkedin_set_conversation_muted, opened "
+            "and read the same way; this acts only from 'Unmute', a word no "
+            "capture holds -- DERIVED."
+        ),
+        wrong_state_note=(
+            "This acts only on a menu drawing 'Unmute'. One drawing 'Mute' is "
+            "not muted and is refused, not pressed: pressing it would mute, "
+            "which is linkedin_set_conversation_muted's act."
+        ),
+        reversibility="STILL-UNKNOWN whether the same menu mutes it again: the inverse is built, the muted menu is not measured",
+        reversibility_measured=False,
+        reversibility_class="STILL-UNKNOWN",
+        reversibility_evidence="DERIVED, NOT MEASURED: the same item, the other direction.",
+        reversible_by=(
+            "this server: linkedin_set_conversation_muted presses the same item "
+            "from 'Mute'."
+        ),
+        residue=(
+            "the same as linkedin_set_conversation_muted's: nobody else is told, the "
+            "press's after-state is counted, and the preview opens the "
+            "conversation behind the receipt guard."
+        ),
+        reversibility_procedure=(
+            "the same round trip as linkedin_set_conversation_muted, this half "
+            "second."
+        ),
+    ),
+    "linkedin_mark_conversation_unread": WriteSpec(
+        action="mark_conversation_unread",
+        tool_name="linkedin_mark_conversation_unread",
+        url_template="https://www.linkedin.com/messaging/thread/{target}/",
+        url_pattern=re.compile(
+            r"^https://www\.linkedin\.com/messaging/thread/"
+            r"[0-9][A-Za-z0-9%\-_=]{0,199}/$"
+        ),
+        exempt_substring=None,
+        summary=(
+            "Mark one LinkedIn conversation you name by its thread id as "
+            "unread, from its own options menu."
+        ),
+        from_state=conversation_menu.READ,
+        to_state=conversation_menu.UNREAD,
+        not_performed_state=conversation_menu.NOT_CHANGED,
+        click_from_state=conversation_menu.MENU_CLOSED,
+        target_kind="thread_id",
+        state_from=conversation_menu.STATE_FROM,
+        direction_source=(
+            "the same conversation menu as linkedin_set_conversation_muted, opened "
+            "behind the receipt guard and read the same way. 'Mark as unread' "
+            "is MEASURED (live session 11, on a conversation already read); "
+            "'Mark as read' is DERIVED. The verification reads the menu IN "
+            "PLACE, without loading the conversation again: a load is believed "
+            "to mark it read, which would undo the act it was checking."
+        ),
+        wrong_state_note=(
+            "This acts only on a menu drawing 'Mark as unread'. One drawing "
+            "'Mark as read' is already unread and is refused, not pressed."
+        ),
+        reversibility="STILL-UNKNOWN whether opening the conversation marks it read again: believed, never measured",
+        reversibility_measured=False,
+        reversibility_class="STILL-UNKNOWN",
+        reversibility_evidence=(
+            "DERIVED, NOT MEASURED. LinkedIn is believed to mark a conversation "
+            "read when it is opened; no capture holds an unread conversation's "
+            "menu or page."
+        ),
+        reversible_by=(
+            "OPENING IT: linkedin_open_thread with allow_unread=True -- your "
+            "opt-in, because your list will now read this row unread -- or "
+            "opening it yourself. No menu act marks it read: on this page the "
+            "preview's own load of the conversation would be that act."
+        ),
+        residue=(
+            "IT CHANGES ONLY YOUR INBOX: marking unread is private (census M "
+            "M31, the Help Center's account). OPENING THE CONVERSATION AGAIN -- "
+            "here, in any browser, or by any tool of this server -- may mark it "
+            "read (DERIVED). While it reads unread, the receipt guard refuses "
+            "every conversation act and read, because a list row carries no "
+            "thread id and the guard cannot tell this row from a message you "
+            "have not read."
+        ),
+        reversibility_procedure=(
+            "One supervised round trip on a conversation HE names, already "
+            "read: mark it unread (preview, press, the menu read in place "
+            "drawing 'Mark as read' -- the first capture of that word), then "
+            "linkedin_open_thread(thread_id, allow_unread=True) and "
+            "linkedin_list_conversations reading no unread row."
+        ),
+    ),
+    "linkedin_set_conversation_archived": WriteSpec(
+        action="set_conversation_archived",
+        tool_name="linkedin_set_conversation_archived",
+        url_template="https://www.linkedin.com/messaging/thread/{target}/",
+        url_pattern=re.compile(
+            r"^https://www\.linkedin\.com/messaging/thread/"
+            r"[0-9][A-Za-z0-9%\-_=]{0,199}/$"
+        ),
+        exempt_substring=None,
+        summary=(
+            "Archive one LinkedIn conversation you name by its thread id, from "
+            "its own options menu."
+        ),
+        from_state=conversation_menu.IN_INBOX,
+        to_state=conversation_menu.ARCHIVED,
+        not_performed_state=conversation_menu.NOT_CHANGED,
+        click_from_state=conversation_menu.MENU_CLOSED,
+        target_kind="thread_id",
+        state_from=conversation_menu.STATE_FROM,
+        direction_source=(
+            "the same conversation menu as linkedin_set_conversation_muted, opened "
+            "behind the receipt guard and read the same way. 'Archive' is "
+            "MEASURED (data-view-name message-toolbar-dropdown-toggle-archive, "
+            "live session 11). What an archived conversation's menu draws is "
+            "not on disk, so this refuses anything but 'Archive' drawn exactly "
+            "once."
+        ),
+        wrong_state_note=(
+            "This acts only on a menu drawing 'Archive' exactly once. A menu "
+            "that does not -- an archived conversation's, whose words are not "
+            "measured -- is refused, not pressed."
+        ),
+        reversibility="STILL-UNKNOWN whether this server can restore it: the restore control has never been captured",
+        reversibility_measured=False,
+        reversibility_class="STILL-UNKNOWN",
+        reversibility_evidence=(
+            "NOT MEASURED. LinkedIn restores an archived conversation from its "
+            "Archived folder (the Help Center, census M M28), and the folder's "
+            "rows were captured with their menus CLOSED (live session 11, "
+            "tests/fixtures/live11/messaging_archived.html): the restore item "
+            "has never been read."
+        ),
+        reversible_by=(
+            "NOT YET through this server: the restore is census M M28's write "
+            "half, whose control waits on the capture messaging-guarded "
+            "(re-aimed). By hand: your Archived folder, then the "
+            "conversation's menu."
+        ),
+        residue=(
+            "IT CHANGES ONLY YOUR INBOX: nobody else is told. The conversation "
+            "leaves your default list; a NEW message in it is believed to bring "
+            "it back (DERIVED). THE VERIFICATION'S POSITIVE IS DERIVED: a fresh "
+            "render of the conversation's own address drawing rows and none "
+            "wearing the active marker. Its negative -- the menu still drawing "
+            "'Archive' -- is strong."
+        ),
+        reversibility_procedure=(
+            "Capture messaging-guarded (re-aimed): the Archived folder, one "
+            "archived row's menu opened as a disclosure and its restore item "
+            "read; then a supervised round trip on a conversation HE names."
+        ),
+    ),
+    "linkedin_set_conversation_deleted": WriteSpec(
+        action="set_conversation_deleted",
+        tool_name="linkedin_set_conversation_deleted",
+        url_template="https://www.linkedin.com/messaging/thread/{target}/",
+        url_pattern=re.compile(
+            r"^https://www\.linkedin\.com/messaging/thread/"
+            r"[0-9][A-Za-z0-9%\-_=]{0,199}/$"
+        ),
+        exempt_substring=None,
+        summary=(
+            "Delete one LinkedIn conversation you name by its thread id, from "
+            "its own options menu. Receipt-only: nothing confirms it."
+        ),
+        from_state=conversation_menu.DELETE_OFFERED,
+        to_state=conversation_menu.DELETE_PRESSED,
+        not_performed_state=conversation_menu.NOT_CHANGED,
+        click_from_state=conversation_menu.MENU_CLOSED,
+        target_kind="thread_id",
+        state_from=conversation_menu.STATE_FROM,
+        unverifiable=Unverifiable(
+            surface_that_would_confirm=(
+                "your conversation list, where a deleted conversation no longer "
+                "appears"
+            ),
+            why_it_cannot=(
+                "a list row carries no thread id (measured), so no list this "
+                "server reads can tell THIS conversation's absence from another "
+                "row's; and what the press of 'Delete conversation' draws -- a "
+                "confirmation or the deletion itself -- has never been "
+                "captured. The act is RECEIPT-ONLY (the J 163 class): its "
+                "receipt is the press and what the page drew after it, and a "
+                "confirmation, if one is drawn, is reported and NEVER pressed"
+            ),
+            what_he_must_do=(
+                "open your LinkedIn messages and look for the conversation. If "
+                "the receipt's menu_gate reports a dialog drawn after the "
+                "press, nothing in it was pressed and the conversation was not "
+                "deleted -- delete it there yourself if you still want it gone"
+            ),
+        ),
+        direction_source=(
+            "the same conversation menu as linkedin_set_conversation_muted, opened "
+            "behind the receipt guard and read the same way. 'Delete "
+            "conversation' is MEASURED (live session 11); what pressing it "
+            "draws is not."
+        ),
+        wrong_state_note=(
+            "This acts only on a menu drawing 'Delete conversation' exactly "
+            "once. Anything else is refused, not pressed."
+        ),
+        reversibility="STILL-UNKNOWN whether LinkedIn lets a deleted conversation be recovered: treat it as permanent",
+        reversibility_measured=False,
+        reversibility_class="STILL-UNKNOWN",
+        reversibility_evidence=(
+            "NOT MEASURED. The item is drawn on the conversation's own menu "
+            "(live session 11); nothing that recovers a deleted conversation "
+            "has been seen on any surface this server holds."
+        ),
+        reversible_by=(
+            "NOBODY that this server knows of: no recovery is built or "
+            "measured, so treat a delete as permanent. It removes the "
+            "conversation from YOUR inbox; whether the other members keep "
+            "their copy is unmeasured here."
+        ),
+        residue=(
+            "IRREVERSIBLE, AS FAR AS ANYTHING HERE KNOWS. The press may delete "
+            "at once or draw a confirmation; a confirmation is never answered, "
+            "so the first fire's receipt is the measurement of which. The "
+            "preview opens the conversation behind the receipt guard."
+        ),
+        irreversible=True,
+        reversibility_procedure=(
+            "None is owed: the act has no inverse (J-163-RECEIPT-ONLY-WRITE). "
+            "Its first fire, on his explicit order at a conversation he names, "
+            "records what the press draws."
+        ),
+    ),
+    # A POST IN ONE GROUP HE NAMES (lane build-msg2, 2026-11-26; census M C64),
+    # on EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS and the capture
+    # B5-GROUP-COMPOSER-OPENS-EMPTY sanctioned: the group page's closed share
+    # box, its trigger pressed, his words typed into the composer it opened,
+    # Post pressed. See ``linkedin_server/group_composer.py``.
+    "linkedin_publish_group_post": WriteSpec(
+        action="publish_group_post",
+        tool_name="linkedin_publish_group_post",
+        # THE GROUP'S OWN PAGE, BY ITS DIGITS. ``url_target_of`` hands the
+        # template the SUBJECT half of the target only -- his words never
+        # enter a navigation.
+        url_template="https://www.linkedin.com/groups/{target}/",
+        url_pattern=re.compile(r"^https://www\.linkedin\.com/groups/[0-9]{1,20}/$"),
+        exempt_substring=None,
+        summary=(
+            "Publish a post in one LinkedIn group you name by its numeric id, "
+            "under your own name."
+        ),
+        from_state=group_composer.BOX_CLOSED,
+        to_state="group_post_published",
+        target_kind="group_and_text",
+        state_from=group_composer.STATE_FROM,
+        unverifiable=Unverifiable(
+            surface_that_would_confirm=(
+                "the group's own feed, where a published post would be drawn, "
+                "or a notice that it waits for a group manager's approval"
+            ),
+            why_it_cannot=(
+                "what Post leaves inside a group has never been captured: a "
+                "post in the group's feed, or one held for a manager's "
+                "approval, are both possible and neither has been drawn on "
+                "any page this server holds. The receipt reads what the page "
+                "drew after the press, counted, and claims no post"
+            ),
+            what_he_must_do=(
+                "open the group and look for your post in its feed. If it is "
+                "not there, it may be waiting for a manager's approval"
+            ),
+        ),
+        direction_source=(
+            "the group page's closed share box, read live by this gate: one "
+            "box, its one 'Start a public post' button, no composer open "
+            "(live session 11, load 36). The composer that button opens was "
+            "captured EMPTY: one editor, Post drawn disabled, and no Schedule "
+            "post, which the feed's own composer draws and the group's does "
+            "not."
+        ),
+        wrong_state_note=(
+            "A group page with no share box is not a group he can post in, as "
+            "far as this server can tell, and nothing is pressed on it."
+        ),
+        reversibility="STILL-UNKNOWN whether a group post can be deleted through LinkedIn's own controls",
+        reversibility_measured=False,
+        reversibility_class="STILL-UNKNOWN",
+        reversibility_evidence=(
+            "NOT MEASURED. His own feed posts draw 'delete post' in their "
+            "control menu (the live lane, 2026-09-24); a group post's menu has "
+            "never been opened."
+        ),
+        reversible_by=(
+            "NOT YET through this server; by hand, he can open the post and "
+            "delete it. Deleting his own post is a class built behind the "
+            "grant -- outward_classes records delete_own_post as "
+            "NEEDS-CAPTURE -- and it is not built."
+        ),
+        residue=(
+            "IRREVERSIBLE IN AUDIENCE: a group post is read by the group's "
+            "members, and a deletion would remove the post, not what they "
+            "read or the notification that told them. The preview loads the "
+            "group's page and presses nothing; the act types his words only "
+            "into ONE empty composer the trigger opened."
+        ),
+        irreversible=True,
+        reversibility_procedure=(
+            "Capture the control menu on one group post he names for "
+            "deletion; then build delete_own_post on it, behind the grant."
+        ),
+    ),
+    # ------------------------------------------------------ end lane build-msg2
 }
 
 
@@ -4314,6 +4724,12 @@ _COMPOSITE_TARGET_KINDS: dict[str, tuple[str, str]] = {
     # exactly as ``profile_and_text``'s is; the CONTENT is the skill, in his
     # own words, compared in the page and never typed.
     "profile_and_skill": ("profile", "skill"),
+    # 2026-11-26, lane build-msg2, ``publish_group_post`` (census M C64). The
+    # SUBJECT is the numeric id of the group he names -- checked by
+    # ``group_leave.checked_group_id``, whose refusal reports a SHAPE and never
+    # the value -- and only it reaches a url; the CONTENT is his post, typed
+    # and never composed here.
+    "group_and_text": ("group", "text"),
 }
 
 #: THE TARGET KINDS OF A NAMED PERSON'S PROFILE (2026-09-27). The one-part
@@ -4706,6 +5122,33 @@ def _composite_target(spec: WriteSpec, target: Any) -> str:
             + TARGET_JOIN
             + _clean_target_part(spec, second, content)
         )
+    if spec.target_kind == "group_and_text":
+        # THE SUBJECT IS A GROUP, CANONICAL AS ITS DIGITS (lane build-msg2,
+        # 2026-11-26). A group's NAME or slug is refused here, before a token
+        # exists, and the refusal never repeats it: a group named after a
+        # person makes it a person's name (``group_leave.checked_group_id``).
+        if isinstance(target, str) and target.count(TARGET_JOIN) == 1:
+            subject, _, content = target.partition(TARGET_JOIN)
+        elif isinstance(target, dict):
+            subject, content = target.get(first), target.get(second)
+        else:
+            raise WriteAttemptError(
+                f"{spec.action!r} is addressed by {first!r} AND {second!r} "
+                "together: the numeric id of the group you name and the exact "
+                "words, as a mapping of the two."
+            )
+        # THE COMPONENT RULES EVERY COMPOSITE KIND KEEPS COME FIRST -- empty,
+        # over the cap, the separator, a control character -- so this kind
+        # refuses exactly as its siblings do; only then the group's shape.
+        digits, why = group_leave.checked_group_id(_clean_target_part(spec, first, subject))
+        if digits is None:
+            raise WriteAttemptError(
+                f"{spec.action!r} is addressed by the numeric LinkedIn group id "
+                "-- as linkedin_group_memberships returns it -- and the value "
+                f"given is not one: {why} A name is not accepted here, and it "
+                "is not repeated here either."
+            )
+        return digits + TARGET_JOIN + _clean_target_part(spec, second, content)
     if isinstance(target, str) and target.count(TARGET_JOIN) == 1:
         # THE CANONICAL FORM IS A VALID SPELLING OF THE TARGET, and accepting
         # it is what makes this function IDEMPOTENT. It was not, and the
@@ -4895,6 +5338,20 @@ def _target_for(spec: WriteSpec, target: Any) -> str:
                 f"under his recommended jobs, and the value given is not one: {why}"
             )
         return answer
+    if spec.target_kind == "thread_id":
+        # ONE CONVERSATION, BY THE ID HE COPIED FROM HIS OWN BROWSER (lane
+        # build-msg2, 2026-11-26, the conversation menu's acts): the shape the
+        # read boundary admits for a thread, checked by ``threads``' own
+        # validator. The refusal names the shape and never repeats the value.
+        if not threads.valid_thread_id(raw):
+            raise WriteAttemptError(
+                f"{spec.action!r} is addressed by one conversation's thread id -- "
+                "the part of its address after /messaging/thread/, copied from "
+                "your own browser: a digit first, then letters, digits, '-', "
+                "'_', '=' and '%' -- and the value given is not one. It is not "
+                "repeated here."
+            )
+        return raw
     if spec.target_kind == "self":
         if raw.casefold() not in {"self", "me", ""}:
             raise WriteAttemptError(
@@ -5084,6 +5541,19 @@ STRICT_PRESS_ACTIONS: frozenset[str] = NAMED_PROFILE_ACTIONS | frozenset(
         # its gate required exactly one form and one Send, so a second match
         # at the press is something drawn since, and it throws.
         "send_attachment",
+        # LANE BUILD-MSG2, 2026-11-26 (census M M26, M M27, M M29, M M31): the
+        # active row's one options trigger, then the one item named exactly
+        # the act's word inside that row's menu -- each counted once by its
+        # gate, so a second match at press time is something drawn since.
+        "set_conversation_muted",
+        "unset_conversation_muted",
+        "mark_conversation_unread",
+        "set_conversation_archived",
+        "set_conversation_deleted",
+        # 2026-11-26 (lane build-msg2, census M C64): the group's share-box
+        # trigger, then Post inside the one modal it opened -- each counted
+        # once by its gate before it is pressed.
+        "publish_group_post",
     }
 )
 
@@ -7013,6 +7483,117 @@ async def observe(
             same_page_as_action=True,
         )
 
+    if spec.state_from == group_composer.STATE_FROM:
+        # ONE LOAD, OF THE GROUP HE NAMED, AND NO PRESS (lane build-msg2,
+        # 2026-11-26; census M C64). The address is the spec's own template
+        # filled with the SUBJECT half of the target -- the digits -- so his
+        # words never enter a navigation. THE LANDING VETOES BY RAISING,
+        # through a comparison's boolean: an id LinkedIn does not show him
+        # lands somewhere else, and a share box there is not his group's.
+        url = str(spec.url_template or "").format(target=url_target_of(spec, target))
+        landed = await _load(navigator, page, url, surface="group page")
+        if group_page.landed_on_the_same_group(landed, url_target_of(spec, target)) is not True:
+            raise WriteAttemptError(
+                "the browser did not land on the group you named, so its share "
+                "box was not read and nothing was minted. THE LANDING IS "
+                f"WITHHELD; what is safe to say about it -- {landing.withheld(landed)}."
+            )
+        box_reading = await group_composer.read_box(page)
+        state, why = group_composer.box_state(box_reading)
+        facts = {
+            "landed_on_the_named_group": True,
+            "share_box": {
+                key: box_reading.get(key) for key in ("boxes", "triggers", "modals", "error")
+            },
+            # WHO WOULD SEE IT, in LinkedIn's own words and nobody else's: the
+            # trigger is matched by its EXACT name, so a page whose trigger
+            # does not say "public" reads unknown and nothing is pressed. The
+            # composer's own audience entry is not read.
+            "audience": {
+                "trigger_words": group_composer.TRIGGER_WORDS,
+                "says": "public" if state == group_composer.BOX_CLOSED else "unknown",
+                "how": (
+                    "the share box's trigger, matched by its exact words; a "
+                    "trigger saying anything else is not pressed"
+                ),
+            },
+        }
+        return _record(
+            spec,
+            target=target,
+            facts=facts,
+            facts_url=url,
+            state=state,
+            state_why=why,
+            state_url=url,
+            same_page_as_action=True,
+        )
+
+    if spec.state_from == conversation_menu.STATE_FROM:
+        # TWO LOADS AND ONE SANCTIONED PREVIEW PRESS (lane build-msg2,
+        # 2026-11-26; CONVERSATION-MENU-PREVIEW-PRESS).
+        #
+        # FIRST THE RECEIPT GUARD, before the conversation is asked for: the
+        # composer's own list, which opens nothing (measured), read for unread
+        # rows. A list row carries no thread id, so an unread rendered row
+        # anywhere refuses -- the conversation about to be opened could be it.
+        # The landing reaches the guard only as a COMPARISON's boolean, so
+        # nothing derived from it is bound to a name here (the navigation
+        # guard's taint walk is per module and by name).
+        landed = await _load(navigator, page, threads.COMPOSE_URL, surface="messaging list")
+        on_the_list = threads.is_the_compose_address(landed) is True
+        listing = await threads.read_conversation_list(page)
+        guard = threads.receipt_guard(
+            listing,
+            allow_unread=False,
+            landed=threads.COMPOSE_URL if on_the_list else "",
+        )
+        if not guard["proceed"]:
+            raise WriteAttemptError(
+                "the receipt guard refused, so the conversation was not opened "
+                "and nothing was minted: " + str(guard["why"])
+            )
+        # THEN THE CONVERSATION HE NAMED, by the spec's own template and his
+        # id, through the read door. THE LANDING VETOES BY RAISING: LinkedIn
+        # sends an id it does not recognise into a conversation of its own
+        # choosing, whose menu would be somebody else's.
+        url = str(spec.url_template or "").format(target=url_target_of(spec, target))
+        landed = await _load(navigator, page, url, surface="messaging thread")
+        if not threads.landed_on_thread(landed, url_target_of(spec, target)):
+            raise WriteAttemptError(
+                "the browser did not land on the conversation you named -- "
+                "LinkedIn sends an id it does not recognise into a conversation "
+                "of its own choosing, and that menu would be somebody else's. "
+                "Nothing was pressed and nothing was minted. THE LANDING IS "
+                f"WITHHELD; what is safe to say about it -- {landing.withheld(landed)}."
+            )
+        # THE CONVERSATION, AS COUNTS (the reply's own reader, no words
+        # compared), and then ITS MENU, BY THE PREVIEW PRESS: the one menu in
+        # the row wearing the active marker, opened, read, nothing pressed
+        # inside it, closed on Escape and read closed.
+        thread_reading = await threads.read_thread(page)
+        menu_facts, state, why = await conversation_menu.read_state(page, spec.action)
+        facts = {
+            "landed_on_the_named_thread": True,
+            **threads.thread_facts(thread_reading),
+            "receipt_guard": {
+                key: guard.get(key)
+                for key in ("rows_rendered", "rows_placeholder", "unread_positions", "residue")
+            },
+            "menu": menu_facts,
+            "ruling": conversation_menu.RULING,
+        }
+        return _record(
+            spec,
+            target=target,
+            facts=facts,
+            facts_url=url,
+            state=state,
+            state_why=why,
+            state_url=url,
+            same_page_as_action=True,
+        )
+
     if spec.state_from == "thread_page":
         # ONE load, OF THE CONVERSATION HE NAMED, and the url is the spec's
         # own template filled with the SUBJECT half of the target -- the
@@ -8336,6 +8917,45 @@ PERFORMABLE: frozenset[str] = frozenset(
         #
         # ENABLING IS NOT FIRING: it fires only on his order.
         "send_recommendations_feedback",
+        # ONE CONVERSATION'S OWN OPTIONS MENU, 2026-11-26 (lane build-msg2,
+        # census M M26, M M27, M M29, M M31), on CONVERSATION-MENU-PREVIEW-PRESS:
+        #
+        #   a measured surface   /messaging/thread/<id>/, the reply's own
+        #                        address, opened behind the receipt guard
+        #   a measured anchor    the item's own word in the menu of the row
+        #                        wearing the active marker (live session 11,
+        #                        load 40): Mute, Mark as unread, Archive,
+        #                        Delete conversation; Unmute DERIVED
+        #   an aimable target    the thread id HE supplies, held to the
+        #                        landing; the one active row, its one trigger
+        #   a verification       the menu read again by the sanctioned preview
+        #                        press -- on a fresh render, or IN PLACE for the
+        #                        read mark; delete is RECEIPT-ONLY, declared
+        #   no new permission    perform()'s one click site, twice: the
+        #                        trigger, then the item its gate re-read. The
+        #                        preview press is two declared mutations in
+        #                        conversation_menu, never reached by a write
+        #
+        # ENABLING IS NOT FIRING: no grant was issued. Delete fires only on his
+        # explicit order for a conversation he names.
+        "set_conversation_muted",
+        "unset_conversation_muted",
+        "mark_conversation_unread",
+        "set_conversation_archived",
+        "set_conversation_deleted",
+        # 2026-11-26 (lane build-msg2, census M C64), on
+        # EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS: a post in one group he
+        # names, its composer opened by the group page's own trigger.
+        #
+        #   target               the group's digits and his words, one
+        #                        canonical string; only the digits reach a url
+        #   no new permission    perform()'s one click site twice (the
+        #                        trigger, then Post) and its fill site once
+        #   receipt-only         Unverifiable: what Post leaves in a group has
+        #                        never been drawn
+        #
+        # ENABLING IS NOT FIRING: no grant was issued.
+        "publish_group_post",
     }
 )
 
@@ -8352,6 +8972,13 @@ TWO_CLICK_ACTIONS: frozenset[str] = frozenset({"apply_job"})
 #: that set is apply's, pinned, and its gate reads a modal rather than a menu.
 #: See ``group_leave.menu_item_gate`` for what the gate requires.
 MENU_ITEM_ACTIONS: frozenset[str] = frozenset({"withdraw_from_group"})
+
+#: THE ACTS THROUGH ONE CONVERSATION'S OWN MENU (lane build-msg2, 2026-11-26):
+#: the same two-press shape as ``MENU_ITEM_ACTIONS`` -- the active row's
+#: trigger, then an item appended by a gate that re-reads the menu -- and a
+#: SEPARATE set, because their gate is ``conversation_menu.menu_item_gate``,
+#: which refuses on the inverse word and closes a menu it will not act in.
+CONVERSATION_MENU_ACTIONS: frozenset[str] = frozenset(conversation_menu.ACTIONS)
 
 #: How long to wait for the anchor to be actionable. Generous, because the
 #: alternative to waiting is clicking early, and a click that lands on a
@@ -8864,6 +9491,18 @@ def anchor_label_for(
         # FIRST press is the menu's trigger, aimed by LinkedIn's fixed
         # prefix; the rest of its label names the author and is never read.
         return feed_curation.NOT_INTERESTED
+    if spec.action in conversation_menu.ACTIONS:
+        # THE ITEM'S OWN WORD, exact (lane build-msg2): 'Mute', 'Mark as
+        # unread', 'Archive' and 'Delete conversation' are MEASURED on live
+        # session 11's open menu; 'Unmute' is DERIVED. The FIRST press is the
+        # active row's trigger, aimed STRUCTURALLY; the item is pressed only
+        # after ``conversation_menu.menu_item_gate`` re-reads this word.
+        return conversation_menu.act_for(spec.action).word
+    if spec.action in GROUP_COMPOSER_ACTIONS:
+        # THE TRIGGER'S OWN WORDS, exact (lane build-msg2): 'Start a public
+        # post', MEASURED by keyed shape on live session 11's group page. The
+        # editor and Post are reached only through their gates afterwards.
+        return group_composer.TRIGGER_WORDS
     if spec.action == "follow_company_page":
         # A PREFIX, like the unfollow's, and for the same reason: LinkedIn
         # writes the Page's own name into the label, which makes it a strong
@@ -9269,6 +9908,15 @@ _WRITE_SURFACE_FOR_ACTION: dict[str, str] = {
     "send_invitation": "your own profile's suggestion rail",
     # Lane S, 2026-10-10: the admitted settings page the target names.
     "set_admitted_setting": "the admitted settings page",
+    # Lane build-msg2, 2026-11-26: the conversation he names, whose own menu
+    # the act presses.
+    "set_conversation_muted": "messaging thread",
+    "unset_conversation_muted": "messaging thread",
+    "mark_conversation_unread": "messaging thread",
+    "set_conversation_archived": "messaging thread",
+    "set_conversation_deleted": "messaging thread",
+    # 2026-11-26 (lane build-msg2, census M C64): the group page he names.
+    "publish_group_post": "group page",
 }
 
 
@@ -9374,6 +10022,16 @@ _WHERE_TO_LOOK: dict[str, str] = {
     # 2026-11-26 (lane build-jobs2, J 163). The block under the list on his
     # recommended jobs: the one place the answer could show.
     "send_recommendations_feedback": "the question under the list on your recommended jobs",
+    # 2026-11-26 (lane build-msg2). The conversation's own menu in your
+    # messages, which the verification re-reads -- or, for an archive and a
+    # delete, the folder lists where a conversation goes.
+    "set_conversation_muted": "that conversation's own menu, in your LinkedIn messages",
+    "unset_conversation_muted": "that conversation's own menu, in your LinkedIn messages",
+    "mark_conversation_unread": "your LinkedIn messages list, without opening the conversation",
+    "set_conversation_archived": "your LinkedIn messages' Archived folder",
+    "set_conversation_deleted": "your LinkedIn messages, for the conversation itself",
+    # 2026-11-26 (lane build-msg2, census M C64).
+    "publish_group_post": "the group's own feed, or its notice of a post awaiting approval",
 }
 
 #: THE ACTIONS THAT ARE ACTUAL TOGGLES, for the one sentence that is only true
@@ -9593,6 +10251,31 @@ _VERIFIED_FROM["follow_company_page"] = (
     "however many Pages he follows, so a follow that landed but whose row is "
     "not drawn is reported UNKNOWN, never as not having happened."
 )
+_VERIFIED_FROM["set_conversation_muted"] = (
+    "THE CONVERSATION'S OWN MENU, READ AGAIN on a FRESH render of its address "
+    "(lane build-msg2), by the same sanctioned preview press that read it "
+    "before: opened, its words counted, nothing pressed inside it, closed on "
+    "Escape. One item carries both directions, so the reading is strong both "
+    "ways -- 'Unmute' means muted, 'Mute' means it did not land. 'Unmute' is "
+    "DERIVED: the first fire is its first capture."
+)
+_VERIFIED_FROM["unset_conversation_muted"] = _VERIFIED_FROM["set_conversation_muted"]
+_VERIFIED_FROM["mark_conversation_unread"] = (
+    "THE CONVERSATION'S OWN MENU, READ AGAIN IN PLACE (lane build-msg2) -- on "
+    "the page the press was made on, with no new load, because a load is "
+    "believed to mark a conversation read and would undo the act it checked. "
+    "'Mark as read' drawn means unread; 'Mark as unread' still drawn means it "
+    "did not land. 'Mark as read' is DERIVED: the first fire is its first "
+    "capture."
+)
+_VERIFIED_FROM["set_conversation_archived"] = (
+    "A FRESH RENDER OF THE CONVERSATION'S OWN ADDRESS (lane build-msg2). Its "
+    "NEGATIVE is strong: the row still wearing the active marker and its menu "
+    "still drawing 'Archive' means it did not land. Its positive is DERIVED: "
+    "the list drawing rows and NONE wearing the active marker -- the "
+    "conversation left the list it was drawn in. No capture holds an archived "
+    "conversation's page, and the Archived folder's rows carry no thread id."
+)
 _VERIFIED_FROM["set_admitted_setting"] = (
     "THE ADMITTED SETTINGS PAGE, RE-RENDERED by a fresh navigation to its "
     "constant address, the one control read again by its exact label: there "
@@ -9802,6 +10485,33 @@ def _assert_landed_on_target(
                 "invitation manager's own tab, and the browser landed somewhere "
                 "that is not that tab. THE LANDING IS WITHHELD rather than "
                 f"named; what is safe to say about it -- {landing.withheld(landed)}."
+            )
+        return
+    if spec.state_from == group_composer.STATE_FROM:
+        # ONE GROUP, BY ITS DIGITS (lane build-msg2): the share box pressed is
+        # the box on the page on screen, so that page must be the group the
+        # grant names -- compared as two digit runs, the landing never quoted.
+        if group_page.landed_on_the_same_group(landed, url_target_of(spec, grant.target)) is not True:
+            raise WriteAttemptError(
+                "refusing to press: this post is for the group your grant names, "
+                "and the browser landed somewhere that is not that group. A share "
+                "box on any other page would publish somewhere else. THE LANDING "
+                f"IS WITHHELD rather than named; what is safe to say about it -- "
+                f"{landing.withheld(landed)}."
+            )
+        return
+    if spec.state_from == conversation_menu.STATE_FROM:
+        # ONE CONVERSATION, BY ITS THREAD ID, compared on the path exactly as
+        # a reply's is (lane build-msg2): the menu pressed is the menu of the
+        # row the active marker binds to the conversation on screen, so the
+        # conversation on screen must be the one the grant names.
+        if not threads.landed_on_thread(landed, url_target_of(spec, grant.target)):
+            raise WriteAttemptError(
+                "refusing to press: this act is for the conversation your grant "
+                "names, and the browser landed somewhere that is not that "
+                "conversation. Its menu would be somebody else's. THE LANDING "
+                f"IS WITHHELD rather than named; what is safe to say about it -- "
+                f"{landing.withheld(landed)}."
             )
         return
     # THE SUBJECT HALF, through the same derivation every other site uses --
@@ -10214,6 +10924,32 @@ async def _live_control(
         if state != job_feedback.ASKED:
             return (state, why, "")
         return (state, why, job_feedback.press_selector(grant.target))
+
+    if spec.state_from == group_composer.STATE_FROM:
+        # THE CLOSED SHARE BOX AND ITS ONE TRIGGER (lane build-msg2, census
+        # M C64): the same reading the preview took, on the page the press is
+        # about to land on. The selector is the FIRST press only -- the
+        # trigger; his words go in only after ``group_composer.opened_gate``
+        # finds one empty group composer, and Post only after
+        # ``group_composer.post_gate`` reads exactly his words in it.
+        box_reading = await group_composer.read_box(page)
+        state, why = group_composer.box_state(box_reading)
+        if state != group_composer.BOX_CLOSED:
+            return (state, why, "")
+        return (state, why, group_composer.TRIGGER)
+
+    if spec.state_from == conversation_menu.STATE_FROM:
+        # THE TRIGGER, COLLAPSED, IN THE ONE ACTIVE ROW (lane build-msg2): the
+        # word cannot be read without opening the menu, and the press below
+        # opens it -- then ``conversation_menu.menu_item_gate`` re-reads the
+        # word inside it and refuses on the inverse before the item is
+        # pressed. So the click-time state is the trigger's own
+        # (``click_from_state``), and the selector is the first press only.
+        structure = await conversation_menu.read_structure(page)
+        state, why = conversation_menu.closed_menu_state(structure)
+        if state != conversation_menu.MENU_CLOSED:
+            return (state, why, "")
+        return (state, why, conversation_menu.ACTIVE_TRIGGER)
 
     if spec.action == "withdraw_from_group":
         # THE SAME READING AND THE SAME VERDICT THE PREVIEW TOOK, on the Groups
@@ -11104,6 +11840,7 @@ async def _verify_after(
     witness: Optional[dict[str, Any]] = None,
     first_contact_after: Optional[dict[str, Any]] = None,
     send_attempted: Optional[bool] = None,
+    menu_item_attempted: Optional[bool] = None,
 ) -> tuple[str, str, str]:
     """Read whether it landed, and read it somewhere the click did not reach.
 
@@ -11180,6 +11917,53 @@ async def _verify_after(
             "the action a measured surface, or declare the outcome "
             "unverifiable on its spec and say why."
         )
+    if spec.action in (
+        "set_conversation_muted",
+        "unset_conversation_muted",
+        "mark_conversation_unread",
+        "set_conversation_archived",
+    ):
+        # THE FOUR NAMES ARE WRITTEN OUT, as every branch here writes its own:
+        # ``tests/test_unverifiable_outcomes.py`` reads this function for
+        # literal action names (lane build-msg2, 2026-11-26). Delete is not
+        # here: it is RECEIPT-ONLY and declares so on its spec.
+        #
+        # THE MENU, READ AGAIN BY THE SANCTIONED PREVIEW PRESS -- on a FRESH
+        # render of the conversation's own address, except for the read mark,
+        # which is read IN PLACE: a load is believed to mark a conversation
+        # read, which would undo the act being checked. An item the gate
+        # refused was never pressed, and that answer needs no reading at all.
+        url = str(spec.url_template).format(target=url_target_of(spec, grant.target))
+        if not menu_item_attempted:
+            state, why = conversation_menu.verification_verdict(
+                {}, spec.action, item_pressed=False
+            )
+            return (state, why, "")
+        if not conversation_menu.act_for(spec.action).fresh_load:
+            reading = await conversation_menu.preview_press(page)
+            state, why = conversation_menu.verification_verdict(
+                reading, spec.action, item_pressed=True
+            )
+            return (
+                state,
+                why + " Read IN PLACE, on the page the press was made on, with no "
+                "new load of the conversation.",
+                url,
+            )
+        landed = await _load(navigator, page, url, surface="messaging thread")
+        if not threads.landed_on_thread(landed, url_target_of(spec, grant.target)):
+            return (
+                UNKNOWN,
+                "the fresh render did not land on the conversation this grant "
+                "names; the landing is withheld, and what is safe to say about it "
+                f"is {landing.withheld(landed)}. So it says nothing about this act.",
+                url,
+            )
+        reading = await conversation_menu.preview_press(page)
+        state, why = conversation_menu.verification_verdict(
+            reading, spec.action, item_pressed=True
+        )
+        return (state, why + " Read on a FRESH render of the conversation's own address.", url)
     if spec.action in ("set_similar_jobs_alert", "unset_similar_jobs_alert"):
         # FIRST, WHAT THE PRESS LEFT IN PLACE -- counts, the closed word and the
         # property only, and it decides nothing; then A FRESH RENDER of the
@@ -11960,6 +12744,10 @@ TYPING_ACTIONS: frozenset[str] = frozenset(
         # OPEN_THEN_TYPE_ACTIONS -- and it is here because it types his words
         # into a composer, which is the claim this set makes.
         "message_from_profile",
+        # 2026-11-26 (lane build-msg2, census M C64): a post in one group he
+        # names. It types AFTER the trigger press opens the composer -- see
+        # GROUP_COMPOSER_ACTIONS -- and is here for the same reason.
+        "publish_group_post",
     }
 )
 
@@ -11974,6 +12762,16 @@ TYPING_ACTIONS: frozenset[str] = frozenset(
 #: until it was retired (2026-09-27), so forgetting a branch fails closed:
 #: the default is "do not type".
 OPEN_THEN_TYPE_ACTIONS: frozenset[str] = frozenset({"message_from_profile"})
+
+#: THE GROUP POST (lane build-msg2, 2026-11-26; census M C64): the same
+#: open-then-type shape as the set above, on its own gates. The group page's
+#: closed share box is pressed first; his words are queued INSIDE the click
+#: loop only when :func:`group_composer.opened_gate` finds exactly one EMPTY
+#: group composer (no Schedule post, the feed composer's mark), and Post only
+#: when :func:`group_composer.post_gate` reads exactly his words in it with
+#: Post turned on. A set of its own, so none of the named-profile gates the
+#: set above carries can reach it -- and forgetting a branch fails closed.
+GROUP_COMPOSER_ACTIONS: frozenset[str] = frozenset({"publish_group_post"})
 
 
 async def _first_contact_after_send(
@@ -13043,6 +13841,11 @@ async def perform(
     # THE UNFOLLOW'S CONFIRMATION GATE (2026-10-10), read after its press: what
     # the press drew, and whether the confirm control may be pressed.
     unfollow_confirm_gate: Optional[dict[str, Any]] = None
+    # THE GROUP COMPOSER'S OPENED GATE and what Post left, for
+    # GROUP_COMPOSER_ACTIONS only (lane build-msg2). Its Post gate is
+    # ``publish_gate``, the composer's own block.
+    group_opened: Optional[dict[str, Any]] = None
+    group_after_post: Optional[dict[str, Any]] = None
 
     # THE TYPING PLAN, and it is a QUEUE FOR THE SAME REASON THE CLICK PLAN IS.
     #
@@ -13074,6 +13877,12 @@ async def perform(
     select_plan: list[tuple[str, str]] = []
     if control_kind == "select_option":
         select_plan.append((selector, _text_component_of(spec, grant.target)))
+    elif spec.action in GROUP_COMPOSER_ACTIONS:
+        # NOTHING IS QUEUED BEFORE THE CLICK (lane build-msg2): the group's
+        # composer does not exist until its trigger is pressed, so the queue
+        # starts with that press alone, and his words are appended inside the
+        # loop only when ``group_composer.opened_gate`` proceeds.
+        pass
     elif spec.action in OPEN_THEN_TYPE_ACTIONS:
         # NOTHING IS QUEUED BEFORE THE CLICK (2026-09-27). The composer this
         # action types into does not exist until the Message press opens it,
@@ -13651,6 +14460,48 @@ async def perform(
                         ),
                         spec.action,
                     )
+                elif spec.action in CONVERSATION_MENU_ACTIONS and clicks_made == 1:
+                    # THE TRIGGER OPENED THE CONVERSATION'S MENU, AND THAT
+                    # DISPATCHED NOTHING (lane build-msg2). The word is re-read
+                    # in the menu that opened, and the item is appended to this
+                    # same queue only when it is drawn exactly once and its
+                    # inverse not at all; otherwise the same trigger is
+                    # appended to CLOSE the menu, while it reads expanded, and
+                    # nothing inside the menu is ever pressed.
+                    opener_clicks += 1
+                    menu_gate = await conversation_menu.menu_item_gate(page, spec.action)
+                    if menu_gate["proceed"]:
+                        click_plan.append(menu_gate["selector"])
+                    elif menu_gate.get("close_selector"):
+                        click_plan.append(menu_gate["close_selector"])
+                elif spec.action in CONVERSATION_MENU_ACTIONS and clicks_made == 2:
+                    if menu_gate is not None and menu_gate.get("proceed"):
+                        # THE ITEM WAS PRESSED. What it drew is read BEFORE
+                        # anything else -- counts and closed words, and nothing
+                        # in a dialog it drew is pressed (delete's receipt).
+                        menu_after_press = conversation_menu.after_press_note(
+                            await conversation_menu.read_after_press(page)
+                        )
+                    else:
+                        # THE CLOSE PRESS of a menu the gate would not act in.
+                        closer_clicks += 1
+                elif spec.action in GROUP_COMPOSER_ACTIONS and clicks_made == 1:
+                    # THE TRIGGER OPENED THE GROUP'S COMPOSER, AND THAT
+                    # DISPATCHED NOTHING (lane build-msg2). His words are
+                    # queued only if exactly one EMPTY group composer opened.
+                    opener_clicks += 1
+                    await group_composer.wait_for_composer(page)
+                    group_opened = group_composer.opened_gate(
+                        await group_composer.read_composer(page)
+                    )
+                    if group_opened["proceed"]:
+                        fill_plan.append(
+                            (group_composer.EDITOR, _text_component_of(spec, grant.target))
+                        )
+                elif spec.action in GROUP_COMPOSER_ACTIONS and clicks_made == 2:
+                    # POST WAS PRESSED. What it left is read IN PLACE, counted,
+                    # before anything else; nothing it drew is pressed.
+                    group_after_post = await group_composer.read_after_post(page)
                 elif spec.action == "unfollow_company" and clicks_made == 1:
                     # THE UNFOLLOW WAS PRESSED, AND THAT PROVED NOTHING LIVE
                     # (2026-10-10, the live lane's session 7: one press, and the
@@ -13706,6 +14557,20 @@ async def perform(
                     )
                     if editor_save_gate["proceed"]:
                         click_plan.append(editor_save_gate["selector"])
+            elif spec.action in GROUP_COMPOSER_ACTIONS:
+                # THE GROUP COMPOSER, held to the reply's bar (lane build-msg2):
+                # one composer, one editor holding EXACTLY his words, Post now
+                # on, and still no Schedule post. Reported as ``publish_gate``.
+                # A bounded wait for Post to turn on comes first; it decides
+                # nothing.
+                await group_composer.wait_for_post_enabled(page)
+                publish_gate = group_composer.post_gate(
+                    await group_composer.read_composer(
+                        page, text=_text_component_of(spec, grant.target)
+                    )
+                )
+                if publish_gate["proceed"]:
+                    click_plan.append(publish_gate["selector"])
             elif spec.action in OPEN_THEN_TYPE_ACTIONS:
                 # THE COMPOSER THE PRESS OPENED, held to the reply's bar
                 # (2026-09-27): no recipient box, one editor, one Send, the
@@ -13810,6 +14675,9 @@ async def perform(
             # and nothing can have left. A Send it passed was pressed, or its
             # press raised -- either may have landed, and keeps "unknown".
             send_attempted=send_gate is not None and send_gate.get("proceed") is True,
+            # WHETHER A CONVERSATION MENU'S ITEM WAS EVER LET THROUGH (lane
+            # build-msg2): an item its gate refused was never pressed.
+            menu_item_attempted=menu_gate is not None and menu_gate.get("proceed") is True,
         )
     except Exception as exc:  # noqa: BLE001 - the click already happened
         # WHERE TO GO AND LOOK, when the verification read itself failed.
@@ -14481,6 +15349,21 @@ async def perform(
                 "after_the_item_press": curation_after_press,
             }
         ),
+        # WHAT THE GROUP COMPOSER'S OPENED GATE SAW, and what Post left, for
+        # GROUP_COMPOSER_ACTIONS only (lane build-msg2). COUNTS AND BOOLEANS;
+        # his words are compared in the page and never come back. Null for
+        # every other action. The Post gate is ``publish_gate`` above.
+        "group_composer_gate": (
+            None
+            if group_opened is None
+            else {
+                "proceeded": bool(group_opened.get("proceed")),
+                "refused_condition": group_opened.get("refused_condition"),
+                "why": group_opened.get("why"),
+                "observed": group_opened.get("observed"),
+                "after_post": group_after_post,
+            }
+        ),
         # WHAT THE UNFOLLOW'S PRESS DREW (2026-10-10), for that action only:
         # counts, closed words and shaped names, never a Page's name. Null for
         # every other action.
@@ -14658,6 +15541,13 @@ async def perform(
                 "but on a page that stores on the press, read the page before "
                 "any retry."
                 if spec.action == "set_admitted_setting"
+                # A CONVERSATION'S MENU ACT (lane build-msg2): a retry opens the
+                # menu and re-reads the word first, refusing on the inverse --
+                # but a delete has no inverse, and a second one is never safe.
+                else "a retry opens the conversation's menu and re-reads its word "
+                "first, refusing if it already reads the other way -- except a "
+                "delete, which has no inverse: look before any retry of it."
+                if spec.action in CONVERSATION_MENU_ACTIONS
                 else "this action is NOT a toggle, so a retry does not undo a "
                 "first attempt that landed -- it may do the same thing twice, "
                 "to the same person or the same employer."

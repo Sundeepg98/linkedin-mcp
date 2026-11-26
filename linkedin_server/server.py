@@ -1,4 +1,26 @@
-"""The tool surface: ninety-nine tools, twenty-nine of which write to LinkedIn.
+"""The tool surface: one hundred and seven tools, thirty-five of which write to LinkedIn.
+
+THE HUNDREDTH TO HUNDRED-AND-SEVENTH, 2026-11-26, at integration 6's merge of
+lane build-msg2: six WRITES and two READS. ``linkedin_set_conversation_muted``
+and its inverse ``linkedin_unset_conversation_muted``,
+``linkedin_mark_conversation_unread``, ``linkedin_set_conversation_archived``
+and ``linkedin_set_conversation_deleted`` (census ``M M26``, ``M M27``,
+``M M29``, ``M M31``; ruling CONVERSATION-MENU-PREVIEW-PRESS), each an act on
+ONE conversation's own options menu, the conversation named by its thread
+id: the preview opens that one menu by the sanctioned preview press -- read,
+nothing pressed inside it, closed on Escape -- and the confirmed press
+re-reads the word and refuses on the inverse; the delete is receipt-only.
+``linkedin_archived_conversations`` (``M M28``'s view half,
+VIEW-SWITCH-PRESS-RESTORED) and ``linkedin_scheduled_posts`` (``M C14``,
+SCHEDULED-LIST-AS-A-SHIPPED-READ), each a READ behind one declared press of
+its own, the folder switched back and the composer read empty again. And
+``linkedin_publish_group_post`` (``M C64``,
+GROUP-POST-AUDIENCE-FROM-ITS-TRIGGER), his words in ONE group he names by its
+numeric id, pressed only where the trigger says "Start a public post",
+receipt-only. Lane build-msg2's branch numbered them the ninety-second to
+ninety-ninth (its paragraphs are not kept; this one replaces them). Measured
+off the merged registry, not summed. The headline read "ninety-nine tools,
+twenty-nine of which write" until then.
 
 THE NINETY-FIFTH TO NINETY-NINTH, 2026-11-26, at integration 6's merge of lane
 build-net2 (on live session 11's captures): four WRITES and a READ.
@@ -500,9 +522,9 @@ assigned to anybody -- it waits for whoever next runs the suite, and in the
 meantime the pin goes on asserting the old number with full confidence.
 
 THE NUMBERS ABOVE ARE DERIVED NOW, and that is a statement about a test rather
-than about an intention. Ninety-nine is ``len(await mcp.list_tools())``,
+than about an intention. One hundred and seven is ``len(await mcp.list_tools())``,
 pinned in ``test_server_surface.py`` by
-``test_the_surface_is_exactly_the_ninety_nine_tools``; the split is pinned by
+``test_the_surface_is_exactly_the_one_hundred_and_seven_tools``; the split is pinned by
 ``tests/test_prose_that_makes_a_claim.py::test_the_server_docstring_numbers_are_derived``,
 which reads THESE WORDS and fails if any of the three disagrees with the
 registry.
@@ -515,9 +537,13 @@ POINTER to it was dangling, so a reader who followed it found nothing and
 would reasonably conclude these numbers are unchecked. A citation is a claim
 like any other.
 The surface splits three ways and the split is the part a reader actually
-needs: SIXTY-SIX read, TWENTY-NINE write, and FOUR are write-shaped,
-registered, gated and unable to act. Sixty-six plus twenty-nine plus four is
-ninety-nine. (Sixty-five, twenty-five and four, summing to ninety-four, until
+needs: SIXTY-EIGHT read, THIRTY-FIVE write, and FOUR are write-shaped,
+registered, gated and unable to act. Sixty-eight plus thirty-five plus four is
+one hundred and seven. (Sixty-six, twenty-nine and four, summing to
+ninety-nine, until integration 6's merge of lane build-msg2's six writes
+and two reads, 2026-11-26; that lane's branch read sixty-six, thirty and
+three, summing to ninety-nine. Sixty-five, twenty-five and four, summing to
+ninety-four, until
 integration 6's merge of lane build-net2's four writes and one read,
 2026-11-26; that lane's branch read sixty-five, twenty-eight and three,
 summing to ninety-six. Sixty-four, twenty-five and four, summing to
@@ -715,11 +741,14 @@ the moment ``update_profile_field`` was given an address while still refusing.
 always meant: an address is not a permission.
 
 NOTE THE ACTION THAT HAS NO TOOL. ``writes.SANCTIONED_WRITES`` holds
-THIRTY-FOUR actions where this surface registers THIRTY-THREE write-shaped
+FORTY actions where this surface registers THIRTY-NINE write-shaped
 tools, and the missing one is ``set_open_to_work``: it is sanctioned, it is
 refused by ``_refuse_unperformable``, and no tool was ever registered for it.
-So thirty-three counts TOOLS and thirty-four counts ACTIONS, and a reader
-comparing the two numbers is not looking at a discrepancy. (THIRTY and
+So thirty-nine counts TOOLS and forty counts ACTIONS, and a reader comparing
+the two numbers is not looking at a discrepancy. (THIRTY-FOUR and
+THIRTY-THREE until integration 6's merge of lane build-msg2's six writes,
+2026-11-26, added six to each; that lane's branch read THIRTY-FOUR and
+THIRTY-THREE too, by its own six. THIRTY and
 TWENTY-NINE until integration 6's merge of lane build-net2's four writes,
 2026-11-26, added four to each; that lane's branch read THIRTY-TWO and
 THIRTY-ONE. TWENTY-NINE and TWENTY-EIGHT until
@@ -1332,12 +1361,12 @@ mcp = FastMCP(
     instructions=(
         "A window onto the operator's OWN LinkedIn account, driven by his own "
         "signed-in browser on his own machine. Most tools read and change "
-        "nothing. ONE READ CLICKS: linkedin_recent_searches clicks his own "
+        "nothing. ONE READ CLICKS HIS SEARCH BOX: linkedin_recent_searches clicks his own "
         "search box once, reads the recent searches its list draws -- "
         "keywords he typed, never the people the same list names -- and "
         "closes it with Escape; to run one again, pass its keywords to the "
         "search tool for its vertical. "
-        "TWENTY-NINE WRITE: linkedin_save_job, "
+        "THIRTY-FIVE WRITE: linkedin_save_job, "
         "linkedin_unsave_job, linkedin_unfollow_company, "
         "linkedin_follow_company, linkedin_apply_job, "
         "linkedin_update_setting, linkedin_react_to_item, "
@@ -1353,8 +1382,11 @@ mcp = FastMCP(
         "linkedin_send_recommendations_feedback, "
         "linkedin_accept_invitation_to_connect, "
         "linkedin_ignore_invitation_to_connect, "
-        "linkedin_withdraw_invitation and "
-        "linkedin_mark_not_interested. "
+        "linkedin_withdraw_invitation, "
+        "linkedin_mark_not_interested, "
+        "linkedin_set_conversation_muted, linkedin_unset_conversation_muted, "
+        "linkedin_mark_conversation_unread, linkedin_set_conversation_archived, "
+        "linkedin_set_conversation_deleted and linkedin_publish_group_post. "
         "ONE MORE IS WRITE-SHAPED AND REFUSES: linkedin_set_tracker_stage, the "
         "stage move on a saved job, whose control -- an item in the tracker "
         "row's overflow menu -- has never been captured; it reads his Saved "
@@ -1427,6 +1459,20 @@ mcp = FastMCP(
         "trigger owns, nothing more; the undo LinkedIn draws is drawn "
         "once and never pressed here, so if he changes his mind he "
         "presses it himself while it is drawn. "
+        "THE TWENTY-NINTH TO THIRTY-THIRD act on ONE conversation he names by "
+        "its thread id, through that conversation's own options menu: "
+        "linkedin_set_conversation_muted and its inverse "
+        "linkedin_unset_conversation_muted, linkedin_mark_conversation_unread (its "
+        "way back is opening the conversation, linkedin_open_thread with "
+        "allow_unread=True), linkedin_set_conversation_archived (no restore is "
+        "built here) and linkedin_set_conversation_deleted, which nothing brings "
+        "back and nothing confirms -- offer it only on his explicit order for "
+        "a conversation he names. "
+        "THE THIRTY-FOURTH, linkedin_publish_group_post, posts his exact words in "
+        "ONE group he names by its NUMERIC id, never a group's name, to the "
+        "group's public feed: it presses the share box only where its trigger "
+        "says 'Start a public post', and nothing confirms the post, so offer "
+        "it only for a group and words he names, and tell him to look. "
         "THE SIXTEENTH, linkedin_withdraw_from_group, leaves one group he "
         "names by its NUMERIC id, never by a group's name; no join is built "
         "here, so offer it only for a group he names -- and not his last "
@@ -1597,7 +1643,7 @@ mcp = FastMCP(
         "a link only when numeric), linkedin_my_following_list (the people "
         "he follows) and linkedin_my_unfollowed_list (the members he "
         "unfollowed, each a name with no link, because the page draws none), "
-        "and linkedin_list_conversations, "
+        "and linkedin_list_conversations, linkedin_archived_conversations, "
         "linkedin_open_messaging and linkedin_people_search_shape when "
         "include_names is passed -- and the three that return what a search "
         "found, linkedin_search_groups (groups), linkedin_search_events "
@@ -12548,10 +12594,16 @@ async def linkedin_server_info(verbose: bool = False) -> dict[str, Any]:
                 "this, and only when called. THESE ALSO LOAD A MESSAGING "
                 "ADDRESS, and none of them opens a conversation LinkedIn "
                 "chooses: linkedin_list_conversations (the composer's list, "
-                "which opens none), linkedin_messaging_presence (the empty "
+                "which opens none), linkedin_archived_conversations (the "
+                "same list, its folder switched to Archived and back), "
+                "linkedin_messaging_presence (the empty "
                 "composer's suggestions, which opens none), "
                 "linkedin_open_thread, linkedin_send_reply and "
                 "linkedin_send_attachment (only the conversation you name by "
+                "id), and linkedin_set_conversation_muted, "
+                "linkedin_unset_conversation_muted, linkedin_mark_conversation_unread, "
+                "linkedin_set_conversation_archived and linkedin_set_conversation_deleted "
+                "(the composer's list, then only the conversation you name by "
                 "id). Whether any of those loads clears the messaging badge "
                 "is unmeasured.",
                 "loading /mynetwork/ ITSELF would consume the pending-"
@@ -14353,6 +14405,340 @@ async def linkedin_recent_searches() -> dict[str, Any]:
 
 
 # ---- end lane build-net2 ----
+
+
+# ---- lane build-msg2 ----
+# Census M M26, M M27, M M29 and M M31 (lane build-msg2, 2026-11-26): one
+# conversation's own options menu, read by the sanctioned preview press and
+# acted on through it (CONVERSATION-MENU-PREVIEW-PRESS). Every tool this lane
+# registers is in this one contiguous block; the menu itself is read and
+# pressed in ``linkedin_server/conversation_menu.py``, through ``writes``.
+# And census M M28's VIEW half: the Archived folder, read through one folder
+# switch and put back (VIEW-SWITCH-PRESS-RESTORED), in
+# ``linkedin_server/messaging_folders.py``.
+# And census M C14: his scheduled posts list, behind the composer's schedule
+# button (SCHEDULED-LIST-AS-A-SHIPPED-READ), in
+# ``linkedin_server/scheduled_posts.py``.
+# And census M C64: a post in one group he names, behind the grant
+# (EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS), through ``writes`` and
+# ``linkedin_server/group_composer.py``.
+
+from linkedin_server import messaging_folders, scheduled_posts  # noqa: E402 -- lane build-msg2's one block
+
+
+def _thread_id_refusal() -> dict[str, Any]:
+    """A thread id these acts cannot address, refused before any page loads."""
+    return {
+        "error": "bad_argument",
+        "message": (
+            "a conversation is named by its thread id -- the part of its address "
+            "after /messaging/thread/, copied from your own browser: a digit "
+            "first, then letters, digits, '-', '_', '=' and '%'. The value given "
+            "is not one, and it is not repeated here. Nothing was loaded."
+        ),
+        "performed": False,
+    }
+
+
+@mcp.tool()
+async def linkedin_set_conversation_muted(thread_id: str, confirm_token: str = "") -> dict[str, Any]:
+    """Set ONE conversation you name MUTED, by its thread id -- a WRITE.
+
+    Presses "Mute" in that conversation's own options menu, which silences
+    your notifications for it; nobody else is told. Census row ``M M29``. Same
+    two-step shape as ``linkedin_save_job``: no ``confirm_token``, no action --
+    you get a block to read and a token that works ONCE, only for this
+    conversation, only for this verb, within two minutes.
+
+    THE PREVIEW opens nothing while any conversation in your list reads unread
+    (the receipt guard ``linkedin_open_thread`` applies), then opens the
+    conversation you named, checks the browser landed on it, and opens its
+    menu -- the one in the list row LinkedIn marks active -- by the sanctioned
+    preview press: its words counted, nothing inside it pressed, closed on
+    Escape and read closed. A menu drawing "Unmute" is already muted and is
+    refused (that is ``linkedin_unset_conversation_muted``).
+
+    THE CONFIRMED PRESS opens the same menu, re-reads the word, and presses
+    "Mute" only when it is drawn exactly once and "Unmute" not at all. A fresh
+    render's menu is then read again: "Unmute" means muted. That word is
+    derived -- no capture holds a muted menu -- so the first supervised use
+    measures it.
+
+    Args:
+        thread_id: the part of the conversation's address after
+            /messaging/thread/, copied from your own browser.
+        confirm_token: leave empty to preview. Pass the token from that
+            preview to actually mute it.
+    """
+    try:
+        if not threads.valid_thread_id(thread_id):
+            return _thread_id_refusal()
+        return await _write_tool("set_conversation_muted", str(thread_id).strip(), confirm_token)
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_unset_conversation_muted(thread_id: str, confirm_token: str = "") -> dict[str, Any]:
+    """Unset the mute on ONE conversation you name by its thread id -- a
+    WRITE, the inverse of ``linkedin_set_conversation_muted``.
+
+    Presses "Unmute" in that conversation's own options menu. Same two steps
+    and the same gates as the mute: the receipt guard, the landing, the
+    sanctioned preview press reading the menu's word. A menu drawing "Mute" is
+    not muted and is refused. "Unmute" is derived -- no capture holds a muted
+    conversation's menu -- so the first supervised round trip measures it.
+    Census row ``M M29``.
+
+    Args:
+        thread_id: the part of the conversation's address after
+            /messaging/thread/, copied from your own browser.
+        confirm_token: leave empty to preview. Pass the token from that
+            preview to actually unmute it.
+    """
+    try:
+        if not threads.valid_thread_id(thread_id):
+            return _thread_id_refusal()
+        return await _write_tool("unset_conversation_muted", str(thread_id).strip(), confirm_token)
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_mark_conversation_unread(thread_id: str, confirm_token: str = "") -> dict[str, Any]:
+    """Mark ONE conversation you name by its thread id as unread -- a WRITE.
+
+    Presses "Mark as unread" in that conversation's own options menu; it
+    changes only your inbox. Census row ``M M31``. Same two steps and the same
+    gates as ``linkedin_set_conversation_muted``: the receipt guard, the landing,
+    the sanctioned preview press reading the menu's word. A menu drawing "Mark
+    as read" is already unread and is refused.
+
+    THE VERIFICATION READS THE MENU IN PLACE, without loading the conversation
+    again: LinkedIn is believed to mark a conversation read when it is opened,
+    which would undo this. For the same reason THE WAY BACK IS TO OPEN IT:
+    ``linkedin_open_thread(thread_id, allow_unread=True)`` -- your opt-in,
+    because the receipt guard will see this conversation's row unread and
+    cannot tell it from a message you have not read.
+
+    Args:
+        thread_id: the part of the conversation's address after
+            /messaging/thread/, copied from your own browser.
+        confirm_token: leave empty to preview. Pass the token from that
+            preview to actually mark it unread.
+    """
+    try:
+        if not threads.valid_thread_id(thread_id):
+            return _thread_id_refusal()
+        return await _write_tool("mark_conversation_unread", str(thread_id).strip(), confirm_token)
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_set_conversation_archived(thread_id: str, confirm_token: str = "") -> dict[str, Any]:
+    """Archive ONE conversation you name by its thread id -- a WRITE.
+
+    Presses "Archive" in that conversation's own options menu, which moves it
+    out of your default list into the Archived folder; nobody else is told.
+    Census row ``M M27``. Same two steps and the same gates as
+    ``linkedin_set_conversation_muted``; anything but "Archive" drawn exactly once
+    is refused.
+
+    THIS SERVER CANNOT RESTORE IT YET: the restore lives in the Archived
+    folder, whose rows' menus have never been captured (census ``M M28``).
+    Restore it by hand there. After the press the conversation's own address
+    is rendered fresh: its menu still drawing "Archive" means it did not land;
+    the list drawing rows and none of them marked active is the derived sign
+    it did.
+
+    Args:
+        thread_id: the part of the conversation's address after
+            /messaging/thread/, copied from your own browser.
+        confirm_token: leave empty to preview. Pass the token from that
+            preview to actually archive it.
+    """
+    try:
+        if not threads.valid_thread_id(thread_id):
+            return _thread_id_refusal()
+        return await _write_tool("set_conversation_archived", str(thread_id).strip(), confirm_token)
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_set_conversation_deleted(thread_id: str, confirm_token: str = "") -> dict[str, Any]:
+    """Delete ONE conversation you name by its thread id -- a WRITE with no inverse.
+
+    Presses "Delete conversation" in that conversation's own options menu.
+    Census row ``M M26``. USE IT ONLY ON YOUR EXPLICIT ORDER FOR A
+    CONVERSATION YOU NAME: nothing this server knows of brings a deleted
+    conversation back.
+
+    RECEIPT-ONLY. Same preview as ``linkedin_set_conversation_muted`` -- the
+    receipt guard, the landing, the sanctioned preview press reading "Delete
+    conversation" in the menu. The confirmed press re-reads that word and
+    presses it, and then presses NOTHING ELSE: what LinkedIn draws next -- a
+    confirmation or the deletion itself -- has never been captured, so a
+    confirmation is counted in the receipt and never answered. ``performed``
+    comes back "unknown" by declaration; the receipt's ``menu_gate`` says what
+    the press drew. If it drew a confirmation, the conversation was NOT
+    deleted.
+
+    Args:
+        thread_id: the part of the conversation's address after
+            /messaging/thread/, copied from your own browser.
+        confirm_token: leave empty to preview. Pass the token from that
+            preview to actually press "Delete conversation".
+    """
+    try:
+        if not threads.valid_thread_id(thread_id):
+            return _thread_id_refusal()
+        return await _write_tool("set_conversation_deleted", str(thread_id).strip(), confirm_token)
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_archived_conversations(include_names: bool = False) -> dict[str, Any]:
+    """List your ARCHIVED conversations without opening any: one folder switch, put back.
+
+    WHY A PRESS. No address shows the Archived folder; on LinkedIn's
+    messaging list it is a choice in the folder menu. So this opens the
+    composer's list (/messaging/compose/, which opens no conversation --
+    measured), presses the folder pill, chooses "Archived", reads the list,
+    then chooses the folder the pill wore before and reads the list again.
+    The ruling it rests on, VIEW-SWITCH-PRESS-RESTORED, permits a press that
+    changes which rows a view shows only when the view is RESTORED and a
+    before/after reading proves it: ``restored`` is true only when the pill
+    wears its folder again, closed, on the composer's address, and the list
+    reads exactly as it did before. A switch left in place is the loudest
+    answer this returns, with the folder to choose yourself.
+
+    WHAT IT COSTS, and all of it is yours: what linkedin_list_conversations
+    costs (the messaging tab's new-since-last-visit badge resets, an empty
+    composer is drawn, nothing is typed) plus four presses of the folder
+    menu. One page load.
+
+    THE ROWS are read exactly as linkedin_list_conversations reads them:
+    unread paired to the row -- an archived conversation can be unread, no
+    default view shows it, and the receipt guard never sees it -- null on a
+    placeholder row, and no thread id. Names are off by default; pass
+    ``include_names=True`` and each rendered row's label comes back in
+    ``with`` as a people record.
+
+    DERIVED, and said so: the switch was captured on /messaging/, not on the
+    composer's list. The same component draws it there and every step's
+    reading is returned, so a page that does not switch reads as not
+    switched, never as an empty folder. Nothing here returns a conversation
+    to your inbox: that control has never been captured.
+
+    Args:
+        include_names: return each rendered row's label as a people record
+            in ``with``, instead of the placeholder ``name``. Default False.
+    """
+    try:
+        async with BROWSER.session() as page:
+            landed = await BROWSER.goto(page, threads.COMPOSE_URL)
+            reading = await messaging_folders.read_archived(
+                page, include_names=bool(include_names)
+            )
+        return messaging_folders.archived_result(
+            reading, landed, include_names=bool(include_names)
+        )
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_scheduled_posts() -> dict[str, Any]:
+    """How many posts you have SCHEDULED, read behind the composer's schedule button.
+
+    WHY PRESSES, AND WHICH. No address lists them: LinkedIn draws the list
+    inside the composer. So this opens the composer (/preload/sharebox/),
+    checks it is EMPTY -- its text box blank, its publish button drawn
+    disabled -- and only then presses its schedule button, then "View all
+    scheduled posts", reads the list, and closes the composer with its own
+    close button. On ruling SCHEDULED-LIST-AS-A-SHIPPED-READ. Nothing is ever
+    typed and nothing is scheduled.
+
+    ZERO ONLY ON THE DRAWN EMPTY HEADLINE. The one capture of the list is
+    empty ("No scheduled posts yet"); a list holding anything has never been
+    seen, so ``scheduled_posts`` is 0 when that headline is drawn and null --
+    unknown, NOT zero -- otherwise.
+
+    NO DRAFT, AS FAR AS ANYTHING HERE CAN SEE: no draft surface is reachable
+    (the read boundary refuses every candidate address). So ``no_draft`` is
+    true only when the composer read empty before the first press, closed
+    with no dialog and no toast left, and read empty AGAIN on a second load.
+    A composer holding text, or anything drawn after the close, is an
+    AUTOSAVE SIGN: every further press stops and ``autosave_sign`` says what
+    was seen. Two page loads.
+    """
+    try:
+        async with BROWSER.session() as page:
+            await BROWSER.goto(page, scheduled_posts.COMPOSER_URL)
+            reading = await scheduled_posts.read_scheduled(page)
+            reopened: dict[str, Any] = {}
+            reclosed: dict[str, Any] = {}
+            if reading.get("closed") is True and not reading.get("autosave_sign"):
+                await BROWSER.goto(page, scheduled_posts.COMPOSER_URL)
+                reopened = await scheduled_posts.reopened_empty(page)
+                if reopened.get("empty") is True:
+                    reclosed = await scheduled_posts.close_composer(page)
+        return scheduled_posts.scheduled_result(reading, reopened, reclosed)
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_publish_group_post(
+    group_id: str, text: str, confirm_token: str = ""
+) -> dict[str, Any]:
+    """Publish a post in ONE LinkedIn group you name by its numeric id -- a WRITE.
+
+    Under your own name, to the group's PUBLIC feed: the group page's share
+    box says "Start a public post", and this presses it only when it says
+    exactly that. Census row ``M C64``. Same two-step shape as
+    ``linkedin_save_job``: no ``confirm_token``, no action -- you get a block
+    to read, with your words printed in full, and a token that works ONCE,
+    only for this group and these words, within two minutes.
+
+    THE PREVIEW loads the group's page and presses nothing. It refuses unless
+    the browser landed on the group you named and the page draws exactly one
+    closed share box with that one trigger. Name the group by the numeric id
+    ``linkedin_group_memberships`` returns; a name is refused and never
+    repeated.
+
+    THE CONFIRMED PRESS opens the box with its trigger, and types your words
+    only into ONE empty composer -- one editor, blank, and Post drawn disabled
+    -- that draws no Schedule post (the feed composer's mark, which the
+    group's does not draw). Post is pressed only when the editor holds EXACTLY
+    your words and Post has turned on. Anything else stops with nothing
+    published; words already typed stay in the composer.
+
+    RECEIPT-ONLY: what Post leaves inside a group -- the post in its feed, or
+    a notice that it waits for a manager's approval -- has never been
+    captured, so the outcome is declared unverifiable and the receipt counts
+    what the page drew after the press. Open the group to look. Irreversible
+    in audience: a deletion would not un-read it, and no delete is built here.
+
+    Args:
+        group_id: the group's numeric id, as linkedin_group_memberships
+            returns it.
+        text: the exact words to post.
+        confirm_token: leave empty to preview. Pass the token from that
+            preview to actually post.
+    """
+    try:
+        return await _write_tool(
+            "publish_group_post", {"group": group_id, "text": text}, confirm_token
+        )
+    except Exception as exc:
+        return _error(exc)
+
+
+# ---- end lane build-msg2 ----
 
 
 def main() -> None:  # pragma: no cover - process entry point

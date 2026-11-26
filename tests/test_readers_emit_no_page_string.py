@@ -1473,6 +1473,31 @@ WHAT_WOULD_DRIVE_IT: dict[str, str] = {
         "label, back only inside the person records. A shipped_drives double "
         "is not built."
     ),
+    # Lane build-msg2, 2026-11-26: the conversation menu's closing wait.
+    "conversation_menu:_wait_for_closed": (
+        "NOT A PAGE READER: a bounded wait that returns how many polls it took "
+        "and decides nothing; whether the menu closed is read by "
+        "conversation_menu.preview_press after it, which the harness drives "
+        "clean, and tests/test_conversation_menu.py drives the wait over live "
+        "session 11's thread page with the menu open and Escape both closing "
+        "it and not."
+    ),
+    # Lane build-msg2, the same day: the folder switch's two steps, each
+    # reached only from messaging_folders.read_archived.
+    "messaging_folders:_switch_to": (
+        "NOT A PAGE READER: one step of the folder switch, returning a boolean "
+        "and appending readings the module's own reader produced; the planted "
+        "page draws no folder pill, so it refuses before its press, as it must. "
+        "messaging_folders.read_archived, its only caller, is driven clean, and "
+        "tests/test_messaging_folders.py drives the step over live session 11's "
+        "composer list with the open capture's choices."
+    ),
+    "messaging_folders:_close_if_open": (
+        "NOT A PAGE READER: returns None; it presses the pill only while the "
+        "pill reads open, which the planted page never draws. "
+        "tests/test_messaging_folders.py drives it over a dropdown a choice "
+        "left open."
+    ),
 }
 
 #: The verdicts that mean a drive never reached its success path.

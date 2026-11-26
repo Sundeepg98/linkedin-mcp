@@ -3,8 +3,13 @@
 An MCP server that shows you your own LinkedIn account data as structured tool
 results instead of pages you have to click through.
 
-**Ninety-nine tools ship. Sixty-six read. Thirty-three write. Four of those
-are write-shaped and unable to act.**
+**One hundred and seven tools ship. Sixty-eight read. Thirty-nine write. Four
+of those are write-shaped and unable to act.**
+(It read "Ninety-nine tools ship. Sixty-six read. Thirty-three write. Four of
+those are write-shaped" until integration 6's merge of lane build-msg2,
+2026-11-26: six writes and two reads, described below in that lane's own
+lines. Lane build-msg2's branch read "Ninety-nine tools ship. Sixty-six
+read. Thirty-three write. Three of those are write-shaped".)
 (It read "Ninety-four tools ship. Sixty-five read. Twenty-nine write" until
 integration 6's merge of lane build-net2, 2026-11-26: four writes and a
 read, each built on live session 11's captures and described below in that
@@ -44,6 +49,26 @@ name by the member's profile link, on your own invitation manager --
 one control in that one row and nothing in any dialog the press draws; a
 fresh render of the tab decides. LinkedIn documents a confirmation for the
 withdraw, so its first use is expected to stop there, withdrawing nothing.)
+(It read "Ninety-eight tools ship. Sixty-six read. Thirty-two write" until
+lane build-msg2's group post, 2026-11-26: `linkedin_publish_group_post`
+posts his exact words in ONE group he names by its numeric id, behind the
+grant -- the share box pressed only where its trigger says "Start a public
+post", his words typed only into one empty group composer, Post pressed
+only when the editor holds exactly them; receipt-only (census `M C64`).)
+(It read "Ninety-six tools ship. Sixty-four read. Thirty-two write" until
+lane build-msg2's two reads, 2026-11-26, each behind one declared press of
+its own: `linkedin_archived_conversations` switches the composer's list to
+the Archived folder, reads it and switches it back, the restore proven by a
+before/after reading (census `M M28`'s view half), and
+`linkedin_scheduled_posts` reads the scheduled posts list behind the
+composer's schedule button -- zero only on its drawn empty headline -- and
+closes the composer with nothing typed (census `M C14`).)
+(It read "Ninety-one tools ship. Sixty-four read. Twenty-seven write" until
+lane build-msg2, 2026-11-26: five writes act on ONE conversation he names by
+its thread id, through its own options menu -- mute, unmute, mark unread,
+archive, and a receipt-only delete -- each previewed by a sanctioned press that
+opens that one menu, reads it, presses nothing inside and closes it (census
+`M M26`, `M M27`, `M M29`, `M M31`).)
 (It read "Ninety tools ship. Sixty-three read. Twenty-seven write" until
 integration 4's merge of lane readers-msg26, 2026-11-26:
 `linkedin_search_content` searches posts by a keyword or a hashtag on the
@@ -845,9 +870,15 @@ renumbering. A read that changes something has to say so:
    this, and only when called. **These also load a messaging address, and
    none of them opens a conversation LinkedIn chooses:**
    `linkedin_list_conversations` (the composer's list, which opens none),
-   `linkedin_messaging_presence` (the empty composer's suggestions, which
+   `linkedin_archived_conversations` (the same list, its folder switched to
+   Archived and back), `linkedin_messaging_presence` (the empty composer's
+   suggestions, which
    opens none), `linkedin_open_thread`, `linkedin_send_reply` and
-   `linkedin_send_attachment` (only the conversation you name by id). Whether any of those loads clears the
+   `linkedin_send_attachment` (only the conversation you name by id), and
+   `linkedin_set_conversation_muted`, `linkedin_unset_conversation_muted`,
+   `linkedin_mark_conversation_unread`, `linkedin_set_conversation_archived` and
+   `linkedin_set_conversation_deleted` (the composer's list, then only the
+   conversation you name by id). Whether any of those loads clears the
    messaging badge is
    unmeasured.
 4. **Three census surfaces may cost something merely by being opened**, and
@@ -1191,7 +1222,7 @@ linkedin_server/
   cdp_bridge.py              the recovery path: attach to a running Chrome
   dom.py                     the read-only harvesters and the control readers
   shape.py                   pure parsers and the result envelope
-  server.py                  the ninety-nine tools
+  server.py                  the one hundred and seven tools
   errors.py
 tests/                       1393 tests, no network, no account
   fixtures/                  frozen LinkedIn markup, scrubbed

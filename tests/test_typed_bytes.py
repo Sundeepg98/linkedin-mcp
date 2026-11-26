@@ -154,7 +154,13 @@ def test_the_fill_types_the_grants_own_text_and_nothing_else():
         and isinstance(node.func.value, ast.Name)
         and node.func.value.id == "fill_plan"
     ]
-    assert len(appended) == 2, [ast.unparse(a) for a in appended]
+    #
+    # THREE SINCE 2026-11-26 (lane build-msg2, census M C64), EXTENDED THE SAME
+    # WAY: ``publish_group_post`` types into the group composer its trigger
+    # opens, so its words are appended inside the click loop after
+    # ``group_composer.opened_gate`` -- a third site, held to exactly the bar
+    # the other two are: a bare ``_text_component_of(spec, grant.target)``.
+    assert len(appended) == 3, [ast.unparse(a) for a in appended]
 
     # THE ARGUMENT MUST BE THE CALL ITSELF, not merely contain it.
     #
@@ -194,6 +200,7 @@ def test_the_fill_types_the_grants_own_text_and_nothing_else():
     # arriving here again would be a write typing WHO -- a name -- which this
     # line now refuses.
     assert sorted(extractors) == [
+        "_text_component_of",
         "_text_component_of",
         "_text_component_of",
     ], extractors

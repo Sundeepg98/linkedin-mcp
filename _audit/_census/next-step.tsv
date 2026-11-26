@@ -94,7 +94,6 @@ M C10	M	W	R3	TARGET:a member he names to mention	INFERRED	RULING:MENTION-COMPOSI
 M C11	M	W	R3	SIBLING:M C1	INFERRED	RULING:D6-CAPABILITY-OVER-AFFORDANCE ; M C1
 M C12	M	W	R3	TARGET:the words of a draft he names	INFERRED	RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS ; M C12
 M C13	M	W	R3	TARGET:a post he names to schedule	NAMED	_audit/_census/messaging-and-content.md::Schedule post is a button opening a modal nobody has opened
-M C14	M	R	-	BUILD:tests/fixtures/live11/sharebox_scheduled_list_open.html	NAMED	_audit/2026-09-28-lane-k-ledger.md::YES, as a shipped read: open the post ; RULING:ABSENT-ON-HIS-ACCOUNT-PER-ROW
 M C15	M	W	R3	PRECONDITION:a post he has scheduled	MEASURED	_audit/2026-11-26-readers-msg26.md::No scheduled posts yet ; RULING:MEASURED-ABSENT-OR-PRECONDITION
 M C16	M	W	R3	PRECONDITION:a post he has scheduled	MEASURED	_audit/2026-11-26-readers-msg26.md::No scheduled posts yet ; RULING:MEASURED-ABSENT-OR-PRECONDITION
 M C17	M	W	R3	PRECONDITION:a post he has scheduled	MEASURED	_audit/2026-11-26-readers-msg26.md::No scheduled posts yet ; RULING:MEASURED-ABSENT-OR-PRECONDITION
@@ -133,7 +132,6 @@ M C57	M	W	R3	TARGET:the event he names to create (title and time)	INFERRED	RULIN
 M C58	M	W	R3	TARGET:an event he names	NAMED	_audit/_census/read-addresses.tsv::ADMITTED 2026-09-23 BY A REVIEW: COMMIT (lane L1): one event by its NUMERIC id ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
 M C61	M	W	R3	CAPTURE:C-B5-1	NAMED	_audit/2026-10-10-lane-b5-groups-build.md::| C-B5-1 | N 63, M C61 | ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
 M C62	M	W	R3	TARGET:a group he has a pending request to join	NAMED	_audit/_census/write-classes.tsv::queued:GROUP-REQUEST-PENDING ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
-M C64	M	W	R3	BUILD:tests/fixtures/live11/group_composer_open.html	MEASURED	_audit/2026-11-26-readers-msg26.md::the same share-box modal ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS ; RULING:B5-GROUP-COMPOSER-OPENS-EMPTY
 M C65	M	W	R3	SIBLING:M C25	INFERRED	RULING:D6-CAPABILITY-OVER-AFFORDANCE ; M C25
 M C66	M	W	R2	TARGET:a member he names to mention	INFERRED	RULING:MENTION-COMPOSITION-RULING ; RULING:OPERATOR-NAMES-THE-TARGET
 M C67	M	W	R3	TARGET:a group post or comment of his he names	INFERRED	RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS ; M C67
@@ -179,12 +177,8 @@ M M22	M	W	R3	TARGET:a group conversation he is in, named by him	INFERRED	RULING:
 M M23	M	W	R2	TARGET:a group conversation he is in, named by him	INFERRED	RULING:OPERATOR-NAMES-THE-TARGET ; M M22
 M M24	M	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 M M25	M	W	R3	TARGET:a group conversation he is in, named by him	INFERRED	RULING:OPERATOR-NAMES-THE-TARGET ; M M22
-M M26	M	W	R3	BUILD:tests/fixtures/live11/c_b3_1_menu_open.html	NAMED	_audit/2026-09-28-lane-k-ledger.md::RECEIPT-ONLY behind the grant ; RULING:OUTWARD-CLASSES-BUILT-BEHIND-GRANTS ; RULING:OWN-INBOX-READS-COVERED-BY-B
-M M27	M	W	R3	BUILD:tests/fixtures/live11/c_b3_1_menu_open.html	NAMED	_audit/2026-09-28-lane-k-ledger.md::YES, a sanctioned PREVIEW press, on the ; RULING:HIS-OWN-CURATION-NOT-OUTWARD ; RULING:OWN-INBOX-READS-COVERED-BY-B
-M M28	M	R+W	-	CAPTURE:messaging-guarded	MEASURED	_audit/2026-11-26-readers-msg26.md::the control that restores one is not on disk ; RULING:VIEW-SWITCH-PRESS-RESTORED
-M M29	M	W	R3	BUILD:tests/fixtures/live11/c_b3_1_menu_open.html	NAMED	_audit/2026-09-28-lane-k-ledger.md::YES, a sanctioned PREVIEW press, on the ; RULING:HIS-OWN-CURATION-NOT-OUTWARD ; RULING:OWN-INBOX-READS-COVERED-BY-B
+M M54	M	W	R3	CAPTURE:messaging-guarded	MEASURED	_audit/2026-11-26-readers-msg26.md::the control that restores one is not on disk ; RULING:VIEW-SWITCH-PRESS-RESTORED
 M M30	M	W	R3	TARGET:a conversation he has starred himself	NAMED	_audit/2026-09-24-lane-l5-messaging.md::**C10 -- the star's ON label** ; RULING:OPERATOR-NAMES-THE-TARGET
-M M31	M	W	R3	BUILD:tests/fixtures/live11/c_b3_1_menu_open.html	NAMED	_audit/2026-09-28-lane-k-ledger.md::YES, a sanctioned PREVIEW press, on the ; RULING:HIS-OWN-CURATION-NOT-OUTWARD ; RULING:OWN-INBOX-READS-COVERED-BY-B
 M M34	M	R	-	CAPTURE:messaging-guarded	NAMED	_audit/2026-09-28-lane-k-ledger.md::CAPTURE FIRST: one capture load that ; RULING:D1-SEARCH-AS-READS
 M M35	M	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 M M36	M	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD

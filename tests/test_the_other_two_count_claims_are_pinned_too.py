@@ -78,6 +78,13 @@ for _tens, _word in ((20, "Twenty"), (30, "Thirty"), (40, "Forty"),
     WORDS[_tens] = _word
     for _unit in range(1, 10):
         WORDS[_tens + _unit] = f"{_word}-{WORDS[_unit].lower()}"
+#: THE HUNDREDS, ADDED 2026-11-26 at integration 6, when the merged registry
+#: reached 107 tools and ``word(107)`` raised exactly as designed. The house
+#: writes "two hundred and", "five hundred and", so the hundred takes an "and".
+#: Two hundred and above still raises: the table grows, the loud edge stays.
+WORDS[100] = "One hundred"
+for _rest in range(1, 100):
+    WORDS[100 + _rest] = f"One hundred and {WORDS[_rest].lower()}"
 
 
 def word(value: int) -> str:
@@ -127,7 +134,8 @@ def _package_docstring() -> str:
     "value, spelled",
     [(0, "Zero"), (5, "Five"), (12, "Twelve"), (20, "Twenty"),
      (29, "Twenty-nine"), (30, "Thirty"), (41, "Forty-one"),
-     (42, "Forty-two"), (99, "Ninety-nine")],
+     (42, "Forty-two"), (99, "Ninety-nine"), (100, "One hundred"),
+     (107, "One hundred and seven"), (199, "One hundred and ninety-nine")],
 )
 def test_the_spelling_table_spells(value, spelled):
     assert word(value) == spelled
@@ -140,8 +148,11 @@ def test_a_count_nobody_spelled_fails_loudly_rather_than_matching_nothing():
     day the surface grows past the table -- a guard that stops guarding by
     growing out of its own vocabulary, silently.
     """
-    with pytest.raises(AssertionError, match="no spelling for 100"):
-        word(100)
+    # 200 SINCE 2026-11-26 (integration 6): the table now spells the hundreds
+    # the merged registry reached, and the edge it must fail loudly at moved
+    # with it. It probed 100 until then.
+    with pytest.raises(AssertionError, match="no spelling for 200"):
+        word(200)
 
 
 # ---------------------------------------------------------------------------
@@ -261,7 +272,12 @@ def test_all_three_files_carry_the_same_count_right_now():
     server_doc = (REPO / "linkedin_server" / "server.py").read_text(
         encoding="utf-8"
     )[:6000]
-    headline = re.search(r"\*\*([A-Z][a-z]+(?:-[a-z]+)?) tools ship\.", _readme())
+    # A count in the hundreds is a phrase, "One hundred and seven" (2026-11-26,
+    # integration 6): the group takes it as well as a single word.
+    headline = re.search(
+        r"\*\*([A-Z][a-z]+(?:-[a-z]+)?(?: hundred(?: and [a-z]+(?:-[a-z]+)?)?)?) tools ship\.",
+        _readme(),
+    )
     assert headline, "README.md has no headline of the expected shape"
     assert headline.group(1).lower() in server_doc.lower(), (
         f"README says {headline.group(1)} tools and server.py's docstring "

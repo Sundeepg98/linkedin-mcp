@@ -48,7 +48,10 @@ already offers) -- read by :func:`read_conversation_list` into its reading and
 published by :func:`list_result` only as people records (since 2026-09-27,
 PEOPLE-DATA-MITIGATIONS) -- and the reply preview's ``who_this_would_reach``,
 returned in the confirm block only, as a people record since 2026-09-27
-(PREVIEW-NAMES-THE-RESOLVED-TARGET) -- see :func:`name_the_reply_recipient`.
+(PREVIEW-NAMES-THE-RESOLVED-TARGET) -- see :func:`name_the_reply_recipient`,
+which since 2026-11-26 (lane build-msg2) returns the same record under
+``whose_conversation`` in the confirm block of an act on the conversation's
+own menu, by the same rule.
 
 A THREAD ID IS ONLY EVER A TOOL ARGUMENT. It is validated against the same
 shape the read allowlist admits, formatted into one constant template, and
@@ -1342,8 +1345,17 @@ async def name_the_reply_recipient(
     """
     # AND FOR AN ATTACHMENT (lane U, 2026-10-10): the same conversation, the
     # same header, the same question -- who the file would reach.
-    if getattr(spec, "action", None) not in ("send_reply", "send_attachment"):
+    # AND FOR AN ACT ON THE CONVERSATION'S OWN MENU (lane build-msg2,
+    # 2026-11-26): the same header, a different question -- WHOSE
+    # conversation the act changes -- under its own key, because a mute or a
+    # delete reaches nobody.
+    from linkedin_server import conversation_menu  # local: it imports this module
+
+    action = getattr(spec, "action", None)
+    sends = ("send_reply", "send_attachment")
+    if action not in sends and action not in conversation_menu.ACTIONS:
         return block
+    key = "who_this_would_reach" if action in sends else "whose_conversation"
     facts = dict(getattr(observation, "facts", None) or {})
     if facts.get("landed_on_the_named_thread") is not True:
         return block
@@ -1382,28 +1394,32 @@ async def name_the_reply_recipient(
         record = conversation_with(title, group=True)
     out = dict(block)
     if record is None:
-        out["who_this_would_reach_check"] = (
+        out[key + "_check"] = (
             "The conversation's header did not draw exactly one title, and at "
-            "most one line under it, so this server cannot tell you who it "
-            "would reach. Open the conversation yourself and check it before "
-            "confirming."
+            "most one line under it, so this server cannot tell you "
+            + ("who it would reach" if action in sends else "whose conversation this is")
+            + ". Open the conversation yourself and check it before confirming."
         )
         return out
-    out["who_this_would_reach"] = record
+    out[key] = record
     kind = (
         "the person in the conversation you named -- its title and the line "
         "its header draws under it, as a person record whose headline is null "
         "where the header draws none"
         if one_person
         else "the title of the GROUP conversation you named, as a title record: "
-        "every participant receives the reply"
+        + (
+            "every participant receives the reply"
+            if action in sends
+            else "the act changes how this whole conversation sits in your own inbox"
+        )
         if group
         else "the title of the conversation you named, as a title record: the "
         "page did not draw its row in the list, so nothing says whether it "
         "has one other member or several"
     )
-    out["who_this_would_reach_check"] = (
-        "who_this_would_reach is " + kind + ", read off that conversation's "
+    out[key + "_check"] = (
+        key + " is " + kind + ", read off that conversation's "
         "own page, already open on your screen; nobody is notified, and this "
         "server keeps no copy -- it is in no grant, no log and no file. CHECK "
         "IT: a thread id that uniquely names the WRONG conversation is the one "

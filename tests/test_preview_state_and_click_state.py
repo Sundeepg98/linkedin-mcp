@@ -418,6 +418,34 @@ REACHED: dict[str, tuple[str, str, str]] = {
         WITHDRAW_MARKUP,
         str(writes._target_for(spec_for_action("withdraw_reaction"), REACTED_ITEM)),
     ),
+    # 2026-11-26 (census M M26, M M27, M M29, M M31; lane build-msg2). A
+    # TRACKED capture, live session 11's load 40 with the menu CLOSED: the
+    # one active row holding its one collapsed trigger. These five declare
+    # ``click_from_state`` -- the click-time gate reads the TRIGGER, and the
+    # word is re-read inside the menu the press opens -- so the check below
+    # compares the click-time reading against that declared field.
+    **{
+        action: (
+            "tests/fixtures/live11/msg_thread.html",
+            markup("live11/msg_thread"),
+            "2-SYNTHETICTHREADAAAA==",
+        )
+        for action in (
+            "set_conversation_muted", "unset_conversation_muted", "mark_conversation_unread",
+            "set_conversation_archived", "set_conversation_deleted",
+        )
+    },
+    # 2026-11-26 (census M C64; lane build-msg2). A TRACKED capture, live
+    # session 11's load 36 with LinkedIn's words put back by keyed shape: the
+    # group page's one closed share box and its one "Start a public post"
+    # trigger -- the one reading the preview and the click-time gate both
+    # take; the composer is read only after the press opens it.
+    "publish_group_post": (
+        "tests/fixtures/live11/group_member_words.html",
+        markup("live11/group_member_words"),
+        str(writes._target_for(spec_for_action("publish_group_post"),
+                               {"group": "10001", "text": "A synthetic group post."})),
+    ),
 }
 
 #: WHAT THIS INSTRUMENT CANNOT REACH, WITH THE REASON -- AND THE REASON IS NOT
@@ -553,7 +581,14 @@ _WORLDS_THAT_REACH_OUT = frozenset({"set_similar_jobs_alert", "unset_similar_job
                                     "accept_invitation_to_connect",
                                     "ignore_invitation_to_connect",
                                     "withdraw_invitation",
-                                    "mark_not_interested"})
+                                    "mark_not_interested",
+                                    # 2026-11-26, lane build-msg2: session 11's thread
+                                    # page is a tracked copy too.
+                                    "set_conversation_muted", "unset_conversation_muted",
+                                    "mark_conversation_unread", "set_conversation_archived",
+                                    "set_conversation_deleted",
+                                    # the same lane: session 11's group page.
+                                    "publish_group_post"})
 
 
 async def _over_refusing_every_request(html: str, work):
@@ -744,8 +779,16 @@ def test_every_performable_action_is_either_reached_or_declared_unreachable():
     # 29 AT INTEGRATION 6'S MERGE OF LANE BUILD-NET2 ONTO LANE BUILD-JOBS2 (2026-11-26): the
     # feedback press beside the four, each reached over its own tracked copy.
     # MEASURED.
-    assert len(PERFORMABLE) == 29, sorted(PERFORMABLE)
-    assert len(REACHED) == 29, sorted(REACHED)
+    # 24 -> 29 ON LANE BUILD-MSG2 (2026-11-26): the five acts on one
+    # conversation's own menu, reached over session 11's tracked thread page,
+    # menu closed. MEASURED.
+    # 29 -> 30 ON THE SAME LANE: the group post, reached over session 11's
+    # tracked group page with its share box closed. MEASURED.
+    # 35 AT INTEGRATION 6'S MERGE OF LANE BUILD-MSG2 (2026-11-26): build-msg2's
+    # six beside the twenty-nine, each reached over its own tracked copy.
+    # MEASURED.
+    assert len(PERFORMABLE) == 35, sorted(PERFORMABLE)
+    assert len(REACHED) == 35, sorted(REACHED)
     assert len(CANNOT_REACH) == 0, sorted(CANNOT_REACH)
 
 

@@ -709,8 +709,15 @@ def test_a_non_ascii_word_survives_the_copy_as_a_reference() -> None:
 #: `live11` 56 ON THE SAME LANE, the count on disk: J 109's Life tab with its
 #: three section headings and its interest button's text written by keyed
 #: shape (`scripts/_build_jobs2_word_skeletons.py`), beside the 55.
+#: live11 59 ON LANE BUILD-MSG2 (2026-11-26), re-counted on disk: five more word
+#: skeletons of session 11's composer captures (the feed's composer, its
+#: schedule and scheduled-list dialogs, his member group's page and its open
+#: composer), LinkedIn's own words written by keyed shape
+#: (`scripts/_build_msg2_word_skeletons.py`), beside the 54.
+#: `live11` 61 AT INTEGRATION 6'S MERGE OF LANE BUILD-MSG2 (2026-11-26), re-counted on
+#: disk: build-jobs2's two word skeletons and build-msg2's five beside the 54.
 LIVE_FIXTURE_COUNTS = {"live1": 5, "live2": 31, "live3": 14, "live4": 4, "live5": 1, "live7": 1, "live8": 8, "live9": 1,
-                       "live11": 56}
+                       "live11": 61}
 
 
 @pytest.mark.parametrize("session_dir", sorted(LIVE_FIXTURE_COUNTS))

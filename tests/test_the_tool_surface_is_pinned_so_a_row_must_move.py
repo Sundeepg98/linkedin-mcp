@@ -126,6 +126,21 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     # Lane build-jmn26, 2026-11-25 (census J 31): the search-alert pair.
     "linkedin_set_search_job_alert": ("confirm_token", "keywords", "location"),
     "linkedin_unset_search_job_alert": ("confirm_token", "keywords", "location"),
+    # Lane build-msg2, 2026-11-26 (census M M26, M M27, M M29, M M31): the
+    # five acts on one conversation's own options menu, by its thread id.
+    "linkedin_set_conversation_muted": ("confirm_token", "thread_id"),
+    "linkedin_unset_conversation_muted": ("confirm_token", "thread_id"),
+    "linkedin_mark_conversation_unread": ("confirm_token", "thread_id"),
+    "linkedin_set_conversation_archived": ("confirm_token", "thread_id"),
+    "linkedin_set_conversation_deleted": ("confirm_token", "thread_id"),
+    # Lane build-msg2, the same day: two READS, each behind one declared
+    # press -- the Archived folder (census M M28's view half) and the
+    # scheduled posts list (census M C14).
+    "linkedin_archived_conversations": ("include_names",),
+    "linkedin_scheduled_posts": (),
+    # Lane build-msg2, the same day (census M C64): a post in one group he
+    # names, by its digits and his words.
+    "linkedin_publish_group_post": ("confirm_token", "group_id", "text"),
     "linkedin_message_from_profile": ("confirm_token", "profile", "text"),
     "linkedin_my_activity_items": (),
     "linkedin_my_applications": ("limit",),
@@ -818,8 +833,33 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: and build-net2's five (eight), beside the ninety-one and 137. Counted off
 #: the merged registry, never summed; each lane's census decisions are its
 #: own, above.
-PINNED_TOOL_COUNT = 99
-PINNED_PARAMETER_COUNT = 148
+#: **AT LANE BUILD-MSG2 (2026-11-26): 96 TOOLS AND 147 PARAMETERS** -- five
+#: WRITES, `linkedin_set_conversation_muted`, `linkedin_unset_conversation_muted`,
+#: `linkedin_mark_conversation_unread`, `linkedin_set_conversation_archived` and
+#: `linkedin_set_conversation_deleted` (`thread_id`, `confirm_token` each), beside
+#: the ninety-one and 137, counted off `mcp.list_tools()`, never summed. THE
+#: CENSUS DECISION, IN THE LANE'S CENSUS COMMIT: `M M26`, `M M27`, `M M29` and
+#: `M M31` GAP -> COVERED-UNFIRED on them, never fired. See
+#: `_audit/2026-11-26-build-msg2.md`.
+#: **ON THE SAME LANE: 98 TOOLS AND 148 PARAMETERS** -- two READS,
+#: `linkedin_archived_conversations(include_names)` and
+#: `linkedin_scheduled_posts()`, beside the ninety-six and 147, counted off
+#: `mcp.list_tools()`, never summed. THE CENSUS DECISION, IN THE SAME COMMIT:
+#: `M C14` GAP -> COVERED-UNFIRED on the scheduled posts read, never fired;
+#: `M M28` STAYS GAP -- its view half is the Archived read, its restore half
+#: waits on a capture, and whether the row splits is the orchestrator's.
+#: See `_audit/2026-11-26-build-msg2.md`.
+#: **ON THE SAME LANE: 99 TOOLS AND 151 PARAMETERS** -- one WRITE,
+#: `linkedin_publish_group_post(group_id, text, confirm_token)`, beside the
+#: ninety-eight and 148, counted off `mcp.list_tools()`, never summed. THE
+#: CENSUS DECISION, IN THE SAME COMMIT: `M C64` GAP -> COVERED-UNFIRED on it,
+#: never fired. See `_audit/2026-11-26-build-msg2.md`.
+#: **107 TOOLS AND 162 PARAMETERS AT INTEGRATION 6'S MERGE OF LANE BUILD-MSG2 (2026-11-26)** --
+#: build-msg2's eight tools beside the ninety-nine and 148, counted off the
+#: merged registry, never summed; that lane's census decisions are its own,
+#: above.
+PINNED_TOOL_COUNT = 107
+PINNED_PARAMETER_COUNT = 162
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:

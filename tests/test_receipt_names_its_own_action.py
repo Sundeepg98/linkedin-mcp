@@ -274,8 +274,19 @@ _WHERE_TO_LOOK_OWNERS: dict[str, frozenset[str]] = {
     # reason: ``send_attachment`` VERIFIES in the conversation itself, by a
     # fresh load of the conversation he named and the count of messages
     # drawing the file's name.
+    # FIVE MORE OWNERS FROM 2026-11-26 (lane build-msg2), entitled for the
+    # reply's reason: each act on a conversation's own menu reads that
+    # conversation's own page -- mute, unmute and archive on a fresh load of
+    # it, the unread mark in place on it, the receipt-only delete what the
+    # press drew on it -- so the conversation in his LinkedIn messages is the
+    # surface each read. Their ``_VERIFIED_FROM`` rows hold no phrase another
+    # action owns.
     "LinkedIn messages": frozenset(
-        {"send_reply", "message_from_profile", "send_attachment"}
+        {
+            "send_reply", "message_from_profile", "send_attachment",
+            "set_conversation_muted", "unset_conversation_muted", "mark_conversation_unread",
+            "set_conversation_archived", "set_conversation_deleted",
+        }
     ),
     # ADDED 2026-09-27 FOR ``withdraw_from_group`` (lane L8): his Groups page is where
     # his memberships are listed and where the leave is verified, and no other
@@ -316,6 +327,10 @@ _LEGITIMATE_SHARED_PLACES: frozenset[frozenset[str]] = frozenset(
         # same equality edit: one switch, both directions, settled on the same
         # search's fresh render.
         frozenset({"set_search_job_alert", "unset_search_job_alert"}),
+        # THE MUTE PAIR, 2026-11-26 (lane build-msg2), by the same equality
+        # edit: one item of one conversation's menu, both directions, settled
+        # in that same menu.
+        frozenset({"set_conversation_muted", "unset_conversation_muted"}),
     }
 )
 
@@ -746,8 +761,28 @@ def test_the_action_set_is_the_one_this_file_was_measured_against():
     # rows name the recommended jobs, the received and Sent tabs, his
     # connections list and his feed, so none holds a phrase the other owns.
     # The phrase-owner checks in this file re-derive that on the merged tree.
-    assert len(writes.PERFORMABLE) == 29, (
-        "writes.PERFORMABLE holds %d actions, not the 29 this file was "
+    # TWENTY-NINE ON LANE BUILD-MSG2 (2026-11-26): the five acts on one
+    # conversation's own menu. Their ten rows were read: every
+    # ``_WHERE_TO_LOOK`` value names his LinkedIn messages, the conversation
+    # family's owned phrase, and the five join its owners on the reply's
+    # ground (each reads the named conversation's own page); the mute pair
+    # shares one value, a sanctioned pair above. The four ``_VERIFIED_FROM``
+    # rows (mute's shared by unmute; delete declares itself unverifiable)
+    # hold no phrase another action owns.
+    # THIRTY ON THE SAME LANE: ``publish_group_post`` (census M C64). Its one
+    # row was read: ``_WHERE_TO_LOOK`` names the group's own feed, a place no
+    # other action owns; it declares itself unverifiable and carries no
+    # ``_VERIFIED_FROM`` row (this file's own rule, which refused the first
+    # version of it for carrying one).
+    # THIRTY-FIVE AT INTEGRATION 6'S MERGE OF LANE BUILD-MSG2 (2026-11-26): the
+    # conversation family's five and the group post beside the twenty-nine.
+    # build-msg2 read its rows against its own base: its five name his
+    # LinkedIn messages and the group post the group's own feed, none of them
+    # a phrase build-jobs2's or build-net2's rows hold (recommended jobs, the
+    # invitation tabs, his connections list, his feed). The phrase-owner
+    # checks in this file re-derive that on the merged tree.
+    assert len(writes.PERFORMABLE) == 35, (
+        "writes.PERFORMABLE holds %d actions, not the 35 this file was "
         "measured against: %s. Re-derive the phrase owners in this file for "
         "the new action, then update this count."
         % (len(writes.PERFORMABLE), sorted(writes.PERFORMABLE))

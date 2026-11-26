@@ -157,6 +157,17 @@ SYNTHETIC_RAW_TARGETS: dict[str, Any] = {
     # HIS ANSWER (the recommendations feedback, lane build-jobs2, 2026-11-26):
     # one of the two closed words ``job_feedback.canonical_answer`` admits.
     "recommendations_feedback": "no",
+    # ONE CONVERSATION'S THREAD ID ALONE (the conversation-menu acts, lane
+    # build-msg2, 2026-11-26), the shape ``threads.valid_thread_id`` admits.
+    # Missing, the KeyError stopped every writes reader being driven for ANY
+    # spec -- measured on that lane's first leak-harness run, as the rows
+    # above record.
+    "thread_id": "2-SYNTHETICHARNESSTHREAD==",
+    # ONE GROUP'S DIGITS AND THE WORDS (the group post, lane build-msg2,
+    # 2026-11-26). Missing, the KeyError stopped every writes reader being
+    # driven for ANY spec -- measured on that lane's gate, as the rows above
+    # record.
+    "group_and_text": {"group": "10001", "text": "example harness group post"},
 }
 
 #: The harness's own upload root, made once per process on first use and

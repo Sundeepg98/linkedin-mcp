@@ -129,7 +129,15 @@ import pin_census_rows as P  # noqa: E402
 #: entered, split from `J 37` under COMPOUND-ROW-SPLITS-ONLY-ON-STATE by the
 #: orchestrator's ruling J-37-SPLITS: the list half stayed `J 37`
 #: (COVERED-UNFIRED), the manage half entered GAP.
-PINNED_ROW_TOTAL = 776
+#: 775 -> 776 ON LANE BUILD-MSG2'S ROUND 2 (2026-11-26), MEASURED: `M M54`
+#: entered, split from `M M28` by the orchestrator's ruling M-M28-SPLITS:
+#: the view half stayed `M M28` (COVERED-UNFIRED), the restore half entered
+#: GAP.
+#: 776 -> 777 AT INTEGRATION 6'S MERGE OF LANE BUILD-MSG2 (2026-11-26), MEASURED by
+#: scripts/pin_census_rows.py --write on the merged tree: `J 170` and `M M54`
+#: both entered. Each lane's branch read 776, so the two equal pins merged
+#: clean as one; the merged census holds 777.
+PINNED_ROW_TOTAL = 777
 
 #: Per slice, because a delta of zero across four slices is reachable by two
 #: errors cancelling -- one row added to `jobs.md` and one dropped from
@@ -137,7 +145,7 @@ PINNED_ROW_TOTAL = 776
 PINNED_SLICE_ROWS = {
     "J": 169,   # jobs.md                    (150 + 16 + 1 + 1 + 1, J 168, J 169, J 170)
     "P": 237,   # profile.md                 (203 + 10 + 22 + 1 + 1, P A23b, P O17)
-    "M": 154,   # messaging-and-content.md   (142 + 11 + 1, M C35b)
+    "M": 155,   # messaging-and-content.md   (142 + 11 + 1 + 1, M C35b, M M54)
     "N": 216,   # network.md                 (209 + 6 + 1, N 26b)
 }
 

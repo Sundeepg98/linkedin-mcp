@@ -458,7 +458,34 @@ AFTER_LANE_READERS_MSG26_CONTENT_SEARCH = (119, {"R": 9, "W": 107, "R+W": 3})
 #: 119 - 1 = 118, writes 107 - 1.
 AFTER_LANE_READERS_MSG26_FOOTER = (118, {"R": 9, "W": 106, "R+W": 3})
 
-EXPECTED_NOW = AFTER_LANE_READERS_MSG26_FOOTER
+#: ON LANE BUILD-MSG2 (2026-11-26), MEASURED with this tree's guard: `M26`,
+#: `M27`, `M29` and `M31` -- four WRITES -- left GAP, COVERED-UNFIRED on the
+#: acts on one conversation's own options menu
+#: (`_audit/2026-11-26-build-msg2.md` section 2). 118 - 4 = 114, writes
+#: 106 - 4.
+AFTER_LANE_BUILD_MSG2_CONVERSATION_MENU = (114, {"R": 9, "W": 102, "R+W": 3})
+
+#: ON THE SAME LANE, MEASURED with this tree's guard: `C14` -- a READ -- left
+#: GAP, COVERED-UNFIRED on his scheduled posts list
+#: (`_audit/2026-11-26-build-msg2.md` section 3). `M28` (R+W) stays GAP:
+#: its view half is built and its restore half is not. 114 - 1 = 113,
+#: reads 9 - 1.
+AFTER_LANE_BUILD_MSG2_SCHEDULED_LIST = (113, {"R": 8, "W": 102, "R+W": 3})
+
+#: ON THE SAME LANE, MEASURED with this tree's guard: `C64` -- a WRITE -- left
+#: GAP, COVERED-UNFIRED on a post in one group he names
+#: (`_audit/2026-11-26-build-msg2.md` section 4). 113 - 1 = 112, writes
+#: 102 - 1.
+AFTER_LANE_BUILD_MSG2_GROUP_POST = (112, {"R": 8, "W": 101, "R+W": 3})
+
+#: ON THE SAME LANE'S ROUND 2, MEASURED with this tree's guard: `M28` -- an
+#: R+W row -- split by the orchestrator's ruling M-M28-SPLITS. Its view half
+#: stayed `M28`, COVERED-UNFIRED (it leaves this GAP count), and its restore
+#: half entered as `M54`, a W row, GAP. 112 - 1 + 1 = 112; R+W 3 - 1, W
+#: 101 + 1.
+AFTER_LANE_BUILD_MSG2_M28_SPLIT = (112, {"R": 8, "W": 102, "R+W": 2})
+
+EXPECTED_NOW = AFTER_LANE_BUILD_MSG2_M28_SPLIT
 
 
 def test_the_headline_split_is_the_one_the_report_quotes():

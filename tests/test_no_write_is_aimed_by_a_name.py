@@ -189,6 +189,23 @@ TARGET_KIND_CLASS: dict[str, tuple[str, str]] = {
         "send_recommendations_feedback: yes or no, the two buttons under his own "
         "recommended jobs; no third party is chosen",
     ),
+    # 2026-11-26, lane build-msg2 (census M M26, M M27, M M29, M M31): the
+    # five acts on one conversation's own options menu, addressed by its
+    # thread id ALONE -- the same shape-checked id send_reply's subject half
+    # is, never read off a page.
+    # 2026-11-26 (lane build-msg2, census M C64): the group post, a group's
+    # NUMERIC id and his words; a name or slug is refused by shape and never
+    # repeated (group_leave.checked_group_id).
+    "group_and_text": (
+        "id",
+        "the group post: the numeric group id the caller supplies, "
+        "shape-checked, never read off a page; a name is refused",
+    ),
+    "thread_id": (
+        "id",
+        "the conversation-menu acts: a thread id the caller supplies, "
+        "shape-checked, never read off a page",
+    ),
     # LANE L5'S TWO, classified at its merge of master 52b55b6 (2026-09-27).
     # The parser is writes._target_for -> named_profile.parse_profile_target.
     "profile": (

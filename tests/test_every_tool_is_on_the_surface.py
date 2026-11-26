@@ -498,4 +498,16 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # NINETY-NINE AT INTEGRATION 6'S MERGE OF LANE BUILD-NET2 ONTO LANE BUILD-JOBS2 (2026-11-26): the
     # two lanes' tools together (build-net2's branch read ninety-six),
     # measured off the merged registry, not summed.
-    assert len(_tool_names()) == 99
+    # NINETY-SIX ON LANE BUILD-MSG2 (2026-11-26): the five acts on one
+    # conversation's own menu, five WRITES, measured off this branch's
+    # registry.
+    # NINETY-EIGHT ON THE SAME LANE: two READS, each behind one declared
+    # press -- linkedin_archived_conversations (M M28's view half) and
+    # linkedin_scheduled_posts (M C14) -- measured off this branch's registry.
+    # NINETY-NINE ON THE SAME LANE: one WRITE, linkedin_publish_group_post
+    # (M C64), measured off this branch's registry.
+    # ONE HUNDRED AND SEVEN AT INTEGRATION 6'S MERGE OF LANE BUILD-MSG2 (2026-11-26): lane
+    # build-msg2's eight beside the ninety-nine; that lane's branch read
+    # ninety-nine too, by its own eight, so the two equal asserts merged as one.
+    # Measured off the merged registry, not summed.
+    assert len(_tool_names()) == 107

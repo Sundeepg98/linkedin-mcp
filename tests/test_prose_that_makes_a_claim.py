@@ -86,6 +86,11 @@ def _spell_cardinal(n: int) -> str:
         "", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy",
         "eighty", "ninety",
     )
+    # THE HUNDREDS, 2026-11-26 (integration 6): the merged registry reached
+    # 107 tools. The house writes "two hundred and", so the hundred takes an
+    # "and"; the table below is generated to 199 and no further.
+    if 100 <= n < 200:
+        return "one hundred" + ("" if n == 100 else " and " + _spell_cardinal(n - 100))
     if n < 20:
         return ones[n]
     return tens[n // 10] + ("" if n % 10 == 0 else "-" + ones[n % 10])
@@ -117,7 +122,7 @@ def _spell_cardinal(n: int) -> str:
 # rather than as a moved number". The guard could never speak while the
 # vocabulary was the thing that broke.
 _NUMBER_WORDS = {
-    **{_spell_cardinal(n): n for n in range(100)},
+    **{_spell_cardinal(n): n for n in range(200)},
     **_NUMBER_WORDS,
 }
 
@@ -172,7 +177,14 @@ async def test_the_server_docstring_numbers_are_derived(tools):
     performable, refusing, toolless = _registered_write_tools(set(tools))
     reads = len(tools) - len(performable) - len(refusing)
 
-    headline = re.search(r"([a-z-]+) tools, ([a-z-]+) of which write", doc)
+    # A COUNT IN THE HUNDREDS IS THREE OR MORE WORDS, "one hundred and seven",
+    # so the first group takes that phrase as well as a single word (2026-11-26,
+    # integration 6, when the registry reached 107). The prose was not bent to
+    # fit the matcher; the matcher follows the prose.
+    headline = re.search(
+        r"((?:[a-z-]+ hundred(?: and [a-z-]+)?)|[a-z-]+) tools, ([a-z-]+) of which write",
+        doc,
+    )
     assert headline, "the headline sentence changed shape -- reword this test"
     assert _NUMBER_WORDS[headline.group(1)] == len(tools), (
         "the headline says %s tools, mcp.list_tools() returns %d"
@@ -206,7 +218,9 @@ async def test_the_server_docstring_numbers_are_derived(tools):
     )
 
     total = re.search(
-        r"([A-Za-z-]+) plus ([a-z-]+) plus ([a-z-]+) is ([a-z-]+)", doc
+        r"([A-Za-z-]+) plus ([a-z-]+) plus ([a-z-]+) is "
+        r"((?:[a-z-]+ hundred(?: and [a-z-]+)?)|[a-z-]+)",
+        doc,
     )
     assert total, "the sum sentence changed shape"
     addends = [_NUMBER_WORDS[total.group(i).lower()] for i in (1, 2, 3)]
