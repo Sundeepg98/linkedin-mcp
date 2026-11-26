@@ -352,11 +352,14 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
     # vocabulary and window, and every match placed: all in older text, in a
     # cell or a neighbour; none in a note of this lane.
     ("network.md", "2026-11-26-readers-net26.md"): (
-        "FIVE MOVES AND NINETEEN NOTES, NOT A CORRECTION. Rows 9, 13, 38, 39 "
-        "and 161 gained the paragraph that moves them, and rows 6, 10 to 12, "
-        "14 to 19, 21, 37, 40, 43, 51, 95, 153, 154 and 200 one note each "
-        "naming the step session 11's capture now gives them; each cites this "
-        "record and none says an earlier paragraph of its row was untrue. "
+        "SIX MOVES AND TWENTY-ONE NOTES, NOT A CORRECTION. Rows 9, 13, 38, "
+        "39 and 161 gained the paragraph that moves them, and rows 6, 10 to "
+        "12, 14 to 19, 21, 37, 40, 43, 51, 95, 153, 154 and 200 one note each "
+        "naming the step session 11's capture now gives them; in the lane's "
+        "round 2, row 6 gained the paragraph that moves it on the "
+        "orchestrator's answer and rows 40 and 200 a second note applying "
+        "theirs. Each cites this record and none says an earlier paragraph of "
+        "its row was untrue. "
         "Every matched word is older text: row 4's 'THE STATED REASON WAS "
         "FALSE AT HEAD AND IS CORRECTED IN PLACE' beside row 6, row 10's "
         "'false of the product' beside rows 9 to 12, row 38's 'NAMES THE WRONG "

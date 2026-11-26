@@ -12701,3 +12701,22 @@ The lane's outline printer, label and slot probes, href-word probe, the two
 structure probes of the kept raw pages, the reader prototypes, the census,
 ledger and queue edit scripts, and the mutation runner; each answered one
 question once, and the answers are in the record.
+
+### 104.5 A defect in 103.4, the people gate, queued for the next live-lane owner
+
+103.4 keeps a raw page only where it draws no member link other than his own,
+and states its own blind spot: "It cannot see a person drawn without a profile
+link". Session 11 met it: `/mypreferences/d/unfollowed` draws 44 members, each
+a name in `[data-test-profile-card-name]` with NO profile link (measured on the
+kept raw: 0 profile addresses, 0 member urns in the 44 rows), so the gate read
+0 other members and the raw page, 44 third parties' names in it, was kept in
+the live lane's gitignored state. The orchestrator deleted it and every copy
+(UNFOLLOWED-RAW-DELETED, 2026-11-26); the tracked skeleton stays, every name
+slot in it `x`. RULED the same day, PEOPLE-GATE-COUNTS-NAME-SLOTS: the gate's
+next version counts a NAME SLOT -- a text node in a slot LinkedIn uses for a
+member's name, with or without a link -- as well as a profile link, and keeps
+no raw page that draws one. Not built here: the runner is the live lane's, in
+its gitignored state, and the next owner takes it with this entry.
+
+    A GATE THAT COUNTS LINKS COUNTS THE PEOPLE A PAGE LINKS, NOT THE PEOPLE IT
+    DRAWS. A NAME WITHOUT A LINK IS STILL A NAME.

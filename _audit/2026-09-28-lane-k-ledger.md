@@ -884,6 +884,13 @@ it. The question: is `N 6` discharged by CALLER-COMPOSITION-UNDER-D6 on those
 two tools, its state the weaker of them, COVERED-UNFIRED -- or does a
 re-invitation need an expiry LinkedIn itself draws, which no capture shows?
 
+ANSWERED 2026-11-26 by the orchestrator, applied in lane readers-net26's round
+2: YES -- discharged by CALLER-COMPOSITION-UNDER-D6 on those two tools, at the
+weaker state, COVERED-UNFIRED; LinkedIn's own re-invite cooldown is honoured,
+because `linkedin_connect_from_profile` presses only a Connect the profile
+draws, and Connect stays outward, fired only at a target he names. `N 6` left
+the ledger with it. Registered at integration 4.
+
 ### Q-REFOLLOW-AIM -- a Follow button on a row that carries no member
 
 Added 2026-11-26 by lane readers-net26 (section 5 of its record). Rows:
@@ -898,6 +905,12 @@ question: is the re-follow built from the member's own profile, which he
 names by link (THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET; row `N 34`'s route,
 unbuilt), the unfollowed list read only as a veto -- or held?
 
+ANSWERED 2026-11-26 by the orchestrator, applied in lane readers-net26's round
+2: build the re-follow from the member's OWN profile, which he names by link
+(THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET, `N 34`'s route); the unfollowed list is
+a read and a veto only, never a source of the target. `N 40` and `M C52` now read
+SIBLING `N 34`. Registered at integration 4.
+
 ### Q-AD-HIDE-TARGET -- hiding an ad LinkedIn chose
 
 Added 2026-11-26 by lane readers-net26 (section 5 of its record). Row:
@@ -911,6 +924,13 @@ names by that urn, read off his own feed by a reader and handed back by him,
 with its undo captured on the first supervised fire (HIS-OWN-CURATION-NOT-
 OUTWARD) -- or does an ad stay out of the curation class? The report half is
 an outward class either way, fired only at a real item he names.
+
+ANSWERED 2026-11-26 by the orchestrator, applied in lane readers-net26's round
+2: YES under HIS-OWN-CURATION-NOT-OUTWARD -- the ad is one he names, an urn a
+reader returned to him and he hands back; the tool never picks an ad itself;
+the hide's undo is captured on the first supervised fire; `Report ad` stays
+outward, fired only at a real item he names. `N 200` now reads BUILD behind the
+grant. Registered at integration 4.
 
 ## 8. Preconditions and purposes
 
