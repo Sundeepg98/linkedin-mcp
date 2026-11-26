@@ -224,6 +224,11 @@ DECLARED: dict[tuple[str, str], tuple[str, int]] = {
     ("following_list.py", "read_following_list"): (ASKED_FOR, 1),
     ("unfollowed_list.py", "read_unfollowed_list"): (ASKED_FOR, 1),
     ("advertising_data.py", "read_advertising_data"): (ASKED_FOR, 1),
+    # 2026-11-26 (lane build-net2, census N 95): the recent-searches group
+    # read wrong -- none or two of its structure, no link, a link that is no
+    # search address -- each raised with the feed, the address the module
+    # ASKED FOR, its constant PAGE_URL; never the landing.
+    ("search_typeahead.py", "_read_recent_searches"): (ASKED_FOR, 3),
     # --- NO_ADDRESS_IN_SCOPE: selector builders ---------------------------
     # Pure string builders. None takes a page or a url, so none of them could
     # publish an address if it tried. Declared so the guard's coverage is the
@@ -604,10 +609,15 @@ def test_the_twenty_are_still_twenty():
     # THIRTY-EIGHT ON LANE INFRA26 (2026-11-26): ``server._read_cards`` was
     # deleted with no caller left (READ-CARDS-DELETION), and its one ASKED_FOR
     # raise with it: ASKED_FOR 17 -> 16. MEASURED off this table, not summed.
+    # FORTY-ONE ON LANE BUILD-NET2 (2026-11-26, census N 95):
+    # ``search_typeahead._read_recent_searches`` raises THREE times on a
+    # recent-searches group read wrong, each with the feed, the module's own
+    # constant PAGE_URL -- the address it asked for -- so ASKED_FOR is
+    # 16 -> 19. MEASURED off this table, not summed.
     assert tally[WITHHELD] == 21, tally
-    assert tally[ASKED_FOR] == 16, tally
+    assert tally[ASKED_FOR] == 19, tally
     assert tally[PASSTHROUGH] == 1, tally
-    assert tally[WITHHELD] + tally[ASKED_FOR] + tally[PASSTHROUGH] == 38, tally
+    assert tally[WITHHELD] + tally[ASKED_FOR] + tally[PASSTHROUGH] == 41, tally
     assert tally[NO_ADDRESS_IN_SCOPE] == 10, tally
 
 

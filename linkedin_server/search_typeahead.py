@@ -341,25 +341,29 @@ async def _read_recent_searches(page: Any) -> dict[str, Any]:
     The group must be EXACTLY ONE by its structure, and every link in it must
     parse as a search address with keywords, or this raises -- a group read
     wrong is never returned as his history. Raises
-    :class:`ExtractionFailedError` with this module's own sentence only.
+    :class:`ExtractionFailedError` with this module's own sentence only, its
+    ``url`` the address this module ASKED FOR (:data:`PAGE_URL`, a constant),
+    never the landing.
     """
     groups = await _count(page, RECENT_GROUP)
     if groups != 1:
         raise ExtractionFailedError(
             f"{groups} group(s) in the search box's own listbox have the "
-            "recent-searches structure, where exactly one is required."
+            "recent-searches structure, where exactly one is required.",
+            url=PAGE_URL,
         )
     links = page.locator(RECENT_LINKS)
     drawn = coerce.as_count(await links.count())
     if drawn < 1:
-        raise ExtractionFailedError("the recent-searches group holds no link.")
+        raise ExtractionFailedError("the recent-searches group holds no link.", url=PAGE_URL)
     searches: list[dict[str, str]] = []
     for index in range(min(drawn, MAX_RECENT)):
         parsed = parse_search_address(await links.nth(index).get_attribute("href"))
         if parsed is None:
             raise ExtractionFailedError(
                 "a link in the recent-searches group is not a search address "
-                "carrying keywords, so the group is not read as his history."
+                "carrying keywords, so the group is not read as his history.",
+                url=PAGE_URL,
             )
         searches.append(parsed)
     return {
