@@ -701,6 +701,10 @@ PEOPLE_TOOLS: frozenset[str] = frozenset(
         "linkedin_company_page_home",
         "linkedin_who_viewed_me",
         "linkedin_list_conversations",
+        # 2026-11-26 (lane build-msg2, census M M28): the same list reader
+        # over the Archived folder, names only on the opt-in, as people
+        # records through threads.list_result.
+        "linkedin_archived_conversations",
         "linkedin_open_messaging",
         "linkedin_people_search_shape",
         "linkedin_recruiter_insights",

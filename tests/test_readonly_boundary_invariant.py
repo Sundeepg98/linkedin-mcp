@@ -1735,7 +1735,16 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # two entry lines hashes to c51296e034af63eb on this key, and the other
     # seventeen pinned digests are byte-identical to master 3c656df's. No
     # refusal moved.
-    "SANCTIONED_MUTATIONS": "7671871060412a70",
+    # RE-FROZEN AGAIN 2026-11-26, the same lane (census M M28's view half and
+    # M C14): ONE digest moved, SANCTIONED_MUTATIONS 7671871060412a70 ->
+    # eafe00fa647db768, 18 -> 20 -- messaging_folders._activate (the folder
+    # switch, VIEW-SWITCH-PRESS-RESTORED) and scheduled_posts._press (the
+    # scheduled list, SCHEDULED-LIST-AS-A-SHIPPED-READ), two reads declared
+    # with their argument beside the entries. ATTRIBUTION, with this file's
+    # ast_digest: readonly.py minus exactly those two entry lines hashes to
+    # 7671871060412a70 on this key, and no other pinned digest moved. No
+    # refusal moved.
+    "SANCTIONED_MUTATIONS": "eafe00fa647db768",
     # PINNED FROM 2026-09-24, lane G's merge of master: the replacement scan's
     # four tables (unchanged since lane G built them; pinned late, see PINNED)
     # and the scanner's sanctioned list, born with ONE entry -- the live

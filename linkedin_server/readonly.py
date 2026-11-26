@@ -4344,6 +4344,54 @@ SANCTIONED_MUTATIONS: tuple[tuple[str, str, str], ...] = (
     # ``writes.perform``'s one click site and nowhere else.
     ("linkedin_server/conversation_menu.py", "_open", "click"),
     ("linkedin_server/conversation_menu.py", "_close", "press"),
+    # THE NINETEENTH, 2026-11-26 (lane build-msg2, census M M28's VIEW half):
+    # the messaging FOLDER switch, ``messaging_folders._activate`` -- the entry
+    # integration 4 queued for the first build lane after it (its record's
+    # section 9), on VIEW-SWITCH-PRESS-RESTORED: "a press that changes which
+    # rows a view shows is permitted if the view is RESTORED afterwards and a
+    # before/after reading proves it."
+    #
+    #   click   messaging_folders._activate -- the ONE folder pill in <main> on
+    #           the composer's list (opened only while it reads collapsed and
+    #           draws no choice), ONE choice by its exact name out of the four
+    #           the open capture draws (``Archived``, then the folder the pill
+    #           wore before), and the same pill again to close a dropdown that
+    #           drew the wrong choices. Strict, every selector built from the
+    #           module's constants.
+    #
+    # WHY IT IS A VIEW SWITCH AND NOT A WRITE. It changes which rows the list
+    # shows and nothing else: ``read_archived`` reads the pill and the list
+    # before the first press, switches back to the folder it read, and reports
+    # ``restored`` only when the pill wears that folder again, closed, on the
+    # composer's own address, and the list read after EQUALS the list read
+    # before. Nothing in any conversation is pressed; the archived rows are
+    # read by the shipped list reader. ``tests/test_messaging_folders.py`` pins
+    # that ``read_archived``'s sequence is its only caller.
+    ("linkedin_server/messaging_folders.py", "_activate", "click"),
+    # THE TWENTIETH, 2026-11-26 (lane build-msg2, census M C14): the scheduled
+    # posts list, ``scheduled_posts._press``, on ruling
+    # SCHEDULED-LIST-AS-A-SHIPPED-READ (the orchestrator, 14:10, registered at
+    # integration 4): "the post composer opened empty, Schedule post, then
+    # View all scheduled posts; the list read (zero only on a drawn empty
+    # headline), closed with nothing typed or scheduled, no draft verified,
+    # and a stop on any autosave sign."
+    #
+    #   click   scheduled_posts._press -- on /preload/sharebox/ only, and only
+    #           after the composer read EMPTY (one modal, its editor blank,
+    #           Post drawn disabled): the modal's ``Schedule post`` button,
+    #           then ``View all scheduled posts`` by its exact name, then the
+    #           modal's own close button. Strict, every selector a constant.
+    #
+    # WHY HERE AND NOT THROUGH ``press``. ``press._COMPOSER_MARKERS`` refuses
+    # every press on a composer, because a composer may autosave; that rule
+    # stands, and this ruling is its one named exception, for exactly this
+    # sequence. Nothing is typed (no fill, no keyboard call in the module); a
+    # composer holding text before the first press, or a dialog or a toast
+    # after the close, is an AUTOSAVE SIGN that stops every further press; and
+    # the tool loads the composer a second time and reads it empty again,
+    # where a kept draft would show. ``tests/test_scheduled_posts.py`` pins
+    # the module's one pressing call site and its two callers.
+    ("linkedin_server/scheduled_posts.py", "_press", "click"),
 )
 
 

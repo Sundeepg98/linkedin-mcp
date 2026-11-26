@@ -1,4 +1,11 @@
-"""The tool surface: ninety-six tools, sixty-four of which do not write.
+"""The tool surface: ninety-eight tools, sixty-six of which do not write.
+
+**IT READ "ninety-six tools, sixty-four of which do not write" UNTIL LANE
+BUILD-MSG2 (2026-11-26) ADDED TWO READS**: ``linkedin_archived_conversations``
+(census M M28's view half) and ``linkedin_scheduled_posts`` (census M C14),
+each behind one declared press of its own, so the non-write count moves by
+two and the write side holds. Measured off this branch's registry, not
+summed.
 
 **IT READ "ninety-one tools, sixty-four of which do not write" UNTIL LANE
 BUILD-MSG2 (2026-11-26) ADDED FIVE WRITES**: ``linkedin_set_conversation_muted``,
@@ -744,6 +751,14 @@ EXPECTED_TOOLS = {
     # 2026-11-24 (lane builds-26): two WRITES that refuse (P E4, P E5).
     "linkedin_endorse_skill",
     "linkedin_withdraw_endorsement",
+    # THE NINETY-SEVENTH AND NINETY-EIGHTH, 2026-11-26 (lane build-msg2): two
+    # READS, each behind one declared press of its own and on no write table
+    # -- the Archived folder through one folder switch put back (census
+    # M M28's view half, VIEW-SWITCH-PRESS-RESTORED) and the scheduled posts
+    # list behind the composer's schedule button (census M C14,
+    # SCHEDULED-LIST-AS-A-SHIPPED-READ).
+    "linkedin_archived_conversations",
+    "linkedin_scheduled_posts",
 }
 
 #: Names a reader must never grow. Listed explicitly so that adding one is a
@@ -828,8 +843,14 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_ninety_six_tools(tools):
-    """RENAMED AGAIN ON LANE BUILD-MSG2 (2026-11-26), to ``..._ninety_six_tools``:
+async def test_the_surface_is_exactly_the_ninety_eight_tools(tools):
+    """RENAMED AGAIN ON THE SAME LANE, to ``..._ninety_eight_tools``: two READS,
+    ``linkedin_archived_conversations`` and ``linkedin_scheduled_posts``
+    (census M M28's view half, M C14), each behind one declared press, beside
+    the ninety-six. MEASURED off this branch's registry, not summed; the name
+    moved with the pin.
+
+    RENAMED AGAIN ON LANE BUILD-MSG2 (2026-11-26), to ``..._ninety_six_tools``:
     five WRITES, the acts on one conversation's own options menu (census M M26,
     M M27, M M29, M M31), beside the ninety-one. MEASURED off this branch's
     registry, not summed; the name moved with the pin.
@@ -1406,7 +1427,9 @@ async def test_the_surface_is_exactly_the_ninety_six_tools(tools):
     # NINETY-SIX ON LANE BUILD-MSG2 (2026-11-26): five WRITES, the acts on one
     # conversation's own options menu, so the split moves on its write side.
     # MEASURED off mcp.list_tools() on this branch, not summed.
-    assert len(tools) == 96
+    # NINETY-EIGHT ON THE SAME LANE: two READS, each behind one declared
+    # press, so the split moves on its read side. MEASURED, not summed.
+    assert len(tools) == 98
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -1684,8 +1707,11 @@ async def test_the_surface_is_exactly_the_ninety_six_tools(tools):
     # STILL SIXTY-FOUR ON LANE BUILD-MSG2 (2026-11-26): its five tools are
     # WRITES, so the non-write count holds and this second copy of the total
     # moves to the measured ninety-six with the first test's pin.
-    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 64
-    assert len(tools) == 96
+    # SIXTY-SIX ON THE SAME LANE: its two READS move the non-write count by
+    # two, and this second copy of the total moves to the measured
+    # ninety-eight with the first test's pin.
+    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 66
+    assert len(tools) == 98
 
 
 def test_the_read_that_was_nearly_named_a_write():

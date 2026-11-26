@@ -1459,6 +1459,22 @@ WHAT_WOULD_DRIVE_IT: dict[str, str] = {
         "session 11's thread page with the menu open and Escape both closing "
         "it and not."
     ),
+    # Lane build-msg2, the same day: the folder switch's two steps, each
+    # reached only from messaging_folders.read_archived.
+    "messaging_folders:_switch_to": (
+        "NOT A PAGE READER: one step of the folder switch, returning a boolean "
+        "and appending readings the module's own reader produced; the planted "
+        "page draws no folder pill, so it refuses before its press, as it must. "
+        "messaging_folders.read_archived, its only caller, is driven clean, and "
+        "tests/test_messaging_folders.py drives the step over live session 11's "
+        "composer list with the open capture's choices."
+    ),
+    "messaging_folders:_close_if_open": (
+        "NOT A PAGE READER: returns None; it presses the pill only while the "
+        "pill reads open, which the planted page never draws. "
+        "tests/test_messaging_folders.py drives it over a dropdown a choice "
+        "left open."
+    ),
 }
 
 #: The verdicts that mean a drive never reached its success path.

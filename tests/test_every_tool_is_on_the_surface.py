@@ -489,4 +489,7 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # NINETY-SIX ON LANE BUILD-MSG2 (2026-11-26): the five acts on one
     # conversation's own menu, five WRITES, measured off this branch's
     # registry.
-    assert len(_tool_names()) == 96
+    # NINETY-EIGHT ON THE SAME LANE: two READS, each behind one declared
+    # press -- linkedin_archived_conversations (M M28's view half) and
+    # linkedin_scheduled_posts (M C14) -- measured off this branch's registry.
+    assert len(_tool_names()) == 98

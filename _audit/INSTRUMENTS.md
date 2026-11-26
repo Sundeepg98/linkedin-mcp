@@ -12910,15 +12910,39 @@ otherwise the menu is closed by its own trigger. A refused item answers
 `not_changed_by_this_call`, never the destination state the menu may already
 read, so an act that was already done is never reported as done by this call.
 
-### 109.3 THE ENTRIES
+### 109.3 A VIEW SWITCH IS PROVEN BY THE READING IT CAME BACK TO, NOT BY THE PRESS THAT TOOK IT BACK
+
+The Archived folder is reached by one folder switch on the composer's list, and
+the switch is reported `restored` only when the pill wears the folder it wore
+before, closed, on the same address, AND the list read after equals the list
+read before -- counts, unread positions and receipt evidence. A pill that reads
+right over a list that does not is NOT a restore; a choice that switches
+nothing is NOT an empty folder.
+
+    THE PROOF OF A RESTORE IS A SECOND READING THAT EQUALS THE FIRST.
+
+### 109.4 ZERO ONLY WHERE THE PAGE DRAWS ZERO, AND "NO DRAFT" IS A SECOND LOAD
+
+The scheduled posts list answers zero only on its drawn empty headline; a list
+without it is `unknown`, because a populated list was never captured. No draft
+surface is reachable, so "no draft" is three readings: the composer empty
+before the first press, closed with nothing drawn after, and empty again on a
+second load. Anything drawn after a close stops every further press.
+
+    A COUNT NOBODY HAS SEEN DRAWN IS UNKNOWN, NOT ZERO.
+
+### 109.5 THE ENTRIES
 
 | path | shown failing by |
 |---|---|
 | `tests/test_conversation_menu.py`; `linkedin_server/conversation_menu.py`; `tests/conversation_menu_worlds.py` | on the base tree `3c656df` the file fails at collection (`ImportError: cannot import name 'conversation_menu'`); with the module present and `writes` unwired, 11 failed and 8 passed (`'set_conversation_muted' is not a sanctioned write`); green 19 passed. Inside the file: the act's inverse word removed makes the gate proceed on a menu reading the conversation already muted; no active row is refused with zero presses on the page's own counter; Escape not closing the menu makes every verdict unknown; a menu already muted at click time is closed by its trigger with no item pressed and `performed` false; the unread mark's verification is read back with no load after the press |
+| `tests/test_messaging_folders.py`; `linkedin_server/messaging_folders.py`; `tests/messaging_folder_worlds.py` | on the base tree the file fails at collection (`ImportError: cannot import name 'messaging_folders'`); with the module present and unwired, 2 failed and 14 passed, and `tests/test_readonly.py` fired on the undeclared click; green 16 passed. Inside the file: the Archived choice reduced makes the pill open and close with nothing chosen; a choice the page ignores reads as not switched, never as an empty folder; a page that keeps Archived reads not restored, loudest; a list that comes back with one row a placeholder reads not restored though the pill reads right; an address that moves on the choice reads not restored; another address, two pills or a dropdown already open are refused with zero presses on the page's own counter |
+| `tests/test_scheduled_posts.py`; `linkedin_server/scheduled_posts.py`; `tests/scheduled_posts_worlds.py` | on the base tree the file fails at collection (`ImportError: cannot import name 'scheduled_posts'`); its first run failed 10, seven on a real defect the capture test caught (an exact-text match on a button whose word sits in a child span matched nothing); unwired, 3 failed and 10 passed; green 13 passed. Inside the file: the empty headline taken away reads unknown, not zero; a composer opening with text stops with zero presses; a dialog or a toast after the close reads not closed and not ok; a schedule dialog that never opens reads no list and still closes |
 | `scripts/_build_msg2_word_skeletons.py` (the provenance of the five `tests/fixtures/live11/*_words.html` composer skeletons) | refuses, writing nothing, unless each keyed skeleton's tracked copy is the committed capture, and refuses any declared word that matches no keyed shape; a fixed point (`--check`: all five match on a second run) |
 
-### 109.4 DECLARED DISPOSABLE
+### 109.6 DECLARED DISPOSABLE
 
 The lane's scratch probes -- the menu and list counters, the keyed-word matcher
 (matched candidate words and counts only), the census editors -- and the
-exported base tree used for the red-first runs.
+exported base tree used for the red-first runs -- and the one-off rename and
+list re-sort scripts the CI fix of section 2.6 of the record ran.

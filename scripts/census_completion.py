@@ -1318,7 +1318,8 @@ PINNED = {
     #: 247 ON LANE READERS-MSG26 (2026-11-26), MEASURED: `M M20` GAP -> MEASURED-ABSENT, under MEASURED-ABSENT-OR-PRECONDITION: the first opened conversation on disk draws no video-meeting control, every footer and header control accounted for (`_audit/2026-11-26-readers-msg26.md` section 3) (was 246).
     #: MEASURED AT INTEGRATION 4'S MERGE OF READERS-MSG26 (2026-11-26) on the merged tree, never summed (the figures above are each lane's own).
     #: 266 ON LANE BUILD-MSG2 (2026-11-26), MEASURED: `M M26`, `M M27`, `M M29` and `M M31` GAP -> COVERED-UNFIRED, the acts on one conversation's own options menu (`linkedin_set_conversation_muted` and its inverse, `linkedin_mark_conversation_unread`, `linkedin_set_conversation_archived`, `linkedin_set_conversation_deleted`; `_audit/2026-11-26-build-msg2.md`) (was 262).
-    "adjudicated": 266,
+    #: 267 ON LANE BUILD-MSG2'S TWO READS (2026-11-26), MEASURED: `M C14` GAP -> COVERED-UNFIRED, his scheduled posts list read behind the composer's schedule button (`linkedin_scheduled_posts`, SCHEDULED-LIST-AS-A-SHIPPED-READ; `_audit/2026-11-26-build-msg2.md`) (was 266).
+    "adjudicated": 267,
     #: THE LIVE LANE'S FOUR ROWS, RE-DERIVED AT EACH OF ITS MERGES OF MASTER
     #: (2026-09-24; last over lane S): four rows fired live and banked
     #: (`_audit/2026-09-23-live-lane-session-1.md`). `P G6` COVERED-UNFIRED ->
@@ -1447,7 +1448,8 @@ PINNED = {
     #: 161 ON LANE READERS-MSG26 (2026-11-26), MEASURED: `M C93` GAP -> COVERED-UNFIRED, the content search vertical read over live session 11's capture (`linkedin_search_content`; `_audit/2026-11-26-readers-msg26.md`) (was 160).
     #: MEASURED AT INTEGRATION 4'S MERGE OF READERS-MSG26 (2026-11-26) on the merged tree, never summed (the figures above are each lane's own).
     #: 178 ON LANE BUILD-MSG2 (2026-11-26), MEASURED: `M M26`, `M M27`, `M M29` and `M M31` GAP -> COVERED-UNFIRED, the acts on one conversation's own options menu (`linkedin_set_conversation_muted` and its inverse, `linkedin_mark_conversation_unread`, `linkedin_set_conversation_archived`, `linkedin_set_conversation_deleted`; `_audit/2026-11-26-build-msg2.md`) (was 174).
-    "delivered_broad": 178,
+    #: 179 ON LANE BUILD-MSG2'S TWO READS (2026-11-26), MEASURED: `M C14` GAP -> COVERED-UNFIRED, his scheduled posts list read behind the composer's schedule button (`linkedin_scheduled_posts`, SCHEDULED-LIST-AS-A-SHIPPED-READ; `_audit/2026-11-26-build-msg2.md`) (was 178).
+    "delivered_broad": 179,
     #: 79 since the live lane's merge (see `adjudicated`): P G6, N 134, P O3
     #: and M C72 COVERED-PROVEN.
     #: 75 and 21 since the bucket-1 merge: `M C41` fired live and moved from
@@ -1600,7 +1602,8 @@ PINNED = {
     #: 527 ON LANE READERS-MSG26 (2026-11-26), MEASURED: `M M20` GAP -> MEASURED-ABSENT, under MEASURED-ABSENT-OR-PRECONDITION: the first opened conversation on disk draws no video-meeting control, every footer and header control accounted for (`_audit/2026-11-26-readers-msg26.md` section 3) (was 528).
     #: MEASURED AT INTEGRATION 4'S MERGE OF READERS-MSG26 (2026-11-26) on the merged tree, never summed (the figures above are each lane's own).
     #: 509 ON LANE BUILD-MSG2 (2026-11-26), MEASURED: `M M26`, `M M27`, `M M29` and `M M31` GAP -> COVERED-UNFIRED, the acts on one conversation's own options menu (`linkedin_set_conversation_muted` and its inverse, `linkedin_mark_conversation_unread`, `linkedin_set_conversation_archived`, `linkedin_set_conversation_deleted`; `_audit/2026-11-26-build-msg2.md`) (was 513).
-    "gap": 509,
+    #: 508 ON LANE BUILD-MSG2'S TWO READS (2026-11-26), MEASURED: `M C14` GAP -> COVERED-UNFIRED, his scheduled posts list read behind the composer's schedule button (`linkedin_scheduled_posts`, SCHEDULED-LIST-AS-A-SHIPPED-READ; `_audit/2026-11-26-build-msg2.md`) (was 509).
+    "gap": 508,
     #: 18 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: `M M1` built (`linkedin_message_from_profile`).
     #: 16 ON LANE L5'S ORDER OF 2026-09-27 23:36, MEASURED:
     #: `linkedin_send_message` RETIRED (aimed by a name): `M M2` to GAP and `N
@@ -1744,7 +1747,8 @@ PINNED = {
     #: 44 ON LANE READERS-MSG26 (2026-11-26), MEASURED: `M C93` GAP -> COVERED-UNFIRED, the content search vertical read over live session 11's capture (`linkedin_search_content`; `_audit/2026-11-26-readers-msg26.md`) (was 43).
     #: MEASURED AT INTEGRATION 4'S MERGE OF READERS-MSG26 (2026-11-26) on the merged tree, never summed (the figures above are each lane's own).
     #: 60 ON LANE BUILD-MSG2 (2026-11-26), MEASURED: `M M26`, `M M27`, `M M29` and `M M31` GAP -> COVERED-UNFIRED, the acts on one conversation's own options menu (`linkedin_set_conversation_muted` and its inverse, `linkedin_mark_conversation_unread`, `linkedin_set_conversation_archived`, `linkedin_set_conversation_deleted`; `_audit/2026-11-26-build-msg2.md`) (was 56).
-    "unfired": 60,
+    #: 61 ON LANE BUILD-MSG2'S TWO READS (2026-11-26), MEASURED: `M C14` GAP -> COVERED-UNFIRED, his scheduled posts list read behind the composer's schedule button (`linkedin_scheduled_posts`, SCHEDULED-LIST-AS-A-SHIPPED-READ; `_audit/2026-11-26-build-msg2.md`) (was 60).
+    "unfired": 61,
     #: 104 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     #: 101 AT LANE S'S NAMES ADOPTION (2026-09-27), MEASURED: `N 79`, `N 172`
@@ -1802,7 +1806,8 @@ PINNED = {
     #: MEASURED AT INTEGRATION 4'S MERGE OF READERS-NET26 (2026-11-26) on the merged tree, never summed (the figures above are each lane's own).
     #: 76 ON LANE READERS-MSG26 (2026-11-26), MEASURED: `M C93` GAP -> COVERED-UNFIRED, the content search vertical read over live session 11's capture (`linkedin_search_content`; `_audit/2026-11-26-readers-msg26.md`) (was 77).
     #: MEASURED AT INTEGRATION 4'S MERGE OF READERS-MSG26 (2026-11-26) on the merged tree, never summed (the figures above are each lane's own).
-    "gap_read": 69,
+    #: 68 ON LANE BUILD-MSG2'S TWO READS (2026-11-26), MEASURED: `M C14` GAP -> COVERED-UNFIRED, his scheduled posts list read behind the composer's schedule button (`linkedin_scheduled_posts`, SCHEDULED-LIST-AS-A-SHIPPED-READ; `_audit/2026-11-26-build-msg2.md`) (was 69).
+    "gap_read": 68,
     #: 151, not the 152 published by `_audit/2026-09-21-the-write-ceiling.md`.
     #: That document scoped itself to `profile.md`, `network.md` and
     #: `messaging-and-content.md`; measured at HEAD those three carry W 151 and
@@ -2052,7 +2057,8 @@ PINNED = {
     "b3_refused": 15,
     "b3_no_address": 1,
     #: 13 ON LANE BUILD-P26 (2026-11-25), MEASURED: `P D25`'s read address measured (the three anchors' target), so its line is ADMITTED, not NEEDS-SESSION (`_audit/2026-11-25-build-p26.md`, section 2).
-    "b3_needs_session": 13,
+    #: 12 ON LANE BUILD-MSG2'S TWO READS (2026-11-26), MEASURED: `M C14` left bucket 3 -- COVERED-UNFIRED on `linkedin_scheduled_posts` -- so its NEEDS-SESSION line left `_audit/_census/read-addresses.tsv` (`_audit/2026-11-26-build-msg2.md`, section 3) (was 13).
+    "b3_needs_session": 12,
     "b3_undetermined": 2,
     #: ITS HISTORY ON 2026-09-23 IS THE RULINGS AND THE LIVE READINGS MOVING
     #: UNDER IT, one line per move:
@@ -2339,7 +2345,8 @@ PINNED = {
     #: MEASURED AT INTEGRATION 4'S MERGE OF READERS-NET26 (2026-11-26) on the merged tree, never summed (the figures above are each lane's own).
     #: 28 ON LANE READERS-MSG26 (2026-11-26), MEASURED: `M C93` GAP -> COVERED-UNFIRED, the content search vertical read over live session 11's capture (`linkedin_search_content`; `_audit/2026-11-26-readers-msg26.md`) (was 27).
     #: MEASURED AT INTEGRATION 4'S MERGE OF READERS-MSG26 (2026-11-26) on the merged tree, never summed (the figures above are each lane's own).
-    "b1_no_ruling": 39,
+    #: 40 ON LANE BUILD-MSG2'S TWO READS (2026-11-26), MEASURED: `M C14` GAP -> COVERED-UNFIRED, his scheduled posts list read behind the composer's schedule button (`linkedin_scheduled_posts`, SCHEDULED-LIST-AS-A-SHIPPED-READ; `_audit/2026-11-26-build-msg2.md`): it entered bucket 1 held by no ruling (see PINNED_B1_ROWS) (was 39).
+    "b1_no_ruling": 40,
     #: 7 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
     #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
     #: 4 AT THE LIVE LANE'S MERGE OF MASTER c2825a4 (2026-09-28), MEASURED on the
@@ -2776,6 +2783,12 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
         #: CONTENT-VERTICAL-NOT-ALL-RESULTS serves the row under D6 and
         #: D1-SEARCH-AS-READS bounds the search; neither holds it.
         "M C93",
+        #: `M C14` entered on lane build-msg2, 2026-11-26: his scheduled
+        #: posts list (`linkedin_scheduled_posts`), read behind the
+        #: composer's schedule button over live session 11's captures and
+        #: never fired. SCHEDULED-LIST-AS-A-SHIPPED-READ permits the read and
+        #: bounds its presses; it holds nothing.
+        "M C14",
     ),
 }
 

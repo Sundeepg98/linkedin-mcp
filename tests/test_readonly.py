@@ -170,6 +170,8 @@ def test_the_sanctioned_list_is_exactly_these_calls():
         ("linkedin_server/job_alert_switch.py", "trial_press", "click"),
         ("linkedin_server/conversation_menu.py", "_open", "click"),
         ("linkedin_server/conversation_menu.py", "_close", "press"),
+        ("linkedin_server/messaging_folders.py", "_activate", "click"),
+        ("linkedin_server/scheduled_posts.py", "_press", "click"),
     )
     # EIGHT FROM 2026-09-23: ``reveal.reveal``'s one click, the first press
     # admitted BY NAME -- per control, in reveal.DECIDED_REVEALS, on a recorded
@@ -193,7 +195,11 @@ def test_the_sanctioned_list_is_exactly_these_calls():
     # PREVIEW PRESS -- one click on the active row's trigger and one Escape --
     # a READ declared on CONVERSATION-MENU-PREVIEW-PRESS (argument beside the
     # entries in readonly.py).
-    assert len(readonly.SANCTIONED_MUTATIONS) == 18
+    # NINETEEN AND TWENTY, the same day and lane: the messaging FOLDER switch
+    # (messaging_folders._activate, VIEW-SWITCH-PRESS-RESTORED, census M M28's
+    # view half) and the scheduled-posts list's presses (scheduled_posts._press,
+    # SCHEDULED-LIST-AS-A-SHIPPED-READ, census M C14), two reads declared.
+    assert len(readonly.SANCTIONED_MUTATIONS) == 20
     # THE KINDS ARE ASSERTED SEPARATELY, because the count alone would let a
     # click be swapped for a fill without moving the number, and those are
     # different capabilities: a click presses what is already there, a fill
@@ -223,6 +229,8 @@ def test_the_sanctioned_list_is_exactly_these_calls():
         "cdp_send",
         "cdp_session",
         "cdp_session",
+        "click",
+        "click",
         "click",
         "click",
         "click",
@@ -329,8 +337,9 @@ def test_the_package_contains_exactly_as_many_mutating_calls_as_are_listed():
     # declared on D4-NO-OWN-BROWSER-CONTEXT (see the entries' argument).
     # SIXTEEN, 2026-10-10 (lane B4): the trial click, a read declared.
     # EIGHTEEN, 2026-11-26 (lane build-msg2): conversation_menu's preview press,
-    # its one click and its one Escape, a read declared.
-    assert total == len(readonly.SANCTIONED_MUTATIONS) == 18, total
+    # its one click and its one Escape, a read declared. TWENTY, the same day
+    # and lane: the folder switch's one click and the scheduled list's one.
+    assert total == len(readonly.SANCTIONED_MUTATIONS) == 20, total
 
 
 def test_the_partition_conserves_every_hit():

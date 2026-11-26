@@ -1,4 +1,16 @@
-"""The tool surface: ninety-six tools, twenty-nine of which write to LinkedIn.
+"""The tool surface: ninety-eight tools, twenty-nine of which write to LinkedIn.
+
+THE NINETY-SEVENTH AND NINETY-EIGHTH ARE READS, 2026-11-26, on lane
+build-msg2, each behind ONE declared press of its own:
+``linkedin_archived_conversations`` (census ``M M28``'s view half, ruling
+VIEW-SWITCH-PRESS-RESTORED) switches the composer's list to the Archived
+folder, reads it and switches it back, the restore proven by a before/after
+reading; ``linkedin_scheduled_posts`` (census ``M C14``, ruling
+SCHEDULED-LIST-AS-A-SHIPPED-READ) opens the composer empty, presses its
+schedule button and "View all scheduled posts", reads the list -- zero only
+on its drawn empty headline -- and closes it, then reads the composer empty
+again on a second load. ``readonly.SANCTIONED_MUTATIONS`` grows by those two
+presses, eighteen to twenty.
 
 THE NINETY-SECOND TO NINETY-SIXTH ARE WRITES, 2026-11-26, on lane build-msg2
 (census ``M M26``, ``M M27``, ``M M29``, ``M M31``; ruling
@@ -465,9 +477,9 @@ assigned to anybody -- it waits for whoever next runs the suite, and in the
 meantime the pin goes on asserting the old number with full confidence.
 
 THE NUMBERS ABOVE ARE DERIVED NOW, and that is a statement about a test rather
-than about an intention. Ninety-six is ``len(await mcp.list_tools())``,
+than about an intention. Ninety-eight is ``len(await mcp.list_tools())``,
 pinned in ``test_server_surface.py`` by
-``test_the_surface_is_exactly_the_ninety_six_tools``; the split is pinned by
+``test_the_surface_is_exactly_the_ninety_eight_tools``; the split is pinned by
 ``tests/test_prose_that_makes_a_claim.py::test_the_server_docstring_numbers_are_derived``,
 which reads THESE WORDS and fails if any of the three disagrees with the
 registry.
@@ -480,9 +492,12 @@ POINTER to it was dangling, so a reader who followed it found nothing and
 would reasonably conclude these numbers are unchecked. A citation is a claim
 like any other.
 The surface splits three ways and the split is the part a reader actually
-needs: SIXTY-FOUR read, TWENTY-NINE write, and THREE are write-shaped,
-registered, gated and unable to act. Sixty-four plus twenty-nine plus three is
-ninety-six. (Sixty-four, twenty-four and three, summing to ninety-one, until
+needs: SIXTY-SIX read, TWENTY-NINE write, and THREE are write-shaped,
+registered, gated and unable to act. Sixty-six plus twenty-nine plus three is
+ninety-eight. (Sixty-four, twenty-nine and three, summing to ninety-six,
+until lane build-msg2's two reads behind one declared press each, the
+Archived folder and the scheduled posts list, 2026-11-26. Sixty-four,
+twenty-four and three, summing to ninety-one, until
 lane build-msg2's five acts on one conversation's own menu, 2026-11-26.
 Sixty-three, twenty-four and three, summing to ninety, until
 integration 4's merge of lane readers-msg26's content search, 2026-11-26; that
@@ -1518,7 +1533,7 @@ mcp = FastMCP(
         "a link only when numeric), linkedin_my_following_list (the people "
         "he follows) and linkedin_my_unfollowed_list (the members he "
         "unfollowed, each a name with no link, because the page draws none), "
-        "and linkedin_list_conversations, "
+        "and linkedin_list_conversations, linkedin_archived_conversations, "
         "linkedin_open_messaging and linkedin_people_search_shape when "
         "include_names is passed -- and the three that return what a search "
         "found, linkedin_search_groups (groups), linkedin_search_events "
@@ -12472,7 +12487,9 @@ async def linkedin_server_info(verbose: bool = False) -> dict[str, Any]:
                 "this, and only when called. THESE ALSO LOAD A MESSAGING "
                 "ADDRESS, and none of them opens a conversation LinkedIn "
                 "chooses: linkedin_list_conversations (the composer's list, "
-                "which opens none), linkedin_messaging_presence (the empty "
+                "which opens none), linkedin_archived_conversations (the "
+                "same list, its folder switched to Archived and back), "
+                "linkedin_messaging_presence (the empty "
                 "composer's suggestions, which opens none), "
                 "linkedin_open_thread, linkedin_send_reply and "
                 "linkedin_send_attachment (only the conversation you name by "
@@ -13959,6 +13976,14 @@ async def linkedin_search_content(keywords: str) -> dict[str, Any]:
 # acted on through it (CONVERSATION-MENU-PREVIEW-PRESS). Every tool this lane
 # registers is in this one contiguous block; the menu itself is read and
 # pressed in ``linkedin_server/conversation_menu.py``, through ``writes``.
+# And census M M28's VIEW half: the Archived folder, read through one folder
+# switch and put back (VIEW-SWITCH-PRESS-RESTORED), in
+# ``linkedin_server/messaging_folders.py``.
+# And census M C14: his scheduled posts list, behind the composer's schedule
+# button (SCHEDULED-LIST-AS-A-SHIPPED-READ), in
+# ``linkedin_server/scheduled_posts.py``.
+
+from linkedin_server import messaging_folders, scheduled_posts  # noqa: E402 -- lane build-msg2's one block
 
 
 def _thread_id_refusal() -> dict[str, Any]:
@@ -14130,6 +14155,98 @@ async def linkedin_set_conversation_deleted(thread_id: str, confirm_token: str =
         if not threads.valid_thread_id(thread_id):
             return _thread_id_refusal()
         return await _write_tool("set_conversation_deleted", str(thread_id).strip(), confirm_token)
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_archived_conversations(include_names: bool = False) -> dict[str, Any]:
+    """List your ARCHIVED conversations without opening any: one folder switch, put back.
+
+    WHY A PRESS. No address shows the Archived folder; on LinkedIn's
+    messaging list it is a choice in the folder menu. So this opens the
+    composer's list (/messaging/compose/, which opens no conversation --
+    measured), presses the folder pill, chooses "Archived", reads the list,
+    then chooses the folder the pill wore before and reads the list again.
+    The ruling it rests on, VIEW-SWITCH-PRESS-RESTORED, permits a press that
+    changes which rows a view shows only when the view is RESTORED and a
+    before/after reading proves it: ``restored`` is true only when the pill
+    wears its folder again, closed, on the composer's address, and the list
+    reads exactly as it did before. A switch left in place is the loudest
+    answer this returns, with the folder to choose yourself.
+
+    WHAT IT COSTS, and all of it is yours: what linkedin_list_conversations
+    costs (the messaging tab's new-since-last-visit badge resets, an empty
+    composer is drawn, nothing is typed) plus four presses of the folder
+    menu. One page load.
+
+    THE ROWS are read exactly as linkedin_list_conversations reads them:
+    unread paired to the row -- an archived conversation can be unread, no
+    default view shows it, and the receipt guard never sees it -- null on a
+    placeholder row, and no thread id. Names are off by default; pass
+    ``include_names=True`` and each rendered row's label comes back in
+    ``with`` as a people record.
+
+    DERIVED, and said so: the switch was captured on /messaging/, not on the
+    composer's list. The same component draws it there and every step's
+    reading is returned, so a page that does not switch reads as not
+    switched, never as an empty folder. Nothing here returns a conversation
+    to your inbox: that control has never been captured.
+
+    Args:
+        include_names: return each rendered row's label as a people record
+            in ``with``, instead of the placeholder ``name``. Default False.
+    """
+    try:
+        async with BROWSER.session() as page:
+            landed = await BROWSER.goto(page, threads.COMPOSE_URL)
+            reading = await messaging_folders.read_archived(
+                page, include_names=bool(include_names)
+            )
+        return messaging_folders.archived_result(
+            reading, landed, include_names=bool(include_names)
+        )
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_scheduled_posts() -> dict[str, Any]:
+    """How many posts you have SCHEDULED, read behind the composer's schedule button.
+
+    WHY PRESSES, AND WHICH. No address lists them: LinkedIn draws the list
+    inside the composer. So this opens the composer (/preload/sharebox/),
+    checks it is EMPTY -- its text box blank, its publish button drawn
+    disabled -- and only then presses its schedule button, then "View all
+    scheduled posts", reads the list, and closes the composer with its own
+    close button. On ruling SCHEDULED-LIST-AS-A-SHIPPED-READ. Nothing is ever
+    typed and nothing is scheduled.
+
+    ZERO ONLY ON THE DRAWN EMPTY HEADLINE. The one capture of the list is
+    empty ("No scheduled posts yet"); a list holding anything has never been
+    seen, so ``scheduled_posts`` is 0 when that headline is drawn and null --
+    unknown, NOT zero -- otherwise.
+
+    NO DRAFT, AS FAR AS ANYTHING HERE CAN SEE: no draft surface is reachable
+    (the read boundary refuses every candidate address). So ``no_draft`` is
+    true only when the composer read empty before the first press, closed
+    with no dialog and no toast left, and read empty AGAIN on a second load.
+    A composer holding text, or anything drawn after the close, is an
+    AUTOSAVE SIGN: every further press stops and ``autosave_sign`` says what
+    was seen. Two page loads.
+    """
+    try:
+        async with BROWSER.session() as page:
+            await BROWSER.goto(page, scheduled_posts.COMPOSER_URL)
+            reading = await scheduled_posts.read_scheduled(page)
+            reopened: dict[str, Any] = {}
+            reclosed: dict[str, Any] = {}
+            if reading.get("closed") is True and not reading.get("autosave_sign"):
+                await BROWSER.goto(page, scheduled_posts.COMPOSER_URL)
+                reopened = await scheduled_posts.reopened_empty(page)
+                if reopened.get("empty") is True:
+                    reclosed = await scheduled_posts.close_composer(page)
+        return scheduled_posts.scheduled_result(reading, reopened, reclosed)
     except Exception as exc:
         return _error(exc)
 

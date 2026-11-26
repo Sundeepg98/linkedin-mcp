@@ -133,6 +133,11 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_mark_conversation_unread": ("confirm_token", "thread_id"),
     "linkedin_set_conversation_archived": ("confirm_token", "thread_id"),
     "linkedin_set_conversation_deleted": ("confirm_token", "thread_id"),
+    # Lane build-msg2, the same day: two READS, each behind one declared
+    # press -- the Archived folder (census M M28's view half) and the
+    # scheduled posts list (census M C14).
+    "linkedin_archived_conversations": ("include_names",),
+    "linkedin_scheduled_posts": (),
     "linkedin_message_from_profile": ("confirm_token", "profile", "text"),
     "linkedin_my_activity_items": (),
     "linkedin_my_applications": ("limit",),
@@ -787,8 +792,16 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: CENSUS DECISION, IN THE LANE'S CENSUS COMMIT: `M M26`, `M M27`, `M M29` and
 #: `M M31` GAP -> COVERED-UNFIRED on them, never fired. See
 #: `_audit/2026-11-26-build-msg2.md`.
-PINNED_TOOL_COUNT = 96
-PINNED_PARAMETER_COUNT = 147
+#: **ON THE SAME LANE: 98 TOOLS AND 148 PARAMETERS** -- two READS,
+#: `linkedin_archived_conversations(include_names)` and
+#: `linkedin_scheduled_posts()`, beside the ninety-six and 147, counted off
+#: `mcp.list_tools()`, never summed. THE CENSUS DECISION, IN THE SAME COMMIT:
+#: `M C14` GAP -> COVERED-UNFIRED on the scheduled posts read, never fired;
+#: `M M28` STAYS GAP -- its view half is the Archived read, its restore half
+#: waits on a capture, and whether the row splits is the orchestrator's.
+#: See `_audit/2026-11-26-build-msg2.md`.
+PINNED_TOOL_COUNT = 98
+PINNED_PARAMETER_COUNT = 148
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:

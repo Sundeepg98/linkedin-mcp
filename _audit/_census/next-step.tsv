@@ -98,7 +98,6 @@ M C10	M	W	R3	TARGET:a member he names to mention	INFERRED	RULING:MENTION-COMPOSI
 M C11	M	W	R3	SIBLING:M C1	INFERRED	RULING:D6-CAPABILITY-OVER-AFFORDANCE ; M C1
 M C12	M	W	R3	TARGET:the words of a draft he names	INFERRED	RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS ; M C12
 M C13	M	W	R3	TARGET:a post he names to schedule	NAMED	_audit/_census/messaging-and-content.md::Schedule post is a button opening a modal nobody has opened
-M C14	M	R	-	BUILD:tests/fixtures/live11/sharebox_scheduled_list_open.html	NAMED	_audit/2026-09-28-lane-k-ledger.md::YES, as a shipped read: open the post ; RULING:ABSENT-ON-HIS-ACCOUNT-PER-ROW
 M C15	M	W	R3	PRECONDITION:a post he has scheduled	MEASURED	_audit/2026-11-26-readers-msg26.md::No scheduled posts yet ; RULING:MEASURED-ABSENT-OR-PRECONDITION
 M C16	M	W	R3	PRECONDITION:a post he has scheduled	MEASURED	_audit/2026-11-26-readers-msg26.md::No scheduled posts yet ; RULING:MEASURED-ABSENT-OR-PRECONDITION
 M C17	M	W	R3	PRECONDITION:a post he has scheduled	MEASURED	_audit/2026-11-26-readers-msg26.md::No scheduled posts yet ; RULING:MEASURED-ABSENT-OR-PRECONDITION

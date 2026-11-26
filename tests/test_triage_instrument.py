@@ -465,7 +465,14 @@ AFTER_LANE_READERS_MSG26_FOOTER = (118, {"R": 9, "W": 106, "R+W": 3})
 #: 106 - 4.
 AFTER_LANE_BUILD_MSG2_CONVERSATION_MENU = (114, {"R": 9, "W": 102, "R+W": 3})
 
-EXPECTED_NOW = AFTER_LANE_BUILD_MSG2_CONVERSATION_MENU
+#: ON THE SAME LANE, MEASURED with this tree's guard: `C14` -- a READ -- left
+#: GAP, COVERED-UNFIRED on his scheduled posts list
+#: (`_audit/2026-11-26-build-msg2.md` section 3). `M28` (R+W) stays GAP:
+#: its view half is built and its restore half is not. 114 - 1 = 113,
+#: reads 9 - 1.
+AFTER_LANE_BUILD_MSG2_SCHEDULED_LIST = (113, {"R": 8, "W": 102, "R+W": 3})
+
+EXPECTED_NOW = AFTER_LANE_BUILD_MSG2_SCHEDULED_LIST
 
 
 def test_the_headline_split_is_the_one_the_report_quotes():
