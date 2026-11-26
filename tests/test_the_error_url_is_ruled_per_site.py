@@ -168,6 +168,13 @@ DECLARED: dict[tuple[str, str], tuple[str, int]] = {
     # `test_navigation_is_never_derived` is the standing proof that no
     # navigation target in this package is page-derived.
     ("server.py", "_read_cards"): (ASKED_FOR, 1),
+    # 2026-11-26 (lane search-fix26): `linkedin_search_jobs` reads through
+    # this helper now, and `url` is the same caller-composed address as
+    # above. FIVE raises, every one passing the ASKED-FOR `url` and never the
+    # landing: the classic zero, the AI fallback's refused arguments, the AI
+    # landing for other keywords, the AI zero, and a landing on any other
+    # route (whose message carries only `landing.withheld`).
+    ("server.py", "_read_job_search"): (ASKED_FOR, 5),
     # f"{BASE_URL}/jobs-tracker/?stage={stage}" -- this package's template.
     ("server.py", "_read_tracker"): (ASKED_FOR, 1),
     # The last of two module constants. THE ONE SURFACE WHOSE OWN DOCSTRING
@@ -545,10 +552,15 @@ def test_the_twenty_are_still_twenty():
     # send_message, RETIRED on lane L5's order of 23:36 because it was aimed by
     # a name. 12 -> 11 WITHHELD, 20 -> 19 in all, 12 -> 10 out of scope.
     # TWENTY-ONE AT LANE S'S MERGE (above): 11 -> 13 WITHHELD.
+    # TWENTY-SIX FROM 2026-11-26 (lane search-fix26): ``_read_job_search``
+    # raises FIVE times, every one ASKED_FOR, so ASKED_FOR is 12. MEASURED off
+    # the declared table, which ``test_every_feeder_site_is_declared`` holds
+    # equal to the measured sites: {WITHHELD 13, ASKED_FOR 12, PASSTHROUGH 1,
+    # NO_ADDRESS_IN_SCOPE 10}.
     assert tally[WITHHELD] == 13, tally
-    assert tally[ASKED_FOR] == 7, tally
+    assert tally[ASKED_FOR] == 12, tally
     assert tally[PASSTHROUGH] == 1, tally
-    assert tally[WITHHELD] + tally[ASKED_FOR] + tally[PASSTHROUGH] == 21, tally
+    assert tally[WITHHELD] + tally[ASKED_FOR] + tally[PASSTHROUGH] == 26, tally
     assert tally[NO_ADDRESS_IN_SCOPE] == 10, tally
 
 

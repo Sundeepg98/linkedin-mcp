@@ -255,6 +255,12 @@ DECLARED: dict[tuple[str, str], tuple[str, int]] = {
     # that is a measurement nobody has taken.
     ("server.py", "_read_cards"): (UNMEASURED, 1),
     ("server.py", "_read_tracker"): (UNMEASURED, 1),
+    # 2026-11-26 (lane search-fix26): the job search's helper, which took over
+    # `linkedin_search_jobs`'s call of `_read_cards`. TWO envelopes, one per
+    # route it reads (the classic search and the AI fallback), each publishing
+    # where the browser FINISHED exactly as `_read_cards` did: the caller's
+    # own search address, with the caller's own keywords in it.
+    ("server.py", "_read_job_search"): (UNMEASURED, 2),
     # Lands on a caller-supplied analytics url.
     ("server.py", "linkedin_who_viewed_me"): (UNMEASURED, 1),
     # Lands on FEED_URL, a module constant -- but what is emitted is where the

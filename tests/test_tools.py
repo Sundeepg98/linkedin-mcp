@@ -1053,24 +1053,32 @@ async def test_the_notification_failure_names_the_selector_list_to_update(drive)
     assert "NOTIFICATION_SELECTORS" in result["hint"]
 
 
-async def test_an_empty_search_page_is_a_legitimate_result_not_an_error(drive):
-    """Search is the one surface where nothing found is a real answer.
+async def test_an_empty_search_page_is_refused_until_linkedin_says_it_is_empty(drive):
+    """INVERTED 2026-11-26 (lane search-fix26), AND IT USED TO PIN THE DEFECT.
 
-    A filter combination that matches nothing, or an offset past the end of the
-    results, is not a broken page -- so search lets the empty harvest through
-    and explains it, where every other tool raises.
+    This test was ``test_an_empty_search_page_is_a_legitimate_result_not_an_error``
+    and asserted ``results == []`` with a note saying "the filters matched
+    nothing". That note was written over a page nobody had looked at: the
+    harvest keys ``/jobs/view/`` links, LinkedIn's AI job search draws none,
+    and an emulation of the harvest keyed 0 of its 25 cards (lane search26).
+    So a redirect off the classic page read exactly like an empty search.
+
+    A filter matching nothing IS a real answer -- and it is believed only when
+    the page drew LinkedIn's own no-results state, which no capture has shown
+    yet. Until one does, every zero is a refusal that says what the page drew.
+    ``tests/test_job_search_route.py`` holds the rest, including the control
+    that shows a declared wording WOULD be believed.
     """
     page = FakePage(evaluate_result=[])
     drive(page)
 
     result = await linkedin_search_jobs(keywords="cobol architect", start=500)
 
-    assert "error" not in result, result
-    assert result["results"] == []
-    assert result["count"] == 0
-    assert result["page_had"] == 0
-    assert result["capped"] is False
-    assert "held no job cards" in result["note"]
+    assert result["error"] == "extraction_failed", result
+    assert "results" not in result
+    assert "count" not in result
+    assert "no job card this reader could read" in result["message"]
+    assert "filters matched nothing" not in result["message"]
 
 
 # ---------------------------------------------------------------------------

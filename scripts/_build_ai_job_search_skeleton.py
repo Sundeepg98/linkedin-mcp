@@ -50,12 +50,11 @@ hold exactly the input's card count. ``tests/test_job_search_route.py`` runs
 
     python scripts/_build_ai_job_search_skeleton.py --raw <raw capture> [--out <path>]
 
-Prints counts and a sha256 digest of what it wrote, never a value it read.
+Prints counts and the byte length of what it wrote, never a value it read.
 """
 from __future__ import annotations
 
 import argparse
-import hashlib
 import re
 import sys
 from html import escape
@@ -297,7 +296,7 @@ class Builder:
         return planted
 
     # -- the transform ------------------------------------------------------
-    def text(self, owner: _Node, index: int, value: str) -> str:
+    def rewrite(self, owner: _Node, index: int, value: str) -> str:
         key = (id(owner), index)
         if key in self.planted:
             return self.planted[key]
@@ -373,9 +372,9 @@ class Builder:
     def render(self, node: _Node, out: list[str], depth: int = 0) -> None:
         for index, child in enumerate(node.children):
             if isinstance(child, str):
-                text = self.text(node, index, child)
-                if text:
-                    out.append(escape(text, quote=False))
+                kept = self.rewrite(node, index, child)
+                if kept:
+                    out.append(escape(kept, quote=False))
                 continue
             if child.tag in DROPPED:
                 continue
@@ -480,11 +479,12 @@ def _input_texts(root: _Node) -> set[str]:
     return found
 
 
-def build(raw: str) -> tuple[str, dict[str, int]]:
+def build(raw: str, builder: Optional["Builder"] = None) -> str:
+    """The fixture's text. ``builder`` (made here when absent) keeps every count."""
     tree = _Tree()
     tree.feed(raw)
     tree.close()
-    builder = Builder()
+    builder = builder if builder is not None else Builder()
     builder.plan_cards(tree.root)
     if builder.counts["cards"] == 0:
         raise SystemExit("no AI job-search card in the input; this builder reads one page only")
@@ -526,11 +526,10 @@ def build(raw: str) -> tuple[str, dict[str, int]]:
     outer = [n for n in written if not any(_inside(n, o) for o in written if o is not n)]
     if len(outer) != builder.counts["cards"]:
         raise SystemExit("the output holds a different card count from the input; refusing")
-    counts = dict(builder.counts)
-    counts.update(checked)
-    counts["synthetic ids"] = len(builder.job_ids)
-    counts["input texts searched for"] = len(inputs)
-    return text, counts
+    builder.counts.update(checked)
+    builder.counts["synthetic ids"] = len(builder.job_ids)
+    builder.counts["input texts searched for"] = len(inputs)
+    return text
 
 
 def main(argv=None) -> int:
@@ -538,13 +537,17 @@ def main(argv=None) -> int:
     parser.add_argument("--raw", required=True, type=Path)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     args = parser.parse_args(argv)
-    raw = args.raw.read_text(encoding="utf-8")
-    text, counts = build(raw)
-    args.out.write_text(text, encoding="ascii", newline="\n")
-    for name in sorted(counts):
-        print("%-22s %d" % (name, counts[name]))
-    print("bytes %d" % len(text))
-    print("sha256 %s" % hashlib.sha256(text.encode("ascii")).hexdigest()[:16])
+    builder = Builder()
+    args.out.write_text(
+        build(args.raw.read_text(encoding="utf-8"), builder),
+        encoding="ascii",
+        newline="\n",
+    )
+    # COUNTS ONLY, read off the builder's own tallies -- never the text it
+    # wrote, so no page-derived string reaches a print, and no digest of one.
+    for key in sorted(builder.counts):
+        print("%-26s %d" % (key, builder.counts[key]))
+    print("bytes %d" % len(args.out.read_bytes()))
     return 0
 
 
