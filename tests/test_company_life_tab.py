@@ -26,7 +26,7 @@ import pytest
 from linkedin_server import company_tabs as ct
 from linkedin_server import people_data
 from linkedin_server.errors import ExtractionFailedError
-from tests.live11_words import plain, words
+from tests.live11_words import chromium_page, plain, words  # noqa: F401 -- a fixture
 from tests.plantedpage import PlantedPage
 from tests.skeleton_page import Element, SkeletonPage, Text, parse
 
@@ -386,3 +386,76 @@ def test_the_tool_reads_the_life_tab_with_its_own_reader():
     assert len(tool) == 1
     calls = {ast.unparse(c.func) for c in ast.walk(tool[0]) if isinstance(c, ast.Call)}
     assert "company_tabs.read_life_tab" in calls
+
+
+# ---------------------------------------------------------------------------
+# The same reading in a real engine
+# ---------------------------------------------------------------------------
+
+
+def _replace_in_order(markup: str, old: str, news: list[str]) -> str:
+    """Each occurrence of ``old``, in document order, replaced by the next of
+    ``news`` -- and the markup must draw exactly that many."""
+    head, sep, body = markup.partition("\n-->\n")
+    assert body.count(old) == len(news), (body.count(old), len(news))
+    for new in news:
+        body = body.replace(old, new, 1)
+    return head + sep + body
+
+
+def real_engine_markup() -> str:
+    """The words fixture with the two items' authors and permalinks planted
+    as markup, for a browser: the parsed-tree plants above have no
+    serialiser."""
+    markup = words("company_life")
+    member = 'href="https://www.linkedin.com/in/x?miniProfileUrn=x"'
+    markup = _replace_in_order(markup, member, [
+        'href="https://www.linkedin.com/in/%s?miniProfileUrn=x"' % slug
+        for slug in (SLUGS[0], SLUGS[0], SLUGS[1], SLUGS[1])])
+    name = '<span dir="ltr">\n<span aria-hidden="true">\nx\n</span>'
+    markup = _replace_in_order(markup, name, [
+        name.replace("\nx\n", "\n%s\n" % author) for author in AUTHORS])
+    for anchor, post in (('id="k26f6e803"', POST_IDS[0]), ('id="k09155234"', POST_IDS[1])):
+        old = 'href="/feed/update/urn:li:activity:x/" ' + anchor
+        markup = _replace_in_order(markup, old, [
+            'href="/feed/update/urn:li:activity:%s/" %s' % (post, anchor)])
+    return markup
+
+
+def test_the_double_keeps_the_permalink_whole_as_the_live_page_drew_it():
+    """MEASURED, the reason the skeleton double is this capture's engine: the
+    live page built its DOM by script, and its serialised skeleton draws each
+    item's permalink anchor HOLDING the hashtag anchors (three and one). The
+    double keeps that tree as serialised: one permalink per item."""
+    root = parse(real_engine_markup())
+    for item, inner in zip(trending_items(root), (3, 1)):
+        permalinks = where(item, lambda n: n.tag == "a" and "/feed/update/" in n.attrs.get("href", ""))
+        assert len(permalinks) == 1
+        assert len(where(permalinks[0], lambda n: n.tag == "a" and "/search/results/" in n.attrs.get("href", ""))) == inner
+
+
+async def test_a_browser_reparse_splits_the_permalink_and_every_item_is_skipped_loudly(chromium_page):
+    """A BROWSER RE-PARSING THE SKELETON DOES NOT REBUILD THE LIVE DOM. The
+    HTML parser never nests an anchor in an anchor: ``set_content`` closes the
+    permalink at its first hashtag and reconstructs it after each one, so a
+    local headless Chromium (every request refused) draws THREE copies of each
+    item's permalink and no hashtag inside any. That is the parser's repair,
+    not the page. What it shows is the reader's failure mode on a DOM it does
+    not know: every item is counted ``not_one_permalink`` and none is read --
+    never words pieced together from the copies, never a silent zero."""
+    await chromium_page.set_content(real_engine_markup(), wait_until="domcontentloaded")
+    result = await ct.read_life_tab(chromium_page)
+    assert result["view"] == "life" and result["reads_failed"] == 0
+    assert result["modules"] == {
+        "hero_media": 1, "featured_members": 1, "trending_employee_content": 1,
+        "interest_pipeline": 1, "company_spotlight": 3, "company_photos": 1,
+    }
+    trending = result["trending"]
+    assert trending["posts"] == [], "items were drawn, so the list is read -- and empty"
+    assert trending["skipped"]["not_one_permalink"] == 2
+    assert trending["skipped"]["holds_other_items"] == 1
+    # The rest of the tab does not rest on a nested anchor, and reads the same.
+    assert result["spotlights"]["heading_matched"] is True
+    assert len(result["spotlights"]["spotlights"]) == 3
+    assert result["photos"] == {"heading_matched": True, "drawn": 2}
+    assert result["interest_offered"] is True
