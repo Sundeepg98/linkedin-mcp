@@ -167,7 +167,7 @@ hunks, measured first with `git merge-tree --write-tree`.
   `tests/test_server_surface.py`, and `_spell_cardinal()` with its table in
   `tests/test_prose_that_makes_a_claim.py`, whose two regexes that read the
   tool count and the sum now take a "hundred" phrase as well as one word.
-- EQUAL VALUES MERGED AS ONE, nine more, each set to its measurement: the
+- EQUAL VALUES MERGED AS ONE, eleven more, each set to its measurement: the
   census population 776 in three places (`tests/census_row_pin.json`, by
   its own writer; the locator's `assert total`; `PINNED_ROW_TOTAL`), the
   package docstring's "thirty-three write tools ship", the README's tree
@@ -187,8 +187,10 @@ hunks, measured first with `git merge-tree --write-tree`.
   adjudicated 281, delivered_broad 193, gap 496, unfired 75, gap_read 66,
   gap_write 347, b1_standing 27, b1_no_ruling 48, b3_needs_session 11,
   b3_undetermined 1, stated_rows 777, capabilities 790,
-  capabilities_achievable 719, achievable 706 -- seven of them values that had
-  merged clean and equal. `PINNED_B1_ROWS["OPERATOR-NAMES-THE-TARGET"]` the
+  capabilities_achievable 719, achievable 706 -- five of them values that had
+  merged clean and equal (stated_rows, capabilities, capabilities_achievable,
+  achievable, b1_standing), and a sixth, b3_needs_session, equal on both sides
+  inside a hunk. `PINNED_B1_ROWS["OPERATOR-NAMES-THE-TARGET"]` the
   union of both lanes' members, 27, none repeated.
 - The scoped tests found three more, each fixed at its cause and re-run
   green: two hand-typed action lists compare sorted, and the union had put
@@ -477,8 +479,9 @@ and `jobs_blocked_on_nothing` 3 (the three READER-gated rows, `J 1`, `J 20`,
   parses the working copy; run while the next merge had already written its
   conflict markers, it failed on them. Run each post-commit test to the end
   before the next merge touches the tree.
-- Equal values merge clean as one line, and it happened eleven times in one
-  integration: two lanes moving a count to the same number by different
+- Equal values merge clean as one line, and it happened eighteen times in one
+  integration (one in merge 2, seventeen in merge 3, six of them census pins),
+  besides three numbered sites in a baseline: two lanes moving a count to the same number by different
   routes leave one line that is right for neither. Every count was therefore
   re-measured on the merged tree, conflicted or not, and the scoped tests and
   `--check` found the ones the reading missed. A table numbered by occurrence
@@ -492,8 +495,37 @@ and `jobs_blocked_on_nothing` 3 (the three READER-gated rows, `J 1`, `J 20`,
 
 ## 10. The head and its CI
 
-(written at certification)
+- THE CERTIFIED HEAD: `6354ce5`, the registration and this record over the
+  fourth merge `191c519`, on master `f4fa447`. It holds build-jobs2
+  (`0d13072`), build-net2 (`42b36fa`), build-msg2 (`c18c913`) and live-s12
+  (`0985fe4`), merged in that order, then the registration.
+  `scripts/lane_ci.py push` put it on `ci/integration6`. The pre-push sweep found 0 hits across 1802
+  blobs and 226 needles, over the 39 commits past master.
+  `origin/master` read `f4fa447` at the push.
+- LANE CI: run 45880858316, read by head sha through `lane_ci.py wait`: SUCCESS, 6 of 6 jobs (the shard plan, four pytest
+  shards and the totals job), 5m41s wall.
+- MEASURED on `6354ce5`:
+  - DELIVERED broad 171 / 706 achievable (24.2%), strict 96 (13.6%); against
+    the published surface, 171 / 777 (22.0%) and 96 (12.4%);
+  - GAP 518, the next-step ledger's own row count;
+  - population 777 rows (71 out of scope: EXCLUDED-RULED 56, MEASURED-ABSENT 15);
+  - 107 tools and 162 parameters;
+  - 182 rulings registered.
+- The committed-blob identity test on that head: 1386 passed in 43 s.
+- This section is a record-only commit on top of that head, one file,
+  checked locally: the three derived-view checks and the corpus guards that
+  read this record. The brief asked for ONE lane CI run, so this commit has
+  none of its own; master CI runs on it after the fast-forward. Master is the
+  orchestrator's to fast-forward; this lane never touches it.
 
 ## 11. The final message
 
-(written at certification)
+integrator6: integration 6 CERTIFIED 6354ce5 (lane CI 45880858316, 6 of 6, 5m41s), read by sha. A record-only commit on top carries sections 10 and 11. Records: _audit/2026-11-26-integration-6.md and _audit/2026-11-26-rulings-integration-6.md.
+1. Merged --no-ff, in order: build-jobs2 0d13072 (45857793741) as 0204f88; build-net2 42b36fa (45857309073) as 2634bfb; build-msg2 c18c913 (45868574255) as 0cd1836; live-s12 0985fe4 (45870701012; its 0796e7a was red, 45867937888; no FINAL by 23:58, so 0985fe4 per your 23:22 note) as 191c519; then the registration 6354ce5.
+2. Census at head: broad 171/706 (24.2%), strict 96/706 (13.6%), GAP 518, population 777 (71 out of scope), 107 tools / 162 params, rulings 167 -> 182.
+3. (a) RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE, its registered text, on session 12 load 3: J 1, J 3, J 8, J 20 CP -> GAP; J 40 CP -> GAP `SKILL`; J 2, J 4-J 7, J 9-J 15, J 17, J 18, J 107, J 151 COVERED-PROVEN -> GAP; J 31 COVERED-UNFIRED -> GAP. Each has its AI-route next step (BUILD on the AI capture for J 1/20/31/40; CAPTURE on search26's C-SRCH specs, placed as queue lines 132-141; J 18 SIBLING J 3) and a reopener. No cell disagreed with search26 4.5.
+4. (b) M C41 COVERED-PROVEN -> COVERED-UNFIRED (session 12 E1, loads 1-2). (c) M C3, M C4: next step BUILD -> RULING:Q-MEDIA-POST-AUDIENCE; no state moved.
+5. Pins SET from --check, never summed: adjudicated 259, delivered_broad 171, delivered_strict 96, gap 518, unfired 75, stated_rows 777, capabilities 790, achievable 706, and 13 more (record s7). 18 equal values (6 of them pins) had merged as one line; each re-measured.
+6. Judgement: the tool count crossed 100, so three test spellers spell to 199 ("one hundred and seven"), each control moved to 200; INSTRUMENTS 110 x4 -> 110/111/112/113 (your resolver run re-pointed at this worktree); 5 guards pinning moved rows followed them (record s8).
+7. Q1. Your words: "Re-aim their next step to RULING:MEDIA-POST-SAME-REFUSAL". check_next_step resolves RULING only to a "### Q-..." lane-K heading, so they read RULING:Q-MEDIA-POST-AUDIENCE (a new ledger question, the ruling's alias; the N 200 shape). Accept, or teach the checker registered ids?
+8. Q2. J 15 had no AI-route spec in search26; I added the All filters press to C-SRCH-3a, and set C-SRCH-3d's needs to "C-SRCH-3a landed" so J 11's step resolves. Accept?
