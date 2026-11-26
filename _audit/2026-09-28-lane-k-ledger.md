@@ -917,6 +917,25 @@ the embed control and `Next` -- each read and closed with nothing chosen and
 nothing published, a draft's appearance recorded -- as
 B5-GROUP-COMPOSER-OPENS-EMPTY allowed a group composer to be opened?
 
+### Q-CONVERSATION-MENU-STATE -- a menu whose items exist only while it is open
+
+Added 2026-11-26 by lane readers-msg26 (`_audit/2026-11-26-readers-msg26.md`,
+section 7). Rows: `M M26`, `M M27`, `M M29`, `M M31`. Live session 11 opened,
+on the conversation he named, by its recorded id and behind the receipt guard,
+the ACTIVE row's options menu: eight items -- Move to Other, one unmatched,
+Mark as unread, Star, Mute, Archive, Delete conversation, Manage settings --
+bound to that conversation by the active marker on the thread's own page,
+which lane B3 found no earlier capture could do. The items exist only while
+the menu is open, so a write's preview, which presses nothing, cannot read
+whether the conversation is already muted, archived or unread. The question:
+may each such write's preview open that one menu as a disclosure and close it
+on Escape, to read its item's word before a token is minted -- a new
+sanctioned preview press, as the similar-jobs toggle's trial press was -- or
+must each act read its word only inside the confirmed press, refusing without
+pressing when the menu draws the inverse word? And `Delete conversation`,
+whose next state is not on disk and which has no inverse: built refusing at
+any dialog it has not seen, as `J-19-BUILT-BEHIND-THE-GRANT` built `J 19`?
+
 ## 8. Preconditions and purposes
 
 PRECONDITION rows stay GAP; each waits on something he does not hold.

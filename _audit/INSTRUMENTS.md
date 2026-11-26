@@ -12647,3 +12647,47 @@ follows and in a denied-terms class.
 The session's offline page probes, member-link counter, patchers, item reader
 and summariser; each answered one question once, and the answers are in the
 record.
+
+## 107. AN EMPTY SEARCH PAGE IS AN ERROR UNTIL ITS EMPTY STATE IS SEEN, AND A FOOTER IS ACCOUNTED FOR BY STRUCTURE (readers-msg26, 2026-11-26)
+
+**Registered 2026-11-26.** Full record: `_audit/2026-11-26-readers-msg26.md`.
+Numbered 107 because sibling wave-2 lanes' worktrees already hold 104 (twice)
+and 105; renumber at the merge if another lane took it.
+
+### 107.1 A ZERO THE PAGE DID NOT SAY IS NOT A RESULT
+
+No empty content search has been captured, so the content search's reader
+knows no empty state. A page that draws no results screen, or a screen with no
+card, RAISES rather than returning no posts -- the zero is not corroborated --
+while cards drawn and none returnable is a reading whose denominators say why.
+And every card's words are paired with its author by reading the author twice,
+before the words and after, because each read re-resolves the card.
+
+    A READER THAT KNOWS NO EMPTY STATE MAY NOT REPORT ONE.
+
+### 107.2 A CONTROL THAT IS NOT THERE IS SHOWN BY ACCOUNTING FOR EVERY CONTROL THAT IS
+
+The opened conversation's reply form draws seven buttons; a tracked copy keeps
+only LinkedIn's furniture words, so two of them read `x`. They are accounted for
+by STRUCTURE -- each is the one button in a wrapper that holds its own file input
+-- never by a word, and the account leaves 0 unaccounted. That is what lets
+`M M20`'s absence be a measurement: the instrument can see a meeting control
+(a planted one is seen by both readings) and sees none among controls it can
+name.
+
+### 107.3 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `tests/test_content_search.py`; `linkedin_server/content_search.py` | on the base tree `7760a5f` the file fails at collection (`ImportError: cannot import name 'content_search'`); with the module present and the tool unwired, the five tool tests fail; green 28 passed. Four mutations of the reader's checks, each red: no cut of the more control's text (2 tests), no check of the profiles outside the words box (1), a screen with no card returning `[]` (1), any heading accepted as a post's (2). `test_THIS_CONTROL_CAN_FAIL_the_base_capture_draws_no_results_screen` keeps the measured screen name load-bearing |
+| `scripts/_build_content_search_skeleton.py` (the provenance of `tests/fixtures/live11/search_content_posts.html`) | refuses, writing nothing, unless the keyed skeleton's tracked copy is the committed `search_content.html`, and refuses any word whose keyed shape does not match; a fixed point on its own input (sha256 `11fb3aada6cc075e`, built twice) |
+| `tests/test_the_opened_conversation_footer.py` | `test_THIS_CONTROL_CAN_FAIL_a_meeting_control_drawn_is_seen_by_both_readings` (a planted footer action: the shipped reader reports `video_meeting`, the structural account one unaccounted control of eight); `test_THIS_CONTROL_CAN_FAIL_a_button_without_a_file_input_is_not_an_attachment` (the rule, not the count, decides) |
+| the shipped drive `content_search:read_content_results` in `tests/shipped_drives.py` | its premise broken in `FIXTURE_BREAKS` (the screen's name changed): the drive raises and the guard records it not driven, never clean |
+
+### 107.4 DECLARED DISPOSABLE
+
+The lane's scratch probes -- the keyed-shape word counter, the card mapper
+(letter counts and matched words only), the census cell, ledger and queue
+editors, the pin re-deriver -- and the exported base tree used for the
+red-first runs. Each answered one question once; the answers are in the
+record.
