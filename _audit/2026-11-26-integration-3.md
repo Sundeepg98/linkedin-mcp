@@ -362,11 +362,26 @@ strict 117; GAP 529; 774 rows published, 68 out of scope.
 
 ## 7. Gates
 
-- Per merge, and again on the registration tree, all green:
-  `census_completion.py --check` ("every headline figure matches its pin"),
-  `check_next_step`, `check_read_addresses`, `check_jobs_directions`,
-  `check_write_classes`, `ruling_holds`, `check_exclusion_basis`,
-  `check_cited_shas_resolve`, and `triage_read_gap_rows`.
+- Per merge, all green: `census_completion.py --check` ("every headline
+  figure matches its pin") and the table checkers (`check_next_step`,
+  `check_read_addresses`, `check_jobs_directions`, `check_write_classes`,
+  `ruling_holds`, `check_exclusion_basis`). On the registration tree, the
+  same set, plus `check_cited_shas_resolve` and `triage_read_gap_rows`.
+- Targeted tests on the registration tree, run sharded because the live flag
+  was absent:
+  - the census, side-table and derived-view tests: 539 passed, 2 failed;
+    then 208 passed, 2 failed; then 88 passed. The four failures came from
+    three defects, each fixed and re-run:
+    - the new documents were untracked, so `git ls-files` could not resolve
+      the document a marker names;
+    - a register note's wording sat within two lines of another entry's
+      citation in the generated rulings index, and the guard read the pair
+      as a candidate, so the note was reworded;
+    - both markers' reasons had wrapped onto a second line, where the marker
+      rule cannot read them.
+  - a second census-reading batch: 700 passed, 3 failed. These were the same
+    three tests that CI failed (section 9).
+  - the committed-blob identity test: 1185 passed in 109 s.
 - The derived views (INDEX, RULINGS, blocker map) were regenerated last after
   every record edit, then `--check` on all three.
 - Serial runs under the live flag that went over the 2-minute local cap,
@@ -389,3 +404,30 @@ strict 117; GAP 529; 774 rows published, 68 out of scope.
   that LINKS-ARE-NOT-DISCLOSURES owes the orchestrator.
 - The AI-generation rows, the article rows, `P M11`, `N 118` and `P E7`, each
   left in section 5 on the ruling's own words.
+
+## 9. The registration head and its CI, before the fifth merge
+
+- `4b42fae`, the registration commit on merge 4's `b5cb2bc`, was pushed by
+  `scripts/lane_ci.py push`. The pre-push sweep found 0 hits across 1550
+  blobs and 226 needles. LANE CI run 45754019564, read by head sha: FAILURE,
+  three tests, all from `P A14` and `P A15` becoming banked rows, which
+  guards read and GAP rows escape:
+  - `test_banked_evidence_is_reachable` (two tests): both cells cited
+    `live7/editor.html`, a path no clone resolves;
+  - `test_an_asserted_name_resolves`: "under" followed by the backticked id
+    `MEASURED-ABSENT-OR-PRECONDITION` sits in a blocker slot, so the guard
+    read a ruling id as a blocker name absent from the ledger.
+  The local second batch had already reproduced all three.
+- `091f7d3` fixes them in the cells alone. Both cite
+  `tests/fixtures/live7/editor.html`, and the id is written bare in the
+  `P A14`, `P A15` and `P K8` notes. No state, pin or population moved.
+  LANE CI run 45755268536, read by head sha: SUCCESS, all four shards green.
+  This is the certified registration head.
+- MEASURED on `091f7d3`: DELIVERED broad 160 / 706 achievable (22.7%),
+  strict 117 (16.6%); GAP 529; 774 rows published, 68 out of scope.
+- `origin/master` read 4c62196 at the fetch before the first push, and again
+  at 10:03 IST, after the green run.
+- NEXT: session 11's certified head (lane live-s11) merges onto this branch as
+  the fifth merge, every pin is re-derived on that tree, and `lane_ci` runs
+  once more. Only that head goes to master.
+- UNRESOLVED: section 8's open items.
