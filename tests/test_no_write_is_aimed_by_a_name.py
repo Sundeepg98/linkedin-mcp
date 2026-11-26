@@ -207,6 +207,12 @@ TARGET_KIND_CLASS: dict[str, tuple[str, str]] = {
         "profile_link_or_member_id",
         "send_invitation: /in/<segment>/ or an ACoAA id, compared in the page with each rail card's link",
     ),
+    # 2026-11-26, lane build-net2 (N 15, N 16, N 10): the three invitation
+    # answers. The parser is writes._target_for -> named_profile.profile_segment.
+    "invitation_profile": (
+        "profile_link_or_member_id",
+        "accept / ignore / withdraw an invitation: /in/<segment>/ or an ACoAA id, compared in the page with the manager row's own links",
+    ),
     # PAID 2026-09-27: ``member_and_text`` -- send_message's subject half, a
     # name typed into the recipient typeahead -- left the registry with that
     # action, which was retired rather than converted.
@@ -285,6 +291,10 @@ KNOWN_WRITE_TOOLS = frozenset(
         "linkedin_unset_similar_jobs_alert",
         "linkedin_set_search_job_alert",
         "linkedin_unset_search_job_alert",
+        # Lane build-net2, 2026-11-26: the three invitation answers.
+        "linkedin_accept_invitation_to_connect",
+        "linkedin_ignore_invitation_to_connect",
+        "linkedin_withdraw_invitation",
         "linkedin_publish_post",
         "linkedin_comment_on_item",
         "linkedin_react_to_item",

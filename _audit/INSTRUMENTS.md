@@ -12884,3 +12884,54 @@ The lane's scratch probes -- the keyed-shape word counter, the card mapper
 editors, the pin re-deriver -- and the exported base tree used for the
 red-first runs. Each answered one question once; the answers are in the
 record.
+
+## 109. A ROW IS AIMED BY ITS OWN LINKS, COMPARED IN THE PAGE, AND A PRESS THAT DRAWS WHAT NOBODY HAS SEEN IS ANSWERED WITH NOTHING (build-net2, 2026-11-26)
+
+Lane build-net2 built network writes behind the grant on live session 11's
+captures; the record is `_audit/2026-11-26-build-net2.md`. Numbered 109 on
+this lane's branch: renumber at the merge if another lane took it. Each entry
+below was shown failing first (the record's section on instruments has the
+runs).
+
+### 109.1 The invitation row aim and its verdicts
+
+`linkedin_server/invitation_acts.py` aims the control of ONE pending
+invitation on his invitation manager by the row's own member links: the
+control wearing LinkedIn's whole word whose nearest `role=listitem` is an
+invitation of its tab's measured shape, linking the member he named and no
+other -- XPath built from constants and a checked segment, evaluated by the
+browser, a COUNT back. `tests/test_invitation_acts.py` holds it over the real
+captures with synthetic members planted into the rows' own links, and is shown
+failing by the lane's mutations: the no-other-member predicate removed, any
+button count accepted, the `wants to connect` line not required, two rows of
+one member accepted, the tab strip not checked, any drop read as an answer,
+an unsafe segment let through, a dialog reported as nothing opened.
+
+    A ROW IS NAMED BY THE LINK HE GAVE, NOT BY ITS PLACE OR ITS NAME, AND
+    TWO ROWS OF ONE MEMBER ARE A REFUSAL, NOT A CHOICE.
+
+### 109.2 The press that is answered with nothing
+
+After each one press, `invitation_acts.read_after_press` counts what the
+press drew -- dialogs, their buttons by a closed list of LinkedIn's words,
+whether the address moved -- and decides nothing; a fresh render decides,
+`group_leave`'s one-row-fewer rule. A dialog is never answered: shown by the
+derived world whose Withdraw draws LinkedIn's documented pop-up, where the
+page's own counters read one press of the control and none in the dialog, and
+the row is still pending.
+
+    A STEP NOBODY HAS SEEN IS COUNTED, NEVER ANSWERED; ITS COUNT IS ITS CAPTURE.
+
+### 109.3 The entries
+
+| path | shown failing by |
+|---|---|
+| `linkedin_server/invitation_acts.py`, `tests/test_invitation_acts.py` | on the base tree `3c656df` the file fails at collection (no module `invitation_acts`); green 16 passed. Eight mutations, each weakening one check and restoring the file byte for byte: seven RED at once -- the no-other-member predicate, any button count, the `wants to connect` line, two rows of one member, any drop read as an answer, an unsafe segment, a dialog read as nothing -- and ONE GREEN, the tab strip's check: on the two captures the rows' shapes alone kept the tabs apart. A world was added (the received page with its strip's Sent link current, its rows still drawn) and the same mutation is RED |
+| `tests/shipped_drives.py` drives `invitation_acts:read_rows`, `read_state`, `read_after_press` | each premise broken in `FIXTURE_BREAKS` (LinkedIn's word in the fixture changed): the drive raises and the guard records it not driven, never clean |
+
+### 109.4 DECLARED DISPOSABLE
+
+The lane's scratch probes -- the keyed-shape word counter, the trigger-label
+shape probe, the id-shaped attribute census, the search-box shape census, the
+selector checker, the census cell editor, the mutation runner. Each answered
+one question once; the answers are in the record.

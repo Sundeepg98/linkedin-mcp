@@ -208,12 +208,9 @@ N 3	N	W	R2	SIBLING:N 1	INFERRED	RULING:D6-CAPABILITY-OVER-AFFORDANCE ; N 1
 N 5	N	W	R2	TARGET:a member he names to invite, with a note	NAMED	_audit/2026-09-24-lane-l5-messaging.md::| C-P3 | the invitation dialog ; RULING:OPERATOR-NAMES-THE-TARGET
 N 7	N	W	R3	TARGET:a Page and the connections he names to invite	INFERRED	RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS ; N 7
 N 8	N	W	R3	TARGET:a Page and the connections he names to invite	INFERRED	RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS ; N 7
-N 10	N	W	R3	BUILD:tests/fixtures/synthetic/live11_invitations_sent_words.html	MEASURED	tests/fixtures/live11/invitations_sent.html ; RULING:J-19-BUILT-BEHIND-THE-GRANT
 N 11	N	R	-	PRECONDITION:a Page-follow invitation he has sent, pending (the Sent tab draws only its CONNECTION category)	MEASURED	tests/fixtures/live11/invitations_sent.html ; RULING:MEASURED-ABSENT-OR-PRECONDITION
 N 12	N	W	R3	PRECONDITION:a Page-follow invitation he has sent, pending (the Sent tab draws only its CONNECTION category)	MEASURED	tests/fixtures/live11/invitations_sent.html ; RULING:MEASURED-ABSENT-OR-PRECONDITION
 N 14	N	R	-	CAPTURE:admit-mynetwork-invitation-manager	MEASURED	tests/fixtures/live11/invitations.html ; RULING:READ-PAST-AN-ACT-SUBSTRING
-N 15	N	W	R2	BUILD:tests/fixtures/synthetic/live11_invitations_words.html	MEASURED	tests/fixtures/live11/invitations.html ; RULING:PEOPLE-DATA-MITIGATIONS
-N 16	N	W	R3	BUILD:tests/fixtures/synthetic/live11_invitations_words.html	MEASURED	tests/fixtures/live11/invitations.html ; RULING:PEOPLE-DATA-MITIGATIONS
 N 17	N	W	R3	SIBLING:N 16	INFERRED	tests/fixtures/live11/invitations.html ; N 16
 N 18	N	W	R2	SIBLING:N 19	INFERRED	tests/fixtures/live11/invitations.html ; N 19
 N 19	N	R	-	PRECONDITION:an invitation carrying a personal note, pending in his received list	INFERRED	tests/fixtures/live11/invitations.html ; RULING:MEASURED-ABSENT-OR-PRECONDITION

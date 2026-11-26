@@ -2101,6 +2101,68 @@ async def read_edit_routes_as_shipped(page: Any) -> Any:
     )
 
 
+# ---------------------------------------------------------------------------
+# invitation_acts -- the invitation answers' readers (N 15, N 16, N 10)
+# ---------------------------------------------------------------------------
+
+#: The segment the harness's grants carry: ``tests/refusinggrant.py``'s own
+#: ``invitation_profile`` link, a declared synthetic slug.
+_INVITATION_SEGMENT = "example-harness-person"
+
+
+async def invitation_rows_as_shipped(page: Any) -> Any:
+    """``invitation_acts.read_rows`` as the accept's preview calls it -- the
+    page, the action, and the segment of the profile link the grant carries --
+    on the received tab ``tests/fixtures/synthetic/live11_invitations_words.html``
+    draws (live session 11, load 14, LinkedIn's words put back by keyed shape).
+
+    THE FIXTURE draws each invitation's ``Ignore`` / ``Accept`` pair and
+    LinkedIn's ``wants to connect`` line -- checked here at every drive.
+    ``tests/test_invitation_acts.py`` reads the same page in an engine. THE
+    PLANTED PAGE answers every count 1, so what comes back is counts the page
+    made, and no text at all: clean.
+    """
+    from linkedin_server import invitation_acts
+
+    _drawn(
+        "synthetic/live11_invitations_words.html",
+        ">\nAccept\n<", ">\nIgnore\n<", ">\nwants to connect\n<",
+    )
+    return await invitation_acts.read_rows(page, invitation_acts.ACCEPT, _INVITATION_SEGMENT)
+
+
+async def invitation_state_as_shipped(page: Any) -> Any:
+    """``invitation_acts.read_state`` as the ignore's click-time gate calls it,
+    on the same received tab, the fixture checked the same way: the verdict
+    over the page's counts -- facts, a state and a why built from counts. No
+    text of the page is in any of them: clean.
+    """
+    from linkedin_server import invitation_acts
+
+    _drawn(
+        "synthetic/live11_invitations_words.html",
+        ">\nAccept\n<", ">\nIgnore\n<", ">\nwants to connect\n<",
+    )
+    return await invitation_acts.read_state(page, invitation_acts.IGNORE, _INVITATION_SEGMENT)
+
+
+async def invitation_after_press_as_shipped(page: Any) -> Any:
+    """``invitation_acts.read_after_press`` as ``writes.perform`` calls it after
+    the withdraw's one press -- the page, the action, the grant's segment and
+    the address taken before the press -- on the Sent tab
+    ``tests/fixtures/synthetic/live11_invitations_sent_words.html`` draws
+    (session 11, load 15). THE FIXTURE draws each row's ``Withdraw`` link,
+    checked here; the planted page's counts are the page's: clean.
+    """
+    from linkedin_server import invitation_acts
+
+    _drawn("synthetic/live11_invitations_sent_words.html", ">\nWithdraw\n<")
+    return await invitation_acts.read_after_press(
+        page, invitation_acts.WITHDRAW, _INVITATION_SEGMENT,
+        address_before=invitation_acts.SENT_URL,
+    )
+
+
 DRIVES: dict[str, Callable[..., Any]] = {
     "dom:read_company_home": read_company_home_as_shipped,
     "dom:read_any_save_control_label": read_any_save_control_label_as_shipped,
@@ -2156,6 +2218,12 @@ DRIVES: dict[str, Callable[..., Any]] = {
     # result cards over live session 11's skeleton; its success path is post
     # records whose author is a person record.
     "content_search:read_content_results": read_content_results_as_shipped,
+    # 2026-11-26 (lane build-net2, census N 15, N 16, N 10): the invitation
+    # answers' row reader and after-press reader, over session 11's two
+    # tabs; counts only, so their success path is clean.
+    "invitation_acts:read_rows": invitation_rows_as_shipped,
+    "invitation_acts:read_state": invitation_state_as_shipped,
+    "invitation_acts:read_after_press": invitation_after_press_as_shipped,
 }
 
 #: As far as a press. Run by the guard, so the reads before the press are

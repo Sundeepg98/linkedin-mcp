@@ -77,6 +77,13 @@ PINNED_STRICT_PRESS_ACTIONS = frozenset(
         "follow_company_page",
         "update_profile_field",
         "withdraw_from_group",
+        # FIFTEEN since lane build-net2 (2026-11-26, census N 15, N 16, N 10):
+        # the three invitation answers, each pressed on the ONE control in the
+        # ONE row its gate counted (invitation_acts.control_selector), shown in
+        # tests/test_invitation_acts.py.
+        "accept_invitation_to_connect",
+        "ignore_invitation_to_connect",
+        "withdraw_invitation",
         "follow_company",
         # 2026-10-10, lane S: the generic settings writer's press is aimed by
         # the control's exact name, which its gate required drawn once.
@@ -102,6 +109,9 @@ CLAIMS: dict[tuple[str, str], str] = {
     ("writes.py", "strict mode refuses a click whose selector matches more -- so"): "follow_company",
     ("writes.py", "strict mode holds to the one toggle"): "set_similar_jobs_alert",
     ("writes.py", "strict mode holds to the one switch"): "set_search_job_alert",
+    # Lane build-net2, 2026-11-26: the invitation answers' set entry and arm.
+    ("writes.py", "strict mode holds the press to that row's control"): "accept_invitation_to_connect",
+    ("writes.py", "strict mode refuses the press if that stops being true"): "withdraw_invitation",
 }
 
 _CLAIM = re.compile(r"strict mode (?:holds|refuses)", re.IGNORECASE)

@@ -217,6 +217,7 @@ from linkedin_server import (
     endorse_skill,
     field_restore,
     group_leave,
+    invitation_acts,
     item_author,
     job_alert_switch,
     landing,
@@ -1168,6 +1169,209 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "a name-free reader of that control exists, open the group's own "
             "page yourself before confirming: an open group can be rejoined by "
             "joining; one that requires approval cannot be without a manager."
+        ),
+    ),
+    # LANE BUILD-NET2, 2026-11-26: ONE PENDING INVITATION HE NAMES, ANSWERED ON
+    # HIS OWN INVITATION MANAGER -- accept it (census ``N 15``), ignore it
+    # (``N 16``), or withdraw one he sent (``N 10``). The selectors, readings
+    # and verdicts live in ``invitation_acts``; these three entries and the
+    # arms below delegate, as ``withdraw_from_group`` delegates to
+    # ``group_leave``. Each address is one of the two CONSTANTS
+    # ``invitation_manager`` admits (lane A, READ-PAST-AN-ACT-SUBSTRING), whose
+    # one forbidden substring, ``invitation``, is the one each excuses -- by
+    # equality, at the write door. The member is the caller's PROFILE LINK,
+    # compared in the page against the row's own member links and never a
+    # name (PEOPLE-DATA-MITIGATIONS item 6); the page may only refuse it.
+    # MEASURED on live session 11's two tabs (loads 14 and 15), with
+    # LinkedIn's words put back by keyed shape. What each press DRAWS is in no
+    # capture: a dialog is counted and never answered, and a fresh render of
+    # the same tab decides.
+    "linkedin_accept_invitation_to_connect": WriteSpec(
+        action="accept_invitation_to_connect",
+        tool_name="linkedin_accept_invitation_to_connect",
+        url_template=invitation_acts.RECEIVED_URL,
+        url_pattern=re.compile(r"^https://www\.linkedin\.com/mynetwork/invitation-manager/$"),
+        exempt_substring="invitation",
+        summary=(
+            "Accept one pending invitation to connect, from the member you name "
+            "by profile link, on your invitation manager."
+        ),
+        from_state=invitation_acts.PENDING,
+        to_state=invitation_acts.NOT_PENDING,
+        target_kind="invitation_profile",
+        state_from="invitation_manager",
+        direction_source=(
+            "your invitation manager's received tab, /mynetwork/invitation-manager/ "
+            "-- the page this action presses on, at one page load. MEASURED on "
+            "live session 11 (load 14): each pending invitation is a list item "
+            "holding exactly two buttons whose whole words are 'Ignore' and "
+            "'Accept', and a member's holds one line ending with LinkedIn's "
+            "'wants to connect', the member's link inside it. The gate requires "
+            "exactly ONE such row whose member links all name the profile you "
+            "linked, compared in the page and returned as a count; no name, "
+            "label or link crosses into this server."
+        ),
+        wrong_state_note=(
+            "Not a toggle. No row carrying the member you linked means the "
+            "invitation is answered already, sits below the first render (all "
+            "this reads), was sent as something other than an invitation to "
+            "connect, or the link names somebody else -- so nothing is pressed."
+        ),
+        reversibility="STILL-UNKNOWN whether an accepted connection is removed cleanly",
+        reversibility_measured=False,
+        reversibility_class="STILL-UNKNOWN",
+        reversibility_evidence=(
+            "NOT MEASURED. The census reads the act REV in part -- a connection "
+            "can be removed afterwards -- but nobody has accepted an invitation "
+            "through this server or removed a connection through it, and the "
+            "inviter is told of an acceptance either way."
+        ),
+        reversible_by=(
+            "NOT through this server: removing a connection (census N 29, under "
+            "RELATION-REMOVALS-BUILT-BEHIND-GRANTS) waits on its own capture of "
+            "the connections list's row menu. By hand he can remove the "
+            "connection in LinkedIn's own interface; the acceptance the inviter "
+            "was told of is not recalled."
+        ),
+        residue=(
+            "WHAT PRESSING 'Accept' DRAWS IS UNMEASURED: LinkedIn may accept at "
+            "once, or draw a further step. This server presses nothing past the "
+            "Accept -- a dialog left open is counted, reported and discarded by "
+            "the fresh render that decides. AN ACCEPT IS AN ACT TOWARD A REAL "
+            "PERSON: the inviter is told, and the two of you become first-degree "
+            "connections. Loading the received tab clears its pending-invitation "
+            "badge, the read's own cost (RECEIVED-BADGE-IS-THE-READS-COST), and "
+            "the act loads it twice more (the press, the fresh render)."
+        ),
+        irreversible=True,
+        reversibility_procedure=(
+            "One supervised accept of an invitation HE NAMES by the inviter's "
+            "profile link: the receipt's after-press reading records what the "
+            "press drew, the fresh render reads the row gone, and "
+            "linkedin_connections re-read shows the inviter among his "
+            "connections (the write-class census's proof for N 15)."
+        ),
+    ),
+    "linkedin_ignore_invitation_to_connect": WriteSpec(
+        action="ignore_invitation_to_connect",
+        tool_name="linkedin_ignore_invitation_to_connect",
+        url_template=invitation_acts.RECEIVED_URL,
+        url_pattern=re.compile(r"^https://www\.linkedin\.com/mynetwork/invitation-manager/$"),
+        exempt_substring="invitation",
+        summary=(
+            "Ignore one pending invitation to connect, from the member you name "
+            "by profile link, on your invitation manager."
+        ),
+        from_state=invitation_acts.PENDING,
+        to_state=invitation_acts.NOT_PENDING,
+        target_kind="invitation_profile",
+        state_from="invitation_manager",
+        direction_source=(
+            "the same received tab and the same row as "
+            "linkedin_accept_invitation_to_connect, read the same way: exactly "
+            "ONE invitation row whose member links all name the profile you "
+            "linked, its 'Ignore' button drawn once. MEASURED on live session "
+            "11 (load 14)."
+        ),
+        wrong_state_note=(
+            "Not a toggle. No row carrying the member you linked means the "
+            "invitation is answered already, sits below the first render, or the "
+            "link names somebody else -- so nothing is pressed."
+        ),
+        reversibility="STILL-UNKNOWN: LinkedIn draws no inverse of an ignore on any capture",
+        reversibility_measured=False,
+        reversibility_class="STILL-UNKNOWN",
+        reversibility_evidence=(
+            "NOT MEASURED. No capture holds the page after an Ignore, and no "
+            "surface this server reads lists ignored invitations."
+        ),
+        reversible_by=(
+            "NOBODY known: no undo of an ignore is drawn anywhere this server "
+            "has read. The member may invite him again; this server never asks "
+            "them to."
+        ),
+        residue=(
+            "WHAT PRESSING 'Ignore' DRAWS IS UNMEASURED -- whether it offers the "
+            "report census row N 17 names, a confirmation, or nothing. This "
+            "server presses nothing past the Ignore: a dialog left open is "
+            "counted, reported and discarded by the fresh render that decides. "
+            "Whether the member can tell is unmeasured. The received tab's "
+            "pending badge is cleared by the load (RECEIVED-BADGE-IS-THE-READS-COST)."
+        ),
+        irreversible=True,
+        reversibility_procedure=(
+            "One supervised ignore of an invitation HE NAMES: the after-press "
+            "reading records what the press drew (and whether a report step "
+            "opened, for N 17), and the fresh render reads the row gone."
+        ),
+    ),
+    "linkedin_withdraw_invitation": WriteSpec(
+        action="withdraw_invitation",
+        tool_name="linkedin_withdraw_invitation",
+        url_template=invitation_acts.SENT_URL,
+        url_pattern=re.compile(
+            r"^https://www\.linkedin\.com/mynetwork/invitation-manager/sent/$"
+        ),
+        exempt_substring="invitation",
+        summary=(
+            "Withdraw one pending invitation you sent, to the member you name by "
+            "profile link, from your invitation manager's Sent tab."
+        ),
+        from_state=invitation_acts.PENDING,
+        to_state=invitation_acts.NOT_PENDING,
+        target_kind="invitation_profile",
+        state_from="invitation_manager",
+        direction_source=(
+            "your invitation manager's Sent tab, "
+            "/mynetwork/invitation-manager/sent/ -- the page this action presses "
+            "on, at one page load. MEASURED on live session 11 (load 15): each "
+            "pending invitation is a list item holding exactly one link whose "
+            "whole word is 'Withdraw' beside the member's link. The gate requires "
+            "exactly ONE such row whose member links all name the profile you "
+            "linked, compared in the page."
+        ),
+        wrong_state_note=(
+            "Not a toggle. No row carrying the member you linked means the "
+            "invitation was answered or withdrawn already, sits below the first "
+            "render, or the link names somebody else -- so nothing is pressed."
+        ),
+        reversibility=(
+            "STILL-UNKNOWN here; by LinkedIn's own account a new invitation to "
+            "the same member is refused for up to three weeks"
+        ),
+        reversibility_measured=False,
+        reversibility_class="STILL-UNKNOWN",
+        reversibility_evidence=(
+            "NOT MEASURED here. LinkedIn's Help Center (a568295, quoted in "
+            "_audit/_census/network.md s8.5): 'You won't be able to send a new "
+            "invitation to the same member for up to three weeks.'"
+        ),
+        reversible_by=(
+            "NOBODY: a withdrawn invitation is re-sent only as a new invitation, "
+            "which LinkedIn refuses for up to three weeks (Help Center a568295); "
+            "outward_classes' withdraw_invitation record."
+        ),
+        residue=(
+            "THE FIRST PRESS IS EXPECTED TO STOP AT A CONFIRMATION. LinkedIn "
+            "documents one (a568295: Withdraw, then Withdraw again in a pop-up); "
+            "no capture holds it, and this server presses NOTHING in any dialog "
+            "(J-19-BUILT-BEHIND-THE-GRANT: refusing until its confirm dialog is "
+            "captured). The after-press reading counts the pop-up's buttons by a "
+            "closed list of words and the fresh render decides -- so a first "
+            "supervised withdraw is expected to find the invitation still "
+            "pending, and its receipt is the pop-up's capture. If no pop-up is "
+            "drawn, the one "
+            "press withdraws: the act he ordered. The Withdraw control is a LINK "
+            "whose address is the site root; a press that navigates is recorded "
+            "as the address having moved. The Sent tab load's effect on the "
+            "pending-invitation badge is unmeasured for this write."
+        ),
+        irreversible=True,
+        reversibility_procedure=(
+            "One supervised withdraw of an invitation HE NAMES for withdrawal: the "
+            "after-press reading is the confirmation's capture, and the confirm "
+            "press is built on it in a later change. Nothing past the Withdraw "
+            "link is pressed before then."
         ),
     ),
     "linkedin_set_open_to_work": WriteSpec(
@@ -4410,6 +4614,14 @@ def _target_for(spec: WriteSpec, target: Any) -> str:
                 "is not repeated here either."
             )
         return digits
+    if spec.target_kind == "invitation_profile":
+        # THE MEMBER ON THE OTHER END OF ONE PENDING INVITATION (lane
+        # build-net2, 2026-11-26: N 15, N 16, N 10), canonical as the profile
+        # LINK -- the named-profile parser, a link or a member id, never a name,
+        # refused before a token exists -- exactly as ``rail_profile`` is. NOT a
+        # named-profile kind: nothing loads it. The invitation manager's rows
+        # are compared against its segment, in the page.
+        return _canonical_profile(raw)
     if spec.target_kind == "job_search":
         # ONE JOB SEARCH, AS THE QUERY ITS OWN KEYWORDS AND LOCATION COMPOSE
         # (2026-11-25, lane build-jmn26, J 31) -- ``search_alert_switch``'s one
@@ -4590,6 +4802,12 @@ STRICT_PRESS_ACTIONS: frozenset[str] = NAMED_PROFILE_ACTIONS | frozenset(
         "follow_company_page",
         "update_profile_field",
         "withdraw_from_group",
+        # 2026-11-26 (lane build-net2, N 15, N 16, N 10): the one control in the
+        # one invitation row the member's link names, counted by the gate as
+        # exactly one; strict mode holds the press to that row's control.
+        "accept_invitation_to_connect",
+        "ignore_invitation_to_connect",
+        "withdraw_invitation",
         "follow_company",
         "send_invitation",
         # Lane S, 2026-10-10: the generic settings writer's press is aimed by
@@ -6221,6 +6439,33 @@ async def observe(
             same_page_as_action=True,
         )
 
+    if spec.state_from == "invitation_manager":
+        # ONE load, of the tab the press lands on, and the url is the spec's
+        # CONSTANT -- the member never enters a navigation (lane build-net2,
+        # 2026-11-26: N 15, N 16, N 10). The reading is COUNTS ONLY, off
+        # selectors built from constants and the segment of the link he gave
+        # (``invitation_acts.read_rows``); no name is read. A landing off the
+        # tab reads ``unknown`` and the landing is not recorded: what was
+        # asked for is.
+        url = str(spec.url_template or "")
+        landed = await _load(navigator, page, url, surface="invitation manager")
+        facts, state, why = await invitation_acts.read_state(
+            page,
+            spec.action,
+            named_profile.profile_segment(target),
+            landed_elsewhere=not invitation_acts.landed_on_tab(spec.action, landed),
+        )
+        return _record(
+            spec,
+            target=target,
+            facts=facts,
+            facts_url=url,
+            state=state,
+            state_why=why,
+            state_url=url,
+            same_page_as_action=True,
+        )
+
     if spec.state_from == settings_writer.STATE_FROM:
         # ONE load, of the admitted page the click lands on (lane S,
         # 2026-10-10). The address is the registry's CONSTANT for the page's
@@ -6915,6 +7160,14 @@ def _render(
             "that id. Check the id against linkedin_group_memberships before "
             "confirming."
         )
+    elif spec.target_kind == "invitation_profile":
+        # THE LINK YOU GAVE AND THE COUNTS THE TAB GAVE -- AND NO NAME (lane
+        # build-net2, 2026-11-26). The row's member is identified by his own
+        # argument, compared in the page; the name the row draws is never read,
+        # so what he checks is the link against the readers that list the tab.
+        where["profile"] = observation.target
+        where["what_the_page_showed"] = observation.facts
+        where["the_invitation"] = invitation_acts.describe_target(spec.action)
     else:
         # THE REST -- TEN target kinds, counted 2026-09-27. This line said
         # "THE SEVEN", which was true until lane L5's thread_and_text made it
@@ -7409,6 +7662,33 @@ PERFORMABLE: frozenset[str] = frozenset(
         # one opens, is counted and never answered, and the fresh render
         # decides. ENABLING IS NOT FIRING: its live proof is aimed by him.
         "withdraw_from_group",
+        # THREE ANSWERS TO ONE PENDING INVITATION HE NAMES, 2026-11-26 (lane
+        # build-net2, census rows N 15, N 16 and N 10), each fired only at an
+        # invitation he names by the member's profile link:
+        #
+        #   a measured surface   the two tabs of his invitation manager, each
+        #                        an exact address the read boundary admits
+        #                        (lane A), loaded live in session 11
+        #   a measured anchor    the row's 'Accept' / 'Ignore' button or its
+        #                        'Withdraw' link, LinkedIn's whole words,
+        #                        verified by keyed shape on that capture
+        #   an aimable target    the ONE row whose member links all name the
+        #                        profile he linked -- compared in the page, a
+        #                        count -- and its one control, strict at the press
+        #   a real verification  a fresh render of the same tab: the row gone
+        #                        and exactly one invitation row fewer
+        #   no new permission    ONE press through perform()'s one click site;
+        #                        readonly.SANCTIONED_MUTATIONS is unchanged
+        #
+        # WHAT THEY CANNOT SAY is what each press draws: a dialog is counted by
+        # closed words and never answered, and the fresh render decides. The
+        # withdraw's confirmation is DOCUMENTED (Help Center a568295), so its
+        # first supervised press is expected to stop there, withdrawing
+        # nothing, and that receipt is the capture its confirm press waits on
+        # (J-19-BUILT-BEHIND-THE-GRANT). ENABLING IS NOT FIRING.
+        "accept_invitation_to_connect",
+        "ignore_invitation_to_connect",
+        "withdraw_invitation",
         # THE THIRTEENTH, 2026-09-23, census row ``N 47``, and the first write
         # added under the operator's reversible-first-round class since the
         # round's own three. Every clause the others needed is true of it:
@@ -8170,6 +8450,13 @@ def anchor_label_for(
         # it is aimed STRUCTURALLY -- by the row carrying the numeric id --
         # never by its label, which carries the group's name.
         return group_leave.LEAVE_LABEL
+    if spec.action in invitation_acts.ACTIONS:
+        # THE CONTROL'S WHOLE VISIBLE WORD, exact -- 'Accept', 'Ignore' or
+        # 'Withdraw' -- verified by keyed shape on live session 11's two tabs
+        # (lane build-net2, 2026-11-26). The control is aimed STRUCTURALLY, by
+        # the row whose member links name the profile he gave; its aria-label
+        # carries the member's name and is never read.
+        return invitation_acts.CONTROL[spec.action][1]
     if spec.action == "follow_company_page":
         # A PREFIX, like the unfollow's, and for the same reason: LinkedIn
         # writes the Page's own name into the label, which makes it a strong
@@ -8548,6 +8835,10 @@ _WRITE_SURFACE_FOR_ACTION: dict[str, str] = {
     # A group id is a kind no other action uses; named per action anyway, so
     # the auth-wall message names the page the click was going to land on.
     "withdraw_from_group": "groups",
+    # 2026-11-26 (lane build-net2): the tab each press lands on.
+    "accept_invitation_to_connect": "your invitation manager's received tab",
+    "ignore_invitation_to_connect": "your invitation manager's received tab",
+    "withdraw_invitation": "your invitation manager's Sent tab",
     # 2026-09-27: addressed by a person's link, acting on HIS OWN profile's
     # suggestion rail -- the page the press lands on, not the linked one.
     "send_invitation": "your own profile's suggestion rail",
@@ -8616,6 +8907,11 @@ _WHERE_TO_LOOK: dict[str, str] = {
     # The page the leave is pressed on and verified off: his memberships are
     # listed there and nowhere else this server may read.
     "withdraw_from_group": "your LinkedIn Groups page",
+    # 2026-11-26 (lane build-net2): the tab each press is made on and
+    # verified off; an accepted inviter also shows in his connections list.
+    "accept_invitation_to_connect": "your invitation manager's received tab, and your connections list",
+    "ignore_invitation_to_connect": "your invitation manager's received tab",
+    "withdraw_invitation": "your invitation manager's Sent tab",
     # Lane S, 2026-10-10: the one page that renders the value is the page that
     # sets it, under Settings and Privacy, named in the preview.
     "set_admitted_setting": "that page under Settings and Privacy, named in the preview",
@@ -8836,6 +9132,18 @@ _VERIFIED_FROM["withdraw_from_group"] = (
     "there; any other count -- a page still drawing, a list that changed in "
     "between, or no row at all -- answers unknown."
 )
+# 2026-11-26 (lane build-net2): the three invitation answers, one sentence.
+_VERIFIED_FROM["accept_invitation_to_connect"] = (
+    "THE SAME TAB OF HIS INVITATION MANAGER, RE-RENDERED by a fresh navigation, "
+    "which also discards any dialog the press left open and this server did "
+    "not answer. A new render from LinkedIn rather than an independent "
+    "witness. Its NEGATIVE is strong -- the member's row still drawn means the "
+    "press did not answer the invitation. Its positive needs the tab to draw "
+    "EXACTLY ONE invitation row fewer than the preview counted and none "
+    "carrying the member; any other count answers unknown."
+)
+_VERIFIED_FROM["ignore_invitation_to_connect"] = _VERIFIED_FROM["accept_invitation_to_connect"]
+_VERIFIED_FROM["withdraw_invitation"] = _VERIFIED_FROM["accept_invitation_to_connect"]
 _VERIFIED_FROM["follow_company_page"] = (
     "a DIFFERENT surface from the one clicked: Manage Pages, where a followed "
     "Page is a row keyed by the same numeric id this action was granted on. "
@@ -9029,6 +9337,20 @@ def _assert_landed_on_target(
                 "that conversation. A reply box on any other page would reach "
                 "somebody else. THE LANDING IS WITHHELD rather than named; "
                 f"what is safe to say about it -- {landing.withheld(landed)}."
+            )
+        return
+    if spec.state_from == "invitation_manager":
+        # THE TAB THIS ACT ANSWERS ON (lane build-net2, 2026-11-26), on the
+        # path alone, as ``invitation_manager`` reads a landing: the received
+        # tab's admitted address, or the Sent tab's. LinkedIn's own strip
+        # links the received tab as ``.../received``, which the boundary does
+        # not admit, so a landing there VETOES the press.
+        if not invitation_acts.landed_on_tab(spec.action, landed):
+            raise WriteAttemptError(
+                "refusing to click: this act answers an invitation on your "
+                "invitation manager's own tab, and the browser landed somewhere "
+                "that is not that tab. THE LANDING IS WITHHELD rather than "
+                f"named; what is safe to say about it -- {landing.withheld(landed)}."
             )
         return
     # THE SUBJECT HALF, through the same derivation every other site uses --
@@ -9447,6 +9769,21 @@ async def _live_control(
         if state != group_leave.MEMBER:
             return (state, why, "")
         return (state, why, group_leave.disclosure_selector(grant.target))
+
+    if spec.action in invitation_acts.ACTIONS:
+        # THE SAME READING AND THE SAME VERDICT THE PREVIEW TOOK, on the tab
+        # the press is about to land on: freshness, not a second source (lane
+        # build-net2, 2026-11-26). The selector is the one control in the one
+        # row the member's link names, built from constants and the grant's
+        # own segment, which the verdict has just required to match exactly
+        # one element; strict mode refuses the press if that stops being true
+        # (STRICT_PRESS_ACTIONS). It is the ONLY press: nothing is appended
+        # after it, so nothing in any dialog it draws is ever pressed.
+        segment = named_profile.profile_segment(grant.target)
+        _facts, state, why = await invitation_acts.read_state(page, spec.action, segment)
+        if state != invitation_acts.PENDING:
+            return (state, why, "")
+        return (state, why, invitation_acts.control_selector(spec.action, segment))
 
     if spec.action == "update_profile_field":
         # THE ONE SWITCH IN THIS FAMILY, P B9 (2026-09-24): the Premium
@@ -10788,6 +11125,37 @@ async def _verify_after(
             + " Read off a FRESH render of the Groups page, after the press "
             "and by a new navigation, so a menu or dialog the press left open "
             "is not what was read.",
+            url,
+        )
+
+    if spec.action in (
+        "accept_invitation_to_connect",
+        "ignore_invitation_to_connect",
+        "withdraw_invitation",
+    ):
+        # A FRESH RENDER OF THE SAME TAB (lane build-net2, 2026-11-26), and the
+        # navigation is also what discards a dialog the press left open -- the
+        # one this server counted after the press and did not answer. Three
+        # answers, all real: ``invitation_pending`` (the member's row still
+        # drawn: NOT answered), ``invitation_not_pending`` (no row carries the
+        # member AND the tab drew exactly one invitation row fewer than the
+        # preview counted), ``unknown`` (anything else). The count half is
+        # ``invitation_acts.verification_verdict``, group_leave's rule.
+        url = str(spec.url_template)
+        landed = await _load(navigator, page, url, surface="invitation manager")
+        _facts, state, why = invitation_acts.verification_verdict(
+            observation.facts,
+            await invitation_acts.read_rows(
+                page, spec.action, named_profile.profile_segment(grant.target)
+            ),
+            spec.action,
+            landed_elsewhere=not invitation_acts.landed_on_tab(spec.action, landed),
+        )
+        return (
+            state,
+            why
+            + " Read off a FRESH render of the tab, after the press and by a new "
+            "navigation, so a dialog the press left open is not what was read.",
             url,
         )
 
@@ -12174,6 +12542,10 @@ async def perform(
     # disclosure press, and what the item press left behind. See group_leave.
     menu_gate: Optional[dict[str, Any]] = None
     menu_after_press: Optional[dict[str, Any]] = None
+    # WHAT AN INVITATION ANSWER'S ONE PRESS DREW (lane build-net2, 2026-11-26),
+    # for ``invitation_acts.ACTIONS`` only: counts and closed words, read
+    # before anything navigates. See ``invitation_acts.read_after_press``.
+    invitation_after_press: Optional[dict[str, Any]] = None
     # THE UNFOLLOW'S CONFIRMATION GATE (2026-10-10), read after its press: what
     # the press drew, and whether the confirm control may be pressed.
     unfollow_confirm_gate: Optional[dict[str, Any]] = None
@@ -12229,7 +12601,10 @@ async def perform(
     # after the landing was held to the named profile and before any click,
     # and it is never navigated to.
     address_before_press: Optional[str] = None
-    if spec.action in OPEN_THEN_TYPE_ACTIONS:
+    # AND FOR AN INVITATION ANSWER (lane build-net2, 2026-11-26): the Withdraw
+    # control is a LINK whose address is the site root, so the after-press
+    # reading says, in a condition, whether a press moved the address.
+    if spec.action in OPEN_THEN_TYPE_ACTIONS or spec.action in invitation_acts.ACTIONS:
         try:
             address_before_press = str(page.url)
         except Exception:  # noqa: BLE001 - absent means "cannot tell": refuses
@@ -12751,6 +13126,22 @@ async def perform(
                     # taken. The verification's fresh render decides.
                     menu_after_press = group_leave.after_press_note(
                         await group_leave.read_after_press(page, grant.target)
+                    )
+                elif spec.action in invitation_acts.ACTIONS and clicks_made == 1:
+                    # THE ONE PRESS WAS MADE (lane build-net2, 2026-11-26).
+                    # Read what it drew BEFORE anything navigates -- counts and
+                    # closed words, and it presses nothing: a dialog here is a
+                    # further step that opened and is NOT taken (for the
+                    # withdraw, LinkedIn's documented confirmation, whose
+                    # reading this is). The verification's fresh render decides.
+                    invitation_after_press = invitation_acts.after_press_note(
+                        await invitation_acts.read_after_press(
+                            page,
+                            spec.action,
+                            named_profile.profile_segment(grant.target),
+                            address_before=address_before_press,
+                        ),
+                        spec.action,
                     )
                 elif spec.action == "unfollow_company" and clicks_made == 1:
                     # THE UNFOLLOW WAS PRESSED, AND THAT PROVED NOTHING LIVE
@@ -13539,6 +13930,12 @@ async def perform(
                 "after_the_item_press": menu_after_press,
             }
         ),
+        # WHAT AN INVITATION ANSWER'S ONE PRESS DREW (lane build-net2,
+        # 2026-11-26), for ``invitation_acts.ACTIONS``; null for every other
+        # action, and null when the press was never made. Counts, closed words
+        # and one sentence -- no name. For the withdraw, its first supervised
+        # use makes this block the capture of LinkedIn's confirmation.
+        "invitation_after_press": invitation_after_press,
         # WHAT THE UNFOLLOW'S PRESS DREW (2026-10-10), for that action only:
         # counts, closed words and shaped names, never a Page's name. Null for
         # every other action.

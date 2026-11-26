@@ -486,4 +486,6 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # NINETY-ONE AT INTEGRATION 4'S MERGE OF LANE READERS-MSG26 (2026-11-26):
     # linkedin_search_content, one read, beside the ninety (its branch read
     # eighty-four), measured off the merged registry, not summed.
-    assert len(_tool_names()) == 91
+    # NINETY-FOUR ON LANE BUILD-NET2 (2026-11-26): the three invitation
+    # answers, three writes, measured off this branch's registry.
+    assert len(_tool_names()) == 94

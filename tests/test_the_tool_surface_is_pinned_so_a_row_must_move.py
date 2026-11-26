@@ -215,6 +215,10 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_who_viewed_me": ("limit", "open_filter_menus", "show_more_analytics", "view_switch"),
     "linkedin_own_item_link": ("activity_id", "include_link"),
     "linkedin_withdraw_from_group": ("confirm_token", "group_id"),
+    # Lane build-net2, 2026-11-26: the three invitation answers.
+    "linkedin_accept_invitation_to_connect": ("confirm_token", "profile"),
+    "linkedin_ignore_invitation_to_connect": ("confirm_token", "profile"),
+    "linkedin_withdraw_invitation": ("confirm_token", "profile"),
 }
 
 #: 44 tools and 61 parameters at the pin. Asserted rather than assumed, so a
@@ -772,8 +776,16 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: summed (the lane's branch read 84 and 135). THE CENSUS DECISION, IN THE
 #: LANE'S OWN COMMIT: `M C93` GAP -> COVERED-UNFIRED on it, never fired. See
 #: `_audit/2026-11-26-readers-msg26.md`.
-PINNED_TOOL_COUNT = 91
-PINNED_PARAMETER_COUNT = 137
+#: **94 TOOLS AND 143 PARAMETERS ON LANE BUILD-NET2 (2026-11-26)** --
+#: `linkedin_accept_invitation_to_connect(profile, confirm_token)`,
+#: `linkedin_ignore_invitation_to_connect(profile, confirm_token)` and
+#: `linkedin_withdraw_invitation(profile, confirm_token)`, three WRITES of two
+#: parameters each, beside the ninety-one and 137, counted off this branch's
+#: registry. THE CENSUS DECISION, IN THE SAME COMMIT: `N 15`, `N 16` and `N 10`
+#: GAP -> COVERED-UNFIRED on them, never fired. See
+#: `_audit/2026-11-26-build-net2.md`.
+PINNED_TOOL_COUNT = 94
+PINNED_PARAMETER_COUNT = 143
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:

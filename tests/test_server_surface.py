@@ -1,4 +1,12 @@
-"""The tool surface: ninety-one tools, sixty-four of which do not write.
+"""The tool surface: ninety-four tools, sixty-four of which do not write.
+
+**IT READ "ninety-one tools, sixty-four of which do not write" UNTIL LANE
+BUILD-NET2 (2026-11-26) ADDED THREE WRITES**:
+``linkedin_accept_invitation_to_connect``,
+``linkedin_ignore_invitation_to_connect`` and ``linkedin_withdraw_invitation``
+(census N 15, N 16, N 10), one pending invitation he names answered on his own
+invitation manager, so the non-write count holds at sixty-four. Measured off
+this branch's registry, not summed.
 
 **IT READ "ninety tools, sixty-three of which do not write" UNTIL INTEGRATION
 4'S MERGE OF LANE READERS-MSG26 (2026-11-26)**: one READ,
@@ -269,6 +277,13 @@ SANCTIONED_WRITE_TOOLS = frozenset(SANCTIONED_WRITES) & {
     # 2026-11-24 (lane builds-26): the endorsement pair, refusing.
     "linkedin_endorse_skill",
     "linkedin_withdraw_endorsement",
+    # 2026-11-26 (lane build-net2, census N 15, N 16, N 10): one pending
+    # invitation he names, accepted, ignored or withdrawn. Their NAMES announce
+    # the write ("accept" beside "connect"; "connect"; "withdraw") and their
+    # docstrings must describe one. Keys in writes.SANCTIONED_WRITES.
+    "linkedin_accept_invitation_to_connect",
+    "linkedin_ignore_invitation_to_connect",
+    "linkedin_withdraw_invitation",
 }
 
 #: THE DOCSTRING EXEMPTION IS THE SAME SET AS THE NAME EXEMPTION, and it took
@@ -700,6 +715,11 @@ EXPECTED_TOOLS = {
     # THE FIFTY-SEVENTH, 2026-09-27 (lane L8, at its merge of master), a
     # WRITE: see SANCTIONED_WRITE_TOOLS.
     "linkedin_withdraw_from_group",
+    # Lane build-net2, 2026-11-26 (census N 15, N 16, N 10): the three
+    # invitation answers, WRITES.
+    "linkedin_accept_invitation_to_connect",
+    "linkedin_ignore_invitation_to_connect",
+    "linkedin_withdraw_invitation",
     # THE FIFTY-EIGHTH AND FIFTY-NINTH, 2026-09-27 (lane L5's follow-up, at
     # its merge of master 52b55b6), two WRITES: see SANCTIONED_WRITE_TOOLS.
     "linkedin_connect_from_profile",
@@ -806,8 +826,14 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_ninety_one_tools(tools):
-    """RENAMED AGAIN AT INTEGRATION 4'S MERGE OF LANE READERS-MSG26 (2026-11-26),
+async def test_the_surface_is_exactly_the_ninety_four_tools(tools):
+    """RENAMED AGAIN ON LANE BUILD-NET2 (2026-11-26), to ``..._ninety_four_tools``:
+    three WRITES -- ``linkedin_accept_invitation_to_connect``,
+    ``linkedin_ignore_invitation_to_connect`` and ``linkedin_withdraw_invitation``
+    (census N 15, N 16, N 10) -- beside the ninety-one. MEASURED off this
+    branch's registry, not summed; the name moved with the pin.
+
+    RENAMED AGAIN AT INTEGRATION 4'S MERGE OF LANE READERS-MSG26 (2026-11-26),
     to ``..._ninety_one_tools``: one READ, ``linkedin_search_content`` (census
     M C93), beside the ninety. MEASURED off the merged registry, not summed;
     the name moved with the pin. (Lane readers-msg26's branch named it
@@ -1376,7 +1402,10 @@ async def test_the_surface_is_exactly_the_ninety_one_tools(tools):
     # linkedin_search_content, a READ beside the ninety (its branch read
     # eighty-four), so the split moves on its read side. MEASURED off
     # mcp.list_tools() on the merged tree, not summed.
-    assert len(tools) == 91
+    # NINETY-FOUR ON LANE BUILD-NET2 (2026-11-26): three WRITES, so the split
+    # moves on its write side and the non-write count holds at sixty-four.
+    # MEASURED off mcp.list_tools().
+    assert len(tools) == 94
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -1424,6 +1453,10 @@ async def test_the_surface_is_exactly_the_ninety_one_tools(tools):
         # 2026-11-24 (lane builds-26): the endorsement pair, refusing.
         "linkedin_endorse_skill",
         "linkedin_withdraw_endorsement",
+        # 2026-11-26 (lane build-net2): the three invitation answers.
+        "linkedin_accept_invitation_to_connect",
+        "linkedin_ignore_invitation_to_connect",
+        "linkedin_withdraw_invitation",
     }
     # THE NON-WRITE COUNT MOVES TO SIXTEEN, and the reason is NOT the reason
     # it moved last time. The comment here said: "THE READ COUNT MOVES OFF
@@ -1644,8 +1677,10 @@ async def test_the_surface_is_exactly_the_ninety_one_tools(tools):
     # and the write side is unmoved (its branch read fifty-seven beside
     # eighty-four); this second copy of the total moves to the measured
     # ninety-one with the first test's pin. MEASURED, never summed.
+    # SIXTY-FOUR HOLDS ON LANE BUILD-NET2 (2026-11-26): its three tools are
+    # WRITES; this second copy of the total moves to the measured ninety-four.
     assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 64
-    assert len(tools) == 91
+    assert len(tools) == 94
 
 
 def test_the_read_that_was_nearly_named_a_write():
@@ -1769,6 +1804,10 @@ async def test_the_exemption_covers_only_the_names_on_it(tools):
         # 2026-11-24 (lane builds-26): the endorsement pair, refusing.
         "linkedin_endorse_skill",
         "linkedin_withdraw_endorsement",
+        # 2026-11-26 (lane build-net2): the three invitation answers.
+        "linkedin_accept_invitation_to_connect",
+        "linkedin_ignore_invitation_to_connect",
+        "linkedin_withdraw_invitation",
     }
     # The probe has to be genuinely sanctioned for this to test the thing it
     # claims to. A name nobody ever specced would only show that made-up names
@@ -2190,6 +2229,9 @@ async def test_server_info_stops_claiming_read_only_once_writes_are_on(monkeypat
     # arriving on the surface has to be typed in here by whoever added it, so
     # deriving it from PERFORMABLE would make the test agree with any change.
     assert info["writes_available"] == [
+        # Lane build-net2, 2026-11-26 (census N 15, N 16, N 10), typed here by
+        # hand: one pending invitation he names, answered on his manager.
+        "accept_invitation_to_connect",
         "apply_job",
         # TENTH, 2026-09-01. Typed here by hand like its nine siblings.
         "comment_on_item",
@@ -2202,6 +2244,7 @@ async def test_server_info_stops_claiming_read_only_once_writes_are_on(monkeypat
         # its twelve siblings: a follow performed on the organisation Page root,
         # addressed by the numeric id the unfollow keys its rows by.
         "follow_company_page",
+        "ignore_invitation_to_connect",
         # FOURTEENTH, 2026-09-24 (census row P I14, lane L7), typed here by
         # hand like its thirteen siblings: "I'm interested", pressed in one
         # posting's About-the-company card, aimed by the card's own employer.
@@ -2267,6 +2310,7 @@ async def test_server_info_stops_claiming_read_only_once_writes_are_on(monkeypat
         # numeric id, two presses through the one click site, verified off a
         # fresh render of his Groups page.
         "withdraw_from_group",
+        "withdraw_invitation",
         # THE TWENTIETH, 2026-10-10 (lane NP, the orchestrator's ruling of
         # 14:14; it reached master beside lane U's, at the lane's merge of
         # 0103810), typed here by hand: the reaction's inverse, aimed only at
@@ -2288,6 +2332,9 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
     monkeypatch.delenv(WRITES_FLAG, raising=False)
     info = await linkedin_server_info(verbose=True)
     assert info["writes_sanctioned"] == [
+        # Lane build-net2, 2026-11-26 (census N 15, N 16, N 10), typed here by
+        # hand: one pending invitation he names, answered on his manager.
+        "accept_invitation_to_connect",
         "apply_job",
         # THE TENTH, 2026-09-01, and the only one that ships EXPECTING TO
         # REFUSE: its submit control has never been observed, so the gate
@@ -2301,6 +2348,7 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
         # THE THIRTEENTH, 2026-09-23 (census row N 47). Typed by hand, as this
         # list requires, by the lane that built it.
         "follow_company_page",
+        "ignore_invitation_to_connect",
         # THE FOURTEENTH, 2026-09-24 (census row P I14). Typed by hand, as
         # this list requires, at the merge of the lane that built it.
         "mark_company_interest",
@@ -2354,6 +2402,7 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
         # THE SIXTEENTH, 2026-09-27 (census M C63 / N 64). Typed by hand, as
         # this list requires, at the merge of the lane that built it.
         "withdraw_from_group",
+        "withdraw_invitation",
         # THE TWENTIETH, 2026-10-10 (lane NP, the orchestrator's ruling of
         # 14:14; it reached master beside lane U's, at the lane's merge of
         # 0103810), typed here by hand: the reaction's inverse, aimed only at
@@ -2742,6 +2791,9 @@ async def test_the_server_instructions_name_every_write_that_ships():
         # TWENTY-THREE AND TWENTY-FOUR ON LANE BUILD-JMN26 (2026-11-25): the
         # search-alert pair beside the twenty-two; only twenty-four is reached.
         23: "twenty-three", 24: "twenty-four",
+        # TWENTY-FIVE TO TWENTY-SEVEN ON LANE BUILD-NET2 (2026-11-26): the three
+        # invitation answers beside the twenty-four; only twenty-seven is reached.
+        25: "twenty-five", 26: "twenty-six", 27: "twenty-seven",
     }
     assert f"{words[len(writes.PERFORMABLE)]} write" in text
     for action in writes.PERFORMABLE:
@@ -3049,6 +3101,11 @@ async def test_server_info_reports_irreversibility_before_a_caller_commits(
     )
     assert block["performable_and_irreversible"] == expected_performable
     assert expected_performable == [
+        # THE TENTH TO TWELFTH, 2026-11-26 (lane build-net2), TYPED BY HAND AS
+        # THIS LIST DEMANDS: an accept tells the inviter and makes a connection;
+        # an ignore has no inverse anywhere drawn; a withdraw bars a new
+        # invitation for up to three weeks. None of the three is undone here.
+        "accept_invitation_to_connect",
         "apply_job",
         "comment_on_item",
         # THE EIGHTH AND NINTH, 2026-09-27, TYPED BY HAND AS THIS LIST
@@ -3066,6 +3123,7 @@ async def test_server_info_reports_irreversibility_before_a_caller_commits(
         # PRESSED: the preview loads that person's profile, which may show him
         # among their viewers, and both specs' residue says so.
         "connect_from_profile",
+        "ignore_invitation_to_connect",
         "message_from_profile",
         "publish_post",
         # THE NINTH, 2026-10-10 (lane U), TYPED BY HAND AS THIS LIST DEMANDS,
@@ -3098,9 +3156,10 @@ async def test_server_info_reports_irreversibility_before_a_caller_commits(
         # it as irreversible though its reversibility was never measured. It
         # lands on no person and sends no message; it spends nothing.
         "withdraw_from_group",
+        "withdraw_invitation",
     ], (
         "the permanent things this server performs are typed in here by "
-        "whoever added one. A TENTH arriving is a decision, not a diff."
+        "whoever added one. A THIRTEENTH arriving is a decision, not a diff."
     )
     # THE SECOND ARRIVED ON 2026-09-01 AND IT IS DIFFERENT IN KIND, which is
     # why this is written out rather than the list quietly growing by one.

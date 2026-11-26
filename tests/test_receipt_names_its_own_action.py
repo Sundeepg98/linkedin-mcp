@@ -725,8 +725,14 @@ def test_the_action_set_is_the_one_this_file_was_measured_against():
     # search, or his job alerts), a sanctioned shared pair above; the two
     # ``_VERIFIED_FROM`` rows are one row (a fresh render of the search). Neither
     # holds a phrase another action owns.
-    assert len(writes.PERFORMABLE) == 24, (
-        "writes.PERFORMABLE holds %d actions, not the 24 this file was "
+    # TWENTY-SEVEN ON LANE BUILD-NET2 (2026-11-26): the three invitation answers.
+    # Their six rows were read: the three ``_WHERE_TO_LOOK`` values are three
+    # different places (the received tab and his connections list; the received
+    # tab; the Sent tab), worded without "My Network", which the invitation
+    # pair owns; the three ``_VERIFIED_FROM`` rows are one row (a fresh render of
+    # the same tab). None holds a phrase another action owns.
+    assert len(writes.PERFORMABLE) == 27, (
+        "writes.PERFORMABLE holds %d actions, not the 27 this file was "
         "measured against: %s. Re-derive the phrase owners in this file for "
         "the new action, then update this count."
         % (len(writes.PERFORMABLE), sorted(writes.PERFORMABLE))

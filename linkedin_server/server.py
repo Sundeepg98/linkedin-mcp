@@ -1,4 +1,15 @@
-"""The tool surface: ninety-one tools, twenty-four of which write to LinkedIn.
+"""The tool surface: ninety-four tools, twenty-seven of which write to LinkedIn.
+
+THE NINETY-SECOND TO NINETY-FOURTH ARE WRITES, 2026-11-26 (lane build-net2,
+census ``N 15``, ``N 16`` and ``N 10``, on live session 11's captures):
+``linkedin_accept_invitation_to_connect`` and
+``linkedin_ignore_invitation_to_connect``, one pending invitation he names by
+the inviter's profile link, answered on his invitation manager's received tab;
+and ``linkedin_withdraw_invitation``, one he sent, on its Sent tab. Each presses
+ONE control in the ONE row whose member links name the profile he gave, never
+a name, and answers nothing a press draws. Measured off this branch's
+registry, not summed. The headline read "ninety-one tools, twenty-four of
+which write" until then.
 
 THE NINETY-FIRST IS A READ, 2026-11-26, at integration 4's merge of lane
 readers-msg26 (census ``M C93``, ruling CONTENT-VERTICAL-NOT-ALL-RESULTS):
@@ -452,9 +463,9 @@ assigned to anybody -- it waits for whoever next runs the suite, and in the
 meantime the pin goes on asserting the old number with full confidence.
 
 THE NUMBERS ABOVE ARE DERIVED NOW, and that is a statement about a test rather
-than about an intention. Ninety-one is ``len(await mcp.list_tools())``,
+than about an intention. Ninety-four is ``len(await mcp.list_tools())``,
 pinned in ``test_server_surface.py`` by
-``test_the_surface_is_exactly_the_ninety_one_tools``; the split is pinned by
+``test_the_surface_is_exactly_the_ninety_four_tools``; the split is pinned by
 ``tests/test_prose_that_makes_a_claim.py::test_the_server_docstring_numbers_are_derived``,
 which reads THESE WORDS and fails if any of the three disagrees with the
 registry.
@@ -467,9 +478,11 @@ POINTER to it was dangling, so a reader who followed it found nothing and
 would reasonably conclude these numbers are unchecked. A citation is a claim
 like any other.
 The surface splits three ways and the split is the part a reader actually
-needs: SIXTY-FOUR read, TWENTY-FOUR write, and THREE are write-shaped,
-registered, gated and unable to act. Sixty-four plus twenty-four plus three is
-ninety-one. (Sixty-three, twenty-four and three, summing to ninety, until
+needs: SIXTY-FOUR read, TWENTY-SEVEN write, and THREE are write-shaped,
+registered, gated and unable to act. Sixty-four plus twenty-seven plus three is
+ninety-four. (Sixty-four, twenty-four and three, summing to ninety-one, until
+lane build-net2's three invitation answers, 2026-11-26. Sixty-three,
+twenty-four and three, summing to ninety, until
 integration 4's merge of lane readers-msg26's content search, 2026-11-26; that
 lane's branch read fifty-seven, twenty-four and three, summing to eighty-four.
 Fifty-eight, twenty-four and three, summing to eighty-five, until
@@ -657,11 +670,13 @@ the moment ``update_profile_field`` was given an address while still refusing.
 always meant: an address is not a permission.
 
 NOTE THE ACTION THAT HAS NO TOOL. ``writes.SANCTIONED_WRITES`` holds
-TWENTY-EIGHT actions where this surface registers TWENTY-SEVEN write-shaped tools, and
+THIRTY-ONE actions where this surface registers THIRTY write-shaped tools, and
 the missing one is ``set_open_to_work``: it is sanctioned, it is refused by
-``_refuse_unperformable``, and no tool was ever registered for it. So twenty-seven
-counts TOOLS and twenty-eight counts ACTIONS, and a reader comparing the two
-numbers is not looking at a discrepancy. (TWENTY-SIX and TWENTY-FIVE on master
+``_refuse_unperformable``, and no tool was ever registered for it. So thirty
+counts TOOLS and thirty-one counts ACTIONS, and a reader comparing the two
+numbers is not looking at a discrepancy. (TWENTY-EIGHT and TWENTY-SEVEN until
+lane build-net2's three invitation answers, 2026-11-26, added three to each.
+TWENTY-SIX and TWENTY-FIVE on master
 at lane build-jmn26's base, 4c62196, measured off that tree's registry -- this
 sentence still read twenty-three and twenty-two there, three behind each, the
 three refusing tools of lane builds-26 never added to it -- until that lane's
@@ -1265,7 +1280,7 @@ mcp = FastMCP(
     instructions=(
         "A window onto the operator's OWN LinkedIn account, driven by his own "
         "signed-in browser on his own machine. Most tools read and change "
-        "nothing. TWENTY-FOUR WRITE: linkedin_save_job, "
+        "nothing. TWENTY-SEVEN WRITE: linkedin_save_job, "
         "linkedin_unsave_job, linkedin_unfollow_company, "
         "linkedin_follow_company, linkedin_apply_job, "
         "linkedin_update_setting, linkedin_react_to_item, "
@@ -1277,7 +1292,10 @@ mcp = FastMCP(
         "linkedin_message_from_profile, linkedin_send_attachment, "
         "linkedin_set_admitted_setting, linkedin_withdraw_reaction, "
         "linkedin_set_similar_jobs_alert, linkedin_unset_similar_jobs_alert, "
-        "linkedin_set_search_job_alert and linkedin_unset_search_job_alert. "
+        "linkedin_set_search_job_alert, linkedin_unset_search_job_alert, "
+        "linkedin_accept_invitation_to_connect, "
+        "linkedin_ignore_invitation_to_connect and "
+        "linkedin_withdraw_invitation. "
         "ONE MORE IS WRITE-SHAPED AND REFUSES: linkedin_set_tracker_stage, the "
         "stage move on a saved job, whose control -- an item in the tracker "
         "row's overflow menu -- has never been captured; it reads his Saved "
@@ -1319,6 +1337,17 @@ mcp = FastMCP(
         "search on and off -- the search named by its keywords and an "
         "optional location, his own saved search, each the other's inverse; "
         "offer the pair together, set then unset. "
+        "THE TWENTY-FIFTH TO TWENTY-SEVENTH, "
+        "linkedin_accept_invitation_to_connect, "
+        "linkedin_ignore_invitation_to_connect and "
+        "linkedin_withdraw_invitation, answer ONE pending invitation on his "
+        "invitation manager -- accept or ignore one he received, withdraw one "
+        "he sent -- aimed by the member's profile link as "
+        "linkedin_received_invitations and linkedin_sent_invitations return "
+        "it, never by a name; each is an act toward that person, so offer it "
+        "only for an invitation he names. Each presses one control and "
+        "nothing in any dialog it draws: the withdraw's documented "
+        "confirmation is expected to stop its first use. "
         "THE SIXTEENTH, linkedin_withdraw_from_group, leaves one group he "
         "names by its NUMERIC id, never by a group's name; no join is built "
         "here, so offer it only for a group he names -- and not his last "
@@ -13918,6 +13947,119 @@ async def linkedin_search_content(keywords: str) -> dict[str, Any]:
 
 
 # ---- end lane readers-msg26 ----
+
+
+# ---- lane build-net2 ----
+# Census rows N 15, N 16 and N 10 (lane build-net2, 2026-11-26): one pending
+# invitation he names, answered on his own invitation manager. Every tool this
+# lane registers is in this one contiguous block.
+
+
+@mcp.tool()
+async def linkedin_accept_invitation_to_connect(
+    profile: str, confirm_token: str = ""
+) -> dict[str, Any]:
+    """Accept ONE pending invitation to connect, from a member YOU NAME -- a WRITE toward that person.
+
+    Presses LinkedIn's "Accept" on the invitation's own row of your invitation
+    manager's received tab. The inviter is told, and the two of you become
+    first-degree connections. Same two-step shape and the same five gates as
+    ``linkedin_save_job``: no ``confirm_token``, no action -- you get a block
+    to read and a token that works ONCE, only for this member, only for this
+    verb, within two minutes. Census row ``N 15``.
+
+    YOU NAME THE INVITER BY PROFILE LINK -- as ``linkedin_received_invitations``
+    returns it -- or member id. A name is never accepted, and none is read:
+    the page is asked, by a count, for exactly ONE invitation row whose member
+    links all name that profile, with LinkedIn's "wants to connect" line and
+    its "Accept" and "Ignore" buttons. Anything else -- no such row, two, a
+    row of another kind -- is refused and nothing is pressed. Only the first
+    render of the tab is read.
+
+    ONE PRESS AND NOTHING MORE. What pressing Accept draws has never been
+    captured: a dialog on the page afterwards is counted, never answered, and
+    a fresh render of the tab decides ``performed`` -- the row gone, and
+    exactly one invitation row fewer. Re-read ``linkedin_connections`` to see
+    the inviter among your connections. Loading the received tab clears its
+    pending badge. Undoing it means removing the connection by hand; this
+    server does not.
+
+    Args:
+        profile: the inviter's profile link, https://www.linkedin.com/in/<segment>/,
+            or member id.
+        confirm_token: leave empty to preview. Pass the token from that
+            preview to actually accept.
+    """
+    try:
+        return await _write_tool("accept_invitation_to_connect", profile, confirm_token)
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_ignore_invitation_to_connect(
+    profile: str, confirm_token: str = ""
+) -> dict[str, Any]:
+    """Ignore ONE pending invitation to connect, from a member YOU NAME -- a WRITE toward that person.
+
+    Presses LinkedIn's "Ignore" on the invitation's own row of your invitation
+    manager's received tab, aimed exactly as
+    ``linkedin_accept_invitation_to_connect`` aims: the inviter's profile link
+    or member id, never a name, matched by a count against ONE invitation row.
+    Two steps, the same gates, a token bound to this member and this verb.
+    Census row ``N 16``.
+
+    ONE PRESS AND NOTHING MORE. Whether Ignore draws a confirmation or offers to
+    report the sender has never been captured: anything it draws is counted,
+    never answered, and a fresh render of the tab decides ``performed``. No
+    undo of an ignore is known; the member may invite you again.
+
+    Args:
+        profile: the inviter's profile link, https://www.linkedin.com/in/<segment>/,
+            or member id.
+        confirm_token: leave empty to preview. Pass the token from that
+            preview to actually ignore it.
+    """
+    try:
+        return await _write_tool("ignore_invitation_to_connect", profile, confirm_token)
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_withdraw_invitation(
+    profile: str, confirm_token: str = ""
+) -> dict[str, Any]:
+    """Withdraw ONE pending invitation YOU SENT, to a member you name -- a WRITE, and LinkedIn bars a new one for weeks.
+
+    Presses LinkedIn's "Withdraw" on that invitation's row of your invitation
+    manager's Sent tab, aimed by the member's profile link or member id --
+    as ``linkedin_sent_invitations`` returns it -- never a name, matched by a
+    count against ONE row. Two steps, the same gates, a token bound to this
+    member and this verb. Census row ``N 10``.
+
+    EXPECT THE FIRST USE TO STOP AT A CONFIRMATION. LinkedIn documents one
+    (press Withdraw, then Withdraw again in a pop-up), and this server has
+    never seen it, so it presses NOTHING in it: the result counts what the
+    pop-up draws, and a fresh render of the Sent tab decides ``performed`` --
+    the row still there means nothing was withdrawn. That reading is what
+    the confirm press will be built on. If LinkedIn draws no pop-up, the one
+    press withdraws. A withdrawn invitation cannot be undone: LinkedIn refuses
+    a new invitation to the same member for up to three weeks.
+
+    Args:
+        profile: the member's profile link, https://www.linkedin.com/in/<segment>/,
+            or member id.
+        confirm_token: leave empty to preview. Pass the token from that
+            preview to actually press Withdraw.
+    """
+    try:
+        return await _write_tool("withdraw_invitation", profile, confirm_token)
+    except Exception as exc:
+        return _error(exc)
+
+
+# ---- end lane build-net2 ----
 
 
 def main() -> None:  # pragma: no cover - process entry point
