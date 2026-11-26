@@ -320,13 +320,13 @@ THE PAGE DRAWS TWO SWITCHES, AND NEITHER SHARES HIS FULL PROFILE. `J 75`
 surface (`O-JOB-APPLICATION-SETTINGS`), and its capture draws exactly the two
 switches above. MEASURED-ABSENT under the orchestrator's
 `MEASURED-ABSENT-OR-PRECONDITION` and `ABSENT-ON-HIS-ACCOUNT-PER-ROW`: not
-offered to his account. Reopener: a capture that draws such a switch.
+offered to his account. REOPENER: a capture that draws such a switch.
 
 NO SAVED ANSWER IS LISTED. `P M6` ("Saved screening-question answers") is
 named by the page only as what the first switch saves, beside LinkedIn's
 own words that he "may change your answers with each application"; no
 answer, list or editor of answers is drawn. MEASURED-ABSENT on the same two
-rulings. Reopener: a capture that draws his saved answers outside an
+rulings. REOPENER: a capture that draws his saved answers outside an
 application.
 
 THE TWO SWITCHES ARE MEASURED AND NOT ADMITTED FOR WRITING. `J 74` and
@@ -433,3 +433,220 @@ matched the candidates tried, so the build's first step is measuring them
 by key. NEXT: BUILD on `tests/fixtures/live11/career_insights.html`: the
 members as person records and the organisations as organisation records
 (name; a slug is not a numeric link, so no link), under NAMES-AT-RUNTIME.
+
+---
+
+## 8. `J 19` and `J 163` -- ruled BUILD, NOT BUILT by this lane
+
+Both are writes, and both stay GAP with their next steps as integration 3
+left them (`BUILD:tests/fixtures/live2/j18.html` and
+`BUILD:tests/fixtures/live8/recommended.html`). This lane spent its run on
+the reads above and did not reach them; nothing of either is half-built on
+this branch. What each build is, from its ruling and its capture, so the
+next lane starts from it:
+
+- `J 19`, `J-19-BUILT-BEHIND-THE-GRANT` ("BUILD behind the grant, REFUSING
+  until its confirm dialog is captured; it fires only on his order"): the
+  refusing shape `set_tracker_stage` set (`J 54`) -- a spec sanctioned and
+  NOT in `writes.PERFORMABLE`, its preview reading the jobs home (one `h2`
+  `Recent job searches`, one button `Clear` beside it, session 2's keyed
+  shapes) and minting no token, its refusal in `_NINE_REFUSALS` naming the
+  capture that lifts it: the dialog the press opens, captured at his order.
+  The fixture needs those two words written by key (session 2's key) into a
+  tracked copy of `j18`.
+- `J 163`, `J-163-RECEIPT-ONLY-WRITE` ("a RECEIPT-ONLY WRITE behind the grant,
+  fired only on his order ... proven by that press"): a PERFORMABLE write on
+  `/jobs/collections/recommended/`, its preview counting the pair inside
+  `div[data-view-name="jobs-search-list-feedback"]` once each (the two
+  buttons `Are you finding what you<U+2019>re looking for? No` / `... Yes`,
+  session 8's keyed shapes), the press the chosen button, strict, and its
+  receipt the press and the render it leaves, recorded as the row's proof.
+  No inverse is built because none exists.
+
+---
+
+## 9. The rows, one by one
+
+    row     from  to                 evidence (this record)
+    J 52    GAP   COVERED-UNFIRED    s2: the shipped tracker tool over session 11's stage page
+    J 106   GAP   COVERED-UNFIRED    s4.1: linkedin_company_page_tab(tab="about")
+    J 113   GAP   COVERED-UNFIRED    s4.3: linkedin_company_page_tab(tab="insights")
+    J 165   GAP   COVERED-UNFIRED    s4.2: linkedin_company_page_tab(tab="events")
+    J 168   GAP   COVERED-UNFIRED    s5: linkedin_company_page_tab(tab="posts"), the live9 capture
+    P M2    GAP   COVERED-UNFIRED    s3.1: linkedin_application_settings(), names withheld
+    J 75    GAP   MEASURED-ABSENT    s3.2: the page it waited on draws two switches, neither this one
+    P M6    GAP   MEASURED-ABSENT    s3.2: the page lists no saved answer
+    J 114   GAP   GAP                s4.4: one of four facets built; CAPTURE C-RJ26-1
+    J 111   GAP   GAP                s4.5: the captured Page has no Products tab; CAPTURE C-RJ26-2
+    J 71    GAP   GAP                s3.2: list half built (P M2); delete behind C-RJ26-3
+    J 72    GAP   GAP                s3.2: download behind C-RJ26-3
+    P M1    GAP   GAP                s3.2: upload drawn; its inverse behind C-RJ26-3
+    P M3    GAP   GAP                s3.2: delete behind C-RJ26-3
+    P M4    GAP   GAP                s3.2: download behind C-RJ26-3
+    J 73    GAP   GAP                s3.2: no tie to an application; TARGET t-named-job
+    P M5    GAP   GAP                s3.2: as J 73
+    J 74    GAP   GAP                s3.2: switch measured, not admitted for writing (question 3)
+    J 76    GAP   GAP                s3.2: as J 74
+    P M7    GAP   GAP                s3.2: as J 76
+    P M8    GAP   GAP                s3.2: as J 74
+    J 70    GAP   GAP                s3.2: control drawn; SIBLING:lane-U
+    P M12   GAP   GAP                s3.2: none on this page; SIBLING:J 147
+    J 37    GAP   GAP                s6: the manager drawn open; BUILD on its capture
+    J 109   GAP   GAP                s7: BUILD on its capture
+    J 160   GAP   GAP                s7: BUILD on its capture
+    J 19    GAP   GAP                s8: not built here
+    J 163   GAP   GAP                s8: not built here
+
+EIGHT ROWS MOVED: six to COVERED-UNFIRED, two to MEASURED-ABSENT. Twenty left,
+each with its next step re-pointed at what its capture showed.
+
+---
+
+## 10. Tools added
+
+- `linkedin_company_page_tab(organisation_id, tab)` -- a READ, `tab` one of
+  `about`, `events`, `insights`, `posts`; one load; a people tool (its About
+  and posts values in `OrganisationProse` records, its events in `Event`
+  records). Module `linkedin_server/company_tabs.py`.
+- `linkedin_application_settings()` -- a READ, no parameter; one load; no
+  page string leaves. Module `linkedin_server/application_settings.py`.
+
+`linkedin_tracker_stage` (lane A) is unchanged but for one docstring
+sentence. THE SURFACE, off `mcp.list_tools()`: 83 -> 85 tools, 134 -> 136
+parameters, 56 -> 58 that do not write; the write side unmoved (24 write,
+three write-shaped). `people_data.PEOPLE_TOOLS` gains the tab tool;
+`PROSE_SOURCES` gains six sources after `overview_card`.
+
+---
+
+## 11. Instruments
+
+`_audit/INSTRUMENTS.md` section 104 registers three, each shown failing:
+
+1. `scripts/_build_live11_word_skeletons.py` -- writes a LinkedIn word into a
+   tracked copy only where its keyed shape matched, and REFUSES when a
+   declared word matches nowhere or when the keyed skeleton's tracked copy is
+   not the committed one. Shown failing, both ways, on the clicked_apply
+   skeleton: a declared count the page does not draw (`Clicked apply <dot> 7`)
+   refused the build, and a measured word under another session's key
+   refused it too ("1 declared word(s) matched no keyed shape; refusing").
+2. `tests/live11_words.py::plant` -- an asserted edit of the MARKUP only,
+   with the exact count. Shown failing as it was written: its first form
+   edited the words fixture's provenance comment, and two controls of
+   section 2 passed the tool as an empty list; it now refuses a count that
+   is not the markup's.
+3. The chain guards in `tests/test_a_covered_row_names_the_artifact_that_covers_it.py`
+   for `J 52`, the four tab rows and `P M2` -- each tool must call its row's
+   reader by name; the tab guard's control renames one call on a copy and
+   watches the set lose it.
+
+Declared disposable: this lane's scratch probes (the keyed-shape matcher,
+the raw-capture UI reader that prints element text by class, the outline
+printer) and its edit scripts, kept outside the repository.
+
+---
+
+## 12. Pins, re-derived from what `census_completion.py` measured
+
+Each commit re-pinned the figures its moves changed, each to the value the
+script printed, never summed (`scripts/census_completion.py`, the comment
+above each pin). Net over the lane, base -> head:
+
+    adjudicated      245 -> 253      delivered_broad  160 -> 166
+    unfired           43 -> 49       gap              529 -> 521
+    gap_unknown       93 -> 87       gap_read          77 -> 75
+    out_of_scope      68 -> 70       achievable       706 -> 704
+    capabilities_achievable 719 -> 717
+    b1_no_ruling      27 -> 33       b3_admitted       46 -> 44
+    jobs_gap          93 -> 87       jobs_dir_r        30 -> 25
+    jobs_dir_w        56 -> 55       jobs_admitted     29 -> 24
+
+`PINNED_B1_ROWS[NO_RULING]` gains `J 52`, `J 106`, `J 113`, `J 165`, `J 168`,
+`P M2`. The capture queue loses nine lines whose captures session 11 took
+(the clicked_apply stage, the About, Events, Insights, Products, Life and
+career-insights addresses, the application settings page and the alert
+manager -- each line leaving when its last row's step stopped being its
+capture) and gains three (`C-RJ26-1` to `C-RJ26-3`); `t-named-job` gains
+`J 73` and `P M5`. `exclusion-basis.tsv` gains `J 75` and `P M6` (class M+).
+
+---
+
+## 13. Gates
+
+LOCAL, targeted and backgrounded, the live-session flag absent at every
+check; the full suite runs on CI only. Per commit: the lane's own test files
+(7 + 44 + 16 passed at the head), the surface and page-string guards
+(tool surface pin, server surface, every tool on the surface, people
+reader, readers inventory, reader-leak and tool-envelope guards with their
+baselines regenerated by their own writers, navigation never derived, error
+url per site, people data), the census guards (next step, jobs directions,
+read addresses, exclusion basis, write classes, ruling holds, census rows,
+row total, literal repeats, correction findability, covered-row artifacts),
+the three derived views written and checked, and the identity gates: the
+pre-commit gate on every commit (226 spellings, 0 hits) and
+`tests/test_no_committed_identity.py` after each.
+
+LANE CI, by head sha:
+
+    head      run           verdict
+    71b3970   45768580137   failure, three tests: the instructions did not
+                            name the tab tool among the people tools; the
+                            tab tests used an organisation id not on the
+                            identity guard's synthetic list; the new readers'
+                            raises were not declared to the error-url guard.
+                            All three fixed in 43221ff.
+    fb15538   45771696426   failure, three tests: the read-gap triage
+                            instrument still held a verdict for P M2, which
+                            left the read-GAP set (two of its tests); and
+                            J 75's MEASURED-ABSENT note wrote its reopener
+                            in lower case, which the contingent write-off
+                            checker does not read (it takes the shouted
+                            REOPENER). Both fixed in the record commit.
+
+The later heads' runs are in section 16 and the final report.
+
+---
+
+## 14. Questions for the orchestrator, each with its ground
+
+1. `J 114` -- SPLIT IT, OR HOLD IT WHOLE. Ground: section 4.4; one of its
+   four facets (distribution and growth by function) is built and read on a
+   real capture, the other three are not drawn on the admitted view or sit
+   behind a closed dropdown; COMPOUND-ROW-SPLITS-ONLY-ON-STATE splits a row
+   whose halves need different states, and these do.
+2. HIS OWN DOCUMENT NAMES AND ALERT WORDS -- MAY THEY LEAVE. Ground: section
+   3.1 and section 6; his resume file names and his job alerts' query words
+   are his own data, but `tests/test_tool_envelopes_emit_no_page_string.py`'s
+   ratchet admits no new path for page text outside a `people_data` record,
+   and those records are other members' words. `P M2` ships with the names
+   withheld; `J 37`'s list would ship without its query words. A ruling that
+   admits his own text (as `ADMITTED_TEXT` already does for the reader guard,
+   under HIS_OWN) would let both carry it.
+3. THE APPLICATION SETTINGS PAGE'S TWO SWITCHES -- ADMIT THE PAGE BY NAME FOR
+   WRITING. Ground: section 3.2; both controls are switches, the kind
+   `linkedin_set_admitted_setting` sets, but its `audiences()` refuses two
+   admitted controls sharing the value words `on` and `off` with different
+   meanings, and the write door would need `/jobs/application` excused for
+   this one address -- the second is the boundary, lane admit5-26's.
+
+---
+
+## 15. Open items
+
+- `J 19` and `J 163` (section 8): not built.
+- `J 37`, `J 109`, `J 160`: each a BUILD on its own session-11 capture.
+- `C-RJ26-1` to `C-RJ26-3`: three session-12 captures, each one load on an
+  admitted address, the first and third one disclosure each.
+- The new readers are `not_driven` in the reader-leak baseline (the planted
+  page reads no structure, so each raises its uncorroborated zero); a
+  shipped drive over each words fixture, as `company_people_insights` has,
+  would drive them to their success path.
+- INSTRUMENTS section 104 and the live11 fixture count (53) may meet
+  another wave-2 lane's equal edit at integration 4.
+
+---
+
+## 16. Certification
+
+The final head and its lane CI run are in the lane's final report: a commit
+cannot carry its own run.

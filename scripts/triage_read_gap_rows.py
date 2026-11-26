@@ -315,7 +315,9 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
     "N 188": ("RETURNED", "", "returned by lane R 2026-09-23; a member roster, admitted as a bounded read by MEMBER-ROSTERS-AS-BOUNDED-READS -- needs an admission and a reader; blocker named in its cell"),
     "N 189": ("RETURNED", "", "returned by lane R 2026-09-23; a member roster, admitted as a bounded read by MEMBER-ROSTERS-AS-BOUNDED-READS -- needs an admission and a reader; blocker named in its cell"),
     "P K1": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
-    "P M2": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
+    # `P M2` LEFT THE READ-GAP SET 2026-11-26 (lane readers-jobs26):
+    # COVERED-UNFIRED on linkedin_application_settings over session 11's
+    # capture of his application settings page.
     "P M4": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
     "P M5": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
     "P N9": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),

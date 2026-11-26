@@ -12647,3 +12647,42 @@ follows and in a denied-terms class.
 The session's offline page probes, member-link counter, patchers, item reader
 and summariser; each answered one question once, and the answers are in the
 record.
+
+## 104. A CAPTURE'S WORDS ARE WRITTEN ONLY WHERE THEIR KEYED SHAPES MATCH, AND A PLANT EDITS THE MARKUP ONLY (readers-jobs26, 2026-11-26)
+
+Lane readers-jobs26 built its readers over session 11's skeletons, whose texts
+are all `x` in their tracked copies. The record is
+`_audit/2026-11-26-readers-jobs26.md`, section 11.
+
+### 104.1 The word-skeleton builder
+
+`scripts/_build_live11_word_skeletons.py` writes a LinkedIn word into a
+tracked copy only where `value_shape(word, key)` equals the keyed shape at that
+place, as a whole text or a whole attribute value, and REFUSES when a declared
+word matches nowhere, or when the keyed skeleton's tracked copy is not the
+committed one. Shown failing on the clicked_apply skeleton: a count the page
+does not draw, and a measured word under another session's key, each refused
+the build. Five fixtures are built by it, each a fixed point.
+
+    A WORD NOBODY MEASURED IS NOT WRITTEN; A WORD THAT MATCHES NOWHERE STOPS THE BUILD.
+
+### 104.2 The markup-only plant
+
+`tests/live11_words.py::plant` replaces a string in a words fixture's MARKUP
+-- never in its provenance comment, which lists the words -- and requires the
+exact count it is told. Shown failing as written: its first form replaced the
+first occurrences in the file, which were the comment's, and two controls of
+the clicked_apply tests then passed the tool as an empty list.
+
+### 104.3 The chain guards
+
+In `tests/test_a_covered_row_names_the_artifact_that_covers_it.py`, each
+COVERED-UNFIRED row this lane moved is bound to its tool calling its reader by
+name (`J 52`, the four tab rows, `P M2`); the tab guard's control renames one
+call on a copy and the set loses it.
+
+### 104.4 Declared disposable
+
+The lane's keyed-shape matcher, its raw-capture UI reader, its outline
+printer and its census edit scripts, kept outside the repository; each
+answered its questions once, and the answers are in the record.
