@@ -292,6 +292,41 @@ def test_his_first_name_alone_is_somebody_elses():
     assert fired(verdict) == {"R4"}, verdict.counts
 
 
+def test_a_first_name_handed_in_is_not_learned_as_his():
+    line = page("<span>%s &amp; 5 other connections work here</span>" % HIS_NAME.split()[0])
+    assert fired(judge(line, names=[HIS_NAME.split()[0]])) == {"R4"}
+    assert judge(page("<p>%s works here</p>" % HIS_NAME), names=[HIS_NAME]).keep_raw
+
+
+def nav_only_page(body: str = "", included: tuple = ()) -> str:
+    """An Ember page that draws the navigation photo and NOT his entity."""
+    payload = json.dumps({"included": list(included)})
+    return ('<html><body><header><img class="global-nav__me-photo" alt="%s" src="%s"></header>'
+            '<main>%s</main><code style="display: none">%s</code></body></html>'
+            % (HIS_NAME, _photo_url(HIS_PHOTO), body, payload))
+
+
+def test_the_navigation_photo_alone_teaches_his_photo_and_his_name():
+    pictures = ({"$type": "x.PhotoFilterPicture", "a11yText": HIS_NAME},)
+    verdict = judge(nav_only_page('<img src="%s" alt="">' % _photo_url(HIS_PHOTO), pictures))
+    assert verdict.keep_raw and verdict.own == "Own(slug=set, member_ids=0, photo_ids=1, names=1)", \
+        (verdict.counts, verdict.own)
+    stranger = ({"$type": "x.PhotoFilterPicture", "a11yText": STRANGER_NAMES[0]},)
+    assert fired(judge(nav_only_page("", stranger))) == {"R3"}
+
+
+def test_what_another_slug_taught_is_not_his():
+    """The slug check is made twice -- reading the cache, and again where what
+    is known joins what the page teaches -- and each is shown here alone."""
+    taught_elsewhere = pg.Own("someone-placeholder-0009", frozenset({pg._h(HIS_TOKEN)}),
+                              frozenset({pg._h(HIS_PHOTO)}), frozenset({pg._h(HIS_NAME.lower())}))
+    page_ = pg._Page()
+    page_.feed(sdui_page())
+    page_.close()
+    own = pg.learn_own(page_, [], HIS_SLUG, known=taught_elsewhere)
+    assert repr(own) == "Own(slug=set, member_ids=0, photo_ids=0, names=0)", repr(own)
+
+
 @pytest.mark.parametrize("glued,mine", [
     (HIS_TOKEN + "ExperienceTopLevelSection", True),
     (HIS_TOKEN + "AboutSection", True),
