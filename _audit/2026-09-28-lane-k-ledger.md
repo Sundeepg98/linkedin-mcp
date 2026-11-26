@@ -1061,9 +1061,12 @@ does `N 95` stay GAP?
 **Answered 2026-11-26 by the orchestrator** (relayed to lane build-net2;
 registration owed at integration 6): YES, as SEARCH-BOX-TYPEAHEAD-DISCLOSURE,
 on the lane's measured anchors. A module of its own, one closed table, one
-`readonly.SANCTIONED_MUTATIONS` entry (the lane's build holds TWO lines, the
-click and the Escape, because that list keys a call by its kind; the lane
-asked, its record section 4 says how). The target is
+`readonly.SANCTIONED_MUTATIONS` entry -- one sanctioned SHAPE, not one
+triple, the orchestrator clarified the same day on the lane's question: one
+drain function with exactly two call sites, the click that opens (as load
+28 measured it) and the Escape that closes, so the list holds TWO lines,
+16 -> 18; every other key and every fill refused; no Shift-key or focus
+open, since nothing measured one. The target is
 `[role=search] input[aria-autocomplete]` on an admitted page, refused at
 runtime if the match count is 0 or 2 or more, naming the count. NOTHING is
 typed: a typing attempt is refused. Only the listbox's recent-searches group

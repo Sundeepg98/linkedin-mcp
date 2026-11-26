@@ -154,12 +154,13 @@ def test_the_sanctioned_list_is_exactly_these_calls():
     EIGHTEEN FROM 2026-11-26, AND THE TWO NEW ONES ARE THE SAME PAIR AGAIN:
     ``search_typeahead._press``, the click that opens his own search box's
     typeahead and the Escape that closes it (lane build-net2, census N 95,
-    SEARCH-BOX-TYPEAHEAD-DISCLOSURE). The ruling asked for one entry; the
-    list keys a call by its kind, the measured opening is a click and the
-    ruled close is a key, and -- as for ``press.disclose`` above -- a
-    sanction for the opening without one for the closing would make the
-    compliant build impossible. Nothing is typed: the drain takes a step
-    from a two-entry table and refuses any other.
+    SEARCH-BOX-TYPEAHEAD-DISCLOSURE). The ruling's "one entry" is one
+    sanctioned SHAPE, not one triple (the orchestrator, 2026-11-26, accepting
+    this build): the list keys a call by its kind, the measured opening is
+    a click and the ruled close is a key, and -- as for ``press.disclose``
+    above -- a sanction for the opening without one for the closing would
+    make the compliant build impossible. Nothing is typed: the drain takes
+    a step from a two-entry table and refuses any other.
     """
     assert readonly.SANCTIONED_MUTATIONS == (
         ("linkedin_server/writes.py", "perform", "click"),
