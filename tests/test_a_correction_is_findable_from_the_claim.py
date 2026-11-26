@@ -307,8 +307,9 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "not hold while leaving the record unmarked."
     ),
     ("jobs.md", "2026-11-26-readers-jobs26.md"): (
-        "A ROW'S MOVE OR NEXT STEP RECORDED, NOT A CORRECTION. Rows `52`, "
-        "`70` to `76`, `106`, `111`, `113`, `114` and `165` each gained one dated note citing "
+        "A ROW'S MOVE OR NEXT STEP RECORDED, NOT A CORRECTION. Rows `37`, `52`, "
+        "`70` to `76`, `106`, `109`, `111`, `113`, `114`, `160`, `165` and `168` "
+        "each gained one dated note citing "
         "lane readers-jobs26's record -- what the row's session-11 capture "
         "draws, and its move to COVERED-UNFIRED or its re-pointed step -- and "
         "none says anything in that record does not hold. The matched word is "

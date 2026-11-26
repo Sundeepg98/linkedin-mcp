@@ -31,6 +31,7 @@
     "company_tabs:read_about_tab": "not_driven:raises ExtractionFailedError",
     "company_tabs:read_events_tab": "not_driven:raises ExtractionFailedError",
     "company_tabs:read_insights_tab": "not_driven:raises ExtractionFailedError",
+    "company_tabs:read_posts_tab": "not_driven:raises ExtractionFailedError",
     "creator_analytics:collect_labels": "returns_text",
     "creator_analytics:read_content_analytics": "clean",
     "dom:_count_by_role": "clean",

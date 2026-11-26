@@ -347,3 +347,89 @@ none. Session 2's posting, the capture its cell names, draws `Use AI to
 assess how you fit` with `Tailor my resume` (keyed shapes, session 2's
 key): that is row `J 147`'s capability, so `P M12`'s step becomes
 `SIBLING:J 147`.
+
+---
+
+## 5. `J 168` -- the Page's posts: GAP -> COVERED-UNFIRED
+
+THE RULING: `J-110-SPLITS-HOME-AND-POSTS` (the orchestrator, 2026-11-25),
+"the Posts half BUILD on the live9 capture". Built as a fourth tab of the
+same tool, `linkedin_company_page_tab(organisation_id, tab="posts")`, over
+`tests/fixtures/live9/company_root_posts_view.html` (lane B4's tracked
+skeleton of session 9's Page root, which drew the Posts view).
+
+THE ADDRESS IS THE ROOT. The read boundary refuses `/company/<x>/posts/`; the
+admitted root drew the Posts view on 2026-10-10 and the Home view on
+2026-09-23, so the tool loads the root (the landing may be the root or the
+Posts tab) and the reader says which view it read first. MEASURED on the
+capture: the Posts view marks `aria-current="true"` on two anchors to the
+Posts tab, so `current_tab` now takes agreeing marked anchors as one tab, and
+anchors naming different tabs as `tabs_disagree` (a test moves one anchor to
+the About tab and reads the disagreement).
+
+THE ITEMS, MEASURED: thirteen `role="listitem"` items each hold exactly one
+`h2` reading `Feed post`; eleven hold exactly one
+`[data-testid="expandable-text-box"]`, one holds none (an item without
+words), and the sixth holds two (a reshare: its own words and the reshared
+item's). The reader returns each one-box item's words as a
+`people_data.OrganisationProse` record, `read_from` `page_post` (a new
+source); the box-less item and the two-box item are counted and not read --
+which of two boxes is the Page's own is not attributable by structure, so
+neither leaves. The view draws no permalink on an item, so no link is
+returned. No feed item read raises.
+
+`tests/test_company_tabs.py` gains five tests (44 passed): the eleven
+records; each box planted with its own number, the two of the two-box item
+never come back (`[0, 1, 2, 3, 6, ..., 12]` returned, measured order); no
+`Feed post` heading raises; agreeing and disagreeing marked anchors; the
+root address and its landings.
+
+---
+
+## 6. `J 37` -- the alert manager: read offline, the next step re-pointed
+
+The brief asked for the skeleton to be read offline first. IT DRAWS THE
+MANAGER, OPEN, OUTSIDE MAIN. Session 11's load of `/jobs/jam/` (load 17) drew
+in `main` only the jobs discovery feed (three discovery modules), which is
+why the live runner counted 0 controls there and found no trigger by name.
+Outside `main`, the page draws a `role="dialog"` modal, `aria-hidden="false"`,
+its header `h2` reading `Manage job alerts` (keyed shape; the jobs home of
+session 2 draws the same heading), and in it a list of FIVE alert rows (one
+drawn `hidden`), each: an anchor to the alert's own job search
+(`/jobs/<x>/?keywords=...&distance=...&geoId=...`, with `f_TPR` or `f_SAL` on
+some), the alert's query words and a second line (his own words, `x` here),
+one button whose title and label are unmatched by the candidates tried, and a
+detail line. The modal's `Done` button is drawn.
+
+So the LIST half is on a real capture and buildable: the alert rows and
+their search parameters. Two things stand in the way of building it here,
+each recorded rather than decided: the alert's query words are his own text,
+which faces the same channel question as his resume names (question 2), and
+the edit button's label and what it opens are unmeasured (the MANAGE half).
+NEXT: BUILD the list on `tests/fixtures/live11/jobs_alerts_manager.html`,
+reading the alert rows inside the open `Manage job alerts` dialog; the
+capture line `jobs-alerts-manager` leaves the queue, its capture taken.
+
+---
+
+## 7. `J 109` and `J 160` -- read offline, each re-pointed at its own capture
+
+`J 109` (the Life tab, load 22, redirected within the tab). MEASURED: a hero
+video; an `h3` reading `Trending employee content` over a carousel of
+members' feed items (each with its author's profile link and its words, `x`
+here); an interest section (`I'm interested`, LinkedIn's curly apostrophe);
+an `h3` reading `Company spotlights` over the Page's own video modules.
+NEXT: BUILD on `tests/fixtures/live11/company_life.html`: the two sections by
+their headings, the trending items as post records (author and words, under
+THIRD-PARTY-TEXT-AT-RUNTIME), the spotlights' titles as the Page's prose.
+
+`J 160` (career insights, load 13, three other members drawn, skeleton only).
+MEASURED by structure: two filter pills (the job title and the location),
+a chart, three organisation cards (each a `/company/<slug>/` anchor beside a
+`/company/<slug>/jobs/` link), three LinkedIn Learning cards, and three
+member cards (`/in/<slug>/` anchors) -- the people and the companies the
+row's cell names. No raw capture was kept and none of the section headings
+matched the candidates tried, so the build's first step is measuring them
+by key. NEXT: BUILD on `tests/fixtures/live11/career_insights.html`: the
+members as person records and the organisations as organisation records
+(name; a slug is not a numeric link, so no link), under NAMES-AT-RUNTIME.

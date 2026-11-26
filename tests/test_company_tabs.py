@@ -17,6 +17,7 @@ Every name-shaped string in this file is synthetic.
 from __future__ import annotations
 
 import asyncio
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -307,7 +308,7 @@ def test_each_tab_is_composed_from_the_numeric_id_and_a_constant():
     assert ct.tab_url("5417062", "events")["url"] == "https://www.linkedin.com/company/5417062/events/"
 
 
-@pytest.mark.parametrize("tab", ["About", "posts", "life", "../about", "", None, 3])
+@pytest.mark.parametrize("tab", ["About", "people", "life", "../about", "", None, 3])
 def test_any_other_tab_is_refused_without_repeating_it(tab):
     refused = ct.tab_url("5417062", tab)
     assert refused["built"] is False and refused["refused"] == "unknown_tab"
@@ -431,3 +432,69 @@ def test_the_insights_tab_is_composed_with_its_one_admitted_query():
     )
     assert ct.landed_on_tab(
         "https://www.linkedin.com/company/example-org/insights/?insightType=HEADCOUNT", "insights")
+
+
+# ---------------------------------------------------------------------------
+# The Page's posts (J 168), off the Page root's Posts view (session 9)
+# ---------------------------------------------------------------------------
+
+POSTS_VIEW = Path(__file__).resolve().parent / "fixtures" / "live9" / "company_root_posts_view.html"
+ROOT_URL = "https://www.linkedin.com/company/example-org/"
+_BOX = 'data-testid="expandable-text-box">x'
+
+
+def posts_markup(words_for=lambda i: "Example Page update %d" % (i + 1)) -> str:
+    """Session 9's Posts view with a synthetic first line planted in each of
+    its thirteen text boxes, in document order."""
+    markup = POSTS_VIEW.read_text(encoding="ascii")
+    assert markup.count(_BOX) == 13
+    for index in range(13):
+        markup = markup.replace(_BOX, 'data-testid="expandable-text-box">' + words_for(index), 1)
+    return markup
+
+
+def test_the_posts_view_returns_each_item_with_one_text_box_as_a_record():
+    result, page = run(ct.read_posts_tab, posts_markup(), ROOT_URL)
+    assert page.unmodelled == [] and page.planted_answers == []
+    assert result["view"] == "posts"
+    assert result["items_seen"] == 13
+    assert len(result["posts"]) == 11
+    assert result["posts_without_text"] == 1
+    assert result["posts_with_several_text_boxes"] == 1
+    for record in result["posts"]:
+        assert record["read_from"] == "page_post"
+        assert record["text"].startswith("Example Page update ")
+        assert type(people_data.as_record(record)) is people_data.OrganisationProse
+
+
+def test_a_reshares_two_boxes_are_never_read():
+    """MEASURED ON THE CAPTURE: in document order the thirteen boxes belong to
+    the feed items one box each, except that the sixth item holds the fifth
+    and sixth boxes and the second holds none. Each box is planted with its
+    own number; the two of the two-box item never come back."""
+    result, _ = run(ct.read_posts_tab, posts_markup(lambda i: "Example box %d" % i), ROOT_URL)
+    returned = [int(r["text"].split()[2]) for r in result["posts"]]
+    assert returned == [0, 1, 2, 3, 6, 7, 8, 9, 10, 11, 12]
+
+
+def test_with_no_feed_item_heading_the_root_is_a_failed_read():
+    markup = posts_markup().replace("<span>Feed post</span>", "<span>x</span>")
+    with pytest.raises(ExtractionFailedError):
+        run(ct.read_posts_tab, markup, ROOT_URL)
+
+
+def test_two_marked_anchors_to_the_same_tab_are_one_tab_and_different_tabs_disagree():
+    result, _ = run(ct.read_posts_tab, posts_markup(), ROOT_URL)
+    assert result["view"] == "posts"
+    split = posts_markup().replace(
+        '<a aria-current="true" href="https://www.linkedin.com/company/x/posts/?feedView=x">',
+        '<a aria-current="true" href="https://www.linkedin.com/company/x/about/">', 1)
+    result, _ = run(ct.read_posts_tab, split, ROOT_URL)
+    assert result["view"] == "tabs_disagree"
+
+
+def test_the_posts_are_read_off_the_root_address():
+    assert ct.tab_url("5417062", "posts")["url"] == "https://www.linkedin.com/company/5417062/"
+    assert ct.landed_on_tab(ROOT_URL, "posts")
+    assert ct.landed_on_tab(ROOT_URL + "posts/", "posts")
+    assert not ct.landed_on_tab(ROOT_URL + "about/", "posts")

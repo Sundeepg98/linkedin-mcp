@@ -78,14 +78,20 @@ from linkedin_server.errors import ExtractionFailedError
 #: ``/company/<id>/``: its segment, and for the Insights tab the one query the
 #: read boundary admits with it (exactly ``insightType=HEADCOUNT``, the value
 #: LinkedIn drew). Closed: anything else is refused before any load.
+#:
+#: ``posts`` HAS NO SEGMENT OF ITS OWN (census ``J 168``, 2026-11-26): the read
+#: boundary refuses ``/company/<x>/posts/``, and the admitted ROOT drew the
+#: Posts view on 2026-10-10 (session 9), so the posts are read off the root.
 TAB_SEGMENTS: dict[str, str] = {
     "about": "about",
     "events": "events",
     "insights": "insights",
+    "posts": "",
 }
 TAB_QUERIES: dict[str, str] = {"insights": "?insightType=HEADCOUNT"}
 TAB_PATHS: dict[str, str] = {
-    tab: segment + "/" + TAB_QUERIES.get(tab, "") for tab, segment in TAB_SEGMENTS.items()
+    tab: (segment + "/" if segment else "") + TAB_QUERIES.get(tab, "")
+    for tab, segment in TAB_SEGMENTS.items()
 }
 
 #: Milliseconds any one read may wait; a node can vanish between a count and
@@ -221,10 +227,13 @@ def landed_on_tab(landed: Any, tab: str) -> bool:
     if parts.scheme != "https" or parts.netloc.lower() not in _LINKEDIN_HOSTS:
         return False
     path = parts.path or ""
+    if path.startswith("/company/unavailable/"):
+        return False
+    if tab == "posts":
+        # The root, or the Posts tab LinkedIn may redirect the root to.
+        return bool(re.fullmatch(r"/company/[^/?#]{1,200}/(?:posts/?)?", path))
     segment = re.escape(TAB_SEGMENTS[tab])
-    return bool(re.fullmatch(r"/company/[^/?#]{1,200}/%s/?" % segment, path)) and not path.startswith(
-        "/company/unavailable/"
-    )
+    return bool(re.fullmatch(r"/company/[^/?#]{1,200}/%s/?" % segment, path))
 
 
 # ---------------------------------------------------------------------------
@@ -265,20 +274,29 @@ async def _texts(locator: Any, failed: list[int], cap: int) -> list[Optional[str
 
 
 async def current_tab(page: Any, failed: list[int]) -> str:
-    """The last path segment of the ONE Page tab the page marks current, from
-    a closed vocabulary; ``no_current_tab`` or ``tabs_disagree`` otherwise."""
-    marked = page.locator('main nav a[aria-current="page"]')
+    """The last path segment of the Page tab the page marks current, from a
+    closed vocabulary; ``no_current_tab`` or ``tabs_disagree`` otherwise.
+
+    MEASURED IN TWO FORMS: the Ember tabs mark one anchor
+    ``aria-current="page"`` (session 11's About and Insights tabs); the SDUI
+    Posts view marks ``aria-current="true"`` on TWO anchors to the same tab
+    (session 9's root). Marked anchors that agree are one tab; anchors that
+    name different tabs disagree, and nothing is chosen between them."""
+    marked = page.locator('main nav a[aria-current="page"], main nav a[aria-current="true"]')
     total = await _count(marked, failed)
     if total == 0:
         return "no_current_tab"
-    if total > 1:
+    seen: set[str] = set()
+    for index in range(min(total, 8)):
+        href = await _attribute(marked.nth(index), "href", failed)
+        try:
+            segments = [s for s in urlsplit(href or "").path.split("/") if s]
+        except ValueError:
+            segments = []
+        seen.add(segments[-1] if len(segments) >= 3 and segments[0] == "company" else "")
+    if len(seen) != 1:
         return "tabs_disagree"
-    href = await _attribute(marked.nth(0), "href", failed)
-    try:
-        segments = [s for s in urlsplit(href or "").path.split("/") if s]
-    except ValueError:
-        segments = []
-    last = segments[-1] if len(segments) >= 3 and segments[0] == "company" else ""
+    last = seen.pop()
     return last if last in _TAB_WORDS else "unrecognised_tab"
 
 
@@ -668,8 +686,92 @@ async def read_insights_tab(page: Any) -> dict[str, Any]:
     return out
 
 
+# ---------------------------------------------------------------------------
+# The Page's posts (J 168), read off the Page ROOT
+# ---------------------------------------------------------------------------
+
+#: The accessible heading LinkedIn draws over every feed item, MEASURED by
+#: lane B4 (``company_home.FEED_ITEM_HEADING``): thirteen on session 9's Posts
+#: view, one on the 2026-09-23 Home view.
+FEED_ITEM_HEADING = "Feed post"
+
+#: The text box's hook on a feed item, MEASURED on session 9's Posts view:
+#: thirteen items, eleven holding one box, one holding none, one two.
+TEXT_BOX = '[data-testid="expandable-text-box"]'
+
+#: Feed items read at most on one page: the thirteen drawn, with room.
+POSTS_PER_PAGE = 40
+
+
+async def read_posts_tab(page: Any) -> dict[str, Any]:
+    """The Page's own posts, off the Page root ``page`` already shows.
+
+    THE ROOT, NOT THE TAB: the read boundary refuses ``/company/<x>/posts/``,
+    and on 2026-10-10 the admitted root address drew the Posts view itself
+    (lane B4's capture, session 9). So the tool loads the root, and this says
+    which view it read before anything else.
+
+    Each feed item -- a ``role="listitem"`` holding exactly one ``h2``
+    reading ``Feed post`` -- comes back as its words in a
+    ``people_data.OrganisationProse`` record (``read_from`` ``page_post``)
+    when it holds exactly ONE text box. An item with no box is a post without
+    words and is counted; an item with two -- a reshare, whose second box is
+    the reshared post's own words, possibly a member's -- is counted and NOT
+    read. No item's link is returned: the Posts view draws no permalink on
+    an item. Raises ``ExtractionFailedError`` when no feed item is read.
+    """
+    failed = [0]
+    out: dict[str, Any] = {
+        "tab": "posts",
+        "view": await current_tab(page, failed),
+        "posts": [],
+        "items_seen": 0,
+        "posts_without_text": 0,
+        "posts_with_several_text_boxes": 0,
+        "items_beyond_bound": 0,
+    }
+    items = page.locator('main div[role="listitem"]')
+    total = await _count(items, failed)
+    for index in range(min(total, MAX_PARTS)):
+        item = items.nth(index)
+        heads = [collapsed(t) for t in await _texts(item.locator("h2"), failed, 6)]
+        if heads.count(FEED_ITEM_HEADING) != 1:
+            continue
+        out["items_seen"] += 1
+        if len(out["posts"]) >= POSTS_PER_PAGE:
+            out["items_beyond_bound"] += 1
+            continue
+        boxes = item.locator(TEXT_BOX)
+        found = await _count(boxes, failed)
+        if found == 0:
+            out["posts_without_text"] += 1
+            continue
+        if found > 1:
+            out["posts_with_several_text_boxes"] += 1
+            continue
+        record = _prose_record(await _text(boxes.nth(0), failed), "page_post")
+        if record is None:
+            out["posts_without_text"] += 1
+            continue
+        out["posts"].append(record)
+    out["reads_failed"] = failed[0]
+    if out["items_seen"] == 0:
+        raise ExtractionFailedError(
+            "the Page root drew no feed item this reader knows; an empty list "
+            "here would be indistinguishable from a broken read "
+            f"(view read {out['view']!r}).",
+            hint=dom._landing_note(page),
+        )
+    return out
+
+
 #: The reader for each tab, by its token. The tool calls each one BY NAME
 #: (``server.linkedin_company_page_tab``), so the guards that follow calls by
 #: name -- the reachability inventory and the people-reader derivation -- find
 #: every reader wired and the record each one builds.
-READERS = {"about": read_about_tab, "events": read_events_tab, "insights": read_insights_tab}
+READERS = {
+    "about": read_about_tab,
+    "events": read_events_tab,
+    "insights": read_insights_tab,
+    "posts": read_posts_tab,
+}

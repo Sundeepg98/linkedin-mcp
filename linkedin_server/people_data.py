@@ -533,6 +533,9 @@ PROSE_SOURCES = (
     "about_industry",
     "about_headquarters",
     "about_specialties",
+    # 2026-11-26 (lane readers-jobs26, census ``J 168``): one of the Page's
+    # own feed items' words, read off its Posts view.
+    "page_post",
 )
 
 #: The cap on an organisation's prose, in characters after normalisation.
