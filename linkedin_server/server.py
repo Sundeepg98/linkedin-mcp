@@ -5814,9 +5814,11 @@ async def linkedin_search_jobs(
     Runs the search LinkedIn's own jobs page runs and reads the rendered
     results: title, company, location, job id and link.
 
-    One page load per call, no scrolling and no auto-paging. capped in the
-    result tells you the limit trimmed the rows, and page_had tells you how
-    many the page actually held.
+    One page load per call, or one per place when `locations` names several
+    (at most five, the one declared exception to the per-call ceiling of
+    three), with no scrolling and no auto-paging. capped in the result tells
+    you the limit trimmed the rows, and page_had tells you how many the page
+    actually held.
 
     THE WINDOW IS SEVEN POSTINGS PER CALL, AND THAT IS A MEASUREMENT, NOT A
     LIMIT YOU SET. Every load returns the seven job cards this reader can see
