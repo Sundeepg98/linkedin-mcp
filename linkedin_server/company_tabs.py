@@ -71,7 +71,7 @@ import re
 from typing import Any, Optional
 from urllib.parse import urlsplit
 
-from linkedin_server import company_page, people_data
+from linkedin_server import company_page, dom, people_data
 from linkedin_server.errors import ExtractionFailedError
 
 #: The tabs this module reads, each with the path it is addressed by under
@@ -365,7 +365,8 @@ async def read_about_tab(page: Any) -> dict[str, Any]:
             "the About tab yielded no Overview card and no recognised fact, and "
             "nothing on the page says the organisation has none; reporting an "
             "empty About tab here would be indistinguishable from a broken read "
-            f"(view read {view!r}, {out['overview_headings']} Overview heading(s))."
+            f"(view read {view!r}, {out['overview_headings']} Overview heading(s)).",
+            hint=dom._landing_note(page),
         )
     return out
 
@@ -491,7 +492,8 @@ async def read_events_tab(page: Any) -> dict[str, Any]:
             "organisation has none; an empty answer here would be "
             "indistinguishable from a broken read "
             f"({out['events_headings']} Events heading(s), "
-            f"{len(out['cards'])} recognised card(s))."
+            f"{len(out['cards'])} recognised card(s)).",
+            hint=dom._landing_note(page),
         )
     return out
 
@@ -660,7 +662,8 @@ async def read_insights_tab(page: Any) -> dict[str, Any]:
         raise ExtractionFailedError(
             "the Insights tab yielded no known module and no function row; an "
             "empty answer here would be indistinguishable from a broken read "
-            f"({out['function_tables']} function table(s) found)."
+            f"({out['function_tables']} function table(s) found).",
+            hint=dom._landing_note(page),
         )
     return out
 

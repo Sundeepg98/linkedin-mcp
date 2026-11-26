@@ -777,3 +777,18 @@ def test_control_the_page_tab_chain_convicts_a_dropped_reader() -> None:
         "company_tabs.read_events_tab(", "company_tabs.read_events_gone(", 1)
     assert _page_tab_calls(source) == {"read_about_tab", "read_events_tab", "read_insights_tab"}
     assert _page_tab_calls(mutated) == {"read_about_tab", "read_insights_tab", "read_events_gone"}
+
+
+def test_the_application_settings_chain_is_still_whole() -> None:
+    """``P M2`` (lane readers-jobs26, 2026-11-26): the tool -> the page's
+    reader. The row claims COVERED-UNFIRED on it."""
+    tree = ast.parse(_source("server.py"))
+    calls = {
+        ast.unparse(inner.func)
+        for node in ast.walk(tree)
+        if isinstance(node, ast.AsyncFunctionDef) and node.name == "linkedin_application_settings"
+        for inner in ast.walk(node)
+        if isinstance(inner, ast.Call)
+    }
+    assert "application_settings.read_application_settings" in calls, (
+        "linkedin_application_settings no longer calls its reader; P M2's chain is broken")

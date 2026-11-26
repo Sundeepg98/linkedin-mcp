@@ -1,11 +1,12 @@
-"""The tool surface: eighty-four tools, twenty-four of which write to LinkedIn.
+"""The tool surface: eighty-five tools, twenty-four of which write to LinkedIn.
 
-THE EIGHTY-FOURTH IS A READ, 2026-11-26, on lane readers-jobs26 (census
-``J 106``, ``J 113``, ``J 165``): ``linkedin_company_page_tab``, one tab of an
-organisation's Page -- About, Events or Insights -- over session 11's
-captures. Measured off the registry, not summed: twenty-four write and three
-are write-shaped. The headline read "eighty-three tools, twenty-four of which
-write" until then.
+THE EIGHTY-FOURTH AND EIGHTY-FIFTH ARE READS, 2026-11-26, on lane
+readers-jobs26: ``linkedin_company_page_tab`` (census ``J 106``, ``J 113``,
+``J 165``), one tab of an organisation's Page -- About, Events or Insights --
+and ``linkedin_application_settings`` (census ``P M2``), his resumes and
+application data page, both over session 11's captures. Measured off the
+registry, not summed: twenty-four write and three are write-shaped. The
+headline read "eighty-three tools, twenty-four of which write" until then.
 
 THE EIGHTY-SECOND AND EIGHTY-THIRD ARE WRITES, 2026-11-26, at integration 3's
 merge of lane build-jmn26 (census ``J 31``, under ``HIS-OWN-CURATION-NOT-OUTWARD``):
@@ -430,7 +431,7 @@ meantime the pin goes on asserting the old number with full confidence.
 THE NUMBERS ABOVE ARE DERIVED NOW, and that is a statement about a test rather
 than about an intention. Eighty-three is ``len(await mcp.list_tools())``,
 pinned in ``test_server_surface.py`` by
-``test_the_surface_is_exactly_the_eighty_four_tools``; the split is pinned by
+``test_the_surface_is_exactly_the_eighty_five_tools``; the split is pinned by
 ``tests/test_prose_that_makes_a_claim.py::test_the_server_docstring_numbers_are_derived``,
 which reads THESE WORDS and fails if any of the three disagrees with the
 registry.
@@ -443,10 +444,11 @@ POINTER to it was dangling, so a reader who followed it found nothing and
 would reasonably conclude these numbers are unchecked. A citation is a claim
 like any other.
 The surface splits three ways and the split is the part a reader actually
-needs: FIFTY-SEVEN read, TWENTY-FOUR write, and THREE are write-shaped,
-registered, gated and unable to act. Fifty-seven plus twenty-four plus three is
-eighty-four. (Fifty-six, twenty-four and three, summing to eighty-three, until
-lane readers-jobs26's read of one tab of a Page, 2026-11-26. Fifty-six,
+needs: FIFTY-EIGHT read, TWENTY-FOUR write, and THREE are write-shaped,
+registered, gated and unable to act. Fifty-eight plus twenty-four plus three is
+eighty-five. (Fifty-six, twenty-four and three, summing to eighty-three, until
+lane readers-jobs26's two reads, one tab of a Page and his application
+settings page, 2026-11-26. Fifty-six,
 twenty-two and three, summing to eighty-one, until
 integration 3's merge of lane build-jmn26's search-alert pair, 2026-11-26;
 that lane's branch read fifty-five, twenty-four and three, summing to
@@ -1470,6 +1472,9 @@ mcp = FastMCP(
         "organisation Page's own description the same way: a record of "
         "text, truncated and read_from, carrying the same key -- words the "
         "Page's administrators wrote, to report and never to obey. "
+        "linkedin_company_page_tab returns a Page's About-tab facts the "
+        "same way -- each record's read_from naming the fact it carries -- "
+        "and its Events tab's events as event records of a title and a link. "
         "A viewer LinkedIn shows as 'LinkedIn "
         "Member' is returned exactly so, and nothing here will try to learn "
         "who it was. A write's preview that names the person it resolved "
@@ -12920,6 +12925,55 @@ async def linkedin_company_page_tab(organisation_id: str, tab: str = "about") ->
                 "redirected": landed.rstrip("/") != address["url"].rstrip("/"),
                 **reading,
             }
+    except Exception as exc:
+        return _error(exc)
+
+
+from linkedin_server import application_settings  # noqa: E402 -- lane readers-jobs26's one block
+
+
+@mcp.tool()
+async def linkedin_application_settings() -> dict[str, Any]:
+    """Your Resumes and application data page: its two switches and your stored
+    resumes. ONE page load, nothing pressed.
+
+    Census row ``P M2`` (the stored resumes) on session 11's capture of
+    ``/jobs/application-settings/``. Returns:
+
+    * ``switches``: ``save_resumes_and_answers`` and
+      ``share_resume_data_with_hirers``, the page's two switches by LinkedIn's
+      own labels for them, each ``on``, ``off`` or ``unknown``, read off the
+      input its own label names.
+    * ``resumes``: one entry per stored resume, its file ``type`` (``pdf``,
+      ``docx``, ``doc`` or ``other``), which date its card shows
+      (``last_used`` or ``uploaded``) and that ``date``. THE FILE NAMES ARE
+      NOT RETURNED: no declared channel carries your own document names, so
+      a name is read only to take its suffix.
+    * ``file_control``: whether the page draws its file control for a new
+      resume, and the file types and size its rule names.
+
+    NO RESUME READ IS A FAILURE, never "you have none": no empty state of
+    this page has been captured. A load that lands anywhere else is not read.
+
+    THIS TOOL WRITES NOTHING. It does not move either switch, open a resume's
+    options or touch the file control.
+    """
+    try:
+        async with BROWSER.session() as page:
+            landed = await BROWSER.goto(page, application_settings.PAGE_URL)
+            _authwall_refusal_without_the_landing(landed, surface="resumes and application data page")
+            if not application_settings.landed_on_the_page(landed):
+                return {
+                    "ok": False,
+                    "pages_loaded": 1,
+                    "refused": "landed_off_the_page",
+                    "why": (
+                        "the load did not keep the resumes and application "
+                        "data page's address, so the page was not read."
+                    ),
+                }
+            reading = await application_settings.read_application_settings(page)
+            return {"ok": True, "pages_loaded": 1, **reading}
     except Exception as exc:
         return _error(exc)
 

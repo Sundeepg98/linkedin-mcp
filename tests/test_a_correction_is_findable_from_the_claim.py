@@ -308,7 +308,7 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
     ),
     ("jobs.md", "2026-11-26-readers-jobs26.md"): (
         "A ROW'S MOVE OR NEXT STEP RECORDED, NOT A CORRECTION. Rows `52`, "
-        "`106`, `111`, `113`, `114` and `165` each gained one dated note citing "
+        "`70` to `76`, `106`, `111`, `113`, `114` and `165` each gained one dated note citing "
         "lane readers-jobs26's record -- what the row's session-11 capture "
         "draws, and its move to COVERED-UNFIRED or its re-pointed step -- and "
         "none says anything in that record does not hold. The matched word is "
@@ -316,6 +316,17 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "above `106`. **WHAT WOULD MAKE THIS ENTRY WRONG:** a jobs row saying "
         "something in the lane's record does not hold while leaving the record "
         "unmarked."
+    ),
+    ("profile.md", "2026-11-26-readers-jobs26.md"): (
+        "A ROW'S MOVE OR NEXT STEP RECORDED, NOT A CORRECTION. Rows `M1` to "
+        "`M8` and `M12` each gained one dated note citing lane readers-jobs26's "
+        "record -- what session 11's capture of his application settings page "
+        "draws, and the row's move or re-pointed step -- and none says anything "
+        "in that record does not hold. The matched word is `M1`'s own older "
+        "text ('which has been false since 2026-09-04', about the upload "
+        "verb's sanction), in the same cell the note was appended to. **WHAT "
+        "WOULD MAKE THIS ENTRY WRONG:** a profile row saying something in the "
+        "lane's record does not hold while leaving the record unmarked."
     ),
     ("messaging-and-content.md", "2026-11-25-build-jmn26.md"): (
         "A ROW'S NEXT STEP RECORDED, NOT A CORRECTION. Rows `C29` and `C97` "

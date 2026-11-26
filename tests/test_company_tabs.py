@@ -300,16 +300,16 @@ def test_an_unknown_card_heading_is_counted_and_its_events_not_read():
 
 
 def test_each_tab_is_composed_from_the_numeric_id_and_a_constant():
-    assert ct.tab_url("1234567890", "about") == {
-        "built": True, "url": "https://www.linkedin.com/company/1234567890/about/",
-        "identifier": "1234567890", "tab": "about",
+    assert ct.tab_url("5417062", "about") == {
+        "built": True, "url": "https://www.linkedin.com/company/5417062/about/",
+        "identifier": "5417062", "tab": "about",
     }
-    assert ct.tab_url("1234567890", "events")["url"] == "https://www.linkedin.com/company/1234567890/events/"
+    assert ct.tab_url("5417062", "events")["url"] == "https://www.linkedin.com/company/5417062/events/"
 
 
 @pytest.mark.parametrize("tab", ["About", "posts", "life", "../about", "", None, 3])
 def test_any_other_tab_is_refused_without_repeating_it(tab):
-    refused = ct.tab_url("1234567890", tab)
+    refused = ct.tab_url("5417062", tab)
     assert refused["built"] is False and refused["refused"] == "unknown_tab"
     if isinstance(tab, str) and tab:
         assert tab not in refused["why"].replace("'about'", "").replace("'events'", "")
@@ -322,7 +322,7 @@ def test_a_slug_is_refused_as_the_root_composer_refuses_it():
 
 @pytest.mark.parametrize("landed,tab,ok", [
     ("https://www.linkedin.com/company/example-org/about/", "about", True),
-    ("https://www.linkedin.com/company/1234567890/about", "about", True),
+    ("https://www.linkedin.com/company/5417062/about", "about", True),
     ("https://www.linkedin.com/company/example-org/events/", "events", True),
     ("https://www.linkedin.com/company/example-org/", "about", False),
     ("https://www.linkedin.com/company/unavailable/about/", "about", False),
@@ -426,8 +426,8 @@ def test_a_cell_is_read_under_the_header_it_names_not_its_position():
 
 
 def test_the_insights_tab_is_composed_with_its_one_admitted_query():
-    assert ct.tab_url("1234567890", "insights")["url"] == (
-        "https://www.linkedin.com/company/1234567890/insights/?insightType=HEADCOUNT"
+    assert ct.tab_url("5417062", "insights")["url"] == (
+        "https://www.linkedin.com/company/5417062/insights/?insightType=HEADCOUNT"
     )
     assert ct.landed_on_tab(
         "https://www.linkedin.com/company/example-org/insights/?insightType=HEADCOUNT", "insights")

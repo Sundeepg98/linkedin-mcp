@@ -239,3 +239,111 @@ and the builder's name is the module's own; both guards are green on it. The
 tool's docstring first said "share of headcount", and the write-claim
 scanner in `tests/test_server_surface.py` read "share" as a write; it now
 says "percentage of the Page's headcount".
+
+---
+
+## 3. Line 1, his resumes and application data page: `P M2` built; ten rows read
+
+Session 11, load 11, `/jobs/application-settings/`, served at its own
+address, raw kept in gitignored state (no other member on the page). Tracked
+as `tests/fixtures/live11/application_settings.html`; with ten LinkedIn
+words and sentences measured by keyed shape (read off the raw capture by
+element, then confirmed by key), as `application_settings_words.html`.
+
+WHAT THE PAGE DRAWS, MEASURED, inside its `role="main"` region:
+
+- one `h1`, `Resumes and application data`;
+- `Save resumes and application data`: LinkedIn's sentence "Allow LinkedIn to
+  save your resumes and answers to application questions. You may change your
+  answers with each application.", and ONE switch, an
+  `input[role=switch][type=checkbox]` its label names by `for`: `Allow
+  LinkedIn to save your resumes and answers`, `aria-checked="true"`;
+- `Share resume data with hirers`: LinkedIn's sentence that hirers can view
+  skills and experiences from the resumes he chooses to share, and ONE
+  switch, `Allow recruiters to view your resumes`, `aria-checked="true"`;
+- FOUR resume cards, each an `h3` holding the file's name (his data), a
+  paragraph `Last used on <date>` or `Uploaded on <date>`, and an options
+  button labelled `Show options for <the file's name>` whose menu is EMPTY
+  while closed;
+- `Upload resume`, a `label[role=button]` bound by `for` to one
+  `input[type=file]`, and the rule `DOC, DOCX, PDF (5MB)`;
+- no Save button: each switch stores itself.
+
+### 3.1 `P M2` -- the stored resumes: GAP -> COVERED-UNFIRED
+
+`linkedin_application_settings()` (`linkedin_server/application_settings.py`)
+loads the one admitted address and, if the landing kept it, returns: the two
+switches by key, each `on`, `off` or `unknown`, read off the input its own
+label names (compared in this process, never built into a selector); one
+entry per resume -- its file type (`pdf`, `docx`, `doc`, `other`, from the
+name's own suffix), which date the card shows, and that date as an ISO date;
+and whether the file control is drawn, with the types and size its rule
+names. A zero is never "you have none": no empty state of this page has been
+captured, so no card read raises.
+
+SCOPE, STATED: THE FILE NAMES DO NOT LEAVE. A resume's name is his own
+data, but no declared channel carries his own document names: `people_data`
+records are other members' words, and the tool-envelope guard's inventory of
+page text outside a record may shrink and may not grow (its ratchet, since
+2026-09-24). So a name is read only to take its suffix, and the options
+button's label, which repeats it, is never read. Whether his own document
+names may leave is question 2.
+
+`tests/test_application_settings.py`, 16 passed, over the words fixture
+through `tests/skeleton_page.py`: both switches and four synthetic resumes
+read; no planted name leaves in any field; turning the second switch off on
+its own input moves only its key; a label bound to no input reads
+`unknown`; the committed copy with its words reduced, and cards whose dates
+do not read, each raise; an unknown suffix is `other`; the landing vetoes;
+and the tool loads exactly the admitted address, and refuses to read a
+landing elsewhere. The first docstring quoted LinkedIn's switch label ("to
+save your resumes") and named the file control "upload"; the write-claim
+scanner read both as claims, and the docstring now names neither.
+
+### 3.2 The other nine rows on the line, and the six riders
+
+THE OPTIONS MENU IS WHERE FIVE ROWS WAIT. Download (`J 72`, `P M4`), delete
+(`P M3`, and the delete half of `J 71`) and the upload's inverse (`P M1`)
+can only be behind the resume card's options button, whose menu is not in
+the document while closed. NEXT: CAPTURE `C-RJ26-3`, one resume card's
+options menu opened as a disclosure, its items read, closed on Escape,
+nothing chosen. `J 71`'s list half is `P M2`'s reader; the row stays GAP as
+one compound row until that capture.
+
+THE PAGE TIES NO RESUME TO AN APPLICATION. Each card dates the resume's last
+use or its upload and names no job (`J 73`, `P M5`). Whether LinkedIn shows
+the resume an application carried is for a job he applied to: NEXT TARGET,
+on the queue line `t-named-job`, "a job he applied to, and its poster".
+
+THE PAGE DRAWS TWO SWITCHES, AND NEITHER SHARES HIS FULL PROFILE. `J 75`
+("Share your full profile when you click Apply") waited on this very
+surface (`O-JOB-APPLICATION-SETTINGS`), and its capture draws exactly the two
+switches above. MEASURED-ABSENT under the orchestrator's
+`MEASURED-ABSENT-OR-PRECONDITION` and `ABSENT-ON-HIS-ACCOUNT-PER-ROW`: not
+offered to his account. Reopener: a capture that draws such a switch.
+
+NO SAVED ANSWER IS LISTED. `P M6` ("Saved screening-question answers") is
+named by the page only as what the first switch saves, beside LinkedIn's
+own words that he "may change your answers with each application"; no
+answer, list or editor of answers is drawn. MEASURED-ABSENT on the same two
+rulings. Reopener: a capture that draws his saved answers outside an
+application.
+
+THE TWO SWITCHES ARE MEASURED AND NOT ADMITTED FOR WRITING. `J 74` and
+`P M8` (share resume data with hirers), and `J 76` and `P M7` (save resumes
+and application data), wait on lane S's writer, `linkedin_set_admitted_setting`
+(next step `SIBLING:lane-S`). Its capture is now taken, and both controls
+are switches -- the kind that writer sets. Admitting the page by name into
+`settings_writer.ADMITTED_PAGES` is NOT done here, for two reasons recorded
+as question 3: the writer's `audiences()` refuses, at import, two admitted
+controls holding the same value words with different meanings (both
+switches hold `on` and `off`), so it must be re-keyed first; and the write
+door's exemptions would have to excuse `/jobs/application` for this
+address, a boundary call lane admit5-26 owns.
+
+`J 70` (upload a new resume) stays `SIBLING:lane-U`: the control is drawn,
+and its inverse waits on `C-RJ26-3`. `P M12` (resume tips): this page draws
+none. Session 2's posting, the capture its cell names, draws `Use AI to
+assess how you fit` with `Tailor my resume` (keyed shapes, session 2's
+key): that is row `J 147`'s capability, so `P M12`'s step becomes
+`SIBLING:J 147`.

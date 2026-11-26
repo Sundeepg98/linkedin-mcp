@@ -97,6 +97,9 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     # 2026-11-26 (lane readers-jobs26, census J 106, J 113, J 165): one tab
     # of a Page -- About, Events or Insights -- over session 11's captures.
     "linkedin_company_page_tab": ("organisation_id", "tab"),
+    # 2026-11-26 (lane readers-jobs26, census P M2): his resumes and
+    # application data page, the two switches and the stored resumes.
+    "linkedin_application_settings": (),
     "linkedin_compose_fields": (),
     "linkedin_connect_from_profile": ("confirm_token", "profile"),
     "linkedin_connections": ("limit",),
@@ -740,7 +743,10 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: eighty-three and 134, counted off `mcp.list_tools()`, never summed. THE
 #: CENSUS DECISION, IN THE SAME COMMIT: `J 106`, `J 113` and `J 165` GAP ->
 #: COVERED-UNFIRED on it, never fired. See `_audit/2026-11-26-readers-jobs26.md`.
-PINNED_TOOL_COUNT = 84
+#: **AND 85 TOOLS, 136 PARAMETERS** on the same lane: `linkedin_application_settings()`,
+#: one READ and no parameter. THE CENSUS DECISION, IN THE SAME COMMIT: `P M2`
+#: GAP -> COVERED-UNFIRED on it, never fired.
+PINNED_TOOL_COUNT = 85
 PINNED_PARAMETER_COUNT = 136
 
 
