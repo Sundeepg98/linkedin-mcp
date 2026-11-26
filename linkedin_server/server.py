@@ -5821,10 +5821,10 @@ async def linkedin_search_jobs(
     reads whatever the load LANDED on, reported as ``route``: ``classic_search``,
     or ``ai_search`` when LinkedIn served its AI search instead. Classic is the
     PRIMARY route while it serves (ruling Q-SEARCH-ROUTE-POLICY). The AI route
-    is the FALLBACK and honours ``keywords``; ``easy_apply`` there is a LOCAL
-    post-filter on each card's own drawn Easy Apply mark, reported as
-    ``easy_apply_post_filter`` with the count before and after, and it is NOT
-    LinkedIn's Easy Apply filter (ruling AI-EASY-APPLY-POST-FILTER). Every other
+    is the FALLBACK and honours ``keywords``. There ``easy_apply`` narrows the
+    one window loaded, locally, to the cards whose own ``easy_apply`` field is
+    true -- it is not LinkedIn's Easy Apply filter, and the result says so in
+    ``easy_apply_post_filter`` with the count before and after. Every other
     argument is REFUSED there, by name, until a fire measures LinkedIn
     honouring it, because a filter accepted and ignored puts an unfiltered
     shortlist in front of you. A landing on any other page refuses, naming only
