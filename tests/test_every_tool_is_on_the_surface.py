@@ -490,4 +490,5 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # a write-shaped tool that refuses (census J 19), measured off the registry.
     # NINETY-THREE ON THE SAME LANE: linkedin_send_recommendations_feedback, a
     # receipt-only write (census J 163), measured off the registry.
-    assert len(_tool_names()) == 93
+    # NINETY-FOUR ON THE SAME LANE: linkedin_job_alerts, a read (census J 37).
+    assert len(_tool_names()) == 94

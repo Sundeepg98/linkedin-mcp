@@ -177,6 +177,11 @@ DECLARED: dict[tuple[str, str], tuple[str, int]] = {
     # with no card. No url; the landing described in the hint by
     # dom._landing_note, as the readers above do.
     ("content_search.py", "read_content_results"): (WITHHELD, 2),
+    # 2026-11-26 (lane build-jobs2, census J 37): the alert manager's two
+    # refusals of an uncorroborated zero -- no manager headed with LinkedIn's
+    # words, or a manager with no readable row. Handed a page and never a url;
+    # the landing described in the hint by dom._landing_note.
+    ("job_alerts_manager.py", "read_alert_manager"): (WITHHELD, 2),
     # --- ASKED_FOR: the seven tool-side raises ----------------------------
     # `url` is this helper's own parameter, composed by its caller
     # (`linkedin_search_jobs._search_url`) out of BASE_URL and urlencode.
@@ -600,10 +605,12 @@ def test_the_twenty_are_still_twenty():
     # search-fix26, readers-jobs26, readers-net26 and readers-msg26, every site
     # of each kept, the tally MEASURED off the merged table, not summed:
     # {WITHHELD 21, ASKED_FOR 17, PASSTHROUGH 1, NO_ADDRESS_IN_SCOPE 10}.
-    assert tally[WITHHELD] == 21, tally
+    # FORTY-ONE ON LANE BUILD-JOBS2 (2026-11-26): the alert manager's two
+    # WITHHELD raises (census J 37), so WITHHELD is 23. MEASURED off this table.
+    assert tally[WITHHELD] == 23, tally
     assert tally[ASKED_FOR] == 17, tally
     assert tally[PASSTHROUGH] == 1, tally
-    assert tally[WITHHELD] + tally[ASKED_FOR] + tally[PASSTHROUGH] == 39, tally
+    assert tally[WITHHELD] + tally[ASKED_FOR] + tally[PASSTHROUGH] == 41, tally
     assert tally[NO_ADDRESS_IN_SCOPE] == 10, tally
 
 

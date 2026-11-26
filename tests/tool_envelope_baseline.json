@@ -26,6 +26,7 @@
     "linkedin_group_memberships": "clean",
     "linkedin_group_page": "not_driven:never read the page",
     "linkedin_item_viewer_demographics": "not_driven:never read the page",
+    "linkedin_job_alerts": "clean",
     "linkedin_job_collections": "clean",
     "linkedin_job_detail": "not_driven:never read the page",
     "linkedin_list_conversations": "clean",

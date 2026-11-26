@@ -5,10 +5,10 @@ Kept as the PROVENANCE of ``tests/fixtures/live2/j18_words.html`` and
 builds census rows ``J 19`` and ``J 163`` over, 2026-11-26.
 
 THE INPUT is the gitignored KEYED skeleton the live lane wrote in each session
-(``<state dir>/live2/j18.skeleton.html`` and
-``<state dir>/live8/lk_recommended.skeleton.html``, every text and attribute
-value a keyed shape ``{L<letters>D<digits>n<length>:<8-hex hash>}``) and that
-session's key (``<state dir>/live<n>/shape.key``). Both are read, neither is
+(``<session dir>/<capture>.skeleton.html``, every text and attribute value a
+keyed shape ``{L<letters>D<digits>n<length>:<8-hex hash>}``) and that
+session's key (``<session dir>/shape.key``), each session's directory given on
+the command line by its label. Both are read, neither is
 written anywhere, and nothing here prints a hash, the key or a value it read.
 The committed copy (``tests/fixtures/live2/j18.html``,
 ``tests/fixtures/live8/recommended.html``) is ``tracked_copy`` of the same
@@ -25,7 +25,8 @@ REFUSES the build. Every other value is reduced exactly as ``tracked_copy``
 reduces it. The machinery is ``scripts/_build_live11_word_skeletons.py``'s,
 imported, with each fixture's own session.
 
-    python scripts/_build_jobs2_word_skeletons.py --state-dir <dir> [--only NAME] [--check]
+    python scripts/_build_jobs2_word_skeletons.py --session live2=<dir> --session live8=<dir>
+        --session live11=<dir> [--only NAME] [--check]
 
 ``--check`` writes nothing and exits non-zero if a committed fixture differs
 from what this would write. Prints counts and a sha256 digest per fixture,
@@ -75,6 +76,14 @@ SPEC: dict[str, tuple[str, str, str, tuple[str, ...]]] = {
             "Are you finding what you" + RSQUO + "re looking for? Yes",
         ),
     ),
+    # J 37: the jobs home's alert manager (session 11, load 17), open on load
+    # outside main. Its heading; every alert's words stay x.
+    "live11/jobs_alerts_manager_words": (
+        "live11",
+        "jobs_alerts_manager",
+        "live11/jobs_alerts_manager",
+        ("Manage job alerts",),
+    ),
 }
 
 
@@ -96,15 +105,19 @@ def header(stem: str, session: str, copy: str, words: tuple[str, ...]) -> str:
 
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n", 1)[0])
-    parser.add_argument("--state-dir", required=True, type=Path)
+    parser.add_argument("--session", action="append", default=[],
+                        help="label=directory, once per session the SPEC names")
     parser.add_argument("--only", default="")
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args(argv)
+    sessions = dict(item.split("=", 1) for item in args.session)
     drift = 0
     for stem, (session, skeleton_stem, copy, words) in sorted(SPEC.items()):
         if args.only and stem != args.only:
             continue
-        session_dir = args.state_dir / session
+        if session not in sessions:
+            raise SystemExit(f"{stem}: no --session given for {session}")
+        session_dir = Path(sessions[session])
         key = bytes.fromhex((session_dir / "shape.key").read_text(encoding="utf-8").strip())
         skeleton = (session_dir / (skeleton_stem + ".skeleton.html")).read_text(encoding="utf-8")
         base = s2.tracked_copy(skeleton)

@@ -116,6 +116,7 @@
     "job_alert_switch:read_state": "clean",
     "job_alert_switch:read_switch": "clean",
     "job_alert_switch:trial_press": "not_driven:navigates (locator.click)",
+    "job_alerts_manager:read_alert_manager": "not_driven:raises ExtractionFailedError",
     "job_collections:read_job_collection": "clean",
     "job_feedback:read_block": "clean",
     "job_home:read_recent_searches": "clean",

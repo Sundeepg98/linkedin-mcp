@@ -205,6 +205,10 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     # 2026-11-26, lane build-jobs2: the receipt-only feedback press. Census
     # J 163 GAP -> COVERED-UNFIRED on it, never fired.
     "linkedin_send_recommendations_feedback": ("answer", "confirm_token"),
+    # 2026-11-26, lane build-jobs2: his job alerts off the alert manager.
+    # Census J 37 does NOT move: its manage half is unbuilt (the record's
+    # question asks whether the row splits).
+    "linkedin_job_alerts": (),
     # 2026-11-24, lane builds-26: SANCTIONED AND REFUSING -- the stage move on
     # a saved job. Census J 54 does NOT move: its control has never been
     # captured; the cell names that capture as its held-by.
@@ -786,7 +790,9 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: **ON THE SAME LANE: 93 TOOLS AND 140 PARAMETERS** --
 #: `linkedin_send_recommendations_feedback(answer, confirm_token)`, a write;
 #: census `J 163` GAP -> COVERED-UNFIRED on it. Counted off the registry.
-PINNED_TOOL_COUNT = 93
+#: **ON THE SAME LANE: 94 TOOLS AND 140 PARAMETERS** -- `linkedin_job_alerts()`,
+#: a read with no parameter. Counted off the registry.
+PINNED_TOOL_COUNT = 94
 PINNED_PARAMETER_COUNT = 140
 
 

@@ -7,7 +7,7 @@ J 33	J	W	-	TARGET:a job alert of his he names	INFERRED	RULING:HIS-OWN-CURATION-N
 J 34	J	W	-	TARGET:a job alert of his he names	INFERRED	RULING:HIS-OWN-CURATION-NOT-OUTWARD ; J 33
 J 35	J	W	-	SIBLING:lane-S	NAMED	_audit/_census/jobs-directions.tsv::Alert frequency is a setting ; RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 J 36	J	W	-	SIBLING:lane-S	NAMED	_audit/_census/jobs-directions.tsv::Alert delivery channel is a setting ; RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
-J 37	J	R+W	-	BUILD:tests/fixtures/live11/jobs_alerts_manager.html	MEASURED	_audit/2026-11-26-readers-jobs26.md::IT DRAWS THE ; RULING:NAMES-AT-RUNTIME
+J 37	J	R+W	-	RULING:Q-J37-SPLITS	MEASURED	_audit/2026-11-26-readers-jobs26.md::IT DRAWS THE ; RULING:HIS-OWN-TEXT-AT-RUNTIME ; RULING:COMPOUND-ROW-SPLITS-ONLY-ON-STATE
 J 41	J	W	-	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 J 53	J	W	-	CAPTURE:C-JMN-1	MEASURED	_audit/2026-11-25-build-jmn26.md::No capture of the Archived tab with a row exists ; RULING:HIS-OWN-CURATION-NOT-OUTWARD
 J 54	J	W	-	TARGET:a tracked job of his he names	INFERRED	RULING:HIS-OWN-CURATION-NOT-OUTWARD ; J 54

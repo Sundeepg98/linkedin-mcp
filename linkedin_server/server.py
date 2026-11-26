@@ -1,4 +1,11 @@
-"""The tool surface: ninety-three tools, twenty-five of which write to LinkedIn.
+"""The tool surface: ninety-four tools, twenty-five of which write to LinkedIn.
+
+THE NINETY-FOURTH IS A READ, 2026-11-26, on lane build-jobs2 (census ``J 37``,
+its list half; ruling HIS-OWN-TEXT-AT-RUNTIME): ``linkedin_job_alerts``, his
+job alerts as LinkedIn's own alert manager lists them on the jobs home --
+each alert's keywords and the names of its filters. It loads ONE page and
+presses nothing. Measured off the registry, not summed. The headline read
+"ninety-three tools, twenty-five of which write" until then.
 
 THE NINETY-THIRD IS A WRITE, 2026-11-26, on lane build-jobs2 (census
 ``J 163``, ruling J-163-RECEIPT-ONLY-WRITE):
@@ -486,9 +493,11 @@ POINTER to it was dangling, so a reader who followed it found nothing and
 would reasonably conclude these numbers are unchecked. A citation is a claim
 like any other.
 The surface splits three ways and the split is the part a reader actually
-needs: SIXTY-FOUR read, TWENTY-FIVE write, and FOUR are write-shaped,
-registered, gated and unable to act. Sixty-four plus twenty-five plus four is
-ninety-three. (Sixty-four, twenty-four and four, summing to ninety-two, until
+needs: SIXTY-FIVE read, TWENTY-FIVE write, and FOUR are write-shaped,
+registered, gated and unable to act. Sixty-five plus twenty-five plus four is
+ninety-four. (Sixty-four, twenty-five and four, summing to ninety-three, until
+lane build-jobs2's ``linkedin_job_alerts``, 2026-11-26. Sixty-four,
+twenty-four and four, summing to ninety-two, until
 lane build-jobs2's receipt-only ``linkedin_send_recommendations_feedback``,
 2026-11-26. Sixty-four, twenty-four and three, summing to ninety-one, until
 lane build-jobs2's refusing ``linkedin_set_recent_job_searches_cleared``,
@@ -14042,6 +14051,52 @@ async def linkedin_send_recommendations_feedback(
     """
     try:
         return await _write_tool("send_recommendations_feedback", answer, confirm_token)
+    except Exception as exc:
+        return _error(exc)
+
+
+from linkedin_server import job_alerts_manager  # noqa: E402 -- lane build-jobs2's one block
+
+
+@mcp.tool()
+async def linkedin_job_alerts() -> dict[str, Any]:
+    """Your job alerts, as LinkedIn's own alert manager lists them.
+
+    ONE PAGE LOAD, NO PRESSES. Census ``J 37``, the list half. The address is
+    a module constant, the jobs home (``/jobs/jam/``), where LinkedIn draws its
+    alert manager open on load (session 11's capture). Each alert comes back as
+    ``search_keywords`` -- the query exactly as ``linkedin_search_jobs`` takes
+    it, read off the alert's own search link -- and ``facets``, the NAMES of
+    the filters it carries (``distance``, ``geoId``, ``f_TPR``, ``f_SAL`` ...),
+    never their values. The keywords are your own text, returned to your own
+    session (HIS-OWN-TEXT-AT-RUNTIME).
+
+    WHAT IT WILL NOT TELL YOU: how often an alert notifies you, what its row
+    button does, or anything a press would open -- those words have never been
+    measured, and nothing here presses. Changing an alert stays with
+    ``linkedin_set_search_job_alert`` and its inverse, on the search itself.
+
+    A ZERO IS NEVER "NO ALERTS": no empty manager has been captured, so a
+    missing manager, or one whose rows do not read, is an error, not an empty
+    list. NOT YET FIRED LIVE: built offline over session 11's capture.
+    """
+    url = job_alerts_manager.HOME_URL
+    try:
+        async with BROWSER.session() as page:
+            landed = await BROWSER.goto(page, url)
+            assert_not_authwall(landed, surface="jobs home")
+            if not job_alerts_manager.landed_on_the_home(landed):
+                return {
+                    "ok": False,
+                    "error": "landed_elsewhere",
+                    "message": (
+                        "The jobs home did not keep its own address, so its alert "
+                        "manager was not read. The landing is withheld."
+                    ),
+                    "pages_loaded": 1,
+                }
+            reading = await job_alerts_manager.read_alert_manager(page)
+            return {"ok": True, "pages_loaded": 1, **reading}
     except Exception as exc:
         return _error(exc)
 

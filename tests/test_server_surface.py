@@ -1,4 +1,8 @@
-"""The tool surface: ninety-three tools, sixty-four of which do not write.
+"""The tool surface: ninety-four tools, sixty-five of which do not write.
+
+**IT READ "ninety-three tools, sixty-four of which do not write" UNTIL LANE
+BUILD-JOBS2'S READ (2026-11-26)**: ``linkedin_job_alerts`` (census J 37, the
+list half), his job alerts off LinkedIn's alert manager.
 
 **IT READ "ninety-two tools, sixty-four of which do not write" UNTIL LANE
 BUILD-JOBS2'S SECOND WRITE (2026-11-26)**: ``linkedin_send_recommendations_feedback``
@@ -740,6 +744,9 @@ EXPECTED_TOOLS = {
     "linkedin_withdraw_endorsement",
     # 2026-11-26 (lane build-jobs2): a WRITE that refuses (census J 19).
     "linkedin_set_recent_job_searches_cleared",
+    # 2026-11-26 (lane build-jobs2): a READ -- his job alerts off LinkedIn's
+    # alert manager on the jobs home (census J 37, the list half).
+    "linkedin_job_alerts",
 }
 
 #: Names a reader must never grow. Listed explicitly so that adding one is a
@@ -1399,7 +1406,9 @@ async def test_the_surface_is_exactly_the_ninety_one_tools(tools):
     # side and the non-write count holds. MEASURED off mcp.list_tools().
     # NINETY-THREE ON THE SAME LANE: linkedin_send_recommendations_feedback,
     # a WRITE (census J 163). MEASURED off mcp.list_tools().
-    assert len(tools) == 93
+    # NINETY-FOUR ON THE SAME LANE: linkedin_job_alerts, a READ (census J 37),
+    # so the split moves on its read side. MEASURED off mcp.list_tools().
+    assert len(tools) == 94
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -1675,8 +1684,9 @@ async def test_the_surface_is_exactly_the_ninety_one_tools(tools):
     # NINETY-TWO ON LANE BUILD-JOBS2 (2026-11-26): a refusing write, so the
     # non-write count holds at sixty-four. MEASURED, never summed.
     # NINETY-THREE ON THE SAME LANE: one WRITE more, the non-write count holds.
-    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 64
-    assert len(tools) == 93
+    # NINETY-FOUR AND SIXTY-FIVE ON THE SAME LANE: linkedin_job_alerts, a READ.
+    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 65
+    assert len(tools) == 94
 
 
 def test_the_read_that_was_nearly_named_a_write():
