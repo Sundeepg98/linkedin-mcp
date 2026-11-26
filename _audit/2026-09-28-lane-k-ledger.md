@@ -900,6 +900,23 @@ read press those two controls, read the list -- an empty state counted as
 zero only when its headline is drawn -- and close it with nothing typed or
 scheduled, or does the row stay unreachable as a composer surface?
 
+### Q-ARTICLE-COMPOSER-DISCLOSURES -- the article editor's own closed controls, nothing typed
+
+Added 2026-11-26 by lane readers-msg26 (`_audit/2026-11-26-readers-msg26.md`,
+section 6). Rows: `M C44`, `M C46`, `M C50`, `M C78`, `M C81`, `P L3`. Live
+session 11's one load of `/article/new/` (ARTICLE-COMPOSER-CAPTURE: nothing
+typed, nothing published, no draft redirect) drew every entry point these rows
+need CLOSED: the author toggle (subtitle `Individual article`, where a
+newsletter is chosen), `Manage`, the embed control, and `Next`, the publish
+flow's first step, enabled on the empty article -- behind an onboarding dialog
+(`Get started`, `Dismiss`). Each is a disclosure or a dialog that commits
+nothing, and each sits inside an editor, which CAPTURE-PRESS-UNDER-PROBE-RULE
+excludes. The question: may one capture load of the article composer, nothing
+typed, dismiss the onboarding dialog and press the author toggle, `Manage`,
+the embed control and `Next` -- each read and closed with nothing chosen and
+nothing published, a draft's appearance recorded -- as
+B5-GROUP-COMPOSER-OPENS-EMPTY allowed a group composer to be opened?
+
 ## 8. Preconditions and purposes
 
 PRECONDITION rows stay GAP; each waits on something he does not hold.
