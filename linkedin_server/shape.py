@@ -815,6 +815,12 @@ PROXIMITY_PHRASES: tuple[tuple[str, str, bool], ...] = (
     ("school_alum", "school alum works here", True),
     ("school_alum", "school alums work here", True),
     ("school_alum", "school alumni work here", True),
+    # MEASURED -- LinkedIn's AI job search (live session 11, 2026-11-26): the
+    # school-alumni insight drew this SINGULAR verb on 1 of its 3 cards, beside
+    # two "alumni work here". Without it that card read not_drawn (lane
+    # search-fix26; tests/fixtures/ai_search/jobs_search_ai.html, card
+    # 4000000123).
+    ("school_alum", "school alumni works here", True),
     ("connection", "connection works here", True),
     ("connection", "connections work here", True),
     # MEASURED -- job_detail_following_hydrated.html. NO COUNT PRECEDES THESE:

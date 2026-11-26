@@ -4116,6 +4116,9 @@ def _census_function_source() -> str:
 TOOLS_WITH_A_RAW_SOURCE_URL = frozenset(
     {
         "_read_cards",
+        # 2026-11-26 (lane search-fix26): the job search's helper since it
+        # took over that call; it lands where `_read_cards` landed for it.
+        "_read_job_search",
         "_read_tracker",
         "linkedin_new_messages",
         "linkedin_job_detail",

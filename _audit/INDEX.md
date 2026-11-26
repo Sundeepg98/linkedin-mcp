@@ -27,8 +27,8 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 292 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 252 |
+| audit documents git tracks under `_audit` | 293 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 253 |
 | distinct dates | 22 |
 | documents with no level-1 heading | 2 |
 | `CORRECTS:` marker lines | 130 |
@@ -39,7 +39,7 @@ are listed as `(undated)`; no date is taken from git history, because
 | documents at either end of a cross-document edge | 109 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
-| documents no correction marker touches at all | 181 |
+| documents no correction marker touches at all | 182 |
 | blockquoted markers naming ANOTHER document | 0 |
 | edges missing one of their two markers | 0 |
 | edges declared a different number of times in each direction | 2 |
@@ -1923,6 +1923,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-11-26 | [2026-11-26-integration-3.md](2026-11-26-integration-3.md) | Integration 3, 2026-11-26: five certified heads onto master, and the rulings since 2026-11-25 22:30 |  |
 | 2026-11-26 | [2026-11-26-pace20.md](2026-11-26-pace20.md) | Lane pace20: the server's default spacing between page loads is the ruled 20 s |  |
 | 2026-11-26 | [2026-11-26-rulings-search-route.md](2026-11-26-rulings-search-route.md) | Orchestrator rulings of 2026-11-26 (01:20 IST): the job search's route, registered at integration 3 |  |
+| 2026-11-26 | [2026-11-26-search-fix26.md](2026-11-26-search-fix26.md) | Lane search-fix26: an empty job search is never silent, and the AI search is a refusing fallback |  |
 | 2026-11-26 | [2026-11-26-selfprofile26.md](2026-11-26-selfprofile26.md) | 2026-11-26 -- lane selfprofile26: his own profile, asserted without the url marker |  |
 
 ## 6. What the scan rejected, could not join, or had to repair
