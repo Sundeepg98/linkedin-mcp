@@ -1060,6 +1060,73 @@ registers it): SPLIT under COMPOUND-ROW-SPLITS-ONLY-ON-STATE, the `J 114` /
 list half, COVERED-UNFIRED on `linkedin_job_alerts`; the manage half is
 `J 170`, GAP, next step BUILD (the alert edits).
 
+### Q-SEARCH-BOX-PRESS-SHAPE -- a press shape the search box does not wear
+
+Added 2026-11-26 by lane build-net2 (`_audit/2026-11-26-build-net2.md`,
+section 4). Row: `N 95`. Its step, from lane readers-net26, is "the search
+box's sanctioned press first, then a reader of that listbox over the capture".
+The global search box's input carries neither sanctioned press shape -- no
+`aria-expanded`, no `aria-haspopup`, no role -- on session 11's three feed
+captures. `press.py` makes a third shape a RULING REQUEST with a measured
+blast radius. Measured over the 176 tracked HTML fixtures, counts only: an
+input carrying `aria-autocomplete` inside `role=search` is 63 elements, one on
+each of 63 pages; the same input outside `role=search` is 78 elements in 57
+files, the typeaheads of forms and filters. The question: may a press of
+`[role=search] input[aria-autocomplete]` -- one element a page -- open the
+recent-searches listbox so a read can take it over the capture, re-running a
+search staying the caller passing its keywords to a search tool (D6)? (The
+nearest ruling, MESSAGE-SEARCH-CAPTURE-FIRST, contemplates a SEARCH-BOX-TYPING
+shape for his inbox search only after a capture; this row types nothing.) Or
+does `N 95` stay GAP?
+
+**Answered 2026-11-26 by the orchestrator** (relayed to lane build-net2;
+registration owed at integration 6): YES, as SEARCH-BOX-TYPEAHEAD-DISCLOSURE,
+on the lane's measured anchors. A module of its own, one closed table, one
+`readonly.SANCTIONED_MUTATIONS` entry -- one sanctioned SHAPE, not one
+triple, the orchestrator clarified the same day on the lane's question: one
+drain function with exactly two call sites, the click that opens (as load
+28 measured it) and the Escape that closes, so the list holds TWO lines,
+16 -> 18; every other key and every fill refused; no Shift-key or focus
+open, since nothing measured one. The target is
+`[role=search] input[aria-autocomplete]` on an admitted page, refused at
+runtime if the match count is 0 or 2 or more, naming the count. NOTHING is
+typed: a typing attempt is refused. Only the listbox's recent-searches group
+is read, located by its own structure, under HIS-OWN-TEXT-AT-RUNTIME; the
+people options are never read or returned. Closed by Escape, and the listbox
+verified gone. Condition 3, the structural argument that a typeahead opening
+sends nothing outward, is accepted. Red first, with three controls: an
+`aria-autocomplete` input outside `role=search` refused; a second matching
+input refusing; an attempt to read the people options failing the test. Row
+`N 95`: built and COVERED-UNFIRED on `linkedin_recent_searches` (the lane's
+record, section 4).
+
+### Q-AD-HIDE-AIM -- an ad he names, when no reader returns one
+
+Added 2026-11-26 by lane build-net2 (`_audit/2026-11-26-build-net2.md`,
+section 5). Row: `N 200`. `Q-AD-HIDE-TARGET`'s answer, AD-HIDE-AT-HIS-NAMED-AD,
+builds the hide at an ad he names: "an urn a reader returned to him and he
+hands back". No shipped reader returns an ad's urn. The readers of item keys are
+`linkedin_my_activity_items` (his own posts) and `linkedin_read_named_profile`'s
+`activity_items` (a named member's posts); `linkedin_search_content` returns no
+link, and `linkedin_surface_census` substitutes urns out. On session 11's
+capture the ad's urn is drawn only inside its own menu (the Embed entry), after
+a press, on `/feed/`. An ad's own permalink -- `N 154`'s route, where the urn is
+the address -- has never been loaded, so whether it draws `Hide this ad` is
+unseen. The question: does `N 200` wait until a reader returns ad urns to him
+(a feed reader under FEED-CONTENT-READ-RULING) and an ad's permalink is
+captured with its menu open, then built in `mark_not_interested`'s shape? Or
+is it built now on the permalink route, aimed at an urn he names, though
+nothing he can read today hands him one? The lane's default, with no answer on
+disk: it waits. `Report ad` stays outward either way.
+
+**Answered 2026-11-26 by the orchestrator** (relayed to lane build-net2;
+registration owed at integration 6): AD-HIDE-AIM-HELD, option (a). `N 200`
+stays GAP with the lane's measurement recorded. Reopener: a sanctioned
+disclosure shape for the ad control-menu trigger, measured, so that a reader
+can return an ad's urn to him WITHOUT pressing ads he did not name. Option
+(b) is declined: it presses the menus of ads he did not name, for a low-value
+row. Row `N 200`: next step this question, held, until the reopener is met.
+
 ## 8. Preconditions and purposes
 
 PRECONDITION rows stay GAP; each waits on something he does not hold.

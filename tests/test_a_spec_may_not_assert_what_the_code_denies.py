@@ -681,7 +681,11 @@ def test_the_urn_probe_is_load_bearing():
 
     # GREW BY ONE, 2026-10-10 (lane NP): withdraw_reaction, the reaction's
     # inverse, is addressed by the same urn as react_to_item.
-    assert reached_by_urn == {"comment_on_item", "react_to_item", "withdraw_reaction"}, (
+    # GREW BY ONE MORE, 2026-11-26 (lane build-net2, census N 154):
+    # mark_not_interested, one feed item he names, on the same urn permalink.
+    assert reached_by_urn == {
+        "comment_on_item", "react_to_item", "withdraw_reaction", "mark_not_interested",
+    }, (
         "the set of specs reachable ONLY through the urn probe changed: %s. "
         "If it is now empty the literal is no longer needed and should become "
         "a placeholder; if it grew, say so here." % sorted(reached_by_urn)

@@ -226,6 +226,12 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_who_viewed_me": ("limit", "open_filter_menus", "show_more_analytics", "view_switch"),
     "linkedin_own_item_link": ("activity_id", "include_link"),
     "linkedin_withdraw_from_group": ("confirm_token", "group_id"),
+    # Lane build-net2, 2026-11-26: the three invitation answers.
+    "linkedin_accept_invitation_to_connect": ("confirm_token", "profile"),
+    "linkedin_ignore_invitation_to_connect": ("confirm_token", "profile"),
+    "linkedin_withdraw_invitation": ("confirm_token", "profile"),
+    "linkedin_mark_not_interested": ("confirm_token", "item"),
+    "linkedin_recent_searches": (),
 }
 
 #: 44 tools and 61 parameters at the pin. Asserted rather than assumed, so a
@@ -792,8 +798,28 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: census `J 163` GAP -> COVERED-UNFIRED on it. Counted off the registry.
 #: **ON THE SAME LANE: 94 TOOLS AND 140 PARAMETERS** -- `linkedin_job_alerts()`,
 #: a read with no parameter. Counted off the registry.
-PINNED_TOOL_COUNT = 94
-PINNED_PARAMETER_COUNT = 140
+#: **94 TOOLS AND 143 PARAMETERS ON LANE BUILD-NET2 (2026-11-26)** --
+#: `linkedin_accept_invitation_to_connect(profile, confirm_token)`,
+#: `linkedin_ignore_invitation_to_connect(profile, confirm_token)` and
+#: `linkedin_withdraw_invitation(profile, confirm_token)`, three WRITES of two
+#: parameters each, beside the ninety-one and 137, counted off this branch's
+#: registry. THE CENSUS DECISION, IN THE SAME COMMIT: `N 15`, `N 16` and `N 10`
+#: GAP -> COVERED-UNFIRED on them, never fired. See
+#: `_audit/2026-11-26-build-net2.md`.
+#: **95 TOOLS AND 145 PARAMETERS ON THE SAME LANE** --
+#: `linkedin_mark_not_interested(item, confirm_token)`, one WRITE of two
+#: parameters. THE CENSUS DECISION, IN THE SAME COMMIT: `N 154` GAP ->
+#: COVERED-UNFIRED on it, never fired.
+#: **96 TOOLS AND 145 PARAMETERS ON ITS THIRD BUILD** --
+#: `linkedin_recent_searches()`, one READ of no parameter. THE CENSUS
+#: DECISION, IN THE SAME COMMIT: `N 95` GAP -> COVERED-UNFIRED on it.
+#: **99 TOOLS AND 148 PARAMETERS AT INTEGRATION 6'S MERGE OF LANE BUILD-NET2 ONTO LANE BUILD-JOBS2 (2026-11-26)** --
+#: the two lanes' tools together: build-jobs2's three (three parameters)
+#: and build-net2's five (eight), beside the ninety-one and 137. Counted off
+#: the merged registry, never summed; each lane's census decisions are its
+#: own, above.
+PINNED_TOOL_COUNT = 99
+PINNED_PARAMETER_COUNT = 148
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:

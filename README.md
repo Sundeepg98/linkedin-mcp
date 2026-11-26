@@ -3,8 +3,13 @@
 An MCP server that shows you your own LinkedIn account data as structured tool
 results instead of pages you have to click through.
 
-**Ninety-four tools ship. Sixty-five read. Twenty-nine write. Four of those
+**Ninety-nine tools ship. Sixty-six read. Thirty-three write. Four of those
 are write-shaped and unable to act.**
+(It read "Ninety-four tools ship. Sixty-five read. Twenty-nine write" until
+integration 6's merge of lane build-net2, 2026-11-26: four writes and a
+read, each built on live session 11's captures and described below in that
+lane's own lines. Lane build-net2's branch read "Ninety-six tools ship.
+Sixty-five read. Thirty-one write. Three of those are write-shaped".)
 (It read "Ninety-three tools ship. Sixty-four read" until lane build-jobs2's
 read, 2026-11-26: `linkedin_job_alerts` (census `J 37`, its list half)
 returns your job alerts as LinkedIn's own alert manager lists them -- each
@@ -19,6 +24,26 @@ those are write-shaped" until lane build-jobs2, 2026-11-26:
 `linkedin_set_recent_job_searches_cleared` (census `J 19`) reads the recent
 job searches card on your jobs home and refuses, because what its Clear press
 opens has never been captured; it fires only on your order.)
+(It read "Ninety-five tools ship. Sixty-four read" until lane build-net2's
+third build, 2026-11-26: `linkedin_recent_searches` returns your recent
+searches as your own search box lists them (census `N 95`) -- one click on
+the box, its recent-searches group read alone, and Escape. It types nothing,
+and the people the same list draws are never returned.)
+(It read "Ninety-four tools ship. Sixty-four read. Thirty write" until
+lane build-net2's second build, 2026-11-26: `linkedin_mark_not_interested`
+marks one feed item you name by its urn "Not interested" from that item's
+own control menu on its permalink (census `N 154`). It presses the menu's
+trigger and the one item in the menu that trigger owns, and reads the result
+where it was drawn; LinkedIn's undo is never pressed by this server.)
+(It read "Ninety-one tools ship. Sixty-four read. Twenty-seven write" until
+lane build-net2, 2026-11-26: three writes answer ONE pending invitation you
+name by the member's profile link, on your own invitation manager --
+`linkedin_accept_invitation_to_connect` and
+`linkedin_ignore_invitation_to_connect` on the received tab (census `N 15`,
+`N 16`), `linkedin_withdraw_invitation` on the Sent tab (`N 10`). Each presses
+one control in that one row and nothing in any dialog the press draws; a
+fresh render of the tab decides. LinkedIn documents a confirmation for the
+withdraw, so its first use is expected to stop there, withdrawing nothing.)
 (It read "Ninety tools ship. Sixty-three read. Twenty-seven write" until
 integration 4's merge of lane readers-msg26, 2026-11-26:
 `linkedin_search_content` searches posts by a keyword or a hashtag on the
@@ -1166,7 +1191,7 @@ linkedin_server/
   cdp_bridge.py              the recovery path: attach to a running Chrome
   dom.py                     the read-only harvesters and the control readers
   shape.py                   pure parsers and the result envelope
-  server.py                  the ninety-four tools
+  server.py                  the ninety-nine tools
   errors.py
 tests/                       1393 tests, no network, no account
   fixtures/                  frozen LinkedIn markup, scrubbed

@@ -140,6 +140,9 @@ _TARGETS: dict[str, object] = {
     # stopped being aimed by a name (lane L5, the orchestrator's order of
     # 23:36). The segment carries a declared synthetic slug token.
     "rail_profile": "https://www.linkedin.com/in/someone-shape-example/",
+    # 2026-11-26, lane build-net2 (N 15, N 16, N 10): the member on the other
+    # end of one pending invitation, as a LINK. A declared synthetic slug token.
+    "invitation_profile": "https://www.linkedin.com/in/someone-shape-example/",
     "post_text": "some text",
     "item_and_text": {"item": _ACTIVITY_URN, "text": "some text"},
     "field_and_value": {"field": "City", "value": "somewhere"},

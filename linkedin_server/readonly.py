@@ -4320,6 +4320,22 @@ SANCTIONED_MUTATIONS: tuple[tuple[str, str, str], ...] = (
     # ``writes.perform`` would make can reach the switch at all, the finding
     # of live session 8 on the same LinkedIn toggle (P B9).
     ("linkedin_server/job_alert_switch.py", "trial_press", "click"),
+    # THE SEVENTEENTH AND EIGHTEENTH, 2026-11-26 (lane build-net2, census
+    # N 95), on SEARCH-BOX-TYPEAHEAD-DISCLOSURE (the orchestrator's answer
+    # to Q-SEARCH-BOX-PRESS-SHAPE; integration 6 registers it):
+    # ``search_typeahead._press``, the one drain point of a disclosure of
+    # HIS OWN search box. ``click`` opens its typeahead -- the one
+    # ``[role=search] input[aria-autocomplete]`` on an admitted page,
+    # refused unless it matches exactly once -- and ``press`` is the one
+    # key ``Escape`` that closes it, the closure verified. NOTHING IS
+    # TYPED: the drain takes a step from a two-entry table and refuses
+    # any other, and the module holds no fill and no keyboard. TWO LINES,
+    # NOT ONE, because this list keys a call by its kind: the measured
+    # opening (live session 11, load 28) is a click and the ruled close
+    # is a key -- share_link's precedent for a disclosure closed by
+    # Escape. Condition 3 is the structural argument the ruling accepted.
+    ("linkedin_server/search_typeahead.py", "_press", "click"),
+    ("linkedin_server/search_typeahead.py", "_press", "press"),
 )
 
 

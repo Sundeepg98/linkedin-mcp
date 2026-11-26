@@ -204,12 +204,9 @@ N 3	N	W	R2	SIBLING:N 1	INFERRED	RULING:D6-CAPABILITY-OVER-AFFORDANCE ; N 1
 N 5	N	W	R2	TARGET:a member he names to invite, with a note	NAMED	_audit/2026-09-24-lane-l5-messaging.md::| C-P3 | the invitation dialog ; RULING:OPERATOR-NAMES-THE-TARGET
 N 7	N	W	R3	TARGET:a Page and the connections he names to invite	INFERRED	RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS ; N 7
 N 8	N	W	R3	TARGET:a Page and the connections he names to invite	INFERRED	RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS ; N 7
-N 10	N	W	R3	BUILD:tests/fixtures/synthetic/live11_invitations_sent_words.html	MEASURED	tests/fixtures/live11/invitations_sent.html ; RULING:J-19-BUILT-BEHIND-THE-GRANT
 N 11	N	R	-	PRECONDITION:a Page-follow invitation he has sent, pending (the Sent tab draws only its CONNECTION category)	MEASURED	tests/fixtures/live11/invitations_sent.html ; RULING:MEASURED-ABSENT-OR-PRECONDITION
 N 12	N	W	R3	PRECONDITION:a Page-follow invitation he has sent, pending (the Sent tab draws only its CONNECTION category)	MEASURED	tests/fixtures/live11/invitations_sent.html ; RULING:MEASURED-ABSENT-OR-PRECONDITION
 N 14	N	R	-	CAPTURE:admit-mynetwork-invitation-manager	MEASURED	tests/fixtures/live11/invitations.html ; RULING:READ-PAST-AN-ACT-SUBSTRING
-N 15	N	W	R2	BUILD:tests/fixtures/synthetic/live11_invitations_words.html	MEASURED	tests/fixtures/live11/invitations.html ; RULING:PEOPLE-DATA-MITIGATIONS
-N 16	N	W	R3	BUILD:tests/fixtures/synthetic/live11_invitations_words.html	MEASURED	tests/fixtures/live11/invitations.html ; RULING:PEOPLE-DATA-MITIGATIONS
 N 17	N	W	R3	SIBLING:N 16	INFERRED	tests/fixtures/live11/invitations.html ; N 16
 N 18	N	W	R2	SIBLING:N 19	INFERRED	tests/fixtures/live11/invitations.html ; N 19
 N 19	N	R	-	PRECONDITION:an invitation carrying a personal note, pending in his received list	INFERRED	tests/fixtures/live11/invitations.html ; RULING:MEASURED-ABSENT-OR-PRECONDITION
@@ -260,7 +257,6 @@ N 90	N	R	-	CAPTURE:search-people-labels	NAMED	RULING:CAPTURE-PRESS-UNDER-PROBE-R
 N 91	N	R	-	CAPTURE:search-people-labels	NAMED	RULING:CAPTURE-PRESS-UNDER-PROBE-RULE ; _audit/_census/read-addresses.tsv::TERMINAL BY THIS ROUTE
 N 92	N	R	-	CAPTURE:search-people-labels	NAMED	RULING:CAPTURE-PRESS-UNDER-PROBE-RULE ; _audit/_census/read-addresses.tsv::TERMINAL BY THIS ROUTE
 N 93	N	R	-	CAPTURE:search-people-labels	MEASURED	RULING:CAPTURE-PRESS-UNDER-PROBE-RULE ; _audit/2026-10-10-lane-b2-network-build.md::So the first render draws no control labelled exactly
-N 95	N	R	-	BUILD:tests/fixtures/live11/feed_search_box_open.html	MEASURED	tests/fixtures/live11/feed_search_box_open.html ; RULING:PAGE-MAY-VETO-NEVER-SUPPLY
 N 96	N	W	R3	CAPTURE:admit-mypreferences-d-categories-privacy	INFERRED	_audit/_census/network.md::awaiting admission by name ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
 N 97	N	R	-	CAPTURE:admit-mynetwork	INFERRED	_audit/_census/read-addresses.tsv::the general R1 badge-cost ruling ; RULING:READ-PAST-AN-ACT-SUBSTRING
 N 98	N	W	R3	CAPTURE:admit-mynetwork	INFERRED	_audit/_census/read-addresses.tsv::the general R1 badge-cost ruling ; RULING:READ-PAST-AN-ACT-SUBSTRING
@@ -298,7 +294,6 @@ N 149	N	W	R3	SIBLING:M M38	NAMED	N 149 ; M M38
 N 150	N	W	R3	TARGET:a conversation thread he names to report	NAMED	_audit/_census/network.md::THE QUEUED RE-FILE MUST NOT BE EXECUTED ON THIS ROW
 N 151	N	W	R3	TARGET:a system-flagged message he names to mark safe	NAMED	_audit/_census/network.md::the only row in section M whose act is to undo a report
 N 153	N	W	R3	SIBLING:N 154	MEASURED	tests/fixtures/live11/permalink_member_post_menu_open.html ; N 154
-N 154	N	W	R3	BUILD:tests/fixtures/live11/permalink_member_post_menu_open.html	MEASURED	tests/fixtures/live11/permalink_member_post_menu_open.html ; RULING:HIS-OWN-CURATION-NOT-OUTWARD
 N 156	N	W	R2	TARGET:a non-connection he names (the act stops at the composer)	NAMED	_audit/2026-09-24-lane-l5-messaging.md::| C-P5 | the composer a NON-connection gets ; RULING:OPERATOR-NAMES-THE-TARGET
 N 158	N	W	R2	TARGET:a non-connection he names (the act stops at the composer)	NAMED	_audit/2026-09-24-lane-l5-messaging.md::| C-P5 | the composer a NON-connection gets ; RULING:OPERATOR-NAMES-THE-TARGET
 N 159	N	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
@@ -327,7 +322,7 @@ N 192	N	W	R2	TARGET:an event he names	NAMED	_audit/_census/read-addresses.tsv::A
 N 193	N	W	R3	TARGET:an event he names	NAMED	_audit/_census/read-addresses.tsv::ADMITTED 2026-09-23 BY A REVIEW: COMMIT (lane L1): one event by its NUMERIC id ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
 N 196	N	W	R3	TARGET:an organisation Page he names to report	NAMED	_audit/2026-09-28-rulings-build-classes.md::a report is never fired for a proof unless he names a real item to report
 N 199	N	R	-	CAPTURE:admit-premium-matches	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/premium/matches/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
-N 200	N	W	R3	BUILD:tests/fixtures/live11/feed_ad_control_open.html	MEASURED	tests/fixtures/live11/feed_ad_control_open.html ; RULING:HIS-OWN-CURATION-NOT-OUTWARD
+N 200	N	W	R3	RULING:Q-AD-HIDE-AIM	MEASURED	tests/fixtures/live11/feed_ad_control_open.html ; RULING:HIS-OWN-CURATION-NOT-OUTWARD ; RULING:AD-HIDE-AT-HIS-NAMED-AD
 N A1	N	W	R3	PRECONDITION:admin rights on a Company Page	NAMED	_audit/_census/blocker-map.tsv::ADMIN-RIGHTS-NOT-HELD
 N A2	N	W	R3	PRECONDITION:admin rights on a Company Page	NAMED	_audit/_census/blocker-map.tsv::ADMIN-RIGHTS-NOT-HELD
 N A3	N	R	-	PRECONDITION:admin rights on a Company Page	NAMED	_audit/_census/blocker-map.tsv::ADMIN-RIGHTS-NOT-HELD

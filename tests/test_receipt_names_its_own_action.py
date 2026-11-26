@@ -730,8 +730,24 @@ def test_the_action_set_is_the_one_this_file_was_measured_against():
     # every owned phrase -- 'the question under the list on your recommended
     # jobs' holds none -- and it has no ``_VERIFIED_FROM`` row: its outcome is
     # declared unverifiable, so the receipt prints the declaration instead.
-    assert len(writes.PERFORMABLE) == 25, (
-        "writes.PERFORMABLE holds %d actions, not the 25 this file was "
+    # TWENTY-SEVEN ON LANE BUILD-NET2 (2026-11-26): the three invitation answers.
+    # Their six rows were read: the three ``_WHERE_TO_LOOK`` values are three
+    # different places (the received tab and his connections list; the received
+    # tab; the Sent tab), worded without "My Network", which the invitation
+    # pair owns; the three ``_VERIFIED_FROM`` rows are one row (a fresh render of
+    # the same tab). None holds a phrase another action owns.
+    # TWENTY-EIGHT ON THE SAME LANE: ``mark_not_interested``. Its two rows were
+    # read: its ``_WHERE_TO_LOOK`` value is his feed, which no other row names,
+    # and its ``_VERIFIED_FROM`` row reads the permalink IN PLACE; neither holds
+    # a phrase another action owns.
+    # TWENTY-NINE AT INTEGRATION 6'S MERGE OF LANE BUILD-NET2 ONTO LANE BUILD-JOBS2 (2026-11-26):
+    # the twenty-fifth beside the twenty-sixth to twenty-ninth. Each lane read
+    # its rows against the actions of its own base; across the two lanes the
+    # rows name the recommended jobs, the received and Sent tabs, his
+    # connections list and his feed, so none holds a phrase the other owns.
+    # The phrase-owner checks in this file re-derive that on the merged tree.
+    assert len(writes.PERFORMABLE) == 29, (
+        "writes.PERFORMABLE holds %d actions, not the 29 this file was "
         "measured against: %s. Re-derive the phrase owners in this file for "
         "the new action, then update this count."
         % (len(writes.PERFORMABLE), sorted(writes.PERFORMABLE))

@@ -712,17 +712,28 @@ OUTWARD_CLASS_SPECS: dict[str, OutwardClassSpec] = {
             ),
         ),
     ),
+    # BLOCKED -> BUILT, 2026-11-26 (lane build-net2, census row N 10). The
+    # ground this record stood on -- the Sent manager refused by the read
+    # boundary -- was lifted by lane A's exact-address admission (2026-10-10,
+    # READ-PAST-AN-ACT-SUBSTRING); live session 11 captured the tab (load 15)
+    # and its Withdraw link on every row. ``writes`` now registers the act
+    # as a sanctioned, performable write (``invitation_acts``): ONE press of
+    # the row's Withdraw, nothing pressed in any dialog it draws
+    # (J-19-BUILT-BEHIND-THE-GRANT), a fresh render decides. N 12 -- the
+    # Page-follow invitation -- is on a record of its own below, because no
+    # such invitation of his is pending and no capture draws its row.
     "withdraw_invitation": OutwardClassSpec(
         action="withdraw_invitation",
         outward_class="delete_or_withdraw_own",
-        status="BLOCKED",
+        status="BUILT",
         target_kind="invitation_id",
         target=(
             "the pending invitation he names -- by the member's profile link "
-            "or an invitation id read off his own sent list and handed back "
-            "by him, never chosen by the package"
+            "or member id, as linkedin_sent_invitations returns the member, "
+            "handed back by him and compared in the page against the row's "
+            "own member link; never chosen by the package"
         ),
-        census_rows=("N 10", "N 12"),
+        census_rows=("N 10",),
         summary="Withdraw one pending invitation he sent.",
         carried_facts=(
             "LinkedIn DOES offer the withdraw: its Help Center (a568295, "
@@ -731,16 +742,15 @@ OUTWARD_CLASS_SPECS: dict[str, OutwardClassSpec] = {
             "Invitations, the Sent tab, Withdraw, then Withdraw again in a "
             "confirmation pop-up, and the price: 'You won't be able to send a "
             "new invitation to the same member for up to three weeks.' "
-            "send_invitation's own "
-            "unverifiable block names the only surface: the Sent "
-            "Invitations manager under My Network > Manage > Sent. Its "
-            "address contains 'invitation', on "
-            "readonly._FORBIDDEN_URL_SUBSTRINGS and checked before the "
-            "allowlist (network R2, whose purpose -- to stop this server "
-            "SENDING invitations -- ruling (b) withdrew, while the entry "
-            "still refuses); and /mynetwork/ loads consume the "
-            "pending-invitation badge, a cost measured twice on its sibling "
-            "badges and never on the sent sub-page."
+            "The Sent tab, /mynetwork/invitation-manager/sent/, is admitted "
+            "by its exact address with 'invitation' excused for it alone "
+            "(lane A, 2026-10-10). MEASURED on live session 11 (load 15): "
+            "five pending invitations, each a list item holding exactly one "
+            "link whose whole word is 'Withdraw' (an action link to the site "
+            "root) beside the member's link. The pop-up has never been "
+            "captured: the build presses nothing in it, so its first "
+            "supervised press is its capture. The Sent tab load's effect on "
+            "the pending-invitation badge is unmeasured for the write."
         ),
         reversible_by=(
             "NOBODY: a withdrawn invitation is re-sent only as a new "
@@ -748,17 +758,47 @@ OUTWARD_CLASS_SPECS: dict[str, OutwardClassSpec] = {
             "(Help Center a568295)."
         ),
         live_proof=(
-            "HE NAMES a pending invitation he sent. One manager load for the "
-            "preview, one for the perform, one verification read -- each "
-            "priced by the badge gate linkedin_connections carries."
+            "HE NAMES a pending invitation he sent and is willing to withdraw, "
+            "by the member's link. One Sent-tab load for the preview, one for "
+            "the press, one fresh render to verify. Expected to stop at the "
+            "documented pop-up, pressing nothing in it: that receipt is the "
+            "capture the confirm press is built on."
+        ),
+    ),
+    # N 12 SPLIT OFF withdraw_invitation, 2026-11-26 (lane build-net2): the
+    # same Sent manager, a different invitation kind, and nothing to aim at.
+    "withdraw_page_follow_invitation": OutwardClassSpec(
+        action="withdraw_page_follow_invitation",
+        outward_class="delete_or_withdraw_own",
+        status="BLOCKED",
+        target_kind="invitation_id",
+        target=(
+            "the pending Page-follow invitation he names, by the invited "
+            "member's link, handed back by him; never chosen by the package"
+        ),
+        census_rows=("N 12",),
+        summary="Withdraw one pending invitation to follow a Page that he sent.",
+        carried_facts=(
+            "MEASURED on live session 11 (load 15): the Sent tab draws one "
+            "category link, .../sent/CONNECTION/, current -- people "
+            "invitations only. No Page-follow invitation of his is pending, so "
+            "no row of that kind, and no control on one, has ever been drawn "
+            "(lane readers-net26's record, section 5)."
+        ),
+        reversible_by=(
+            "NOBODY known: as withdraw_invitation, a withdrawn invitation is "
+            "re-sent only as a new one."
+        ),
+        live_proof=(
+            "HE NAMES a pending Page-follow invitation he sent, once one "
+            "exists; until then there is nothing to name."
         ),
         blocked_by=(
-            "the Sent Invitations manager is refused by the read boundary "
-            "('invitation') and unadmitted; an exact-url admission, with "
-            "its badge cost measured, comes first. Then the capture: the "
-            "sent list with his named pending invitation, its row's "
-            "withdraw control and the confirmation pop-up LinkedIn documents "
-            "(a568295), taken only on an invitation he names for withdrawal."
+            "PRECONDITION: he has sent no Page-follow invitation that is still "
+            "pending (the Sent tab draws only its CONNECTION category), so the "
+            "row the withdraw would press on has never been drawn. Reopener: "
+            "he sends one (census N 7, N 8), and a capture of that category's "
+            "tab draws its row."
         ),
     ),
     "withdraw_application": OutwardClassSpec(

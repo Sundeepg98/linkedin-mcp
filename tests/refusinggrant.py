@@ -86,6 +86,10 @@ SYNTHETIC_RAW_TARGETS: dict[str, Any] = {
     # word for a person, a name -- when that action stopped being aimed by
     # one. A link, because a bare word is refused by ``_target_for``.
     "rail_profile": "https://www.linkedin.com/in/example-harness-person/",
+    # THE INVITATION ANSWERS (lane build-net2, 2026-11-26): the member on the
+    # other end of one pending invitation, as a profile LINK, compared in the
+    # page against the manager rows' own links. A declared synthetic slug.
+    "invitation_profile": "https://www.linkedin.com/in/example-harness-person/",
     "item_urn": "example-harness-item",
     "self": "self",
     # A NUMERIC GROUP ID (``withdraw_from_group``, 2026-09-24). Five digits, under the

@@ -150,6 +150,17 @@ def test_the_sanctioned_list_is_exactly_these_calls():
     AND THE PRESS ALLOWLIST IS A STRICT SUBSET OF THE READ ALLOWLIST --
     `/article/new/` is admitted for reading and refused for pressing. A page
     this server may open is not thereby a page whose controls it may activate.
+
+    EIGHTEEN FROM 2026-11-26, AND THE TWO NEW ONES ARE THE SAME PAIR AGAIN:
+    ``search_typeahead._press``, the click that opens his own search box's
+    typeahead and the Escape that closes it (lane build-net2, census N 95,
+    SEARCH-BOX-TYPEAHEAD-DISCLOSURE). The ruling's "one entry" is one
+    sanctioned SHAPE, not one triple (the orchestrator, 2026-11-26, accepting
+    this build): the list keys a call by its kind, the measured opening is
+    a click and the ruled close is a key, and -- as for ``press.disclose``
+    above -- a sanction for the opening without one for the closing would
+    make the compliant build impossible. Nothing is typed: the drain takes
+    a step from a two-entry table and refuses any other.
     """
     assert readonly.SANCTIONED_MUTATIONS == (
         ("linkedin_server/writes.py", "perform", "click"),
@@ -168,6 +179,8 @@ def test_the_sanctioned_list_is_exactly_these_calls():
         ("linkedin_server/cdp_download.py", "capture_download", "cdp_session"),
         ("linkedin_server/cdp_download.py", "reset_download_behaviour", "cdp_session"),
         ("linkedin_server/job_alert_switch.py", "trial_press", "click"),
+        ("linkedin_server/search_typeahead.py", "_press", "click"),
+        ("linkedin_server/search_typeahead.py", "_press", "press"),
     )
     # EIGHT FROM 2026-09-23: ``reveal.reveal``'s one click, the first press
     # admitted BY NAME -- per control, in reveal.DECIDED_REVEALS, on a recorded
@@ -187,7 +200,10 @@ def test_the_sanctioned_list_is_exactly_these_calls():
     # SIXTEEN, 2026-10-10 (lane B4): ``job_alert_switch.trial_press``'s one
     # trial click, a READ declared on the list (its argument and its budget
     # are beside the entry in readonly.py).
-    assert len(readonly.SANCTIONED_MUTATIONS) == 16
+    # EIGHTEEN, 2026-11-26 (lane build-net2, census N 95):
+    # ``search_typeahead._press``'s click and its Escape, on
+    # SEARCH-BOX-TYPEAHEAD-DISCLOSURE (argument beside the entries).
+    assert len(readonly.SANCTIONED_MUTATIONS) == 18
     # THE KINDS ARE ASSERTED SEPARATELY, because the count alone would let a
     # click be swapped for a fill without moving the number, and those are
     # different capabilities: a click presses what is already there, a fill
@@ -212,6 +228,10 @@ def test_the_sanctioned_list_is_exactly_these_calls():
     # FIFTEEN FROM 2026-09-27, and two kinds are FIRSTS on this list:
     # ``cdp_send`` and ``cdp_session``, the DevTools patterns, each bound to
     # ``cdp_download`` and to a one-method table (see the entries' argument).
+    #
+    # EIGHTEEN FROM 2026-11-26 (lane build-net2, N 95): one more ``click`` and
+    # one more ``press``, ``search_typeahead._press`` -- the click that opens
+    # his search box's typeahead and the one key, Escape, that closes it.
     kinds = sorted(kind for _p, _f, kind in readonly.SANCTIONED_MUTATIONS)
     assert kinds == [
         "cdp_send",
@@ -224,8 +244,10 @@ def test_the_sanctioned_list_is_exactly_these_calls():
         "click",
         "click",
         "click",
+        "click",
         "evaluate",
         "fill",
+        "press",
         "press",
         "press",
         "select_option",
@@ -320,7 +342,9 @@ def test_the_package_contains_exactly_as_many_mutating_calls_as_are_listed():
     # sessions -- met the scanner lane G had widened to see them, and was
     # declared on D4-NO-OWN-BROWSER-CONTEXT (see the entries' argument).
     # SIXTEEN, 2026-10-10 (lane B4): the trial click, a read declared.
-    assert total == len(readonly.SANCTIONED_MUTATIONS) == 16, total
+    # EIGHTEEN, 2026-11-26 (lane build-net2, N 95): the search box
+    # typeahead's click and its Escape.
+    assert total == len(readonly.SANCTIONED_MUTATIONS) == 18, total
 
 
 def test_the_partition_conserves_every_hit():

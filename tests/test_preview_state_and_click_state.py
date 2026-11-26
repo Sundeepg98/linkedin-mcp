@@ -113,6 +113,10 @@ from tests.test_messaging_threads import THREAD as MESSAGING_THREAD
 from tests.test_messaging_threads import THREAD_ID as MESSAGING_THREAD_ID
 from tests.test_send_attachment import CAPTURED as ATTACHMENT_THREAD
 from tests.test_leave_group import GROUPS_LEAVE_ID, GROUPS_LEAVE_MARKUP
+from tests.test_invitation_acts import MEMBER as INVITATION_MEMBER  # noqa: E402
+from tests.test_invitation_acts import WORLD as INVITATION_WORLD  # noqa: E402
+from tests.test_mark_not_interested import CLOSED as NOT_INTERESTED_CLOSED  # noqa: E402
+from tests.test_mark_not_interested import URN as NOT_INTERESTED_URN  # noqa: E402
 from tests.test_named_profile_route import LINK as NAMED_PROFILE_LINK
 from tests.test_named_profile_route import PROFILE as NAMED_PROFILE
 from tests.test_result_verification_block import SHAREBOX_MARKUP
@@ -340,6 +344,35 @@ REACHED: dict[str, tuple[str, str, str]] = {
         GROUPS_LEAVE_MARKUP,
         GROUPS_LEAVE_ID,
     ),
+    # 2026-11-26 (census rows ``N 15``, ``N 16``, ``N 10``; lane build-net2).
+    # TRACKED captures: live session 11's two invitation tabs with LinkedIn's
+    # words put back by keyed shape and a synthetic member planted into each
+    # row's own links. The preview and the click read the row through ONE
+    # verdict, ``invitation_acts.read_state``.
+    "accept_invitation_to_connect": (
+        "tests/test_invitation_acts.py",
+        INVITATION_WORLD["accept_invitation_to_connect"],
+        "https://www.linkedin.com/in/" + INVITATION_MEMBER["accept_invitation_to_connect"] + "/",
+    ),
+    "ignore_invitation_to_connect": (
+        "tests/test_invitation_acts.py",
+        INVITATION_WORLD["ignore_invitation_to_connect"],
+        "https://www.linkedin.com/in/" + INVITATION_MEMBER["ignore_invitation_to_connect"] + "/",
+    ),
+    "withdraw_invitation": (
+        "tests/test_invitation_acts.py",
+        INVITATION_WORLD["withdraw_invitation"],
+        "https://www.linkedin.com/in/" + INVITATION_MEMBER["withdraw_invitation"] + "/",
+    ),
+    # 2026-11-26 (census row ``N 154``; lane build-net2). A TRACKED capture,
+    # session 11's permalink of a member's post, its one trigger labelled with
+    # LinkedIn's measured prefix and a synthetic name: the preview and the click
+    # read it through ONE verdict, ``feed_curation.read_state``.
+    "mark_not_interested": (
+        "tests/test_mark_not_interested.py",
+        NOT_INTERESTED_CLOSED,
+        NOT_INTERESTED_URN,
+    ),
     # THE EIGHTEENTH, 2026-10-10 (census ``P O17``, lane S, settings). THE
     # REAL PAGE: the live lane's capture of "Share profile updates" as a
     # tracked skeleton. The preview and the click read its one switch
@@ -514,7 +547,13 @@ _WORLDS_THAT_REACH_OUT = frozenset({"set_similar_jobs_alert", "unset_similar_job
                                     "set_search_job_alert", "unset_search_job_alert",
                                     # 2026-11-26, lane build-jobs2: session 8's
                                     # recommended jobs, a tracked copy too.
-                                    "send_recommendations_feedback"})
+                                    "send_recommendations_feedback",
+                                    # 2026-11-26, lane build-net2: session 11's two
+                                    # invitation tabs are tracked copies too.
+                                    "accept_invitation_to_connect",
+                                    "ignore_invitation_to_connect",
+                                    "withdraw_invitation",
+                                    "mark_not_interested"})
 
 
 async def _over_refusing_every_request(html: str, work):
@@ -698,8 +737,15 @@ def test_every_performable_action_is_either_reached_or_declared_unreachable():
     # over session 2's tracked search and its derived on world. MEASURED.
     # 24 -> 25 ON LANE BUILD-JOBS2 (2026-11-26): the receipt-only feedback press
     # (J 163), reached over session 8's tracked recommended jobs. MEASURED.
-    assert len(PERFORMABLE) == 25, sorted(PERFORMABLE)
-    assert len(REACHED) == 25, sorted(REACHED)
+    # 24 -> 27 ON LANE BUILD-NET2 (2026-11-26): the three invitation answers,
+    # reached over session 11's two tracked tabs. MEASURED.
+    # 27 -> 28 ON THE SAME LANE: ``mark_not_interested``, reached over session
+    # 11's tracked permalink. MEASURED.
+    # 29 AT INTEGRATION 6'S MERGE OF LANE BUILD-NET2 ONTO LANE BUILD-JOBS2 (2026-11-26): the
+    # feedback press beside the four, each reached over its own tracked copy.
+    # MEASURED.
+    assert len(PERFORMABLE) == 29, sorted(PERFORMABLE)
+    assert len(REACHED) == 29, sorted(REACHED)
     assert len(CANNOT_REACH) == 0, sorted(CANNOT_REACH)
 
 

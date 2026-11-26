@@ -13028,3 +13028,107 @@ The lane's scratch tools in the main checkout's gitignored state: the
 keyed-shape word and context probes, the census cell, ledger and queue
 editors, the pin re-deriver, the surface measurer and the edit scripts. Each
 answered one question once; the answers are in the record.
+
+## 111. A ROW IS AIMED BY ITS OWN LINKS, COMPARED IN THE PAGE, AND A PRESS THAT DRAWS WHAT NOBODY HAS SEEN IS ANSWERED WITH NOTHING (build-net2, 2026-11-26)
+
+Lane build-net2 built network writes behind the grant on live session 11's
+captures; the record is `_audit/2026-11-26-build-net2.md`. Numbered 110 at
+this lane's merge of master `f4fa447`, where lane infra26 had taken 109 (the
+branch numbered it 109 until then), and renumbered 111 at integration 6,
+where lane build-jobs2, merged first, had taken 110. Each entry
+below was shown failing first (the record's section on instruments has the
+runs).
+
+### 111.1 The invitation row aim and its verdicts
+
+`linkedin_server/invitation_acts.py` aims the control of ONE pending
+invitation on his invitation manager by the row's own member links: the
+control wearing LinkedIn's whole word whose nearest `role=listitem` is an
+invitation of its tab's measured shape, linking the member he named and no
+other -- XPath built from constants and a checked segment, evaluated by the
+browser, a COUNT back. `tests/test_invitation_acts.py` holds it over the real
+captures with synthetic members planted into the rows' own links, and is shown
+failing by the lane's mutations: the no-other-member predicate removed, any
+button count accepted, the `wants to connect` line not required, two rows of
+one member accepted, the tab strip not checked, any drop read as an answer,
+an unsafe segment let through, a dialog reported as nothing opened.
+
+    A ROW IS NAMED BY THE LINK HE GAVE, NOT BY ITS PLACE OR ITS NAME, AND
+    TWO ROWS OF ONE MEMBER ARE A REFUSAL, NOT A CHOICE.
+
+### 111.2 The press that is answered with nothing
+
+After each one press, `invitation_acts.read_after_press` counts what the
+press drew -- dialogs, their buttons by a closed list of LinkedIn's words,
+whether the address moved -- and decides nothing; a fresh render decides,
+`group_leave`'s one-row-fewer rule. A dialog is never answered: shown by the
+derived world whose Withdraw draws LinkedIn's documented pop-up, where the
+page's own counters read one press of the control and none in the dialog, and
+the row is still pending.
+
+    A STEP NOBODY HAS SEEN IS COUNTED, NEVER ANSWERED; ITS COUNT IS ITS CAPTURE.
+
+### 111.3 The entries
+
+| path | shown failing by |
+|---|---|
+| `linkedin_server/invitation_acts.py`, `tests/test_invitation_acts.py` | on the base tree `3c656df` the file fails at collection (no module `invitation_acts`); green 16 passed. Eight mutations, each weakening one check and restoring the file byte for byte: seven RED at once -- the no-other-member predicate, any button count, the `wants to connect` line, two rows of one member, any drop read as an answer, an unsafe segment, a dialog read as nothing -- and ONE GREEN, the tab strip's check: on the two captures the rows' shapes alone kept the tabs apart. A world was added (the received page with its strip's Sent link current, its rows still drawn) and the same mutation is RED |
+| `tests/shipped_drives.py` drives `invitation_acts:read_rows`, `read_state`, `read_after_press` | each premise broken in `FIXTURE_BREAKS` (LinkedIn's word in the fixture changed): the drive raises and the guard records it not driven, never clean |
+| `linkedin_server/feed_curation.py`, `tests/test_mark_not_interested.py` | on the base tree `3c656df` the file fails at collection (no module `feed_curation`); green 10 passed. Eight mutations, each weakening one check and restoring the file byte for byte, all eight RED and each a FAILED, never an error: the owned-portal relation dropped, the owned-menu count not required, any number of visible items passed, two triggers read as one, an open menu read as the closed item, no undo read as not done, the undo never read, and `perform` pressing the item by its word with the gate ignored |
+| `scripts/_build_live11_net2_word_skeletons.py`, `tests/test_live11_net2_word_fixtures.py` | the fixture held to its tracked copy token by token; the restorer's list losing `Not interested` is RED (a ninth mutation), and the file's own can-fail test takes `Not interested` off the word list and finds the difference nothing explains |
+| `linkedin_server/search_typeahead.py`, `tests/test_search_typeahead.py` | on the base tree `3c656df` the file fails at collection (no module `search_typeahead`); green 16 passed. Ten mutations, 10 RED, each a FAILED: two matching inputs read as one; the role=search scope dropped from the target; an open box pressed anyway; a group whose links are not all searches passes; a group under its own heading passes; the parser falls back to a link's own path (reads the people); a step outside the table is pressed as a key; a box that stays open read as closed; a click that opened nothing is Escaped; the restorer's list loses 'search-results' |
+
+### 111.4 DECLARED DISPOSABLE
+
+The lane's scratch probes -- the keyed-shape word counter, the trigger-label
+shape probe, the id-shaped attribute census, the search-box shape census, the
+selector checker, the census cell editor, the mutation runner -- and, for
+`N 154`, `N 95` and the CI run, the search input's attribute-name probe,
+the navigation-taint probes and the batch and step runners. Each answered
+one question once; the answers are in the record.
+
+### 111.5 The menu a pressed trigger owns, by id
+
+`linkedin_server/feed_curation.py` presses an item's control menu by
+LinkedIn's fixed trigger prefix and then the menu's `Not interested` ONLY
+inside the portal whose id the pressed trigger's own anchor names in
+`aria-owns` -- the relation session 11's permalink draws, never a position.
+Its verification is IN PLACE, because the undo LinkedIn draws is drawn once:
+an `Undo` (DERIVED) is hidden, the menu still open with its item unpressed is
+not done, anything else unknown -- never "not done".
+`tests/test_mark_not_interested.py` holds it over the real captures (the
+closed permalink and the open one with its menu words put back), with the
+trigger's label planted after LinkedIn's measured prefix, and is shown failing
+by eight mutations, every one RED (the entries table, 111.3).
+
+    A MENU IS AN ITEM'S ONLY WHERE THE PRESSED CONTROL NAMES IT; AN UNDO
+    DRAWN ONCE IS READ WHERE IT IS DRAWN, AND NOT SEEING IT IS NOT A NO.
+
+### 111.6 The second word restorer
+
+`scripts/_build_live11_net2_word_skeletons.py` puts LinkedIn's menu words back
+into the permalink's tracked copy through readers-jobs26's own
+`_build_live11_word_skeletons.build` (imported: a word only at its keyed
+shape, a declared word matching nowhere refused), naming the keyed skeleton
+and the committed copy apart because their file names differ, and refusing
+unless the skeleton's tracked copy IS the committed one.
+`tests/test_live11_net2_word_fixtures.py` holds the fixture to its copy token
+by token and is shown failing by taking `Not interested` off its word list, RED.
+
+### 111.7 The search box's typeahead, disclosed and closed
+
+`linkedin_server/search_typeahead.py` presses ONE control on SEARCH-BOX-TYPEAHEAD-DISCLOSURE:
+the one `[role=search] input[aria-autocomplete]` on the feed, refused unless
+it matches exactly once (the count named), opened with one click, read for the
+recent-searches group of the listbox it owns -- located by its own structure,
+a group with no heading of its own whose every option holds one search link --
+and closed with one Escape, the closure verified. A click that opens nothing
+is not Escaped; nothing is typed, because the one drain point takes a step
+from a two-entry table and refuses any other. `tests/test_search_typeahead.py`
+holds it over session 11's open capture with its address word put back by
+keyed shape, synthetic keywords and a NEEDLE planted in the people group, and
+a world that answers presses as LinkedIn's box does; it is shown failing by
+ten mutations, every one RED (the entries table, 111.3).
+
+    A PRESS THAT OPENS A LIST IS ANSWERED BY ONE GROUP OF IT, FOUND BY ITS
+    SHAPE; THE REST OF THE LIST NEVER CROSSES, AND ITS CLOSING IS SHOWN.

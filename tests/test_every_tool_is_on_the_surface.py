@@ -491,4 +491,11 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # NINETY-THREE ON THE SAME LANE: linkedin_send_recommendations_feedback, a
     # receipt-only write (census J 163), measured off the registry.
     # NINETY-FOUR ON THE SAME LANE: linkedin_job_alerts, a read (census J 37).
-    assert len(_tool_names()) == 94
+    # NINETY-FOUR ON LANE BUILD-NET2 (2026-11-26): the three invitation
+    # answers, three writes, measured off this branch's registry.
+    # NINETY-FIVE ON THE SAME LANE: linkedin_mark_not_interested, a write.
+    # NINETY-SIX ON ITS THIRD BUILD: linkedin_recent_searches, a read.
+    # NINETY-NINE AT INTEGRATION 6'S MERGE OF LANE BUILD-NET2 ONTO LANE BUILD-JOBS2 (2026-11-26): the
+    # two lanes' tools together (build-net2's branch read ninety-six),
+    # measured off the merged registry, not summed.
+    assert len(_tool_names()) == 99

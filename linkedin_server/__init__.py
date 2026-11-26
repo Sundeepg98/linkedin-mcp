@@ -57,8 +57,12 @@ chosen by hand and did not include it. The instrument worked; the selection
 of instruments did not. The count is twelve now: the same lane added three
 for the copy link of the operator's own post.
 
-WHAT IS TRUE, measured rather than remembered: twenty-nine write tools ship,
-sixteen sanctioned mutating calls exist (twenty-eight write tools until lane
+WHAT IS TRUE, measured rather than remembered: thirty-three write tools ship,
+eighteen sanctioned mutating calls exist (twenty-nine write tools and sixteen
+mutating calls until integration 6's merge of lane build-net2, 2026-11-26,
+whose branch read thirty-one and eighteen -- its search box disclosure, a
+read, declared its click and its Escape, and its four writes each press
+through perform()'s own click; twenty-eight write tools until lane
 build-jobs2 registered its receipt-only feedback press, 2026-11-26 -- its
 press is perform()'s own click, so the mutating-call count did not move;
 twenty-seven write tools until lane

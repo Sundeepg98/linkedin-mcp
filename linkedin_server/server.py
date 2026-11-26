@@ -1,4 +1,26 @@
-"""The tool surface: ninety-four tools, twenty-five of which write to LinkedIn.
+"""The tool surface: ninety-nine tools, twenty-nine of which write to LinkedIn.
+
+THE NINETY-FIFTH TO NINETY-NINTH, 2026-11-26, at integration 6's merge of lane
+build-net2 (on live session 11's captures): four WRITES and a READ.
+``linkedin_accept_invitation_to_connect`` and
+``linkedin_ignore_invitation_to_connect`` (census ``N 15`` and ``N 16``), one
+pending invitation he names by the inviter's profile link, answered on his
+invitation manager's received tab, and ``linkedin_withdraw_invitation``
+(``N 10``), one he sent, on its Sent tab: each presses ONE control in the ONE
+row whose member links name the profile he gave, never a name, and answers
+nothing a press draws. ``linkedin_mark_not_interested`` (``N 154``; ``N 153``
+rides it), one feed item he names by its urn marked "Not interested" from
+that item's own control menu on its permalink, under
+HIS-OWN-CURATION-NOT-OUTWARD, the result read IN PLACE because the undo
+LinkedIn draws is drawn once. And the READ, ``linkedin_recent_searches``
+(``N 95``, on SEARCH-BOX-TYPEAHEAD-DISCLOSURE), his recent searches as his own
+search box lists them: the feed loaded once, its one search input clicked
+once, the list it opens read for its recent-searches group alone, and Escape;
+it types nothing and chooses nothing, and the people the same list draws
+never leave. Lane build-net2's branch numbered them the ninety-second to
+ninety-sixth (its paragraphs are not kept; this one replaces them). Measured
+off the merged registry, not summed. The headline read "ninety-four tools,
+twenty-five of which write" until then.
 
 THE NINETY-FOURTH IS A READ, 2026-11-26, on lane build-jobs2 (census ``J 37``,
 its list half; ruling HIS-OWN-TEXT-AT-RUNTIME): ``linkedin_job_alerts``, his
@@ -478,9 +500,9 @@ assigned to anybody -- it waits for whoever next runs the suite, and in the
 meantime the pin goes on asserting the old number with full confidence.
 
 THE NUMBERS ABOVE ARE DERIVED NOW, and that is a statement about a test rather
-than about an intention. Ninety-one is ``len(await mcp.list_tools())``,
+than about an intention. Ninety-nine is ``len(await mcp.list_tools())``,
 pinned in ``test_server_surface.py`` by
-``test_the_surface_is_exactly_the_ninety_one_tools``; the split is pinned by
+``test_the_surface_is_exactly_the_ninety_nine_tools``; the split is pinned by
 ``tests/test_prose_that_makes_a_claim.py::test_the_server_docstring_numbers_are_derived``,
 which reads THESE WORDS and fails if any of the three disagrees with the
 registry.
@@ -493,9 +515,13 @@ POINTER to it was dangling, so a reader who followed it found nothing and
 would reasonably conclude these numbers are unchecked. A citation is a claim
 like any other.
 The surface splits three ways and the split is the part a reader actually
-needs: SIXTY-FIVE read, TWENTY-FIVE write, and FOUR are write-shaped,
-registered, gated and unable to act. Sixty-five plus twenty-five plus four is
-ninety-four. (Sixty-four, twenty-five and four, summing to ninety-three, until
+needs: SIXTY-SIX read, TWENTY-NINE write, and FOUR are write-shaped,
+registered, gated and unable to act. Sixty-six plus twenty-nine plus four is
+ninety-nine. (Sixty-five, twenty-five and four, summing to ninety-four, until
+integration 6's merge of lane build-net2's four writes and one read,
+2026-11-26; that lane's branch read sixty-five, twenty-eight and three,
+summing to ninety-six. Sixty-four, twenty-five and four, summing to
+ninety-three, until
 lane build-jobs2's ``linkedin_job_alerts``, 2026-11-26. Sixty-four,
 twenty-four and four, summing to ninety-two, until
 lane build-jobs2's receipt-only ``linkedin_send_recommendations_feedback``,
@@ -689,11 +715,14 @@ the moment ``update_profile_field`` was given an address while still refusing.
 always meant: an address is not a permission.
 
 NOTE THE ACTION THAT HAS NO TOOL. ``writes.SANCTIONED_WRITES`` holds
-THIRTY actions where this surface registers TWENTY-NINE write-shaped tools, and
-the missing one is ``set_open_to_work``: it is sanctioned, it is refused by
-``_refuse_unperformable``, and no tool was ever registered for it. So twenty-nine
-counts TOOLS and thirty counts ACTIONS, and a reader comparing the two
-numbers is not looking at a discrepancy. (TWENTY-NINE and TWENTY-EIGHT until
+THIRTY-FOUR actions where this surface registers THIRTY-THREE write-shaped
+tools, and the missing one is ``set_open_to_work``: it is sanctioned, it is
+refused by ``_refuse_unperformable``, and no tool was ever registered for it.
+So thirty-three counts TOOLS and thirty-four counts ACTIONS, and a reader
+comparing the two numbers is not looking at a discrepancy. (THIRTY and
+TWENTY-NINE until integration 6's merge of lane build-net2's four writes,
+2026-11-26, added four to each; that lane's branch read THIRTY-TWO and
+THIRTY-ONE. TWENTY-NINE and TWENTY-EIGHT until
 lane build-jobs2's receipt-only ``send_recommendations_feedback``, the same
 day, added one to each. TWENTY-EIGHT and TWENTY-SEVEN until
 lane build-jobs2's refusing ``set_recent_job_searches_cleared``, 2026-11-26, added
@@ -1303,7 +1332,12 @@ mcp = FastMCP(
     instructions=(
         "A window onto the operator's OWN LinkedIn account, driven by his own "
         "signed-in browser on his own machine. Most tools read and change "
-        "nothing. TWENTY-FIVE WRITE: linkedin_save_job, "
+        "nothing. ONE READ CLICKS: linkedin_recent_searches clicks his own "
+        "search box once, reads the recent searches its list draws -- "
+        "keywords he typed, never the people the same list names -- and "
+        "closes it with Escape; to run one again, pass its keywords to the "
+        "search tool for its vertical. "
+        "TWENTY-NINE WRITE: linkedin_save_job, "
         "linkedin_unsave_job, linkedin_unfollow_company, "
         "linkedin_follow_company, linkedin_apply_job, "
         "linkedin_update_setting, linkedin_react_to_item, "
@@ -1315,8 +1349,12 @@ mcp = FastMCP(
         "linkedin_message_from_profile, linkedin_send_attachment, "
         "linkedin_set_admitted_setting, linkedin_withdraw_reaction, "
         "linkedin_set_similar_jobs_alert, linkedin_unset_similar_jobs_alert, "
-        "linkedin_set_search_job_alert, linkedin_unset_search_job_alert and "
-        "linkedin_send_recommendations_feedback. "
+        "linkedin_set_search_job_alert, linkedin_unset_search_job_alert, "
+        "linkedin_send_recommendations_feedback, "
+        "linkedin_accept_invitation_to_connect, "
+        "linkedin_ignore_invitation_to_connect, "
+        "linkedin_withdraw_invitation and "
+        "linkedin_mark_not_interested. "
         "ONE MORE IS WRITE-SHAPED AND REFUSES: linkedin_set_tracker_stage, the "
         "stage move on a saved job, whose control -- an item in the tracker "
         "row's overflow menu -- has never been captured; it reads his Saved "
@@ -1369,6 +1407,26 @@ mcp = FastMCP(
         "no inverse exists and its outcome cannot be confirmed, so offer it "
         "only when he orders it and give him the receipt's after_press "
         "record. "
+        "THE TWENTY-FIFTH TO TWENTY-SEVENTH, "
+        "linkedin_accept_invitation_to_connect, "
+        "linkedin_ignore_invitation_to_connect and "
+        "linkedin_withdraw_invitation, answer ONE pending invitation on his "
+        "invitation manager -- accept or ignore one he received, withdraw one "
+        "he sent -- aimed by the member's profile link as "
+        "linkedin_received_invitations and linkedin_sent_invitations return "
+        "it, never by a name; each is an act toward that person, so offer it "
+        "only for an invitation he names. Each presses one control and "
+        "nothing in any dialog it draws: the withdraw's documented "
+        "confirmation is expected to stop its first use. "
+        "THE TWENTY-EIGHTH, linkedin_mark_not_interested, marks ONE feed "
+        "item he names by its urn -- as linkedin_read_named_profile's "
+        "activity_items returns a member's posts -- 'Not interested' from "
+        "that item's own control menu on its "
+        "permalink: curation of his own feed, and nobody is told. It "
+        "presses the menu's trigger and the one item in the menu that "
+        "trigger owns, nothing more; the undo LinkedIn draws is drawn "
+        "once and never pressed here, so if he changes his mind he "
+        "presses it himself while it is drawn. "
         "THE SIXTEENTH, linkedin_withdraw_from_group, leaves one group he "
         "names by its NUMERIC id, never by a group's name; no join is built "
         "here, so offer it only for a group he names -- and not his last "
@@ -14102,6 +14160,199 @@ async def linkedin_job_alerts() -> dict[str, Any]:
 
 
 # ---- end lane build-jobs2 ----
+
+
+# ---- lane build-net2 ----
+# Census rows N 15, N 16 and N 10 (lane build-net2, 2026-11-26): one pending
+# invitation he names, answered on his own invitation manager. Every tool this
+# lane registers is in this one contiguous block.
+
+
+@mcp.tool()
+async def linkedin_accept_invitation_to_connect(
+    profile: str, confirm_token: str = ""
+) -> dict[str, Any]:
+    """Accept ONE pending invitation to connect, from a member YOU NAME -- a WRITE toward that person.
+
+    Presses LinkedIn's "Accept" on the invitation's own row of your invitation
+    manager's received tab. The inviter is told, and the two of you become
+    first-degree connections. Same two-step shape and the same five gates as
+    ``linkedin_save_job``: no ``confirm_token``, no action -- you get a block
+    to read and a token that works ONCE, only for this member, only for this
+    verb, within two minutes. Census row ``N 15``.
+
+    YOU NAME THE INVITER BY PROFILE LINK -- as ``linkedin_received_invitations``
+    returns it -- or member id. A name is never accepted, and none is read:
+    the page is asked, by a count, for exactly ONE invitation row whose member
+    links all name that profile, with LinkedIn's "wants to connect" line and
+    its "Accept" and "Ignore" buttons. Anything else -- no such row, two, a
+    row of another kind -- is refused and nothing is pressed. Only the first
+    render of the tab is read.
+
+    ONE PRESS AND NOTHING MORE. What pressing Accept draws has never been
+    captured: a dialog on the page afterwards is counted, never answered, and
+    a fresh render of the tab decides ``performed`` -- the row gone, and
+    exactly one invitation row fewer. Re-read ``linkedin_connections`` to see
+    the inviter among your connections. Loading the received tab clears its
+    pending badge. Undoing it means removing the connection by hand; this
+    server does not.
+
+    Args:
+        profile: the inviter's profile link, https://www.linkedin.com/in/<segment>/,
+            or member id.
+        confirm_token: leave empty to preview. Pass the token from that
+            preview to actually accept.
+    """
+    try:
+        return await _write_tool("accept_invitation_to_connect", profile, confirm_token)
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_ignore_invitation_to_connect(
+    profile: str, confirm_token: str = ""
+) -> dict[str, Any]:
+    """Ignore ONE pending invitation to connect, from a member YOU NAME -- a WRITE toward that person.
+
+    Presses LinkedIn's "Ignore" on the invitation's own row of your invitation
+    manager's received tab, aimed exactly as
+    ``linkedin_accept_invitation_to_connect`` aims: the inviter's profile link
+    or member id, never a name, matched by a count against ONE invitation row.
+    Two steps, the same gates, a token bound to this member and this verb.
+    Census row ``N 16``.
+
+    ONE PRESS AND NOTHING MORE. Whether Ignore draws a confirmation or offers to
+    report the sender has never been captured: anything it draws is counted,
+    never answered, and a fresh render of the tab decides ``performed``. No
+    undo of an ignore is known; the member may invite you again.
+
+    Args:
+        profile: the inviter's profile link, https://www.linkedin.com/in/<segment>/,
+            or member id.
+        confirm_token: leave empty to preview. Pass the token from that
+            preview to actually ignore it.
+    """
+    try:
+        return await _write_tool("ignore_invitation_to_connect", profile, confirm_token)
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_withdraw_invitation(
+    profile: str, confirm_token: str = ""
+) -> dict[str, Any]:
+    """Withdraw ONE pending invitation YOU SENT, to a member you name -- a WRITE, and LinkedIn bars a new one for weeks.
+
+    Presses LinkedIn's "Withdraw" on that invitation's row of your invitation
+    manager's Sent tab, aimed by the member's profile link or member id --
+    as ``linkedin_sent_invitations`` returns it -- never a name, matched by a
+    count against ONE row. Two steps, the same gates, a token bound to this
+    member and this verb. Census row ``N 10``.
+
+    EXPECT THE FIRST USE TO STOP AT A CONFIRMATION. LinkedIn documents one
+    (press Withdraw, then Withdraw again in a pop-up), and this server has
+    never seen it, so it presses NOTHING in it: the result counts what the
+    pop-up draws, and a fresh render of the Sent tab decides ``performed`` --
+    the row still there means nothing was withdrawn. That reading is what
+    the confirm press will be built on. If LinkedIn draws no pop-up, the one
+    press withdraws. A withdrawn invitation cannot be undone: LinkedIn refuses
+    a new invitation to the same member for up to three weeks.
+
+    Args:
+        profile: the member's profile link, https://www.linkedin.com/in/<segment>/,
+            or member id.
+        confirm_token: leave empty to preview. Pass the token from that
+            preview to actually press Withdraw.
+    """
+    try:
+        return await _write_tool("withdraw_invitation", profile, confirm_token)
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_mark_not_interested(
+    item: str, confirm_token: str = ""
+) -> dict[str, Any]:
+    """Mark ONE feed item you name "Not interested" -- a WRITE to your own feed, from the item's own menu.
+
+    Opens the permalink of the item whose urn you give
+    (``/feed/update/<urn>/``), presses that item's own control menu -- the one
+    trigger LinkedIn draws with its fixed "Open control menu" prefix -- and
+    presses "Not interested" ONLY if it is the one such item on the page and it
+    sits in the menu that trigger owns. Curation of your own feed
+    (HIS-OWN-CURATION-NOT-OUTWARD): nobody is told. Same two steps and gates as
+    ``linkedin_save_job``: no ``confirm_token``, no action. Census row ``N 154``.
+
+    YOU NAME THE ITEM BY ITS URN (``urn:li:activity:<digits>`` and its kin),
+    as ``linkedin_read_named_profile``'s ``activity_items`` returns a member's
+    posts -- never by its author or words; the page may only refuse it. The
+    item's author is never read.
+
+    THE UNDO IS LINKEDIN'S AND IS DRAWN ONCE. What the press draws has never
+    been captured, so the result is read IN PLACE: an ``Undo`` drawn where the
+    item was means it is hidden; the menu still open with its item means it
+    was not pressed; anything else is ``unknown`` -- look at your feed, do not
+    retry. This server never presses the undo; press it yourself while it is
+    drawn if you change your mind.
+
+    Args:
+        item: the item's urn, e.g. ``urn:li:activity:<digits>``.
+        confirm_token: leave empty to preview. Pass the token from that
+            preview to actually press.
+    """
+    try:
+        return await _write_tool("mark_not_interested", item, confirm_token)
+    except Exception as exc:
+        return _error(exc)
+
+
+from linkedin_server import search_typeahead  # noqa: E402 -- lane build-net2's one block
+
+
+@mcp.tool()
+async def linkedin_recent_searches() -> dict[str, Any]:
+    """Your recent searches, as LinkedIn's own search box lists them. ONE page load, ONE click, ONE Escape.
+
+    Loads your feed, clicks its search box once -- the one
+    ``[role=search] input[aria-autocomplete]`` on the page, refused unless
+    there is exactly one -- reads the recent-searches group of the list it
+    opens, and closes it with Escape, checking that it closed. Census row
+    ``N 95``, on SEARCH-BOX-TYPEAHEAD-DISCLOSURE.
+
+    WHAT COMES BACK, under ``recent_searches``: each search's ``keywords``,
+    the words you typed into your own search box (returned to you under
+    HIS-OWN-TEXT-AT-RUNTIME, never stored), and its ``vertical`` (``jobs``,
+    ``all``, or ``other`` for any other results page). To run one again, pass
+    its keywords to the search tool for its vertical; this tool opens no
+    address it read.
+
+    WHAT NEVER COMES BACK: the people you viewed recently, which the same list
+    draws -- no name, no link, no count of them -- LinkedIn's suggestions, or
+    anything else on the page.
+
+    IT TYPES NOTHING AND CHOOSES NOTHING: no key but Escape, no Enter, no
+    option of the list -- not a search, not a suggestion, not "Clear all".
+    A box that does not close is reported as ``did_not_close`` and what it
+    read is withheld; look at the page.
+    """
+    try:
+        async with BROWSER.session() as page:
+            landed = await BROWSER.goto(page, search_typeahead.PAGE_URL)
+            _authwall_refusal_without_the_landing(landed, surface="feed")
+            typeahead_reading = await search_typeahead.disclose_recent_searches(page, landed)
+            return {
+                "ok": not typeahead_reading.get("refused"),
+                "pages_loaded": 1,
+                **typeahead_reading,
+            }
+    except Exception as exc:
+        return _error(exc)
+
+
+# ---- end lane build-net2 ----
 
 
 def main() -> None:  # pragma: no cover - process entry point

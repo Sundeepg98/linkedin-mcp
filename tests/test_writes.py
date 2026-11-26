@@ -787,6 +787,15 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         # OUTWARD-CLASSES-BUILT-BEHIND-GRANTS, on the admitted /groups/ root
         # and an item measured on all five membership rows' menus.
         "withdraw_from_group",
+        # LANE BUILD-NET2, 2026-11-26: the three invitation answers (census
+        # N 15, N 16, N 10), sanctioned and performable in the same move, on
+        # the two admitted tabs of his invitation manager.
+        "accept_invitation_to_connect",
+        "ignore_invitation_to_connect",
+        "withdraw_invitation",
+        # LANE BUILD-NET2, 2026-11-26: one feed item he names marked Not
+        # interested (census N 154), sanctioned and performable in one move.
+        "mark_not_interested",
         # EIGHTEEN AND NINETEEN FROM LANE L5'S MERGE OF MASTER 52b55b6, the
         # same day (seventeen and eighteen on its follow-up branch): Connect
         # and Message on the profile of a person he names (census N 4 by D6,
@@ -959,6 +968,16 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         # a gate that re-reads the menu (writes.MENU_ITEM_ACTIONS). No undo
         # is built here, and its spec says so.
         "withdraw_from_group",
+        # LANE BUILD-NET2, 2026-11-26: accept, ignore and withdraw one pending
+        # invitation he names by the member's link (census N 15, N 16, N 10).
+        # ONE press each and NO new permission; a dialog it draws is counted
+        # and never answered, and a fresh render of the tab decides.
+        "accept_invitation_to_connect",
+        "ignore_invitation_to_connect",
+        "withdraw_invitation",
+        # LANE BUILD-NET2, 2026-11-26: one feed item he names marked Not
+        # interested (census N 154), sanctioned and performable in one move.
+        "mark_not_interested",
         # THE SEVENTEENTH AND EIGHTEENTH, 2026-09-27 (lane L5's follow-up; the
         # sixteenth and seventeenth on its branch until its merge of master
         # 52b55b6 brought withdraw_from_group in first): Connect and Message on
@@ -1537,6 +1556,15 @@ _UNMEASURED_REVERSIBILITY = {
     # 2026-09-27 (census rows M C63 / N 64). No rejoin has ever been observed
     # and nothing here joins a group; its spec treats it as irreversible.
     "withdraw_from_group",
+    # 2026-11-26 (lane build-net2). What each invitation answer's press draws
+    # has never been captured; no undo of an accept, an ignore or a withdraw
+    # is built, and LinkedIn bars a new invitation for weeks after a withdraw.
+    "accept_invitation_to_connect",
+    "ignore_invitation_to_connect",
+    "withdraw_invitation",
+    # 2026-11-26 (lane build-net2, N 154). The undo LinkedIn draws after Not
+    # interested has never been captured.
+    "mark_not_interested",
     # 2026-09-27 (lane L5's follow-up). What a pressed Connect becomes on a
     # profile has never been captured, so neither has a withdraw control; and
     # whether a message sent from a profile can be recalled has never been
@@ -1607,6 +1635,12 @@ REVERSIBILITY_CLASS = {
     # carries irreversible=True regardless, because no join is built here and
     # an approval-gated group needs a manager to let him back in.
     "withdraw_from_group": "STILL-UNKNOWN",
+    # 2026-11-26 (lane build-net2). STILL-UNKNOWN, all three: see
+    # _UNMEASURED_REVERSIBILITY.
+    "accept_invitation_to_connect": "STILL-UNKNOWN",
+    "ignore_invitation_to_connect": "STILL-UNKNOWN",
+    "withdraw_invitation": "STILL-UNKNOWN",
+    "mark_not_interested": "STILL-UNKNOWN",
     # 2026-09-27 (lane L5's follow-up). STILL-UNKNOWN, both: see
     # _UNMEASURED_REVERSIBILITY.
     "connect_from_profile": "STILL-UNKNOWN",
@@ -1652,6 +1686,10 @@ REVERSIBILITY_MEASURED = {
     "send_reply": False,
     "send_attachment": False,
     "withdraw_from_group": False,
+    "accept_invitation_to_connect": False,
+    "ignore_invitation_to_connect": False,
+    "withdraw_invitation": False,
+    "mark_not_interested": False,
     "connect_from_profile": False,
     "message_from_profile": False,
     "set_admitted_setting": False,

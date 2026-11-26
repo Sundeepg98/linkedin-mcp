@@ -233,6 +233,11 @@ DECLARED: dict[tuple[str, str], tuple[str, int]] = {
     ("following_list.py", "read_following_list"): (ASKED_FOR, 1),
     ("unfollowed_list.py", "read_unfollowed_list"): (ASKED_FOR, 1),
     ("advertising_data.py", "read_advertising_data"): (ASKED_FOR, 1),
+    # 2026-11-26 (lane build-net2, census N 95): the recent-searches group
+    # read wrong -- none or two of its structure, no link, a link that is no
+    # search address -- each raised with the feed, the address the module
+    # ASKED FOR, its constant PAGE_URL; never the landing.
+    ("search_typeahead.py", "_read_recent_searches"): (ASKED_FOR, 3),
     # --- NO_ADDRESS_IN_SCOPE: selector builders ---------------------------
     # Pure string builders. None takes a page or a url, so none of them could
     # publish an address if it tried. Declared so the guard's coverage is the
@@ -621,10 +626,21 @@ def test_the_twenty_are_still_twenty():
     # infra26's deletion and this lane's three raises, every site of each
     # kept, the tally MEASURED off the merged table, not summed:
     # {WITHHELD 24, ASKED_FOR 16, PASSTHROUGH 1, NO_ADDRESS_IN_SCOPE 10}.
+    # FORTY-ONE ON LANE BUILD-NET2 (2026-11-26, census N 95):
+    # ``search_typeahead._read_recent_searches`` raises THREE times on a
+    # recent-searches group read wrong, each with the feed, the module's own
+    # constant PAGE_URL -- the address it asked for -- so ASKED_FOR is
+    # 16 -> 19. MEASURED off this table, not summed.
+    # FORTY-FOUR AT INTEGRATION 6'S MERGE OF LANE BUILD-NET2 ONTO LANE BUILD-JOBS2 (2026-11-26):
+    # build-jobs2's three WITHHELD raises and build-net2's three ASKED_FOR
+    # raises, every site of each kept; the tally MEASURED off the merged
+    # table, not summed: {WITHHELD 24, ASKED_FOR 19, PASSTHROUGH 1}.
     assert tally[WITHHELD] == 24, tally
-    assert tally[ASKED_FOR] == 16, tally
+    assert tally[ASKED_FOR] == 19, tally
     assert tally[PASSTHROUGH] == 1, tally
-    assert tally[WITHHELD] + tally[ASKED_FOR] + tally[PASSTHROUGH] == 41, tally
+    # 44, not 41: both lanes' branches read 41 (24 + 16 + 1 and 21 + 19 + 1), so
+    # the two equal lines merged clean as one; the merged table measures 44.
+    assert tally[WITHHELD] + tally[ASKED_FOR] + tally[PASSTHROUGH] == 44, tally
     assert tally[NO_ADDRESS_IN_SCOPE] == 10, tally
 
 

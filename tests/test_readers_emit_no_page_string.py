@@ -2317,6 +2317,25 @@ FIXTURE_BREAKS: dict[str, dict[str, str]] = {
         "needle": 'data-view-name="org-member-life-trending-employee-content"',
         "into": 'data-view-name="org-member-life-trending-other"',
     },
+    # 2026-11-26 (lane build-net2): LinkedIn's own words the invitation
+    # answers are aimed by. Broken, the tab draws no invitation of the
+    # shape and each drive raises.
+    "invitation_acts:read_rows": {
+        "fixture": "synthetic/live11_invitations_words.html",
+        "needle": ">\nwants to connect\n<", "into": ">\nwants to xxxxxxx\n<",
+    },
+    "invitation_acts:read_state": {
+        "fixture": "synthetic/live11_invitations_words.html",
+        "needle": ">\nIgnore\n<", "into": ">\nXxxxxx\n<",
+    },
+    "invitation_acts:read_after_press": {
+        "fixture": "synthetic/live11_invitations_sent_words.html",
+        "needle": ">\nWithdraw\n<", "into": ">\nXxxxxxxx\n<",
+    },
+    "search_typeahead:disclose_recent_searches": {
+        "fixture": "live11/feed_menus.html",
+        "needle": 'role="search"', "into": 'role="xxxxxx"',
+    },
 }
 
 ALL_DRIVES = {**shipped_drives.DRIVES, **shipped_drives.TO_THE_PRESS}
