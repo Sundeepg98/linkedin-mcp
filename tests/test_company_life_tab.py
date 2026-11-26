@@ -39,7 +39,7 @@ MARKER = "Exampleperson Markersurname"
 #: The two trending items' synthetic authors, slugs and post ids, in document
 #: order -- declared people (``tests/test_fixtures_hold_only_synthetic_people.py``).
 AUTHORS = ("Kai Example", "Juno Fixture")
-SLUGS = ("kai-example-1a2b", "juno-fixture-3c4d")
+SLUGS = ("kai-example-1a2b", "juno-example-3c4d")
 POST_IDS = ("7400000000000000001", "7400000000000000002")
 #: The see-more control's text, as the reader cuts it from the words' end.
 MORE = chr(0x2026) + "more"
@@ -252,7 +252,7 @@ def test_a_member_mentioned_in_the_words_is_never_taken_for_the_author():
     root = life()
     item = trending_items(root)[0]
     hashtag = where(_permalink(item), lambda n: n.tag == "a" and "/search/results/" in n.attrs.get("href", ""))
-    hashtag[0].attrs["href"] = "https://www.linkedin.com/in/lea-sample-5e6f/"
+    hashtag[0].attrs["href"] = "https://www.linkedin.com/in/lea-example-5e6f/"
     result, _ = run(root)
     assert result["trending"]["posts"][0]["author"]["link"] == "https://www.linkedin.com/in/kai-example-1a2b/"
 
@@ -262,7 +262,7 @@ def test_a_second_profile_outside_the_words_skips_the_item_never_chooses():
     item = trending_items(root)[0]
     outside = [a for a in _member_links(item) if a not in _member_links(_permalink(item))]
     avatar = [a for a in outside if not where(a, lambda n: n.tag == "span" and n.attrs.get("aria-hidden") == "true")]
-    avatar[0].attrs["href"] = "https://www.linkedin.com/in/lea-sample-5e6f/"
+    avatar[0].attrs["href"] = "https://www.linkedin.com/in/lea-example-5e6f/"
     result, _ = run(root)
     assert [p["author"]["name"] for p in result["trending"]["posts"]] == ["Juno Fixture"]
     assert result["trending"]["skipped"]["more_than_one_profile"] == 1
