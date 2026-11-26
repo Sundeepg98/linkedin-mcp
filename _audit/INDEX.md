@@ -27,8 +27,8 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 289 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 249 |
+| audit documents git tracks under `_audit` | 290 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 250 |
 | distinct dates | 22 |
 | documents with no level-1 heading | 2 |
 | `CORRECTS:` marker lines | 130 |
@@ -39,7 +39,7 @@ are listed as `(undated)`; no date is taken from git history, because
 | documents at either end of a cross-document edge | 109 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
-| documents no correction marker touches at all | 178 |
+| documents no correction marker touches at all | 179 |
 | blockquoted markers naming ANOTHER document | 0 |
 | edges missing one of their two markers | 0 |
 | edges declared a different number of times in each direction | 2 |
@@ -1920,6 +1920,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-11-25 | [2026-11-25-live-session-11.md](2026-11-25-live-session-11.md) | Live session 11 -- campaign L1, the capture session: the prep, written offline |  |
 | 2026-11-25 | [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md) | Orchestrator rulings of 2026-11-25 (from 22:30 IST), registered at integration 3 | corrects x1 |
 | 2026-11-26 | [2026-11-26-integration-3.md](2026-11-26-integration-3.md) | Integration 3, 2026-11-26: five certified heads onto master, and the rulings since 2026-11-25 22:30 |  |
+| 2026-11-26 | [2026-11-26-readers-msg26.md](2026-11-26-readers-msg26.md) | readers-msg26, 2026-11-26: the messaging and content rows live session 11 captured, read offline |  |
 | 2026-11-26 | [2026-11-26-rulings-search-route.md](2026-11-26-rulings-search-route.md) | Orchestrator rulings of 2026-11-26 (01:20 IST): the job search's route, registered at integration 3 |  |
 
 ## 6. What the scan rejected, could not join, or had to repair

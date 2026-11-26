@@ -670,6 +670,10 @@ class Category:
 #: payload is WHO) and joined at lane build-p26's merge of that branch,
 #: 2026-11-25: the members on the first render of his own follower list, each
 #: beside whether he follows that member back, no opt-in.
+#: ``linkedin_search_content`` joined on 2026-11-26 (lane readers-msg26,
+#: census ``M C93``, ruling CONTENT-VERTICAL-NOT-ALL-RESULTS): the result
+#: cards of ONE content search page, each a :class:`Post` whose author is a
+#: person record, no opt-in -- which posts a search drew is its whole answer.
 PEOPLE_TOOLS: frozenset[str] = frozenset(
     {
         "linkedin_group_members",
@@ -689,6 +693,7 @@ PEOPLE_TOOLS: frozenset[str] = frozenset(
         # records, so every rule for a people reader binds it: one page.
         "linkedin_company_people_insights",
         "linkedin_my_followers_list",
+        "linkedin_search_content",
     }
 )
 

@@ -289,6 +289,23 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "in the ledger record does not hold while leaving the record unmarked."
     ),
 
+    # 2026-11-26, lane readers-msg26. READ, not inferred from the filenames:
+    # every line citing the lane's record was listed with the matched words in
+    # its two-line window, and none sits in the lane's own note (a scan of each
+    # note's text alone: zero hits).
+    ("messaging-and-content.md", "2026-11-26-readers-msg26.md"): (
+        "A ROW'S MOVE OR NEXT STEP RECORDED, NOT A CORRECTION. Rows `C93` and "
+        "`C70` each gained one dated note citing the lane's record -- `C93`'s "
+        "move to COVERED-UNFIRED on the content search reader, `C70`'s reading "
+        "that the same capture draws no group facet and its re-pointed capture "
+        "-- and neither says anything in that record does not hold. The matched "
+        "words are older text: `C70`'s own 2026-09-21 paragraph ('TWO "
+        "CORRECTIONS', 'A PLAUSIBLE WRONG ANSWER', 'is **False** for') and row "
+        "`C72`'s cell two lines below it. **WHAT WOULD MAKE THIS ENTRY WRONG:** "
+        "a messaging row saying something in the lane's record does not hold "
+        "while leaving the record unmarked."
+    ),
+
     # 2026-11-25, lane build-jmn26. TABLE-ROW PROXIMITY, read and not inferred
     # from the filenames: every line citing the lane's record was listed with
     # the matched words in its two-line window, and none sits in the lane's own

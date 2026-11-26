@@ -26,6 +26,7 @@
     "company_interest:read_state": "clean",
     "company_people_insights:read_people_insights": "returns_records",
     "company_root:read_company_root": "not_driven:read the page and returned nothing the page made",
+    "content_search:read_content_results": "returns_records",
     "creator_analytics:collect_labels": "returns_text",
     "creator_analytics:read_content_analytics": "clean",
     "dom:_count_by_role": "clean",

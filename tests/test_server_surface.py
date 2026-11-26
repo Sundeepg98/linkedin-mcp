@@ -1,4 +1,9 @@
-"""The tool surface: eighty-three tools, fifty-six of which do not write.
+"""The tool surface: eighty-four tools, fifty-seven of which do not write.
+
+**IT READ "eighty-three tools, fifty-six of which do not write" UNTIL LANE
+READERS-MSG26 (2026-11-26) ADDED ONE READ**: ``linkedin_search_content``
+(census M C93), the content search vertical, so the non-write count moves to
+fifty-seven.
 
 **IT READ "eighty-one tools, fifty-six of which do not write" UNTIL
 INTEGRATION 3'S MERGE OF LANE BUILD-JMN26 (2026-11-26) ADDED TWO WRITES**:
@@ -326,6 +331,11 @@ EXPECTED_TOOLS = {
     # presses; the groups page's Join control is never read.
     "linkedin_search_groups",
     "linkedin_search_events",
+    # THE EIGHTY-FOURTH, 2026-11-26 (lane readers-msg26, ruling
+    # CONTENT-VERTICAL-NOT-ALL-RESULTS): a READ of one content search results
+    # page composed from a keyword alone, its cards read as people_data.Post
+    # records (census M C93). It presses nothing and is on no write table.
+    "linkedin_search_content",
     # THE SIXTY-SECOND, 2026-10-10 (lane B3, ruling
     # THIRD-PARTY-TEXT-AT-RUNTIME): a READ of ONE item's own words off the
     # permalink its caller's key names, returned inside one people_data.Post
@@ -766,8 +776,13 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_eighty_three_tools(tools):
-    """RENAMED AGAIN AT INTEGRATION 3'S MERGE OF LANE BUILD-JMN26 (2026-11-26), to
+async def test_the_surface_is_exactly_the_eighty_four_tools(tools):
+    """RENAMED AGAIN ON LANE READERS-MSG26 (2026-11-26), to
+    ``..._eighty_four_tools``: one READ, ``linkedin_search_content`` (census
+    M C93), beside the eighty-three. MEASURED off this branch's registry, not
+    summed; the name moved with the pin.
+
+    RENAMED AGAIN AT INTEGRATION 3'S MERGE OF LANE BUILD-JMN26 (2026-11-26), to
     ``..._eighty_three_tools``: two WRITES, ``linkedin_set_search_job_alert`` and
     its inverse ``linkedin_unset_search_job_alert`` (census J 31), beside the
     eighty-one. MEASURED off the merged registry, not summed; the name moved
@@ -1303,7 +1318,10 @@ async def test_the_surface_is_exactly_the_eighty_three_tools(tools):
     # search-alert pair beside build-p26's eighty-one, so the split moves on its
     # write side and the non-write count holds at fifty-six. MEASURED off
     # mcp.list_tools() on the merged tree, not summed.
-    assert len(tools) == 83
+    # EIGHTY-FOUR ON LANE READERS-MSG26 (2026-11-26): linkedin_search_content,
+    # a READ, so the split moves on its read side. MEASURED off
+    # mcp.list_tools().
+    assert len(tools) == 84
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -1557,8 +1575,12 @@ async def test_the_surface_is_exactly_the_eighty_three_tools(tools):
     # tools are writes, so the non-write count holds at build-p26's fifty-six,
     # and this second copy of the total moves to the measured eighty-three with
     # the first test's pin. MEASURED on the merged tree, never summed.
-    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 56
-    assert len(tools) == 83
+    # FIFTY-SEVEN ON LANE READERS-MSG26 (2026-11-26): linkedin_search_content
+    # is a READ beside the fifty-six, so the non-write count moves by one and
+    # the write side is unmoved; this second copy of the total moves to the
+    # measured eighty-four with the first test's pin.
+    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 57
+    assert len(tools) == 84
 
 
 def test_the_read_that_was_nearly_named_a_write():

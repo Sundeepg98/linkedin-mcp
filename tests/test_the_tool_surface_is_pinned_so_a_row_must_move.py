@@ -156,6 +156,10 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_save_job": ("confirm_token", "job_id"),
     "linkedin_saved_jobs": ("limit",),
     "linkedin_search_appearances": (),
+    # 2026-11-26, lane readers-msg26: census M C93, banked in the same commit
+    # (GAP -> COVERED-UNFIRED) -- the content search vertical, read over live
+    # session 11's capture.
+    "linkedin_search_content": ("keywords",),
     # 2026-10-10, lane B2: census N 161 and N 179, REPORTED to the lane's lead
     # rather than banked -- the census is the lead's to move at merge.
     "linkedin_search_events": ("keywords",),
@@ -732,8 +736,13 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: PARAMETERS** -- the search-alert pair (three parameters each) beside
 #: build-p26's eighty-one tools and 128 parameters (its follower list takes
 #: none), counted on the merged registry, never summed.
-PINNED_TOOL_COUNT = 83
-PINNED_PARAMETER_COUNT = 134
+#: **AT LANE READERS-MSG26 (2026-11-26): 84 TOOLS AND 135 PARAMETERS** --
+#: `linkedin_search_content(keywords)`, one READ and one parameter, beside the
+#: eighty-three and 134, counted off `mcp.list_tools()`, never summed. THE
+#: CENSUS DECISION, IN THE SAME COMMIT: `M C93` GAP -> COVERED-UNFIRED on it,
+#: never fired. See `_audit/2026-11-26-readers-msg26.md`.
+PINNED_TOOL_COUNT = 84
+PINNED_PARAMETER_COUNT = 135
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:
