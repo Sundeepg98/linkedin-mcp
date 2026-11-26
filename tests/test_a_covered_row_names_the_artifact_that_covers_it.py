@@ -738,3 +738,42 @@ def test_control_the_tracker_stage_chain_convicts_a_dropped_reader() -> None:
                + source[start:].replace("await _read_tracker(",
                                         "await _read_tracker_gone(", 1))
     assert not _tracker_stage_calls_the_reader(mutated)
+
+
+def _page_tab_calls(server_src: str) -> set[str]:
+    """The ``company_tabs`` readers ``linkedin_company_page_tab`` calls by name."""
+    tree = ast.parse(server_src)
+    for node in ast.walk(tree):
+        if isinstance(node, ast.AsyncFunctionDef) and node.name == "linkedin_company_page_tab":
+            return {
+                inner.func.attr
+                for inner in ast.walk(node)
+                if isinstance(inner, ast.Call)
+                and isinstance(inner.func, ast.Attribute)
+                and ast.unparse(inner.func.value) == "company_tabs"
+                and inner.func.attr.startswith("read_")
+            }
+    return set()
+
+
+def test_the_page_tab_chain_is_still_whole() -> None:
+    """``J 106``, ``J 113`` and ``J 165`` (lane readers-jobs26, 2026-11-26):
+    the tool -> each tab's own reader. The three rows claim COVERED-UNFIRED on
+    it."""
+    from linkedin_server import company_tabs
+
+    assert _page_tab_calls(_source("server.py")) == {
+        "read_about_tab", "read_events_tab", "read_insights_tab",
+    }, "linkedin_company_page_tab no longer calls every tab's reader; J 106/J 113/J 165's chain is broken"
+    for name in ("read_about_tab", "read_events_tab", "read_insights_tab"):
+        assert callable(getattr(company_tabs, name, None)), name
+
+
+def test_control_the_page_tab_chain_convicts_a_dropped_reader() -> None:
+    """SHOWN FAILING against a MUTATED COPY: one reader call renamed away."""
+    source = _source("server.py")
+    start = source.index("async def linkedin_company_page_tab(")
+    mutated = source[:start] + source[start:].replace(
+        "company_tabs.read_events_tab(", "company_tabs.read_events_gone(", 1)
+    assert _page_tab_calls(source) == {"read_about_tab", "read_events_tab", "read_insights_tab"}
+    assert _page_tab_calls(mutated) == {"read_about_tab", "read_insights_tab", "read_events_gone"}

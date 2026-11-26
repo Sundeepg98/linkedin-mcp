@@ -520,9 +520,20 @@ class Post:
         }
 
 
-#: Where an organisation's prose was read, as a closed vocabulary. One place so
-#: far: the Home view's Overview card (census row ``J 110``).
-PROSE_SOURCES = ("overview_card",)
+#: Where an organisation's prose was read, as a closed vocabulary. The Home
+#: view's Overview card (census row ``J 110``) first -- ``company_home`` reads
+#: position 0 -- then, since 2026-11-26 (lane readers-jobs26, census row
+#: ``J 106``, ``company_tabs``), the About tab's description and the values of
+#: four of its measured definition terms, each named for the fact it was read
+#: as, so a record says WHICH of the Page's words it carries.
+PROSE_SOURCES = (
+    "overview_card",
+    "about_overview",
+    "about_website",
+    "about_industry",
+    "about_headquarters",
+    "about_specialties",
+)
 
 #: The cap on an organisation's prose, in characters after normalisation.
 #: LinkedIn's own limit for a Page's description is the model: 2,000
@@ -689,6 +700,10 @@ PEOPLE_TOOLS: frozenset[str] = frozenset(
         # records, so every rule for a people reader binds it: one page.
         "linkedin_company_people_insights",
         "linkedin_my_followers_list",
+        # 2026-11-26 (lane readers-jobs26, census J 106, J 113, J 165): ONE
+        # tab of a Page, read off ONE page -- its About tab's own prose in
+        # OrganisationProse records, its Events tab's events as Event records.
+        "linkedin_company_page_tab",
     }
 )
 

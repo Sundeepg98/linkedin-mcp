@@ -50,13 +50,11 @@ J 97	J	W	-	SIBLING:P I9	INFERRED	P I9
 J 98	J	W	-	SIBLING:P I13	INFERRED	P I13
 J 99	J	W	-	SIBLING:P I12	NAMED	_audit/_census/jobs.md::Container: `P I12`
 J 100	J	W	-	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
-J 106	J	R	-	CAPTURE:admit-company-org-about	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/company/placeholder-org/about/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
 J 109	J	R	-	CAPTURE:admit-company-org-life	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/company/placeholder-org/life/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
 J 168	J	R	-	BUILD:tests/fixtures/live9/company_root_posts_view.html	MEASURED	_audit/2026-11-25-build-jmn26.md::So the Home half is delivered unfired ; RULING:THIRD-PARTY-TEXT-AT-RUNTIME
-J 111	J	R	-	CAPTURE:admit-company-org-products	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/company/placeholder-org/products/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
+J 111	J	R	-	CAPTURE:C-RJ26-2	MEASURED	_audit/2026-11-26-readers-jobs26.md::That organisation has no ; RULING:READ-PAST-AN-ACT-SUBSTRING
 J 112	J	R	-	TARGET:a school Page he names	NAMED	_audit/_census/read-addresses.tsv::UNDER THE WHO/WHICH RULE, EXTENDED ; RULING:OPERATOR-NAMES-THE-TARGET
-J 113	J	R	-	CAPTURE:admit-company-org-insights-insighttype-headcount	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/company/placeholder-org/insights/?insightType=HEADCOUNT ; RULING:READ-PAST-AN-ACT-SUBSTRING
-J 114	J	R	-	CAPTURE:admit-company-org-insights-insighttype-headcount	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/company/placeholder-org/insights/?insightType=HEADCOUNT ; RULING:READ-PAST-AN-ACT-SUBSTRING
+J 114	J	R	-	CAPTURE:C-RJ26-1	MEASURED	_audit/2026-11-26-readers-jobs26.md::sits behind the job-openings card's ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
 J 115	J	R+W	-	CAPTURE:C-JMN-3	MEASURED	_audit/2026-11-25-build-jmn26.md::NEITHER CAPTURED POSTING DRAWS ONE ; RULING:OPERATOR-NAMES-THE-TARGET
 J 116	J	R	-	RULING:Q-AI-GENERATING-LOADS	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/preload/guideOverlay/?interop=guideOverlay&query=Show+match+details ; RULING:READ-PAST-AN-ACT-SUBSTRING
 J 117	J	R	-	RULING:Q-AI-GENERATING-LOADS	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/preload/guideOverlay/?interop=guideOverlay&query=Show+match+details ; RULING:READ-PAST-AN-ACT-SUBSTRING
@@ -88,7 +86,6 @@ J 156	J	R+W	-	CAPTURE:admit-learning-career-journey	MEASURED	_audit/_census/jobs
 J 157	J	W	-	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 J 160	J	R	-	CAPTURE:admit-explore-career-insights	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/explore-career-insights/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
 J 163	J	W	-	BUILD:tests/fixtures/live8/recommended.html	MEASURED	_audit/2026-11-25-build-jmn26.md::THE PRESS IS ONE-SHOT. There is no inverse to build ; RULING:HIS-OWN-CURATION-NOT-OUTWARD ; RULING:OUTSIDE-THE-PRODUCT-PURPOSE
-J 165	J	R	-	CAPTURE:admit-company-org-events	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/company/placeholder-org/events/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
 J 166	J	R	-	CAPTURE:admit-products-product	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/products/placeholder-product/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
 J 167	J	R	-	CAPTURE:admit-showcase-showcase	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/showcase/placeholder-showcase/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
 M C2	M	W	R3	SIBLING:M C12	NAMED	_audit/_census/messaging-and-content.md::which is why the two rows close together or not at all

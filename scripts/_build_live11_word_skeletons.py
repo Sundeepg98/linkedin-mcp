@@ -71,6 +71,86 @@ SPEC: dict[str, tuple[str, tuple[str, ...]]] = {
             "No matches",
         ),
     ),
+    # Line 1, admit-jobs-application-settings (load 11): his own resumes and
+    # application data page. LinkedIn's headings, its two switches' names and
+    # sentences, the upload control's word and its file rule; every resume's
+    # name and date stays x.
+    "application_settings_words": (
+        "application_settings",
+        (
+            "Resumes and application data",
+            "Save resumes and application data",
+            "Allow LinkedIn to save your resumes and answers to application "
+            "questions. You may change your answers with each application.",
+            "Learn more about saved application data",
+            "Allow LinkedIn to save your resumes and answers",
+            "Share resume data with hirers",
+            "Hirers can view skills and experiences from the resumes you choose "
+            "to share when they search and view profiles and evaluate applicants "
+            "through LinkedIn" + chr(0x2019) + "s hiring tools.",
+            "Allow recruiters to view your resumes",
+            "Upload resume",
+            "DOC, DOCX, PDF (5MB)",
+        ),
+    ),
+    # J 106: an organisation Page's About tab (load 20). The definition
+    # list's TERMS and LinkedIn's size band; the Page's own values stay x.
+    "company_about_words": (
+        "company_about",
+        (
+            "Overview",
+            "Details",
+            "Website",
+            "Verified page",
+            "Industry",
+            "Company size",
+            "10,001+ employees",
+            "Headquarters",
+            "Specialties",
+            "Locations (45)",
+        ),
+    ),
+    # J 113 / J 114: the same Page's Insights tab at insightType=HEADCOUNT
+    # (load 19). The two modules' headings, the screen-reader table's header
+    # cells and the eleven job functions it drew -- LinkedIn's taxonomy --
+    # and the current tab's path word and query value; every count and
+    # percentage stays x.
+    "company_insights_headcount_words": (
+        "company_insights_headcount",
+        (
+            "insights",
+            "HEADCOUNT",
+            "Hiring trends",
+            "Total job openings",
+            "Function",
+            "Number of employees",
+            "Percentage of total headcount",
+            "3 month growth",
+            "6 month growth",
+            "Job openings growth",
+            "Engineering",
+            "Information Technology",
+            "Sales",
+            "Program and Project Management",
+            "Operations",
+            "Product Management",
+            "Business Development",
+            "Arts and Design",
+            "Marketing",
+            "Finance",
+            "Support",
+        ),
+    ),
+    # J 165: the same Page's Events tab (load 21). The two cards' headings
+    # and the button under the list; every event's words stay x.
+    "company_events_words": (
+        "company_events",
+        (
+            "Upcoming events",
+            "Past events",
+            "Show more events",
+        ),
+    ),
 }
 
 _KEYED = re.compile(r"\{L(\d{1,7})D(\d{1,7})n(\d{1,7}):([0-9a-f]{8})\}")

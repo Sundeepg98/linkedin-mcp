@@ -306,6 +306,17 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "ENTRY WRONG:** a jobs row saying something in the lane's record does "
         "not hold while leaving the record unmarked."
     ),
+    ("jobs.md", "2026-11-26-readers-jobs26.md"): (
+        "A ROW'S MOVE OR NEXT STEP RECORDED, NOT A CORRECTION. Rows `52`, "
+        "`106`, `111`, `113`, `114` and `165` each gained one dated note citing "
+        "lane readers-jobs26's record -- what the row's session-11 capture "
+        "draws, and its move to COVERED-UNFIRED or its re-pointed step -- and "
+        "none says anything in that record does not hold. The matched word is "
+        "older text in a neighbouring row: `104`'s 'same correction', two lines "
+        "above `106`. **WHAT WOULD MAKE THIS ENTRY WRONG:** a jobs row saying "
+        "something in the lane's record does not hold while leaving the record "
+        "unmarked."
+    ),
     ("messaging-and-content.md", "2026-11-25-build-jmn26.md"): (
         "A ROW'S NEXT STEP RECORDED, NOT A CORRECTION. Rows `C29` and `C97` "
         "each gained one dated note citing the lane's record -- the capture "

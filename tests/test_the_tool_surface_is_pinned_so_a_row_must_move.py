@@ -94,6 +94,9 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_company_page_home": ("organisation_id",),
     # 2026-10-10 (lane B4, census J 108): the People tab's insight cards.
     "linkedin_company_people_insights": ("organisation_id",),
+    # 2026-11-26 (lane readers-jobs26, census J 106, J 113, J 165): one tab
+    # of a Page -- About, Events or Insights -- over session 11's captures.
+    "linkedin_company_page_tab": ("organisation_id", "tab"),
     "linkedin_compose_fields": (),
     "linkedin_connect_from_profile": ("confirm_token", "profile"),
     "linkedin_connections": ("limit",),
@@ -732,8 +735,13 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: PARAMETERS** -- the search-alert pair (three parameters each) beside
 #: build-p26's eighty-one tools and 128 parameters (its follower list takes
 #: none), counted on the merged registry, never summed.
-PINNED_TOOL_COUNT = 83
-PINNED_PARAMETER_COUNT = 134
+#: **AT LANE READERS-JOBS26 (2026-11-26): 84 TOOLS AND 136 PARAMETERS** --
+#: `linkedin_company_page_tab(organisation_id, tab)`, one READ, beside the
+#: eighty-three and 134, counted off `mcp.list_tools()`, never summed. THE
+#: CENSUS DECISION, IN THE SAME COMMIT: `J 106`, `J 113` and `J 165` GAP ->
+#: COVERED-UNFIRED on it, never fired. See `_audit/2026-11-26-readers-jobs26.md`.
+PINNED_TOOL_COUNT = 84
+PINNED_PARAMETER_COUNT = 136
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:

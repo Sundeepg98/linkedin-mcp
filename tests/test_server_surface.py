@@ -1,4 +1,8 @@
-"""The tool surface: eighty-three tools, fifty-six of which do not write.
+"""The tool surface: eighty-four tools, fifty-seven of which do not write.
+
+**IT READ "eighty-three tools, fifty-six of which do not write" UNTIL LANE
+READERS-JOBS26 (2026-11-26) ADDED ONE READ**: ``linkedin_company_page_tab``
+(census J 106, J 113, J 165), one tab of an organisation's Page.
 
 **IT READ "eighty-one tools, fifty-six of which do not write" UNTIL
 INTEGRATION 3'S MERGE OF LANE BUILD-JMN26 (2026-11-26) ADDED TWO WRITES**:
@@ -349,6 +353,7 @@ EXPECTED_TOOLS = {
     # for it (MEMBER-ROSTERS-AS-BOUNDED-READS). One load, no press; it is on
     # no write table.
     "linkedin_company_people_insights",
+    "linkedin_company_page_tab",
     # THE SIXTY-SECOND, 2026-10-10 (lane B1, child lb1-dashboard, census
     # P L8): a READ of his analytics hub, /dashboard/, loaded once; its
     # metric cards come back as integers and closed words. It presses
@@ -766,8 +771,13 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_eighty_three_tools(tools):
-    """RENAMED AGAIN AT INTEGRATION 3'S MERGE OF LANE BUILD-JMN26 (2026-11-26), to
+async def test_the_surface_is_exactly_the_eighty_four_tools(tools):
+    """RENAMED AGAIN ON LANE READERS-JOBS26 (2026-11-26), to
+    ``..._eighty_four_tools``: one READ, ``linkedin_company_page_tab`` (census
+    J 106, J 113, J 165), beside the eighty-three. MEASURED off the registry,
+    not summed; the name moved with the pin.
+
+    RENAMED AGAIN AT INTEGRATION 3'S MERGE OF LANE BUILD-JMN26 (2026-11-26), to
     ``..._eighty_three_tools``: two WRITES, ``linkedin_set_search_job_alert`` and
     its inverse ``linkedin_unset_search_job_alert`` (census J 31), beside the
     eighty-one. MEASURED off the merged registry, not summed; the name moved
@@ -1303,7 +1313,10 @@ async def test_the_surface_is_exactly_the_eighty_three_tools(tools):
     # search-alert pair beside build-p26's eighty-one, so the split moves on its
     # write side and the non-write count holds at fifty-six. MEASURED off
     # mcp.list_tools() on the merged tree, not summed.
-    assert len(tools) == 83
+    # EIGHTY-FOUR ON LANE READERS-JOBS26 (2026-11-26): one tab of a Page, a
+    # READ, so the split moves on its read side and the write set holds.
+    # MEASURED off mcp.list_tools().
+    assert len(tools) == 84
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -1557,8 +1570,11 @@ async def test_the_surface_is_exactly_the_eighty_three_tools(tools):
     # tools are writes, so the non-write count holds at build-p26's fifty-six,
     # and this second copy of the total moves to the measured eighty-three with
     # the first test's pin. MEASURED on the merged tree, never summed.
-    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 56
-    assert len(tools) == 83
+    # FIFTY-SEVEN ON LANE READERS-JOBS26 (2026-11-26): its one tool is a
+    # READ, so the non-write count moves by one, and this second copy of the
+    # total moves to the measured eighty-four with the first test's pin.
+    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 57
+    assert len(tools) == 84
 
 
 def test_the_read_that_was_nearly_named_a_write():

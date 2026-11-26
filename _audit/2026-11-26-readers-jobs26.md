@@ -98,3 +98,144 @@ THE CENSUS: `J 52` GAP -> COVERED-UNFIRED; its next-step and jobs-directions
 lines left the side tables; the capture queue's single-row line
 `admit-jobs-tracker-stage-clicked-apply` left the queue (its next step is a
 fire, not a capture); `J 52` joins `PINNED_B1_ROWS[NO_RULING]`.
+
+---
+
+## 4. An organisation Page's tabs: `J 106`, `J 113`, `J 165` built; `J 114`, `J 111` read
+
+Session 11 loaded five tabs of one organisation's Page (loads 19 to 23), the
+organisation the live lane chose under `L1-D4-NEUTRAL-READ-VALUES`. Every
+address was admitted by lane A on 2026-10-10. Built here: ONE tool,
+`linkedin_company_page_tab(organisation_id, tab)`, `tab` one of `about`,
+`events`, `insights`, over a new module, `linkedin_server/company_tabs.py`.
+LOCATOR-ONLY, in the skeleton grammar (tags, attributes, the descendant
+combinator, the parent step): no `evaluate`, so no `dom.py` waiver and no
+edit there. The address is `company_page.company_page_url(<ten digits>)`
+plus a constant path of the module; the landing may veto (it must keep the
+tab), never supply.
+
+THE WORDS, each measured by keyed shape and written by
+`scripts/_build_live11_word_skeletons.py`:
+
+- `company_about_words.html` (10 words): `Overview`, `Details`, the six
+  definition terms `Website`, `Verified page`, `Industry`, `Company size`,
+  `Headquarters`, `Specialties`, LinkedIn's size band `10,001+ employees`, and
+  `Locations (45)`.
+- `company_events_words.html` (3): `Upcoming events`, `Past events`,
+  `Show more events`.
+- `company_insights_headcount_words.html` (21): the two module headings
+  `Hiring trends` and `Total job openings`; the screen-reader table's five
+  header cells `Function`, `Number of employees`,
+  `Percentage of total headcount`, `3 month growth`, `6 month growth`; the
+  visible table's `Job openings growth`; the eleven job functions the table
+  drew (LinkedIn's taxonomy); the current tab's path word `insights` and its
+  query value `HEADCOUNT`.
+
+The Page's own values, every event's words and every figure stay `x`; the
+tests plant synthetic ones where the capture drew the real ones.
+
+### 4.1 `J 106` -- the About tab: GAP -> COVERED-UNFIRED
+
+MEASURED: the tab navigation marks `About` current; one `h2` reading
+`Overview` opens the details card, whose own paragraph is the description and
+whose definition list draws each term as an `h3` inside a `dt`, followed by
+its `dd` values. THE CARD NESTS A CARD: the Page's "interested in working
+here" section sits inside the details card with a paragraph of its own, so
+the description is the one paragraph no nested section holds -- found by
+subtraction, compared as text, never by position.
+
+THE READER returns, under THIRD-PARTY-TEXT-AT-RUNTIME, the description and
+the website, industry, headquarters and specialties, each in a
+`people_data.OrganisationProse` record whose `read_from` names the fact
+(`PROSE_SOURCES` gains `about_overview`, `about_website`, `about_industry`,
+`about_headquarters`, `about_specialties`, after `overview_card`, which
+`company_home` reads at position 0); the size as one of LinkedIn's nine size
+bands, or withheld; the `<n> associated members` link's count and the
+`Locations (<n>)` count as integers; the `Verified page` date as an ISO date.
+A term not in the measured six is counted and its values are never read.
+SCOPE, STATED: the tab draws its locations as a map and a count, not as a
+list, so "locations" is the headquarters and the count.
+
+### 4.2 `J 165` -- the Events tab: GAP -> COVERED-UNFIRED
+
+MEASURED: a sub-page with its own `h2` reading `Events`; an `Upcoming events`
+card that, on the capture, holds no event and the sentence
+`<the Page's name> has no upcoming events planned` (read off the raw capture
+by element and confirmed by keyed shape; the name is not written here); a
+`Past events` card of six anchors to `/events/<title>-<id>/`, each holding
+exactly two spans, the start and the title; a `Show more events` button.
+
+THE READER returns each event as a `people_data.Event` record -- the title
+and the canonical link, the title dropped from the address -- beside `starts`,
+an ISO local date-time parsed from the span that reads as one; the title is
+the one other span. An anchor that does not draw exactly one start and one
+title is withheld and counted. The attendee line, which on one card named a
+member, is never read. An empty tab is believed only on the Upcoming card's
+own sentence, matched on LinkedIn's tail and never returned; otherwise a
+zero raises. `Show more events` is reported, never pressed. NAMES-AT-RUNTIME
+is the ruling the row's cell waited on ("such rows now wait on a
+name-returning reader, not on the doctrine").
+
+### 4.3 `J 113` -- the Insights tab (Premium): GAP -> COVERED-UNFIRED
+
+MEASURED at `insightType=HEADCOUNT`: the tab navigation marks the Insights
+tab current; two Premium modules, `Hiring trends` and `Total job openings`;
+and a screen-reader data table whose header cells read `Function`,
+`Number of employees`, `Percentage of total headcount`, `3 month growth` and
+`6 month growth`, one row per job function, each growth cell's own words
+`<n>% increase` or `-<n>% decrease`, every cell naming its header through its
+`headers` attribute.
+
+THE READER returns the modules drawn and each row: a function from
+LinkedIn's fixed taxonomy (a function outside it withholds its row), the
+employee count, the percentage of headcount (bounded at 100), and the two
+growth figures, signed by their word (a sign that disagrees with the word is
+withheld, never flipped). EACH CELL IS READ UNDER THE HEADER ITS OWN
+`headers` ATTRIBUTE NAMES: a test swaps two header ids and the values follow
+the ids, not the positions.
+
+### 4.4 `J 114` -- four Premium facets: STAYS GAP, one of four built
+
+On the HEADCOUNT view, "distribution and growth by function" is drawn as the
+function table that `J 113`'s reader reads. The Hiring trends module draws a
+chart and two summary figures that this reader does not read; "job openings
+by seniority" sits behind the job-openings card's `Functions` dropdown, drawn
+closed; "notable alumni" is not drawn on this view. The row is compound, and
+COMPOUND-ROW-SPLITS-ONLY-ON-STATE is the orchestrator's to apply: question 1
+below. NEXT: CAPTURE `C-RJ26-1`, the job-openings card's Functions dropdown
+opened as a disclosure, its options read, closed, nothing chosen.
+
+### 4.5 `J 111` -- Products and Services: STAYS GAP, the captured Page has none
+
+Session 11's load of the products address drew the Page's tab navigation
+with no Products or Services tab and no tab marked current, and an empty
+body between the navigation and the footer. That organisation has no
+Products tab to read; the capability is the tab of an organisation that has
+one. NEXT: CAPTURE `C-RJ26-2`, the products tab of an organisation whose
+Page navigation draws a Products or Services tab.
+
+### 4.6 The tests and the controls
+
+`tests/test_company_tabs.py`, 39 passed, through `tests/skeleton_page.py`
+with no browser (every locator answered from the parsed capture,
+`unmodelled` and `planted_answers` empty). THE CONTROLS, each a reading the
+reader refuses: each tab's committed copy with its words reduced raises (the
+words are the anchor); an unmeasured term (`Founded` planted for `Industry`)
+is counted and its value never read; a size outside the bands and a date
+that is not one are withheld; two `Overview` headings read no card and the
+zero raises; no readable event and a silent Upcoming card raise; a function
+outside the taxonomy withholds its row; a growth sign that disagrees with its
+word is withheld. A synthetic name planted in the description, the
+headquarters, the Upcoming sentence or an event title leaves only inside a
+record, or not at all.
+
+RED FIRST, as it happened: the first wiring dispatched the three readers
+through a table, and two guards went red on it --
+`tests/test_readers_outside_dom_are_a_pinned_inventory.py` (three readers no
+other module calls by name) and `tests/test_a_people_reader_reads_one_page.py`
+(the record builder, then named `_record`, sat behind the write door by a
+name another module also defines). The tool now calls each reader by name
+and the builder's name is the module's own; both guards are green on it. The
+tool's docstring first said "share of headcount", and the write-claim
+scanner in `tests/test_server_surface.py` read "share" as a write; it now
+says "percentage of the Page's headcount".
