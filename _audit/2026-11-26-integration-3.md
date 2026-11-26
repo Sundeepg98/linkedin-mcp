@@ -507,3 +507,32 @@ GATES on the merged tree, all green:
   recorded. The files were the harness and synthetic-people guards, the
   queue and next-step tests, the register-number test, the derived-view
   tests, and the corpus guards a record edit can trip.
+
+## 11. The final head
+
+- THE FINAL MERGED HEAD: `0799464`, the fifth merge on master 4c62196. It
+  holds build-p26, build-jmn26, admit26, apply-26, the registration and its
+  fix, then live-s11. It was pushed by `scripts/lane_ci.py push`, and the
+  pre-push sweep found 0 hits across 1617 blobs and 226 needles.
+- LANE CI: run 45759195593, read by head sha `0799464`: SUCCESS. All four
+  shards and the totals job were green (6 of 6 jobs, 9m06s wall). On that
+  head, the committed-blob identity test passed 1234 tests in 48 s, and
+  `check_cited_shas_resolve` was green.
+- MEASURED on that head:
+  - DELIVERED broad 160 / 706 achievable (22.7%), strict 117 (16.6%);
+  - GAP 529;
+  - population 774 rows (68 out of scope);
+  - 83 tools and 134 parameters;
+  - 137 rulings registered.
+- `origin/master` read 4c62196 at the fetch after the green run.
+- This section is a record-only commit on top of that head. It gets its own
+  lane CI run, reported with it, so the head that goes to master is
+  certified. Master is the orchestrator's to fast-forward; this lane never
+  touches it.
+- UNRESOLVED:
+  - the four ADMIT targets (21 rows), which need their `readonly.py`
+    admissions;
+  - SELF-PROFILE-QUERY-VARIANT-ADMITTED, which lands with admit5-26;
+  - the 32 other session cells session 11 left as they were (section 10);
+  - `Q-AWAY-MESSAGE`, still unruled;
+  - the rows section 5 left on their rulings' own words.
