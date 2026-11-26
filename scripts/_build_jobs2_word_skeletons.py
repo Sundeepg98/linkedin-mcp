@@ -1,8 +1,11 @@
-"""Build two earlier sessions' skeletons WITH THEIR MEASURED WORDS into committed fixtures: the jobs home's recent-searches card (session 2) and the recommendations feedback pair (session 8).
+"""Build earlier sessions' skeletons WITH THEIR MEASURED WORDS into committed fixtures: the jobs home's recent-searches card (session 2), the recommendations feedback pair (session 8), and the alert manager and a Page's Life tab (session 11).
 
-Kept as the PROVENANCE of ``tests/fixtures/live2/j18_words.html`` and
-``tests/fixtures/live8/recommended_words.html``, the fixtures lane build-jobs2
-builds census rows ``J 19`` and ``J 163`` over, 2026-11-26.
+Kept as the PROVENANCE of ``tests/fixtures/live2/j18_words.html``,
+``tests/fixtures/live8/recommended_words.html``,
+``tests/fixtures/live11/jobs_alerts_manager_words.html`` and
+``tests/fixtures/live11/company_life_words.html``, the fixtures lane
+build-jobs2 builds census rows ``J 19``, ``J 163``, ``J 37`` and ``J 109``
+over, 2026-11-26.
 
 THE INPUT is the gitignored KEYED skeleton the live lane wrote in each session
 (``<session dir>/<capture>.skeleton.html``, every text and attribute value a
@@ -83,6 +86,21 @@ SPEC: dict[str, tuple[str, str, str, tuple[str, ...]]] = {
         "jobs_alerts_manager",
         "live11/jobs_alerts_manager",
         ("Manage job alerts",),
+    ),
+    # J 109: an organisation Page's Life tab (session 11, load 22). The three
+    # section headings the reader corroborates its modules by, and the text
+    # of the interest button it reports drawn and never presses. Every
+    # member's name and words, and every Page's, stay x.
+    "live11/company_life_words": (
+        "live11",
+        "company_life",
+        "live11/company_life",
+        (
+            "Trending employee content",
+            "Company spotlights",
+            "Company photos",
+            "I" + RSQUO + "m interested",
+        ),
     ),
 }
 

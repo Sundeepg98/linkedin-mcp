@@ -1850,6 +1850,62 @@ async def read_content_results_as_shipped(page: Any) -> Any:
 
 
 # ---------------------------------------------------------------------------
+# company_tabs:read_life_tab -- a Page's Life tab (J 109)
+# ---------------------------------------------------------------------------
+
+#: The fixture, and the shapes this drive rests on: the trending module by
+#: LinkedIn's name for it, the two section headings measured by key, an
+#: item's permalink and its author's profile link, as drawn.
+COMPANY_LIFE = "live11/company_life_words.html"
+COMPANY_LIFE_DRAWN = (
+    'data-view-name="org-member-life-trending-employee-content"',
+    "\nTrending employee content\n",
+    "\nCompany spotlights\n",
+    'href="/feed/update/urn:li:activity:x/"',
+    'href="https://www.linkedin.com/in/x?miniProfileUrn=x"',
+)
+
+
+async def read_life_tab_as_shipped(page: Any) -> Any:
+    """``read_life_tab`` as ``linkedin_company_page_tab`` calls it -- on the
+    page it was handed, no argument but the page -- over the planted page
+    drawn as session 11's Life tab.
+
+    THE SIGNATURE DRIVE reads every module and keeps nothing: the planted
+    headings are the plant, not LinkedIn's words, so no section is read --
+    NO_RECORD.
+
+    THE SKELETON: ``tests/fixtures/live11/company_life_words.html``
+    (``scripts/_build_jobs2_word_skeletons.py``): the session-11 capture with
+    its three section headings and its interest button's text measured
+    against the session key, every other text ``x``.
+    ``tests/test_company_life_tab.py`` runs this reader over it with
+    synthetic people planted and asserts two post records and three
+    spotlights.
+
+    THE DOUBLE is ``tests/skeleton_page.SkeletonPage`` over that document:
+    every locator is answered from the markup LinkedIn drew, and EVERY text
+    the capture reduced to ``x`` -- every member's name and words, every
+    Page's, and every interface word left unmeasured -- is answered as the
+    plant. So each post and spotlight record that comes back carries the
+    plant inside it, and anything the reader carried out beside a record
+    would carry the plant there too.
+    """
+    from linkedin_server import company_tabs
+    from tests.skeleton_page import SkeletonPage, parse
+
+    markup = _drawn(COMPANY_LIFE, *COMPANY_LIFE_DRAWN)
+
+    def answer(text: str) -> str:
+        return PLANT if text.strip() == "x" else text
+
+    skeleton = SkeletonPage(
+        page, parse(markup), url="https://www.linkedin.com/company/x/life/", answer_text=answer,
+    )
+    return await company_tabs.read_life_tab(skeleton)
+
+
+# ---------------------------------------------------------------------------
 # followers_list:read_followers_list -- his own follower list (P L2b)
 # ---------------------------------------------------------------------------
 
@@ -2156,6 +2212,10 @@ DRIVES: dict[str, Callable[..., Any]] = {
     # result cards over live session 11's skeleton; its success path is post
     # records whose author is a person record.
     "content_search:read_content_results": read_content_results_as_shipped,
+    # 2026-11-26 (lane build-jobs2, census J 109): a Page's Life tab over live
+    # session 11's skeleton; its success path is post records whose author is
+    # a person record, and the Page's spotlights as its prose.
+    "company_tabs:read_life_tab": read_life_tab_as_shipped,
 }
 
 #: As far as a press. Run by the guard, so the reads before the press are

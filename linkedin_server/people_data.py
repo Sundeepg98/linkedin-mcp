@@ -536,6 +536,10 @@ PROSE_SOURCES = (
     # 2026-11-26 (lane readers-jobs26, census ``J 168``): one of the Page's
     # own feed items' words, read off its Posts view.
     "page_post",
+    # 2026-11-26 (lane build-jobs2, census ``J 109``): one of the Page's own
+    # spotlights on its Life tab -- its title, and the words beside it.
+    "life_spotlight_title",
+    "life_spotlight_body",
 )
 
 #: The cap on an organisation's prose, in characters after normalisation.

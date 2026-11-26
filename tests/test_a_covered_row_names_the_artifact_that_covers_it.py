@@ -758,14 +758,17 @@ def _page_tab_calls(server_src: str) -> set[str]:
 
 def test_the_page_tab_chain_is_still_whole() -> None:
     """``J 106``, ``J 113``, ``J 165`` and ``J 168`` (lane readers-jobs26,
-    2026-11-26): the tool -> each tab's own reader. The four rows claim
-    COVERED-UNFIRED on it."""
+    2026-11-26) and ``J 109`` (lane build-jobs2, the same day): the tool ->
+    each tab's own reader. The five rows claim COVERED-UNFIRED on it."""
     from linkedin_server import company_tabs
 
     assert _page_tab_calls(_source("server.py")) == {
-        "read_about_tab", "read_events_tab", "read_insights_tab", "read_posts_tab",
-    }, "linkedin_company_page_tab no longer calls every tab's reader; J 106/J 113/J 165/J 168's chain is broken"
-    for name in ("read_about_tab", "read_events_tab", "read_insights_tab", "read_posts_tab"):
+        "read_about_tab", "read_events_tab", "read_insights_tab", "read_life_tab",
+        "read_posts_tab",
+    }, ("linkedin_company_page_tab no longer calls every tab's reader; "
+        "J 106/J 109/J 113/J 165/J 168's chain is broken")
+    for name in ("read_about_tab", "read_events_tab", "read_insights_tab",
+                 "read_life_tab", "read_posts_tab"):
         assert callable(getattr(company_tabs, name, None)), name
 
 
@@ -776,9 +779,11 @@ def test_control_the_page_tab_chain_convicts_a_dropped_reader() -> None:
     mutated = source[:start] + source[start:].replace(
         "company_tabs.read_events_tab(", "company_tabs.read_events_gone(", 1)
     assert _page_tab_calls(source) == {
-        "read_about_tab", "read_events_tab", "read_insights_tab", "read_posts_tab"}
+        "read_about_tab", "read_events_tab", "read_insights_tab", "read_life_tab",
+        "read_posts_tab"}
     assert _page_tab_calls(mutated) == {
-        "read_about_tab", "read_insights_tab", "read_posts_tab", "read_events_gone"}
+        "read_about_tab", "read_insights_tab", "read_life_tab", "read_posts_tab",
+        "read_events_gone"}
 
 
 def test_the_application_settings_chain_is_still_whole() -> None:

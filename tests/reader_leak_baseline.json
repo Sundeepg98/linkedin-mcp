@@ -32,6 +32,7 @@
     "company_tabs:read_about_tab": "not_driven:raises ExtractionFailedError",
     "company_tabs:read_events_tab": "not_driven:raises ExtractionFailedError",
     "company_tabs:read_insights_tab": "not_driven:raises ExtractionFailedError",
+    "company_tabs:read_life_tab": "returns_records",
     "company_tabs:read_posts_tab": "not_driven:raises ExtractionFailedError",
     "content_search:read_content_results": "returns_records",
     "creator_analytics:collect_labels": "returns_text",

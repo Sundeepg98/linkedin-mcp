@@ -2092,6 +2092,12 @@ DRIVEN_TO["followers_list:read_followers_list"] = RETURNS_RECORDS
 # success path returns one post record per card, its author a person record,
 # so the plant comes back inside a record and nowhere else.
 DRIVEN_TO["content_search:read_content_results"] = RETURNS_RECORDS
+# A PAGE'S LIFE TAB (2026-11-26, lane build-jobs2, census J 109): its success
+# path returns its trending items as post records, each author a person
+# record, and its spotlights as the Page's prose -- the plant, which the
+# drive answers for every text the capture reduced, comes back inside those
+# records and nowhere else.
+DRIVEN_TO["company_tabs:read_life_tab"] = RETURNS_RECORDS
 
 
 @pytest.mark.parametrize("key", sorted(shipped_drives.DRIVES))
@@ -2303,6 +2309,13 @@ FIXTURE_BREAKS: dict[str, dict[str, str]] = {
         "fixture": "live11/search_content_posts.html",
         "needle": 'data-sdui-screen="com.linkedin.sdui.flagshipnav.search.SearchResultsContent"',
         "into": 'data-sdui-screen="com.linkedin.sdui.flagshipnav.search.SearchResultsOther"',
+    },
+    # 2026-11-26 (lane build-jobs2, census J 109): the trending module's own
+    # name, the premise its items are found under.
+    "company_tabs:read_life_tab": {
+        "fixture": "live11/company_life_words.html",
+        "needle": 'data-view-name="org-member-life-trending-employee-content"',
+        "into": 'data-view-name="org-member-life-trending-other"',
     },
 }
 

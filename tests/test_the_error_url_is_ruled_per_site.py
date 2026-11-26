@@ -182,6 +182,10 @@ DECLARED: dict[tuple[str, str], tuple[str, int]] = {
     # words, or a manager with no readable row. Handed a page and never a url;
     # the landing described in the hint by dom._landing_note.
     ("job_alerts_manager.py", "read_alert_manager"): (WITHHELD, 2),
+    # 2026-11-26 (lane build-jobs2, census J 109): the Life tab's refusal of
+    # an uncorroborated zero -- no Life module drawn. Handed a page and never
+    # a url; the landing described in the hint, as its sibling tabs do.
+    ("company_tabs.py", "read_life_tab"): (WITHHELD, 1),
     # --- ASKED_FOR: the seven tool-side raises ----------------------------
     # `url` is this helper's own parameter, composed by its caller
     # (`linkedin_search_jobs._search_url`) out of BASE_URL and urlencode.
@@ -607,10 +611,12 @@ def test_the_twenty_are_still_twenty():
     # {WITHHELD 21, ASKED_FOR 17, PASSTHROUGH 1, NO_ADDRESS_IN_SCOPE 10}.
     # FORTY-ONE ON LANE BUILD-JOBS2 (2026-11-26): the alert manager's two
     # WITHHELD raises (census J 37), so WITHHELD is 23. MEASURED off this table.
-    assert tally[WITHHELD] == 23, tally
+    # FORTY-TWO ON THE SAME LANE: the Life tab's one WITHHELD raise (census
+    # J 109), so WITHHELD is 24. MEASURED off this table.
+    assert tally[WITHHELD] == 24, tally
     assert tally[ASKED_FOR] == 17, tally
     assert tally[PASSTHROUGH] == 1, tally
-    assert tally[WITHHELD] + tally[ASKED_FOR] + tally[PASSTHROUGH] == 41, tally
+    assert tally[WITHHELD] + tally[ASKED_FOR] + tally[PASSTHROUGH] == 42, tally
     assert tally[NO_ADDRESS_IN_SCOPE] == 10, tally
 
 

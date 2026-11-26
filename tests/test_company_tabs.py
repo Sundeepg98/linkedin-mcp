@@ -308,7 +308,9 @@ def test_each_tab_is_composed_from_the_numeric_id_and_a_constant():
     assert ct.tab_url("5417062", "events")["url"] == "https://www.linkedin.com/company/5417062/events/"
 
 
-@pytest.mark.parametrize("tab", ["About", "people", "life", "../about", "", None, 3])
+# "life" LEFT 2026-11-26 (lane build-jobs2, census J 109): it is a tab now;
+# "jobs" is a tab the Page draws and this does not read.
+@pytest.mark.parametrize("tab", ["About", "people", "jobs", "../about", "", None, 3])
 def test_any_other_tab_is_refused_without_repeating_it(tab):
     refused = ct.tab_url("5417062", tab)
     assert refused["built"] is False and refused["refused"] == "unknown_tab"

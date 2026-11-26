@@ -47,7 +47,6 @@ J 97	J	W	-	SIBLING:P I9	INFERRED	P I9
 J 98	J	W	-	SIBLING:P I13	INFERRED	P I13
 J 99	J	W	-	SIBLING:P I12	NAMED	_audit/_census/jobs.md::Container: `P I12`
 J 100	J	W	-	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
-J 109	J	R	-	BUILD:tests/fixtures/live11/company_life.html	MEASURED	_audit/2026-11-26-readers-jobs26.md::over a carousel of ; RULING:THIRD-PARTY-TEXT-AT-RUNTIME
 J 111	J	R	-	CAPTURE:C-RJ26-2	MEASURED	_audit/2026-11-26-readers-jobs26.md::That organisation has no ; RULING:READ-PAST-AN-ACT-SUBSTRING
 J 112	J	R	-	TARGET:a school Page he names	NAMED	_audit/_census/read-addresses.tsv::UNDER THE WHO/WHICH RULE, EXTENDED ; RULING:OPERATOR-NAMES-THE-TARGET
 J 169	J	R	-	CAPTURE:C-RJ26-1	MEASURED	_audit/2026-11-26-readers-jobs26.md::sits behind the job-openings card's ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE

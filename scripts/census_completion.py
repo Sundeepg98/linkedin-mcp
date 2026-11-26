@@ -1319,7 +1319,8 @@ PINNED = {
     #: MEASURED AT INTEGRATION 4'S MERGE OF READERS-MSG26 (2026-11-26) on the merged tree, never summed (the figures above are each lane's own).
     #: 266 ON LANE BUILD-JOBS2 (2026-11-26), MEASURED: `J 74`, `J 76`, `P M7` and `P M8` GAP -> COVERED-UNFIRED, his application settings page's two switches admitted by name for writing under APPLICATION-SETTINGS-WRITE (`linkedin_set_admitted_setting`; `_audit/2026-11-26-build-jobs2.md` section 2) (was 262).
     #: 267 ON LANE BUILD-JOBS2 (2026-11-26), MEASURED: `J 163` GAP -> COVERED-UNFIRED, the recommendations feedback pair built as a receipt-only write under J-163-RECEIPT-ONLY-WRITE (`linkedin_send_recommendations_feedback`; `_audit/2026-11-26-build-jobs2.md` section 5) (was 266).
-    "adjudicated": 267,
+    #: 268 ON LANE BUILD-JOBS2 (2026-11-26), MEASURED: `J 109` GAP -> COVERED-UNFIRED, a Page's Life tab read by `linkedin_company_page_tab(tab="life")` over session 11's capture (`_audit/2026-11-26-build-jobs2.md` section 7) (was 267).
+    "adjudicated": 268,
     #: THE LIVE LANE'S FOUR ROWS, RE-DERIVED AT EACH OF ITS MERGES OF MASTER
     #: (2026-09-24; last over lane S): four rows fired live and banked
     #: (`_audit/2026-09-23-live-lane-session-1.md`). `P G6` COVERED-UNFIRED ->
@@ -1449,7 +1450,8 @@ PINNED = {
     #: MEASURED AT INTEGRATION 4'S MERGE OF READERS-MSG26 (2026-11-26) on the merged tree, never summed (the figures above are each lane's own).
     #: 178 ON LANE BUILD-JOBS2 (2026-11-26), MEASURED: `J 74`, `J 76`, `P M7` and `P M8` GAP -> COVERED-UNFIRED, his application settings page's two switches admitted by name for writing under APPLICATION-SETTINGS-WRITE (`linkedin_set_admitted_setting`; `_audit/2026-11-26-build-jobs2.md` section 2) (was 174).
     #: 179 ON LANE BUILD-JOBS2 (2026-11-26), MEASURED: `J 163` GAP -> COVERED-UNFIRED, the recommendations feedback pair built as a receipt-only write under J-163-RECEIPT-ONLY-WRITE (`linkedin_send_recommendations_feedback`; `_audit/2026-11-26-build-jobs2.md` section 5) (was 178).
-    "delivered_broad": 179,
+    #: 180 ON LANE BUILD-JOBS2 (2026-11-26), MEASURED: `J 109` GAP -> COVERED-UNFIRED, a Page's Life tab read by `linkedin_company_page_tab(tab="life")` over session 11's capture (`_audit/2026-11-26-build-jobs2.md` section 7) (was 179).
+    "delivered_broad": 180,
     #: 79 since the live lane's merge (see `adjudicated`): P G6, N 134, P O3
     #: and M C72 COVERED-PROVEN.
     #: 75 and 21 since the bucket-1 merge: `M C41` fired live and moved from
@@ -1603,7 +1605,8 @@ PINNED = {
     #: MEASURED AT INTEGRATION 4'S MERGE OF READERS-MSG26 (2026-11-26) on the merged tree, never summed (the figures above are each lane's own).
     #: 509 ON LANE BUILD-JOBS2 (2026-11-26), MEASURED: `J 74`, `J 76`, `P M7` and `P M8` GAP -> COVERED-UNFIRED, his application settings page's two switches admitted by name for writing under APPLICATION-SETTINGS-WRITE (`linkedin_set_admitted_setting`; `_audit/2026-11-26-build-jobs2.md` section 2) (was 513).
     #: 508 ON LANE BUILD-JOBS2 (2026-11-26), MEASURED: `J 163` GAP -> COVERED-UNFIRED, the recommendations feedback pair built as a receipt-only write under J-163-RECEIPT-ONLY-WRITE (`linkedin_send_recommendations_feedback`; `_audit/2026-11-26-build-jobs2.md` section 5) (was 509).
-    "gap": 508,
+    #: 507 ON LANE BUILD-JOBS2 (2026-11-26), MEASURED: `J 109` GAP -> COVERED-UNFIRED, a Page's Life tab read by `linkedin_company_page_tab(tab="life")` over session 11's capture (`_audit/2026-11-26-build-jobs2.md` section 7) (was 508).
+    "gap": 507,
     #: 18 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: `M M1` built (`linkedin_message_from_profile`).
     #: 16 ON LANE L5'S ORDER OF 2026-09-27 23:36, MEASURED:
     #: `linkedin_send_message` RETIRED (aimed by a name): `M M2` to GAP and `N
@@ -1748,7 +1751,8 @@ PINNED = {
     #: MEASURED AT INTEGRATION 4'S MERGE OF READERS-MSG26 (2026-11-26) on the merged tree, never summed (the figures above are each lane's own).
     #: 60 ON LANE BUILD-JOBS2 (2026-11-26), MEASURED: `J 74`, `J 76`, `P M7` and `P M8` GAP -> COVERED-UNFIRED, his application settings page's two switches admitted by name for writing under APPLICATION-SETTINGS-WRITE (`linkedin_set_admitted_setting`; `_audit/2026-11-26-build-jobs2.md` section 2) (was 56).
     #: 61 ON LANE BUILD-JOBS2 (2026-11-26), MEASURED: `J 163` GAP -> COVERED-UNFIRED, the recommendations feedback pair built as a receipt-only write under J-163-RECEIPT-ONLY-WRITE (`linkedin_send_recommendations_feedback`; `_audit/2026-11-26-build-jobs2.md` section 5) (was 60).
-    "unfired": 61,
+    #: 62 ON LANE BUILD-JOBS2 (2026-11-26), MEASURED: `J 109` GAP -> COVERED-UNFIRED, a Page's Life tab read by `linkedin_company_page_tab(tab="life")` over session 11's capture (`_audit/2026-11-26-build-jobs2.md` section 7) (was 61).
+    "unfired": 62,
     #: 104 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     #: 101 AT LANE S'S NAMES ADOPTION (2026-09-27), MEASURED: `N 79`, `N 172`
@@ -1896,7 +1900,8 @@ PINNED = {
     #: 87 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `J 168` GAP -> COVERED-UNFIRED, the Page's posts read off its root by `linkedin_company_page_tab(tab="posts")` over session 9's Posts view (was 88).
     #: 85 ON LANE BUILD-JOBS2 (2026-11-26), MEASURED: `J 74`, `J 76`, `P M7` and `P M8` GAP -> COVERED-UNFIRED, his application settings page's two switches admitted by name for writing under APPLICATION-SETTINGS-WRITE (`linkedin_set_admitted_setting`; `_audit/2026-11-26-build-jobs2.md` section 2) (was 87).
     #: 84 ON LANE BUILD-JOBS2 (2026-11-26), MEASURED: `J 163` GAP -> COVERED-UNFIRED, the recommendations feedback pair built as a receipt-only write under J-163-RECEIPT-ONLY-WRITE (`linkedin_send_recommendations_feedback`; `_audit/2026-11-26-build-jobs2.md` section 5) (was 85).
-    "gap_unknown": 84,
+    #: 83 ON LANE BUILD-JOBS2 (2026-11-26), MEASURED: `J 109` GAP -> COVERED-UNFIRED, a Page's Life tab read by `linkedin_company_page_tab(tab="life")` over session 11's capture (`_audit/2026-11-26-build-jobs2.md` section 7) (was 84).
+    "gap_unknown": 83,
     "gap_ambiguous": 0,
     #: BUCKET 3, MEASURED 2026-09-23 (`_audit/2026-09-23-bucket3-addresses.md`),
     #: counted off `_audit/_census/read-addresses.tsv`, whose every verdict
@@ -2346,7 +2351,8 @@ PINNED = {
     #: 28 ON LANE READERS-MSG26 (2026-11-26), MEASURED: `M C93` GAP -> COVERED-UNFIRED, the content search vertical read over live session 11's capture (`linkedin_search_content`; `_audit/2026-11-26-readers-msg26.md`) (was 27).
     #: MEASURED AT INTEGRATION 4'S MERGE OF READERS-MSG26 (2026-11-26) on the merged tree, never summed (the figures above are each lane's own).
     #: 43 ON LANE BUILD-JOBS2 (2026-11-26), MEASURED: `J 74`, `J 76`, `P M7` and `P M8` GAP -> COVERED-UNFIRED, his application settings page's two switches admitted by name for writing under APPLICATION-SETTINGS-WRITE (`linkedin_set_admitted_setting`; `_audit/2026-11-26-build-jobs2.md` section 2) (was 39).
-    "b1_no_ruling": 43,
+    #: 44 ON LANE BUILD-JOBS2 (2026-11-26), MEASURED: `J 109` GAP -> COVERED-UNFIRED, a Page's Life tab read by `linkedin_company_page_tab(tab="life")` over session 11's capture (`_audit/2026-11-26-build-jobs2.md` section 7) (was 43).
+    "b1_no_ruling": 44,
     #: 7 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
     #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
     #: 4 AT THE LIVE LANE'S MERGE OF MASTER c2825a4 (2026-09-28), MEASURED on the
@@ -2427,7 +2433,8 @@ PINNED = {
     #: 87 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `J 168` GAP -> COVERED-UNFIRED, the Page's posts read off its root by `linkedin_company_page_tab(tab="posts")` over session 9's Posts view (was 88).
     #: 85 ON LANE BUILD-JOBS2 (2026-11-26), MEASURED: `J 74`, `J 76`, `P M7` and `P M8` GAP -> COVERED-UNFIRED, his application settings page's two switches admitted by name for writing under APPLICATION-SETTINGS-WRITE (`linkedin_set_admitted_setting`; `_audit/2026-11-26-build-jobs2.md` section 2) (was 87).
     #: 84 ON LANE BUILD-JOBS2 (2026-11-26), MEASURED: `J 163` GAP -> COVERED-UNFIRED, the recommendations feedback pair built as a receipt-only write under J-163-RECEIPT-ONLY-WRITE (`linkedin_send_recommendations_feedback`; `_audit/2026-11-26-build-jobs2.md` section 5) (was 85).
-    "jobs_gap": 84,
+    #: 83 ON LANE BUILD-JOBS2 (2026-11-26), MEASURED: `J 109` GAP -> COVERED-UNFIRED, a Page's Life tab read by `linkedin_company_page_tab(tab="life")` over session 11's capture (`_audit/2026-11-26-build-jobs2.md` section 7) (was 84).
+    "jobs_gap": 83,
     #: 40 AT LANE S'S OFFLINE FRONTIER (2026-09-28), MEASURED: the five rows
     #: bucket 3 called blocked on nothing, taken one by one. `M M53`, `N 195`
     #: and `P S5` (three R rows ADMITTED and gated READER) and `J 107` (the one
@@ -2451,7 +2458,8 @@ PINNED = {
     #: 29 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `J 52` GAP -> COVERED-UNFIRED, the clicked_apply stage read by the shipped tracker tool over session 11's capture of its own page (was 30).
     #: 26 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `J 106`, `J 113` and `J 165` GAP -> COVERED-UNFIRED, one tab of a Page (About, Insights, Events) read by `linkedin_company_page_tab` over session 11's captures (was 29).
     #: 25 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `J 168` GAP -> COVERED-UNFIRED, the Page's posts read off its root by `linkedin_company_page_tab(tab="posts")` over session 9's Posts view (was 26).
-    "jobs_dir_r": 25,
+    #: 24 ON LANE BUILD-JOBS2 (2026-11-26), MEASURED: `J 109` GAP -> COVERED-UNFIRED, a Page's Life tab read by `linkedin_company_page_tab(tab="life")` over session 11's capture (`_audit/2026-11-26-build-jobs2.md` section 7) (was 25).
+    "jobs_dir_r": 24,
     #: 60 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: `J 69` and
     #: `J 87`, both W.
     #: 58 ON LANE K's APPLICATION OF THE RULINGS OF 2026-10-10, MEASURED: `J
@@ -2489,7 +2497,8 @@ PINNED = {
     #: 28 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `J 52` GAP -> COVERED-UNFIRED, the clicked_apply stage read by the shipped tracker tool over session 11's capture of its own page (was 29).
     #: 25 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `J 106`, `J 113` and `J 165` GAP -> COVERED-UNFIRED, one tab of a Page (About, Insights, Events) read by `linkedin_company_page_tab` over session 11's captures (was 28).
     #: 24 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `J 168` GAP -> COVERED-UNFIRED, the Page's posts read off its root by `linkedin_company_page_tab(tab="posts")` over session 9's Posts view (was 25).
-    "jobs_admitted": 24,
+    #: 23 ON LANE BUILD-JOBS2 (2026-11-26), MEASURED: `J 109` GAP -> COVERED-UNFIRED, a Page's Life tab read by `linkedin_company_page_tab(tab="life")` over session 11's capture (`_audit/2026-11-26-build-jobs2.md` section 7) (was 24).
+    "jobs_admitted": 23,
     #: 11 ON LANE A'S J 38 BUILD (2026-10-10), MEASURED: `J 38` GAP -> COVERED-UNFIRED by D6 --
     #: an alert's delivered job ids, read off the notifications page (never fired).
     #: 11 AT LANE A'S MERGE OF MASTER 71d83ca (2026-10-10), MEASURED on the
@@ -2669,6 +2678,13 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
         #: direction once off the GAP side table, so no ruling holds any of
         #: the four.
         "J 74", "J 76", "P M7", "P M8",
+        #: `J 109` entered on lane build-jobs2 (2026-11-26): a Page's Life tab
+        #: (`linkedin_company_page_tab(tab="life")`), its trending items as post
+        #: records and its spotlights as the Page's prose, read over live
+        #: session 11's capture under NAMES-AT-RUNTIME and
+        #: THIRD-PARTY-TEXT-AT-RUNTIME, which govern what it returns and hold
+        #: nothing; never fired. A read, so no write hold applies.
+        "J 109",
         #: `P L8` and `P L1` entered on lane B1 (2026-10-10): his analytics hub's
         #: metric cards (`linkedin_analytics_hub`) and his audience page's follower
         #: count and demographics (`linkedin_audience_analytics`), each read off one
