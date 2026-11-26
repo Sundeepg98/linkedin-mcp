@@ -72,6 +72,8 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
+import pytest
+
 REPO = Path(__file__).resolve().parents[1]
 PACKAGE = REPO / "linkedin_server"
 
@@ -198,24 +200,93 @@ KNOWN_UNWIRED: dict[str, str] = {
         "writes.perform's apply arm calls it to report a draft a refused "
         "apply left behind (_audit/2026-11-25-apply.md section 2.7)."
     ),
+    # ADDED 2026-11-26 (lane build-msg2, round 2): the first line the
+    # qualified match (READER-INVENTORY-BY-QUALIFIED-NAME) found -- the
+    # read_filters shape, which the bare-name match had hidden.
+    "analytics_hub.read_card": (
+        "NOT UNWIRED -- WIRED ONE HOP AWAY, and HIDDEN UNTIL THE MATCH WAS "
+        "QUALIFIED. It is a PURE shaper of one card's texts and icons, called "
+        "by `analytics_hub.tally`, which `read_analytics_hub` calls, which "
+        "`server.py` calls. The bare-name detector read it as wired only "
+        "because `search_vertical_results` calls a callback PARAMETER named "
+        "`read_card` -- a coincidence of names, not a call. Delete this line "
+        "if and only if some other module calls `analytics_hub.read_card` "
+        "directly."
+    ),
 }
 
 
+_PACKAGE_NAME = "linkedin_server"
+
+
+def _package_module_of(node: ast.ImportFrom) -> str | None:
+    """The package module an ``ImportFrom`` names: ``""`` for the package
+    itself (``from . import x``, ``from linkedin_server import x``), the stem
+    for one of its modules (``from .x import f``,
+    ``from linkedin_server.x import f``), None for anything outside it."""
+    if node.level == 1:
+        return node.module or ""
+    if node.level == 0 and node.module:
+        if node.module == _PACKAGE_NAME:
+            return ""
+        if node.module.startswith(_PACKAGE_NAME + "."):
+            return node.module[len(_PACKAGE_NAME) + 1:]
+    return None
+
+
 def _called_names(tree: ast.AST) -> set[str]:
-    """Names that are CALLED, never names that merely appear.
+    """``module.function`` for every call this module makes into a package
+    module, never a name that merely appears.
 
     The same distinction ``test_reader_reachability`` makes and for the same
     measured reason: a reader named in a docstring is not a reference, and a
     grep cannot tell the difference.
+
+    QUALIFIED SINCE 2026-11-26 (READER-INVENTORY-BY-QUALIFIED-NAME, the
+    orchestrator's ruling on lane build-msg2's round 2). Until then this
+    returned BARE names -- ``func.attr`` of any attribute call -- so a reader
+    no module called read as wired whenever any module called ANOTHER
+    module's function of the same name (measured: ``scheduled_posts.read_state``
+    hidden by ``conversation_menu.read_state``), and a reader imported under
+    an alias read as unwired. Every import is resolved now -- absolute or
+    relative, the module or the function, aliased, at any depth in the file --
+    and a call counts only for the function it reaches.
     """
+    modules: dict[str, str] = {}
+    functions: dict[str, str] = {}
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ImportFrom):
+            base = _package_module_of(node)
+            if base is None:
+                continue
+            for alias in node.names:
+                local = alias.asname or alias.name
+                if base == "":
+                    modules[local] = alias.name
+                else:
+                    functions[local] = f"{base}.{alias.name}"
+        elif isinstance(node, ast.Import):
+            for alias in node.names:
+                if alias.name.startswith(_PACKAGE_NAME + ".") and alias.asname:
+                    modules[alias.asname] = alias.name[len(_PACKAGE_NAME) + 1:]
     out: set[str] = set()
     for node in ast.walk(tree):
-        if isinstance(node, ast.Call):
-            func = node.func
-            if isinstance(func, ast.Name):
-                out.add(func.id)
-            elif isinstance(func, ast.Attribute):
-                out.add(func.attr)
+        if not isinstance(node, ast.Call):
+            continue
+        func = node.func
+        if isinstance(func, ast.Attribute) and isinstance(func.value, ast.Name):
+            stem = modules.get(func.value.id)
+            if stem is not None:
+                out.add(f"{stem}.{func.attr}")
+        elif (
+            isinstance(func, ast.Attribute)
+            and isinstance(func.value, ast.Attribute)
+            and isinstance(func.value.value, ast.Name)
+            and func.value.value.id == _PACKAGE_NAME
+        ):
+            out.add(f"{func.value.attr}.{func.attr}")
+        elif isinstance(func, ast.Name) and func.id in functions:
+            out.add(functions[func.id])
     return out
 
 
@@ -271,7 +342,9 @@ def _unwired(modules: dict[str, str]) -> set[str]:
             continue
         stem = name[:-3] if name.endswith(".py") else name
         for reader in readers:
-            if not (callers.get(reader, frozenset()) - {name}):
+            # BY QUALIFIED NAME (READER-INVENTORY-BY-QUALIFIED-NAME): the
+            # callers of THIS module's reader, never of a same-named one.
+            if not (callers.get(f"{stem}.{reader}", frozenset()) - {name}):
                 unwired.add(f"{stem}.{reader}")
     return unwired
 
@@ -307,6 +380,54 @@ def test_the_detector_stays_silent_on_a_planted_reader_that_is_called():
         "async def go(page):\n"
         "    return await _planted.read_planted_surface(page)\n"
     )
+    assert "_planted.read_planted_surface" not in _unwired(sources)
+
+
+def test_a_same_named_reader_in_another_module_does_not_wire_it():
+    """READER-INVENTORY-BY-QUALIFIED-NAME (the orchestrator, 2026-11-26, round 2
+    of lane build-msg2): a reader is wired only when some OTHER module calls
+    THAT module's function -- ``module.function``, never the bare name.
+
+    MEASURED, the reason this exists: ``scheduled_posts.read_state`` passed
+    while no module called it, because ``writes`` calls
+    ``conversation_menu.read_state`` and the detector matched the bare name.
+    The plant reproduces exactly that: an unwired ``read_state`` beside a
+    module that calls another module's ``read_state``.
+    """
+    sources = _package_sources()
+    sources["_planted.py"] = "async def read_state(page):\n    return {}\n"
+    sources["_caller.py"] = (
+        "from linkedin_server import conversation_menu\n\n"
+        "async def go(page):\n"
+        "    return await conversation_menu.read_state(page, 'x')\n"
+    )
+    assert "_planted.read_state" in _unwired(sources)
+
+
+@pytest.mark.parametrize(
+    "caller",
+    [
+        "from linkedin_server import _planted\n\nasync def go(page):\n"
+        "    return await _planted.read_planted_surface(page)\n",
+        "from . import _planted as planted\n\nasync def go(page):\n"
+        "    return await planted.read_planted_surface(page)\n",
+        "from linkedin_server._planted import read_planted_surface\n\nasync def go(page):\n"
+        "    return await read_planted_surface(page)\n",
+        "from ._planted import read_planted_surface as reader\n\nasync def go(page):\n"
+        "    return await reader(page)\n",
+        "async def go(page):\n"
+        "    from linkedin_server import _planted\n"
+        "    return await _planted.read_planted_surface(page)\n",
+    ],
+    ids=["module-import", "relative-alias", "name-import", "relative-name-alias", "lazy-import"],
+)
+def test_every_import_spelling_the_package_uses_still_wires_a_reader(caller):
+    """The other direction for the qualified match: each spelling of an import
+    this package actually uses -- absolute or relative, the module or the
+    function, aliased, inside a function body -- still counts as a call."""
+    sources = _package_sources()
+    sources["_planted.py"] = "async def read_planted_surface(page):\n    return {}\n"
+    sources["_caller.py"] = caller
     assert "_planted.read_planted_surface" not in _unwired(sources)
 
 

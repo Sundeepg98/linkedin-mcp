@@ -478,7 +478,14 @@ AFTER_LANE_BUILD_MSG2_SCHEDULED_LIST = (113, {"R": 8, "W": 102, "R+W": 3})
 #: 102 - 1.
 AFTER_LANE_BUILD_MSG2_GROUP_POST = (112, {"R": 8, "W": 101, "R+W": 3})
 
-EXPECTED_NOW = AFTER_LANE_BUILD_MSG2_GROUP_POST
+#: ON THE SAME LANE'S ROUND 2, MEASURED with this tree's guard: `M28` -- an
+#: R+W row -- split by the orchestrator's ruling M-M28-SPLITS. Its view half
+#: stayed `M28`, COVERED-UNFIRED (it leaves this GAP count), and its restore
+#: half entered as `M54`, a W row, GAP. 112 - 1 + 1 = 112; R+W 3 - 1, W
+#: 101 + 1.
+AFTER_LANE_BUILD_MSG2_M28_SPLIT = (112, {"R": 8, "W": 102, "R+W": 2})
+
+EXPECTED_NOW = AFTER_LANE_BUILD_MSG2_M28_SPLIT
 
 
 def test_the_headline_split_is_the_one_the_report_quotes():

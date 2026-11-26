@@ -136,6 +136,10 @@ async def test_the_preview_reads_the_closed_box_and_presses_nothing(writes_on, p
     shown = block["where"]["what_the_page_showed"]
     assert shown["landed_on_the_named_group"] is True
     assert shown["audience"]["says"] == "public"
+    # GROUP-POST-AUDIENCE-FROM-ITS-TRIGGER, condition 1 (the orchestrator, round
+    # 2): the preview shows the trigger's label VERBATIM, before any grant.
+    assert shown["audience"]["trigger_words"] == "Start a public post"
+    assert "Start a public post" in str(block)
     assert await _witness(page) == {"trigger": 0, "post": 0, "typed": 0, "other": 0}
     assert block["verification"]["outcome_is_verifiable"] == "NO"
     assert block["irreversible"] is True

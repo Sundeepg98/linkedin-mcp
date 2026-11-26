@@ -233,10 +233,14 @@ def test_the_split_is_the_one_the_lane_report_quotes():
     delete-or-withdraw-own for M M26). 369 - 4 = 365 = 16 R1 + 33 R2 + 316 R3.
     364 ON THE SAME LANE, MEASURED: `M C64` COVERED-UNFIRED (a post in one
     group he names), so its R3 line leaves the table. 365 - 1 = 364 = 16 R1 +
-    33 R2 + 315 R3."""
+    33 R2 + 315 R3.
+    365 ON THE SAME LANE'S ROUND 2, MEASURED: `M M54` entered, the restore half
+    split from `M M28` (M-M28-SPLITS), a W GAP row, so its R3 line
+    (messaging-manage) enters the table. 364 + 1 = 365 = 16 R1 + 33 R2 + 316
+    R3."""
     rows, _ = cwc.load()
     split = cwc.split(rows)
-    assert (split["R1"], split["R2"], split["R3"]) == (16, 33, 315)
+    assert (split["R1"], split["R2"], split["R3"]) == (16, 33, 316)
     assert split["R1:built"] + split["R1:queued"] == split["R1"]
 
 

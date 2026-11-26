@@ -181,7 +181,7 @@ M M22	M	W	R3	TARGET:a group conversation he is in, named by him	INFERRED	RULING:
 M M23	M	W	R2	TARGET:a group conversation he is in, named by him	INFERRED	RULING:OPERATOR-NAMES-THE-TARGET ; M M22
 M M24	M	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 M M25	M	W	R3	TARGET:a group conversation he is in, named by him	INFERRED	RULING:OPERATOR-NAMES-THE-TARGET ; M M22
-M M28	M	R+W	-	CAPTURE:messaging-guarded	MEASURED	_audit/2026-11-26-readers-msg26.md::the control that restores one is not on disk ; RULING:VIEW-SWITCH-PRESS-RESTORED
+M M54	M	W	R3	CAPTURE:messaging-guarded	MEASURED	_audit/2026-11-26-readers-msg26.md::the control that restores one is not on disk ; RULING:VIEW-SWITCH-PRESS-RESTORED
 M M30	M	W	R3	TARGET:a conversation he has starred himself	NAMED	_audit/2026-09-24-lane-l5-messaging.md::**C10 -- the star's ON label** ; RULING:OPERATOR-NAMES-THE-TARGET
 M M34	M	R	-	CAPTURE:messaging-guarded	NAMED	_audit/2026-09-28-lane-k-ledger.md::CAPTURE FIRST: one capture load that ; RULING:D1-SEARCH-AS-READS
 M M35	M	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
