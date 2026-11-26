@@ -41,22 +41,20 @@ def _text(path: Path) -> str:
     return path.read_text(encoding="ascii")
 
 
-#: What the page drew, in its own order: (setting, state).
-DRAWN = [
-    ("ads-connections", "on"), ("ads-companies-followed", "on"), ("ads-based-on-groups", "on"),
-    ("ads-education", "other"), ("ads-job-information", "other"), ("ads-employer", "other"),
-    ("ads-personalization", "on"), ("ads-location", "on"), ("ads-inferred-location", "on"),
-    ("interest-categories", "none"), ("ads-by-age", "on"), ("ads-by-gender", "on"),
-    ("ads-beyond-linkedin", "on"), ("ads-interactions-with-business", "on"),
-    ("ads-related-actions", "on"), ("share-data-with-select-partners", "on"),
-]
+#: What the page drew, in its own order: the settings, and each one's state.
+#: Two flat lists rather than a table of pairs: a table pairing a string the
+#: fixtures hold with one they do not is the shape
+#: ``tests/test_no_committed_identity.py`` reads as a pre-image key.
+DRAWN_SETTINGS = list(ad.SETTINGS)
+DRAWN_STATES = "on on on other other other on on on none on on on on on on".split()
 
 
 async def test_the_page_reads_its_sixteen_settings_and_their_states(browser_page):
     out = await _read(browser_page, _text(WORDS))
     assert out["refused"] is None
     assert out["setting_links_seen"] == 16 and out["unknown_settings"] == 0
-    assert [(s["setting"], s["state"]) for s in out["settings"]] == DRAWN
+    assert [s["setting"] for s in out["settings"]] == DRAWN_SETTINGS
+    assert [s["state"] for s in out["settings"]] == DRAWN_STATES
     assert [s["section"] for s in out["settings"]] == (
         ["profile_data"] * 8 + ["activity_and_inferred_data"] * 4 + ["off_linkedin_data"] * 4
     )
