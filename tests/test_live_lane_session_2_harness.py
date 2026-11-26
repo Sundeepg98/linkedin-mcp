@@ -698,7 +698,7 @@ def test_a_non_ascii_word_survives_the_copy_as_a_reference() -> None:
 #: re-counted on the merged tree's disk: live11 54 (the 48, readers-jobs26's five
 #: word skeletons and readers-msg26's content search).
 LIVE_FIXTURE_COUNTS = {"live1": 5, "live2": 30, "live3": 14, "live4": 4, "live5": 1, "live7": 1, "live8": 7, "live9": 1,
-                       "live11": 54}
+                       "live11": 54, "live12": 47}
 
 
 @pytest.mark.parametrize("session_dir", sorted(LIVE_FIXTURE_COUNTS))
