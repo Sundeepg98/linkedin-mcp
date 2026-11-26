@@ -364,7 +364,7 @@ P A13	P	W	R3	CAPTURE:C-B1a	NAMED	_audit/_census/write-classes.tsv::queued:AUTOCO
 P A17	P	W	R3	CAPTURE:C-B1a	NAMED	_audit/_census/write-classes.tsv::queued:AUTOCOMPLETE-ENTRY-PICK ; tests/fixtures/live7/editor.html ; _audit/2026-10-10-lane-b1-profile-build.md::NEEDS A SANCTION ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
 P A23b	P	W	R3	PRECONDITION:a name-pronunciation recording (only the mobile app records one)	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::`P A23b` (a name-pronunciation recording must first exist
 P A24	P	W	R3	PRECONDITION:a completed identity verification (a verified name to show)	NAMED	_audit/_census/profile.md::no build is appropriate before he has a verified name to show
-P A25	P	R	-	RULING:Q-SELF-PROFILE-QUERY-VARIANT	INFERRED	_audit/2026-10-10-lane-b1-profile-build.md::THE PANEL IS NOT DRAWN ; _audit/_census/read-addresses.tsv::https://www.linkedin.com/in/me/overlay/contact-info/ ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
+P A25	P	R	-	CAPTURE:admit-in-me-isselfprofile-true	INFERRED	_audit/2026-10-10-lane-b1-profile-build.md::THE PANEL IS NOT DRAWN ; _audit/_census/read-addresses.tsv::https://www.linkedin.com/in/me/overlay/contact-info/ ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
 P A26	P	W	R3	CAPTURE:admit-in-me-edit-contact-info	NAMED	_audit/_census/profile.md::/in/<me>/edit/forms/contact-info/new/ ; _audit/_census/write-classes.tsv::queued:CONTACT-INFO-EDITOR ; RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
 P A27	P	W	R3	CAPTURE:admit-in-me-edit-contact-info	NAMED	_audit/_census/profile.md::/in/<me>/edit/forms/contact-info/new/ ; _audit/_census/write-classes.tsv::queued:CONTACT-INFO-EDITOR ; RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
 P A28	P	W	R3	CAPTURE:admit-in-me-edit-contact-info	NAMED	_audit/_census/profile.md::/in/<me>/edit/forms/contact-info/new/ ; _audit/_census/write-classes.tsv::queued:CONTACT-INFO-EDITOR ; RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
@@ -403,7 +403,7 @@ P D21	P	W	R3	CAPTURE:in-me-profile	INFERRED	RULING:PROFILE-EDITOR-ADDRESSES-ALLO
 P D22	P	W	R3	CAPTURE:in-me-profile	INFERRED	RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
 P D23	P	W	R3	CAPTURE:in-me-profile	INFERRED	RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
 P D24	P	W	R3	CAPTURE:admit-in-me-opportunities-volunteering-education	NAMED	_audit/_census/profile.md::Lifted by capture C3 (after that exact address is admitted ; RULING:READ-PAST-AN-ACT-SUBSTRING
-P D25	P	R	-	RULING:Q-SELF-PROFILE-QUERY-VARIANT	INFERRED	_audit/2026-10-10-lane-b1-profile-build.md::(the three links) ; _audit/2026-11-25-build-p26.md::?isSelfProfile=true ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
+P D25	P	R	-	CAPTURE:admit-in-me-isselfprofile-true	INFERRED	_audit/2026-10-10-lane-b1-profile-build.md::(the three links) ; _audit/2026-11-25-build-p26.md::?isSelfProfile=true ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
 P D26	P	R	-	CAPTURE:in-me-profile	INFERRED	tests/fixtures/live8/in_me.html ; _audit/2026-09-05-the-scroll-ruling.md::A surface exists that has no ; RULING:SCROLL-NOT-SANCTIONED
 P D27	P	W	R3	CAPTURE:admit-in-me-edit-secondary-language	NAMED	_audit/_census/profile.md::/edit/secondary-language/ ; RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
 P D28	P	R	-	PRECONDITION:a secondary-language profile (his own has one language)	NAMED	_audit/_census/read-addresses.tsv::the reading found distinct_langs 1

@@ -275,6 +275,52 @@ ADMISSIONS = (
                     "a member's own newsletter tab"),
         ),
     ),
+    # ------------------------------------------------------------------
+    # HIS OWN PROFILE WITH EXACTLY isSelfProfile=true, a read address in its
+    # own right: the /in/me/ form the server composes, the one parameter and
+    # value LinkedIn draws (the tracked top card's 'Add section' anchors, slug
+    # form, slash before the query), and nothing else.
+    Admission(
+        key="self-profile-query-variant",
+        ruling="SELF-PROFILE-QUERY-VARIANT-ADMITTED",
+        rows=("P D25",),
+        address=f"{B}/in/me/?isSelfProfile=true",
+        excused=frozenset(),
+        twin=False,
+        siblings=(
+            Sibling(f"{B}/in/someone-else/?isSelfProfile=true", None,
+                    "THE SAME QUERY ON ANOTHER MEMBER'S PROFILE: the ruling's "
+                    "own control"),
+            Sibling(f"{B}/in/me/?isSelfProfile=true&x=1", None,
+                    "AN EXTRA PARAMETER: the ruling's own control"),
+            Sibling(f"{B}/in/me/?x=1&isSelfProfile=true", None,
+                    "an extra parameter before it"),
+            Sibling(f"{B}/in/me/?isSelfProfile=true&isSelfProfile=true", None,
+                    "the parameter twice"),
+            Sibling(f"{B}/in/me/?isSelfProfile=false", None, "another value"),
+            Sibling(f"{B}/in/me/?isSelfProfile=TRUE", None,
+                    "another case of the value"),
+            Sibling(f"{B}/in/me/?isselfprofile=true", None,
+                    "another case of the key"),
+            Sibling(f"{B}/in/me/?isSelfProfile=", None, "an empty value"),
+            Sibling(f"{B}/in/me/?isSelfProfile=1", None, "another truthy value"),
+            Sibling(f"{B}/in/me?isSelfProfile=true", None,
+                    "no slash before the query: LinkedIn draws the slash"),
+            Sibling(f"{B}/in/me/?isSelfProfile=true#x", None, "a FRAGMENT"),
+            Sibling(f"{B}/in/me/?trk=x", None,
+                    "any other parameter on his own profile"),
+            Sibling(f"{B}/in/?isSelfProfile=true", None, "no member segment"),
+            Sibling(f"{B}/in/me/recent-activity/all/?isSelfProfile=true", None,
+                    "the query on a sub-page"),
+            Sibling(f"{B}/in/me/overlay/contact-info/?isSelfProfile=true", None,
+                    "the query on the contact-info overlay, which is read by "
+                    "its own address alone (P A25)"),
+            Sibling(f"{B}/in/me/edit/intro/?isSelfProfile=true", "/edit/",
+                    "the query on an editor"),
+            Sibling(f"{B}/company/placeholder/?isSelfProfile=true", None,
+                    "the query on a company Page"),
+        ),
+    ),
 )
 
 KEYS = [a.key for a in ADMISSIONS]
@@ -420,3 +466,33 @@ def test_the_forbidden_tuple_is_unchanged_and_every_crossed_substring_is_in_it()
 def test_the_table_holds_no_duplicate_address():
     addresses = [a.address for a in ADMISSIONS]
     assert len(addresses) == len(set(addresses)), addresses
+
+
+def test_p_a25_rides_lane_l1s_overlay_line_measured_at_the_base_and_unchanged():
+    """P A25 -- the contact-info overlay by its own address, under the same
+    self-only anchors (SELF-PROFILE-QUERY-VARIANT-ADMITTED). MEASURED at this
+    lane's base and NOT CHANGED by it: lane L1 admitted the address on
+    2026-09-23 by one anchored line, the /in/me/ form only, no query, no
+    sub-path, so nothing is admitted for it here. This holds the measurement
+    and the self-only anchors as controls; it passes before this lane's edits
+    and after them, by design."""
+    overlay = f"{B}/in/me/overlay/contact-info/"
+    for url in (overlay, _slash_twin(overlay)):
+        assert readonly.is_read_url(url), url
+        assert len(_lines_for(url)) == 1, url
+        assert _trips(url) == frozenset(), url
+        assert _exemptions_for(url) == [], url
+    for url, gate in (
+        (f"{B}/in/someone-else/overlay/contact-info/", None),
+        (overlay + "?isSelfProfile=true", None),
+        (overlay + "?x=1", None),
+        (overlay + "x/", None),
+        (f"{B}/in/me/overlay/", None),
+        (f"{B}/in/me/edit/contact-info/", "/edit/"),
+    ):
+        assert not readonly.is_read_url(url), url
+        message = _refusal(url)
+        if gate is None:
+            assert ALLOWLIST_SENTENCE in message, (url, message)
+        else:
+            assert "contains %r" % gate in message, (url, message)

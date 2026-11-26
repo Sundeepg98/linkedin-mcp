@@ -2838,6 +2838,38 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # sharing or reporting is a write with its own row, and the press gate
     # refuses every control.
     re.compile(r"^https://www\.linkedin\.com/newsletters/[a-z0-9][a-z0-9-]{0,99}-[0-9]{19}/?$"),
+    # His own profile with exactly ONE query parameter, `isSelfProfile=true`
+    # (census P D25). Ruling SELF-PROFILE-QUERY-VARIANT-ADMITTED (the
+    # orchestrator, 2026-11-26 10:10 IST; the record carries it for the
+    # integrator to register): the self-profile spelling of his OWN profile
+    # is a READ address in its own right, on four anchors --
+    #   (a) his own profile path only. This line is the /in/me/ form. The
+    #       spelling LinkedIn draws is the slug form (the tracked top card's
+    #       'Add section' anchors: `/in/<his slug>/?isSelfProfile=true`, a
+    #       slash before the query), and it is NOT a line here: a slug is
+    #       never stored in a tracked file, and a slug class would admit
+    #       every member's profile. His slug resolved at runtime from his
+    #       session would need a door of its own, which nothing builds today;
+    #   (b) `isSelfProfile=true` the only parameter: any other parameter or
+    #       value, another case, the key twice, a fragment, or no slash before
+    #       the query is refused;
+    #   (c) the server composes the address from this ruling, never from a
+    #       page's href (PAGE-MAY-VETO-NEVER-SUPPLY stands; this replaces the
+    #       link presses LINKS-ARE-NOT-DISCLOSURES vetoed);
+    #   (d) the landing must prove his own profile, or the read refuses. THIS
+    #       LINE CANNOT EXPRESS (d). It is owed by whatever loads the address
+    #       -- the capture first, any reader after it -- and it rests on the
+    #       self-profile recognition another lane is fixing (session 11: the
+    #       /in/me/ redirect no longer carries `isSelfProfile`).
+    # The ruling's controls, each refused (`tests/test_admit5_26_admissions.py`):
+    # the same query on another member's profile, and any extra parameter.
+    # Reopener: a capture showing the variant draws nothing the bare profile
+    # does not. It trips no forbidden substring -- allowlist silence alone, no
+    # exemption -- and nothing is pressed: the 'Add section' contents (P D25)
+    # are read as drawn. P A25's contact-info overlay is NOT this line: it is
+    # read by its own address, lane L1's `/in/me/overlay/contact-info/` line
+    # above, under the same self-only anchors, labels only.
+    re.compile(r"^https://www\.linkedin\.com/in/me/\?isSelfProfile=true$"),
 )
 
 #: Substrings that must never appear in a navigation target, checked before

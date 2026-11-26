@@ -1998,7 +1998,13 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # hyphen, nineteen digits; no capital, dot, underscore or percent), on
     # NAME-BEARING-ADDRESS-REDACTION-SCOPE, no exemption; every other key
     # byte-identical (17 of 18).
-    "_ALLOWED_URL_PATTERNS": "88fe4122b84e54fd",
+    #
+    # 88fe4122b84e54fd until lane admit5-26's fifth commit: one anchored
+    # line, his own profile in the /in/me/ form with exactly
+    # `?isSelfProfile=true`, on SELF-PROFILE-QUERY-VARIANT-ADMITTED (the
+    # orchestrator, 2026-11-26), no exemption; every other key byte-identical
+    # (17 of 18).
+    "_ALLOWED_URL_PATTERNS": "5d3109ee0aa96e48",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     # 419e64a3cd92ec7e until the same REVIEW: commit: a third entry, excusing
     # exactly {"/follow"} for exactly the anchored follower-list address.
