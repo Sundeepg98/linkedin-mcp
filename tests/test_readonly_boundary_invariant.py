@@ -1981,7 +1981,13 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # lane's base 091f7d3 hashes to the prior pin on every key, and only this
     # key moved (17 of 18 byte-identical). Record:
     # _audit/2026-11-26-admit5-26.md.
-    "_ALLOWED_URL_PATTERNS": "2e7f989cb033beb7",
+    #
+    # 2e7f989cb033beb7 until lane admit5-26's second commit: one anchored
+    # line, his Verifications settings page by name, on
+    # VERIFICATIONS-PAGE-ADMITTED, paired with one exemption below; the tree
+    # at the first commit hashes to the prior pins on every key, and only
+    # this key and the pattern-exemption key moved (16 of 18 byte-identical).
+    "_ALLOWED_URL_PATTERNS": "d4cda7f60112d344",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     # 419e64a3cd92ec7e until the same REVIEW: commit: a third entry, excusing
     # exactly {"/follow"} for exactly the anchored follower-list address.
@@ -2005,7 +2011,12 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # 08c29a59104b680c until lane admit26's fourth commit: one more, excusing
     # exactly {"/mypreferences/d/categories/"} for exactly his Data privacy
     # category page.
-    "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "56fec205ec8de3fe",
+    # 56fec205ec8de3fe until lane admit5-26's second commit (2026-11-26): one
+    # more, excusing exactly {"verification"} -- the one substring the
+    # address trips, measured -- for exactly his Verifications settings page,
+    # the per-address exemption VERIFICATIONS-PAGE-ADMITTED names; the
+    # forbidden tuple is unchanged at 33.
+    "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "8a0202843de29ce2",
     "_FORBIDDEN_URL_SUBSTRINGS": "b0291a66ec9bd51e",
     # 23aece1483afdee9 until 2026-09-19. See the re-freeze note above: eleven
     # detector classes added, zero removed, and the direction is pinned by

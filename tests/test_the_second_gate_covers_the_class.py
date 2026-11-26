@@ -94,7 +94,12 @@ CLASS_MEMBERS = (
         "https://www.linkedin.com/mypreferences/d/two-factor-authentication",
         "two-factor",
     ),
-    ("https://www.linkedin.com/mypreferences/d/verifications", "verification"),
+    # ``/mypreferences/d/verifications`` WAS THIS WORD'S MEMBER UNTIL
+    # 2026-11-26, when VERIFICATIONS-PAGE-ADMITTED admitted that one address
+    # past "verification" by a per-address exemption (lane admit5-26). The
+    # word keeps its reach, and the Premium hub's verification link -- an
+    # address P K1's census cell records as drawn and refused -- stands in.
+    ("https://www.linkedin.com/trust/verification/", "verification"),
     ("https://www.linkedin.com/mypreferences/d/member-cookies", "cookies"),
     (
         "https://www.linkedin.com/mypreferences/d/job-application-accounts",

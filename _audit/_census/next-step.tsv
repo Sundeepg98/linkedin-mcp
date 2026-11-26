@@ -452,13 +452,13 @@ P I12	P	W	R3	CAPTURE:admit-jobs-preferences-viewtype-seeking-preferences	NAMED	_
 P I13	P	W	R3	CAPTURE:admit-jobs-preferences-viewtype-seeking-preferences	NAMED	_audit/_census/profile.md::/jobs/preferences?viewType=SEEKING_PREFERENCES ; RULING:READ-PAST-AN-ACT-SUBSTRING
 P I15	P	W	R3	TARGET:a company he has signalled interest in	NAMED	_audit/_census/write-classes.tsv::queued:INTEREST-ON-LABEL ; RULING:OPERATOR-NAMES-THE-TARGET
 P I16	P	W	R3	PRECONDITION:a job change to share	NAMED	_audit/_census/write-classes.tsv::queued:NO-JOB-CHANGE
-P K1	P	R	-	ADMIT:https://www.linkedin.com/mypreferences/d/verifications	NAMED	_audit/_census/read-addresses.tsv::the settings index draws Verifications only as a link
+P K1	P	R	-	CAPTURE:admit-mypreferences-d-verifications	NAMED	_audit/_census/read-addresses.tsv::the settings index draws Verifications only as a link
 P K2	P	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 P K3	P	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 P K4	P	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 P K5	P	W	R3	PRECONDITION:a company LinkedIn Learning licence	NAMED	_audit/_census/profile.md::needs a company LinkedIn Learning licence
 P K6	P	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
-P K7	P	W	R3	ADMIT:https://www.linkedin.com/mypreferences/d/verifications	INFERRED	_audit/_census/profile.md::the verification management surface has never been captured
+P K7	P	W	R3	CAPTURE:admit-mypreferences-d-verifications	INFERRED	_audit/_census/profile.md::the verification management surface has never been captured
 P K8	P	R	-	PRECONDITION:a Top Voice badge awarded to his account	NAMED	tests/fixtures/live8/in_me.html ; _audit/2026-10-10-lane-b1-profile-build.md::MEASURED-ABSENT FOR
 P K9	P	W	R3	PRECONDITION:a Top Voice badge	NAMED	_audit/_census/write-classes.tsv::queued:NO-TOP-VOICE-BADGE
 P L3	P	W	R3	CAPTURE:article-composer	NAMED	RULING:ARTICLE-COMPOSER-CAPTURE ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS

@@ -2735,7 +2735,7 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # each line decides what MAY be opened, and the first load is a capture's.
     #
     # His recommendations detail page (census N 121 to N 123, N 125 to N 128,
-    # P F1, P F5 to P F9). RULED: RECOMMENDATIONS-DETAIL-PAGE-ADMITTED (the
+    # P F1, P F5 to P F9). Ruling RECOMMENDATIONS-DETAIL-PAGE-ADMITTED (the
     # orchestrator, 2026-11-25): "ADMIT the named /in/me/details/
     # recommendations/ line (interests-page precedent); the capture records
     # the landing." The spelling is NAMED, never drawn (session 8's first
@@ -2753,6 +2753,27 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # recommendation is a write with its own row, and the press gate refuses
     # every control here.
     re.compile(r"^https://www\.linkedin\.com/in/me/details/recommendations/?$"),
+    # His Verifications settings page (census P K1, P K7), BY NAME, in its
+    # own commit. Ruling VERIFICATIONS-PAGE-ADMITTED (the orchestrator,
+    # 2026-11-25): "ADMIT that exact address read-only, zero presses, a
+    # per-address exemption for "verification"; two-step-verification stays
+    # refused." DRAWN on the settings index as 'Verifications'
+    # (`completeness-annotations.tsv`, the index captured 2026-09-23; P K1's
+    # cell records the slashed spelling, so the line takes both). The address
+    # trips "verification" -- one of the six words the 2026-09-03 block added
+    # beside "password" and "two-factor" -- and nothing else, measured with
+    # every entry of the shipped tuple. THIS LINE IS HALF OF A TWO-GATE
+    # ADMISSION: the paired LANE ADMIT5-26 entry in
+    # `_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS` excuses exactly
+    # {"verification"} for exactly this anchored address, and NEITHER HALF
+    # ALONE ADMITS ANYTHING. "verification" keeps its full reach everywhere
+    # else: `/mypreferences/d/two-step-verification`, the ruling's own
+    # control, stays refused on it, as do the Premium hub's
+    # `/trust/verification/`, the singular, another case, a query, a sub-path
+    # and a longer leaf (`tests/test_admit5_26_admissions.py`). READ-ONLY,
+    # ZERO PRESSES: adding or removing a verification (P K7) is a write with
+    # its own row, and the press gate refuses every control on the page.
+    re.compile(r"^https://www\.linkedin\.com/mypreferences/d/verifications/?$"),
 )
 
 #: Substrings that must never appear in a navigation target, checked before
@@ -3266,6 +3287,18 @@ _FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS: tuple[
     (
         re.compile(r"^https://www\.linkedin\.com/mypreferences/d/categories/privacy/?$"),
         frozenset({"/mypreferences/d/categories/"}),
+    ),
+    # LANE ADMIT5-26 (2026-11-26) -- the second gate of each pair whose first
+    # gate is the matching LANE ADMIT5-26 line in `_ALLOWED_URL_PATTERNS`; the
+    # argument and the ruling are written there. Each entry excuses exactly
+    # the substring(s) its address trips, measured with the shipped tuple,
+    # and nothing more; the tuple itself is unchanged.
+    #
+    # His Verifications settings page, tripping "verification" and nothing
+    # else -- the per-address exemption VERIFICATIONS-PAGE-ADMITTED names.
+    (
+        re.compile(r"^https://www\.linkedin\.com/mypreferences/d/verifications/?$"),
+        frozenset({"verification"}),
     ),
 )
 

@@ -138,6 +138,48 @@ ADMISSIONS = (
                     None, "a TRAVERSAL onto a third party"),
         ),
     ),
+    # ------------------------------------------------------------------
+    # HIS VERIFICATIONS SETTINGS PAGE, by name, in its own commit, past
+    # "verification" for this one address: the ruling names the exemption
+    # and its own control, two-step verification, which stays refused.
+    Admission(
+        key="verifications-page",
+        ruling="VERIFICATIONS-PAGE-ADMITTED",
+        rows=("P K1", "P K7"),
+        address=f"{B}/mypreferences/d/verifications",
+        excused=frozenset({"verification"}),
+        siblings=(
+            Sibling(f"{B}/mypreferences/d/two-step-verification", "verification",
+                    "TWO-STEP VERIFICATION STAYS REFUSED: the ruling's own "
+                    "control"),
+            Sibling(f"{B}/mypreferences/d/two-step-verification/", "verification",
+                    "the same, slashed"),
+            Sibling(f"{B}/mypreferences/d/verifications?x=1", "verification",
+                    "a QUERY"),
+            Sibling(f"{B}/mypreferences/d/verifications/x", "verification",
+                    "a SUB-PATH: each page it lists is admitted by its own name "
+                    "or not at all"),
+            Sibling(f"{B}/mypreferences/d/verificationsx", "verification",
+                    "a longer leaf"),
+            Sibling(f"{B}/mypreferences/d/verification", "verification",
+                    "the singular"),
+            Sibling(f"{B}/mypreferences/d/Verifications", "verification",
+                    "another case: the exemption is matched as written"),
+            Sibling(f"{B}/trust/verification/", "verification",
+                    "the Premium hub's verification link (P K1's cell), "
+                    "another page"),
+            Sibling(f"{B}/mypreferences/d/two-factor-authentication",
+                    "two-factor", "the second factor, refused on its own word"),
+            Sibling(f"{B}/mypreferences/d/categories/sign-in-and-security",
+                    "/mypreferences/d/categories/",
+                    "the security category -- a surface the ruling's class "
+                    "excludes"),
+            Sibling(f"{B}/mypreferences/d/verifications/../change-password",
+                    "password", "a TRAVERSAL onto the password page"),
+            Sibling(f"{B}/psettings/verifications", "/psettings/",
+                    "the legacy settings tree"),
+        ),
+    ),
 )
 
 KEYS = [a.key for a in ADMISSIONS]
