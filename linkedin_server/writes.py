@@ -6453,7 +6453,13 @@ async def observe(
             page,
             spec.action,
             named_profile.profile_segment(target),
-            landed_elsewhere=not invitation_acts.landed_on_tab(spec.action, landed),
+            # A COMPARISON, NOT ``not``: tests/test_navigation_is_never_derived.py
+            # reads a call over ``landed`` as carrying the landing into every
+            # name bound from it -- module-wide, so ``not landed_on_tab(...)``
+            # here tainted 222 names in this file, ``url`` among them, and every
+            # navigation through ``_load``. A comparison is a boolean to it; and
+            # ``is not True`` refuses anything but an exact True.
+            landed_elsewhere=invitation_acts.landed_on_tab(spec.action, landed) is not True,
         )
         return _record(
             spec,
@@ -11149,7 +11155,13 @@ async def _verify_after(
                 page, spec.action, named_profile.profile_segment(grant.target)
             ),
             spec.action,
-            landed_elsewhere=not invitation_acts.landed_on_tab(spec.action, landed),
+            # A COMPARISON, NOT ``not``: tests/test_navigation_is_never_derived.py
+            # reads a call over ``landed`` as carrying the landing into every
+            # name bound from it -- module-wide, so ``not landed_on_tab(...)``
+            # here tainted 222 names in this file, ``url`` among them, and every
+            # navigation through ``_load``. A comparison is a boolean to it; and
+            # ``is not True`` refuses anything but an exact True.
+            landed_elsewhere=invitation_acts.landed_on_tab(spec.action, landed) is not True,
         )
         return (
             state,
