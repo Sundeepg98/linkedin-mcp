@@ -18,7 +18,7 @@ from unittest import mock
 
 import pytest
 
-from linkedin_server import press, readonly
+from linkedin_server import press, readonly, self_profile
 
 BASE = "https://www.linkedin.com"
 
@@ -539,10 +539,50 @@ async def test_a_refused_press_never_touches_the_page(condition, url, shape, exp
     assert verdict["refused"] in expected, (condition, url, shape, verdict)
     assert page.clicks == [], (condition, url, shape, page.clicks)
     assert page.keys == [], (condition, url, shape, page.keys)
-    assert page.selectors == [], (
+    # ONE PAGE IS ASKED SOMETHING BEFORE ITS VERDICT, SINCE 2026-11-26: a
+    # member profile root carrying no marker. LinkedIn stopped writing
+    # isSelfProfile on 2026-11-25, so his own landing has that shape too and
+    # whether such a page is his is no longer a function of the url. The gate
+    # may COUNT the three locators self_profile names for that url's member --
+    # reads; no click, no key -- and NOTHING ELSE. Every other refusal here is
+    # still taken with the page never asked.
+    counted = (
+        set(self_profile.edit_route_selectors(self_profile.landed_member_segment(url)).values())
+        if self_profile.wants_structure(url)
+        else set()
+    )
+    assert [asked for asked in page.selectors if asked not in counted] == [], (
         f"a refused press ({condition}, {verdict.get('refused')}) asked the "
         "page for a locator. The gate must return before touching anything."
     )
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("drawn", [0, 1], ids=["draws_none", "draws_one_of_every_shape"])
+async def test_a_member_root_with_no_marker_is_counted_and_refused_untouched(drawn):
+    """ANOTHER MEMBER'S PROFILE, LANDED THE WAY HIS NOW LANDS -- no marker.
+
+    The fake answers one count for every locator: 0 is a page drawing no edit
+    control at all; 1 draws one for the landed member AND one under another
+    member's path, which is ambiguous. Either way the gate COUNTS exactly the
+    three structural locators, refuses ``address_not_admitted`` (terminal, as
+    before), names what it counted -- integers and closed words, no address --
+    and never clicks or types."""
+    url = f"{BASE}/in/another-person/"
+    page = FakePage(url, control_count=drawn)
+    verdict = await press.disclose(page, shape="[aria-expanded]", read_counters=_counters)
+    assert verdict["refused"] == "address_not_admitted", verdict
+    assert verdict["reachable_by_this_route"] is False
+    assert page.clicks == [] and page.keys == []
+    assert sorted(page.selectors) == sorted(
+        self_profile.edit_route_selectors("another-person").values()
+    ), page.selectors
+    saw = verdict["self_evidence"]
+    assert saw["url_marker"] == "absent" and saw["structure_read"] is True
+    assert saw["edit_controls_on_landed_member"] == drawn
+    assert saw["edit_routes_on_another_member"] == drawn
+    assert saw["self_signal"] is None
+    assert "another-person" not in repr(saw)
 
 
 @pytest.mark.asyncio

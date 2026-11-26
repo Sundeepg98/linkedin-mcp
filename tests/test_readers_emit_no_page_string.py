@@ -2215,6 +2215,14 @@ FIXTURE_BREAKS: dict[str, dict[str, str]] = {
         "needle": 'aria-selected="false" id="ka0515091"',
         "into": 'aria-selected="true" id="ka0515091"',
     },
+    # 2026-11-26 (lane selfprofile26): his own profile's edit routes under the
+    # landed member's path, the one premise the edit-route drive transcribes.
+    # Broken, the capture draws none of the four and the drive raises.
+    "self_profile:read_edit_routes": {
+        "fixture": "live11/in_me_profile.html",
+        "needle": 'href="https://www.linkedin.com/in/x/edit/',
+        "into": 'href="https://www.linkedin.com/in/x/view/',
+    },
 }
 
 ALL_DRIVES = {**shipped_drives.DRIVES, **shipped_drives.TO_THE_PRESS}

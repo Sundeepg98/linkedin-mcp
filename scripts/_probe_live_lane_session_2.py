@@ -115,6 +115,7 @@ from linkedin_server import (  # noqa: E402
     profile_editor,
     readonly,
     search_verticals,
+    self_profile,
     server,
     threads,
 )
@@ -1623,10 +1624,14 @@ def expanded_record(raw: Any) -> dict[str, Any]:
 
 async def _in_me(capture: bool) -> dict[str, Any]:
     """His profile through the package's self-profile loader: once, and once
-    more only when LinkedIn's self-assertion did not ride (never on false)."""
+    more only when LinkedIn's self-assertion did not ride (never on false).
+    Since 2026-11-26 the loader also asks the page -- LinkedIn's edit controls
+    for the landed member -- when the url carries no marker; the line printed
+    says which signal answered."""
     async with BROWSER.session() as page:
-        _profile, assertion, loads = await server._goto_self_profile_asserted(page)
-        say("    self-assertion " + shape_of(assertion, "state") + " after " + str(loads) + " load(s)")
+        _profile, assertion, loads, saw = await server._goto_self_profile_asserted(page)
+        say("    self-assertion " + shape_of(assertion, "state") + " after " + str(loads)
+            + " load(s), by " + shape_of(saw.get("self_signal"), "state"))
         if assertion != server.SELF_ASSERTION_TRUE:
             raise _Anomaly("self_assertion_not_true", "in_me")
         await _health(page, "in_me")
@@ -1686,7 +1691,14 @@ async def _in_me_more(capture: bool) -> dict[str, Any]:
     left open, its menu read by attribute, Save to PDF found by comparison
     inside the page, nothing inside it pressed."""
     async with BROWSER.session() as page:
-        on_his_profile = press.self_landing(page.url)
+        # THE PRESS GATE'S OWN READING OF HIS LANDING. Since 2026-11-25 the url
+        # carries no marker, so for a member profile root with none the page's
+        # edit controls for that member are counted first (self_profile), as
+        # press.disclose itself does; the url is read once for both.
+        landed = page.url
+        edit_routes = (await self_profile.read_edit_routes(page, landed)
+                       if self_profile.wants_structure(landed) else None)
+        on_his_profile = press.self_landing(landed, edit_routes)
         if not on_his_profile:
             return {"stopped": "not_on_his_profile"}
         handle, opener, counts = await topcard_opener(page)
