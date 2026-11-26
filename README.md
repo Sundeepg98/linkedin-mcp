@@ -390,7 +390,7 @@ What this design does is minimise exposure rather than pretend it away:
 | Choice | Why it lowers the risk |
 |---|---|
 | Human-directed only | Every call is one you made, in the moment. Nothing runs on a timer, nothing runs while you sleep. |
-| One action at a time | At most three page loads per tool call, enforced: a fourth is refused before it loads. The one fan-out is `linkedin_search_jobs` over several `locations`, one load per place and five at most. No scroll loops, no auto-paging. |
+| One action at a time | Enforced: at most 3 page loads per tool call, each at least 20 s apart; a job search across N places loads N, at most 5. Any other call's fourth load is refused before it loads. No scroll loops, no auto-paging. |
 | Your own session, your own machine, your own IP | No cookie is exported to any third party. No proxy, no datacentre IP, no headless farm. |
 | An ordinary browser, one flag | No stealth plugin, no user-agent or platform spoofing, no fingerprint patching, no proxy, no timing engineered to imitate a human. One Chromium flag is passed -- `--disable-blink-features=AutomationControlled`, which stops Blink setting `navigator.webdriver` -- because LinkedIn checks it at sign-in and refuses one without it. That is the whole of it, it is enforced at launch by `readonly.assert_launch_flags_permitted`, and `tests/test_launch_boundary.py` fails the build if a third flag appears. |
 | Your data only | Your profile views, your applications, your saved jobs, your profile, your notifications. No enumerating or harvesting other members. |
@@ -1080,10 +1080,12 @@ before it was relied on. The read-only allowlist is identical in both modes.
   overrides it for one process. The cost is deliberate: a tool call that
   loads three pages takes at least 40 seconds. Throttling, not disguise: it is
   deliberately not jittered to resemble anything.
-- **At most three page loads per tool call, enforced.** Every tool call gets
-  its own budget of `MAX_NAVIGATIONS_PER_CALL` (3), and the server refuses a
-  fourth load before making it, saying how many it made and what the ceiling
-  is (`navigation_ceiling`). Three is the measured maximum. Most reads load
+- **Enforced: at most 3 page loads per tool call, each at least 20 s apart;
+  a job search across N places loads N, at most 5.** Every tool call gets
+  its own budget of `MAX_NAVIGATIONS_PER_CALL` (3). The server refuses a
+  fourth load before making it, and says which tool asked, how many loads it
+  made and what the ceiling is (`navigation_ceiling`). Three is the measured
+  maximum. Most reads load
   one page; `linkedin_my_profile(include_skills=True)` loads two and reports
   `pages_loaded: 2`. Every write loads up to three (a preview read, then the
   act), and so do `linkedin_group_memberships`, `linkedin_surface_census` and
