@@ -65,7 +65,8 @@ kept as `test_the_signal_on_every_tracked_profile_capture`):
 |---|---|---|---|
 | session 11 landing (`in_me_profile.skeleton.html`, keyed) | 4 | 4 | 0 |
 | session 11, top-card More open / photo dialog open | 4 / 11 | -- | 0 / 0 |
-| tracked copy of the session 11 landing (`tests/fixtures/self_profile/in_me_live11.html`) | 4 | 4 | 0 |
+| tracked copy of the session 11 landing (`tests/fixtures/live11/in_me_profile.html`) | 4 | 4 | 0 |
+| tracked copies of the same landing with the top-card menu open / the photo dialog open (`live11/in_me_more_open.html`, `live11/in_me_photo_open.html`) | 4 / 11 | 4 / 7 | 0 / 0 |
 | tracked `live2/in_me.html`, `live3/in_me.html`, `live8/in_me.html` | 4 each | 4 each | 0 |
 | tracked `live2/first_degree_profile.html` (another member) | 0 | 0 | 0 |
 | tracked `live3/named_profile.html` (another member) | 0 | 0 | 0 |
@@ -170,12 +171,15 @@ so it reads nothing there either way.
 
 ## 4. Tests, red first
 
-**THE FIXTURE.** `tests/fixtures/self_profile/in_me_live11.html` -- session 11's
-skeleton of the landing, written by the live harness's own shipped
-`tracked_copy` (imported, not re-implemented): strict ASCII, no keyed shape,
-every value `x` (so every member segment is `x`), id references as `k`+hash.
-243,094 characters. It lives OUTSIDE `tests/fixtures/live*/` so the live lane's
-own session-11 copies and `LIVE_FIXTURE_COUNTS` are not contended. The controls
+**THE FIXTURE.** `tests/fixtures/live11/in_me_profile.html` -- session 11's
+skeleton of the landing through the live harness's own shipped `tracked_copy`:
+strict ASCII, no keyed shape, every value `x` (so every member segment is `x`),
+id references as `k`+hash, 243,094 characters. This lane first built its own
+copy (the harness's function, imported, over the same skeleton) and committed
+it in a fixtures directory of its own; the live lane's session
+11 merge then landed its 48 tracked copies on master, and the two files were
+BYTE-IDENTICAL (one sha-256). At the merge of master 7760a5f this lane's copy
+was removed and every test points at the live lane's. The controls
 are the tracked captures already in the repository (another member's profile:
 `live2/first_degree_profile.html`, `live3/named_profile.html`,
 `live3/m1_after_press.html`) plus the SAME real landing re-landed under a
@@ -258,7 +262,7 @@ its text -- read 0/1/0, refused everywhere. The rerun: 3 failed, the press
 gate admitting that profile among them. Green: 44 passed.
 
 **THE PEOPLE GUARD MET A NEW SLOT SHAPE IN THE NEW MARKUP, AND THE SLOT WAS
-NARROWED, NOT THE FIXTURE.** With the fixture staged,
+NARROWED, NOT THE FIXTURE -- TWICE, IDENTICALLY.** With the fixture staged,
 `tests/test_fixtures_hold_only_synthetic_people.py` refused it: 9 member links
 whose aria-label "matches no template", all one value. Opened at the lines it
 named: each post's Send control, drawn in the new markup as an `<a>` to the
@@ -272,7 +276,10 @@ it (and the link's text slot still read), and
 `test_THIS_CONTROL_CAN_FAIL_an_interface_label_is_exact` -- a name in the
 label, or a label that only CONTAINS an interface word, is taken whole and
 convicted as before. Red first: the unnarrowed guard refused the real fixture
-(the run above).
+(the run above). The live lane met the same 27 sites in its own session-11
+copies and landed the SAME one-line narrowing on master, with its own control;
+at the merge of 7760a5f this lane took master's file whole and dropped its
+duplicate tests -- one narrowing, one control.
 
 **AND ONE OF MY OWN TEST INPUTS WAS SLUG-SHAPED.** After the first commit,
 `tests/test_no_committed_identity.py` (which reads the committed blob) refused
@@ -340,4 +347,33 @@ path does not use the self-profile loader.
 
 ## 7. CI
 
-Pending: certified on the lane's `ci/` ref by `scripts/lane_ci.py`, read by sha.
+**THE FIRST RUN WAS RED, AND THE CAUSE WAS MY SCOPING.** Run 45755740942 on
+`fa11407` (the fix and this record over 4c62196), read by sha through
+`scripts/lane_ci.py wait`: failure, shard 1, `2 failed, 4728 passed, 2 skipped`.
+The two tests, from the run's own failed log:
+
+* `tests/test_readers_emit_no_page_string.py::test_every_drive_has_its_premise_broken_below`
+* `tests/test_readers_emit_no_page_string.py::test_a_drive_on_a_fixture_that_stopped_drawing_its_shape_raises[self_profile:read_edit_routes]`
+
+Every drive in `tests/shipped_drives.py` must have its fixture premise broken in
+`FIXTURE_BREAKS` -- a needle that, replaced, makes the drive raise rather than
+measure a page nobody draws. This lane added a drive and no break. Its local
+gate ran three tests of the guard that owns the table (the driven set, the
+vacuous readers, the drive's own verdict) and not the fourth that enumerates
+it. The fix is the entry: the four `/in/x/edit/` routes of the landing, replaced,
+leave the drive nothing to transcribe and it raises. The scoped gate for the
+second run is the guard's whole file.
+
+    A TABLE'S COMPLETENESS IS TESTED WHERE THE TABLE IS OWNED. A SCOPED GATE
+    THAT ADDS A ROW RUNS THE WHOLE FILE THAT ENUMERATES THE ROWS.
+
+**MASTER MOVED** to 7760a5f (integration 3: four lanes, session 11's records,
+41 rulings) before the second run. Merged into this branch: five conflicts,
+resolved by id -- `tests/shipped_drives.py` (master's follower-list drive and
+this lane's edit-route drive, both kept); `_audit/INSTRUMENTS.md` (master's
+99-103, then 104, in number order); the people guard (master's file whole, see
+section 4); `_audit/INDEX.md` and `_audit/RULINGS.md` (master's, then each
+regenerated by its own `--write`; the blocker map too, unchanged in content).
+`linkedin_server/server.py` and `tests/reader_leak_baseline.json` merged
+cleanly. The duplicate fixture was removed and the tests repointed at the live
+lane's byte-identical copy (section 4).

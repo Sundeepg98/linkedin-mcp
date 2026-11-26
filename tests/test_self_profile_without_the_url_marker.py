@@ -16,11 +16,13 @@ older self captures, 0 on each of the three tracked captures of another
 member's profile. :func:`test_the_signal_on_every_tracked_profile_capture` is
 that measurement, kept as a test.
 
-THE FIXTURE. ``tests/fixtures/self_profile/in_me_live11.html`` is session 11's
-skeleton of the landing, through the live harness's own ``tracked_copy``:
-every value is ``x``, so every member segment is ``x`` and a page landed at
-``/in/x/`` is the page this markup was captured at. Landed at ``/in/y/`` the
-same markup is a page whose edit controls belong to somebody else.
+THE FIXTURE. ``tests/fixtures/live11/in_me_profile.html`` is session 11's
+skeleton of the landing, the live lane's tracked copy through the harness's
+own ``tracked_copy`` (this lane built the same copy byte for byte from the same
+skeleton, and kept the live lane's): every value is ``x``, so every member
+segment is ``x`` and a page landed at ``/in/x/`` is the page this markup was
+captured at. Landed at ``/in/y/`` the same markup is a page whose edit
+controls belong to somebody else.
 
 EVERY BEHAVIOURAL TEST HERE DRIVES A SHIPPED ENTRY POINT -- a tool, the press
 gate, the live harness -- and was RED before the fix, refusing his profile.
@@ -63,7 +65,16 @@ import _probe_live_lane_session_2 as harness  # noqa: E402
 FIXTURES = ROOT / "tests" / "fixtures"
 
 #: Session 11's landing of ``/in/me/`` (2026-11-25 23:23), as a tracked copy.
-NEW_LANDING = FIXTURES / "self_profile" / "in_me_live11.html"
+NEW_LANDING = FIXTURES / "live11" / "in_me_profile.html"
+
+#: The same session's landing with a top-card menu open and with the photo
+#: dialog open -- the photo dialog adds editor links, four of them with NO
+#: accessible name, which is the route-versus-control line drawn by LinkedIn's
+#: own markup: (named controls, all routes) for the landed member.
+SESSION_11_OPEN_STATES = (
+    (FIXTURES / "live11" / "in_me_more_open.html", (4, 4, 0)),
+    (FIXTURES / "live11" / "in_me_photo_open.html", (7, 11, 0)),
+)
 
 #: The three older self captures, from sessions 2, 3 and 8, which still carried
 #: the marker -- 28 times each.
@@ -344,13 +355,15 @@ def test_the_marker_still_answers_where_it_rides():
 
 async def test_the_signal_on_every_tracked_profile_capture(chromium):
     """4 edit controls for the landed member on every self capture, old and
-    new; none on any other member's; and the new landing's 4 belong to
-    ANOTHER member once it is landed under a different path. The whole table
-    is compared at once, so a failure prints every row."""
+    new (7 named of 11 routes with the photo dialog open); none on any other
+    member's; and the new landing's 4 belong to ANOTHER member once it is
+    landed under a different path. The whole table is compared at once, so a
+    failure prints every row."""
     from linkedin_server import self_profile
 
     cases = (
         [(NEW_LANDING, LANDED, (4, 4, 0), _html)]
+        + [(path, LANDED, counts, _html) for path, counts in SESSION_11_OPEN_STATES]
         + [(path, LANDED, (4, 4, 0), _html) for path in OLDER_SELF]
         + [(path, LANDED, (0, 0, 0), _html) for path in OTHER_MEMBERS]
         + [(NEW_LANDING, LANDED_ELSEWHERE, (0, 0, 4), _html)]

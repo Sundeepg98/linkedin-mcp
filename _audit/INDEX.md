@@ -27,25 +27,25 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 282 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 242 |
-| distinct dates | 21 |
+| audit documents git tracks under `_audit` | 290 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 250 |
+| distinct dates | 22 |
 | documents with no level-1 heading | 2 |
-| `CORRECTS:` marker lines | 126 |
-| `CORRECTED BY:` marker lines | 126 |
-| distinct declared correction edges | 111 |
-| documents something later corrects | 53 |
-| documents that correct something | 74 |
-| documents at either end of a cross-document edge | 103 |
+| `CORRECTS:` marker lines | 130 |
+| `CORRECTED BY:` marker lines | 130 |
+| distinct declared correction edges | 115 |
+| documents something later corrects | 55 |
+| documents that correct something | 78 |
+| documents at either end of a cross-document edge | 109 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
-| documents no correction marker touches at all | 177 |
+| documents no correction marker touches at all | 179 |
 | blockquoted markers naming ANOTHER document | 0 |
 | edges missing one of their two markers | 0 |
 | edges declared a different number of times in each direction | 2 |
 | marker lines rejected as malformed | 0 |
 | marker-shaped lines inside a fenced code block | 0 |
-| reasons that continue past their own line (printed whole below) | 15 |
+| reasons that continue past their own line (printed whole below) | 17 |
 | tightest margin over the 20-character admission floor, in characters | 0 |
 | titles carrying a non-ASCII character | 5 |
 | quoted strings whose backticked citation had to be defused | 6 |
@@ -550,6 +550,30 @@ document is dead; it says one thing in it was overtaken and names what.
 - CORRECTED BY [2026-10-10-lane-b2-network-build.md](2026-10-10-lane-b2-network-build.md)
 
   > read against the two skeletons, the feed menu cannot be aimed at an item he names and the search page's first render draws no School, Industry or Keywords control, so `N 37`, `N 43`, `N 51`, `N 153`, `N 154`, `N 200`, `N 88`, `N 89` and `N 93` return to CAPTURE and `N 80` is discharged under D6; and section 5's "unsubscribe" on the newsletter list was counted inside the fixture's header comment, so `N 56` goes to ADMIT.
+
+- CORRECTED BY [2026-11-25-admit26.md](2026-11-25-admit26.md)
+
+  > five of those editors are admitted since 2026-11-25 (the position, About, contact-info and secondary-language forms and one skill's form, each in the spelling LinkedIn draws, two of them re-addressed), and every other ADMIT step in the ledger has moved to a capture or to a question in section 7; the Open To Work editor has no address at all, so its rows wait on Q-OPEN-TO-WORK-EDITOR.
+
+- CORRECTED BY [2026-11-25-build-p26.md](2026-11-25-build-p26.md)
+
+  > read against their captures, the eleven profile rows this ledger put on BUILD (`P A11`, `P A13`, `P A17` on `live4/editor.html`, `P A14`, `P A15` on `live7/editor.html`, `P A25` on the planned `live1/contact_info.html`, `P D25`, `P D26`, `P F1`, `P K8` and `P S8` on session 8's skeletons) have nothing to build on; they go to three questions (`Q-EDITOR-TYPEAHEAD`, `Q-ABSENT-ON-HIS-ACCOUNT`, `Q-OWN-PROFILE-SCROLL`), one admission and two captures, and `P L2b` moves to COVERED-UNFIRED on the reader built for it.
+
+### [2026-10-10-lane-b3-messaging-build.md](2026-10-10-lane-b3-messaging-build.md)
+
+2026-10-10 &middot; Lane B3, 2026-10-10: messaging and content -- one item's words read, two session-1 pages read, and the rest held by what was measured
+
+- CORRECTED BY [2026-11-25-build-jmn26.md](2026-11-25-build-jmn26.md)
+
+  > `Delete notification` is word-measured on today's captures as well: the keyed skeletons of live sessions 5 and 10 match it on every card (9 of 9, 10 of 10). The blocker, a card key a caller can pass, stands.
+
+### [2026-10-26-integration-2.md](2026-10-26-integration-2.md)
+
+2026-10-26 &middot; Integration 2, 2026-10-26: five pending lane heads onto one certified head
+
+- CORRECTED BY [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md)
+
+  > the orchestrator's later ruling N-102-MOVES-WITH-J-108 (lane build-jmn26's question 1) moves `N 102` with `J 108` as its sibling: lane build-jmn26 measured both readers on the same capture, so there is no distinct capability to rebuild, and the "stays GAP" outcome above no longer holds; integration 3 moved the row.
 
 ### [INSTRUMENTS.md](INSTRUMENTS.md)
 
@@ -1565,6 +1589,38 @@ reach is visible. The quoted reason here is the CORRECTOR's own
 
   > section 12.7 moved `N 37`, `N 43`, `N 51`, `N 153`, `N 154`, `N 200`, `N 80`, `N 88`, `N 89` and `N 93` to BUILD on session 8's skeletons, and section 5 counted "unsubscribe" on the newsletter list for `N 56`; read against the captures, ten of those eleven steps had nothing to build on (sections 2, 3 and 5), and the eleventh, `N 80`'s, is discharged under D6.
 
+### [2026-11-25-admit26.md](2026-11-25-admit26.md)
+
+2026-11-25 &middot; Lane admit26: the ledger's ADMIT rows, address by address
+
+- CORRECTS [2026-09-28-lane-k-ledger.md](2026-09-28-lane-k-ledger.md)
+
+  > section 4 says the profile section editors, the contact-info editor and the Open To Work editor are all refused and "only the intro editor is admitted", and the ledger gave the contact-info, position and job-preferences rows addresses LinkedIn does not draw: five editors are admitted since this lane (section 3.1), the contact-info, position and job-preferences rows are re-addressed to the drawn spellings (3.1, 3.6), and the Open To Work editor has no address at all (section 5).
+
+### [2026-11-25-build-jmn26.md](2026-11-25-build-jmn26.md)
+
+2026-11-25 &middot; build-jmn26, 2026-11-25: the J, M and N rows the ledger marked BUILD
+
+- CORRECTS [2026-10-10-lane-b3-messaging-build.md](2026-10-10-lane-b3-messaging-build.md)
+
+  > its section 4.6 has `Delete notification` word-measured only on the 2026-08-22 capture; the keyed skeletons of live sessions 5 and 10 match it on every card (9 of 9, 10 of 10). The row's blocker, no card key, is unchanged.
+
+### [2026-11-25-build-p26.md](2026-11-25-build-p26.md)
+
+2026-11-25 &middot; Lane build-p26, 2026-11-25: the profile slice's twelve BUILD rows -- one reader merged, eleven next steps re-pointed
+
+- CORRECTS [2026-09-28-lane-k-ledger.md](2026-09-28-lane-k-ledger.md)
+
+  > sections 6 and 12.7 gave eleven profile rows a BUILD step on a capture: `P A11`, `P A13`, `P A17` on `live4/editor.html`, `P A14`, `P A15` on `live7/editor.html`, `P A25` on a planned `live1/contact_info.html`, `P D25`, `P D26`, `P F1`, `P K8` on `live8/in_me.html` and `P S8` on `live8/keyskills.html`; read against those captures, none of the eleven has what its build needs (sections 2 and 4), and each takes the step its own measured reason names.
+
+### [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md)
+
+2026-11-25 &middot; Orchestrator rulings of 2026-11-25 (from 22:30 IST), registered at integration 3
+
+- CORRECTS [2026-10-26-integration-2.md](2026-10-26-integration-2.md)
+
+  > its section 6 recorded the orchestrator's earlier 2026-11-25 call that `N 102` "stays GAP", to be rebuilt under its own tool name if its distinct capability were wanted; the ruling below supersedes that outcome, because build-jmn26 measured that the two readers read the same carousel on the same capture, so there is no distinct capability, and `N 102` moves with `J 108`.
+
 ## 5. Every document, by date
 
 `CORRECTED` means at least one later document declares a correction of
@@ -1835,7 +1891,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-27 | [2026-09-27-rulings-previews-and-receipts.md](2026-09-27-rulings-previews-and-receipts.md) | Ruling, 2026-09-27: a preview names whom the tool resolved |  |
 | 2026-09-27 | [2026-09-27-rulings-relation-removals-and-account-destruction.md](2026-09-27-rulings-relation-removals-and-account-destruction.md) | Rulings, 2026-09-27: removing a relation, and destroying the account |  |
 | 2026-09-28 | [2026-09-28-lane-a-admissions.md](2026-09-28-lane-a-admissions.md) | Lane A: refused reads past an act substring, and the rows a press or a ruling holds |  |
-| 2026-09-28 | [2026-09-28-lane-k-ledger.md](2026-09-28-lane-k-ledger.md) | Lane K: the next-step ledger and the capture queue | **CORRECTED x1** |
+| 2026-09-28 | [2026-09-28-lane-k-ledger.md](2026-09-28-lane-k-ledger.md) | Lane K: the next-step ledger and the capture queue | **CORRECTED x3** |
 | 2026-09-28 | [2026-09-28-lane-s-settings.md](2026-09-28-lane-s-settings.md) | Lane S (settings): the settings of his own account, built behind the grant |  |
 | 2026-09-28 | [2026-09-28-lane-u-uploads.md](2026-09-28-lane-u-uploads.md) | Lane U: uploads -- the decision registered, the rows relabelled, the verb made performable |  |
 | 2026-09-28 | [2026-09-28-rulings-build-classes.md](2026-09-28-rulings-build-classes.md) | Rulings, 2026-09-28: the classes the census still leaves undecided |  |
@@ -1843,7 +1899,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-10-10 | [2026-10-10-integration.md](2026-10-10-integration.md) | Integration, 2026-10-10: lanes B5, NP, B2 and B3 onto master |  |
 | 2026-10-10 | [2026-10-10-lane-b1-profile-build.md](2026-10-10-lane-b1-profile-build.md) | Lane B1, 2026-10-10: fifteen profile rows on real captures -- what the captures draw, the one select that was waiting, and three readers |  |
 | 2026-10-10 | [2026-10-10-lane-b2-network-build.md](2026-10-10-lane-b2-network-build.md) | Lane B2 -- the network build: seventeen BUILD rows read against their captures | corrects x1 |
-| 2026-10-10 | [2026-10-10-lane-b3-messaging-build.md](2026-10-10-lane-b3-messaging-build.md) | Lane B3, 2026-10-10: messaging and content -- one item's words read, two session-1 pages read, and the rest held by what was measured |  |
+| 2026-10-10 | [2026-10-10-lane-b3-messaging-build.md](2026-10-10-lane-b3-messaging-build.md) | Lane B3, 2026-10-10: messaging and content -- one item's words read, two session-1 pages read, and the rest held by what was measured | **CORRECTED x1** |
 | 2026-10-10 | [2026-10-10-lane-b4-jobs-build.md](2026-10-10-lane-b4-jobs-build.md) | Lane B4, 2026-10-10: the jobs rows lane K's ledger marked BUILD |  |
 | 2026-10-10 | [2026-10-10-lane-b5-groups-build.md](2026-10-10-lane-b5-groups-build.md) | Lane B5, 2026-10-10: the groups build |  |
 | 2026-10-10 | [2026-10-10-lane-ci-fastlane.md](2026-10-10-lane-ci-fastlane.md) | Lane CI fast lane (lci-fastlane-lead), 2026-10-10 |  |
@@ -1854,9 +1910,17 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-10-10 | [2026-10-10-rulings-named-profile-detail-pages.md](2026-10-10-rulings-named-profile-detail-pages.md) | Ruling, 2026-10-10: the detail pages of a profile he names |  |
 | 2026-10-26 | [2026-10-26-builds.md](2026-10-26-builds.md) | builds-26 -- tracker-stage + endorsement tools (offline) |  |
 | 2026-10-26 | [2026-10-26-fixes.md](2026-10-26-fixes.md) | 2026-10-26 -- fixes lane (fixes-26): three measured defects |  |
-| 2026-10-26 | [2026-10-26-integration-2.md](2026-10-26-integration-2.md) | Integration 2, 2026-10-26: five pending lane heads onto one certified head |  |
+| 2026-10-26 | [2026-10-26-integration-2.md](2026-10-26-integration-2.md) | Integration 2, 2026-10-26: five pending lane heads onto one certified head | **CORRECTED x1** |
 | 2026-10-26 | [2026-10-26-lane-ci-defect.md](2026-10-26-lane-ci-defect.md) | 2026-10-26 lane-ci defect -- `wait` printed only the exit-code banner on a red run |  |
 | 2026-10-26 | [2026-10-26-ledger.md](2026-10-26-ledger.md) | Ledger pass, 2026-10-26: B5's six group rows onto their captures, B3's thirteen lines onto their real next steps |  |
+| 2026-11-25 | [2026-11-25-admit26.md](2026-11-25-admit26.md) | Lane admit26: the ledger's ADMIT rows, address by address | corrects x1 |
+| 2026-11-25 | [2026-11-25-apply.md](2026-11-25-apply.md) | Lane apply-26: multi-step Easy Apply, phase A (offline) |  |
+| 2026-11-25 | [2026-11-25-build-jmn26.md](2026-11-25-build-jmn26.md) | build-jmn26, 2026-11-25: the J, M and N rows the ledger marked BUILD | corrects x1 |
+| 2026-11-25 | [2026-11-25-build-p26.md](2026-11-25-build-p26.md) | Lane build-p26, 2026-11-25: the profile slice's twelve BUILD rows -- one reader merged, eleven next steps re-pointed | corrects x1 |
+| 2026-11-25 | [2026-11-25-live-session-11.md](2026-11-25-live-session-11.md) | Live session 11 -- campaign L1, the capture session: the prep, written offline |  |
+| 2026-11-25 | [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md) | Orchestrator rulings of 2026-11-25 (from 22:30 IST), registered at integration 3 | corrects x1 |
+| 2026-11-26 | [2026-11-26-integration-3.md](2026-11-26-integration-3.md) | Integration 3, 2026-11-26: five certified heads onto master, and the rulings since 2026-11-25 22:30 |  |
+| 2026-11-26 | [2026-11-26-rulings-search-route.md](2026-11-26-rulings-search-route.md) | Orchestrator rulings of 2026-11-26 (01:20 IST): the job search's route, registered at integration 3 |  |
 | 2026-11-26 | [2026-11-26-selfprofile26.md](2026-11-26-selfprofile26.md) | 2026-11-26 -- lane selfprofile26: his own profile, asserted without the url marker |  |
 
 ## 6. What the scan rejected, could not join, or had to repair
@@ -1890,6 +1954,8 @@ against the same line, so a missing continuation satisfies it.
 - REASON PAST ITS LINE [2026-09-20-the-first-firing.md](2026-09-20-the-first-firing.md) line 233 -- a line-scoped reader sees 35 of 465 characters.
 - REASON PAST ITS LINE [2026-09-20-the-five-under-banked.md](2026-09-20-the-five-under-banked.md) line 3 -- a line-scoped reader sees 35 of 349 characters.
 - REASON PAST ITS LINE [2026-09-20-the-five-under-banked.md](2026-09-20-the-five-under-banked.md) line 457 -- a line-scoped reader sees 94 of 717 characters.
+- REASON PAST ITS LINE [2026-09-28-lane-k-ledger.md](2026-09-28-lane-k-ledger.md) line 255 -- a line-scoped reader sees 25 of 386 characters.
+- REASON PAST ITS LINE [2026-11-25-admit26.md](2026-11-25-admit26.md) line 15 -- a line-scoped reader sees 26 of 482 characters.
 - REASON PAST ITS LINE [_census/jobs.md](_census/jobs.md) line 467 -- a line-scoped reader sees 825 of 1189 characters.
 
 - TIGHTEST ADMISSION MARGIN [2026-09-03-linkedin-gap-blockers.md](2026-09-03-linkedin-gap-blockers.md) line 272 clears the 20-character floor by 0. The floor is applied to the marker's OWN LINE, so a reason of 723 characters is admitted on the strength of 20. Reflow that paragraph by one word and a guard rejects it saying it *carries no reason after the citation*, which would not be true. Reported every regeneration rather than counted, because a count of rejections reads zero until the day it does not.

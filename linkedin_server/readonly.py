@@ -2596,6 +2596,132 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(r"^https://www\.linkedin\.com/events/[0-9]{1,20}/attendees/?$"),
     re.compile(r"^https://www\.linkedin\.com/company/[A-Za-z0-9\-_]{1,100}/people/?$"),
     re.compile(r"^https://www\.linkedin\.com/school/[A-Za-z0-9\-_]{1,100}/people/?$"),
+    # ======================================================================
+    # LANE ADMIT26 (2026-11-25) -- PAGES OF HIS OWN ACCOUNT THE BOUNDARY
+    # REFUSED, each on a registered ruling and each in the spelling LinkedIn
+    # DRAWS. Record: `_audit/2026-11-25-admit26.md`, which names the capture
+    # or committed table that measured every spelling below. Pinned, each
+    # control shown failing, in `tests/test_admit26_admissions.py`.
+    #
+    # HIS OWN PROFILE EDITORS, past "/edit/". Ruling PROFILE-EDITOR-ADDRESSES-
+    # ALLOWED (the operator, 2026-08-31, `_audit/2026-08-31-linkedin-finish.md`
+    # #4: "/in/<member>/edit/ and the profile editors are allowed. His own
+    # profile, no third party"), read with READ-PAST-AN-ACT-SUBSTRING: "/edit/"
+    # stands on the forbidden tuple as a fence against EDITING, and loading an
+    # editor edits nothing.
+    #
+    # EACH LINE IS HALF OF A TWO-GATE ADMISSION, as lane A's are: its other
+    # half is the paired LANE ADMIT26 entry in
+    # `_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS`, excusing exactly {"/edit/"}
+    # for exactly that anchored address. NEITHER HALF ALONE ADMITS ANYTHING.
+    # "/edit/" is not narrowed: it keeps refusing every other member of the
+    # family, on his profile and on everybody else's, as the intro editor's
+    # exemption above required.
+    #
+    # THE /in/me/ SPELLING ONLY, the measured constraint the intro-editor
+    # entry records: /in/me/ resolves to whoever is signed in, so no line
+    # here can address a third party's editor.
+    #
+    # THE SPELLINGS ARE THE DRAWN ONES, NARROWED. The add-an-Experience form
+    # is drawn WITH its entry-point query, so that exact query is the line
+    # and the bare form stays refused. The contact-info editor is drawn as a
+    # forms/ page (the intro editor's dialog, `P A25`'s cell), not the
+    # `/in/me/edit/contact-info/` the ledger inferred, which stays refused.
+    # The skill form's segment is the skill's id the skills page draws,
+    # digits only, and it comes from a tool's arguments, never off a page.
+    #
+    # NOTHING IS PRESSED OR SAVED: every control on an editor stays refused by
+    # the press gate (`composer_or_editor`), a save is a write with its own
+    # spec, and SELF-PROFILE-EDITS-NOT-OUTWARD governs any live proof.
+    re.compile(
+        r"^https://www\.linkedin\.com/in/me/edit/forms/position/new/"
+        r"\?profileFormEntryPoint=identityModuleMirror$"
+    ),
+    re.compile(r"^https://www\.linkedin\.com/in/me/edit/forms/summary/new/?$"),
+    re.compile(r"^https://www\.linkedin\.com/in/me/edit/forms/contact-info/new/?$"),
+    re.compile(r"^https://www\.linkedin\.com/in/me/edit/secondary-language/?$"),
+    re.compile(r"^https://www\.linkedin\.com/in/me/details/skills/edit/forms/[0-9]{1,20}/?$"),
+    # ----------------------------------------------------------------------
+    # LANE ADMIT26, CONTINUED -- PAGES REFUSED BY ALLOWLIST SILENCE ALONE,
+    # admitted on READ-PAST-AN-ACT-SUBSTRING's second clause ("admitted the
+    # same way when a row needs it and no ruling holds it"). No substring is
+    # crossed, so no exemption is involved.
+    #
+    # His "Open to" services page (census P H1), an anchor on his own profile
+    # ('Showcase your services ... Add services', tracked
+    # `profile_topcard_hydrated.html`), drawn with no query. The flow behind
+    # it is entered by a PRESS, which the press gate refuses; the Open To Work
+    # sibling's entry fires `saveAndFetchNextStep`, so the capture stops at
+    # the first control (lane L7's capture C3). NOT HERE: the volunteering
+    # page beside it, which LinkedIn draws only with his own profile id in its
+    # query (the record, section 5).
+    re.compile(r"^https://www\.linkedin\.com/in/me/opportunities/services/education/?$"),
+    # His My Network page (census N 22, N 32, N 62, N 97, N 98), drawn in the
+    # global nav of nearly every tracked live fixture and in the drawn-route
+    # corpus. THIS REVERSES A RECORDED REFUSAL, and the argument is the
+    # rulings', not this lane's:
+    #
+    #   * The refusal is R1 (`_audit/2026-08-30-linkedin-nine.md` section 2.2),
+    #     a wave's side-effect gate that calls itself "a DERIVED refusal" -- not
+    #     an operator's ruling and never registered (lane A's record, 2.2).
+    #     Under D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING it decides nothing.
+    #   * Its first ground, the pending-invitation badge a load may clear, is
+    #     answered in READ-PAST-AN-ACT-SUBSTRING's own words: "a badge the load
+    #     may clear is a passive cost (D5-PASSIVE-COST-IS-NOT-A-ROW), recorded
+    #     on the row". NOTIFICATIONS-UNREAD-SPEND permits clearing his own.
+    #   * Its second, whether an invitation marked seen is visible to its
+    #     SENDER, is the question RECEIVED-INVITATIONS-READ-STAYS-ADMITTED
+    #     answered for the invitation manager itself: a passive cost, recorded
+    #     on the rows as UNMEASURED, reopened when a capture shows the sender
+    #     can see it. This page shows a preview of the same invitations.
+    #
+    # The page is refused by allowlist silence alone (no substring), so this is
+    # the second clause of READ-PAST-AN-ACT-SUBSTRING: one anchored line, NO
+    # QUERY and NO SUB-PATH -- every page below it keeps its own refusal, the
+    # discovery lists, the import page and the invitation surfaces among them.
+    # THE PAGE LISTS OTHER PEOPLE: a reader owes NAMES-AT-RUNTIME and
+    # PEOPLE-DATA-MITIGATIONS, and brackets the invitation badge before and
+    # after, as `linkedin_connections` does. Every control stays refused by the
+    # press gate.
+    re.compile(r"^https://www\.linkedin\.com/mynetwork/?$"),
+    # ----------------------------------------------------------------------
+    # LANE ADMIT26, NAMED SETTINGS PAGES -- each by its exact address, in its
+    # own commit, as NAMED-SETTINGS-PAGES-RATIFIED reads ONE-NAMED-SETTINGS-
+    # PAGE-AT-A-TIME ("One named settings page per commit is within the
+    # ruling"), with HIS-OWN-SETTINGS-NOT-OUTWARD ("Settings pages are still
+    # admitted one by name"). Never the family, never a wildcard.
+    #
+    # His Data privacy category page (census J 87, N 96, N 143, P O22, P P3),
+    # drawn on the settings index (`completeness-annotations.tsv`, the index
+    # captured 2026-09-23). It trips "/mypreferences/d/categories/", whose
+    # recorded ground (42e90e3, 2026-08-30) is that "the category pages carry
+    # the toggles" -- a write; reading the page presses none of them, exactly
+    # the reading lane A gave the advertising-data category. It is not the
+    # credential or security category (`/categories/sign-in-and-security`
+    # stays refused), and the sensitive pages it links stay refused by their
+    # own address. Each row's own settings page is the capture's to spell and
+    # a later admission's, one name at a time.
+    re.compile(r"^https://www\.linkedin\.com/mypreferences/d/categories/privacy/?$"),
+    # His Premium account settings page (census P N22, "Subscriptions and
+    # payments", a read), drawn on the Premium hub as 'Manage Premium account'
+    # (`completeness-annotations.tsv`, P N22's cell, captured 2026-09-23). It
+    # trips no substring -- allowlist silence alone -- and it is a page below
+    # the settings index, so it goes in by name, in its own commit. Every
+    # control on it that changes or cancels the subscription is a purchase
+    # act, never built (PURCHASES-STAY-MANUAL), and the press gate refuses it;
+    # a reader returns the plan and its dates, never a payment detail.
+    re.compile(r"^https://www\.linkedin\.com/mypreferences/d/premium-manage-account/?$"),
+    # His job-seeker preferences page (census P I12, P I13: the career-
+    # interests page and its minimum-pay preference), a persisted preference
+    # admitted BY NAME (MESSAGING-SETTINGS-CAPABILITY-LEVEL: "a setting is
+    # admitted by name or not at all"), in its own commit. LinkedIn draws it
+    # in ONE spelling, the jobs nav's 'Preferences' anchor, twice on the
+    # captured jobs-alerts page: `/jobs/preferences?viewType=SEEKING_
+    # PREFERENCES`, no slash before the query. That exact spelling is the line;
+    # the bare page, any other view and any second key stay refused. It trips
+    # no substring. Editing a preference is a write with its own spec; the
+    # press gate refuses every control here.
+    re.compile(r"^https://www\.linkedin\.com/jobs/preferences\?viewType=SEEKING_PREFERENCES$"),
 )
 
 #: Substrings that must never appear in a navigation target, checked before
@@ -3070,6 +3196,45 @@ _FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS: tuple[
             r"notify-network-for-updates/?$"
         ),
         frozenset({"/settings/", "settings"}),
+    ),
+    # LANE ADMIT26 (2026-11-25) -- the second gate of each pair whose first
+    # gate is the matching LANE ADMIT26 line in `_ALLOWED_URL_PATTERNS`; the
+    # argument and the ruling are written there. Each entry excuses exactly
+    # the substring(s) its address trips, measured with the shipped tuple,
+    # and nothing more; the tuple itself is unchanged.
+    #
+    # His own profile editors, each tripping "/edit/" and nothing else.
+    (
+        re.compile(
+            r"^https://www\.linkedin\.com/in/me/edit/forms/position/new/"
+            r"\?profileFormEntryPoint=identityModuleMirror$"
+        ),
+        frozenset({"/edit/"}),
+    ),
+    (
+        re.compile(r"^https://www\.linkedin\.com/in/me/edit/forms/summary/new/?$"),
+        frozenset({"/edit/"}),
+    ),
+    (
+        re.compile(r"^https://www\.linkedin\.com/in/me/edit/forms/contact-info/new/?$"),
+        frozenset({"/edit/"}),
+    ),
+    (
+        re.compile(r"^https://www\.linkedin\.com/in/me/edit/secondary-language/?$"),
+        frozenset({"/edit/"}),
+    ),
+    (
+        re.compile(
+            r"^https://www\.linkedin\.com/in/me/details/skills/edit/forms/"
+            r"[0-9]{1,20}/?$"
+        ),
+        frozenset({"/edit/"}),
+    ),
+    # His Data privacy category page, a named settings page in its own commit,
+    # tripping "/mypreferences/d/categories/" and nothing else.
+    (
+        re.compile(r"^https://www\.linkedin\.com/mypreferences/d/categories/privacy/?$"),
+        frozenset({"/mypreferences/d/categories/"}),
     ),
 )
 

@@ -145,9 +145,9 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
     # "P L1" LEFT 2026-10-10: lane B1 built its reader over the tracked skeleton
     # of session 1's capture (COVERED-UNFIRED), so its line goes, as a line
     # whose row left GAP must.
-    "P L2b": ("ADDRESS", "REFUSED", "every follower-list spelling carries the "
-                                    "forbidden substring /follow, which no "
-                                    "exemption covers"),
+    # "P L2b" LEFT 2026-11-25: lane build-p26 merged lane B1's child reader of
+    # his follower list over the tracked skeleton of session 2's capture
+    # (COVERED-UNFIRED), so its line goes, as a line whose row left GAP must.
     "P L4": ("ADDRESS", "ABSENT", "the newsletter analytics address is named "
                                   "in readonly.py among those NOT admitted"),
     "P L7": ("ADDRESS", "ABSENT", "creator hub; the blocker's address is "
@@ -241,9 +241,10 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
                            "refused by the member-roster cause; overturning "
                            "that is a decision"),
     "N 100": ("RULING", "", "same tab, same cause, same decision"),
-    "N 102": ("RULING", "", "the Page root is admitted and the People tab is "
-                            "refused by the same member-roster ruling, by the "
-                            "anchor and by nothing else"),
+    # "N 102" LEFT 2026-11-26 (integration 3): the orchestrator's ruling
+    # N-102-MOVES-WITH-J-108 of 2026-11-25 moved it with its sibling `J 108`
+    # to COVERED-UNFIRED on linkedin_company_people_insights, so its line
+    # goes, as a line whose row left GAP must.
     "N 104": ("RULING", "", "the non-search half SHIPPED 2026-09-20; the "
                             "'by searching' half needs the companies vertical, "
                             "which the admission deliberately left out"),
@@ -449,10 +450,8 @@ DECIDED_SINCE_TRIAGE: dict[str, str] = {
              "name-returning reader held to PEOPLE-DATA-MITIGATIONS on lane "
              "G's people-record foundation, and a capture; bucket-3 gate "
              "MEASURE (the foundation landed 2026-09-27; the cell names the capture it waits on)",
-    "N 102": "MEMBER-ROSTERS-AS-BOUNDED-READS: a Page's People tab is a "
-             "roster he can open; an admission and a reader -- admitted in "
-             "lane S's follow-up (2026-09-24), so a capture and a reader "
-             "remain",
+    # "N 102" LEFT 2026-11-26 (integration 3), with its TRIAGE entry: moved
+    # with `J 108` to COVERED-UNFIRED by N-102-MOVES-WITH-J-108.
     "N 104": "D2-SEARCH-VERTICALS-WIDENED: the companies vertical is "
              "admitted in principle, and on the boundary since lane S's "
              "follow-up (2026-09-24, bucket-3 gate MEASURE); it needs a "

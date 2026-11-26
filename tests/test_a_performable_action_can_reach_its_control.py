@@ -156,6 +156,10 @@ _TARGETS: dict[str, object] = {
     # 2026-10-10, lane U: a thread id and a FILE in the declared root, which
     # the autouse fixture above provides.
     "thread_and_file": {"thread": "2-SYNTHETICTHREADAAAA==", "file": "shape-example.png"},
+    # 2026-11-25, lane build-jmn26 (J 31): one job search, as the one query
+    # spelling ``search_alert_switch.query_for`` composes from his keywords
+    # and location. Declared shapes, not his data.
+    "job_search": "keywords=some+role&location=somewhere",
 }
 
 

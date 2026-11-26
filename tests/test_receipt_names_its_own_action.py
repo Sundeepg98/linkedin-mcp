@@ -312,6 +312,10 @@ _LEGITIMATE_SHARED_PLACES: frozenset[frozenset[str]] = frozenset(
         # THE ALERT PAIR, 2026-10-10 (lane B4, J 161), by the same equality
         # edit: one switch, both directions, settled on the same posting.
         frozenset({"set_similar_jobs_alert", "unset_similar_jobs_alert"}),
+        # THE SEARCH-ALERT PAIR, 2026-11-25 (lane build-jmn26, J 31), by the
+        # same equality edit: one switch, both directions, settled on the same
+        # search's fresh render.
+        frozenset({"set_search_job_alert", "unset_search_job_alert"}),
     }
 )
 
@@ -715,8 +719,14 @@ def test_the_action_set_is_the_one_this_file_was_measured_against():
     # ``_VERIFIED_FROM`` rows are one row (a fresh render of the posting).
     # TWENTY-TWO AT THE INTEGRATION MERGE OF LANE B4 ONTO LANE B3 (2026-10-10): both lanes'
     # rows were read against each other's owned phrases with the rest of this file.
-    assert len(writes.PERFORMABLE) == 22, (
-        "writes.PERFORMABLE holds %d actions, not the 22 this file was "
+    # TWENTY-FOUR ON LANE BUILD-JMN26 (2026-11-25): ``set_search_job_alert`` and
+    # its inverse ``unset_search_job_alert``. Their four rows were read: the two
+    # ``_WHERE_TO_LOOK`` values are one place (the switch at the head of the
+    # search, or his job alerts), a sanctioned shared pair above; the two
+    # ``_VERIFIED_FROM`` rows are one row (a fresh render of the search). Neither
+    # holds a phrase another action owns.
+    assert len(writes.PERFORMABLE) == 24, (
+        "writes.PERFORMABLE holds %d actions, not the 24 this file was "
         "measured against: %s. Re-derive the phrase owners in this file for "
         "the new action, then update this count."
         % (len(writes.PERFORMABLE), sorted(writes.PERFORMABLE))

@@ -100,6 +100,10 @@ EXPECTED_TOOLS = (
     # 2026-10-10, lane B1 (lb1-audience): a READ, his follower count and
     # demographics off one admitted page; census P L1, banked at merge.
     "linkedin_audience_analytics",
+    # 2026-10-10, lane B1 (child lb1-followers), merged by lane build-p26 on
+    # 2026-11-25: a READ of his own follower list, each follower a people
+    # record beside its relation; census P L2b.
+    "linkedin_my_followers_list",
 )
 
 
@@ -447,4 +451,15 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # EIGHTY AT INTEGRATION 2'S MERGE OF LANE BUILDS-26, 2026-11-25: its three
     # write-shaped tools beside the seventy-seven, measured off the merged
     # registry, not summed.
-    assert len(_tool_names()) == 80
+    # SIXTY-TWO ON LANE B1'S CHILD BRANCH lb1-followers, 2026-10-10: one READ,
+    # linkedin_my_followers_list (census P L2b), measured off that branch's
+    # registry.
+    # EIGHTY-ONE AT LANE BUILD-P26'S MERGE OF THAT BRANCH, 2026-11-25: the
+    # follower list beside the eighty, measured off the merged registry, not
+    # summed.
+    # EIGHTY-TWO AT LANE BUILD-JMN26 (2026-11-25): the search-alert pair, two
+    # writes, measured off this branch's registry.
+    # EIGHTY-THREE AT INTEGRATION 3'S MERGE OF LANE BUILD-JMN26, 2026-11-26: the
+    # search-alert pair beside the eighty-one, measured off the merged registry,
+    # not summed.
+    assert len(_tool_names()) == 83

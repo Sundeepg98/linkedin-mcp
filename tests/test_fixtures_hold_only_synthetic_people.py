@@ -243,15 +243,6 @@ ACCEPTED = SYNTHETIC_PEOPLE | INVENTED_NAMES | SYNTHETIC_GROUPS
 #: verbatim by that capture's closed word list: "Send" 11 (his profile 9, the
 #: first-degree profile 2), "Show all" 4 (2 and 2), "Premium" 4 (the profile
 #: card in the left rail of the jobs, groups, notifications and post pages).
-#:
-#: AND AS A MEMBER LINK'S WHOLE ARIA-LABEL, since 2026-11-26 (lane
-#: selfprofile26). Session 11's landing of ``/in/me/``
-#: (``tests/fixtures/self_profile/in_me_live11.html``) draws each post's Send
-#: control as an ``<a>`` to the author's profile labelled exactly "Send" -- 9
-#: sites, the one label value the fallback slot read there. The same words,
-#: compared whole and exactly, are skipped in that slot too; a label that only
-#: CONTAINS one is taken whole as before
-#: (:func:`test_THIS_CONTROL_CAN_FAIL_an_interface_label_is_exact`).
 MEMBER_LINK_INTERFACE_WORDS = frozenset({"Premium", "Send", "Show all"})
 
 # ===========================================================================
@@ -489,6 +480,9 @@ class _SlotReader(HTMLParser):
                 for part in parts:
                     self._add(slot, part, line, col)
             elif link is not None and link.member and label not in MEMBER_LINK_INTERFACE_WORDS:
+                # NARROWED like the text slot, the whole label compared exactly:
+                # session 11's skeletons draw LinkedIn's "Send" as a member link's
+                # aria-label, 27 sites (the control below the interface-word one).
                 self._add(MEMBER_LABEL_UNPARSED, label, line, col)
 
         if tag == "img" and self._innermost_link() is not None:
@@ -865,6 +859,25 @@ def test_THIS_CONTROL_CAN_FAIL_an_interface_word_does_not_hide_the_name_after_it
     assert len(violations(PLANTED_PATH, contains, ACCEPTED)) == 1
 
 
+def test_THIS_CONTROL_CAN_FAIL_an_interface_word_as_a_member_links_label_is_skipped_a_name_is_not():
+    """The label slot is narrowed by the SAME closed words as the text slot,
+    compared whole: LinkedIn's "Send" as a member link's whole aria-label is
+    skipped, while a name there -- alone, or after the word -- is convicted.
+
+    MEASURED 2026-11-26 in the live lane's session-11 skeletons
+    (``tests/fixtures/live11/``): 27 sites, every one the label "Send" as the
+    aria-label of a member link on his own profile's activity cards (9 per
+    capture, three captures). Session 2's skeletons drew the same word as such a
+    link's first visible TEXT, which this file already skipped."""
+    skipped = '<a href="%s" aria-label="Send"></a>' % PLANT_MEMBER
+    assert violations(PLANTED_PATH, skipped, ACCEPTED) == []
+    named = '<a href="%s" aria-label="%s"></a>' % (PLANT_MEMBER, PLANTED)
+    found = violations(PLANTED_PATH, named, ACCEPTED)
+    assert len(found) == 1 and "[%s]" % MEMBER_LABEL_UNPARSED in found[0], found
+    after = '<a href="%s" aria-label="Send %s"></a>' % (PLANT_MEMBER, PLANTED)
+    assert len(violations(PLANTED_PATH, after, ACCEPTED)) == 1
+
+
 def test_a_name_on_the_invented_table_is_accepted_by_the_import():
     """``INVENTED_NAMES`` is IMPORTED, and the import is what accepts it.
 
@@ -920,31 +933,6 @@ def test_a_conversation_label_is_read_one_participant_at_a_time():
     assert len(found) == 1 and fingerprint(PLANTED) in found[0], found
     fine = PLANTS[LABEL_CONVERSATION].format(name=declared + " and Kai Example")
     assert violations(PLANTED_PATH, fine, ACCEPTED) == []
-
-
-def test_an_interface_word_as_a_member_links_whole_label_is_skipped():
-    """The narrowing as session 11's landing draws it: an ``<a>`` to a member
-    path whose aria-label is exactly one of the interface words. No
-    candidate -- and the link's text slot is untouched by the skip."""
-    for word in sorted(MEMBER_LINK_INTERFACE_WORDS):
-        planted = '<a href="%s" aria-label="%s"></a>' % (PLANT_MEMBER, word)
-        assert candidates_in(planted) == [], word
-        with_text = '<a href="%s" aria-label="%s"><span>%s</span></a>' % (
-            PLANT_MEMBER, word, SHAPED_NAME
-        )
-        assert [(f.slot, f.value) for f in candidates_in(with_text)] == [
-            (MEMBER_TEXT, SHAPED_NAME)
-        ], word
-
-
-def test_THIS_CONTROL_CAN_FAIL_an_interface_label_is_exact():
-    """The label skip is the WHOLE VALUE and nothing wider: a name in the
-    label, or a label that only contains an interface word, is taken whole
-    and convicted as before."""
-    for label in (PLANTED, "Send " + PLANTED, PLANTED + " Premium", "Show all " + PLANTED):
-        planted = '<a href="%s" aria-label="%s"></a>' % (PLANT_MEMBER, label)
-        found = violations(PLANTED_PATH, planted, ACCEPTED)
-        assert len(found) == 1 and "[%s]" % MEMBER_LABEL_UNPARSED in found[0], (label, found)
 
 
 def test_an_unparsed_label_on_a_member_link_is_taken_whole():

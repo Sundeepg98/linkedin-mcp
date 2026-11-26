@@ -245,9 +245,11 @@ def test_a_row_label_is_a_unique_key():
     # MEASURED: `M C35b`, split from `M C35` under a label no row held.
     # 772 -> 773 AT THE INTEGRATION MERGE OF LANE NP ONTO LANES S AND B5 (2026-10-10), MEASURED:
     # `P O17` and `M C35b` are two rows.
-    assert total == 773, (
+    # 773 -> 774 AT INTEGRATION 3 (2026-11-26), MEASURED: `J 168`, split from
+    # `J 110` under COMPOUND-ROW-SPLITS-ONLY-ON-STATE (J-110-SPLITS-HOME-AND-POSTS).
+    assert total == 774, (
         f"the four slices hold {total} stated rows with distinct labels, and "
-        "the census holds 773. If the census really moved, re-run "
+        "the census holds 774. If the census really moved, re-run "
         "`scripts/count_census_states.py` and re-derive; if it did not, this "
         "index has started merging or dropping labels and every RESOLVES it "
         "prints is resting on a set that moved."

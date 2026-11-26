@@ -619,6 +619,8 @@ is wanted later it is rebuilt under its OWN tool name. No census row was
 edited for this ruling: the row already reads GAP, and this section is where
 the reason is written.
 
+**CORRECTED BY:** `_audit/2026-11-25-rulings-end-of-wave.md` -- the orchestrator's later ruling N-102-MOVES-WITH-J-108 (lane build-jmn26's question 1) moves `N 102` with `J 108` as its sibling: lane build-jmn26 measured both readers on the same capture, so there is no distinct capability to rebuild, and the "stays GAP" outcome above no longer holds; integration 3 moved the row.
+
 RULED: (orchestrator, 2026-11-25) DOM-WAIVER-25-J110 -- "dom.py may hold a 25th
 waived page evaluate, solely J 110's page-root reader read, moved verbatim from
 its branch. It is read-only, passes readonly's JS scanner, and is argued under

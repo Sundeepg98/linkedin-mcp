@@ -147,7 +147,12 @@ SCRIPT = ROOT / "scripts" / "check_gap_rows_on_refused_addresses.py"
 #: 75 ON LANE A'S APPLICATION OF THE RULINGS OF 2026-10-10, MEASURED: `P M9`
 #: (refused on "job-application") left GAP for EXCLUDED-RULED on
 #: CREDENTIAL-ADJACENT-STAYS-REFUSED.
-EXPECTED_GAP_ROWS = 75
+#: 74 ON LANE BUILD-P26 (2026-11-25), MEASURED: `P L2b` left GAP for
+#: COVERED-UNFIRED on its follower-list reader; its cell backticks the list's
+#: second address, `/feed/followers/`, refused on "/follow". The eleven rows
+#: this lane re-pointed only gained notes, none backticking a refused address,
+#: so nothing entered: 75 - 1, and the walk reads 74.
+EXPECTED_GAP_ROWS = 74
 
 
 def _run(*args: str) -> subprocess.CompletedProcess:

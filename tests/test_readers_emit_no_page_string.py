@@ -1371,6 +1371,24 @@ WHAT_WOULD_DRIVE_IT: dict[str, str] = {
         "are states and sentences of counts and the package's words, so a "
         "drive would come back clean."
     ),
+    #: ADDED 2026-11-25 (lane apply-26): the multi-step walker's inverse
+    #: verification -- is a draft for THIS posting in the Draft tab.
+    "apply_walk:read_draft_state": (
+        "WORDS: the job id, and then the tab count. The harness hands its "
+        "synthetic argument, which is no numeric job id, and the reader "
+        "refuses it before any read -- by design, since the id is the "
+        "posting he names and never a page's. Handed a numeric id it is "
+        "_read_tracker_membership's drive for the Draft tab exactly: it keys "
+        "on the tab's count in main's text, which the planted page answers "
+        "with the plant, so no count parses and it returns unknown. Its "
+        "success path runs in a headless browser over "
+        "tests/fixtures/jobs_tracker_row.html: tests/test_apply_walk.py"
+        "::test_the_drafted_posting_reads_as_a_draft_left_behind reads "
+        "draft_left and test_another_posting_reads_as_no_draft_when_the_"
+        "whole_tab_was_read reads no_draft. Its answers are states and "
+        "sentences of counts and the package's words, so a drive would come "
+        "back clean."
+    ),
     #: ADDED 2026-10-10 (lane B5, the groups build): one page of a group's
     #: member list, as people records. Found by the lane's CI run 38047812344.
     "group_roster:read_group_members": (
@@ -1996,6 +2014,10 @@ DRIVEN_TO["dom:read_company_home"] = RETURNS_RECORDS
 # insight cards. A category's label is third-party text, so it leaves as a
 # people_data.Category record -- the declared channel, not the text inventory.
 DRIVEN_TO["company_people_insights:read_people_insights"] = RETURNS_RECORDS
+# HIS FOLLOWER LIST (2026-10-10, lane B1, child lb1-followers): its success
+# path returns one people record per row read, beside the row's relation, so
+# the plant comes back inside a record and nowhere else.
+DRIVEN_TO["followers_list:read_followers_list"] = RETURNS_RECORDS
 
 
 @pytest.mark.parametrize("key", sorted(shipped_drives.DRIVES))
@@ -2185,6 +2207,13 @@ FIXTURE_BREAKS: dict[str, dict[str, str]] = {
     "threads:composer_holds": {
         "fixture": "synthetic/messaging_thread.html",
         "needle": 'id="reply-editor"', "into": 'id="reply-other"',
+    },
+    # 2026-10-10 (lane B1, child lb1-followers): the Following tab drawn
+    # SELECTED, the one premise the follower-list drive's double answers.
+    "followers_list:read_followers_list": {
+        "fixture": "live2/followers.html",
+        "needle": 'aria-selected="false" id="ka0515091"',
+        "into": 'aria-selected="true" id="ka0515091"',
     },
 }
 
