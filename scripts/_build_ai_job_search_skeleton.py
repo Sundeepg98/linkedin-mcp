@@ -1,6 +1,6 @@
 """Build LinkedIn's AI job search into a committed fixture: the structure kept, every value replaced.
 
-Kept as the PROVENANCE of ``tests/fixtures/jobs_search_ai.html``, the fixture
+Kept as the PROVENANCE of ``tests/fixtures/live11/jobs_search_ai.html``, the fixture
 ``linkedin_server.job_search_route`` reads (lane search-fix26, 2026-11-26).
 
 THE INPUT is live session 11's RAW capture of ``/jobs/search-results/?keywords=``
@@ -64,7 +64,7 @@ from typing import Optional
 from urllib.parse import parse_qsl, urlsplit
 
 REPO = Path(__file__).resolve().parent.parent
-DEFAULT_OUT = REPO / "tests" / "fixtures" / "jobs_search_ai.html"
+DEFAULT_OUT = REPO / "tests" / "fixtures" / "live11" / "jobs_search_ai.html"
 
 #: Elements a browser does not draw, dropped whole.
 DROPPED = frozenset({"script", "style", "template", "noscript", "code", "link",

@@ -11,7 +11,7 @@ WHAT IS HELD HERE, and which section holds it:
 
 1. the landing is classified by whole path segments, and the AI landing must
    carry the keywords asked for;
-2. the AI reader, on ``tests/fixtures/jobs_search_ai.html`` -- built by
+2. the AI reader, on ``tests/fixtures/live11/jobs_search_ai.html`` -- built by
    ``scripts/_build_ai_job_search_skeleton.py`` from live session 11's raw
    capture, its structure LinkedIn's and every value replaced. Each neutral
    value sits in the slot of the field it stands for, so a reader bound to the
@@ -48,7 +48,7 @@ from tests.test_tools import SEARCH_CARD, drive  # noqa: F401 - drive is used by
 
 REPO = Path(__file__).resolve().parent.parent
 FIXTURES = REPO / "tests" / "fixtures"
-AI_FIXTURE = FIXTURES / "jobs_search_ai.html"
+AI_FIXTURE = FIXTURES / "live11" / "jobs_search_ai.html"
 CLASSIC_FIXTURE = FIXTURES / "jobs_search.html"
 BUILDER = REPO / "scripts" / "_build_ai_job_search_skeleton.py"
 
@@ -517,6 +517,36 @@ def test_the_fixture_is_ascii_and_carries_no_opaque_id():
     assert "ACoAA" not in text
     ids = set(re.findall(r"job-card-component-ref-(\d+)", text))
     assert ids == set(SYNTHETIC_IDS)
+
+
+def test_the_fixture_passes_the_repositorys_fixture_privacy_patterns():
+    """THE TOP-LEVEL GUARDS' PATTERNS, APPLIED BY NAME, BECAUSE THEIR GLOB DOES
+    NOT REACH ``live11/``.
+
+    ``test_sdui_surfaces_fixture.py`` runs its opaque-id and session-material
+    checks over ``tests/fixtures/*.html`` only. This fixture sits in a
+    per-session directory with its siblings, so the same two checks are run
+    over it here with the patterns IMPORTED -- a second copy of a privacy
+    pattern is a copy free to drift.
+    """
+    from tests.test_sdui_surfaces_fixture import _ALLOWED_OPAQUE_IDS, _OPAQUE_ID_PATTERNS
+
+    html = AI_FIXTURE.read_text(encoding="utf-8")
+    for token in ("li_at", "JSESSIONID", "csrfToken", "Bearer "):
+        assert token not in html, token
+    for label, pattern in _OPAQUE_ID_PATTERNS:
+        for match in pattern.finditer(html):
+            tail = html[match.start() : match.start() + 120]
+            assert _ALLOWED_OPAQUE_IDS.search(tail), (label, tail[:90])
+    # Not vacuous: the patterns do fire on a planted member id of the shape.
+    # ASSEMBLED, NOT WRITTEN, so this file does not itself carry the shape
+    # the repository-wide identity sweep hunts.
+    planted = html + "urn" + ":li:" + "fsd_profile:" + "ACo" + "AA" + "PLANTED" * 4 + "0001"
+    assert any(
+        not _ALLOWED_OPAQUE_IDS.search(planted[m.start() : m.start() + 120])
+        for _label, pattern in _OPAQUE_ID_PATTERNS
+        for m in pattern.finditer(planted)
+    )
 
 
 # ---------------------------------------------------------------------------
