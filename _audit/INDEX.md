@@ -1930,7 +1930,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-11-26 | [2026-11-26-rulings-search-route.md](2026-11-26-rulings-search-route.md) | Orchestrator rulings of 2026-11-26 (01:20 IST): the job search's route, registered at integration 3 |  |
 | 2026-11-26 | [2026-11-26-search-fix26.md](2026-11-26-search-fix26.md) | Lane search-fix26: an empty job search is never silent, and the AI search is a refusing fallback |  |
 | 2026-11-26 | [2026-11-26-selfprofile26.md](2026-11-26-selfprofile26.md) | 2026-11-26 -- lane selfprofile26: his own profile, asserted without the url marker |  |
-| 2026-11-26 | [2026-11-26-session-12-plan.md](2026-11-26-session-12-plan.md) | Live session 12 -- the plan, written offline: 37 loads, 5 searches, 105 rows |  |
+| 2026-11-26 | [2026-11-26-session-12-plan.md](2026-11-26-session-12-plan.md) | Live session 12 -- the plan, written offline: 37 loads, 5 searches, 113 rows |  |
 
 ## 6. What the scan rejected, could not join, or had to repair
 
