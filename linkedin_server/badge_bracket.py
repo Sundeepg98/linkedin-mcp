@@ -27,8 +27,10 @@ THE THREE OUTCOMES, by what the list's own page can cost:
   RECEIVED-INVITATIONS-READ-STAYS-ADMITTED keeps the read admitted with
   whatever it changes in an invitation's seen state as a passive cost,
   recorded and unmeasured. So a badge that fell is THAT cost, MEASURED, and
-  returned beside the list; it never withholds it. (Lane readers-net26's call
-  on the ruling's words; its record, section 4.)
+  returned beside the list; it never withholds it. RULED by the orchestrator,
+  2026-11-26, RECEIVED-BADGE-IS-THE-READ'S-COST: reading the received tab
+  inherently clears the pending badge, on the ``linkedin_notifications``
+  precedent; the sent tab and the following list keep withholding.
 
 ``cost.proven`` says which case a held badge is: a non-zero badge that held
 is a measurement; a zero that held proves nothing about the page and cost
