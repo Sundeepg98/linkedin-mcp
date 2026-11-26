@@ -1158,6 +1158,15 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     #                                records a page load writes its address as
     #                                a SHAPE, never the slug. Census M C101 is
     #                                GAP on that blocker until then.
+    #
+    #                                [AMENDED 2026-11-26, COMMENT ONLY:
+    #                                NAME-BEARING-ADDRESS-REDACTION-SCOPE
+    #                                answered that condition, and this page is
+    #                                admitted since ON ITS DRAWN SLUG SHAPE, by
+    #                                its own line in the LANE ADMIT5-26 block;
+    #                                every spelling off that shape stays
+    #                                refused, and the paragraphs above stand
+    #                                as their authors wrote them.]
     #     /newsletters/              the product root, which is a family
     #     /newsletters/<slug>/analytics/   census ``M C83``, ``P L4``
     #
@@ -2794,6 +2803,41 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # every control: the capture reads shapes and stops at the first one
     # (lane L7's capture C3).
     re.compile(r"^https://www\.linkedin\.com/in/me/opportunities/volunteering/education/?$"),
+    # One newsletter's own page (census M C80, M C82, M C101, N 55, N 56), ON
+    # THE SLUG SHAPE LINKEDIN DRAWS. Ruling NAME-BEARING-ADDRESS-REDACTION-
+    # SCOPE (the orchestrator, 2026-11-25): the redaction "reaches every
+    # TRACKED or CI/console-printed record; gitignored raw state may hold the
+    # address. Newsletter page admitted now on its drawn slug shape; article
+    # page after a capture spells it." It answers the condition the
+    # subscriptions-root entry above records (NAMED-ADDRESS-NEEDS-LOG-
+    # REDACTION, 2026-10-10).
+    #
+    # THE SHAPE, MEASURED, never a slug: on the two gitignored raw captures of
+    # his subscribed-newsletters page in the main checkout, each of the five
+    # distinct newsletter anchors is `/newsletters/<title words>-<19 digits>/`
+    # -- lowercase letters, digits and hyphens, two or three words before the
+    # id, no query, the trailing slash -- read by a disposable scan that
+    # printed lengths and character classes only. So the segment is a CLOSED
+    # class: an alphanumeric first unit, at most a hundred more letters,
+    # digits and hyphens, a hyphen, and exactly nineteen ASCII digits. No
+    # capital, no dot, no underscore and NO PERCENT -- the encoded-dot lesson
+    # the roster lines record -- so no literal or encoded dot segment reaches
+    # a traversal; no query; no sub-path, so a newsletter's analytics (M C83,
+    # P L4, still unmeasured) and every act's spelling stay refused; the id
+    # alone and a title with no id stay refused, because neither is drawn.
+    #
+    # THE SLUG IS NAME-BEARING -- routinely its author's name -- so it never
+    # enters a tracked or CI-printed file: this line is a shape, every test
+    # slug is synthetic, and whatever composes the address takes the slug
+    # from the operator's arguments (PAGE-MAY-VETO-NEVER-SUPPLY; the capture
+    # is one load of a newsletter he names). NOTHING IN THE PACKAGE COMPOSES
+    # IT TODAY, and the first caller owes a refusal that does not echo it:
+    # `assert_read_url`'s own sentence quotes the address it refuses. A
+    # forbidden word in a title (a slug opening on "create", say) still
+    # refuses on its substring: the tuple keeps its full reach. Subscribing,
+    # sharing or reporting is a write with its own row, and the press gate
+    # refuses every control.
+    re.compile(r"^https://www\.linkedin\.com/newsletters/[a-z0-9][a-z0-9-]{0,99}-[0-9]{19}/?$"),
 )
 
 #: Substrings that must never appear in a navigation target, checked before

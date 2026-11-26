@@ -1992,7 +1992,13 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # line, the bare spelling of his "Open to" volunteering page, on
     # VOLUNTEERING-BARE-SPELLING-FIRST (allowlist silence alone, no
     # exemption); every other key byte-identical (17 of 18).
-    "_ALLOWED_URL_PATTERNS": "d79f4b5ec440f640",
+    #
+    # d79f4b5ec440f640 until lane admit5-26's fourth commit: one anchored
+    # line, one newsletter's own page on its drawn slug SHAPE (title words, a
+    # hyphen, nineteen digits; no capital, dot, underscore or percent), on
+    # NAME-BEARING-ADDRESS-REDACTION-SCOPE, no exemption; every other key
+    # byte-identical (17 of 18).
+    "_ALLOWED_URL_PATTERNS": "88fe4122b84e54fd",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     # 419e64a3cd92ec7e until the same REVIEW: commit: a third entry, excusing
     # exactly {"/follow"} for exactly the anchored follower-list address.

@@ -72,9 +72,16 @@ def test_the_newsletters_root_is_admitted_in_both_slash_forms(url):
 #: widening is only narrow if its refusals are stated, and because the obvious
 #: later "fix" is to reach for one of these.
 MUST_STAY_REFUSED = (
-    ("one newsletter's own page -- its SLUG IS ROUTINELY ITS AUTHOR'S NAME",
+    # ONE NEWSLETTER'S OWN PAGE IS ADMITTED SINCE 2026-11-26, ON ITS DRAWN SLUG
+    # SHAPE ONLY -- title words, a hyphen, a nineteen-digit id -- by its own
+    # line (lane admit5-26, NAME-BEARING-ADDRESS-REDACTION-SCOPE;
+    # tests/test_admit5_26_admissions.py). Its slug is still ROUTINELY ITS
+    # AUTHOR'S NAME, which is why the line is a shape. The two spellings below
+    # are off that shape, so they stay refused here as its near misses; the
+    # captured subscriptions page draws neither form.
+    ("one newsletter's page with a short id tail, off the drawn shape",
      f"{BASE}/newsletters/weekly-123456/"),
-    ("the same in the word-slug form the page actually writes",
+    ("a word slug with no id at all, off the drawn shape",
      f"{BASE}/newsletters/a-made-up-letter/"),
     ("the product root, which is a family and not a page",
      f"{BASE}/newsletters/"),

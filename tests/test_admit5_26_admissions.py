@@ -215,6 +215,66 @@ ADMISSIONS = (
                     "../someone-else/", None, "a TRAVERSAL onto a third party"),
         ),
     ),
+    # ------------------------------------------------------------------
+    # ONE NEWSLETTER'S OWN PAGE, on the slug SHAPE LinkedIn draws: title
+    # words, a hyphen, a nineteen-digit id, the trailing slash. The slug is
+    # name-bearing, so the line is a shape and every slug here is synthetic.
+    Admission(
+        key="newsletter-page",
+        ruling="NAME-BEARING-ADDRESS-REDACTION-SCOPE",
+        rows=("M C80", "M C82", "M C101", "N 55", "N 56"),
+        address=f"{B}/newsletters/placeholder-newsletter-1234567890123456789/",
+        excused=frozenset(),
+        # A SECOND TITLE, digits among its words, both slash forms: the line
+        # is a shape, and the blast radius shows it admits a family of titles
+        # and nothing beside them.
+        spellings=(
+            f"{B}/newsletters/placeholder-notes-2-1234567890123456789/",
+            f"{B}/newsletters/placeholder-notes-2-1234567890123456789",
+        ),
+        siblings=(
+            Sibling(f"{B}/newsletters/", None, "the product root, a family"),
+            Sibling(f"{B}/newsletters/placeholder-newsletter/", None,
+                    "a title with no id: the ledger's placeholder, never drawn"),
+            Sibling(f"{B}/newsletters/1234567890123456789/", None,
+                    "the id alone: never drawn"),
+            Sibling(f"{B}/newsletters/placeholder-newsletter-123456789012345678/",
+                    None, "an eighteen-digit id"),
+            Sibling(f"{B}/newsletters/placeholder-newsletter-12345678901234567890/",
+                    None, "a twenty-digit id"),
+            Sibling(f"{B}/newsletters/Placeholder-Newsletter-1234567890123456789/",
+                    None, "capitals: LinkedIn draws the slug lowercased"),
+            Sibling(f"{B}/newsletters/placeholder.newsletter-1234567890123456789/",
+                    None, "a DOT: outside the class, so no dotted segment"),
+            Sibling(f"{B}/newsletters/placeholder%2Enewsletter-1234567890123456789/",
+                    None, "an ENCODED dot: no percent in the class"),
+            Sibling(f"{B}/newsletters/placeholder_newsletter-1234567890123456789/",
+                    None, "an underscore, never drawn"),
+            Sibling(f"{B}/newsletters/-placeholder-1234567890123456789/", None,
+                    "a leading hyphen"),
+            Sibling(f"{B}/newsletters/placeholder-newsletter-"
+                    "١٢٣٤٥٦٧٨٩٠١٢٣٤٥٦٧٨٩/", None,
+                    "Arabic-Indic digits, which a \\d class would admit"),
+            Sibling(f"{B}/newsletters/placeholder-newsletter-1234567890123456789"
+                    "/analytics/", None,
+                    "its analytics (M C83, P L4): a SUB-PATH, still unmeasured"),
+            Sibling(f"{B}/newsletters/placeholder-newsletter-1234567890123456789"
+                    "/?x=1", None, "a QUERY"),
+            Sibling(f"{B}/newsletters/placeholder-newsletter-1234567890123456789"
+                    "/x/../../../in/someone-else/", None,
+                    "a TRAVERSAL onto a third party"),
+            Sibling(f"{B}/newsletters/create/", "/create",
+                    "the creation route, refused twice"),
+            Sibling(f"{B}/newsletters/create-placeholder-1234567890123456789/",
+                    "/create", "a title opening on a forbidden word: the tuple "
+                    "keeps its full reach"),
+            Sibling(f"{B}/mynetwork/network-manager/newsletters/"
+                    "placeholder-newsletter-1234567890123456789/", None,
+                    "a sub-path under the admitted subscriptions root"),
+            Sibling(f"{B}/in/someone-else/recent-activity/newsletters/", None,
+                    "a member's own newsletter tab"),
+        ),
+    ),
 )
 
 KEYS = [a.key for a in ADMISSIONS]
