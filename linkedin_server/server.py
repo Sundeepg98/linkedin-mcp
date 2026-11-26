@@ -8135,7 +8135,9 @@ _SELF_ASSERTION_PARAM = "isSelfProfile"
 #: on 2026-09-02 the first load came back absent and the immediate second came
 #: back true. BOUNDED because a gate that retries without limit turns a
 #: LinkedIn change into a page-load loop against his account, and the rate
-#: discipline this server promises is 3s between loads.
+#: discipline this server promises is 20 s between loads (the ruled pace,
+#: ``config.MIN_NAVIGATION_INTERVAL_S``; 3 s until 2026-11-26) -- so the
+#: second attempt waits that long first.
 _SELF_ASSERTION_ATTEMPTS = 2
 
 

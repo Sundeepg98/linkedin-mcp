@@ -404,9 +404,10 @@ Audited 2026-08-24 across all 105 tracked files:
   package -- its only hits anywhere are a deliberately planted control in a
   test.
 - **Timing is fixed, not humanised.** Every delay is a constant. `import
-  random` appears **0 times**. The 3-second gap between page loads is
-  `MIN_INTERVAL - elapsed`, slept exactly -- machine-regular. Randomised jitter
-  is what a tool imitating a human does; a flat interval is throttling.
+  random` appears **0 times**. The 20-second gap between page loads (the ruled
+  pace; 3 seconds until 2026-11-26) is `MIN_INTERVAL - elapsed`, slept exactly
+  -- machine-regular. Randomised jitter is what a tool imitating a human does;
+  a flat interval is throttling.
 - **The flag itself is bounded by a gate**, not by good intentions:
   `readonly.assert_launch_flags_permitted` runs at every launch and
   `tests/test_launch_boundary.py` fails the build if a third flag appears.
@@ -1048,8 +1049,13 @@ before it was relied on. The read-only allowlist is identical in both modes.
 
 ## Rate discipline
 
-- A flat **3-second minimum between page loads**, enforced globally. Throttling,
-  not disguise: it is deliberately not jittered to resemble anything.
+- A flat **20-second minimum between page loads**, enforced globally: between
+  every two loads the server makes, inside one tool call as well as across
+  calls. It is the ruled pace (`LIVE-BUDGET-40-LOADS`, at least 20 seconds
+  apart), and it was 3 seconds until 2026-11-26. `LINKEDIN_MIN_INTERVAL_S`
+  overrides it for one process. The cost is deliberate: a tool call that
+  loads three pages takes at least 40 seconds. Throttling, not disguise: it is
+  deliberately not jittered to resemble anything.
 - **One page load per tool call.** The only exception is
   `linkedin_my_profile(include_skills=True)`, which loads a second page and
   reports `pages_loaded: 2`.

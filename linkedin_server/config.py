@@ -216,8 +216,21 @@ LAUNCH_ARGS: tuple[str, ...] = (
 #: This is spacing, not disguise: it exists so a burst of tool calls cannot
 #: turn into a burst of page loads, and it is applied uniformly rather than
 #: jittered to look like anything.
+#:
+#: THE DEFAULT IS THE RULED PACE, 20 s, AND WAS 3 s UNTIL 2026-11-26.
+#: ``LIVE-BUDGET-40-LOADS`` (``_audit/RULINGS.md``) puts LinkedIn page loads
+#: at least 20 seconds apart. That 20 lived only in the environment the live
+#: lane sets for itself, so anything that drove this server without it ran at
+#: 3 s: a red team of the apply pipeline measured one tool call's two or three
+#: loads landing about 3 s apart (its attack N-01, 2026-11-26), because the
+#: pipeline's hook spaces call STARTS and this interval is the one layer that
+#: spaces EVERY navigation, inside a call and across tools. The cost is
+#: deliberate: a call that makes three loads now takes at least 40 s.
+#: ``LINKEDIN_MIN_INTERVAL_S`` still overrides it for one process. The test
+#: suite runs the rate slot on a fake clock (``tests/conftest.py``), so no
+#: test sleeps it for real.
 MIN_NAVIGATION_INTERVAL_S = float(
-    os.environ.get("LINKEDIN_MIN_INTERVAL_S", "3.0")
+    os.environ.get("LINKEDIN_MIN_INTERVAL_S", "20.0")
 )
 
 #: A data tool performs ONE page load. There is no scroll loop, no "next

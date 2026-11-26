@@ -61,8 +61,15 @@ async def test_a_navigation_failure_is_raised_not_swallowed():
 
 
 async def test_consecutive_navigations_are_spaced_by_the_configured_floor(
-    monkeypatch,
+    monkeypatch, real_rate_clock,
 ):
+    """ON THE REAL CLOCK: the production sleeper really sleeps.
+
+    Every other test runs the rate slot on the fake clock (conftest's
+    ``rate_clock``), so this one and its control below are what show the
+    sleeper production binds is a real one -- at a quarter of a second, not
+    the ruled 20.
+    """
     monkeypatch.setattr(browser_module, "MIN_NAVIGATION_INTERVAL_S", 0.25)
     browser = LinkedInBrowser()
     page = FakePage()
@@ -79,16 +86,18 @@ async def test_consecutive_navigations_are_spaced_by_the_configured_floor(
     ]
 
 
-async def test_the_first_navigation_is_not_delayed(monkeypatch):
-    """Spacing applies BETWEEN loads. A cold server should not stall on call one."""
-    monkeypatch.setattr(browser_module, "MIN_NAVIGATION_INTERVAL_S", 5.0)
+async def test_the_first_navigation_is_not_delayed(rate_clock):
+    """Spacing applies BETWEEN loads. A cold server should not stall on call one.
+
+    At the shipped interval, the ruled 20 s, a stall here would cost every
+    first call 20 s.
+    """
     browser = LinkedInBrowser()
-    started = time.monotonic()
     await browser.goto(FakePage(), "https://www.linkedin.com/feed/")
-    assert time.monotonic() - started < 1.0
+    assert rate_clock.sleeps == []
 
 
-async def test_the_rate_gate_is_shown_actually_waiting(monkeypatch):
+async def test_the_rate_gate_is_shown_actually_waiting(monkeypatch, real_rate_clock):
     """The spacing check, shown failing: with the floor at zero, no wait happens."""
     monkeypatch.setattr(browser_module, "MIN_NAVIGATION_INTERVAL_S", 0.0)
     browser = LinkedInBrowser()
@@ -99,9 +108,13 @@ async def test_the_rate_gate_is_shown_actually_waiting(monkeypatch):
     assert time.monotonic() - started < 0.2
 
 
-async def test_a_failed_navigation_still_consumes_its_rate_slot(monkeypatch):
-    """A page that errors still hit LinkedIn, so it must still count."""
-    monkeypatch.setattr(browser_module, "MIN_NAVIGATION_INTERVAL_S", 0.25)
+async def test_a_failed_navigation_still_consumes_its_rate_slot(monkeypatch, rate_clock):
+    """A page that errors still hit LinkedIn, so it must still count.
+
+    On the fake clock, at the ruled 20 s: the next load owes the WHOLE
+    interval, asserted exactly and never slept.
+    """
+    monkeypatch.setattr(browser_module, "MIN_NAVIGATION_INTERVAL_S", 20.0)
 
     class ExplodingPage(FakePage):
         async def goto(self, url, **kwargs):
@@ -111,10 +124,9 @@ async def test_a_failed_navigation_still_consumes_its_rate_slot(monkeypatch):
     with pytest.raises(BrowserUnavailableError):
         await browser.goto(ExplodingPage(), "https://www.linkedin.com/feed/")
 
-    started = time.monotonic()
     waited = await browser.wait_for_rate_slot()
-    assert waited > 0, waited
-    assert time.monotonic() - started >= 0.2
+    assert waited == 20.0, waited
+    assert rate_clock.sleeps == [20.0]
 
 
 def test_nothing_in_the_package_schedules_background_work():

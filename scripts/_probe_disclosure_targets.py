@@ -124,8 +124,9 @@ SHAPE_EXPANDED = "[aria-expanded]"
 SHAPE_HASPOPUP = "[aria-haspopup]"
 
 #: The two targets, serial, profile-views first. Loads go through
-#: `BROWSER.goto`, which enforces `config.MIN_NAVIGATION_INTERVAL_S` (3.0s by
-#: default) between navigations, so no extra spacing is added here.
+#: `BROWSER.goto`, which enforces `config.MIN_NAVIGATION_INTERVAL_S` (20 s by
+#: default since 2026-11-26, the ruled pace; 3.0 s before) between
+#: navigations, so no extra spacing is added here.
 TARGETS: tuple[str, ...] = (
     "%s/analytics/profile-views/" % config.BASE_URL,
     "%s/feed/" % config.BASE_URL,
