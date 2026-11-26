@@ -207,6 +207,12 @@ declares its scratch instruments disposable.
 gitignored state, so run in place for a worktree it would edit the main
 checkout's file. The wave-3 lanes that also took 109 renumber at integration 6.
 
+Declared disposable, because none was shown failing on a planted defect:
+this lane's own scratch tools, kept in the lane scratch. Each one answered
+one question for this record: the gate runner (the eleven gates in one
+pass), the batch runner, the capture-queue cell counter (0 of 87 lines
+differ), and the section-10 assembler.
+
 ## 7. Pins, re-derived from the merged tree
 
 `census_completion.py --check` on every tree ends "every headline figure
@@ -298,6 +304,36 @@ file 0 -> 20 tests. The capture queue keeps 87 lines and the ledger 513 rows.
 
 ## 10. The head and its CI
 
-The combined head is this record's own commit, so its sha and its lane CI run
-are added in a record-only commit on top of it, as integration 4 did. Master
-is the orchestrator's to fast-forward; this lane never touches it.
+- THE CERTIFIED HEAD: `8e97e16`, the registration and this record over the
+  fourth merge `ef1439d`, on master `3c656df`. It holds infra26 (a053645,
+  then d6c4a1e) and s12-prep (b16cb67, then c1a0b74), the old-name commit and
+  the registration. `scripts/lane_ci.py push` put it on `ci/integration5`.
+  The pre-push sweep found 0 hits across 1298 blobs and 226 needles, over
+  the 20 commits past master. `origin/master` read `3c656df` at the push.
+- LANE CI: run 45842034895, read by head sha through `lane_ci.py wait`:
+  SUCCESS, 6 of 6 jobs (the shard plan, four pytest shards and the totals job), 5m59s wall.
+- MEASURED on `8e97e16`:
+  - DELIVERED broad 174 / 704 achievable (24.7%), strict 118 (16.8%);
+  - GAP 513;
+  - population 775 rows (71 out of scope);
+  - 91 tools and 137 parameters;
+  - 167 rulings registered.
+- The committed-blob identity test on that head: 1292 passed in 114 s.
+- This section is a record-only commit on top of that head, one file,
+  checked locally: the three derived-view checks and the corpus guards that
+  read this record. The brief asked for ONE lane CI run, so this commit has
+  none of its own; master CI runs on it after the fast-forward. Master is the
+  orchestrator's to fast-forward; this lane never touches it.
+
+## 11. The final message
+
+integrator5: integration 5 CERTIFIED 8e97e16 (lane CI 45842034895, 6 of 6), read by sha. A record-only commit on top carries sections 10 and 11. Record: _audit/2026-11-26-integration-5.md.
+1. Merged, --no-ff, in order: infra26 a053645 (lane CI 45822233556) as aa0c83e; s12-prep b16cb67 (45825093162; b93cebd was amended away) as b873038; infra26 d6c4a1e (45825874447) as 6ccc800; s12-prep c1a0b74 (45827693075) as ef1439d. The last two came from your 19:31 note on disk; your 18:44 and 18:50 messages never reached me.
+2. Census at head: broad 174/704 (24.7%), strict 118/704 (16.8%), GAP 513, population 775 (71 out of scope), 91 tools / 137 params, rulings 158 -> 167.
+3. Pins: every one re-measured, none moved (no row moved). infra26's error-url tally 39 -> 38, its test green. Corpus 298 -> 302 documents.
+4. Rulings: NAVIGATION-CEILING-PER-TOOL-CALL (its 16:45 name is the alias), HELD IN FULL at head (20 of 20 ceiling tests); SEARCH-BOX-TYPEAHEAD-DISCLOSURE; AD-HIDE-AIM-HELD; the five s12 plan answers under new ids; BUDGET-ONE-ACCOUNT-40, with your 18:40 "not a second ledger" quoted. b16cb67 had already folded in the budget line, so I edited nothing for it.
+5. Judgement: (a) the plan named call_ceiling.spend, which infra26 renamed count_load, and so did infra26's own errors.py docstring; both put right in ca41e79. (b) NAVIGATION-CEILING-MADE-TRUE is AMENDED, not SUPERSEDED, because only its "raise to 3" was taken back. (c) N 95 and N 200 cells left to build-net2; N 200 still reads BUILD.
+6. Gates: every per-merge gate green; every scoped test passes. Four steps ran over the 2-min cap on the shared box. One batch first failed 4 tests on process-start errors (0xC0000142) and passed 58 of 58 alone (record section 8).
+7. Pipeline repo: server._read_cards is gone at head (no def; the caller-census deletion test is green). Not edited.
+8. Q1. The 15:36 entry falls between integration 4's 14:27 and my 16:45: "RULE FOR THE NEXT LIVE-LANE BRIEF (session 12): while _state/LIVE_SESSION_ON is up, the user-scope guard DENIES every non-exempt LinkedIn MCP tool". Neither integration registers it; I read it as an order. Register it in integration 6?
+9. Q2. Two people-gate hand-offs are on master: infra26 4.5, "REPLACE raw = s_plus_r and others == 0 ... .keep_raw", and plan section 6, "split as below, every page is judged". I read the plan's lines as the ones the live lane applies, alone. Confirm?
