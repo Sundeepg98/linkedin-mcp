@@ -252,6 +252,13 @@ record, merged from master, moved three more (section 4).
   editor is admitted. Their write rows wait on an admission, not on a
   capture.
 
+**CORRECTED BY:** `_audit/2026-11-25-admit26.md` -- five of those editors are
+admitted since 2026-11-25 (the position, About, contact-info and
+secondary-language forms and one skill's form, each in the spelling LinkedIn
+draws, two of them re-addressed), and every other ADMIT step in the ledger has
+moved to a capture or to a question in section 7; the Open To Work editor has
+no address at all, so its rows wait on Q-OPEN-TO-WORK-EDITOR.
+
 ## 5. The capture queue and the session plans
 
 `_audit/_census/capture-queue.tsv`, one line per capture surface, 103 lines.
@@ -616,6 +623,254 @@ capture draws slugs only: 10 result Pages, 0 numeric. The question: does
 prose returned at runtime), let a search return each organisation it found as
 its name and its Page link, held to the ruling `PEOPLE-DATA-MITIGATIONS` --
 or does the row wait on a page that draws numeric ids?
+
+### Q-EDITOR-TYPEAHEAD -- typing into his own editor's autocomplete field, saving nothing
+
+Added 2026-11-25 by lane build-p26 (`_audit/2026-11-25-build-p26.md`, section
+4). Rows (3): `P A11`, `P A13`, `P A17`. Each is an intro-editor field drawn as
+an input carrying `aria-autocomplete="list"` and no list relation; LinkedIn
+draws the entry list only after typing, and the editor captures of sessions 1,
+4 and 7 hold 0 `role=listbox` and 0 `role=option`. The one measurement is lane
+B1's capture C-B1a (its section F.1; queue line `C-B1a`): type three
+characters into one field, keep a skeleton of the list, then Escape and the
+dialog's Dismiss, never Save, and re-read the stored value. Ruling 1 reaches
+"a SEARCH box, never a composer or an editor", and the press gate refuses
+typing on that page as `composer_or_editor`. The question: may a capture type
+into his own editor's autocomplete field when nothing is saved?
+
+### Q-ABSENT-ON-HIS-ACCOUNT -- three things no live reading of his account draws
+
+Added 2026-11-25 by lane build-p26 (`_audit/2026-11-25-build-p26.md`, section
+4). Rows (3): `P A14` (postal code), `P A15` (location display choice), `P K8`
+(Top Voice badge). Each was read on a live capture of his own account and read
+zero: session 7's intro editor holds eleven controls, every one named, none a
+postal code or a location display choice; session 8's first render of his
+profile, whose top card is where a badge is drawn, holds 0 "Top Voice" in its
+text, its labels, its attributes and its scripts. The grounds: `P A14`'s cell,
+"if C1 finds none, this row's candidate state is MEASURED-ABSENT for this
+account"; `P K8`'s cell, "the next holder of the signed-in profile can settle
+it in one re-read"; the state's definition, "no tool, and a LIVE READING of
+the surface says LinkedIn does not draw the thing". A build lane moves rows
+only to COVERED-UNFIRED. The question, lane B1's first of 2026-10-10: is each
+of the three MEASURED-ABSENT for this account?
+
+### Q-OWN-PROFILE-SCROLL -- one bounded scroll of his own profile
+
+Added 2026-11-25 by lane build-p26 (`_audit/2026-11-25-build-p26.md`, section
+4). Row: `P D26` (the profile-strength meter). Session 8's first render of
+`/in/me/` holds 0 "Profile strength", "All-Star", "Intermediate" and
+"Suggested for you" anywhere in the document, and draws no section heading
+below Activity. No sub-page of his profile draws a meter, so the details-page
+route of `NAMED-PROFILE-DETAIL-PAGES` reaches nothing here. The scroll ruling's
+reopener 3: "A surface exists that has no `start` equivalent at all. Then
+scroll is not an efficiency but the only route, and this ruling does not cover
+it." The question: one bounded scroll of his own `/in/me/` inside a capture
+that commits nothing -- or is the first render enough to put `P D26` on
+Q-ABSENT-ON-HIS-ACCOUNT beside `P K8`?
+
+### Q-NOTIFICATION-KEY -- which notification card a delete is aimed at
+
+Added 2026-11-25 by lane build-jmn26 (`_audit/2026-11-25-build-jmn26.md`,
+section 4). Row: `M C97`. Every notification card draws its own
+`Delete notification` item -- 9 of 9 cards on live session 5's capture and 10
+of 10 on session 10's, by keyed shape -- but no card carries a key a caller
+could pass back: the card and its menu nodes hold `id`, `class`, `type`, a
+position (`data-nt-card-index`) and a view name, and `linkedin_notifications`
+returns a card's text, its relative time and its link, a link shared by every
+card of one kind. A target chosen by position is the page supplying it
+(`PAGE-MAY-VETO-NEVER-SUPPLY`), and one matched on a card's words is a write
+aimed by text. The question: may a caller name one notification by what
+`linkedin_notifications` returned for it, the page vetoing unless exactly one
+card matches -- or does the row wait on a key LinkedIn draws?
+
+### Q-ONE-SHOT-FEEDBACK -- a press with no inverse that tunes his recommendations
+
+Added 2026-11-25 by lane build-jmn26 (`_audit/2026-11-25-build-jmn26.md`,
+section 5.2). Row: `J 163`. The control is drawn on real markup: live session
+8's recommended jobs draws, in `div[data-view-name="jobs-search-list-feedback"]`,
+the sentence `Your feedback helps us improve job recommendations.` and two
+buttons whose texts are `Are you finding what you<U+2019>re looking for? No`
+and `... Yes`, by keyed shape. OUTSIDE-THE-PRODUCT-PURPOSE keeps the row
+because it tunes his recommendations. But the press is ONE-SHOT: no inverse
+exists to build, what it leaves is unmeasured, and so nothing on the page can
+verify it. HIS-OWN-CURATION-NOT-OUTWARD builds curation with its inverse and
+proves it in one session, which this act cannot meet, and
+OUTWARD-ACTS-NEED-THE-OPERATOR sends an irreversible act to him. The
+question: is it built as his own curation whose first press, at his order,
+captures what LinkedIn leaves (an undo, if one is drawn, becoming its
+inverse) -- or as a one-shot write fired only on his order and verified by
+nothing but its receipt -- or held until he asks for it?
+
+### Q-RECOMMENDATIONS-DETAIL-PAGE -- his own recommendations detail page, on a named spelling
+
+Added 2026-11-25 by lane admit26 (`_audit/2026-11-25-admit26.md`, section 5).
+Rows: `N 121`, `N 122`, `N 123`, `N 125`, `N 126`, `N 127`, `N 128` and
+`P F5` to `P F9`, twelve writes on his recommendations. Lane B1 asked this
+first (`_audit/2026-10-10-lane-b1-profile-build.md`, section K, question 3:
+"`F1`: admit `/in/me/details/recommendations/` (the `/in/me/` form only)? The
+first render never draws the section (A.2)"), and no answer is on disk. The
+spelling is NAMED, never drawn: session 8's raw first render of `/in/me/`
+holds 0 "Recommendations" as text or label, no capture draws the detail page,
+and the ruling `SCROLL-NOT-SANCTIONED` closes the route that would render the
+section. The family is measured (`/in/me/details/` for skills, experience,
+education and interests), and the interests page is this repository's
+precedent for a NAMED detail page admitted and then measured to redirect, its
+line kept because it widens nothing. The question: admit
+`/in/me/details/recommendations/` by its own anchored `/in/me/` line on the
+second clause of `READ-PAST-AN-ACT-SUBSTRING`, on that NAMED spelling, the
+capture recording the landing -- or do the rows wait on a capture that draws
+it, which no sanctioned route can take?
+
+### Q-OPEN-TO-WORK-EDITOR -- an editor whose only entry is a press named save
+
+Added 2026-11-25 by lane admit26 (record, section 5). Rows: `P B6` and `P I2`
+to `P I11`, eleven writes on the Open To Work card. The editor has NO ADDRESS:
+`_audit/_slice-otw-census.md`, C3, finds its entry is a button
+(`aria-label="Edit"`, no href) whose action is two `SetState`s and a
+`ServerRequest` named `saveAndFetchNextStepRequest`, `isEditFlow = true` --
+"There is no url anywhere in that action." The ledger's
+`/in/me/opportunities/job-opportunities/edit/` is an inference, refused on
+`/edit/`, and admitting it would buy nothing. The ruling
+`CAPTURE-PRESS-UNDER-PROBE-RULE` lets a capture press a disclosure, "never a
+composer or an editor", and the census owes "one capture of the modal taken
+with him watching" (`_audit/2026-09-05-profile-modals.md`, section 7). The
+question: may a capture press that Edit button -- whose request's name says
+save -- with him watching, the modal read and closed and nothing chosen; or
+do the eleven rows stay GAP on an editor no route can open?
+
+### Q-VOLUNTEERING-PROFILE-ID -- a page drawn only with his own member id
+
+Added 2026-11-25 by lane admit26 (record, section 5). Row: `P D24`. LinkedIn
+draws his "Open to volunteering" page only as
+`/in/<me>/opportunities/volunteering/education/?profileId=<his own profile
+id>` (both tracked top-card fixtures, the id replaced, and the raw capture);
+the services page beside it is drawn bare and was admitted (record, section
+3.2). The bare volunteering spelling is unmeasured, and a line for the drawn
+one would carry his own member id, which no tracked file may hold, or a
+pattern admitting any id. `PAGE-MAY-VETO-NEVER-SUPPLY` says an id comes from a
+tool's arguments; `OTHER-MEMBER-IDS-AS-READS` reaches another member's id in a
+search facet, not his own in an address. The question: admit the drawn shape
+with `profileId` as an id-shaped value from the tool's arguments (his own id,
+never stored), or the bare spelling nothing draws with the capture recording
+the landing -- or neither?
+
+### Q-VERIFICATIONS-PAGE -- a page the credential words refuse by name
+
+Added 2026-11-25 by lane admit26 (record, section 5). Rows: `P K1`, `P K7`.
+`/mypreferences/d/verifications` is refused on "verification", one of the six
+words the 2026-09-03 block added beside "password" and "two-factor";
+`tests/test_the_second_gate_covers_the_class.py` lists this exact address as
+that word's class member, beside `/mypreferences/d/two-step-verification`. So
+the substring's recorded ground is a credential-and-security class, not an
+act, and `READ-PAST-AN-ACT-SUBSTRING` does not reach "a credential, recovery,
+session or security surface". The page lists his identity and workplace
+verifications (`P K1`'s cell). The question: is his Verifications settings
+page a security surface that stays refused, or a page of his own account to
+admit by name, one exemption excusing "verification" for that address alone?
+
+### Q-NAME-BEARING-ADDRESS-REDACTION -- which load records the redaction reaches
+
+Added 2026-11-25 by lane admit26 (record, section 5). Rows: `M C80`, `M C82`,
+`M C101`, `N 55`, `N 56` (a newsletter's own page) and `M C79`, `N 41`, `N 42`
+(a member's article page). The ruling `NAMED-ADDRESS-NEEDS-LOG-REDACTION`
+admits a page whose address carries a person's or a publication's name only
+after every log line that records a page load writes that route as a shape.
+Lane A measured that the server's own navigation logs no address -- no logger
+call in `browser.py` takes the url -- and that the load records which do carry
+addresses are the probe and capture scripts' own, the live lane's harness
+among them; it left "which of those lines the ruling reaches" to the
+orchestrator (its record, section 8, item 4), and no answer is on disk. The
+newsletter address is drawn as a slug (`/newsletters/<slug>/` in the
+drawn-route corpus); the article address is drawn on no capture, so whether
+its slug carries the author's name is unmeasured. The question: does the
+redaction reach the probe and capture scripts' load records, or only the
+server's own, which already log no address? If only the server's, the
+newsletter page can be admitted on its drawn shape now, and the article page
+after a capture spells it.
+
+### Q-AI-GENERATING-LOADS -- a load that starts a generation in LinkedIn's AI
+
+Added 2026-11-25 by lane admit26 (record, section 5). Rows: `J 116` to
+`J 120`, `J 126` and `J 78` (a posting's guide overlay: Show match details,
+Help me stand out, Create cover letter) and `P S2` (the Enhance profile
+overlay). The guide overlay's anchors are drawn on the tracked job-detail
+fixtures, and the side table records that "Its query is a prompt and its href
+carries a conversation id, so opening it starts a generation rather than a
+read" (`_audit/_census/jobs-directions.tsv`, `J 116`) -- a GET that changes
+state, which `READ-PAST-AN-ACT-SUBSTRING` does not reach, named so by lane A
+(its record, 2.6). `/in/<me>/overlay/enhance/` is drawn too (the drawn-route
+corpus), carries no prompt and no conversation id, and has never been opened:
+whether its first render starts a generation is unmeasured. `J 116`'s flag half
+is already derivable from `linkedin_premium_job_collection(0)`. The question:
+is a load that starts a generation in LinkedIn's AI products, on his own
+account and toward no person, a GET that changes state (refused), or a passive
+cost of a read (admitted, the generation recorded on the row)? And does the
+answer reach the enhance overlay on its unmeasured first render?
+
+### Q-AI-COACH-QUESTION -- a typed question to an AI product
+
+Added 2026-11-25 by lane admit26 (record, section 5). Row: `J 155` (ask
+LinkedIn Learning's AI coach and read its answers). `/learning/chatbot/` is
+drawn in the Learning nav (the completeness table); lane A left it out because
+"the read half exists only after a typed question, a write" (its record, 2.6).
+A question typed to an AI product reaches no person, so it is no outward act
+in `OUTWARD-ACTS-NEED-THE-OPERATOR`'s sense, and no build-class ruling names
+it. The question: is asking the coach a question a write this server builds
+behind the grant -- the page then admitted for its capture -- or does the row
+stay GAP, or leave by the ruling `OUTSIDE-THE-PRODUCT-PURPOSE`?
+
+### Q-COURSE-VIDEO-PROGRESS -- a hold that was answered and never registered
+
+Added 2026-11-25 by lane admit26 (record, section 5). Row: `J 153` (watch a
+LinkedIn Learning course video). The shape `/learning/<digits>/<digits>/` is
+drawn (the drawn-route corpus). Lane A did not admit it, on its own inference
+that "playing a course records progress in his own Learning history, a state
+change" (its record, 2.6), and the orchestrator's answer of 2026-10-10 kept it
+"as lane A left them: refused on its stated inference"
+(`_audit/2026-10-10-rulings-lane-a-questions.md`, Q4), registering no ruling.
+`D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING` leaves such a row GAP until a
+decision is registered. The question: register the hold -- a course video
+stays refused as a GET that changes state, the row EXCLUDED-RULED with a
+reopener -- or rule that progress recorded in his own history is a passive
+cost by `D5-PASSIVE-COST-IS-NOT-A-ROW`, admitting the drawn shape by its own
+line?
+
+### Q-AD-LIBRARY-PURPOSE -- a purpose doubt that was answered and never registered
+
+Added 2026-11-25 by lane admit26 (record, section 5). Row: `J 159` (search
+LinkedIn's Ad Library for the ads a company runs). `/ad-library/search/` is
+drawn on a company Page as 'View ad library' (the completeness table). Lane A
+did not admit it, class (e), "purpose doubtful", reopening "on the
+orchestrator's word that it serves the product" (its record, 2.6), and the
+orchestrator's answer of 2026-10-10 (Q4) kept it as lane A left it,
+registering no ruling. The row's own cell reads "Company research reachable
+from a job, beside rows 106-114". The question: does company research from a
+job serve his search -- then `/ad-library/search/?companyIds=<digits>` is
+admitted by its own exact line -- or is the row EXCLUDED-RULED by
+`OUTSIDE-THE-PRODUCT-PURPOSE`, reopened when he asks?
+
+### Q-RESUME-BUILDER -- a builder that may autosave, at an address nothing draws
+
+Added 2026-11-25 by lane admit26 (record, section 5). Row: `P M11` (LinkedIn's
+Resume Builder, read and write). Lane A left `/resume-builder/` refused on two
+grounds (its record, 2.6): the address is INFERRED -- nothing draws it; it comes
+from a script's table -- and "a builder is a composer-class surface that may
+autosave" (lane L1's ground, argued, not measured). The ruling
+`ARTICLE-COMPOSER-CAPTURE` answered that question for the article composer
+alone: one load, nothing typed, an empty draft his, private and deletable,
+recorded if it appears. The question: does its reasoning extend to the resume
+builder, so that once a capture finds where LinkedIn draws it (the
+application-settings page, admitted, is the likeliest), one load of it may be
+taken -- or does it stay refused as a surface that may autosave?
+
+### Q-SELF-PROFILE-QUERY-VARIANT -- whether his own profile's self-profile spelling is a read address
+
+Owed to the orchestrator since integration 3 (2026-11-26), by its ruling LINKS-ARE-NOT-DISCLOSURES of
+2026-11-25: the `in-me-profile` capture's link presses for `P D25` ('Add section', a top-card link to his own
+profile carrying `?isSelfProfile=true`) and `P A25` ('Contact info', the top card's link to his contact-info
+overlay) are vetoed, because a link is not a disclosure and a page may veto a target, never supply one. The
+question both rows wait on: is the self-profile query variant of his own profile address admissible as a READ
+address in its own right? Rows: `P D25`, `P A25`.
 
 ## 8. Preconditions and purposes
 
@@ -1051,6 +1306,8 @@ rulings 1 and 3 permit a capture to make, and the queue is renumbered to start
 at session 9.
 
 **CORRECTED BY:** `_audit/2026-10-10-lane-b2-network-build.md` -- read against the two skeletons, the feed menu cannot be aimed at an item he names and the search page's first render draws no School, Industry or Keywords control, so `N 37`, `N 43`, `N 51`, `N 153`, `N 154`, `N 200`, `N 88`, `N 89` and `N 93` return to CAPTURE and `N 80` is discharged under D6; and section 5's "unsubscribe" on the newsletter list was counted inside the fixture's header comment, so `N 56` goes to ADMIT.
+
+**CORRECTED BY:** `_audit/2026-11-25-build-p26.md` -- read against their captures, the eleven profile rows this ledger put on BUILD (`P A11`, `P A13`, `P A17` on `live4/editor.html`, `P A14`, `P A15` on `live7/editor.html`, `P A25` on the planned `live1/contact_info.html`, `P D25`, `P D26`, `P F1`, `P K8` and `P S8` on session 8's skeletons) have nothing to build on; they go to three questions (`Q-EDITOR-TYPEAHEAD`, `Q-ABSENT-ON-HIS-ACCOUNT`, `Q-OWN-PROFILE-SCROLL`), one admission and two captures, and `P L2b` moves to COVERED-UNFIRED on the reader built for it.
 
 THE THREAD FOOTER, as the live lane re-read it at 15:32. Its session-8
 capture `lk_thread` is the NEW-MESSAGE COMPOSER page, not a named thread's

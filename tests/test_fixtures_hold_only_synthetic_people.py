@@ -479,7 +479,10 @@ class _SlotReader(HTMLParser):
                 )
                 for part in parts:
                     self._add(slot, part, line, col)
-            elif link is not None and link.member:
+            elif link is not None and link.member and label not in MEMBER_LINK_INTERFACE_WORDS:
+                # NARROWED like the text slot, the whole label compared exactly:
+                # session 11's skeletons draw LinkedIn's "Send" as a member link's
+                # aria-label, 27 sites (the control below the interface-word one).
                 self._add(MEMBER_LABEL_UNPARSED, label, line, col)
 
         if tag == "img" and self._innermost_link() is not None:
@@ -854,6 +857,25 @@ def test_THIS_CONTROL_CAN_FAIL_an_interface_word_does_not_hide_the_name_after_it
     assert len(found) == 1 and "[%s]" % MEMBER_TEXT in found[0], found
     contains = '<a href="/in/xxxx/"><span>Premium %s</span></a>' % PLANTED
     assert len(violations(PLANTED_PATH, contains, ACCEPTED)) == 1
+
+
+def test_THIS_CONTROL_CAN_FAIL_an_interface_word_as_a_member_links_label_is_skipped_a_name_is_not():
+    """The label slot is narrowed by the SAME closed words as the text slot,
+    compared whole: LinkedIn's "Send" as a member link's whole aria-label is
+    skipped, while a name there -- alone, or after the word -- is convicted.
+
+    MEASURED 2026-11-26 in the live lane's session-11 skeletons
+    (``tests/fixtures/live11/``): 27 sites, every one the label "Send" as the
+    aria-label of a member link on his own profile's activity cards (9 per
+    capture, three captures). Session 2's skeletons drew the same word as such a
+    link's first visible TEXT, which this file already skipped."""
+    skipped = '<a href="%s" aria-label="Send"></a>' % PLANT_MEMBER
+    assert violations(PLANTED_PATH, skipped, ACCEPTED) == []
+    named = '<a href="%s" aria-label="%s"></a>' % (PLANT_MEMBER, PLANTED)
+    found = violations(PLANTED_PATH, named, ACCEPTED)
+    assert len(found) == 1 and "[%s]" % MEMBER_LABEL_UNPARSED in found[0], found
+    after = '<a href="%s" aria-label="Send %s"></a>' % (PLANT_MEMBER, PLANTED)
+    assert len(violations(PLANTED_PATH, after, ACCEPTED)) == 1
 
 
 def test_a_name_on_the_invented_table_is_accepted_by_the_import():

@@ -144,6 +144,12 @@ SYNTHETIC_RAW_TARGETS: dict[str, Any] = {
         "thread": "2-SYNTHETICHARNESSTHREAD==",
         "file": "example-harness-file.png",
     },
+    # ONE JOB SEARCH (the search-alert pair, lane build-jmn26, 2026-11-25), as
+    # the one query spelling ``search_alert_switch.query_for`` composes, which
+    # ``_target_for`` re-derives and refuses in any other spelling. Missing,
+    # the KeyError stopped every writes reader being driven for ANY spec --
+    # measured on that lane's first local run, as the rows above record.
+    "job_search": "keywords=example+harness+search&location=example+harness+place",
 }
 
 #: The harness's own upload root, made once per process on first use and

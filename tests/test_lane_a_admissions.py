@@ -114,9 +114,12 @@ ADMISSIONS = (
                     "/invite", "the other invitation surface"),
             Sibling(f"{B}/groups/12345678/invite/", "/invite",
                     "inviting somebody to a group"),
-            Sibling(f"{B}/mynetwork/", None,
-                    "the hub, refused on its badge cost (R1) and by nothing "
-                    "else -- the allowlist alone"),
+            # The hub, /mynetwork/, stood here until 2026-11-25, "refused on
+            # its badge cost (R1) and by nothing else"; lane admit26 admitted
+            # it (tests/test_admit26_admissions.py). Its discovery lists did
+            # not travel with it.
+            Sibling(f"{B}/mynetwork/discovery-see-all/", None,
+                    "the hub's full suggestion lists -- the allowlist alone"),
         ),
     ),
     Admission(
@@ -193,7 +196,9 @@ ADMISSIONS = (
                     "a SUB-PATH naming the write"),
             Sibling(f"{B}/company/placeholder-org/unfollow/", "/unfollow",
                     "unfollowing a Page"),
-            Sibling(f"{B}/mypreferences/d/categories/privacy",
+            # categories/privacy stood here until 2026-11-25, when lane admit26
+            # admitted it by name; another category page stands in.
+            Sibling(f"{B}/mypreferences/d/categories/notifications",
                     "/mypreferences/d/categories/", "a category page"),
             Sibling(f"{B}/mypreferences/d/settings/show-profile-photos",
                     "/settings/", "a sibling settings page"),
@@ -215,8 +220,10 @@ ADMISSIONS = (
             Sibling(f"{B}/mypreferences/d/categories/sign-in-and-security",
                     "/mypreferences/d/categories/",
                     "the security category -- a surface the ruling excludes"),
-            Sibling(f"{B}/mypreferences/d/categories/privacy",
-                    "/mypreferences/d/categories/", "the privacy category"),
+            # The privacy category stood here until 2026-11-25, when lane
+            # admit26 admitted it by name in its own commit.
+            Sibling(f"{B}/mypreferences/d/categories/notifications",
+                    "/mypreferences/d/categories/", "the notifications category"),
             Sibling(f"{B}/mypreferences/d/categories/ads?x=1",
                     "/mypreferences/d/categories/", "a QUERY"),
             Sibling(f"{B}/mypreferences/d/categories/ads/off",

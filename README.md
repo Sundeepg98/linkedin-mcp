@@ -3,8 +3,19 @@
 An MCP server that shows you your own LinkedIn account data as structured tool
 results instead of pages you have to click through.
 
-**Eighty tools ship. Fifty-five read. Twenty-five write. Three of those
+**Eighty-three tools ship. Fifty-six read. Twenty-seven write. Three of those
 are write-shaped and unable to act.**
+(It read "Eighty-one tools ship. Fifty-six read. Twenty-five write" until
+integration 3's merge of lane build-jmn26, 2026-11-26:
+`linkedin_set_search_job_alert` and its inverse `linkedin_unset_search_job_alert`
+(census `J 31`), one job search's own alert switch, on and off. Lane
+build-jmn26's branch read "Eighty-two tools ship. Fifty-five read.
+Twenty-seven write".)
+(It read "Eighty tools ship. Fifty-five read. Twenty-five write" until lane
+build-p26 merged lane B1's follower list, 2026-11-25:
+`linkedin_my_followers_list` reads your own follower list, one admitted page
+and no press, each follower a people record beside whether you follow them
+back (census `P L2b`).)
 (It read "Seventy-seven tools ship. Fifty-five read. Twenty-two write. None is
 write-shaped and unable to act" until integration 2's merge of lane builds-26,
 2026-11-25: `linkedin_set_tracker_stage`, `linkedin_endorse_skill` and
@@ -1099,7 +1110,7 @@ linkedin_server/
   cdp_bridge.py              the recovery path: attach to a running Chrome
   dom.py                     the read-only harvesters and the control readers
   shape.py                   pure parsers and the result envelope
-  server.py                  the eighty tools
+  server.py                  the eighty-three tools
   errors.py
 tests/                       1393 tests, no network, no account
   fixtures/                  frozen LinkedIn markup, scrubbed

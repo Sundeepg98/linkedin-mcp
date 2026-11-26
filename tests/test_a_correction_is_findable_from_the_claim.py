@@ -289,6 +289,42 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "in the ledger record does not hold while leaving the record unmarked."
     ),
 
+    # 2026-11-25, lane build-jmn26. TABLE-ROW PROXIMITY, read and not inferred
+    # from the filenames: every line citing the lane's record was listed with
+    # the matched words in its two-line window, and none sits in the lane's own
+    # note (a scan of each note's text alone: zero hits).
+    ("jobs.md", "2026-11-25-build-jmn26.md"): (
+        "A ROW'S NEXT STEP RECORDED, NOT A CORRECTION. Rows `19`, `31`, `53`, "
+        "`55`, `56`, `84`, `108`, `110`, `115` and `163` each gained one dated note "
+        "citing the lane's record -- what the row's capture draws, its "
+        "re-pointed step, and for `31` and `108` its move to COVERED-UNFIRED "
+        "-- and none says "
+        "anything in that record does not hold. Every matched word is older "
+        "text in a neighbouring row: `17`'s 'The impossibility half above is "
+        "false' and `18`'s 'PRICED ON THE WRONG ADDRESS' within two lines of "
+        "`19`, and `112`'s cell two lines below `110`. **WHAT WOULD MAKE THIS "
+        "ENTRY WRONG:** a jobs row saying something in the lane's record does "
+        "not hold while leaving the record unmarked."
+    ),
+    ("messaging-and-content.md", "2026-11-25-build-jmn26.md"): (
+        "A ROW'S NEXT STEP RECORDED, NOT A CORRECTION. Rows `C29` and `C97` "
+        "each gained one dated note citing the lane's record -- the capture "
+        "each still needs and its re-pointed step -- and correct nothing in "
+        "it. The matched words are row `C27`'s older text ('correction', "
+        "'stale'), two lines above `C29`; `C97`'s window holds none. **WHAT "
+        "WOULD MAKE THIS ENTRY WRONG:** a messaging row saying something in the "
+        "lane's record does not hold while leaving the record unmarked."
+    ),
+    ("network.md", "2026-11-25-build-jmn26.md"): (
+        "A ROW'S NEXT STEP RECORDED, NOT A CORRECTION. Row `102` gained one "
+        "dated note citing the lane's record -- that its capability is `J "
+        "108`'s, held GAP by the orchestrator's ruling, its step SIBLING -- and "
+        "corrects nothing in it. The matched words are older text in the two "
+        "rows above it: `100`'s 'correction' and `101`'s 'stale'. **WHAT WOULD "
+        "MAKE THIS ENTRY WRONG:** a network row saying something in the lane's "
+        "record does not hold while leaving the record unmarked."
+    ),
+
     # 2026-10-10, lane B1. READ, not inferred from the filenames: found by the
     # lane's CI run 38047037803 on row A13's line, and measured over every line
     # citing the record -- no correction word stands in lane B1's own text.
@@ -305,6 +341,28 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "place. **WHAT WOULD MAKE THIS ENTRY WRONG:** a lane B1 paragraph "
         "saying an earlier paragraph of its row was untrue while leaving it "
         "unmarked, which would need its own CORRECTS: / CORRECTED BY: pair."
+    ),
+    # 2026-11-25, lane build-p26. READ, not inferred from the filenames: every
+    # one of the twelve lines citing the lane's record, and the DELTA line, was
+    # listed with the guard's own vocabulary and window, and each match placed
+    # in the line's older text or in this lane's note; none is in a note.
+    ("profile.md", "2026-11-25-build-p26.md"): (
+        "A LEDGER NOTE AND ONE MOVE, NOT A CORRECTION. Rows A11, A13, A14, "
+        "A15, A17, A25, D25, D26, F1, K8 and S8 each gained one note -- the "
+        "step their ledger line moved to off BUILD, and the re-measured reason "
+        "-- and L2b gained its COVERED-UNFIRED paragraph; each cites this "
+        "record, and none says an earlier paragraph of its row was untrue. "
+        "Every matched word is older text in a cell or a neighbour: 'THE "
+        "BLOCKER'S PREMISE IS NOW WRONG' (A14, A15, from 2026-09-19, inside "
+        "the windows of A13, A14, A15 and A17), D25's correction of 2026-09-19 "
+        "('CORRECTED ... WITHIN THE HOUR', its overturned and superseded "
+        "reading, D27's 'false' beside it), K8's '\"NO REASON\" IS FALSE' with "
+        "K10's 'false', and L3's 'false' beside L2b. The windows of A11, A25, "
+        "F1, S8 and the DELTA paragraph hold none. **WHAT WOULD MAKE THIS "
+        "ENTRY WRONG:** a note of this lane saying an earlier paragraph of its "
+        "row was untrue while leaving it unmarked; the BUILD steps this lane "
+        "moved are lane K's ledger's, and that correction is declared by a "
+        "CORRECTS: / CORRECTED BY: pair between the two records."
     ),
 
     # 2026-10-10, lane K. THE CLASS RULINGS OF 2026-09-28 CITE THE UPLOAD

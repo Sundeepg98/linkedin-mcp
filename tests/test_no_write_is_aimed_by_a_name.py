@@ -173,6 +173,15 @@ TARGET_KIND_CLASS: dict[str, tuple[str, str]] = {
         "id",
         "withdraw_from_group: a numeric group id the caller supplies, 1 to 20 ASCII digits",
     ),
+    # 2026-11-25, lane build-jmn26 (census J 31): the search-alert pair. The
+    # target is wholly his own words -- keywords and a location, composed by
+    # search_alert_switch.query_for into one query -- and it addresses his own
+    # alert on that search; it chooses no person.
+    "job_search": (
+        "own_text",
+        "set_search_job_alert / unset_search_job_alert: his own keywords and "
+        "location, composed into one search's query, which picks no person",
+    ),
     # LANE L5'S TWO, classified at its merge of master 52b55b6 (2026-09-27).
     # The parser is writes._target_for -> named_profile.parse_profile_target.
     "profile": (
@@ -274,6 +283,8 @@ KNOWN_WRITE_TOOLS = frozenset(
         "linkedin_mark_company_interest",
         "linkedin_set_similar_jobs_alert",
         "linkedin_unset_similar_jobs_alert",
+        "linkedin_set_search_job_alert",
+        "linkedin_unset_search_job_alert",
         "linkedin_publish_post",
         "linkedin_comment_on_item",
         "linkedin_react_to_item",

@@ -898,7 +898,9 @@ def test_the_settings_key_reaches_the_index_and_not_the_toggles():
     assert readonly.is_read_url(SETTINGS_URL)
     for below in (
         SETTINGS_URL + "categories/account",
-        SETTINGS_URL + "categories/privacy",
+        # categories/privacy stood here until 2026-11-25, when lane admit26
+        # admitted that one page by name; another category stands in.
+        SETTINGS_URL + "categories/notifications",
         SETTINGS_URL + "?tab=account",
         "https://www.linkedin.com/psettings/",
     ):

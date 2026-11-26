@@ -12427,6 +12427,227 @@ stubbed to return them), `resolve_instruments.py` (this register's 95/98 merge
 union) and the pytest banner-shape probe. Each answered one question once; the
 answers are in `_audit/2026-10-26-lane-ci-defect.md`, "Second pass".
 
+## 99. A GUARD IS SHOWN FAILING BY ITS OWN MUTATION, AND THE BYTECODE GOES BEFORE EVERY RUN (apply-26, 2026-11-25)
+
+### 99.1 A MUTATION SWEEP CAN RUN THE PREVIOUS MUTATION
+
+The multi-step walker's guards were each disabled by one exact-string edit of
+their module, only their own tests run, and the module restored byte for byte.
+The first sweep reported one guard surviving, and the guard was sound: two
+consecutive mutations shortened the file by the same 17 characters inside one
+second, so the `.pyc` written for the first carried the size and the
+whole-second mtime of the second's source, and Python loaded it -- the test ran
+the PREVIOUS mutation's code and passed. Deleting the module's bytecode before
+every run, and writing none (`PYTHONDONTWRITEBYTECODE=1`), turned the survivor
+red: 40 of 40. The final sweep is 79 of 79, and one of its reds was earned the
+other way: a guard that survived its mutation because a sibling check always
+refused first, so it could never be the one to fire. It was moved, not kept.
+
+    A MUTATION RUNNER THAT LEAVES BYTECODE ON DISK MEASURES WHICHEVER
+    VERSION PYTHON BELIEVES IS CURRENT. DELETE THE MODULE'S .pyc BEFORE
+    EACH RUN; SIZE AND SECONDS ARE NOT AN IDENTITY.
+
+### 99.2 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `tests/test_apply_answers.py` -- the shared JSON answer bank is found by its runtime order (never by `JOBHUNT_HOME`, which keeps jobcore's meaning), reads only confirmed, answers only a wording its class lists in its own kind, platform and option set, never serves an expired answer or lets a never-auto one fire unseen, refuses a malformed file whole with no value in the refusal, imports Naukri's cache as drafts only, and is read fresh | mutations A1-A37 of the record's section 2.6, each red on its named test; its jobcore parity test runs jobcore's own `config.locate`, found as the vendored-copy drift guard finds jobcore, and fails rather than skips without it (T1) |
+| `tests/test_apply_walk.py` -- the walker refuses every unmeasured shape naming what it saw, stops on any question his bank cannot answer, never presses Submit in a dry walk and presses it once on confirm, opens no flow before its inverse is measured, and reads the Draft tab on its real skeleton | mutations W1-W43, each red on its named test |
+
+### 99.3 DECLARED DISPOSABLE
+
+The lane's scratch tools: the mutation runner (its bytecode rule is kept in
+99.1), the two bank-template generators and the move to the ruled location (each
+wrote only over the lane's own unconfirmed copy; the move asked pipeline-26's
+guard first and removed the old copy only after a byte-for-byte check),
+the baseline-line and queue-line appenders, and the
+read-only evidence sweep that inventoried every apply capture on the box. Each
+answered one question once; the answers are in `_audit/2026-11-25-apply.md`.
+
+## 100. A MERGED CHILD'S TESTS ARE SHOWN FAILING AGAIN ON THE TREE THEY JOIN (build-p26, 2026-11-25)
+
+**Registered 2026-11-25.** Full record: `_audit/2026-11-25-build-p26.md`.
+Numbered 100 by the brief, appended at the end; keep heading-number order.
+
+### 100.1 THE ENTRY
+
+Lane B1's child built the follower-list reader on a branch based six weeks
+behind this tree, and its reds were taken there. A test shown failing on a
+different tree is a claim about that tree, so each was mutated again here,
+after the merge, before the row moved.
+
+| path | shown failing by |
+|---|---|
+| `tests/test_followers_list.py`, `tests/test_followers_list_people.py` (built by lane B1's child `lb1-followers`, merged by this lane) | four mutations of `linkedin_server/followers_list.py`, each run against the tests that should catch it, the module restored after each: the side check removed (`test_each_side_plant_refuses_the_read`, 1 failed); the name read from the button's `aria-label` (`test_a_name_in_every_button_label_never_appears`, `test_the_module_stores_nothing_and_reads_no_attribute_but_href`, 2 failed); the per-call bound lifted (`test_each_mitigation_holds_and_fails_without_its_code`, 1 failed); "Follow back" accepted as "Follow" (`test_each_row_plant_makes_that_row_unknown`, `test_a_word_maps_to_a_relation_only_exactly`, 2 failed, 8 passed). Restored: 35 passed. |
+
+A MERGE-TIME CATCH BY A SHIPPED GUARD, recorded rather than registered (it was
+already in the register's corpus): `tests/test_people_data.py::test_the_instructions_name_exactly_the_declared_people_tools`
+went red on the merged tree, naming `linkedin_my_followers_list` -- the tool
+joined `PEOPLE_TOOLS`, and the guard postdates the child's branch -- and passed
+once the server's instructions named it.
+
+### 100.2 DECLARED DISPOSABLE
+
+`probe_p26_captures.py` and `probe_p26_followup.py` (counts-only readings of
+the raw captures and keyed skeletons behind the twelve rows; never shown
+failing, each answered its question once and the answers are in the record's
+section 2); `mutate_followers.py` (the mutation harness; it registers the
+tests above, and was never itself shown letting a mutant through); and the
+one-shot edit scripts (`resolve_union.py`, `resolve_server.py`,
+`resolve_surface_two.py`, `resolve_server_surface.py`, `edit_tables.py`,
+`edit_cells.py`, `edit_pins.py`), each asserting the exact text it replaced.
+
+---
+
+## 101. A WRITE ADDRESSED BY HIS OWN WORDS IS COMPOSED IN ONE SPELLING, AND THE PAGE ONLY VETOES IT (build-jmn26, 2026-11-25)
+
+**Registered 2026-11-25.** Full record: `_audit/2026-11-25-build-jmn26.md`.
+Numbered 101 by the orchestrator's allocation, appended at the end; renumber
+at the merge if another lane took it.
+
+### 101.1 A SEARCH IS AN ADDRESS NOBODY MAY HAND-WRITE
+
+`J 31`'s pair is the first write whose target is not an id but a query -- his
+keywords and a location. Two dangers follow, and each has a test that fails
+without the code that answers it. A query the caller writes by hand could
+carry a filter, a second key or a different spelling that rebuilds to another
+url than the one he saw; so the tool composes it (`query_for`), the gate
+re-derives it (`canonical`, inside `writes._target_for`), and any target that
+is not that one spelling is refused before a page loads. And LinkedIn may
+answer a search with ANOTHER search -- its AI search, a rewritten query -- on
+whose switch a press would set some other alert; so the landing is compared
+with his two values at the preview, the click and the fresh render, and every
+other landing vetoes, withheld and never quoted.
+
+    WHEN THE TARGET IS HIS WORDS, ONE FUNCTION SPELLS IT, THE GATE RE-SPELLS
+    IT, AND THE PAGE MAY ONLY SAY NO.
+
+### 101.2 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `tests/test_search_job_alert.py`; `linkedin_server/search_alert_switch.py`, the `job_search` branch of `writes._target_for`, and the `search_alert_switch` arms of `observe`, `_assert_landed_on_target`, `_live_control` and `_verify_after` | on the base tree `afa8442` the file fails at collection (`ImportError: cannot import name 'search_alert_switch'`), and with the module present but `writes` unwired, `WriteAttemptError: 'set_search_job_alert' is not a sanctioned write`; green 49 passed. `test_a_target_not_in_the_one_spelling_is_refused` pins six spellings the gate refuses; `test_the_page_may_veto_the_search_and_never_supply_one` pins eight landings; `test_the_tracked_copy_with_its_word_reduced_reads_unknown` keeps the anchor word load-bearing |
+| `scripts/_build_search_alert_skeleton.py` (the provenance of `tests/fixtures/live2/j107_search_alert.html`) | refused, writing nothing, on another session-2 skeleton ("this skeleton's tracked copy is not tests/fixtures/live2/j107.html") and on the right skeleton under another session's key ("the toggle's text did not match its measured word; refusing to write it"); a fixed point on its own input (sha256 `3d7cceee5588bfba`, built twice) |
+
+### 101.3 DECLARED DISPOSABLE
+
+The lane's scratch probes -- the keyed-shape word counter, the region printer
+(a skeleton's tag structure with matched candidates only), the card-label
+counter for `J 84`, the census cell editor, the ledger and queue editor, the
+pin re-deriver and the note writer -- and the exported base tree used for the
+red-first runs. Each answered one question once; the answers are in the
+record.
+
+## 102. AN ADDRESS IS ADMITTED IN THE SPELLING LINKEDIN DRAWS, QUERY INCLUDED, OR NOT AT ALL (admit26, 2026-11-25)
+
+Record: `_audit/2026-11-25-admit26.md`.
+
+### 102.1 `tests/test_admit26_admissions.py` -- section 83.1's harness over this lane's table
+
+WHAT IT IS. Lane A's harness (83.1), its six conditions unchanged, over this
+lane's own `ADMISSIONS` table of ten entries: five of his own profile editors
+past `/edit/`, his "Open to" services page, `/mynetwork/`, his Data privacy and
+Premium account settings pages, and his job-preferences page. One field is
+added, `twin=False`, for a spelling that ends in a query value and so has no
+slash twin (the add-an-Experience form, the job-preferences page); the shape
+check then holds the exact query as part of the line.
+
+SHOWN FAILING, six times, each entry against the boundary of the commit before
+it: 30 failed / 7 passed for the five editors, 4 / 2 for the services page,
+4 / 2 for `/mynetwork/`, 6 / 1 for the privacy category, 4 / 2 for the Premium
+page, 4 / 2 for the job-preferences page. In every run the passes were exactly
+the controls an admission must not move -- the siblings, the empty exemption of
+an allowlist-silence page, the tuple size and the duplicate check.
+
+| path | shown failing by |
+|---|---|
+| `tests/test_admit26_admissions.py` (`ADMISSIONS`, the six parametrized conditions, `twin`) | each entry run against the previous commit's `readonly.py` before its line existed: 30 / 7, 4 / 2, 4 / 2, 6 / 1, 4 / 2, 4 / 2 (failed / passed); green after each, 68 passed at the last |
+
+### 102.2 What was measured on the way
+
+    A TABLE THAT NORMALISES QUERIES AWAY CANNOT SAY WHICH SPELLING WAS DRAWN.
+    READ THE CAPTURE ITSELF, FOR SHAPES ONLY, BEFORE WRITING AN EXACT LINE.
+
+`_audit/_census/completeness-annotations.tsv` records the add-an-Experience
+form as `/in/<entity>/edit/forms/position/new` and the job-preferences page as
+`/jobs/preferences`; the raw captures of that corpus draw the first only with
+`?profileFormEntryPoint=identityModuleMirror` and the second only as
+`?viewType=SEEKING_PREFERENCES`, and the volunteering page only with his own
+profile id in its query. Census cells written from the table inherit its
+normalisation (`P D5`'s and `P I12`'s both read bare). The lines admit the
+drawn spellings; the volunteering page went to a question instead.
+
+An existing guard's limit, met: the census-prose check reads only the first
+6000 characters after its section heading, so a census cell that grows can
+push a claimed surface out of the window -- record the growth in the cell
+tersely, as section 3.5 of the record did.
+
+### 102.3 DECLARED DISPOSABLE
+
+`measure_addresses.py` (every ADMIT address through the shipped gate and the
+whole forbidden tuple), `dump_cells.py` (each row's census cells, by the
+shipped walk), `shape_scan.py` (route shapes in the raw captures, member
+segments replaced), `digests.py` (the invariant test's own `ast_digest`, tree
+against base), `ledger_edit.py` (asserting edits to the two ledger tables) and
+`table68.py` (section 6's table from the ledgers on disk). Each answered one
+question once; the answers are in the record.
+
+## 103. A PRESS IS CLOSED BY ITS OWN EVIDENCE, AND A CLICK THAT CANNOT BE MADE IS A READING (live-s11, 2026-11-26)
+
+The live lane's session-11 runner (`runner_s11.py`, kept in the live lane's
+gitignored `_state/live11/tools/`, beside its offline checks): five checks, each
+SHOWN FAILING offline on a synthetic page before it was trusted, then held live
+from load 28 to load 40, every press closing on its own evidence. The record is
+`_audit/2026-11-25-live-session-11.md`, "E10" and "Instruments".
+
+### 103.1 The close rule, by the opening's own evidence
+
+A trigger whose `aria-expanded` FLIPPED on the press is closed when it reads its
+before-value again; any other opening is the set of popups that became visible
+on the press, held by REFERENCE (a JS handle, nothing written into the page),
+closed when each is hidden or gone; nothing flipped and nothing appeared is
+nothing opened, and is not Escaped (an Escape then would close the composer it
+sits in). MEASURED LIVE (load 27): a feed item's menu closed on Escape while the
+feed went on drawing itself, 11 popup containers at the load, 16 open, 15 after;
+a page-wide count of dialogs and of closed words gave that growth to the press.
+
+    A PAGE THAT KEEPS HYDRATING LENDS ITS GROWTH TO WHATEVER WAS PRESSED LAST.
+    JUDGE AN OPENING BY ITS OWN TRIGGER, OR BY THE ELEMENTS IT DREW.
+
+### 103.2 The not-actionable reading
+
+A visible control whose click's actionability wait times out (load 26: the
+feed's search input) is reported NOT PRESSED and nothing is Escaped; the search
+box falls back to a focus, the same disclosure. Shown failing: a covered button
+raised TimeoutError on the old runner and read "not pressed" on the new.
+
+### 103.3 The click site's document guard
+
+A document request during any press is an uncounted load: it is counted into
+the ledger by hand at once and the phase stops. Shown failing on a link press,
+counted into a fake ledger.
+
+### 103.4 The people gate
+
+Raw is kept only on a line whose save column asks for it AND whose page draws no
+member link other than `/in/me/` and his own slug: withheld on 11 of the
+session's 18 such loads, kept on 7. Shown failing on a planted page. It cannot
+see a person drawn without a profile link: stated, not smoothed.
+
+### 103.5 The keyword veto, scoped by class
+
+A keyword sharing a word with the identity key's classes that name him, the
+people he named, his places or employers, or equal to any key value as a whole
+phrase, is refused before any load. Shown failing first: the first version
+matched every class and refused two generic words that sit in a page he
+follows and in a denied-terms class.
+
+### 103.6 Declared disposable
+
+The session's offline page probes, member-link counter, patchers, item reader
+and summariser; each answered one question once, and the answers are in the
+record.
+
 ## 105. AN EMPTY READ IS REFUSED UNLESS THE PAGE SAID SO, AND A FIXTURE IS BUILT FROM A CLOSED ALPHABET (search-fix26, 2026-11-26)
 
 **Registered 2026-11-26.** Full record: `_audit/2026-11-26-search-fix26.md`.

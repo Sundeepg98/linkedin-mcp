@@ -86,8 +86,12 @@ MUST_STAY_REFUSED = (
      f"{NEWSLETTERS_ROOT}?filter=subscribed"),
     ("a sub-path under the admitted root",
      f"{NEWSLETTERS_ROOT}subscribed/"),
-    ("MY NETWORK ITSELF, the parent believed to consume the invitation badge",
-     f"{BASE}/mynetwork/"),
+    # MY NETWORK ITSELF stood here until 2026-11-25, "the parent believed to
+    # consume the invitation badge"; lane admit26 admitted it on
+    # READ-PAST-AN-ACT-SUBSTRING (the badge is a passive cost). The parent of
+    # this page that did NOT travel with it stands in.
+    ("the network manager's own root, the parent of the admitted root",
+     f"{BASE}/mynetwork/network-manager/"),
     ("a member's own newsletter tab -- a page about that member",
      f"{BASE}/in/priya-sharma-12ab34/recent-activity/newsletters/"),
 )

@@ -214,10 +214,16 @@ def test_the_split_is_the_one_the_lane_report_quotes():
     line. 370 + 1 = 371 = 16 R1 + 34 R2 + 321 R3.
 
     372 AT THE INTEGRATION MERGE OF LANE NP ONTO LANES S AND B5 (2026-10-10), MEASURED: lane S's
-    `P O17` built line and lane NP's `M C35b` line, each +1 R3 on its own tree."""
+    `P O17` built line and lane NP's `M C35b` line, each +1 R3 on its own tree.
+
+    370 AT INTEGRATION 3 (2026-11-26), MEASURED on the merged tree: the
+    orchestrator's ruling ABSENT-ON-HIS-ACCOUNT-PER-ROW of 2026-11-25 made
+    `P A14` and `P A15` MEASURED-ABSENT (no editor capture draws either
+    control), so both lines leave the table. Both R3 (profile-edit).
+    372 - 2 = 370 = 16 R1 + 34 R2 + 320 R3."""
     rows, _ = cwc.load()
     split = cwc.split(rows)
-    assert (split["R1"], split["R2"], split["R3"]) == (16, 34, 322)
+    assert (split["R1"], split["R2"], split["R3"]) == (16, 34, 320)
     assert split["R1:built"] + split["R1:queued"] == split["R1"]
 
 
