@@ -222,8 +222,9 @@ same 113 rows, and the freed load and search go to standby line 1.
 **Why this order.** The re-proof first, because every line anchored on his
 own profile (E5, E18, E19) rests on the rule it re-proves. The route decision
 (C-SRCH-1) before anything else that serves the job search, as session 11
-handed over. His own profile (E5) before the first S+R line, because it is the
-page that teaches the people gate who he is (section 6). Then rows per load,
+handed over. His application settings (E11) before every other S+R line,
+because it is the one page measured to teach the people gate who he is
+(section 6). Then rows per load,
 falling, with each dependency kept: E5 before E23 (the skill id), E25 and E26
 (the D-4 clearance); E1 before E9 (his own post); E21 before E22.
 
@@ -391,13 +392,21 @@ readings it vetoes against are read only: the previous live lane's state
      verdict.covers(html)` replaces `raw = s_plus_r and others == 0`, so the
      string judged is the string written, and v1's live count stays as a
      further condition. The line after it prints the verdict's counts.
-* **Why every page is judged:** infra26 measured that server-driven pages
-  cannot teach his identity, so until a page carrying his own entity has
-  been judged, every raw is withheld (fail closed). E5, his own profile, is
-  judged first among his pages for that reason: its verdict keeps no raw
-  (an S line), but it teaches the cache before E11, the first S+R line. If it
-  teaches nothing, every S+R raw is withheld, the skeletons still serve, and
-  the record says which page taught the cache.
+* **Which page teaches it, measured:** infra26 judged session 11's five
+  clean kept raws offline (its record, section 4.4). Four are server-driven
+  pages, his experience list among them: they draw no navigation photo and
+  no payload, so they cannot teach his identity, and judged alone each was
+  withheld. Only his application settings page carries his entity: judged
+  alone it was kept, and judged first it taught the cache for all five. So
+  **E11, his application settings, is the teacher**, and it is the first S+R
+  line in section 3's order; every S+R line after it can keep its raw. Until
+  a page has taught the cache, every raw is withheld (fail closed).
+* **Why every page is judged anyway:** judging an S page keeps no raw and
+  costs nothing, and E5, his own profile, may teach earlier (UNVERIFIED: no
+  clean raw of his profile was ever kept to measure; the experience list,
+  its own detail page, could not). If nothing teaches, every S+R raw is
+  withheld, the skeletons still serve, and the record says which page taught
+  the cache.
 * **Shown failing before READY** (red first, in the runner's offline checks,
   on synthetic pages, no LinkedIn load): each rule planted alone on a page
   of his own withholds the raw page; a clean page of his own keeps it once
@@ -417,7 +426,10 @@ browser module's own words say that outside a tool call, for the live
 lane's runner and the probes, nothing is counted. The runner calls the
 package in-process, never through MCP (the job-pipeline guard denies MCP
 while the flag stands), so its phases of 5 to 7 loads are bounded by the
-pinned ledger and the session's own limits only. No ceiling check is owed.
+pinned ledger and the session's own limits only. No ceiling check is owed at
+READY: infra26's branch carries a test that makes 7 loads outside a tool
+call, the own-pages maximum, so the suite holds the property once
+integration 5 lands it.
 
 **THE ACCOUNT BUDGET IS THE PINNED LEDGER (BUDGET-ONE-ACCOUNT-40).** One
 budget of 40 page loads per 12 hours covers his account, shared by this
@@ -562,7 +574,7 @@ every check.
 | the three derived views | written twice to a fixed point, then checked clean |
 | `scripts/check_cited_shas_resolve.py` | every cited SHA an ancestor of master |
 | `scripts/check_asserted_names_resolve.py` | 1 asserted and absent, the site master already pins in its own test; none from this record |
-| the guard files that read the queue or every audit document, one process each | round 1: eleven files, 186 passed, the slowest 85 s; round 2: the same eleven, 186 passed (ten side by side, the slowest 82 s; the recall guard alone in 74 s, after contention pushed its side-by-side run past the cap); and again with answer 6 folded in, 186 passed (the ten side by side, the slowest 66 s; the recall guard alone in 86 s) |
+| the guard files that read the queue or every audit document, one process each | round 1: eleven files, 186 passed, the slowest 85 s; round 2: the same eleven, 186 passed (ten side by side, the slowest 82 s; the recall guard alone in 74 s, after contention pushed its side-by-side run past the cap); and again with answer 6 folded in, 186 passed (the ten side by side, the slowest 66 s; the recall guard alone in 86 s); and on the follow-up that names E11 as the cache's teacher, 186 passed (the slowest 46 s) |
 | `tests/test_a_cited_sha_resolves.py` | over the two-minute cap on its own (stopped at 115 s, nothing failed before the stop): left to lane CI; the script it wraps passed above |
 | the identity gate | the pre-commit gate at each commit; the committed-blob test and lane CI after it, reported by head sha in the lane's report to the orchestrator |
 
