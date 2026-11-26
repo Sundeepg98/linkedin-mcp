@@ -409,8 +409,10 @@ readings it vetoes against are read only: the previous live lane's state
 **THE NAVIGATION CEILING IS NOT THE RUNNER'S (round 1's ceiling risk,
 resolved).** On infra26's branch (VERIFIED by reading it):
 `call_ceiling.PerCallCeiling`, a middleware, arms a three-load budget around
-every MCP tool call; `LinkedInBrowser.goto` spends from it through
-`call_ceiling.spend`, which does nothing when no budget is armed; and the
+every MCP tool call; `LinkedInBrowser.goto` counts each load against it
+through `call_ceiling.count_load` (named `spend` on infra26's branch when
+this plan read it, renamed by that lane before its certified head), which
+does nothing when no budget is armed; and the
 browser module's own words say that outside a tool call, for the live
 lane's runner and the probes, nothing is counted. The runner calls the
 package in-process, never through MCP (the job-pipeline guard denies MCP
