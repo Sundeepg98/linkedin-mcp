@@ -346,6 +346,56 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
     # one of the twelve lines citing the lane's record, and the DELTA line, was
     # listed with the guard's own vocabulary and window, and each match placed
     # in the line's older text or in this lane's note; none is in a note.
+    # 2026-11-26, lane readers-net26. READ, not inferred from the filenames:
+    # every line citing the lane's record (or, in its notes, lane K's record
+    # and the live lane's session-11 record) was listed with the guard's own
+    # vocabulary and window, and every match placed: all in older text, in a
+    # cell or a neighbour; none in a note of this lane.
+    ("network.md", "2026-11-26-readers-net26.md"): (
+        "FIVE MOVES AND TWENTY-TWO NOTES, NOT A CORRECTION. Rows 9, 13, 38, 39 "
+        "and 161 gained the paragraph that moves them, and rows 6, 10 to 12, "
+        "14 to 19, 21, 37, 40, 43, 51, 95, 153, 154 and 200 one note each "
+        "naming the step session 11's capture now gives them; each cites this "
+        "record and none says an earlier paragraph of its row was untrue. "
+        "Every matched word is older text: row 4's 'THE STATED REASON WAS "
+        "FALSE AT HEAD AND IS CORRECTED IN PLACE' beside row 6, row 10's "
+        "'false of the product' beside rows 9 to 12, row 38's 'NAMES THE WRONG "
+        "GATE' and row 39's 'false' beside rows 37 to 40, row 53's 'refuted' "
+        "and 'correction' beside row 51, and row 161's own 'TWO CORRECTIONS "
+        "2026-09-21', 'WRONG ANSWER' and 'False' with row 163's beside it. "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** a note of this lane saying an "
+        "earlier paragraph of its row was untrue while leaving it unmarked."
+    ),
+    ("network.md", "2026-09-28-lane-k-ledger.md"): (
+        "THIS LANE'S NOTES CITE LANE K'S RECORD AS WHERE THEIR QUESTIONS LIVE, "
+        "NOT AS A DOCUMENT THEY CORRECT. Rows 6, 40 and 200 each name the "
+        "question lane readers-net26 added to that record's section 7 "
+        "(Q-REINVITE-COMPOSITION, Q-REFOLLOW-AIM, Q-AD-HIDE-TARGET); the other "
+        "lines citing it are older notes. The matched words are older text: "
+        "row 4's 'FALSE AT HEAD AND IS CORRECTED IN PLACE' two lines above "
+        "row 6, and row 38's 'WRONG GATE' and row 39's 'false' beside row 40. "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** a note saying a step lane K's "
+        "ledger set was untrue; this lane advanced steps a capture answered, "
+        "and corrected none."
+    ),
+    ("network.md", "2026-11-25-live-session-11.md"): (
+        "A FIRE BANKED, NOT A CORRECTION. Row 161 gained the paragraph that "
+        "banks session 11's fire (load 34) on its own bar, citing that "
+        "session's record for the evidence. The matched words are the row's "
+        "own older text -- 'TWO CORRECTIONS 2026-09-21', 'A PLAUSIBLE WRONG "
+        "ANSWER', and 'returns **False**' for the boundary as it read that "
+        "day -- and row 163's beside it. **WHAT WOULD MAKE THIS ENTRY WRONG:** "
+        "the banking paragraph saying the session's record was untrue."
+    ),
+    ("messaging-and-content.md", "2026-11-26-readers-net26.md"): (
+        "A NOTE, NOT A CORRECTION. Row C52 gained one note -- session 11's "
+        "capture of its address and the step it names, SIBLING N 40 -- citing "
+        "this record. Every matched word is the row's own older text, its "
+        "2026-09-19 paragraph 'CORRECTED ... BY THE WAVE THAT GOT IT WRONG' "
+        "with its 'mistake', 'stale' and 'false', and row C54's 'corrected' "
+        "beside it. **WHAT WOULD MAKE THIS ENTRY WRONG:** this lane's note "
+        "saying the row's earlier text was untrue."
+    ),
     ("profile.md", "2026-11-25-build-p26.md"): (
         "A LEDGER NOTE AND ONE MOVE, NOT A CORRECTION. Rows A11, A13, A14, "
         "A15, A17, A25, D25, D26, F1, K8 and S8 each gained one note -- the "

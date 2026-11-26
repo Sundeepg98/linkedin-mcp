@@ -181,11 +181,9 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
                            "no committed source spells this one; the archive "
                            "then needs the download transport "
                            "D4-NO-OWN-BROWSER-CONTEXT names for P C8"),
-    "P P15": ("RULING", "", "the operator names the page first: the settings "
-                            "ruling admits a settings page only by name; the "
-                            "drawn address is then refused on the forbidden "
-                            "substring /mypreferences/d/categories/, which "
-                            "fires before the allowlist"),
+    # "P P15" LEFT 2026-11-26: lane readers-net26 built its reader over live
+    # session 11's capture of its page (COVERED-UNFIRED), so its line goes,
+    # as a line whose row left GAP must.
     # P S5 LEFT 2026-09-28 (lane S's offline frontier) -- see LEFT THE
     # READ-GAP SET below.
     # ---- network.md ----
@@ -290,9 +288,13 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
                                    "admission and a count reader would still "
                                    "not deliver it"),
     # ---- RETURNED by lane R, 2026-09-23 (its own class; see VERDICTS) ----
-    "N 9": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
+    # N 9 LEFT 2026-11-26: lane readers-net26 built its reader over live
+    # session 11's capture of its page (COVERED-UNFIRED), so its line goes,
+    # as a line whose row left GAP must.
     "N 11": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
-    "N 13": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
+    # N 13 LEFT 2026-11-26: lane readers-net26 built its reader over live
+    # session 11's capture of its page (COVERED-UNFIRED), so its line goes,
+    # as a line whose row left GAP must.
     "N 14": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
     "N 19": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
     "N 22": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
@@ -307,8 +309,12 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
     "N 27": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
     "N 28": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
     "N 32": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
-    "N 38": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
-    "N 39": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
+    # N 38 LEFT 2026-11-26: lane readers-net26 built its reader over live
+    # session 11's capture of its page (COVERED-UNFIRED), so its line goes,
+    # as a line whose row left GAP must.
+    # N 39 LEFT 2026-11-26: lane readers-net26 built its reader over live
+    # session 11's capture of its page (COVERED-UNFIRED), so its line goes,
+    # as a line whose row left GAP must.
     "N 97": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
     "N 143": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
     # N 165 LEFT 2026-10-10 (lane B5) -- see LEFT THE READ-GAP SET below.

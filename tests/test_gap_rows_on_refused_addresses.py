@@ -152,7 +152,18 @@ SCRIPT = ROOT / "scripts" / "check_gap_rows_on_refused_addresses.py"
 #: second address, `/feed/followers/`, refused on "/follow". The eleven rows
 #: this lane re-pointed only gained notes, none backticking a refused address,
 #: so nothing entered: 75 - 1, and the walk reads 74.
-EXPECTED_GAP_ROWS = 74
+#: 78 ON LANE READERS-NET26 (2026-11-26), MEASURED: two removed, six added,
+#: found by running the shipped walk on master `7760a5f`'s census (74) and on
+#: this lane's (78) and diffing the two row lists. REMOVED: `N 38` and `N 39`
+#: left GAP for COVERED-UNFIRED on their readers. ADDED, each a cell newly
+#: naming the address LinkedIn draws for it, refused on a substring: `N 11`
+#: (the Sent tab's category link, `/mynetwork/invitation-manager/sent/CONNECTION/`,
+#: on "invitation" -- only the tab's own address is exempted) and `P P10` to
+#: `P P14` (their settings pages, `/mypreferences/m/settings/<word>/`, on
+#: "settings"). Each stays GAP on the step its own cell names -- `N 11` a
+#: PRECONDITION, the five an admission by name -- under
+#: INCIDENTAL-CAPTURE-IS-NOT-A-RULING. No boundary entry changed.
+EXPECTED_GAP_ROWS = 78
 
 
 def _run(*args: str) -> subprocess.CompletedProcess:

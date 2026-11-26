@@ -12647,3 +12647,57 @@ follows and in a denied-terms class.
 The session's offline page probes, member-link counter, patchers, item reader
 and summariser; each answered one question once, and the answers are in the
 record.
+
+## 104. A WORD THE SKELETON SHAPED IS PUT BACK ONLY WHERE ITS KEYED SHAPE PROVES IT, AND A HELPER THAT BUILDS RECORDS IS NAMED ONCE (readers-net26, 2026-11-26)
+
+Lane readers-net26 built five readers on live session 11's captures; the record
+is `_audit/2026-11-26-readers-net26.md`, section 7. Each entry below was shown
+failing first (its section 7.1: fourteen mutations, fourteen RED).
+
+### 104.1 The word restorer, held to the tracked copy token by token
+
+`scripts/_build_live11_word_fixtures.py` writes a tracked copy with LinkedIn's
+own words put back where, and only where, the session's KEYED skeleton proves
+them by keyed shape (FIXED-UI-LABEL-MATCH): a closed list per page, no argument
+that takes a word, ids converted before any word goes back, everything else
+reduced by the harness's own `tracked_copy`. With no words it reproduces each
+tracked copy byte for byte (3 of 3, on the box that holds the keys).
+`tests/test_live11_word_fixtures.py` holds the three fixtures to their copies
+token by token -- a token may differ only where the copy has `x` and the
+fixture a word of its own page's list -- and is shown failing by giving the
+received page another page's words. The builder's own test is shown failing by
+the mutation that skips the id pass.
+
+    A WORD THE SKELETON SHAPED IS NOT LOST: THE KEY THAT SHAPED IT CAN PROVE IT,
+    ONE CLOSED WORD AT A TIME, AND NEVER A NAME.
+
+### 104.2 The badge bracket's verdict
+
+`linkedin_server/badge_bracket.py` judges two readings of the pending-invitation
+badge around a `/mynetwork/` list: before unreadable opens nothing; after
+unreadable or moved withholds the sent tab and the following list; on the
+received tab a fall is its passive cost, returned. Pure; the label never leaves.
+`tests/test_badge_bracket.py` is shown failing by three mutations (each tab's
+rule flipped, the label kept) and drives the three tools over a browser that
+loads nothing.
+
+### 104.3 A name-based closure lends a builder to every function of that name
+
+`tests/test_readers_emit_no_page_string.py` takes "which readers build people
+records" from `tests/test_a_people_reader_reads_one_page.py`'s reference
+closure, which follows NAMES. A new `_row` that built a person record (this
+lane's first `unfollowed_list._row`) made `post_viewer_demographics`' own `_row`
+look like a builder, and that reader's committed `clean` verdict measured
+`not_driven` -- a regression in a module nobody touched, caught by the baseline's
+shrink check. Not a defect in the guard so much as its edge, written down: a
+helper that builds a record takes a name no other module uses.
+
+    A CLOSURE THAT FOLLOWS NAMES JOINS EVERY FUNCTION THAT SHARES ONE. NAME A
+    RECORD BUILDER ONCE IN THE PACKAGE, OR ANOTHER MODULE INHERITS ITS VERDICT.
+
+### 104.4 Declared disposable
+
+The lane's outline printer, label and slot probes, href-word probe, the two
+structure probes of the kept raw pages, the reader prototypes, the census,
+ledger and queue edit scripts, and the mutation runner; each answered one
+question once, and the answers are in the record.

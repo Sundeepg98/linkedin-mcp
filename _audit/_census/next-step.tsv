@@ -135,7 +135,7 @@ M C47	M	R+W	-	CAPTURE:article-composer	MEASURED	_audit/_census/read-addresses.ts
 M C49	M	W	R3	PRECONDITION:an article he has published	INFERRED	M C49 ; M C77
 M C50	M	W	R3	CAPTURE:article-composer	NAMED	RULING:ARTICLE-COMPOSER-CAPTURE ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
 M C51	M	W	R3	PRECONDITION:a newsletter he authors	INFERRED	_audit/_census/read-addresses.tsv::the page listing his newsletters links no analytics address
-M C52	M	W	R3	CAPTURE:admit-mypreferences-d-unfollowed	NAMED	_audit/_census/write-classes.tsv::/mypreferences/d/unfollowed, is refused by the /unfollow substring ; RULING:READ-PAST-AN-ACT-SUBSTRING
+M C52	M	W	R3	SIBLING:N 40	MEASURED	tests/fixtures/live11/unfollowed.html ; N 40
 M C54	M	W	R3	TARGET:the words of a collaborative post he names	INFERRED	_audit/_census/messaging-and-content.md::the post composer is an address already loaded
 M C55	M	W	R3	PRECONDITION:a collaborative post he is part of	INFERRED	M C55
 M C56	M	W	R3	PRECONDITION:a collaborative post he is part of	INFERRED	M C55
@@ -214,21 +214,19 @@ M M51	M	W	R2	CAPTURE:msg-thread-footer	NAMED	_audit/2026-10-10-lane-b3-messaging
 M M52	M	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 N 3	N	W	R2	SIBLING:N 1	INFERRED	RULING:D6-CAPABILITY-OVER-AFFORDANCE ; N 1
 N 5	N	W	R2	TARGET:a member he names to invite, with a note	NAMED	_audit/2026-09-24-lane-l5-messaging.md::| C-P3 | the invitation dialog ; RULING:OPERATOR-NAMES-THE-TARGET
-N 6	N	W	R2	CAPTURE:admit-mynetwork-invitation-manager-sent	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::`/mynetwork/invitation-manager/sent/` -- REFUSED today ; RULING:READ-PAST-AN-ACT-SUBSTRING
+N 6	N	W	R2	RULING:Q-REINVITE-COMPOSITION	MEASURED	tests/fixtures/live11/invitations_sent.html ; RULING:CALLER-COMPOSITION-UNDER-D6
 N 7	N	W	R3	TARGET:a Page and the connections he names to invite	INFERRED	RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS ; N 7
 N 8	N	W	R3	TARGET:a Page and the connections he names to invite	INFERRED	RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS ; N 7
-N 9	N	R	-	CAPTURE:admit-mynetwork-invitation-manager	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/mynetwork/invitation-manager/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
-N 10	N	W	R3	CAPTURE:admit-mynetwork-invitation-manager-sent	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::`/mynetwork/invitation-manager/sent/` -- REFUSED today ; RULING:READ-PAST-AN-ACT-SUBSTRING
-N 11	N	R	-	CAPTURE:admit-mynetwork-invitation-manager	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/mynetwork/invitation-manager/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
-N 12	N	W	R3	CAPTURE:admit-mynetwork-invitation-manager-sent	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::`/mynetwork/invitation-manager/sent/` -- REFUSED today ; RULING:READ-PAST-AN-ACT-SUBSTRING
-N 13	N	R	-	CAPTURE:admit-mynetwork-invitation-manager	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/mynetwork/invitation-manager/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
-N 14	N	R	-	CAPTURE:admit-mynetwork-invitation-manager	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/mynetwork/invitation-manager/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
-N 15	N	W	R2	CAPTURE:admit-mynetwork-invitation-manager	INFERRED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/mynetwork/invitation-manager/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
-N 16	N	W	R3	CAPTURE:admit-mynetwork-invitation-manager	INFERRED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/mynetwork/invitation-manager/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
-N 17	N	W	R3	CAPTURE:admit-mynetwork-invitation-manager	INFERRED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/mynetwork/invitation-manager/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
-N 18	N	W	R2	CAPTURE:admit-mynetwork-invitation-manager	INFERRED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/mynetwork/invitation-manager/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
-N 19	N	R	-	CAPTURE:admit-mynetwork-invitation-manager	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/mynetwork/invitation-manager/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
-N 21	N	W	R3	CAPTURE:admit-mynetwork-invitation-manager	INFERRED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/mynetwork/invitation-manager/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
+N 10	N	W	R3	BUILD:tests/fixtures/synthetic/live11_invitations_sent_words.html	MEASURED	tests/fixtures/live11/invitations_sent.html ; RULING:J-19-BUILT-BEHIND-THE-GRANT
+N 11	N	R	-	PRECONDITION:a Page-follow invitation he has sent, pending (the Sent tab draws only its CONNECTION category)	MEASURED	tests/fixtures/live11/invitations_sent.html ; RULING:MEASURED-ABSENT-OR-PRECONDITION
+N 12	N	W	R3	PRECONDITION:a Page-follow invitation he has sent, pending (the Sent tab draws only its CONNECTION category)	MEASURED	tests/fixtures/live11/invitations_sent.html ; RULING:MEASURED-ABSENT-OR-PRECONDITION
+N 14	N	R	-	CAPTURE:admit-mynetwork-invitation-manager	MEASURED	tests/fixtures/live11/invitations.html ; RULING:READ-PAST-AN-ACT-SUBSTRING
+N 15	N	W	R2	BUILD:tests/fixtures/synthetic/live11_invitations_words.html	MEASURED	tests/fixtures/live11/invitations.html ; RULING:PEOPLE-DATA-MITIGATIONS
+N 16	N	W	R3	BUILD:tests/fixtures/synthetic/live11_invitations_words.html	MEASURED	tests/fixtures/live11/invitations.html ; RULING:PEOPLE-DATA-MITIGATIONS
+N 17	N	W	R3	SIBLING:N 16	INFERRED	tests/fixtures/live11/invitations.html ; N 16
+N 18	N	W	R2	SIBLING:N 19	INFERRED	tests/fixtures/live11/invitations.html ; N 19
+N 19	N	R	-	PRECONDITION:an invitation carrying a personal note, pending in his received list	INFERRED	tests/fixtures/live11/invitations.html ; RULING:MEASURED-ABSENT-OR-PRECONDITION
+N 21	N	W	R3	SIBLING:N 15	INFERRED	tests/fixtures/live11/invitations.html ; N 15
 N 22	N	R	-	CAPTURE:admit-mynetwork	INFERRED	_audit/_census/read-addresses.tsv::the general R1 badge-cost ruling ; RULING:READ-PAST-AN-ACT-SUBSTRING
 N 24	N	R	-	CAPTURE:connections-sort-and-filters	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/mynetwork/invite-connect/connections/?foo=1 ; RULING:READ-PAST-AN-ACT-SUBSTRING
 N 26b	N	R	-	CAPTURE:search-people-first-degree	NAMED	_audit/_census/read-addresses.tsv::so the first thing past the boundary is a capture
@@ -238,16 +236,14 @@ N 29	N	W	R3	TARGET:a 1st-degree connection he names for removal	NAMED	_audit/202
 N 32	N	R	-	CAPTURE:admit-mynetwork	INFERRED	_audit/_census/read-addresses.tsv::the general R1 badge-cost ruling ; RULING:READ-PAST-AN-ACT-SUBSTRING
 N 34	N	W	R1	TARGET:a member he names to follow or unfollow	INFERRED	RULING:NAMED-PROFILE-READ-BEHIND-A-GRANT ; _audit/_census/write-classes.tsv::queued:THIRD-PARTY-PROFILE-FORBIDDEN
 N 36	N	W	R1	TARGET:a member he names to follow or unfollow	INFERRED	RULING:NAMED-PROFILE-READ-BEHIND-A-GRANT ; _audit/_census/write-classes.tsv::queued:THIRD-PARTY-PROFILE-FORBIDDEN
-N 37	N	W	R1	CAPTURE:feed-item-permalink-menu	MEASURED	RULING:HIS-OWN-CURATION-NOT-OUTWARD ; _audit/2026-10-10-lane-b2-network-build.md::one anchor in all carries an activity address
-N 38	N	R	-	CAPTURE:admit-mynetwork-network-manager-people-follow-following	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/mynetwork/network-manager/people-follow/following/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
-N 39	N	R	-	CAPTURE:admit-mypreferences-d-unfollowed	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/mypreferences/d/unfollowed ; RULING:READ-PAST-AN-ACT-SUBSTRING
-N 40	N	W	R1	CAPTURE:admit-mypreferences-d-unfollowed	INFERRED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/mypreferences/d/unfollowed ; RULING:READ-PAST-AN-ACT-SUBSTRING
+N 37	N	W	R1	CAPTURE:feed-item-permalink-menu	MEASURED	tests/fixtures/live11/permalink_member_post_menu_open.html ; RULING:HIS-OWN-CURATION-NOT-OUTWARD
+N 40	N	W	R1	RULING:Q-REFOLLOW-AIM	MEASURED	tests/fixtures/live11/unfollowed.html ; RULING:PEOPLE-DATA-MITIGATIONS
 N 41	N	W	R1	RULING:Q-NAME-BEARING-ADDRESS-REDACTION	INFERRED	_audit/_census/messaging-and-content.md::`/pulse/` stays refused ; RULING:READ-PAST-AN-ACT-SUBSTRING
 N 42	N	W	R1	RULING:Q-NAME-BEARING-ADDRESS-REDACTION	INFERRED	_audit/_census/messaging-and-content.md::`/pulse/` stays refused ; RULING:READ-PAST-AN-ACT-SUBSTRING
-N 43	N	W	R3	CAPTURE:feed-item-permalink-menu	MEASURED	RULING:HIS-OWN-CURATION-NOT-OUTWARD ; _audit/2026-10-10-lane-b2-network-build.md::Entry 6 does not fit
+N 43	N	W	R3	CAPTURE:feed-item-permalink-menu	MEASURED	tests/fixtures/live11/permalink_member_post_menu_open.html ; RULING:HIS-OWN-CURATION-NOT-OUTWARD
 N 49	N	W	R1	TARGET:a skills Page he names	INFERRED	RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS ; N 49
 N 50	N	W	R1	SIBLING:N 47	NAMED	_audit/_census/network.md::Only the ROUTE is retired, not the outcome ; RULING:D6-CAPABILITY-OVER-AFFORDANCE
-N 51	N	W	R3	CAPTURE:feed-item-permalink-menu	MEASURED	RULING:HIS-OWN-CURATION-NOT-OUTWARD ; _audit/2026-10-10-lane-b2-network-build.md::Entry 6 does not fit
+N 51	N	W	R3	CAPTURE:feed-item-permalink-menu	MEASURED	tests/fixtures/live11/feed_menus.html ; RULING:HIS-OWN-CURATION-NOT-OUTWARD
 N 55	N	W	R3	ADMIT:https://www.linkedin.com/newsletters/placeholder-newsletter/	NAMED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/newsletters/1234567890/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
 N 56	N	W	R3	ADMIT:https://www.linkedin.com/newsletters/placeholder-newsletter/	INFERRED	_audit/2026-10-10-lane-b2-network-build.md::The list draws no control to press
 N 58	N	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
@@ -277,7 +273,7 @@ N 90	N	R	-	CAPTURE:search-people-labels	NAMED	RULING:CAPTURE-PRESS-UNDER-PROBE-R
 N 91	N	R	-	CAPTURE:search-people-labels	NAMED	RULING:CAPTURE-PRESS-UNDER-PROBE-RULE ; _audit/_census/read-addresses.tsv::TERMINAL BY THIS ROUTE
 N 92	N	R	-	CAPTURE:search-people-labels	NAMED	RULING:CAPTURE-PRESS-UNDER-PROBE-RULE ; _audit/_census/read-addresses.tsv::TERMINAL BY THIS ROUTE
 N 93	N	R	-	CAPTURE:search-people-labels	MEASURED	RULING:CAPTURE-PRESS-UNDER-PROBE-RULE ; _audit/2026-10-10-lane-b2-network-build.md::So the first render draws no control labelled exactly
-N 95	N	R	-	CAPTURE:feed-menus	INFERRED	_audit/_census/read-addresses.tsv::where the list of recent PEOPLE searches is drawn
+N 95	N	R	-	BUILD:tests/fixtures/live11/feed_search_box_open.html	MEASURED	tests/fixtures/live11/feed_search_box_open.html ; RULING:PAGE-MAY-VETO-NEVER-SUPPLY
 N 96	N	W	R3	CAPTURE:admit-mypreferences-d-categories-privacy	INFERRED	_audit/_census/network.md::awaiting admission by name ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
 N 97	N	R	-	CAPTURE:admit-mynetwork	INFERRED	_audit/_census/read-addresses.tsv::the general R1 badge-cost ruling ; RULING:READ-PAST-AN-ACT-SUBSTRING
 N 98	N	W	R3	CAPTURE:admit-mynetwork	INFERRED	_audit/_census/read-addresses.tsv::the general R1 badge-cost ruling ; RULING:READ-PAST-AN-ACT-SUBSTRING
@@ -314,8 +310,8 @@ N 148	N	W	R3	TARGET:a real post or comment he names to report	NAMED	_audit/2026-
 N 149	N	W	R3	SIBLING:M M38	NAMED	N 149 ; M M38
 N 150	N	W	R3	TARGET:a conversation thread he names to report	NAMED	_audit/_census/network.md::THE QUEUED RE-FILE MUST NOT BE EXECUTED ON THIS ROW
 N 151	N	W	R3	TARGET:a system-flagged message he names to mark safe	NAMED	_audit/_census/network.md::the only row in section M whose act is to undo a report
-N 153	N	W	R3	CAPTURE:feed-item-permalink-menu	MEASURED	RULING:HIS-OWN-CURATION-NOT-OUTWARD ; _audit/2026-10-10-lane-b2-network-build.md::one anchor in all carries an activity address
-N 154	N	W	R3	CAPTURE:feed-item-permalink-menu	MEASURED	RULING:HIS-OWN-CURATION-NOT-OUTWARD ; _audit/2026-10-10-lane-b2-network-build.md::one anchor in all carries an activity address
+N 153	N	W	R3	SIBLING:N 154	MEASURED	tests/fixtures/live11/permalink_member_post_menu_open.html ; N 154
+N 154	N	W	R3	BUILD:tests/fixtures/live11/permalink_member_post_menu_open.html	MEASURED	tests/fixtures/live11/permalink_member_post_menu_open.html ; RULING:HIS-OWN-CURATION-NOT-OUTWARD
 N 156	N	W	R2	TARGET:a non-connection he names (the act stops at the composer)	NAMED	_audit/2026-09-24-lane-l5-messaging.md::| C-P5 | the composer a NON-connection gets ; RULING:OPERATOR-NAMES-THE-TARGET
 N 158	N	W	R2	TARGET:a non-connection he names (the act stops at the composer)	NAMED	_audit/2026-09-24-lane-l5-messaging.md::| C-P5 | the composer a NON-connection gets ; RULING:OPERATOR-NAMES-THE-TARGET
 N 159	N	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
@@ -344,7 +340,7 @@ N 192	N	W	R2	TARGET:an event he names	NAMED	_audit/_census/read-addresses.tsv::A
 N 193	N	W	R3	TARGET:an event he names	NAMED	_audit/_census/read-addresses.tsv::ADMITTED 2026-09-23 BY A REVIEW: COMMIT (lane L1): one event by its NUMERIC id ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
 N 196	N	W	R3	TARGET:an organisation Page he names to report	NAMED	_audit/2026-09-28-rulings-build-classes.md::a report is never fired for a proof unless he names a real item to report
 N 199	N	R	-	CAPTURE:admit-premium-matches	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/premium/matches/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
-N 200	N	W	R3	CAPTURE:feed-menus	MEASURED	RULING:CAPTURE-PRESS-UNDER-PROBE-RULE ; _audit/2026-10-10-lane-b2-network-build.md::The ad item's own control was not pressed
+N 200	N	W	R3	RULING:Q-AD-HIDE-TARGET	MEASURED	tests/fixtures/live11/feed_ad_control_open.html ; RULING:PAGE-MAY-VETO-NEVER-SUPPLY
 N A1	N	W	R3	PRECONDITION:admin rights on a Company Page	NAMED	_audit/_census/blocker-map.tsv::ADMIN-RIGHTS-NOT-HELD
 N A2	N	W	R3	PRECONDITION:admin rights on a Company Page	NAMED	_audit/_census/blocker-map.tsv::ADMIN-RIGHTS-NOT-HELD
 N A3	N	R	-	PRECONDITION:admin rights on a Company Page	NAMED	_audit/_census/blocker-map.tsv::ADMIN-RIGHTS-NOT-HELD
@@ -480,7 +476,7 @@ P N5	P	W	R3	SIBLING:lane-S	NAMED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD ; RULING:CR
 P N6	P	W	R3	SIBLING:lane-S	NAMED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD ; RULING:CREDENTIAL-SETTINGS-NEED-THE-OPERATOR
 P N7	P	W	R3	SIBLING:lane-S	NAMED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD ; RULING:CREDENTIAL-SETTINGS-NEED-THE-OPERATOR
 P N8	P	W	R3	SIBLING:lane-S	NAMED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD ; RULING:CREDENTIAL-SETTINGS-NEED-THE-OPERATOR
-P N9	P	R	-	CAPTURE:sessions-surface	NAMED	RULING:SESSION-SURFACE ; _audit/2026-10-10-rulings-ledger-questions.md::after a capture proves the address is the current settings page
+P N9	P	R	-	ADMIT:https://www.linkedin.com/mypreferences/d/categories/sign-in-and-security/	MEASURED	tests/fixtures/live11/sessions_surface.html ; RULING:SESSION-SURFACE
 P N11	P	W	R3	SIBLING:lane-S	NAMED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD ; RULING:CREDENTIAL-SETTINGS-NEED-THE-OPERATOR
 P N12	P	W	R3	SIBLING:lane-S	NAMED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD ; RULING:CREDENTIAL-SETTINGS-NEED-THE-OPERATOR
 P N15	P	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
@@ -507,12 +503,11 @@ P P6	P	W	R3	SIBLING:lane-S	NAMED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 P P7	P	W	R3	SIBLING:lane-S	NAMED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 P P8	P	W	R3	SIBLING:lane-S	NAMED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 P P9	P	W	R3	SIBLING:lane-S	NAMED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
-P P10	P	W	R3	SIBLING:lane-S	NAMED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
-P P11	P	W	R3	SIBLING:lane-S	NAMED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
-P P12	P	W	R3	SIBLING:lane-S	NAMED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
-P P13	P	W	R3	SIBLING:lane-S	NAMED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
-P P14	P	W	R3	SIBLING:lane-S	NAMED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
-P P15	P	R	-	CAPTURE:admit-mypreferences-d-categories-ads	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/mypreferences/d/categories/ads ; RULING:ONE-NAMED-SETTINGS-PAGE-AT-A-TIME
+P P10	P	W	R3	ADMIT:https://www.linkedin.com/mypreferences/m/settings/ads-connections/	MEASURED	tests/fixtures/synthetic/live11_ads_words.html ; RULING:ONE-NAMED-SETTINGS-PAGE-AT-A-TIME
+P P11	P	W	R3	ADMIT:https://www.linkedin.com/mypreferences/m/settings/ads-inferred-location/	MEASURED	tests/fixtures/synthetic/live11_ads_words.html ; RULING:ONE-NAMED-SETTINGS-PAGE-AT-A-TIME
+P P12	P	W	R3	ADMIT:https://www.linkedin.com/mypreferences/m/settings/ads-beyond-linkedin/	MEASURED	tests/fixtures/synthetic/live11_ads_words.html ; RULING:ONE-NAMED-SETTINGS-PAGE-AT-A-TIME
+P P13	P	W	R3	ADMIT:https://www.linkedin.com/mypreferences/m/settings/ads-personalization/	MEASURED	tests/fixtures/synthetic/live11_ads_words.html ; RULING:ONE-NAMED-SETTINGS-PAGE-AT-A-TIME
+P P14	P	W	R3	ADMIT:https://www.linkedin.com/mypreferences/m/settings/ads-by-age/	MEASURED	tests/fixtures/synthetic/live11_ads_words.html ; RULING:ONE-NAMED-SETTINGS-PAGE-AT-A-TIME
 P P16	P	W	R3	SIBLING:lane-S	NAMED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 P P17	P	W	R3	SIBLING:lane-S	NAMED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 P P18	P	W	R3	SIBLING:lane-S	NAMED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
