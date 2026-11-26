@@ -692,7 +692,7 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 | signal NOT scanned | files | lines |
 |---|---|---|
-| a heading naming a ruling | 140 | 302 |
+| a heading naming a ruling | 141 | 303 |
 | a bold line opening on RULING/RULED | 65 | 152 |
 | the phrase THE RULING | 39 | 64 |
 | a named -RULING id | 42 | 111 |

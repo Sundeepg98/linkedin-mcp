@@ -295,18 +295,21 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
     # note's text alone: zero hits).
     ("messaging-and-content.md", "2026-11-26-readers-msg26.md"): (
         "A ROW'S MOVE OR NEXT STEP RECORDED, NOT A CORRECTION. Rows `C93`, "
-        "`C70`, `M20`, `M40` and `M51` each gained one dated note citing the "
-        "lane's record -- `C93`'s move to COVERED-UNFIRED on the content search "
-        "reader, `C70`'s reading that the same capture draws no group facet and "
-        "its re-pointed capture, `M20`'s move to MEASURED-ABSENT on the first "
-        "opened conversation's footer, and `M40` and `M51`'s re-aimed capture "
-        "-- and none says anything in that record does not hold. The matched "
-        "words are older text: `C70`'s own 2026-09-21 paragraph ('TWO "
-        "CORRECTIONS', 'A PLAUSIBLE WRONG ANSWER', 'is **False** for'), row "
-        "`C72`'s cell two lines below it, and row `M18`'s cell ('correction', "
-        "'stale') two lines above `M20`. **WHAT WOULD MAKE THIS ENTRY WRONG:** "
-        "a messaging row saying something in the lane's record does not hold "
-        "while leaving the record unmarked."
+        "`C70`, `M20`, `M40`, `M51`, `M7`, `M8`, `M9`, `M28` and `M34` each "
+        "gained one dated note citing the lane's record -- `C93`'s move to "
+        "COVERED-UNFIRED on the content search reader, `C70`'s reading that the "
+        "same capture draws no group facet and its re-pointed capture, `M20`'s "
+        "move to MEASURED-ABSENT on the first opened conversation's footer, "
+        "`M40` and `M51`'s re-aimed capture, the three requests rows' "
+        "PRECONDITION, `M28`'s re-aimed capture and `M34`'s question -- and none "
+        "says anything in that record does not hold. The matched words are "
+        "older text: `C70`'s own 2026-09-21 paragraph ('TWO CORRECTIONS', 'A "
+        "PLAUSIBLE WRONG ANSWER', 'is **False** for'), row `C72`'s cell two "
+        "lines below it, row `M18`'s cell ('correction', 'stale') two lines "
+        "above `M20`, row `M6`'s ('corrected') above `M7` and `M8`, row `M30`'s "
+        "('wrong') below `M28` and row `M35`'s ('corrected') below `M34`. "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** a messaging row saying something "
+        "in the lane's record does not hold while leaving the record unmarked."
     ),
 
     # 2026-11-25, lane build-jmn26. TABLE-ROW PROXIMITY, read and not inferred

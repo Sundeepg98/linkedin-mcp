@@ -176,9 +176,9 @@ M M2	M	W	R2	TARGET:a non-connection he names (the act stops at the composer)	NAM
 M M3	M	W	R2	TARGET:a non-connection he names (the act stops at the composer)	NAMED	_audit/2026-09-24-lane-l5-messaging.md::| C-P5 | the composer a NON-connection gets ; RULING:OPERATOR-NAMES-THE-TARGET
 M M5	M	W	R2	TARGET:a non-connection he names (the act stops at the composer)	NAMED	_audit/2026-09-24-lane-l5-messaging.md::| C-P5 | the composer a NON-connection gets ; RULING:OPERATOR-NAMES-THE-TARGET
 M M6	M	W	R2	TARGET:a non-connection he names (the act stops at the composer)	NAMED	_audit/2026-09-24-lane-l5-messaging.md::| C-P5 | the composer a NON-connection gets ; RULING:OPERATOR-NAMES-THE-TARGET
-M M7	M	W	R3	CAPTURE:messaging-guarded	NAMED	_audit/_census/read-addresses.tsv::No committed source names a message-requests address
-M M8	M	W	R3	CAPTURE:messaging-guarded	NAMED	_audit/_census/read-addresses.tsv::No committed source names a message-requests address
-M M9	M	R	-	CAPTURE:messaging-guarded	NAMED	_audit/_census/read-addresses.tsv::No committed source names a message-requests address
+M M7	M	W	R3	PRECONDITION:a pending message request in his inbox	INFERRED	_audit/2026-11-26-readers-msg26.md::LinkedIn draws its requests entry only while a request is pending ; RULING:MEASURED-ABSENT-OR-PRECONDITION
+M M8	M	W	R3	PRECONDITION:a pending message request in his inbox	INFERRED	_audit/2026-11-26-readers-msg26.md::LinkedIn draws its requests entry only while a request is pending ; RULING:MEASURED-ABSENT-OR-PRECONDITION
+M M9	M	R	-	PRECONDITION:a message request he has declined	INFERRED	_audit/2026-11-26-readers-msg26.md::LinkedIn draws its requests entry only while a request is pending ; RULING:MEASURED-ABSENT-OR-PRECONDITION
 M M11	M	W	R2	TARGET:a conversation he names whose last message is his, under 60 minutes old	NAMED	_audit/2026-09-24-lane-l5-messaging.md::**C6 -- the per-message menu on his OWN message** ; RULING:OPERATOR-NAMES-THE-TARGET
 M M12	M	W	R3	TARGET:a conversation he names whose last message is his, under 60 minutes old	NAMED	_audit/2026-09-24-lane-l5-messaging.md::**C6 -- the per-message menu on his OWN message** ; RULING:OPERATOR-NAMES-THE-TARGET
 M M13	M	W	R2	TARGET:a message he names and the person to forward it to	INFERRED	RULING:OPERATOR-NAMES-THE-TARGET ; M M13
@@ -191,11 +191,11 @@ M M24	M	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 M M25	M	W	R3	TARGET:a group conversation he is in, named by him	INFERRED	RULING:OPERATOR-NAMES-THE-TARGET ; M M22
 M M26	M	W	R3	CAPTURE:C-B3-1	NAMED	_audit/2026-10-10-lane-b3-messaging-build.md::NEEDS-CAPTURE (one capture serves all four) ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE ; RULING:OWN-INBOX-READS-COVERED-BY-B
 M M27	M	W	R3	CAPTURE:C-B3-1	NAMED	_audit/2026-10-10-lane-b3-messaging-build.md::NEEDS-CAPTURE (one capture serves all four) ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE ; RULING:OWN-INBOX-READS-COVERED-BY-B
-M M28	M	R+W	-	CAPTURE:messaging-guarded	NAMED	RULING:CAPTURE-PRESS-UNDER-PROBE-RULE ; _audit/_census/read-addresses.tsv::no archive pill among the seven sanctioned
+M M28	M	R+W	-	CAPTURE:messaging-guarded	MEASURED	_audit/2026-11-26-readers-msg26.md::the control that restores one is not on disk ; RULING:VIEW-SWITCH-PRESS-RESTORED
 M M29	M	W	R3	CAPTURE:C-B3-1	NAMED	_audit/2026-10-10-lane-b3-messaging-build.md::NEEDS-CAPTURE (one capture serves all four) ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE ; RULING:OWN-INBOX-READS-COVERED-BY-B
 M M30	M	W	R3	TARGET:a conversation he has starred himself	NAMED	_audit/2026-09-24-lane-l5-messaging.md::**C10 -- the star's ON label** ; RULING:OPERATOR-NAMES-THE-TARGET
 M M31	M	W	R3	CAPTURE:C-B3-1	NAMED	_audit/2026-10-10-lane-b3-messaging-build.md::NEEDS-CAPTURE (one capture serves all four) ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE ; RULING:OWN-INBOX-READS-COVERED-BY-B
-M M34	M	R	-	CAPTURE:messaging-guarded	NAMED	RULING:CAPTURE-PRESS-UNDER-PROBE-RULE ; _audit/_census/read-addresses.tsv::the press ruling refuses typing outright
+M M34	M	R	-	RULING:Q-MESSAGE-SEARCH-TYPING	MEASURED	_audit/2026-11-26-readers-msg26.md::TYPING IS REFUSED BY BOTH ; RULING:D1-SEARCH-AS-READS
 M M35	M	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 M M36	M	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 M M37	M	W	R3	SIBLING:lane-S	NAMED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD ; RULING:MESSAGING-SETTINGS-CAPABILITY-LEVEL

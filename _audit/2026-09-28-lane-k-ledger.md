@@ -872,6 +872,20 @@ overlay) are vetoed, because a link is not a disclosure and a page may veto a ta
 question both rows wait on: is the self-profile query variant of his own profile address admissible as a READ
 address in its own right? Rows: `P D25`, `P A25`.
 
+### Q-MESSAGE-SEARCH-TYPING -- a search box in his own inbox, reachable only by typing
+
+Added 2026-11-26 by lane readers-msg26 (`_audit/2026-11-26-readers-msg26.md`,
+section 4). Row: `M M34`. Live session 11 typed one benign keyword into the
+message search at the head of his own inbox and LinkedIn drew a results view
+in place of the conversation list; no address of the search's own was
+recorded. A shipped read may not type -- the press module refuses typing in
+both its rules -- and `D1-SEARCH-AS-READS` permits search keywords as reads
+for an address composed from a tool's arguments, which this search has not
+been seen to have. The question: may a shipped read type a caller's keyword
+into his inbox's search box, read the rows the view draws as the list reader
+does, and clear the box -- or does the row wait on a capture that shows the
+search landing on an address of its own?
+
 ## 8. Preconditions and purposes
 
 PRECONDITION rows stay GAP; each waits on something he does not hold.
