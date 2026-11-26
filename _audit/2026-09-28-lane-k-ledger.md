@@ -886,6 +886,20 @@ into his inbox's search box, read the rows the view draws as the list reader
 does, and clear the box -- or does the row wait on a capture that shows the
 search landing on an address of its own?
 
+**Answered 2026-11-26 by the orchestrator** (relayed to lane readers-msg26;
+registration owed at integration 4). CAPTURE FIRST: one capture load that
+types a benign keyword into the inbox search and records whether the search
+lands on an address of its own. If it does, the read composes that address
+under `D1-SEARCH-AS-READS` and types nothing. Only if it does not, a shipped
+read may type the caller's keyword into the inbox SEARCH input, under a new
+sanctioned shape SEARCH-BOX-TYPING: the input identified by role search or
+searchbox and its own label, never a contenteditable composer; Enter pressed
+only within that input; the rows read as the list reader reads them; the box
+then cleared and the conversation list verified restored; a refusal if focus
+is ever in a composer or any send control becomes enabled -- built red first,
+with a control that shows composer typing refused. Row `M M34`: next step
+`CAPTURE:messaging-guarded`, the search box riding that line's load.
+
 ### Q-SCHEDULED-LIST-PRESS -- a list of his own reached only through the post composer
 
 Added 2026-11-26 by lane readers-msg26 (`_audit/2026-11-26-readers-msg26.md`,
@@ -899,6 +913,14 @@ surface's admission (the autosave argument). The question: may a shipped
 read press those two controls, read the list -- an empty state counted as
 zero only when its headline is drawn -- and close it with nothing typed or
 scheduled, or does the row stay unreachable as a composer surface?
+
+**Answered 2026-11-26 by the orchestrator** (relayed to lane readers-msg26;
+registration owed at integration 4). YES, as a shipped read: open the post
+composer EMPTY, press `Schedule post`, then `View all scheduled posts`, read
+the list -- an empty state counted as zero only when its headline is drawn --
+and close everything with nothing typed or scheduled, VERIFYING that no draft
+appeared; STOP on any autosave or draft sign. Row `M C14`: next step `BUILD`
+on `tests/fixtures/live11/sharebox_scheduled_list_open.html`.
 
 ### Q-ARTICLE-COMPOSER-DISCLOSURES -- the article editor's own closed controls, nothing typed
 
@@ -916,6 +938,15 @@ typed, dismiss the onboarding dialog and press the author toggle, `Manage`,
 the embed control and `Next` -- each read and closed with nothing chosen and
 nothing published, a draft's appearance recorded -- as
 B5-GROUP-COMPOSER-OPENS-EMPTY allowed a group composer to be opened?
+
+**Answered 2026-11-26 by the orchestrator** (relayed to lane readers-msg26;
+registration owed at integration 4). YES, as ONE CAPTURE, nothing typed:
+dismiss the onboarding dialog, then press the author toggle, `Manage`, the
+embed control and `Next`, each read and closed with Escape or Cancel; never
+Publish and never Schedule; record whether a draft appeared, and if one did
+its next step is deleting that draft (his own, reversible); STOP-ALL if any
+control would publish. Rows `M C44`, `M C46`, `M C50`, `M C78`, `M C81`,
+`P L3`: next step `CAPTURE:C-MSG26-4`, one queue line.
 
 ### Q-CONVERSATION-MENU-STATE -- a menu whose items exist only while it is open
 
@@ -935,6 +966,18 @@ must each act read its word only inside the confirmed press, refusing without
 pressing when the menu draws the inverse word? And `Delete conversation`,
 whose next state is not on disk and which has no inverse: built refusing at
 any dialog it has not seen, as `J-19-BUILT-BEHIND-THE-GRANT` built `J 19`?
+
+**Answered 2026-11-26 by the orchestrator** (relayed to lane readers-msg26;
+registration owed at integration 4). YES, a sanctioned PREVIEW press, on the
+similar-jobs trial-press precedent: the preview opens that ONE options menu as
+a disclosure, bound to the named conversation by the active marker, reads the
+item's word (Mute or Unmute, Archive or Unarchive, and so on), presses nothing
+inside it, closes it on Escape and verifies it closed; the confirmed press
+RE-READS the word and refuses on the inverse. `Delete conversation` has no
+inverse, so it is RECEIPT-ONLY behind the grant (the `J 163` class), fired only
+on his explicit order for a conversation he names, and refusing otherwise.
+Rows `M M26`, `M M27`, `M M29`, `M M31`: next step `BUILD` on
+`tests/fixtures/live11/c_b3_1_menu_open.html`.
 
 ## 8. Preconditions and purposes
 

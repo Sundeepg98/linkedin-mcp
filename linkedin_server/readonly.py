@@ -2465,11 +2465,13 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # D1-SEARCH-AS-READS'S THREE CONDITIONS, stated for this line: the
     # keywords come from a tool's arguments only, never from a page; never an
     # identifying value of the operator; at most five test searches a live
-    # session. NOTHING IN THE PACKAGE COMPOSES THIS ADDRESS TODAY: the first
-    # tool that opens it lands with its reader in the same commit, and the
-    # results are other people's posts, returned under
-    # THIRD-PARTY-TEXT-AT-RUNTIME. The next step is a capture
-    # (`_audit/_census/capture-queue.tsv`, admit-search-results-content).
+    # session. ONE TOOL COMPOSES THIS ADDRESS SINCE 2026-11-26:
+    # `linkedin_search_content` (lane readers-msg26, census `M C93`), through
+    # `content_search.compose`, which landed with its reader
+    # `content_search.read_content_results` in the same commit, as this line
+    # asked; the results are other people's posts, returned under
+    # THIRD-PARTY-TEXT-AT-RUNTIME. (Until then this said nothing in the
+    # package composed the address, and that its next step was a capture.)
     re.compile(r"^https://www\.linkedin\.com/search/results/content/?(\?[^#]*)?$"),
     # ======================================================================
     # REVIEW (lane L1, 2026-09-23) -- N 184, ONE EVENT BY ITS NUMERIC ID.
