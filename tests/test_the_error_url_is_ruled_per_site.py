@@ -178,17 +178,18 @@ DECLARED: dict[tuple[str, str], tuple[str, int]] = {
     # dom._landing_note, as the readers above do.
     ("content_search.py", "read_content_results"): (WITHHELD, 2),
     # --- ASKED_FOR: the seven tool-side raises ----------------------------
-    # `url` is this helper's own parameter, composed by its caller
-    # (`linkedin_search_jobs._search_url`) out of BASE_URL and urlencode.
-    # `test_navigation_is_never_derived` is the standing proof that no
-    # navigation target in this package is page-derived.
-    ("server.py", "_read_cards"): (ASKED_FOR, 1),
+    # (``_read_cards``'s one raise left this table on 2026-11-26, when the
+    # helper was deleted with no caller left: READ-CARDS-DELETION, lane
+    # infra26.)
     # 2026-11-26 (lane search-fix26): `linkedin_search_jobs` reads through
-    # this helper now, and `url` is the same caller-composed address as
-    # above. FIVE raises, every one passing the ASKED-FOR `url` and never the
-    # landing: the classic zero, the AI fallback's refused arguments, the AI
-    # landing for other keywords, the AI zero, and a landing on any other
-    # route (whose message carries only `landing.withheld`).
+    # this helper, and `url` is its own parameter, composed by that tool's
+    # `_search_url` out of BASE_URL and urlencode;
+    # `test_navigation_is_never_derived` is the standing proof that no
+    # navigation target in this package is page-derived. FIVE raises, every
+    # one passing the ASKED-FOR `url` and never the landing: the classic zero,
+    # the AI fallback's refused arguments, the AI landing for other keywords,
+    # the AI zero, and a landing on any other route (whose message carries
+    # only `landing.withheld`).
     ("server.py", "_read_job_search"): (ASKED_FOR, 5),
     # f"{BASE_URL}/jobs-tracker/?stage={stage}" -- this package's template.
     ("server.py", "_read_tracker"): (ASKED_FOR, 1),
@@ -600,10 +601,13 @@ def test_the_twenty_are_still_twenty():
     # search-fix26, readers-jobs26, readers-net26 and readers-msg26, every site
     # of each kept, the tally MEASURED off the merged table, not summed:
     # {WITHHELD 21, ASKED_FOR 17, PASSTHROUGH 1, NO_ADDRESS_IN_SCOPE 10}.
+    # THIRTY-EIGHT ON LANE INFRA26 (2026-11-26): ``server._read_cards`` was
+    # deleted with no caller left (READ-CARDS-DELETION), and its one ASKED_FOR
+    # raise with it: ASKED_FOR 17 -> 16. MEASURED off this table, not summed.
     assert tally[WITHHELD] == 21, tally
-    assert tally[ASKED_FOR] == 17, tally
+    assert tally[ASKED_FOR] == 16, tally
     assert tally[PASSTHROUGH] == 1, tally
-    assert tally[WITHHELD] + tally[ASKED_FOR] + tally[PASSTHROUGH] == 39, tally
+    assert tally[WITHHELD] + tally[ASKED_FOR] + tally[PASSTHROUGH] == 38, tally
     assert tally[NO_ADDRESS_IN_SCOPE] == 10, tally
 
 

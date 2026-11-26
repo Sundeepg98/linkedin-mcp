@@ -12885,15 +12885,112 @@ editors, the pin re-deriver -- and the exported base tree used for the
 red-first runs. Each answered one question once; the answers are in the
 record.
 
-## 109. A ROW IS AIMED BY ITS OWN LINKS, COMPARED IN THE PAGE, AND A PRESS THAT DRAWS WHAT NOBODY HAS SEEN IS ANSWERED WITH NOTHING (build-net2, 2026-11-26)
+## 109. A CALLER IS COUNTED ONLY ONCE ITS NAME IS BOUND, A CEILING IS A COUNTER, AND A RAW PAGE IS JUDGED AS IT IS WRITTEN (infra26, 2026-11-26)
+
+**Registered 2026-11-26.** Full record: `_audit/2026-11-26-infra26.md`.
+Numbered 109, the next free number on base `3c656df`. Sibling wave-3 lanes
+may take 109 too, so renumber at the merge.
+
+### 109.1 The AST caller census
+
+`scripts/caller_census.py` answers "who can reach this one function?" for
+deletion rulings such as READ-CARDS-DELETION. It BINDS each reference to a
+module before it counts it:
+
+* COUNTED: a bare call or a value in the defining module, an attribute on any
+  import spelling, `getattr`/`hasattr`/`setattr`/`delattr` with the literal
+  name, and an import (relative spellings resolved).
+* COUNTED, because a reference that cannot be bound is never dropped: an
+  unbindable receiver, and an unreadable file.
+* LISTED, NOT COUNTED: a same-named function in another module, and a string
+  mention, which a reader classifies.
+
+`tests/test_caller_census.py` shows it failing on 13 planted channels. It
+also shows the sibling and the string listed and not counted, a clean
+package passing, and an extra root read. Its deletion assertion was red on
+`3c656df`.
+
+    A GREP FINDS A NAME. A CENSUS FINDS A CALLER ONLY AFTER IT HAS BOUND THE
+    NAME TO THE MODULE IT CAME FROM.
+
+### 109.2 The per-call navigation ceiling
+
+`linkedin_server/call_ceiling.py` (ruled NAVIGATION-CEILING-PER-TOOL-CALL):
+a fastmcp middleware arms a per-call budget for every `tools/call`.
+`LinkedInBrowser.goto` counts each load against it (`count_load`) after its
+doors and before its rate slot, and it refuses the fourth load unmade,
+naming the tool, the count, the ceiling and the page family.
+
+* The one declared fan-out is the search's places, capped at
+  `jobfilter.MAX_LOCATIONS`. Its single call site is pinned, and the pin is
+  shown failing by a planted second caller in three spellings.
+* Outside a tool call nothing is counted. The live runner loads many pages
+  in one browser session, which is why the scope is the tool call and not
+  the session.
+* `tests/test_navigation_ceiling.py` drives a planted tool through a real
+  fastmcp `Client`. On the tree before `goto` counted, its fourth load
+  reached the page, and 7 of 12 tests failed.
+* EVERY REGISTERED TOOL is then called through the middleware with a
+  recording probe. A server without the middleware is the control: its tool
+  is listed and never reached. A second `FastMCP` in the package is the
+  registration path the census could not list, and it is caught
+  structurally, with its own planted control.
+
+    A CEILING NOTHING COUNTS IS A SENTENCE. COUNT IT WHERE EVERY LOAD
+    PASSES, SCOPE IT TO WHAT THE RULING BOUNDS, AND NAME THE ONE EXCEPTION.
+
+### 109.3 The synthetic-people guard: one parse, and a scoped mode
+
+`tests/test_fixtures_hold_only_synthetic_people.py` now parses its corpus
+once per process: 75 s became 14 s here, and the assertions are unchanged.
+`--people-guard-scope=changed` reads only the fixtures changed since the
+merge base. It skips the corpus-wide tests by name, and skips loudly over an
+empty set. It falls back to the full sweep on anything it cannot classify,
+including a change to the guard's own rules. CI passes no option, and a test
+pins that. Shown failing by five selection mutants, each red, and by a staged
+real-looking plant that both modes convicted on the real repository.
+
+    A SCOPED GATE SAYS WHAT IT DID NOT READ, AND READS EVERYTHING WHEN IT
+    CANNOT TELL WHAT A CHANGE TOUCHES.
+
+### 109.4 PEOPLE-GATE v2
+
+`scripts/people_gate.py` judges the HTML string a capture is about to write,
+under the orchestrator's six rules of 2026-11-26 14:05. It keeps v1's
+member-link count (103.4), now read off the string, and counts name slots
+through the fixture guard's own reader. That closes 107.5's defect once the
+runner takes the two-line change in the record (section 4.5). His identity
+is held as digests, learned from his own navigation photo and entity, and
+carried across pages by a cache tied to his slug. MEASURED on session 11's
+five clean raws: judged alone, four server-driven pages withheld his own
+avatar as somebody else's; taught by one page that carries his entity, all
+five were kept. `tests/test_people_gate.py` rebuilds the two page shapes
+that broke v1 from rawsweep26's names-free counts. v1's rule keeps both; v2
+withholds both. 16 of 16 mutants are red, three of them only after the
+first run left them green and a control was added for each.
+
+    A GATE THAT CANNOT TELL HIS OWN FACE FROM A STRANGER'S WITHHOLDS BOTH.
+    TEACH IT HIS IDENTITY ONCE, FROM THE PAGE THAT CARRIES IT, AND KEEP ONLY
+    DIGESTS OF IT.
+
+### 109.5 Declared disposable
+
+The lane's scratch scripts are disposable. They are the navigation and
+session runners over the pipeline repository's static census, the
+own-identity and glued-token probes, the real-raw measurement, the item-3
+demonstration, the two mutant runners and an ASCII rewriter. Each answered
+one question once, and the answers are in the record.
+
+## 110. A ROW IS AIMED BY ITS OWN LINKS, COMPARED IN THE PAGE, AND A PRESS THAT DRAWS WHAT NOBODY HAS SEEN IS ANSWERED WITH NOTHING (build-net2, 2026-11-26)
 
 Lane build-net2 built network writes behind the grant on live session 11's
-captures; the record is `_audit/2026-11-26-build-net2.md`. Numbered 109 on
-this lane's branch: renumber at the merge if another lane took it. Each entry
+captures; the record is `_audit/2026-11-26-build-net2.md`. Numbered 110 at
+this lane's merge of master `f4fa447`, where lane infra26 had taken 109 (the
+branch numbered it 109 until then). Each entry
 below was shown failing first (the record's section on instruments has the
 runs).
 
-### 109.1 The invitation row aim and its verdicts
+### 110.1 The invitation row aim and its verdicts
 
 `linkedin_server/invitation_acts.py` aims the control of ONE pending
 invitation on his invitation manager by the row's own member links: the
@@ -12910,7 +13007,7 @@ an unsafe segment let through, a dialog reported as nothing opened.
     A ROW IS NAMED BY THE LINK HE GAVE, NOT BY ITS PLACE OR ITS NAME, AND
     TWO ROWS OF ONE MEMBER ARE A REFUSAL, NOT A CHOICE.
 
-### 109.2 The press that is answered with nothing
+### 110.2 The press that is answered with nothing
 
 After each one press, `invitation_acts.read_after_press` counts what the
 press drew -- dialogs, their buttons by a closed list of LinkedIn's words,
@@ -12922,7 +13019,7 @@ the row is still pending.
 
     A STEP NOBODY HAS SEEN IS COUNTED, NEVER ANSWERED; ITS COUNT IS ITS CAPTURE.
 
-### 109.3 The entries
+### 110.3 The entries
 
 | path | shown failing by |
 |---|---|
@@ -12932,7 +13029,7 @@ the row is still pending.
 | `scripts/_build_live11_net2_word_skeletons.py`, `tests/test_live11_net2_word_fixtures.py` | the fixture held to its tracked copy token by token; the restorer's list losing `Not interested` is RED (a ninth mutation), and the file's own can-fail test takes `Not interested` off the word list and finds the difference nothing explains |
 | `linkedin_server/search_typeahead.py`, `tests/test_search_typeahead.py` | on the base tree `3c656df` the file fails at collection (no module `search_typeahead`); green 16 passed. Ten mutations, 10 RED, each a FAILED: two matching inputs read as one; the role=search scope dropped from the target; an open box pressed anyway; a group whose links are not all searches passes; a group under its own heading passes; the parser falls back to a link's own path (reads the people); a step outside the table is pressed as a key; a box that stays open read as closed; a click that opened nothing is Escaped; the restorer's list loses 'search-results' |
 
-### 109.4 DECLARED DISPOSABLE
+### 110.4 DECLARED DISPOSABLE
 
 The lane's scratch probes -- the keyed-shape word counter, the trigger-label
 shape probe, the id-shaped attribute census, the search-box shape census, the
@@ -12941,7 +13038,7 @@ selector checker, the census cell editor, the mutation runner -- and, for
 the navigation-taint probes and the batch and step runners. Each answered
 one question once; the answers are in the record.
 
-### 109.5 The menu a pressed trigger owns, by id
+### 110.5 The menu a pressed trigger owns, by id
 
 `linkedin_server/feed_curation.py` presses an item's control menu by
 LinkedIn's fixed trigger prefix and then the menu's `Not interested` ONLY
@@ -12953,12 +13050,12 @@ not done, anything else unknown -- never "not done".
 `tests/test_mark_not_interested.py` holds it over the real captures (the
 closed permalink and the open one with its menu words put back), with the
 trigger's label planted after LinkedIn's measured prefix, and is shown failing
-by eight mutations, every one RED (the entries table, 109.3).
+by eight mutations, every one RED (the entries table, 110.3).
 
     A MENU IS AN ITEM'S ONLY WHERE THE PRESSED CONTROL NAMES IT; AN UNDO
     DRAWN ONCE IS READ WHERE IT IS DRAWN, AND NOT SEEING IT IS NOT A NO.
 
-### 109.6 The second word restorer
+### 110.6 The second word restorer
 
 `scripts/_build_live11_net2_word_skeletons.py` puts LinkedIn's menu words back
 into the permalink's tracked copy through readers-jobs26's own
@@ -12969,7 +13066,7 @@ unless the skeleton's tracked copy IS the committed one.
 `tests/test_live11_net2_word_fixtures.py` holds the fixture to its copy token
 by token and is shown failing by taking `Not interested` off its word list, RED.
 
-### 109.7 The search box's typeahead, disclosed and closed
+### 110.7 The search box's typeahead, disclosed and closed
 
 `linkedin_server/search_typeahead.py` presses ONE control on SEARCH-BOX-TYPEAHEAD-DISCLOSURE:
 the one `[role=search] input[aria-autocomplete]` on the feed, refused unless
@@ -12982,7 +13079,7 @@ from a two-entry table and refuses any other. `tests/test_search_typeahead.py`
 holds it over session 11's open capture with its address word put back by
 keyed shape, synthetic keywords and a NEEDLE planted in the people group, and
 a world that answers presses as LinkedIn's box does; it is shown failing by
-ten mutations, every one RED (the entries table, 109.3).
+ten mutations, every one RED (the entries table, 110.3).
 
     A PRESS THAT OPENS A LIST IS ANSWERED BY ONE GROUP OF IT, FOUND BY ITS
     SHAPE; THE REST OF THE LIST NEVER CROSSES, AND ITS CLOSING IS SHOWN.
