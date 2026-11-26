@@ -1054,6 +1054,12 @@ shape. The question: split `J 37` -- the list half COVERED-UNFIRED on the new
 read, the manage half the next free numeric id, GAP, resting on `J 33` and
 `J 34` -- or hold it whole and GAP until the manage half is built?
 
+ANSWERED 2026-11-26 by the orchestrator, `J-37-SPLITS` (integration 6
+registers it): SPLIT under COMPOUND-ROW-SPLITS-ONLY-ON-STATE, the `J 114` /
+`J 169` precedent. Applied by lane build-jobs2's round 2: `J 37` keeps the
+list half, COVERED-UNFIRED on `linkedin_job_alerts`; the manage half is
+`J 170`, GAP, next step BUILD (the alert edits).
+
 ## 8. Preconditions and purposes
 
 PRECONDITION rows stay GAP; each waits on something he does not hold.

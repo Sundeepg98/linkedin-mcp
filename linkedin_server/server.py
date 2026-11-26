@@ -14061,7 +14061,8 @@ from linkedin_server import job_alerts_manager  # noqa: E402 -- lane build-jobs2
 async def linkedin_job_alerts() -> dict[str, Any]:
     """Your job alerts, as LinkedIn's own alert manager lists them.
 
-    ONE PAGE LOAD, NO PRESSES. Census ``J 37``, the list half. The address is
+    ONE PAGE LOAD, NO PRESSES. Census ``J 37``, *List all alerts* (the
+    manage half, split off on 2026-11-26, is ``J 170``). The address is
     a module constant, the jobs home (``/jobs/jam/``), where LinkedIn draws its
     alert manager open on load (session 11's capture). Each alert comes back as
     ``search_keywords`` -- the query exactly as ``linkedin_search_jobs`` takes

@@ -1,11 +1,14 @@
 """His job alerts, as LinkedIn's own alert manager lists them -- census row ``J 37``, the LIST half.
 
-*List and manage all alerts.* Lane build-jobs2, 2026-11-26, over the live
-lane's session-11 capture of the jobs home (``/jobs/jam/``, load 17), tracked
-as ``tests/fixtures/live11/jobs_alerts_manager.html`` and, with its one
-LinkedIn heading measured by keyed shape, as
+*List all alerts* -- the list half of what the census wrote as *List and
+manage all alerts*, split on 2026-11-26 under COMPOUND-ROW-SPLITS-ONLY-ON-STATE
+by the orchestrator's J-37-SPLITS; the manage half is ``J 170``. Lane
+build-jobs2, 2026-11-26, over the live lane's session-11 capture of the jobs
+home (``/jobs/jam/``, load 17), tracked as
+``tests/fixtures/live11/jobs_alerts_manager.html`` and, with its one LinkedIn
+heading measured by keyed shape, as
 ``tests/fixtures/live11/jobs_alerts_manager_words.html``
-(``scripts/_build_live11_word_skeletons.py``).
+(``scripts/_build_jobs2_word_skeletons.py``).
 
 ## WHAT WAS MEASURED (session 11)
 
