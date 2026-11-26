@@ -17,6 +17,13 @@ What this module guarantees, and why each guarantee exists:
   anything. Its only job is to stop a burst of tool calls becoming a burst of
   page loads on one human's account.
 
+* **At most three page loads per tool call.** :meth:`LinkedInBrowser.goto`
+  spends each load from the budget ``call_ceiling.PerCallCeiling`` arms
+  around every MCP tool call, and it refuses the load past
+  :data:`config.MAX_NAVIGATIONS_PER_CALL` before making it. Outside a tool
+  call, for the live lane's runner and the probes, nothing is counted
+  (NAVIGATION-CEILING-MADE-TRUE, 2026-11-26).
+
 * **Nothing but reading.** The only Playwright verbs used anywhere in this
   package are ``goto``, waits, and text/JSON reads. There is no click, no
   fill, no form submission, no non-GET request. ``readonly.assert_read_url``
@@ -67,7 +74,7 @@ from contextlib import asynccontextmanager
 from typing import Any, AsyncIterator, Optional
 from urllib.parse import urlsplit
 
-from linkedin_server import preflight, profile_lock, profile_version
+from linkedin_server import call_ceiling, preflight, profile_lock, profile_version
 from linkedin_server.session_store import SessionStore
 from linkedin_server.config import (
     CDP_ATTACH,
@@ -596,6 +603,11 @@ class LinkedInBrowser:
             assert_named_profile_url(url)
         else:
             assert_read_url(url)
+        # THE PER-CALL CEILING, spent AFTER the doors (a refused address costs
+        # nothing) and BEFORE the rate slot and the page: a load over the
+        # ceiling is refused unloaded. Counts only inside an MCP tool call
+        # (call_ceiling.PerCallCeiling); NAVIGATION-CEILING-MADE-TRUE.
+        call_ceiling.spend(url)
         await self.wait_for_rate_slot()
         try:
             await page.goto(url, wait_until="domcontentloaded", timeout=NAV_TIMEOUT_MS)

@@ -780,6 +780,7 @@ from linkedin_server import (
     analytics_hub,
     anchors,
     buildinfo,
+    call_ceiling,
     cdp_bridge,
     coerce,
     collections_page,
@@ -845,6 +846,7 @@ from linkedin_server.config import (
     MIN_NAVIGATION_INTERVAL_S,
     NOTIFICATIONS_DEFAULT_LIMIT,
     NOTIFICATIONS_MAX_LIMIT,
+    PAGE_AND_ITS_FALLBACK,
     SEARCH_DEFAULT_LIMIT,
     SEARCH_MAX_LIMIT,
     SERVER_NAME,
@@ -1522,6 +1524,11 @@ mcp = FastMCP(
         "operator to check before anything fires; it is kept nowhere."
     ),
 )
+
+#: AT MOST MAX_NAVIGATIONS_PER_CALL PAGE LOADS PER TOOL CALL, ENFORCED: every
+#: tools/call runs with its own budget, which BROWSER.goto spends and refuses
+#: past. NAVIGATION-CEILING-MADE-TRUE (2026-11-26); see call_ceiling.py.
+mcp.add_middleware(call_ceiling.PerCallCeiling())
 
 
 # ---------------------------------------------------------------------------
@@ -2572,7 +2579,7 @@ async def linkedin_who_viewed_me(
             # BOUND BEFORE THE NAVIGATION ON PURPOSE: if `goto` raises, the
             # requested address is still the one that was tried.
             last_requested_url = ""
-            for attempt, url in enumerate(urls[:MAX_NAVIGATIONS_PER_CALL], start=1):
+            for attempt, url in enumerate(urls[:PAGE_AND_ITS_FALLBACK], start=1):
                 last_requested_url = url
                 last_url = await BROWSER.goto(page, url)
                 assert_not_authwall(last_url, surface="profile views")
@@ -6004,6 +6011,9 @@ async def linkedin_search_jobs(
         if plan["state"] == "refused":
             return {"error": "bad_argument", "message": plan["why"]}
         places: list[str] = plan["places"]
+        # THE ONE DECLARED EXCEPTION to the per-call ceiling: one load per
+        # place, capped at jobfilter.MAX_LOCATIONS (NAVIGATION-CEILING-MADE-TRUE).
+        call_ceiling.allow_fan_out(len(places))
 
         # EVERY PARAMETER EXCEPT THE LOCATION. The location is spliced in per
         # search below, at the index it has always occupied -- second, right

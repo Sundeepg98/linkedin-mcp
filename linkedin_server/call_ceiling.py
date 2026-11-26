@@ -1,0 +1,120 @@
+"""At most three page loads per tool call: the ceiling, enforced.
+
+NAVIGATION-CEILING-MADE-TRUE (ruled 2026-11-26, lane pace20's first question;
+built by lane infra26, record ``_audit/2026-11-26-infra26.md`` section 2).
+``config.MAX_NAVIGATIONS_PER_CALL`` was DOCUMENTED as a ceiling ("Nothing may
+exceed this ceiling") at 2, and enforced nowhere, while 31 tools reached 3.
+The measured maximum is now the ceiling, and this module enforces it.
+
+HOW. Every MCP ``tools/call`` runs inside :class:`PerCallCeiling`, a fastmcp
+middleware that server.py registers once. It arms a per-call budget in a
+context variable. ``browser.LinkedInBrowser.goto`` spends one load from that
+budget BEFORE it waits for the rate slot or touches the page, and the load
+that would exceed the budget is REFUSED there, with a
+:class:`~linkedin_server.errors.NavigationCeilingError` naming what it saw:
+the loads already made, the ceiling, and the refused page's family (its
+first path segment, never the address).
+
+WHAT IS NOT A TOOL CALL IS NOT COUNTED. The live lane's runner and the
+tracked probes drive ``BROWSER.goto`` themselves, many loads to one browser
+session, under their own ledger (LIVE-BUDGET-40-LOADS). Tests that call a
+tool function directly are not counted either. The scope is the MCP tool
+call because that is what the ruling bounds. A per-SESSION counter was
+measured wrong first: the runner loads five company tabs inside one session.
+
+THE ONE DECLARED EXCEPTION is ``linkedin_search_jobs`` with ``locations``:
+one search per place, ``jobfilter.MAX_LOCATIONS`` (5) at most, the fan-out its
+docstring prices. That tool, and only that tool (an AST test holds the call
+site), calls :func:`allow_fan_out` with its place count before its first load.
+The allowance can raise this call's budget to at most ``MAX_LOCATIONS``, never
+past it, and outside a tool call it does nothing.
+"""
+from __future__ import annotations
+
+import contextvars
+from contextlib import contextmanager
+from typing import Any, Iterator, Optional
+from urllib.parse import urlsplit
+
+from fastmcp.server.middleware import Middleware
+
+from linkedin_server.config import MAX_NAVIGATIONS_PER_CALL
+from linkedin_server.errors import NavigationCeilingError
+from linkedin_server.jobfilter import MAX_LOCATIONS
+
+#: The most loads a declared fan-out may raise one call's budget to.
+MAX_FAN_OUT_LOADS = MAX_LOCATIONS
+
+
+class _Budget:
+    __slots__ = ("ceiling", "fan_out", "made")
+
+    def __init__(self, ceiling: int) -> None:
+        self.ceiling = int(ceiling)
+        self.fan_out = 0
+        self.made = 0
+
+    @property
+    def limit(self) -> int:
+        return max(self.ceiling, self.fan_out)
+
+
+_BUDGET: contextvars.ContextVar[Optional[_Budget]] = contextvars.ContextVar(
+    "linkedin_navigation_budget", default=None
+)
+
+
+@contextmanager
+def per_call(ceiling: int = MAX_NAVIGATIONS_PER_CALL) -> Iterator[None]:
+    """Arm one tool call's budget for the duration of the block."""
+    token = _BUDGET.set(_Budget(ceiling))
+    try:
+        yield
+    finally:
+        _BUDGET.reset(token)
+
+
+def allow_fan_out(loads: int) -> int:
+    """Raise THIS call's budget to ``loads``, capped at :data:`MAX_FAN_OUT_LOADS`.
+
+    Returns the budget granted, or 0 outside a tool call. Never lowers it."""
+    budget = _BUDGET.get()
+    if budget is None:
+        return 0
+    budget.fan_out = max(budget.fan_out, min(int(loads), MAX_FAN_OUT_LOADS))
+    return budget.limit
+
+
+def spend(url: str) -> None:
+    """Count one page load against the armed budget, or refuse it unloaded.
+
+    Called by ``LinkedInBrowser.goto`` after its door and before its rate slot.
+    Outside a tool call there is no budget and nothing is counted."""
+    budget = _BUDGET.get()
+    if budget is None:
+        return
+    if budget.made >= budget.limit:
+        family = urlsplit(url).path.strip("/").split("/")[0] or "root"
+        fan_out = (" with this call's declared fan-out of %d" % budget.fan_out
+                   if budget.fan_out > budget.ceiling else "")
+        raise NavigationCeilingError(
+            "navigation refused before loading: this tool call has already made "
+            "%d page load(s) and its ceiling is %d (MAX_NAVIGATIONS_PER_CALL = %d%s). "
+            "The refused load was to a /%s/ page."
+            % (budget.made, budget.limit, budget.ceiling, fan_out, family)
+        )
+    budget.made += 1
+
+
+def made() -> Optional[int]:
+    """Loads this tool call has made so far, or None outside a tool call."""
+    budget = _BUDGET.get()
+    return None if budget is None else budget.made
+
+
+class PerCallCeiling(Middleware):
+    """Every ``tools/call`` gets its own budget of MAX_NAVIGATIONS_PER_CALL."""
+
+    async def on_call_tool(self, context: Any, call_next: Any) -> Any:
+        with per_call(MAX_NAVIGATIONS_PER_CALL):
+            return await call_next(context)
