@@ -68,7 +68,7 @@ from linkedin_server.server import (
     SELF_PROFILE_URL,
     linkedin_my_activity_items,
 )
-from tests.test_surface_census import ACTIVITY_ID, MEMBER_SLUG
+from tests.test_surface_census import ACTIVITY_ID, MEMBER_SLUG, OTHER_SLUG
 
 ACTIVITY_VIEWPORT = {"width": 1280, "height": 720}
 
@@ -292,6 +292,24 @@ DATA_ID_RAIL_HTML = page(
     ),
 )
 
+#: C1 WITHOUT THE URL MARKER, which LinkedIn stopped writing on 2026-11-25 (the
+#: live lane's session 11). The structural half of C1 (``self_profile``) is an
+#: edit control LinkedIn draws for the member the landing names -- here one,
+#: in the shape every self capture carries (an ``<a>`` with an accessible
+#: name, ``/in/<member>/edit/...``). The real landing is driven in
+#: ``tests/test_self_profile_without_the_url_marker.py``; these two isolate C1
+#: on A2's own markup, as A3 does.
+HIS_EDIT_CONTROL = (
+    f'<a aria-label="Intro editor" href="https://www.linkedin.com/in/{MEMBER_SLUG}/edit/intro/"></a>'
+)
+HIS_RAIL_WITH_HIS_EDIT_CONTROL_HTML = HIS_RAIL_HTML.replace("<main>", "<main>" + HIS_EDIT_CONTROL)
+
+#: The same control for ANOTHER member, beside his: a page offering to edit
+#: somebody the landing does not name is ambiguous, whatever else it draws.
+HIS_RAIL_WITH_A_FOREIGN_EDIT_CONTROL_HTML = HIS_RAIL_WITH_HIS_EDIT_CONTROL_HTML.replace(
+    "<main>", "<main>" + HIS_EDIT_CONTROL.replace(MEMBER_SLUG, OTHER_SLUG)
+)
+
 #: A4: C1 and C2 both hold, and only C3 catches it.
 WRONG_OWNER_HTML = HIS_RAIL_HTML.replace(H1_OWNER, f"<h1>{OTHER_AUTHOR}</h1>")
 
@@ -404,6 +422,13 @@ async def run_tool(monkeypatch):
                     @property
                     def url(self):
                         return self._inner.url
+
+                    # FORWARDED UNRECORDED, since 2026-11-26: C1's structural
+                    # half (``self_profile.read_edit_routes``) is a locator
+                    # COUNT, which injects no script, so ``scripts`` still
+                    # holds exactly what the tool executed.
+                    def locator(self, *args, **kwargs):
+                        return self._inner.locator(*args, **kwargs)
 
                     async def evaluate(self, script, *args, **kwargs):
                         scripts.append(script)
@@ -833,6 +858,39 @@ async def test_an_absent_reading_that_turns_true_on_retry_succeeds(run_tool):
     assert scripts == [dom.ACTIVITY_ITEMS_JS], scripts
 
 
+async def test_c1_holds_by_structure_when_the_url_carries_no_marker(run_tool):
+    """A3's landing -- no marker -- over A2's markup plus ONE edit control for
+    the member the landing names: C1 holds on the FIRST load, by structure,
+    and the block says which signal answered. Red before 2026-11-26, when
+    this refused exactly as A3 does."""
+    result, navigations, scripts = await run_tool(
+        HIS_RAIL_WITH_HIS_EDIT_CONTROL_HTML, landed=LANDED_NO_ASSERTION
+    )
+    assert result.get("refused") is None, result
+    assert result["items"] == [HIS_ITEM_ONE, HIS_ITEM_TWO], result["items"]
+    assert result["authorship"]["self_assertion_present"] is True
+    assert result["authorship"]["self_signal"] == "edit_controls", result["authorship"]
+    assert navigations == [SELF_PROFILE_URL] and result["pages_loaded"] == 1
+    assert scripts == [dom.ACTIVITY_ITEMS_JS], scripts
+
+
+async def test_an_edit_control_for_another_member_is_ambiguous_and_reads_nothing(run_tool):
+    """The same page with a second edit control naming ANOTHER member: refused
+    at once as ambiguous, not retried, the rail never read -- and the refusal
+    says what it counted."""
+    result, navigations, scripts = await run_tool(
+        HIS_RAIL_WITH_A_FOREIGN_EDIT_CONTROL_HTML, landed=LANDED_NO_ASSERTION
+    )
+    assert result.get("refused") == "self_profile_ambiguous", result
+    assert "items" not in result and "counts" not in result, sorted(result)
+    assert scripts == [], scripts
+    assert navigations == [SELF_PROFILE_URL] and result["pages_loaded"] == 1
+    saw = result["self_evidence"]
+    assert saw["url_marker"] == "absent"
+    assert saw["edit_controls_on_landed_member"] == 1
+    assert saw["edit_routes_on_another_member"] == 1
+
+
 # ---------------------------------------------------------------------------
 # A4 and A5. C3, in its three failing shapes
 # ---------------------------------------------------------------------------
@@ -1072,7 +1130,9 @@ def test_the_stray_really_sits_outside_the_rail():
 #: missed the refusal reasons entirely.
 EVERY_PATH = [
     ("established", HIS_RAIL_HTML, LANDED_PROFILE),
+    ("established_by_structure", HIS_RAIL_WITH_HIS_EDIT_CONTROL_HTML, LANDED_NO_ASSERTION),
     ("self_assertion_unreadable", HIS_RAIL_HTML, LANDED_NO_ASSERTION),
+    ("self_profile_ambiguous", HIS_RAIL_WITH_A_FOREIGN_EDIT_CONTROL_HTML, LANDED_NO_ASSERTION),
     ("not_self_profile", HIS_RAIL_HTML, LANDED_NOT_SELF_PROFILE),
     ("mixed_authors", MIXED_RAIL_HTML, LANDED_PROFILE),
     ("no_overflow_controls", EMPTY_RAIL_HTML, LANDED_PROFILE),
@@ -1414,6 +1474,9 @@ async def test_the_refusal_codes_are_the_enumeration_they_claim_to_be(run_tool):
     assert produced == set(dom.ACTIVITY_REFUSALS) | {
         "not_self_profile",
         "self_assertion_unreadable",
+        # SINCE 2026-11-26: the url carries no marker, and a page drawing an
+        # edit control for a member the landing does not name is AMBIGUOUS.
+        "self_profile_ambiguous",
     }, (
         sorted(produced),
         sorted(dom.ACTIVITY_REFUSALS),

@@ -1851,6 +1851,77 @@ async def read_company_home_as_shipped(page: Any) -> Any:
     return await dom.read_company_home(_DrawsTheHomeView(page))
 
 
+# ---------------------------------------------------------------------------
+# self_profile:read_edit_routes -- his own profile's edit controls, counted
+# ---------------------------------------------------------------------------
+
+#: Session 11's ``/in/me/`` landing (2026-11-25), tracked by lane selfprofile26
+#: through the live harness's ``tracked_copy``: every member segment is ``x``,
+#: so the page was captured at this address.
+SELF_LANDING_FIXTURE = "self_profile/in_me_live11.html"
+SELF_LANDING_URL = "https://www.linkedin.com/in/x/"
+
+#: An ``<a>`` start tag, for the drive's own transcription of the capture.
+_ANCHOR_TAG = re.compile(r"<a\s[^>]*>")
+
+
+def _the_new_landing_counts() -> dict[str, int]:
+    """What the capture draws for ``self_profile.edit_route_selectors``' three
+    locators, transcribed off the fixture before the reader runs: 4 edit
+    routes under the landed member's path, all 4 named, none under any other
+    member's. A fixture that stopped drawing them RAISES (``_drawn``)."""
+    markup = _drawn(SELF_LANDING_FIXTURE, 'href="https://www.linkedin.com/in/x/edit/')
+    routes = [tag for tag in _ANCHOR_TAG.findall(markup)
+              if 'href="https://www.linkedin.com/in/x/edit/' in tag]
+    named = [tag for tag in routes if 'aria-label="' in tag and 'aria-label=""' not in tag]
+    others = [tag for tag in _ANCHOR_TAG.findall(markup)
+              if re.search(r'href="https://www\.linkedin\.com/in/(?!x/|me/)[^/"?#]+/edit/', tag)]
+    if (len(routes), len(named), len(others)) != (4, 4, 0):
+        raise AssertionError(f"{SELF_LANDING_FIXTURE} no longer draws 4 named edit routes for x and none for another member")
+    return {
+        "edit_controls_on_landed_member": len(named),
+        "edit_routes_on_landed_member": len(routes),
+        "edit_routes_on_another_member": len(others),
+    }
+
+
+class _DrawsHisEditControls(_AtTheAddress):
+    """His profile at the address session 11 landed on, answering the three
+    locators the reader counts with the capture's counts. Every other read is
+    the planted page's own."""
+
+    def __init__(self, wrapped: Any, url: str, counts: dict[str, int]) -> None:
+        super().__init__(wrapped, url)
+        self._counts = counts
+
+    def locator(self, selector: Any, *args: Any, **kwargs: Any) -> Any:
+        from linkedin_server import self_profile
+
+        located = self._wrapped.locator(selector, *args, **kwargs)  # the read, counted
+        for name, wanted in self_profile.edit_route_selectors("x").items():
+            if selector == wanted:
+                return _CountsAs(located, self._counts[name])
+        return located
+
+
+async def read_edit_routes_as_shipped(page: Any) -> Any:
+    """``self_profile.read_edit_routes`` as the self-profile loader and the
+    press gate call it -- the page, and the url it landed on.
+
+    THE SIGNATURE DRIVE hands it only the planted page, whose address is the
+    feed: not a member profile root, so the reader returns without asking
+    the page anything. AS SHIPPED, the page sits at the member root session
+    11's landing was captured at, and its three counts are the capture's. The
+    reader returns integers and closed words; no page string can reach them.
+    """
+    from linkedin_server import self_profile
+
+    counts = _the_new_landing_counts()
+    return await self_profile.read_edit_routes(
+        _DrawsHisEditControls(page, SELF_LANDING_URL, counts), SELF_LANDING_URL
+    )
+
+
 DRIVES: dict[str, Callable[..., Any]] = {
     "dom:read_company_home": read_company_home_as_shipped,
     "dom:read_any_save_control_label": read_any_save_control_label_as_shipped,
@@ -1894,6 +1965,9 @@ DRIVES: dict[str, Callable[..., Any]] = {
     "view_switch:_apply_positions": apply_positions_over_the_skeleton,
     "reveal:reveal": reveal_over_the_skeletons,
     "server:_profile_views_more_analytics": profile_views_more_analytics_over_the_skeletons,
+    # 2026-11-26 (lane selfprofile26): his own profile's edit controls, over
+    # session 11's landing, the capture the structural self signal rests on.
+    "self_profile:read_edit_routes": read_edit_routes_as_shipped,
 }
 
 #: As far as a press. Run by the guard, so the reads before the press are

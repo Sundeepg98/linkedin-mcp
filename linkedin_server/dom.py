@@ -4542,8 +4542,10 @@ async def read_self_owned_editor_fields(
     THE CALLER MUST HAVE ESTABLISHED SELF-OWNERSHIP BEFORE THIS RUNS. This
     function reads a container; it does not and cannot establish whose page it
     is on. ``server.linkedin_profile_editor_fields`` is the only caller and it
-    does that first, from LinkedIn's own ``isSelfProfile=true`` assertion plus
-    a same-member comparison across two landed urls. Pointing this at an
+    does that first, from LinkedIn's own assertion that the profile is his --
+    ``isSelfProfile=true``, or since 2026-11-26 its editor controls for exactly
+    the landed member (``self_profile``) -- plus a same-member comparison
+    across two landed urls. Pointing this at an
     arbitrary page would publish names off it, which is precisely what the
     census's gate exists to prevent -- so it is not exposed as a tool and takes
     no argument selecting a surface.
@@ -5180,7 +5182,11 @@ async def read_self_owned_editor_values(
 #   ``_self_assertion_on`` until 2026-09-03, when the activity path stopped
 #   using it: that boolean collapses ABSENT into FALSE, so a redirect that
 #   simply did not carry the parameter was reported as LinkedIn denying the
-#   profile was his. Not in this script.
+#   profile was his. Not in this script. SINCE 2026-11-26 C1 HAS A SECOND
+#   SIGNAL, because the url stopped carrying the parameter on 2026-11-25:
+#   LinkedIn's editor controls for exactly the landed member, counted by
+#   ``self_profile.read_edit_routes`` -- locator counts, still not this
+#   script.
 # * C2 -- UNANIMITY. Every control whose accessible name starts with
 #   :data:`ACTIVITY_OVERFLOW_PREFIX` must carry the SAME remainder, and there
 #   must be at least one. Two different authors anywhere on the page is MIXED
@@ -5710,10 +5716,11 @@ async def read_own_activity_items(
     THE CALLER MUST HAVE ESTABLISHED C1 BEFORE THIS RUNS. This function reads a
     document; it cannot see a url's query string and does not try.
     ``server.linkedin_my_activity_items`` is the only caller and it checks
-    LinkedIn's own ``isSelfProfile=true`` first, through the same
-    ``server._goto_self_profile_asserted`` ``linkedin_profile_editor_fields``
-    uses -- one loader, reading the tri-state and retrying only the ABSENT
-    case. That parity was a CLAIM this line made and the code did not keep
+    LinkedIn's own assertion first -- ``isSelfProfile=true``, or since
+    2026-11-26 its editor controls for the landed member (``self_profile``)
+    -- through the same ``server._goto_self_profile_asserted``
+    ``linkedin_profile_editor_fields`` uses -- one loader, retrying only the
+    ABSENT case. That parity was a CLAIM this line made and the code did not keep
     until 2026-09-03: this path used the collapsing boolean and loaded once,
     so a redirect that did not carry the parameter refused as though LinkedIn
     had said no. Both paths share the loader now. This

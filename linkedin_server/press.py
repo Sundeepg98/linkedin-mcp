@@ -222,9 +222,9 @@ from __future__ import annotations
 
 import re
 from typing import Any, Callable, Optional
-from urllib.parse import parse_qs, urlsplit
+from urllib.parse import urlsplit
 
-from linkedin_server import readonly
+from linkedin_server import readonly, self_profile
 
 #: THE ENUMERATED DISCLOSURE SHAPES. The whole of what may be pressed.
 #:
@@ -261,10 +261,12 @@ _SELF_SEGMENTS = frozenset({"me"})
 #: ``readonly`` admits.
 SELF_PROFILE_ADDRESS = "https://www.linkedin.com/in/me/"
 
-#: LINKEDIN'S OWN CLAIM THAT A LANDED PROFILE IS THE VIEWER'S. The parameter
-#: ``server._SELF_ASSERTION_PARAM`` names, pinned equal to it by a test so the
-#: two readers of one assertion cannot drift onto two spellings.
-_SELF_ASSERTION_PARAM = "isSelfProfile"
+#: LINKEDIN'S OWN CLAIM THAT A LANDED PROFILE IS THE VIEWER'S -- the URL
+#: MARKER, one of the two signals ``self_profile`` reads. The parameter
+#: ``server._SELF_ASSERTION_PARAM`` names, both bound to ``self_profile``'s one
+#: spelling and pinned equal by a test, so the two readers of one assertion
+#: cannot drift onto two spellings.
+_SELF_ASSERTION_PARAM = self_profile.SELF_ASSERTION_PARAM
 
 #: A member profile ROOT and nothing beneath it: the one page ``/in/me/``
 #: lands on. A page under the profile (``/recent-activity/``, ``/details/``,
@@ -273,7 +275,9 @@ _SELF_ASSERTION_PARAM = "isSelfProfile"
 _PROFILE_ROOT = re.compile(r"^/in/[^/?#]+/?$")
 
 
-def self_landing(url: Optional[str]) -> bool:
+def self_landing(
+    url: Optional[str], edit_routes: Optional[dict[str, Any]] = None
+) -> bool:
     """IS THIS THE URL ``/in/me/`` LANDS ON, BY LINKEDIN'S OWN ASSERTION? PURE.
 
     **ADDED 2026-09-24, BECAUSE THE GATE COULD NOT SEE HIS PROFILE AT ALL.**
@@ -303,6 +307,19 @@ def self_landing(url: Optional[str]) -> bool:
     caller reloads ``/in/me/`` as the self-profile loader already does); an
     assertion of ``false``; a page BENEATH a profile root; any other host or
     scheme.
+
+    **AND SINCE 2026-11-26, BY ITS EDIT CONTROLS WHEN THE URL SAYS NOTHING.**
+    LinkedIn stopped writing ``isSelfProfile`` on 2026-11-25 (the live lane's
+    session 11): both landings were a bare member path, and this function
+    refused his profile for every press. ``edit_routes`` is
+    ``self_profile.read_edit_routes`` taken against THIS url, and it is
+    consulted only when the url carries NO marker at all: a marker that
+    answered still decides, by the stricter rule above, exactly as before.
+    The structure admits only a member's profile ROOT whose page draws an
+    edit control for that very member and no edit route for any other
+    (``self_profile.self_state``) -- never "any profile under /in/".
+    :func:`disclose` takes the reading itself, and only for such a url, so
+    every other page is admitted or refused without being touched.
     """
     if not url:
         return False
@@ -311,14 +328,17 @@ def self_landing(url: Optional[str]) -> bool:
         return False
     if not _PROFILE_ROOT.match(parts.path):
         return False
-    values = [
-        str(value).strip().lower()
-        for value in parse_qs(parts.query).get(_SELF_ASSERTION_PARAM, [])
-    ]
-    return bool(values) and all(value == "true" for value in values)
+    marker = self_profile.url_marker(url, unanimous=True)
+    if marker != self_profile.SELF_ABSENT:
+        return marker == self_profile.SELF_TRUE
+    if self_profile.landed_member_segment(url) is None:
+        return False
+    return self_profile.self_state(marker, edit_routes) == self_profile.SELF_TRUE
 
 
-def admitted_address(url: Optional[str]) -> Optional[str]:
+def admitted_address(
+    url: Optional[str], edit_routes: Optional[dict[str, Any]] = None
+) -> Optional[str]:
     """THE ADMITTED FORM OF AN ADDRESS, which is what the gate reasons about.
     PURE.
 
@@ -327,14 +347,15 @@ def admitted_address(url: Optional[str]) -> Optional[str]:
     page the allowlist admits, reached by the redirect it was written for --
     so every later check (the composer and third-party refusals, the basis,
     the reading's surface) sees the page by the name the tables use. Anything
-    else is None: not admitted.
+    else is None: not admitted. ``edit_routes`` is :func:`self_landing`'s, and
+    only ever changes the answer for a member profile root with no marker.
     """
     if not url or not str(url).strip():
         return None
     address = str(url).strip()
     if readonly.is_read_url(address):
         return address
-    if self_landing(address):
+    if self_landing(address, edit_routes):
         return SELF_PROFILE_ADDRESS
     return None
 
@@ -577,7 +598,10 @@ def _control_judgement(
 
 
 def sensitivity_basis(
-    url: Optional[str], shape: Optional[str] = None
+    url: Optional[str],
+    shape: Optional[str] = None,
+    *,
+    edit_routes: Optional[dict[str, Any]] = None,
 ) -> Optional[dict[str, Any]]:
     """The declared basis for this surface -- or, on a surface judged per
     control, for this CONTROL -- or None. PURE.
@@ -591,11 +615,12 @@ def sensitivity_basis(
     the answer is a mapping even when nothing is judged -- see
     :func:`_control_judgement`. The address is taken in its ADMITTED FORM
     (:func:`admitted_address`), so his profile as landed is looked up as the
-    ``/in/me/`` the table names.
+    ``/in/me/`` the table names -- with the structural reading, when one was
+    taken, so a landing admitted by its edit controls is looked up the same.
     """
     if not url:
         return None
-    path = urlsplit(admitted_address(url) or str(url).strip()).path
+    path = urlsplit(admitted_address(url, edit_routes) or str(url).strip()).path
     for marker, basis in SENSITIVITY_BASES:
         if basis.get("match") == "exact":
             if path.rstrip("/") != marker.rstrip("/"):
@@ -703,7 +728,12 @@ def open_reading(key: Optional[str]) -> Optional[dict[str, Any]]:
     return None
 
 
-def check_reading(url: Optional[str], reading: Optional[str]) -> dict[str, Any]:
+def check_reading(
+    url: Optional[str],
+    reading: Optional[str],
+    *,
+    edit_routes: Optional[dict[str, Any]] = None,
+) -> dict[str, Any]:
     """The reading half of the pre-press gate. PURE, and TERMINAL when it refuses.
 
     ``None`` is no reading asked for, which is the gate as it always was. A key
@@ -726,7 +756,7 @@ def check_reading(url: Optional[str], reading: Optional[str]) -> dict[str, Any]:
         )
     # THE ADMITTED FORM, so a reading sanctioned on ``/in/me/`` is sanctioned
     # on his profile as landed and on nothing else (see admitted_address).
-    path = urlsplit(admitted_address(url) or str(url or "").strip()).path
+    path = urlsplit(admitted_address(url, edit_routes) or str(url or "").strip()).path
     if path not in tuple(entry.get("surfaces") or ()):
         return _refuse(
             "reading_not_for_this_surface",
@@ -836,7 +866,9 @@ def _refuse(reason: str, why: str, *, terminal: bool) -> dict[str, Any]:
     }
 
 
-def check_address(url: Optional[str]) -> dict[str, Any]:
+def check_address(
+    url: Optional[str], edit_routes: Optional[dict[str, Any]] = None
+) -> dict[str, Any]:
     """Conditions 1 and the composer/third-party refusals. PURE.
 
     Separated from the press so the whole gate is testable with no browser at
@@ -853,9 +885,9 @@ def check_address(url: Optional[str]) -> dict[str, Any]:
         )
 
     address = str(url).strip()
-    admitted = admitted_address(address)
+    admitted = admitted_address(address, edit_routes)
     if admitted is None:
-        return _refuse(
+        refusal = _refuse(
             "address_not_admitted",
             "the page is not on the read allowlist. A PRESS NEVER EXTENDS "
             "REACH: if the address is refused, every control on it is "
@@ -863,6 +895,14 @@ def check_address(url: Optional[str]) -> dict[str, Any]:
             "will not admit.",
             terminal=True,
         )
+        if edit_routes is not None:
+            # A MEMBER PROFILE ROOT WITH NO MARKER, ASKED AND NOT ADMITTED: the
+            # refusal names what the page showed, in closed words and counts
+            # (``self_profile.evidence``), and never the address.
+            refusal["self_evidence"] = self_profile.evidence(
+                self_profile.url_marker(address, unanimous=True), edit_routes
+            )
+        return refusal
 
     # EVERY CHECK BELOW READS THE ADMITTED FORM. For his profile as landed
     # that is ``/in/me/`` -- whose member segment is the self one -- and for
@@ -1069,7 +1109,12 @@ def check_price_can_move(
     return {"pressed": False, "price_can_move": True}
 
 
-def check_basis(url: Optional[str], shape: Optional[str] = None) -> dict[str, Any]:
+def check_basis(
+    url: Optional[str],
+    shape: Optional[str] = None,
+    *,
+    edit_routes: Optional[dict[str, Any]] = None,
+) -> dict[str, Any]:
     """CONDITION 3, THE HALF ANSWERABLE BEFORE ANY PAGE CONTACT. PURE.
 
     :data:`SENSITIVITY_BASES` is keyed by SURFACE and :func:`sensitivity_basis`
@@ -1088,7 +1133,7 @@ def check_basis(url: Optional[str], shape: Optional[str] = None) -> dict[str, An
     ``read_counters`` must return before it builds one, rather than discovering
     ``sensitive_counter_not_read`` after a press.
     """
-    basis = sensitivity_basis(url, shape)
+    basis = sensitivity_basis(url, shape, edit_routes=edit_routes)
     refusal = _basis_refusal(basis)
     if refusal is not None:
         return refusal
@@ -1346,6 +1391,7 @@ def evaluate(
     already_pressed: bool = False,
     reading: Optional[str] = None,
     scope: Optional[str] = None,
+    edit_routes: Optional[dict[str, Any]] = None,
 ) -> dict[str, Any]:
     """THE WHOLE GATE, PURE AND BROWSER-FREE. Conjunctive, in order.
 
@@ -1364,10 +1410,15 @@ def evaluate(
     permit with conditions 3 and 4 never evaluated. :func:`disclose` passes
     True. See the module docstring.
 
+    ``edit_routes`` is the structural reading :func:`self_landing` takes for a
+    member profile root with no marker (2026-11-26); :func:`disclose` takes it
+    against the same url it passes here, and every other caller gets exactly
+    the gate it always had.
+
     Returns the first refusal, or a permit. It never raises: one unusable
     control is not an error.
     """
-    verdict = check_address(url)
+    verdict = check_address(url, edit_routes)
     if verdict.get("refused"):
         return verdict
     verdict = check_shape(shape)
@@ -1376,7 +1427,7 @@ def evaluate(
     # THE CALLER'S OTHER TWO KEYS, both closed tables, both pure functions of
     # the arguments -- so both are refused here, before the basis and before
     # any contact, on the same footing as an off-list shape.
-    verdict = check_reading(url, reading)
+    verdict = check_reading(url, reading, edit_routes=edit_routes)
     if verdict.get("refused"):
         return verdict
     verdict = check_scope(scope)
@@ -1389,7 +1440,7 @@ def evaluate(
         # of the 2026-09-21 repair. A surface with no declared basis can only
         # ever end in ``no_sensitivity_basis``, so a permit here was a promise
         # the gate had already decided not to keep.
-        verdict = check_basis(url, shape)
+        verdict = check_basis(url, shape, edit_routes=edit_routes)
         if verdict.get("refused"):
             return verdict
         judged = verdict.get("judged")
@@ -1423,7 +1474,9 @@ def evaluate(
     # somebody in a hurry would make about a surface they had not read. On a
     # surface judged per control the shape KEY picks the control's entry --
     # a key from a closed tuple, already checked above, never a selector.
-    verdict = check_counters(before, after, basis=sensitivity_basis(url, shape))
+    verdict = check_counters(
+        before, after, basis=sensitivity_basis(url, shape, edit_routes=edit_routes)
+    )
     if verdict.get("refused"):
         return verdict
     priced_by = verdict.get("priced_by")
@@ -1487,9 +1540,29 @@ async def disclose(
     declared sensitivity basis is refused with the page never asked for a
     locator. It was not true before, and the surface where that was measured
     lists other people.
+
+    **THE ONE READ BEFORE THE PRE-PRESS VERDICT, AND THE ONE PAGE IT IS FOR**
+    (2026-11-26). Since LinkedIn stopped writing ``isSelfProfile``, his own
+    profile as landed is a bare member path, and whether it is his is no
+    longer a function of the url. So for a member profile ROOT carrying NO
+    marker -- and for no other url -- the page's edit controls for that member
+    are COUNTED before the verdict (``self_profile.read_edit_routes``: locator
+    counts, no script, no string back), against the url read once here. Every
+    other page, his marker-carrying landing included, is admitted or refused
+    exactly as before with the page never asked for anything.
     """
+    landed = getattr(page, "url", None)
+    edit_routes = (
+        await self_profile.read_edit_routes(page, landed)
+        if self_profile.wants_structure(landed)
+        else None
+    )
     pre = evaluate(
-        url=getattr(page, "url", None), shape=shape, reading=reading, scope=scope
+        url=landed,
+        shape=shape,
+        reading=reading,
+        scope=scope,
+        edit_routes=edit_routes,
     )
     if pre.get("refused"):
         return pre
@@ -1537,7 +1610,7 @@ async def disclose(
         # A PRICE THAT CANNOT MOVE IS REFUSED BEFORE THE CLICK, not after it:
         # it is knowable from this one reading. See check_price_can_move.
         price = check_price_can_move(
-            before, sensitivity_basis(getattr(page, "url", None), shape)
+            before, sensitivity_basis(landed, shape, edit_routes=edit_routes)
         )
         if price.get("refused"):
             return price
@@ -1572,8 +1645,19 @@ async def disclose(
             terminal=False,
         )
 
+    # THE URL AFTER THE PRESS, AND ITS OWN READING. A press that moved the page
+    # moved the question too, so the post-press verdict is taken on the page
+    # as it now is -- the structure counted again, against that url, and only
+    # if it is a member profile root with no marker. It never raises.
+    landed_after = getattr(page, "url", None)
+    edit_routes_after = (
+        await self_profile.read_edit_routes(page, landed_after)
+        if self_profile.wants_structure(landed_after)
+        else None
+    )
     verdict = evaluate(
-        url=getattr(page, "url", None),
+        url=landed_after,
+        edit_routes=edit_routes_after,
         shape=shape,
         before=before,
         after=after,
