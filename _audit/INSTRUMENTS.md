@@ -12884,3 +12884,47 @@ The lane's scratch probes -- the keyed-shape word counter, the card mapper
 editors, the pin re-deriver -- and the exported base tree used for the
 red-first runs. Each answered one question once; the answers are in the
 record.
+
+## 109. AN EXCUSAL IS KEYED BY THE ADDRESS, AND A WORD IS WRITTEN ONLY WHERE ITS KEYED SHAPE MATCHED (build-jobs2, 2026-11-26)
+
+Lane build-jobs2's record is `_audit/2026-11-26-build-jobs2.md`; its section 12
+lists the same instruments with the rows they serve.
+
+### 109.1 AN EXCUSAL THAT FOLLOWS THE ACTION WOULD FOLLOW IT ANYWHERE
+
+The settings writer's second admitted page lives at
+`/jobs/application-settings/`, which carries `/jobs/application`, the first
+commit's fence against applying. Excused on the spec as a whole, the word
+would be excused at every address that spec's pattern ever admits. Keyed by
+the address -- `WriteSpec.exempt_substrings_at`, compared by equality with the
+url the grant rebuilds -- it is excused at one. The control registers a second
+page under `/jobs/application/`, widens the pattern to admit it, and watches
+the write door refuse it on that word; the same spec excusing the word
+spec-wide admits it.
+
+    AN EXCUSAL BELONGS TO AN ADDRESS, NOT TO AN ACTION.
+
+### 109.2 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `scripts/_build_jobs2_word_skeletons.py` (the provenance of `tests/fixtures/live2/j18_words.html`, `tests/fixtures/live8/recommended_words.html` and `tests/fixtures/live11/jobs_alerts_manager_words.html`) | refuses, writing nothing, when a declared word matches no keyed shape ("1 declared word(s) matched no keyed shape; refusing", a word the jobs home does not draw) and when a skeleton's tracked copy is not the committed one (session 8's skeleton declared against session 2's copy); a fixed point on all three fixtures |
+| `WriteSpec.exempt_substrings_at` in `linkedin_server/writes.py`, with `tests/test_application_settings_write.py::test_THIS_CONTROL_CAN_FAIL_the_excusal_does_not_follow_a_second_address` | the second page under `/jobs/application/` refused on that word; the spec-wide excusal admitting it |
+| `settings_writer.audiences()` keyed by the whole target, with `test_THIS_CONTROL_CAN_FAIL_the_same_control_admitted_twice_is_refused` | the same page and control admitted twice raises at import |
+| the settings chain guard in `tests/test_a_covered_row_names_the_artifact_that_covers_it.py` (`J 74`, `J 76`, `P M7`, `P M8`) | `test_control_the_application_settings_chain_convicts_a_dropped_page`: the page removed, and one switch's rows dropped, each convicted |
+| `tests/test_recent_searches_clear.py`, `tests/test_recommendations_feedback.py`, `tests/test_job_alerts_manager.py` | each file red first on the previous head (collection error, then the unwired tool's tests); each reader's `THIS_CONTROL_CAN_FAIL_...` test plants a doubt -- the words reduced, a second card or block, an extra button, an empty list -- and reads `unknown` or raises |
+
+### 109.3 A FINDING, NOT AN INSTRUMENT
+
+`python -m tests.test_readers_emit_no_page_string --write-baseline`, run
+outside pytest, drives four `server` helpers into "timed out after 5.0s"
+where the committed baseline reads "navigates (page.goto)": the ruled 20 s
+pacing default runs on the real clock there. With `LINKEDIN_MIN_INTERVAL_S=0`
+the writer moves nothing it should not. Recorded, not fixed here.
+
+### 109.4 DECLARED DISPOSABLE
+
+The lane's scratch tools in the main checkout's gitignored state: the
+keyed-shape word and context probes, the census cell, ledger and queue
+editors, the pin re-deriver, the surface measurer and the edit scripts. Each
+answered one question once; the answers are in the record.
