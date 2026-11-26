@@ -1,4 +1,14 @@
-"""The tool surface: ninety-two tools, twenty-four of which write to LinkedIn.
+"""The tool surface: ninety-three tools, twenty-five of which write to LinkedIn.
+
+THE NINETY-THIRD IS A WRITE, 2026-11-26, on lane build-jobs2 (census
+``J 163``, ruling J-163-RECEIPT-ONLY-WRITE):
+``linkedin_send_recommendations_feedback``, his yes or no to the question
+LinkedIn draws under his recommended jobs. Behind the single-use grant and
+fired only on his order; RECEIPT-ONLY -- no inverse exists, and its outcome
+is declared unverifiable, the receipt recording what the page draws after
+the press. Measured off the registry, not summed: twenty-five write and
+four are write-shaped. The headline read "ninety-two tools, twenty-four of
+which write" until then.
 
 THE NINETY-SECOND IS WRITE-SHAPED AND REFUSES, 2026-11-26, on lane
 build-jobs2 (census ``J 19``, ruling J-19-BUILT-BEHIND-THE-GRANT):
@@ -476,9 +486,11 @@ POINTER to it was dangling, so a reader who followed it found nothing and
 would reasonably conclude these numbers are unchecked. A citation is a claim
 like any other.
 The surface splits three ways and the split is the part a reader actually
-needs: SIXTY-FOUR read, TWENTY-FOUR write, and FOUR are write-shaped,
-registered, gated and unable to act. Sixty-four plus twenty-four plus four is
-ninety-two. (Sixty-four, twenty-four and three, summing to ninety-one, until
+needs: SIXTY-FOUR read, TWENTY-FIVE write, and FOUR are write-shaped,
+registered, gated and unable to act. Sixty-four plus twenty-five plus four is
+ninety-three. (Sixty-four, twenty-four and four, summing to ninety-two, until
+lane build-jobs2's receipt-only ``linkedin_send_recommendations_feedback``,
+2026-11-26. Sixty-four, twenty-four and three, summing to ninety-one, until
 lane build-jobs2's refusing ``linkedin_set_recent_job_searches_cleared``,
 2026-11-26. Sixty-three, twenty-four and three, summing to ninety, until
 integration 4's merge of lane readers-msg26's content search, 2026-11-26; that
@@ -668,11 +680,13 @@ the moment ``update_profile_field`` was given an address while still refusing.
 always meant: an address is not a permission.
 
 NOTE THE ACTION THAT HAS NO TOOL. ``writes.SANCTIONED_WRITES`` holds
-TWENTY-NINE actions where this surface registers TWENTY-EIGHT write-shaped tools, and
+THIRTY actions where this surface registers TWENTY-NINE write-shaped tools, and
 the missing one is ``set_open_to_work``: it is sanctioned, it is refused by
-``_refuse_unperformable``, and no tool was ever registered for it. So twenty-eight
-counts TOOLS and twenty-nine counts ACTIONS, and a reader comparing the two
-numbers is not looking at a discrepancy. (TWENTY-EIGHT and TWENTY-SEVEN until
+``_refuse_unperformable``, and no tool was ever registered for it. So twenty-nine
+counts TOOLS and thirty counts ACTIONS, and a reader comparing the two
+numbers is not looking at a discrepancy. (TWENTY-NINE and TWENTY-EIGHT until
+lane build-jobs2's receipt-only ``send_recommendations_feedback``, the same
+day, added one to each. TWENTY-EIGHT and TWENTY-SEVEN until
 lane build-jobs2's refusing ``set_recent_job_searches_cleared``, 2026-11-26, added
 one to each. TWENTY-SIX and TWENTY-FIVE on master
 at lane build-jmn26's base, 4c62196, measured off that tree's registry -- this
@@ -1278,7 +1292,7 @@ mcp = FastMCP(
     instructions=(
         "A window onto the operator's OWN LinkedIn account, driven by his own "
         "signed-in browser on his own machine. Most tools read and change "
-        "nothing. TWENTY-FOUR WRITE: linkedin_save_job, "
+        "nothing. TWENTY-FIVE WRITE: linkedin_save_job, "
         "linkedin_unsave_job, linkedin_unfollow_company, "
         "linkedin_follow_company, linkedin_apply_job, "
         "linkedin_update_setting, linkedin_react_to_item, "
@@ -1290,7 +1304,8 @@ mcp = FastMCP(
         "linkedin_message_from_profile, linkedin_send_attachment, "
         "linkedin_set_admitted_setting, linkedin_withdraw_reaction, "
         "linkedin_set_similar_jobs_alert, linkedin_unset_similar_jobs_alert, "
-        "linkedin_set_search_job_alert and linkedin_unset_search_job_alert. "
+        "linkedin_set_search_job_alert, linkedin_unset_search_job_alert and "
+        "linkedin_send_recommendations_feedback. "
         "ONE MORE IS WRITE-SHAPED AND REFUSES: linkedin_set_tracker_stage, the "
         "stage move on a saved job, whose control -- an item in the tracker "
         "row's overflow menu -- has never been captured; it reads his Saved "
@@ -1338,6 +1353,11 @@ mcp = FastMCP(
         "search on and off -- the search named by its keywords and an "
         "optional location, his own saved search, each the other's inverse; "
         "offer the pair together, set then unset. "
+        "THE TWENTY-FOURTH, linkedin_send_recommendations_feedback, sends "
+        "LinkedIn his yes or no to the question under his recommended jobs; "
+        "no inverse exists and its outcome cannot be confirmed, so offer it "
+        "only when he orders it and give him the receipt's after_press "
+        "record. "
         "THE SIXTEENTH, linkedin_withdraw_from_group, leaves one group he "
         "names by its NUMERIC id, never by a group's name; no join is built "
         "here, so offer it only for a group he names -- and not his last "
@@ -13986,6 +14006,42 @@ async def linkedin_set_recent_job_searches_cleared(confirm_token: str = "") -> d
     """
     try:
         return await _write_tool("set_recent_job_searches_cleared", "self", confirm_token)
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_send_recommendations_feedback(
+    answer: str, confirm_token: str = ""
+) -> dict[str, Any]:
+    """Send LinkedIn your answer, yes or no, to the question under your recommended jobs.
+
+    Census row ``J 163``, ruled ``J-163-RECEIPT-ONLY-WRITE``: a write behind the
+    grant, fired only on your order. Your recommended jobs
+    (``/jobs/collections/recommended/``) draw, under the list, "Are these
+    results helpful?" with two buttons -- "Are you finding what you're looking
+    for? No" and "... Yes". This presses the one your ``answer`` names.
+
+    Two calls, and the first is free. CALL IT WITHOUT ``confirm_token``
+    FIRST: the page is loaded and the block read live -- its heading, its
+    sentence and its two buttons, each drawn once -- and you get back a block
+    naming the button that would be pressed, plus a token that works ONCE, for
+    exactly this answer, within two minutes.
+
+    RECEIPT-ONLY, AND IT SAYS SO. No inverse exists: nothing withdraws an
+    answer once sent. And what LinkedIn draws after an answer has never been
+    captured, so the outcome is DECLARED unverifiable: ``performed`` is
+    ``"unknown"``, and the receipt's ``after_press`` records what the page drew
+    right after the press -- counts only -- which is the proof the ruling names.
+    The answer tunes your own recommendations; no other member is told.
+
+    Args:
+        answer: "yes" or "no" -- the button to press. Part of the target, so
+            the token binds to it.
+        confirm_token: leave empty to preview; pass the preview's token to act.
+    """
+    try:
+        return await _write_tool("send_recommendations_feedback", answer, confirm_token)
     except Exception as exc:
         return _error(exc)
 

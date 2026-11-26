@@ -770,6 +770,9 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         # (census J 31), sanctioned and performable in the same move.
         "set_search_job_alert",
         "unset_search_job_alert",
+        # LANE BUILD-JOBS2, 2026-11-26: the recommendations feedback press
+        # (census J 163), receipt-only, sanctioned and performable in one move.
+        "send_recommendations_feedback",
         # SIXTEEN FROM LANE L5'S MERGE OF MASTER 66aaa95, the same day (fifteen
         # on the lane's branch): the reply inside a conversation he names
         # (census M M10), sanctioned and performable in the same move.
@@ -926,6 +929,9 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         # (census J 31), sanctioned and performable in the same move.
         "set_search_job_alert",
         "unset_search_job_alert",
+        # LANE BUILD-JOBS2, 2026-11-26: the recommendations feedback press
+        # (census J 163), receipt-only, sanctioned and performable in one move.
+        "send_recommendations_feedback",
         # THE FIFTEENTH, 2026-09-24 (the fourteenth on lane L5's branch), and
         # the first write that CONFIRMS ITSELF
         # FROM THE SURFACE A PERSON READS: a reply inside a conversation he
@@ -1514,6 +1520,9 @@ _UNMEASURED_REVERSIBILITY = {
     # both BUILT, the on shape never captured.
     "set_search_job_alert",
     "unset_search_job_alert",
+    # 2026-11-26 (lane build-jobs2, J 163). No answer has been sent or
+    # watched; nothing that withdraws one is drawn.
+    "send_recommendations_feedback",
     # 2026-09-24. Whether LinkedIn lets a sent reply be recalled has never
     # been observed. This comment used to add "and recalling one is
     # destruction this server may not perform at any confirm level either
@@ -1592,6 +1601,8 @@ REVERSIBILITY_CLASS = {
     # 2026-11-25 (lane build-jmn26). STILL-UNKNOWN, both: see _UNMEASURED_REVERSIBILITY.
     "set_search_job_alert": "STILL-UNKNOWN",
     "unset_search_job_alert": "STILL-UNKNOWN",
+    # 2026-11-26 (lane build-jobs2). See _UNMEASURED_REVERSIBILITY.
+    "send_recommendations_feedback": "STILL-UNKNOWN",
     # 2026-09-27. STILL-UNKNOWN whether a group left can be rejoined; it
     # carries irreversible=True regardless, because no join is built here and
     # an approval-gated group needs a manager to let him back in.
@@ -1637,6 +1648,7 @@ REVERSIBILITY_MEASURED = {
     "unset_similar_jobs_alert": False,
     "set_search_job_alert": False,
     "unset_search_job_alert": False,
+    "send_recommendations_feedback": False,
     "send_reply": False,
     "send_attachment": False,
     "withdraw_from_group": False,

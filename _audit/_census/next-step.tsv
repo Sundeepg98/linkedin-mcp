@@ -81,7 +81,6 @@ J 154	J	R	-	CAPTURE:admit-learning-me-my-library	MEASURED	_audit/_census/jobs-di
 J 156	J	R+W	-	CAPTURE:admit-learning-career-journey	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/learning/career-journey/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
 J 157	J	W	-	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 J 160	J	R	-	BUILD:tests/fixtures/live11/career_insights.html	MEASURED	_audit/2026-11-26-readers-jobs26.md::the people and the companies the ; RULING:NAMES-AT-RUNTIME
-J 163	J	W	-	BUILD:tests/fixtures/live8/recommended.html	MEASURED	_audit/2026-11-25-build-jmn26.md::THE PRESS IS ONE-SHOT. There is no inverse to build ; RULING:HIS-OWN-CURATION-NOT-OUTWARD ; RULING:OUTSIDE-THE-PRODUCT-PURPOSE
 J 166	J	R	-	CAPTURE:admit-products-product	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/products/placeholder-product/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
 J 167	J	R	-	CAPTURE:admit-showcase-showcase	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/showcase/placeholder-showcase/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
 M C2	M	W	R3	SIBLING:M C12	NAMED	_audit/_census/messaging-and-content.md::which is why the two rows close together or not at all

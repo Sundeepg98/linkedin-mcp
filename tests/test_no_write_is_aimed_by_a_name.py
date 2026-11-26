@@ -182,6 +182,13 @@ TARGET_KIND_CLASS: dict[str, tuple[str, str]] = {
         "set_search_job_alert / unset_search_job_alert: his own keywords and "
         "location, composed into one search's query, which picks no person",
     ),
+    # 2026-11-26, lane build-jobs2 (census J 163): the feedback press. The
+    # target is his yes or no, a closed word, about his own recommended jobs.
+    "recommendations_feedback": (
+        "self",
+        "send_recommendations_feedback: yes or no, the two buttons under his own "
+        "recommended jobs; no third party is chosen",
+    ),
     # LANE L5'S TWO, classified at its merge of master 52b55b6 (2026-09-27).
     # The parser is writes._target_for -> named_profile.parse_profile_target.
     "profile": (

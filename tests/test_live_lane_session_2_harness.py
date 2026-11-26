@@ -700,7 +700,10 @@ def test_a_non_ascii_word_survives_the_copy_as_a_reference() -> None:
 #: `live2` 31 ON LANE BUILD-JOBS2 (2026-11-26), the count on disk: J 19's
 #: jobs home with its card's two words written by keyed shape
 #: (`scripts/_build_jobs2_word_skeletons.py`), beside the 30.
-LIVE_FIXTURE_COUNTS = {"live1": 5, "live2": 31, "live3": 14, "live4": 4, "live5": 1, "live7": 1, "live8": 7, "live9": 1,
+#: `live8` 8 ON LANE BUILD-JOBS2 (2026-11-26), the count on disk: J 163's
+#: recommended jobs with the feedback block's four words written by keyed
+#: shape (`scripts/_build_jobs2_word_skeletons.py`), beside the 7.
+LIVE_FIXTURE_COUNTS = {"live1": 5, "live2": 31, "live3": 14, "live4": 4, "live5": 1, "live7": 1, "live8": 8, "live9": 1,
                        "live11": 54}
 
 

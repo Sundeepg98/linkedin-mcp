@@ -70,6 +70,11 @@ PINNED_STRICT_PRESS_ACTIONS = frozenset(
         # tests/test_search_job_alert.py.
         "set_search_job_alert",
         "unset_search_job_alert",
+        # THIRTEEN since lane build-jobs2 (2026-11-26, census J 163): the
+        # feedback press, on the ONE button naming his answer inside the one
+        # feedback block (job_feedback.press_selector), shown in
+        # tests/test_recommendations_feedback.py.
+        "send_recommendations_feedback",
         "send_invitation",
         "connect_from_profile",
         "message_from_profile",

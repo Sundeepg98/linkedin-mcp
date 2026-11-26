@@ -72,6 +72,7 @@
     "linkedin_search_jobs": "clean",
     "linkedin_send_attachment": "not_driven:never read the page",
     "linkedin_send_invitation": "not_driven:never read the page",
+    "linkedin_send_recommendations_feedback": "not_driven:never read the page",
     "linkedin_send_reply": "not_driven:never read the page",
     "linkedin_sent_invitations": "clean",
     "linkedin_server_info": "not_driven:never read the page",

@@ -202,6 +202,9 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     # recent job searches. Census J 19 does NOT move: what the press opens has
     # never been captured (J-19-BUILT-BEHIND-THE-GRANT).
     "linkedin_set_recent_job_searches_cleared": ("confirm_token",),
+    # 2026-11-26, lane build-jobs2: the receipt-only feedback press. Census
+    # J 163 GAP -> COVERED-UNFIRED on it, never fired.
+    "linkedin_send_recommendations_feedback": ("answer", "confirm_token"),
     # 2026-11-24, lane builds-26: SANCTIONED AND REFUSING -- the stage move on
     # a saved job. Census J 54 does NOT move: its control has never been
     # captured; the cell names that capture as its held-by.
@@ -780,8 +783,11 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: `linkedin_set_recent_job_searches_cleared(confirm_token)`, a sanctioned write
 #: that refuses; census `J 19` keeps its state (what the press opens has never
 #: been captured). Counted off the registry, never summed.
-PINNED_TOOL_COUNT = 92
-PINNED_PARAMETER_COUNT = 138
+#: **ON THE SAME LANE: 93 TOOLS AND 140 PARAMETERS** --
+#: `linkedin_send_recommendations_feedback(answer, confirm_token)`, a write;
+#: census `J 163` GAP -> COVERED-UNFIRED on it. Counted off the registry.
+PINNED_TOOL_COUNT = 93
+PINNED_PARAMETER_COUNT = 140
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:
