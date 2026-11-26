@@ -8,9 +8,9 @@
 
 **THIS REGISTER IS NOT THE CORPUS AND DOES NOT CLAIM TO BE COMPLETE.** Read section 4 before concluding a question is unruled: the scan that keeps it honest reads ONE marker, and the ruling that caused this file to be written does not carry it.
 
-    rulings registered       158
-    documents scanned        298
-    RULED: declarations      144 claimed, 7 triaged, 0 unclaimed
+    rulings registered       167
+    documents scanned        302
+    RULED: declarations      153 claimed, 7 triaged, 0 unclaimed
 
 ---
 
@@ -60,6 +60,11 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | `OWN-PROFILE-SCROLL-SANCTIONED` | One scroll pass of his own profile per load is permitted, reading what renders and pressing nothing. | a scroll of his own profile (P D26) | 2026-11-25 | [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md)<br>*5. Lane build-p26's four (22:50)* |
 | `RESUME-BUILDER-UNDER-ARTICLE-COMPOSER-CAPTURE` | ARTICLE-COMPOSER-CAPTURE extends to LinkedIn's resume builder, since it serves the job search: one load, nothing typed, once a capture finds where LinkedIn draws it. | the resume builder (P M11) | 2026-11-25 | [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md)<br>*6. Lane admit26's ten (23:35)* |
 | `ARTICLE-COMPOSER-ONE-CAPTURE` | The article composer's closed controls are read in ONE capture with nothing typed: onboarding dismissed, then the author toggle, Manage, the embed control and Next, each read and closed; never Publish or Schedule; a draft's appearance recorded (its next step is deleting it), and a stop on any publishing control. | the article composer's disclosures (M C44, M C46, M C50, M C78, M C81, P L3) | 2026-11-26 | [2026-11-26-rulings-integration-4.md](2026-11-26-rulings-integration-4.md)<br>*7. Lane readers-msg26's four questions (14:10)* |
+| `EDITOR-TYPEAHEAD-ONLY-ATTENDED` | C-B1a, the editor's typeahead, is captured only in a session he attends, so it stays out of an unattended session. | the editor typeahead line, C-B1a | 2026-11-26 | [2026-11-26-rulings-integration-5.md](2026-11-26-rulings-integration-5.md)<br>*3. The session-12 plan (17:45 and 18:18, lane s12-prep's calls)* |
+| `FIFTH-SEARCH-TO-PEOPLE-LABELS` | Session 12's fifth search goes to the search-people-labels capture, whose All-filters button is drawn outside main. | session 12's fifth search | 2026-11-26 | [2026-11-26-rulings-integration-5.md](2026-11-26-rulings-integration-5.md)<br>*3. The session-12 plan (17:45 and 18:18, lane s12-prep's calls)* |
+| `MESSAGING-LINE-TO-SESSION-13-STANDBY` | The one queue line that carries M M34 (the inbox-search capture-first) and M M28 behind one receipt guard moves whole to session 13's standby, so session 12 needs no inbox read. | the guarded messaging line, M M34 and M M28 | 2026-11-26 | [2026-11-26-rulings-integration-5.md](2026-11-26-rulings-integration-5.md)<br>*3. The session-12 plan (17:45 and 18:18, lane s12-prep's calls)* |
+| `MSG-THREAD-FOOTER-TO-L2` | The msg-thread-footer capture needs a conversation he names, so it runs in an L2 session once he names it. | msg-thread-footer | 2026-11-26 | [2026-11-26-rulings-integration-5.md](2026-11-26-rulings-integration-5.md)<br>*3. The session-12 plan (17:45 and 18:18, lane s12-prep's calls)* |
+| `NEWSLETTER-PICKED-FROM-HIS-SUBSCRIPTIONS` | The newsletter page session 12 captures is one the lane picks at runtime from his own subscriptions, published by LinkedIn or an organisation and never by a person. | the newsletter page's target | 2026-11-26 | [2026-11-26-rulings-integration-5.md](2026-11-26-rulings-integration-5.md)<br>*3. The session-12 plan (17:45 and 18:18, lane s12-prep's calls)* |
 | `NO-RESULTS-STATE-CAPTURES` | Each job-search route's no-results state is captured (C-SRCH-0a classic, C-SRCH-0b AI; one load and one search each, a keyword chosen to draw nothing); until then every zero refuses on both routes. | the job search's two no-results states | 2026-11-26 | [2026-11-26-rulings-integration-4.md](2026-11-26-rulings-integration-4.md)<br>*2. The job search's AI fallback (11:05, lane search-fix26's three questions)* |
 
 ### census convention
@@ -147,6 +152,7 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 | id | what was ruled | binds | when | where (document / section) |
 |---|---|---|---|---|
+| `AD-HIDE-AIM-HELD` | N 200 stays GAP: no reader returns an ad urn without pressing ads he did not name, and pressing un-named ads' menus to search for one is declined. | where a hidden ad's urn comes from | 2026-11-26 | [2026-11-26-rulings-integration-5.md](2026-11-26-rulings-integration-5.md)<br>*2. Two answers for lane build-net2 (17:10)* |
 | `AD-HIDE-AT-HIS-NAMED-AD` | Hiding an ad is allowed under HIS-OWN-CURATION-NOT-OUTWARD for an ad he names (an urn a reader returned to him that he hands back); the tool never picks an ad, the undo is captured on the first supervised fire, and Report ad stays outward. | hiding an ad | 2026-11-26 | [2026-11-26-rulings-integration-4.md](2026-11-26-rulings-integration-4.md)<br>*5. Lane readers-net26's section 9 (13:31)* |
 
 ### census row N 6
@@ -235,7 +241,8 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 | id | what was ruled | binds | when | where (document / section) |
 |---|---|---|---|---|
-| `NAVIGATION-CEILING-MADE-TRUE` | MAX_NAVIGATIONS_PER_CALL is raised to the measured maximum, 3, and enforced in BrowserManager.goto by a per-call counter refusing a 4th; the README's 'One page load per tool call' is put right. | page loads per tool call | 2026-11-26 | [2026-11-26-rulings-integration-4.md](2026-11-26-rulings-integration-4.md)<br>*8. The navigation ceiling (14:27, lane pace20)* |
+| `NAVIGATION-CEILING-MADE-TRUE` | AMENDED 2026-11-26 by NAVIGATION-CEILING-PER-TOOL-CALL: the measured maximum is 5, not 3, reached by the job search's place fan-out alone, so that one tool declares an allowance capped at 5 and every other tool call keeps the ceiling of 3, enforced in goto, refusing a 4th. Original: MAX_NAVIGATIONS_PER_CALL is raised to the measured maximum, 3, and enforced in BrowserManager.goto by a per-call counter refusing a 4th; the README's 'One page load per tool call' is put right. | page loads per tool call | 2026-11-26 | [2026-11-26-rulings-integration-4.md](2026-11-26-rulings-integration-4.md)<br>*8. The navigation ceiling (14:27, lane pace20)* |
+| `NAVIGATION-CEILING-PER-TOOL-CALL` | At most 3 page loads per MCP tool call: a fastmcp middleware arms a budget for each tools/call, goto counts only while one is armed and refuses the 4th load before making it, and code outside a tool call (the live runner, probes, direct test calls) is untouched; linkedin_search_jobs alone declares a fan-out allowance, one load per place, capped at MAX_LOCATIONS 5 and AST-pinned to its one call site; the people readers' loop bound is its own constant, 2. | page loads per tool call | 2026-11-26 | [2026-11-26-rulings-integration-5.md](2026-11-26-rulings-integration-5.md)<br>*1. The navigation ceiling (16:45 and 17:12, lane infra26's item 2)* |
 | `READ-CARDS-DELETION` | After integration 4, the first lane touching server.py deletes server._read_cards if an AST caller census shows no caller. | server._read_cards | 2026-11-26 | [2026-11-26-rulings-integration-4.md](2026-11-26-rulings-integration-4.md)<br>*2. The job search's AI fallback (11:05, lane search-fix26's three questions)* |
 
 ### configuration
@@ -262,6 +269,12 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | id | what was ruled | binds | when | where (document / section) |
 |---|---|---|---|---|
 | `LIVE-BUDGET-40-LOADS` | A live session may use up to 40 LinkedIn page loads, serial, at least 20 seconds apart -- a ceiling, not a target; one browser driver at a time. | page loads per session | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md)<br>*The live-session budget* |
+
+### live lanes and the job pipeline
+
+| id | what was ruled | binds | when | where (document / section) |
+|---|---|---|---|---|
+| `BUDGET-ONE-ACCOUNT-40` | His account has ONE budget of 40 page loads per trailing 12 hours, shared by the live lane and the job pipeline; the live runner records every load in the pipeline's one pinned ledger before making it, with no copy and no second ledger, and a session starts only with 40 free, or shrinks its plan from the bottom of the rank. | page loads on his account | 2026-11-26 | [2026-11-26-rulings-integration-5.md](2026-11-26-rulings-integration-5.md)<br>*4. His account's one page-load budget (17:52)* |
 
 ### live loads
 
@@ -307,6 +320,12 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | `VIEW-SWITCH-PRESS-RESTORED` | A press that changes which rows a view shows is permitted if the view is RESTORED afterwards and a before/after reading proves it. | sort and filter controls | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md)<br>*View-switch presses* |
 | `NO-INDEX-PINNED-JUDGEMENTS` | A control is judged by its own accessible name and role, never by its position; controls on his own profile go to capture first, and label-based basis entries follow from it. | how a control is judged | 2026-10-10 | [2026-10-10-rulings-ledger-questions.md](2026-10-10-rulings-ledger-questions.md)<br>*3. No position-pinned judgements* |
 | `PRESS-GATE-MAY-READ-TO-DECIDE-SELF` | Where the URL alone no longer decides self or other (a member profile root with no marker), the press gate may make its own read-only count of edit links before any press; a caller-supplied reading stays refused, and where the URL decides, the gate still refuses before touching the page. | deciding his own profile | 2026-11-26 | [2026-11-26-rulings-integration-4.md](2026-11-26-rulings-integration-4.md)<br>*6. The press gate's own read (13:40, lane selfprofile26)* |
+
+### presses
+
+| id | what was ruled | binds | when | where (document / section) |
+|---|---|---|---|---|
+| `SEARCH-BOX-TYPEAHEAD-DISCLOSURE` | The search box's typeahead is a sanctioned disclosure shape over [role=search] input[aria-autocomplete] on an admitted page, refused at runtime unless exactly one is drawn; nothing is typed, only the recent-searches group is read (HIS-OWN-TEXT-AT-RUNTIME), people options are never read, and Escape closes it with the listbox verified gone. | the search box's recent searches (N 95) | 2026-11-26 | [2026-11-26-rulings-integration-5.md](2026-11-26-rulings-integration-5.md)<br>*2. Two answers for lane build-net2 (17:10)* |
 
 ### read boundary
 
@@ -474,6 +493,7 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | MESSAGING-SETTINGS | `MESSAGING-SETTINGS-CAPABILITY-LEVEL` |
 | N 163 re-cost | `GROUPS-ADDRESS-BUYS-NO-WRITE` |
 | names at runtime | `NAMES-AT-RUNTIME` |
+| NAVIGATION-CEILING-PER-CALL-WITH-ONE-DECLARED-FAN-OUT | `NAVIGATION-CEILING-PER-TOOL-CALL` |
 | one canonical id | `CANONICAL-RULING-ID` |
 | OWNED-BY-A-SIBLING-SLICE | `DUPLICATE-ROW-IS-MARKED-NEVER-DELETED` |
 | P I12 -> J99 | `CONTAINER-EXCLUSION-PROPAGATES-ONLY-IF-UNREACHABLE` |
@@ -563,7 +583,9 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 **`AD-DATA-GRAIN`** -- Orchestrator's call on lane readers-net26's section 9, question 4, applying GRAIN-FOLLOWS-WHAT-THE-PLATFORM-DRAWS. No cell changed. Reopener: a row's pages admitted and its settings' states diverging.
 
-**`AD-HIDE-AT-HIS-NAMED-AD`** -- Orchestrator's call on the lane-K ledger's question; applied by lane readers-net26's second round (N 200 BUILD behind the grant). Reopener: none stated.
+**`AD-HIDE-AIM-HELD`** -- Orchestrator's call for lane build-net2 (17:10), registered before that lane merges; option (b) declined. AD-HIDE-AT-HIS-NAMED-AD still stands: a hide fires only at an ad he names. The row's cells are build-net2's. Reopener: a measured disclosure shape for the ad control-menu trigger.
+
+**`AD-HIDE-AT-HIS-NAMED-AD`** -- Orchestrator's call on the lane-K ledger's question; applied by lane readers-net26's second round (N 200 BUILD behind the grant). Its aim is held by AD-HIDE-AIM-HELD (17:10): no reader returns an ad urn without pressing ads he did not name. Reopener: none stated.
 
 **`AD-LIBRARY-OUTSIDE-PURPOSE`** -- Orchestrator's call on lane admit26, applying OUTSIDE-THE-PRODUCT-PURPOSE. Reopener: he asks.
 
@@ -590,6 +612,8 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 **`B5-RAIL-JOIN-DOES-NOT-DISCHARGE`** -- Lane B5's first answer, recorded 2026-10-10 19:18, registered at integration 3. Applies PAGE-MAY-VETO-NEVER-SUPPLY. Reopener: none stated.
 
 **`BOUNDARY-IS-NOT-A-REASON`** -- The application of EXCLUDED-RULED-ADMISSION that section 5.4a found. It quotes the census rule rather than restating it.
+
+**`BUDGET-ONE-ACCOUNT-40`** -- Orchestrator's call (17:52), overridable by him; it closes the 15:36 open question and is the stricter reading of LIVE-BUDGET-40-LOADS. Two separate budgets only on his word. Folded into the session-12 plan by lane s12-prep; at 18:40 the orchestrator confirmed that the harness's own session file holds session rules, not an account count, so it is not a second ledger. Moves no row. Reopener: his word.
 
 **`C-J68-IDS-KEPT`** -- Orchestrator's call on lane apply-26. Applied at integration 3: the ids kept, the ranks renumbered on merge. Reopener: none stated.
 
@@ -629,6 +653,8 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 **`DOM-WAIVER-25-J110`** -- Orchestrator's call, answering integration 2's question about the budget move its J 110 fix made by commit (24 -> 25). Applies THIRD-PARTY-TEXT-AT-RUNTIME.
 
+**`EDITOR-TYPEAHEAD-ONLY-ATTENDED`** -- Orchestrator's answer to lane s12-prep's third call, as that lane's plan records it; the merge-notes entries do not carry it in words. The capture itself is EDITOR-TYPEAHEAD-SANCTIONED's (P A11, P A13, P A17 on C-B1a); this adds only when it runs. Moves no row. Reopener: none stated.
+
 **`EDITOR-TYPEAHEAD-SANCTIONED`** -- Orchestrator's call on lane build-p26. Moves P A11, P A13, P A17 to CAPTURE on C-B1a. Reopener: any autosave sign.
 
 **`ERROR-MESSAGE-RULED-AT-THE-RAISE`** -- THE SIBLING OF `ERROR-URL-ASKED-FOR-OR-NOTHING`, and it goes the OTHER WAY for a stated reason rather than by temperament. The url field could be ruled PER SITE because every value feeding it is an address this package composed or read; `$.message` cannot, because `_error` holds only `type(exc)` and `str(exc)` and the provenance of what that text QUOTES is not among them. So the ruling moves the decision to the raise, which is where the corpus had already put it three times without naming it: `coerce.py`, `press.disclose` and `landing.py`. It also DECLINES the sibling's own recommendation to make the twelve `dom.py` messages type-only -- all twelve are inside `tests/test_readers_emit_no_page_string.py`'s driven subject set and green (4 clean, 8 returns_text, 0 not_driven), so the payload class is already closed for them and type-only would delete twelve diagnoses to close a channel no needle travels. What it SHIPPED is the other end of the pipe: `tests/test_tool_envelopes_emit_no_page_string.py`, because the reader guard discovers only `async def` functions taking a `page` and the 48 tool bodies that funnel into `_error` are therefore outside it, permanently.
@@ -640,6 +666,8 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 **`EXCLUDED-RULED-ADMISSION`** -- Written twice, once per slice, in near-identical words; `_audit/_census/profile.md` carries the twin. This is the ORIGIN of the forbidden-substring question and it already answers it: a substring entry counts only when it is one of the four WRITTEN grounds, i.e. when it was aimed at the capability.
 
 **`FEED-CONTENT-READ-RULING`** -- The ground `M C85`'s read half would rest on if that row were ever split -- see OPEN-QUESTIONS.
+
+**`FIFTH-SEARCH-TO-PEOPLE-LABELS`** -- Orchestrator's answer to lane s12-prep's second call (17:45); applied in its round 2. Moves no row. Reopener: none stated.
 
 **`FILE-UPLOAD-OPENED`** -- THE OPERATOR'S decision, made 2026-09-04. No committed source records his words: it is recorded by 615a5c4 and _audit/2026-09-20-the-decides.md section 1, and registered on that record. The date shown is the record's, 2026-09-20.
 
@@ -685,7 +713,7 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 **`LINKS-ARE-NOT-DISCLOSURES`** -- Orchestrator's call on lane build-p26, applying PAGE-MAY-VETO-NEVER-SUPPLY. Reopener: the ruling on the self-profile query variant.
 
-**`LIVE-BUDGET-40-LOADS`** -- Operator's words: "go, 40 loads is fine". Raised from 15 per wave, to feed one live lane from several offline build lanes.
+**`LIVE-BUDGET-40-LOADS`** -- Operator's words: "go, 40 loads is fine". Raised from 15 per wave, to feed one live lane from several offline build lanes. Read strictly by BUDGET-ONE-ACCOUNT-40 (2026-11-26): the 40 are his account's, per trailing 12 hours, shared with the job pipeline.
 
 **`M-C18-EDITOR-OPENS-UNSAVED`** -- Orchestrator's call, applying B5-GROUP-COMPOSER-OPENS-EMPTY. Reopener: none stated.
 
@@ -699,7 +727,11 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 **`MESSAGE-SEARCH-CAPTURE-FIRST`** -- Orchestrator's call on the lane-K ledger's question; applied by lane readers-msg26's second round as a next step. Reopener: none stated.
 
+**`MESSAGING-LINE-TO-SESSION-13-STANDBY`** -- Orchestrator's answer to lane s12-prep's second call (17:45), and its acceptance of that lane's reading of it (18:18); X-0 is dropped with it. Applied in the lane's round 2. Moves no row. Reopener: none stated.
+
 **`MESSAGING-SETTINGS-CAPABILITY-LEVEL`** -- The ruling CANONICAL-RULING-ID was written about: one sentence wearing three names across three slices. Its census twin is `_audit/_census/profile.md`.
+
+**`MSG-THREAD-FOOTER-TO-L2`** -- Orchestrator's answer to lane s12-prep's fifth call (17:45); applied in the line's session cell. Moves no row. Reopener: none stated.
 
 **`N-102-MOVES-WITH-J-108`** -- Orchestrator's call on lane build-jmn26. Integration 2's section 6 had kept N 102 GAP; this ruling moves it, and that record carries the back-pointer. Reopener: none stated.
 
@@ -715,7 +747,11 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 **`NAMES-AT-RUNTIME`** -- The operator's ruling, verbatim in its document. Amends the 2026-09-05 name-free doctrine for runtime returns; answers WHO-WHICH-COUNTS-ARE-NOT-DELIVERY's question.
 
-**`NAVIGATION-CEILING-MADE-TRUE`** -- Orchestrator's call on lane pace20's question 1. Queued for the first build lane after integration 4. Moves no row. Reopener: none stated.
+**`NAVIGATION-CEILING-MADE-TRUE`** -- Orchestrator's call on lane pace20's question 1. Built as amended by lane infra26 and merged in integration 5: three loads per tool call, enforced in LinkedInBrowser.goto, and the README's two statements put right. Moves no row. Reopener: none stated.
+
+**`NAVIGATION-CEILING-PER-TOOL-CALL`** -- Orchestrator's call on lane infra26's item 2: named NAVIGATION-CEILING-PER-CALL-WITH-ONE-DECLARED-FAN-OUT at 16:45 (the alias), final form at 17:12. Lane infra26's record calls it option (C). Built by that lane in two heads, both merged in integration 5, and held there in full: the middleware, the refused 4th load, the capped fan-out with its one-caller pin and a planted-second-caller control, a test that every registered tool passes through the middleware, and the people bound. The lead's four asks under it are orders, not rulings. It amends NAVIGATION-CEILING-MADE-TRUE, whose 'raise it to 3' rested on a measured maximum of 3 where infra26 measured 5. Moves no row. Reopener: none stated.
+
+**`NEWSLETTER-PICKED-FROM-HIS-SUBSCRIPTIONS`** -- Orchestrator's answer to lane s12-prep's fourth call (17:45); applied in queue line 32's plan cell. Moves no row. Reopener: none stated.
 
 **`NO-INDEX-PINNED-JUDGEMENTS`** -- Orchestrator's call; overridable. Session 7 saw LinkedIn move structure under a recorded position.
 
@@ -749,7 +785,7 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 **`PEOPLE-DATA-MITIGATIONS`** -- Orchestrator's call applying the operator's ruling; overridable.
 
-**`PEOPLE-GATE-COUNTS-NAME-SLOTS`** -- Orchestrator's call on lane readers-net26's section 9; queued for the next live-lane owner. Specified at 14:05 as six rules (people gate v2), before session 12. Reopener: none stated.
+**`PEOPLE-GATE-COUNTS-NAME-SLOTS`** -- Orchestrator's call on lane readers-net26's section 9. Specified at 14:05 as six rules (people gate v2), before session 12. Built by lane infra26 as scripts/people_gate.py (rule N1, with the six rules as R1 to R6), merged in integration 5; the live lane wires it into its runner. Reopener: none stated.
 
 **`PERMALINK-READ-IS-ALLOWED`** -- `M C42` records that this ruling DID NOT REACH naming the target -- which is why that row cannot rest on it. See the DISPUTED section of `_audit/2026-09-21-what-was-ruled.md`.
 
@@ -761,7 +797,7 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 **`RATIFIED-POLICY-NAMES-APPLICATION-TARGETS`** -- Orchestrator's lead ruling L1 (12:22) on the operator's 'yes, automate max' (11:39, 2026-11-26). Amends OPERATOR-NAMES-THE-TARGET for job applications only. Moves no row today: no policy for LinkedIn applications has been ratified. Reopener: none stated.
 
-**`READ-CARDS-DELETION`** -- Orchestrator's call on lane search-fix26's Q3. Queued for the first build lane after integration 4. Moves no row. Reopener: none stated.
+**`READ-CARDS-DELETION`** -- Orchestrator's call on lane search-fix26's Q3. Executed by lane infra26 on an AST caller census that found no caller (717 tracked files and the 12 live-runner files), merged in integration 5. Moves no row. Reopener: none stated.
 
 **`READ-PAST-AN-ACT-SUBSTRING`** -- Orchestrator's call applying OUTWARD-ACTS-NEED-THE-OPERATOR and D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING; overridable. A page the allowlist refuses by its silence is admitted the same way.
 
@@ -792,6 +828,8 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 **`SCREENING-QUESTION-RECORD`** -- Orchestrator's call on lane apply-26. Applies THIRD-PARTY-TEXT-AT-RUNTIME. Reopener: none stated.
 
 **`SEARCH-ADMISSION-APPROVED-FIVE-CONDITIONS`** -- Condition 2 was AMENDED the same day -- see SEARCH-CONDITION-2-CLOSED. The ruling bars FIRING, not READING; conflating the two cost a later wave a decision it did not need.
+
+**`SEARCH-BOX-TYPEAHEAD-DISCLOSURE`** -- Orchestrator's call for lane build-net2 (17:10), registered before that lane merges. Measured by the orchestrator: exactly one such input on 62 of 175 fixtures, none on 113, never two. The row's cells are build-net2's. Reopener: none stated.
 
 **`SEARCH-ROUTE-CLASSIC-PRIMARY`** -- Orchestrator's call on the classic search's retirement (01:20 entry). Moves no row. Reopener: none stated.
 
@@ -831,12 +869,12 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 | signal NOT scanned | files | lines |
 |---|---|---|
-| a heading naming a ruling | 148 | 314 |
+| a heading naming a ruling | 151 | 320 |
 | a bold line opening on RULING/RULED | 66 | 155 |
-| the phrase THE RULING | 40 | 65 |
+| the phrase THE RULING | 41 | 67 |
 | a named -RULING id | 43 | 112 |
 | the phrase standing ruling | 18 | 41 |
-| a lead or operator ruling in prose | 43 | 110 |
+| a lead or operator ruling in prose | 44 | 111 |
 
 **The ruling that caused this register to be written is in the first row and not in the scan.** `BOUNDARY-IS-NOT-A-REASON` is phrased as a quoted ledger rule under a heading that carries no marker at all. It is registered because a person read it, and nothing here would have found it.
 
@@ -945,6 +983,10 @@ Every `RULED:` line in the corpus, and what became of it. An UNCLAIMED row fails
 | [2026-11-26-rulings-integration-4.md](2026-11-26-rulings-integration-4.md) | RULED: (orchestrator, 2026-11-26) PRESS-GATE-MAY-READ-TO-DECIDE-SELF -- "where | `PRESS-GATE-MAY-READ-TO-DECIDE-SELF` |
 | [2026-11-26-rulings-integration-4.md](2026-11-26-rulings-integration-4.md) | RULED: (orchestrator, 2026-11-26) MESSAGE-SEARCH-CAPTURE-FIRST -- | `MESSAGE-SEARCH-CAPTURE-FIRST` |
 | [2026-11-26-rulings-integration-4.md](2026-11-26-rulings-integration-4.md) | RULED: (orchestrator, 2026-11-26) NAVIGATION-CEILING-MADE-TRUE -- | `NAVIGATION-CEILING-MADE-TRUE` |
+| [2026-11-26-rulings-integration-5.md](2026-11-26-rulings-integration-5.md) | RULED: (orchestrator, 2026-11-26) NAVIGATION-CEILING-PER-TOOL-CALL -- at 16:45, | `NAVIGATION-CEILING-PER-TOOL-CALL` |
+| [2026-11-26-rulings-integration-5.md](2026-11-26-rulings-integration-5.md) | RULED: (orchestrator, 2026-11-26) SEARCH-BOX-TYPEAHEAD-DISCLOSURE -- | `SEARCH-BOX-TYPEAHEAD-DISCLOSURE` |
+| [2026-11-26-rulings-integration-5.md](2026-11-26-rulings-integration-5.md) | RULED: (orchestrator, 2026-11-26) FIFTH-SEARCH-TO-PEOPLE-LABELS -- | `FIFTH-SEARCH-TO-PEOPLE-LABELS` |
+| [2026-11-26-rulings-integration-5.md](2026-11-26-rulings-integration-5.md) | RULED: (orchestrator, 2026-11-26) BUDGET-ONE-ACCOUNT-40 -- "Closes the 15:36 | `BUDGET-ONE-ACCOUNT-40` |
 | [2026-11-26-rulings-search-route.md](2026-11-26-rulings-search-route.md) | RULED: (orchestrator, 2026-11-26) SEARCH-ROUTE-CLASSIC-PRIMARY -- | `SEARCH-ROUTE-CLASSIC-PRIMARY` |
 | [2026-11-26-rulings-search-route.md](2026-11-26-rulings-search-route.md) | RULED: (orchestrator, 2026-11-26) FILTER-REQUERY-COUNTS-AS-A-SEARCH -- | `FILTER-REQUERY-COUNTS-AS-A-SEARCH` |
 | [2026-11-26-rulings-search-route.md](2026-11-26-rulings-search-route.md) | RULED: (orchestrator, 2026-11-26) RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE -- | `RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE` |

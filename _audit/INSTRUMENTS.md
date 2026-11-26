@@ -12885,13 +12885,109 @@ editors, the pin re-deriver -- and the exported base tree used for the
 red-first runs. Each answered one question once; the answers are in the
 record.
 
-## 109. A MENU IS READ BY A PRESS THAT PRESSES NOTHING INSIDE IT, AND A CONFIRMED PRESS RE-READS ITS WORD (build-msg2, 2026-11-26)
+## 109. A CALLER IS COUNTED ONLY ONCE ITS NAME IS BOUND, A CEILING IS A COUNTER, AND A RAW PAGE IS JUDGED AS IT IS WRITTEN (infra26, 2026-11-26)
+
+**Registered 2026-11-26.** Full record: `_audit/2026-11-26-infra26.md`.
+Numbered 109, the next free number on base `3c656df`. Sibling wave-3 lanes
+may take 109 too, so renumber at the merge.
+
+### 109.1 The AST caller census
+
+`scripts/caller_census.py` answers "who can reach this one function?" for
+deletion rulings such as READ-CARDS-DELETION. It BINDS each reference to a
+module before it counts it:
+
+* COUNTED: a bare call or a value in the defining module, an attribute on any
+  import spelling, `getattr`/`hasattr`/`setattr`/`delattr` with the literal
+  name, and an import (relative spellings resolved).
+* COUNTED, because a reference that cannot be bound is never dropped: an
+  unbindable receiver, and an unreadable file.
+* LISTED, NOT COUNTED: a same-named function in another module, and a string
+  mention, which a reader classifies.
+
+`tests/test_caller_census.py` shows it failing on 13 planted channels. It
+also shows the sibling and the string listed and not counted, a clean
+package passing, and an extra root read. Its deletion assertion was red on
+`3c656df`.
+
+    A GREP FINDS A NAME. A CENSUS FINDS A CALLER ONLY AFTER IT HAS BOUND THE
+    NAME TO THE MODULE IT CAME FROM.
+
+### 109.2 The per-call navigation ceiling
+
+`linkedin_server/call_ceiling.py` (ruled NAVIGATION-CEILING-PER-TOOL-CALL):
+a fastmcp middleware arms a per-call budget for every `tools/call`.
+`LinkedInBrowser.goto` counts each load against it (`count_load`) after its
+doors and before its rate slot, and it refuses the fourth load unmade,
+naming the tool, the count, the ceiling and the page family.
+
+* The one declared fan-out is the search's places, capped at
+  `jobfilter.MAX_LOCATIONS`. Its single call site is pinned, and the pin is
+  shown failing by a planted second caller in three spellings.
+* Outside a tool call nothing is counted. The live runner loads many pages
+  in one browser session, which is why the scope is the tool call and not
+  the session.
+* `tests/test_navigation_ceiling.py` drives a planted tool through a real
+  fastmcp `Client`. On the tree before `goto` counted, its fourth load
+  reached the page, and 7 of 12 tests failed.
+* EVERY REGISTERED TOOL is then called through the middleware with a
+  recording probe. A server without the middleware is the control: its tool
+  is listed and never reached. A second `FastMCP` in the package is the
+  registration path the census could not list, and it is caught
+  structurally, with its own planted control.
+
+    A CEILING NOTHING COUNTS IS A SENTENCE. COUNT IT WHERE EVERY LOAD
+    PASSES, SCOPE IT TO WHAT THE RULING BOUNDS, AND NAME THE ONE EXCEPTION.
+
+### 109.3 The synthetic-people guard: one parse, and a scoped mode
+
+`tests/test_fixtures_hold_only_synthetic_people.py` now parses its corpus
+once per process: 75 s became 14 s here, and the assertions are unchanged.
+`--people-guard-scope=changed` reads only the fixtures changed since the
+merge base. It skips the corpus-wide tests by name, and skips loudly over an
+empty set. It falls back to the full sweep on anything it cannot classify,
+including a change to the guard's own rules. CI passes no option, and a test
+pins that. Shown failing by five selection mutants, each red, and by a staged
+real-looking plant that both modes convicted on the real repository.
+
+    A SCOPED GATE SAYS WHAT IT DID NOT READ, AND READS EVERYTHING WHEN IT
+    CANNOT TELL WHAT A CHANGE TOUCHES.
+
+### 109.4 PEOPLE-GATE v2
+
+`scripts/people_gate.py` judges the HTML string a capture is about to write,
+under the orchestrator's six rules of 2026-11-26 14:05. It keeps v1's
+member-link count (103.4), now read off the string, and counts name slots
+through the fixture guard's own reader. That closes 107.5's defect once the
+runner takes the two-line change in the record (section 4.5). His identity
+is held as digests, learned from his own navigation photo and entity, and
+carried across pages by a cache tied to his slug. MEASURED on session 11's
+five clean raws: judged alone, four server-driven pages withheld his own
+avatar as somebody else's; taught by one page that carries his entity, all
+five were kept. `tests/test_people_gate.py` rebuilds the two page shapes
+that broke v1 from rawsweep26's names-free counts. v1's rule keeps both; v2
+withholds both. 16 of 16 mutants are red, three of them only after the
+first run left them green and a control was added for each.
+
+    A GATE THAT CANNOT TELL HIS OWN FACE FROM A STRANGER'S WITHHOLDS BOTH.
+    TEACH IT HIS IDENTITY ONCE, FROM THE PAGE THAT CARRIES IT, AND KEEP ONLY
+    DIGESTS OF IT.
+
+### 109.5 Declared disposable
+
+The lane's scratch scripts are disposable. They are the navigation and
+session runners over the pipeline repository's static census, the
+own-identity and glued-token probes, the real-raw measurement, the item-3
+demonstration, the two mutant runners and an ASCII rewriter. Each answered
+one question once, and the answers are in the record.
+
+## 110. A MENU IS READ BY A PRESS THAT PRESSES NOTHING INSIDE IT, AND A CONFIRMED PRESS RE-READS ITS WORD (build-msg2, 2026-11-26)
 
 **Registered 2026-11-26.** Full record: `_audit/2026-11-26-build-msg2.md`.
-Numbered 109, the next after master's 108; sibling build lanes may take the same
-number on their branches, and the integrator numbers the wave in merge order.
+Numbered 110 at this lane's merge of master f4fa447, where integration 5
+had given 109 to infra26 (this lane's branch carried it as 109 until then).
 
-### 109.1 A STATE THAT EXISTS ONLY WHILE A MENU IS OPEN IS READ BY OPENING IT AND NOTHING ELSE
+### 110.1 A STATE THAT EXISTS ONLY WHILE A MENU IS OPEN IS READ BY OPENING IT AND NOTHING ELSE
 
 A conversation's options menu draws its items only while open, so its state
 cannot be read without a press. The preview press opens the ONE menu the active
@@ -12902,7 +12998,7 @@ mutations; the acts press through the write's one click site.
 
     A PRESS THAT READS MAY OPEN AND CLOSE; IT MAY NOT CHOOSE.
 
-### 109.2 THE CONFIRMED PRESS RE-READS THE WORD, AND "IT DID NOT HAPPEN" IS ITS OWN ANSWER
+### 110.2 THE CONFIRMED PRESS RE-READS THE WORD, AND "IT DID NOT HAPPEN" IS ITS OWN ANSWER
 
 The word is re-read in the menu the confirmed press opened, and the item is
 pressed only when its word is drawn exactly once and its inverse not at all;
@@ -12910,7 +13006,7 @@ otherwise the menu is closed by its own trigger. A refused item answers
 `not_changed_by_this_call`, never the destination state the menu may already
 read, so an act that was already done is never reported as done by this call.
 
-### 109.3 A VIEW SWITCH IS PROVEN BY THE READING IT CAME BACK TO, NOT BY THE PRESS THAT TOOK IT BACK
+### 110.3 A VIEW SWITCH IS PROVEN BY THE READING IT CAME BACK TO, NOT BY THE PRESS THAT TOOK IT BACK
 
 The Archived folder is reached by one folder switch on the composer's list, and
 the switch is reported `restored` only when the pill wears the folder it wore
@@ -12921,7 +13017,7 @@ nothing is NOT an empty folder.
 
     THE PROOF OF A RESTORE IS A SECOND READING THAT EQUALS THE FIRST.
 
-### 109.4 ZERO ONLY WHERE THE PAGE DRAWS ZERO, AND "NO DRAFT" IS A SECOND LOAD
+### 110.4 ZERO ONLY WHERE THE PAGE DRAWS ZERO, AND "NO DRAFT" IS A SECOND LOAD
 
 The scheduled posts list answers zero only on its drawn empty headline; a list
 without it is `unknown`, because a populated list was never captured. No draft
@@ -12931,7 +13027,7 @@ second load. Anything drawn after a close stops every further press.
 
     A COUNT NOBODY HAS SEEN DRAWN IS UNKNOWN, NOT ZERO.
 
-### 109.5 THE ENTRIES
+### 110.5 THE ENTRIES
 
 | path | shown failing by |
 |---|---|
@@ -12940,7 +13036,7 @@ second load. Anything drawn after a close stops every further press.
 | `tests/test_scheduled_posts.py`; `linkedin_server/scheduled_posts.py`; `tests/scheduled_posts_worlds.py` | on the base tree the file fails at collection (`ImportError: cannot import name 'scheduled_posts'`); its first run failed 10, seven on a real defect the capture test caught (an exact-text match on a button whose word sits in a child span matched nothing); unwired, 3 failed and 10 passed; green 13 passed. Inside the file: the empty headline taken away reads unknown, not zero; a composer opening with text stops with zero presses; a dialog or a toast after the close reads not closed and not ok; a schedule dialog that never opens reads no list and still closes |
 | `scripts/_build_msg2_word_skeletons.py` (the provenance of the five `tests/fixtures/live11/*_words.html` composer skeletons) | refuses, writing nothing, unless each keyed skeleton's tracked copy is the committed capture, and refuses any declared word that matches no keyed shape; a fixed point (`--check`: all five match on a second run) |
 
-### 109.6 DECLARED DISPOSABLE
+### 110.6 DECLARED DISPOSABLE
 
 The lane's scratch probes -- the menu and list counters, the keyed-word matcher
 (matched candidate words and counts only), the census editors -- and the

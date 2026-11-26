@@ -27,8 +27,8 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 299 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 259 |
+| audit documents git tracks under `_audit` | 303 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 263 |
 | distinct dates | 22 |
 | documents with no level-1 heading | 2 |
 | `CORRECTS:` marker lines | 130 |
@@ -39,7 +39,7 @@ are listed as `(undated)`; no date is taken from git history, because
 | documents at either end of a cross-document edge | 109 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
-| documents no correction marker touches at all | 188 |
+| documents no correction marker touches at all | 192 |
 | blockquoted markers naming ANOTHER document | 0 |
 | edges missing one of their two markers | 0 |
 | edges declared a different number of times in each direction | 2 |
@@ -1921,16 +1921,20 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-11-25 | [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md) | Orchestrator rulings of 2026-11-25 (from 22:30 IST), registered at integration 3 | corrects x1 |
 | 2026-11-26 | [2026-11-26-admit5-26.md](2026-11-26-admit5-26.md) | Lane admit5-26: five ruled admissions in the read boundary, red-first |  |
 | 2026-11-26 | [2026-11-26-build-msg2.md](2026-11-26-build-msg2.md) | build-msg2, 2026-11-26: the messaging and content rows readers-msg26 specified, built offline |  |
+| 2026-11-26 | [2026-11-26-infra26.md](2026-11-26-infra26.md) | Lane infra26: the dead card reader deleted, the navigation ceiling made true, the people guard scoped, PEOPLE-GATE v2 tracked |  |
 | 2026-11-26 | [2026-11-26-integration-3.md](2026-11-26-integration-3.md) | Integration 3, 2026-11-26: five certified heads onto master, and the rulings since 2026-11-25 22:30 |  |
 | 2026-11-26 | [2026-11-26-integration-4.md](2026-11-26-integration-4.md) | Integration 4, 2026-11-26: seven certified heads onto master 7760a5f, and the rulings from 10:10 to 14:27 |  |
+| 2026-11-26 | [2026-11-26-integration-5.md](2026-11-26-integration-5.md) | Integration 5, 2026-11-26: infra26 and the session-12 plan, two heads each, onto master 3c656df, and the rulings from 16:45 to 18:40 |  |
 | 2026-11-26 | [2026-11-26-pace20.md](2026-11-26-pace20.md) | Lane pace20: the server's default spacing between page loads is the ruled 20 s |  |
 | 2026-11-26 | [2026-11-26-readers-jobs26.md](2026-11-26-readers-jobs26.md) | readers-jobs26, 2026-11-26: the jobs-side readers on session 11's skeletons |  |
 | 2026-11-26 | [2026-11-26-readers-msg26.md](2026-11-26-readers-msg26.md) | readers-msg26, 2026-11-26: the messaging and content rows live session 11 captured, read offline |  |
 | 2026-11-26 | [2026-11-26-readers-net26.md](2026-11-26-readers-net26.md) | Lane readers-net26, 2026-11-26: the network rows live session 11 captured -- five readers built, one composition, one fire banked, twenty-five next steps re-pointed |  |
 | 2026-11-26 | [2026-11-26-rulings-integration-4.md](2026-11-26-rulings-integration-4.md) | Orchestrator rulings of 2026-11-26 (10:10 to 14:27 IST), registered at integration 4 |  |
+| 2026-11-26 | [2026-11-26-rulings-integration-5.md](2026-11-26-rulings-integration-5.md) | Orchestrator rulings of 2026-11-26 (16:45 to 18:40 IST), registered at integration 5 |  |
 | 2026-11-26 | [2026-11-26-rulings-search-route.md](2026-11-26-rulings-search-route.md) | Orchestrator rulings of 2026-11-26 (01:20 IST): the job search's route, registered at integration 3 |  |
 | 2026-11-26 | [2026-11-26-search-fix26.md](2026-11-26-search-fix26.md) | Lane search-fix26: an empty job search is never silent, and the AI search is a refusing fallback |  |
 | 2026-11-26 | [2026-11-26-selfprofile26.md](2026-11-26-selfprofile26.md) | 2026-11-26 -- lane selfprofile26: his own profile, asserted without the url marker |  |
+| 2026-11-26 | [2026-11-26-session-12-plan.md](2026-11-26-session-12-plan.md) | Live session 12 -- the plan, written offline: 37 loads, 5 searches, 113 rows |  |
 
 ## 6. What the scan rejected, could not join, or had to repair
 

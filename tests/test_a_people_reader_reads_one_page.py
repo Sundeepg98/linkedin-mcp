@@ -78,7 +78,7 @@ WHAT EACH ASSERTION HOLDS
    ``.go_forward(`` call) or by naming a package function that navigates,
    must be a plain ``for`` over an unstepped SLICE whose upper bound is a name
    the module imports ONCE from ``linkedin_server.config``, or over
-   ``enumerate()`` of one: ``urls[:MAX_NAVIGATIONS_PER_CALL]``. The value is
+   ``enumerate()`` of one: ``urls[:PAGE_AND_ITS_FALLBACK]``. The value is
    read from ``config`` and must be at most 2 -- one page and its fallback
    address, not paging. A navigating function that reaches itself is refused
    too: recursion is a loop without a loop statement. And every people tool
@@ -130,8 +130,12 @@ LIMITS, stated plainly.
   ``BROWSER.goto`` and refuses the 41st load before navigating (held offline
   by ``tests/test_live_lane_session_harness.py``). Spacing inside one process
   is ``config.MIN_NAVIGATION_INTERVAL_S``, taken by ``BROWSER.goto``'s rate
-  slot in ``browser.py``. The per-call ceiling is
-  ``config.MAX_NAVIGATIONS_PER_CALL``, which assertion 4 reads. "No loop,
+  slot in ``browser.py``. The people loop's bound is
+  ``config.PAGE_AND_ITS_FALLBACK``, which assertion 4 reads. The per-call
+  ceiling, ``config.MAX_NAVIGATIONS_PER_CALL``, was this bound until
+  2026-11-26, when it rose to the measured 3, enforced in ``BROWSER.goto`` by
+  ``call_ceiling``. The two were split so the people loop did not rise with
+  it. "No loop,
   sweep or schedule" for WRITES is ``writes.PERMANENTLY_FORBIDDEN``.
 """
 
@@ -984,16 +988,16 @@ def test_every_navigating_loop_a_people_tool_reaches_is_bounded():
     assert found.refused == [], (
         "navigating loops refused: %s. The one admitted shape is a for over an "
         "unstepped slice bounded by a ceiling imported from linkedin_server.config "
-        "-- for attempt, url in enumerate(urls[:MAX_NAVIGATIONS_PER_CALL], start=1)."
+        "-- for attempt, url in enumerate(urls[:PAGE_AND_ITS_FALLBACK], start=1)."
         % found.refused
     )
     assert found.recursions == [], found.recursions
 
 
 def test_the_bound_is_a_config_ceiling_of_at_most_two():
-    ceiling = config.MAX_NAVIGATIONS_PER_CALL
+    ceiling = config.PAGE_AND_ITS_FALLBACK
     assert isinstance(ceiling, int) and 1 <= ceiling <= ONE_PAGE_AND_ITS_FALLBACK, (
-        "config.MAX_NAVIGATIONS_PER_CALL = %r. A people reader's loop is bounded "
+        "config.PAGE_AND_ITS_FALLBACK = %r. A people reader's loop is bounded "
         "by it, and above 2 it is paging rather than one page and its fallback."
         % (ceiling,)
     )
@@ -1012,7 +1016,7 @@ def test_the_bound_is_a_config_ceiling_of_at_most_two():
 
 _READER = "linkedin_who_viewed_me"
 
-_READER_HEADER = "from linkedin_server.config import MAX_LIMIT, MAX_NAVIGATIONS_PER_CALL\n"
+_READER_HEADER = "from linkedin_server.config import MAX_LIMIT, PAGE_AND_ITS_FALLBACK\n"
 
 #: The real reader names its builder as ``shape.parse_person_card``; this is
 #: a builder of that name, and nothing else.
@@ -1099,7 +1103,7 @@ def test_the_real_reader_audited_alone_passes():
         "paging": [], "helpers": [], "loops": [], "recursions": [], "silent": [],
     }, found.findings()
     admitted = [(loop.bound, loop.value) for loop in found.loops]
-    assert admitted == [("MAX_NAVIGATIONS_PER_CALL", config.MAX_NAVIGATIONS_PER_CALL)], (
+    assert admitted == [("PAGE_AND_ITS_FALLBACK", config.PAGE_AND_ITS_FALLBACK)], (
         "the real reader should hold exactly one navigating loop, bounded by the "
         "config ceiling; found %s" % [(loop.head, loop.bound) for loop in found.loops]
     )
@@ -1132,7 +1136,7 @@ def test_the_real_reader_changed_by_one_node_is_refused(mutation):
 #: addresses and a module literal. All synthetic; nothing here is run.
 _PLANT_HEADER = '''\
 from linkedin_server import people_data
-from linkedin_server.config import MAX_LIMIT, MAX_NAVIGATIONS_PER_CALL
+from linkedin_server.config import MAX_LIMIT, PAGE_AND_ITS_FALLBACK
 
 ADDRESSES = ("/analytics/profile-views/", "/me/profile-views/")
 PAGES = 50
@@ -1223,7 +1227,7 @@ async def linkedin_planted(limit: int = 25) -> dict:
 async def linkedin_planted(limit: int = 25) -> dict:
     rows = []
     async with BROWSER.session() as page:
-        for address in ADDRESSES[:MAX_NAVIGATIONS_PER_CALL:-1]:
+        for address in ADDRESSES[:PAGE_AND_ITS_FALLBACK:-1]:
             await BROWSER.goto(page, address)
             rows.extend(_record(row) for row in await harvest(page))
     return {"rows": rows[:limit]}

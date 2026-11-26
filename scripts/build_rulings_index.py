@@ -752,7 +752,10 @@ REGISTER: tuple = (
         document="_audit/2026-09-23-rulings-write-class-and-delegated-calls.md",
         anchor='verbatim "go, 40 loads is fine")',
         note="Operator's words: \"go, 40 loads is fine\". Raised from 15 per "
-             "wave, to feed one live lane from several offline build lanes.",
+             "wave, to feed one live lane from several offline build lanes. "
+             "Read strictly by BUDGET-ONE-ACCOUNT-40 (2026-11-26): the 40 are "
+             "his account's, per trailing 12 hours, shared with the job "
+             "pipeline.",
     ),
     Ruling(
         id="OUTWARD-ACTS-NEED-THE-OPERATOR",
@@ -1767,7 +1770,7 @@ REGISTER: tuple = (
         binds="code -- server._read_cards",
         document="_audit/2026-11-26-rulings-integration-4.md",
         anchor="RULED: (orchestrator, 2026-11-26) READ-CARDS-DELETION",
-        note="Orchestrator's call on lane search-fix26's Q3. Queued for the first build lane after integration 4. Moves no row. Reopener: none stated.",
+        note="Orchestrator's call on lane search-fix26's Q3. Executed by lane infra26 on an AST caller census that found no caller (717 tracked files and the 12 live-runner files), merged in integration 5. Moves no row. Reopener: none stated.",
     ),
     Ruling(
         id="RATIFIED-POLICY-NAMES-APPLICATION-TARGETS",
@@ -1815,7 +1818,7 @@ REGISTER: tuple = (
         binds="live captures -- the people gate on raw pages",
         document="_audit/2026-11-26-rulings-integration-4.md",
         anchor="RULED: (orchestrator, 2026-11-26) PEOPLE-GATE-COUNTS-NAME-SLOTS",
-        note="Orchestrator's call on lane readers-net26's section 9; queued for the next live-lane owner. Specified at 14:05 as six rules (people gate v2), before session 12. Reopener: none stated.",
+        note="Orchestrator's call on lane readers-net26's section 9. Specified at 14:05 as six rules (people gate v2), before session 12. Built by lane infra26 as scripts/people_gate.py (rule N1, with the six rules as R1 to R6), merged in integration 5; the live lane wires it into its runner. Reopener: none stated.",
     ),
     Ruling(
         id="RECEIVED-BADGE-IS-THE-READS-COST",
@@ -1851,7 +1854,7 @@ REGISTER: tuple = (
         document="_audit/2026-11-26-rulings-integration-4.md",
         anchor="RULED: (orchestrator, 2026-11-26) AD-HIDE-AT-HIS-NAMED-AD",
         aliases=("Q-AD-HIDE-TARGET",),
-        note="Orchestrator's call on the lane-K ledger's question; applied by lane readers-net26's second round (N 200 BUILD behind the grant). Reopener: none stated.",
+        note="Orchestrator's call on the lane-K ledger's question; applied by lane readers-net26's second round (N 200 BUILD behind the grant). Its aim is held by AD-HIDE-AIM-HELD (17:10): no reader returns an ad urn without pressing ads he did not name. Reopener: none stated.",
     ),
     Ruling(
         id="AD-DATA-GRAIN",
@@ -1907,11 +1910,88 @@ REGISTER: tuple = (
     ),
     Ruling(
         id="NAVIGATION-CEILING-MADE-TRUE",
-        claim="MAX_NAVIGATIONS_PER_CALL is raised to the measured maximum, 3, and enforced in BrowserManager.goto by a per-call counter refusing a 4th; the README's 'One page load per tool call' is put right.",
+        status="AMENDED",
+        claim="AMENDED 2026-11-26 by NAVIGATION-CEILING-PER-TOOL-CALL: the measured maximum is 5, not 3, reached by the job search's place fan-out alone, so that one tool declares an allowance capped at 5 and every other tool call keeps the ceiling of 3, enforced in goto, refusing a 4th. Original: MAX_NAVIGATIONS_PER_CALL is raised to the measured maximum, 3, and enforced in BrowserManager.goto by a per-call counter refusing a 4th; the README's 'One page load per tool call' is put right.",
         binds="code -- page loads per tool call",
         document="_audit/2026-11-26-rulings-integration-4.md",
         anchor="RULED: (orchestrator, 2026-11-26) NAVIGATION-CEILING-MADE-TRUE",
-        note="Orchestrator's call on lane pace20's question 1. Queued for the first build lane after integration 4. Moves no row. Reopener: none stated.",
+        note="Orchestrator's call on lane pace20's question 1. Built as amended by lane infra26 and merged in integration 5: three loads per tool call, enforced in LinkedInBrowser.goto, and the README's two statements put right. Moves no row. Reopener: none stated.",
+    ),
+    # INTEGRATION 5 (2026-11-26): the orchestrator's rulings of 16:45 to
+    # 18:18, from its merge notes, quoted in their own document.
+    Ruling(
+        id="NAVIGATION-CEILING-PER-TOOL-CALL",
+        claim="At most 3 page loads per MCP tool call: a fastmcp middleware arms a budget for each tools/call, goto counts only while one is armed and refuses the 4th load before making it, and code outside a tool call (the live runner, probes, direct test calls) is untouched; linkedin_search_jobs alone declares a fan-out allowance, one load per place, capped at MAX_LOCATIONS 5 and AST-pinned to its one call site; the people readers' loop bound is its own constant, 2.",
+        binds="code -- page loads per tool call",
+        document="_audit/2026-11-26-rulings-integration-5.md",
+        anchor="RULED: (orchestrator, 2026-11-26) NAVIGATION-CEILING-PER-TOOL-CALL",
+        aliases=("NAVIGATION-CEILING-PER-CALL-WITH-ONE-DECLARED-FAN-OUT",),
+        status="AMENDS NAVIGATION-CEILING-MADE-TRUE",
+        note="Orchestrator's call on lane infra26's item 2: named NAVIGATION-CEILING-PER-CALL-WITH-ONE-DECLARED-FAN-OUT at 16:45 (the alias), final form at 17:12. Lane infra26's record calls it option (C). Built by that lane in two heads, both merged in integration 5, and held there in full: the middleware, the refused 4th load, the capped fan-out with its one-caller pin and a planted-second-caller control, a test that every registered tool passes through the middleware, and the people bound. The lead's four asks under it are orders, not rulings. It amends NAVIGATION-CEILING-MADE-TRUE, whose 'raise it to 3' rested on a measured maximum of 3 where infra26 measured 5. Moves no row. Reopener: none stated.",
+    ),
+    Ruling(
+        id="SEARCH-BOX-TYPEAHEAD-DISCLOSURE",
+        claim="The search box's typeahead is a sanctioned disclosure shape over [role=search] input[aria-autocomplete] on an admitted page, refused at runtime unless exactly one is drawn; nothing is typed, only the recent-searches group is read (HIS-OWN-TEXT-AT-RUNTIME), people options are never read, and Escape closes it with the listbox verified gone.",
+        binds="presses -- the search box's recent searches (N 95)",
+        document="_audit/2026-11-26-rulings-integration-5.md",
+        anchor="RULED: (orchestrator, 2026-11-26) SEARCH-BOX-TYPEAHEAD-DISCLOSURE",
+        note="Orchestrator's call for lane build-net2 (17:10), registered before that lane merges. Measured by the orchestrator: exactly one such input on 62 of 175 fixtures, none on 113, never two. The row's cells are build-net2's. Reopener: none stated.",
+    ),
+    Ruling(
+        id="AD-HIDE-AIM-HELD",
+        claim="N 200 stays GAP: no reader returns an ad urn without pressing ads he did not name, and pressing un-named ads' menus to search for one is declined.",
+        binds="census row N 200 -- where a hidden ad's urn comes from",
+        document="_audit/2026-11-26-rulings-integration-5.md",
+        anchor="RULED: (orchestrator, 2026-11-26) AD-HIDE-AIM-HELD",
+        note="Orchestrator's call for lane build-net2 (17:10), registered before that lane merges; option (b) declined. AD-HIDE-AT-HIS-NAMED-AD still stands: a hide fires only at an ad he names. The row's cells are build-net2's. Reopener: a measured disclosure shape for the ad control-menu trigger.",
+    ),
+    Ruling(
+        id="FIFTH-SEARCH-TO-PEOPLE-LABELS",
+        claim="Session 12's fifth search goes to the search-people-labels capture, whose All-filters button is drawn outside main.",
+        binds="captures -- session 12's fifth search",
+        document="_audit/2026-11-26-rulings-integration-5.md",
+        anchor="RULED: (orchestrator, 2026-11-26) FIFTH-SEARCH-TO-PEOPLE-LABELS",
+        note="Orchestrator's answer to lane s12-prep's second call (17:45); applied in its round 2. Moves no row. Reopener: none stated.",
+    ),
+    Ruling(
+        id="MESSAGING-LINE-TO-SESSION-13-STANDBY",
+        claim="The one queue line that carries M M34 (the inbox-search capture-first) and M M28 behind one receipt guard moves whole to session 13's standby, so session 12 needs no inbox read.",
+        binds="captures -- the guarded messaging line, M M34 and M M28",
+        document="_audit/2026-11-26-rulings-integration-5.md",
+        anchor="RULED: (orchestrator, 2026-11-26) MESSAGING-LINE-TO-SESSION-13-STANDBY",
+        note="Orchestrator's answer to lane s12-prep's second call (17:45), and its acceptance of that lane's reading of it (18:18); X-0 is dropped with it. Applied in the lane's round 2. Moves no row. Reopener: none stated.",
+    ),
+    Ruling(
+        id="EDITOR-TYPEAHEAD-ONLY-ATTENDED",
+        claim="C-B1a, the editor's typeahead, is captured only in a session he attends, so it stays out of an unattended session.",
+        binds="captures -- the editor typeahead line, C-B1a",
+        document="_audit/2026-11-26-rulings-integration-5.md",
+        anchor="RULED: (orchestrator, 2026-11-26) EDITOR-TYPEAHEAD-ONLY-ATTENDED",
+        note="Orchestrator's answer to lane s12-prep's third call, as that lane's plan records it; the merge-notes entries do not carry it in words. The capture itself is EDITOR-TYPEAHEAD-SANCTIONED's (P A11, P A13, P A17 on C-B1a); this adds only when it runs. Moves no row. Reopener: none stated.",
+    ),
+    Ruling(
+        id="NEWSLETTER-PICKED-FROM-HIS-SUBSCRIPTIONS",
+        claim="The newsletter page session 12 captures is one the lane picks at runtime from his own subscriptions, published by LinkedIn or an organisation and never by a person.",
+        binds="captures -- the newsletter page's target",
+        document="_audit/2026-11-26-rulings-integration-5.md",
+        anchor="RULED: (orchestrator, 2026-11-26) NEWSLETTER-PICKED-FROM-HIS-SUBSCRIPTIONS",
+        note="Orchestrator's answer to lane s12-prep's fourth call (17:45); applied in queue line 32's plan cell. Moves no row. Reopener: none stated.",
+    ),
+    Ruling(
+        id="MSG-THREAD-FOOTER-TO-L2",
+        claim="The msg-thread-footer capture needs a conversation he names, so it runs in an L2 session once he names it.",
+        binds="captures -- msg-thread-footer",
+        document="_audit/2026-11-26-rulings-integration-5.md",
+        anchor="RULED: (orchestrator, 2026-11-26) MSG-THREAD-FOOTER-TO-L2",
+        note="Orchestrator's answer to lane s12-prep's fifth call (17:45); applied in the line's session cell. Moves no row. Reopener: none stated.",
+    ),
+    Ruling(
+        id="BUDGET-ONE-ACCOUNT-40",
+        claim="His account has ONE budget of 40 page loads per trailing 12 hours, shared by the live lane and the job pipeline; the live runner records every load in the pipeline's one pinned ledger before making it, with no copy and no second ledger, and a session starts only with 40 free, or shrinks its plan from the bottom of the rank.",
+        binds="live lanes and the job pipeline -- page loads on his account",
+        document="_audit/2026-11-26-rulings-integration-5.md",
+        anchor="RULED: (orchestrator, 2026-11-26) BUDGET-ONE-ACCOUNT-40",
+        note="Orchestrator's call (17:52), overridable by him; it closes the 15:36 open question and is the stricter reading of LIVE-BUDGET-40-LOADS. Two separate budgets only on his word. Folded into the session-12 plan by lane s12-prep; at 18:40 the orchestrator confirmed that the harness's own session file holds session rules, not an account count, so it is not a second ledger. Moves no row. Reopener: his word.",
     ),
     Ruling(
         id="FIXED-UI-LABEL-MATCH",
