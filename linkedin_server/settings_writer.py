@@ -367,8 +367,7 @@ APPLICATION_SETTINGS = AdmittedPage(
     capture=(
         "the live lane's capture of 2026-11-25 (session 11, load 11), tracked "
         "as the skeleton tests/fixtures/live11/application_settings.html, its "
-        "LinkedIn words measured by keyed shape in "
-        "tests/fixtures/live11/application_settings_words.html"
+        "LinkedIn words measured by keyed shape in tests/fixtures/live11/application_settings_words.html"
     ),
     admitted_by=(
         "APPLICATION-SETTINGS-WRITE (the orchestrator, 2026-11-26), under "
