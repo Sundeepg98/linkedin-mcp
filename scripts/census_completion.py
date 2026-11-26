@@ -1120,7 +1120,8 @@ PINNED = {
     #: CREDENTIAL-ADJACENT-STAYS-REFUSED.
     #: MEASURED AT INTEGRATION 2'S MERGE OF LANE A (2026-11-24) on the merged tree, never summed (the figures above are each lane's own).
     #: 719 AT INTEGRATION 3 (2026-11-26), MEASURED on the merged tree after the orchestrator's rulings of 2026-11-25 applied: `J 153`, `J 155`, `J 159` EXCLUDED-RULED (OUTSIDE-THE-PRODUCT-PURPOSE), `P A14`, `P A15` MEASURED-ABSENT, `N 102` and `J 110`'s Home half COVERED-UNFIRED, `J 168` (the Posts half) entered GAP: 5 out of scope, `J 168` in.
-    "capabilities_achievable": 719,
+    #: 718 ON LANE READERS-MSG26 (2026-11-26), MEASURED: `M M20` GAP -> MEASURED-ABSENT, under MEASURED-ABSENT-OR-PRECONDITION: the first opened conversation on disk draws no video-meeting control, every footer and header control accounted for (`_audit/2026-11-26-readers-msg26.md` section 3) (was 719).
+    "capabilities_achievable": 718,
     #: 43 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: 29 rows returned
     #: to GAP when OUTWARD-CLASSES-BUILT-BEHIND-GRANTS retired their key, and
     #: `P P2` at the merge (-30); `P N27` and `P P2` then EXCLUDED-RULED on
@@ -1141,7 +1142,8 @@ PINNED = {
     #: M9` and `J 77` GAP -> EXCLUDED-RULED on
     #: CREDENTIAL-ADJACENT-STAYS-REFUSED.
     #: 68 AT INTEGRATION 3 (2026-11-26), MEASURED on the merged tree after the orchestrator's rulings of 2026-11-25 applied: `J 153`, `J 155`, `J 159` EXCLUDED-RULED (OUTSIDE-THE-PRODUCT-PURPOSE), `P A14`, `P A15` MEASURED-ABSENT, `N 102` and `J 110`'s Home half COVERED-UNFIRED, `J 168` (the Posts half) entered GAP: 3 EXCLUDED-RULED and 2 MEASURED-ABSENT.
-    "out_of_scope": 68,
+    #: 69 ON LANE READERS-MSG26 (2026-11-26), MEASURED: `M M20` GAP -> MEASURED-ABSENT, under MEASURED-ABSENT-OR-PRECONDITION: the first opened conversation on disk draws no video-meeting control, every footer and header control accounted for (`_audit/2026-11-26-readers-msg26.md` section 3) (was 68).
+    "out_of_scope": 69,
     #: 727 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: stated rows 770
     #: less out_of_scope 43: the returns, `P A23b`, and the two re-exclusions.
     #: 728 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: stated rows 770 less out_of_scope 42 (`N 2`).
@@ -1165,7 +1167,8 @@ PINNED = {
     #: CREDENTIAL-ADJACENT-STAYS-REFUSED.
     #: MEASURED AT INTEGRATION 2'S MERGE OF LANE A (2026-11-24) on the merged tree, never summed (the figures above are each lane's own).
     #: 706 AT INTEGRATION 3 (2026-11-26), MEASURED on the merged tree after the orchestrator's rulings of 2026-11-25 applied: `J 153`, `J 155`, `J 159` EXCLUDED-RULED (OUTSIDE-THE-PRODUCT-PURPOSE), `P A14`, `P A15` MEASURED-ABSENT, `N 102` and `J 110`'s Home half COVERED-UNFIRED, `J 168` (the Posts half) entered GAP: 5 rows left the achievable surface, `J 168` joined it.
-    "achievable": 706,
+    #: 705 ON LANE READERS-MSG26 (2026-11-26), MEASURED: `M M20` GAP -> MEASURED-ABSENT, under MEASURED-ABSENT-OR-PRECONDITION: the first opened conversation on disk draws no video-meeting control, every footer and header control accounted for (`_audit/2026-11-26-readers-msg26.md` section 3) (was 706).
+    "achievable": 705,
     #: 205 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
     #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
     #: 179 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: the 30 returned
@@ -1294,7 +1297,8 @@ PINNED = {
     #: MEASURED AT INTEGRATION 3'S MERGE OF BUILD-JMN26 (2026-11-26) on the merged tree, never summed (the figures above are each lane's own).
     #: 245 AT INTEGRATION 3 (2026-11-26), MEASURED on the merged tree after the orchestrator's rulings of 2026-11-25 applied: `J 153`, `J 155`, `J 159` EXCLUDED-RULED (OUTSIDE-THE-PRODUCT-PURPOSE), `P A14`, `P A15` MEASURED-ABSENT, `N 102` and `J 110`'s Home half COVERED-UNFIRED, `J 168` (the Posts half) entered GAP: +3 EXCLUDED-RULED, +2 MEASURED-ABSENT, +2 COVERED-UNFIRED (`N 102`, `J 110`).
     #: 246 ON LANE READERS-MSG26 (2026-11-26), MEASURED: `M C93` GAP -> COVERED-UNFIRED, the content search vertical read over live session 11's capture (`linkedin_search_content`; `_audit/2026-11-26-readers-msg26.md`) (was 245).
-    "adjudicated": 246,
+    #: 247 ON LANE READERS-MSG26 (2026-11-26), MEASURED: `M M20` GAP -> MEASURED-ABSENT, under MEASURED-ABSENT-OR-PRECONDITION: the first opened conversation on disk draws no video-meeting control, every footer and header control accounted for (`_audit/2026-11-26-readers-msg26.md` section 3) (was 246).
+    "adjudicated": 247,
     #: THE LIVE LANE'S FOUR ROWS, RE-DERIVED AT EACH OF ITS MERGES OF MASTER
     #: (2026-09-24; last over lane S): four rows fired live and banked
     #: (`_audit/2026-09-23-live-lane-session-1.md`). `P G6` COVERED-UNFIRED ->
@@ -1555,7 +1559,8 @@ PINNED = {
     #: MEASURED AT INTEGRATION 3'S MERGE OF BUILD-JMN26 (2026-11-26) on the merged tree, never summed (the figures above are each lane's own).
     #: 529 AT INTEGRATION 3 (2026-11-26), MEASURED on the merged tree after the orchestrator's rulings of 2026-11-25 applied: `J 153`, `J 155`, `J 159` EXCLUDED-RULED (OUTSIDE-THE-PRODUCT-PURPOSE), `P A14`, `P A15` MEASURED-ABSENT, `N 102` and `J 110`'s Home half COVERED-UNFIRED, `J 168` (the Posts half) entered GAP: -7 rows left GAP, +1 entered (`J 168`).
     #: 528 ON LANE READERS-MSG26 (2026-11-26), MEASURED: `M C93` GAP -> COVERED-UNFIRED, the content search vertical read over live session 11's capture (`linkedin_search_content`; `_audit/2026-11-26-readers-msg26.md`) (was 529).
-    "gap": 528,
+    #: 527 ON LANE READERS-MSG26 (2026-11-26), MEASURED: `M M20` GAP -> MEASURED-ABSENT, under MEASURED-ABSENT-OR-PRECONDITION: the first opened conversation on disk draws no video-meeting control, every footer and header control accounted for (`_audit/2026-11-26-readers-msg26.md` section 3) (was 528).
+    "gap": 527,
     #: 18 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: `M M1` built (`linkedin_message_from_profile`).
     #: 16 ON LANE L5'S ORDER OF 2026-09-27 23:36, MEASURED:
     #: `linkedin_send_message` RETIRED (aimed by a name): `M M2` to GAP and `N
@@ -1795,7 +1800,8 @@ PINNED = {
     #: 365 with lane U's three rows (-3).
     #: 361 AT LANE B1'S MERGE OF ORIGIN/MASTER 0103810, MEASURED: master's figure with `P A22` GAP -> COVERED-UNFIRED (the Organization select, session 7).
     #: 359 AT INTEGRATION 3 (2026-11-26), MEASURED on the merged tree after the orchestrator's rulings of 2026-11-25 applied: `J 153`, `J 155`, `J 159` EXCLUDED-RULED (OUTSIDE-THE-PRODUCT-PURPOSE), `P A14`, `P A15` MEASURED-ABSENT, `N 102` and `J 110`'s Home half COVERED-UNFIRED, `J 168` (the Posts half) entered GAP: `P A14` and `P A15` left GAP.
-    "gap_write": 359,
+    #: 358 ON LANE READERS-MSG26 (2026-11-26), MEASURED: `M M20` GAP -> MEASURED-ABSENT, under MEASURED-ABSENT-OR-PRECONDITION: the first opened conversation on disk draws no video-meeting control, every footer and header control accounted for (`_audit/2026-11-26-readers-msg26.md` section 3) (was 359).
+    "gap_write": 358,
     #: All 54 are `jobs.md`, which has no per-row R/W column (56 until the
     #: lane-L3 merge built J 18 and J 39). Not a coincidence
     #: and not a defect in the finder: it is the whole of that slice's still-GAP

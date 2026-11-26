@@ -116,7 +116,7 @@ from __future__ import annotations
 from typing import Any, Optional
 from urllib.parse import urlencode, urlsplit
 
-from linkedin_server import coerce, jobfilter, people_data, people_search
+from linkedin_server import coerce, dom, jobfilter, people_data, people_search
 from linkedin_server.errors import ExtractionFailedError
 
 #: The one address this module composes, before its query. The read
@@ -329,12 +329,14 @@ async def read_content_results(page: Any) -> dict[str, Any]:
     the results screen is not drawn, or is drawn with no card at all: this
     reader knows no empty state, so such a zero is not corroborated.
     """
+    # THE LANDING IS DESCRIBED, NEVER PUBLISHED: the ruling the dom readers
+    # raise under (WITHHELD), and the same describer, in the hint.
     if await _count(page.locator(SCREEN)) != 1:
-        raise ExtractionFailedError(WHY_UNREADABLE["no_screen"])
+        raise ExtractionFailedError(WHY_UNREADABLE["no_screen"], hint=dom._landing_note(page))
     cards = page.locator(CARDS)
     seen = await _count(cards)
     if seen == 0:
-        raise ExtractionFailedError(WHY_UNREADABLE["no_cards"])
+        raise ExtractionFailedError(WHY_UNREADABLE["no_cards"], hint=dom._landing_note(page))
     skipped = {reason: 0 for reason in SKIP_REASONS}
     failed: dict[str, int] = {}
     posts: list[dict[str, Any]] = []

@@ -162,6 +162,11 @@ DECLARED: dict[tuple[str, str], tuple[str, int]] = {
     # review asked for the kind every other reader failure has).
     ("presence.py", "read_suggested_presence"): (WITHHELD, 1),
     ("recruiter_views.py", "read_recruiter_views"): (WITHHELD, 1),
+    # 2026-11-26 (lane readers-msg26, census M C93): the content search's
+    # two refusals of an uncorroborated zero -- no results screen, or a screen
+    # with no card. No url; the landing described in the hint by
+    # dom._landing_note, as the readers above do.
+    ("content_search.py", "read_content_results"): (WITHHELD, 2),
     # --- ASKED_FOR: the seven tool-side raises ----------------------------
     # `url` is this helper's own parameter, composed by its caller
     # (`linkedin_search_jobs._search_url`) out of BASE_URL and urlencode.
@@ -545,10 +550,14 @@ def test_the_twenty_are_still_twenty():
     # send_message, RETIRED on lane L5's order of 23:36 because it was aimed by
     # a name. 12 -> 11 WITHHELD, 20 -> 19 in all, 12 -> 10 out of scope.
     # TWENTY-ONE AT LANE S'S MERGE (above): 11 -> 13 WITHHELD.
-    assert tally[WITHHELD] == 13, tally
+    # TWENTY-THREE ON LANE READERS-MSG26 (2026-11-26): the content search's
+    # reader raises twice under the WITHHELD ruling with the same describer --
+    # no results screen, or a screen with no card -- so WITHHELD is 15.
+    # MEASURED off this table, not summed.
+    assert tally[WITHHELD] == 15, tally
     assert tally[ASKED_FOR] == 7, tally
     assert tally[PASSTHROUGH] == 1, tally
-    assert tally[WITHHELD] + tally[ASKED_FOR] + tally[PASSTHROUGH] == 21, tally
+    assert tally[WITHHELD] + tally[ASKED_FOR] + tally[PASSTHROUGH] == 23, tally
     assert tally[NO_ADDRESS_IN_SCOPE] == 10, tally
 
 

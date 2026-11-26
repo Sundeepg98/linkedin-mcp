@@ -184,7 +184,6 @@ M M12	M	W	R3	TARGET:a conversation he names whose last message is his, under 60 
 M M13	M	W	R2	TARGET:a message he names and the person to forward it to	INFERRED	RULING:OPERATOR-NAMES-THE-TARGET ; M M13
 M M16	M	W	R2	TARGET:a conversation he names, to send a GIF in (a tile press may send at once)	NAMED	_audit/2026-10-10-lane-b3-messaging-build.md::itself an act at a recipient he names ; _audit/2026-09-28-lane-k-ledger.md::the step is TARGET, not RULING ; RULING:OPERATOR-NAMES-THE-TARGET
 M M19	M	W	R2	SIBLING:lane-U	INFERRED	linkedin_server/uploads.py ; _audit/2026-09-28-rulings-build-classes.md::`FILE-UPLOAD-UNSANCTIONED` is therefore a stale label.
-M M20	M	W	R2	CAPTURE:msg-thread-footer	NAMED	_audit/2026-10-10-lane-b3-messaging-build.md::NEEDS-CAPTURE: an opened conversation, ideally one already read ; _audit/2026-09-24-lane-l5-messaging.md::**C7 -- where the video-meeting control lives** ; RULING:OWN-INBOX-READS-COVERED-BY-B
 M M21	M	W	R2	TARGET:two or more connections he names for a group chat	INFERRED	RULING:OPERATOR-NAMES-THE-TARGET ; M M21
 M M22	M	W	R3	TARGET:a group conversation he is in, named by him	INFERRED	RULING:OPERATOR-NAMES-THE-TARGET ; M M22
 M M23	M	W	R2	TARGET:a group conversation he is in, named by him	INFERRED	RULING:OPERATOR-NAMES-THE-TARGET ; M M22
@@ -202,14 +201,14 @@ M M36	M	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 M M37	M	W	R3	SIBLING:lane-S	NAMED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD ; RULING:MESSAGING-SETTINGS-CAPABILITY-LEVEL
 M M38	M	W	R3	TARGET:a real message he names to report	NAMED	_audit/2026-09-28-rulings-build-classes.md::a report is never fired for a proof unless he names a real item to report
 M M39	M	W	R3	RULING:Q-AWAY-MESSAGE	NAMED	_audit/_census/messaging-and-content.md::a message composed and approved IN ADVANCE is not a reply he did not read
-M M40	M	W	R2	CAPTURE:msg-thread-footer	NAMED	_audit/2026-10-10-lane-b3-messaging-build.md::NEEDS-CAPTURE: an opened conversation, ideally one already read ; RULING:OWN-INBOX-READS-COVERED-BY-B
+M M40	M	W	R2	CAPTURE:msg-thread-footer	MEASURED	_audit/2026-11-26-readers-msg26.md::that conversation's last message is HIS ; RULING:OWN-INBOX-READS-COVERED-BY-B
 M M41	M	W	R3	SIBLING:lane-S	NAMED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD ; RULING:MESSAGING-SETTINGS-CAPABILITY-LEVEL
 M M42	M	W	R3	SIBLING:lane-S	NAMED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD ; RULING:MESSAGING-SETTINGS-CAPABILITY-LEVEL
 M M46	M	W	R3	SIBLING:lane-S	NAMED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD ; RULING:MESSAGING-SETTINGS-CAPABILITY-LEVEL
 M M47	M	W	R2	TARGET:a Recruiter InMail he has already read	NAMED	_audit/2026-09-24-lane-l5-messaging.md::**C2 -- a Recruiter InMail's response controls** ; RULING:OPERATOR-NAMES-THE-TARGET
 M M48	M	W	R3	TARGET:a conversation he names whose last message is his, under 60 minutes old	NAMED	_audit/2026-09-24-lane-l5-messaging.md::**C6 -- the per-message menu on his OWN message** ; RULING:OPERATOR-NAMES-THE-TARGET
 M M50	M	W	R3	SIBLING:lane-S	NAMED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD ; RULING:MESSAGING-SETTINGS-CAPABILITY-LEVEL
-M M51	M	W	R2	CAPTURE:msg-thread-footer	NAMED	_audit/2026-10-10-lane-b3-messaging-build.md::NEEDS-CAPTURE: an opened conversation, ideally one already read ; RULING:OWN-INBOX-READS-COVERED-BY-B
+M M51	M	W	R2	CAPTURE:msg-thread-footer	MEASURED	_audit/2026-11-26-readers-msg26.md::that conversation's last message is HIS ; RULING:OWN-INBOX-READS-COVERED-BY-B
 M M52	M	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 N 3	N	W	R2	SIBLING:N 1	INFERRED	RULING:D6-CAPABILITY-OVER-AFFORDANCE ; N 1
 N 5	N	W	R2	TARGET:a member he names to invite, with a note	NAMED	_audit/2026-09-24-lane-l5-messaging.md::| C-P3 | the invitation dialog ; RULING:OPERATOR-NAMES-THE-TARGET
