@@ -1642,40 +1642,6 @@ def _clamp(value: Optional[int], default: int, maximum: int) -> int:
     return max(1, min(value, maximum))
 
 
-async def _read_cards(
-    url: str,
-    *,
-    href_pattern: str,
-    parser,
-    limit: int,
-    surface: str,
-    allow_empty: bool = False,
-) -> dict[str, Any]:
-    """One page load, one harvest, one shaping pass. The shape of every list tool."""
-    async with BROWSER.session() as page:
-        final_url = await BROWSER.goto(page, url)
-        assert_not_authwall(final_url, surface=surface)
-        records = await dom.harvest_linked_cards(
-            page, href_pattern=href_pattern, max_items=limit * 3
-        )
-        if not allow_empty:
-            # THE REQUESTED ADDRESS, NOT THE LANDED ONE. `url` is this
-            # function's own parameter and `test_navigation_is_never_derived`
-            # is the standing proof that no navigation target in this package
-            # is page-derived, so it is a string this package or its caller
-            # composed. `final_url` is `BROWSER.goto`'s return, which is
-            # `page.url` -- a string LinkedIn chose, published by
-            # `server._error` with no scrubber. Ruled ASKED_FOR in
-            # _audit/2026-09-21-the-field-beside-the-message.md; the contract
-            # "open the same page by hand" is honoured better by the address
-            # that travels the same redirect than by its endpoint.
-            dom.require_rows(records, url=url, surface=surface)
-        rows, dropped = dom.parse_all(records, parser)
-        return shape.envelope(
-            rows, limit=limit, source_url=final_url, dropped=dropped
-        )
-
-
 async def _read_tracker(
     stage: str, *, tab_label: str, limit: int, surface: str
 ) -> dict[str, Any]:
@@ -5682,10 +5648,12 @@ async def _read_job_search(
 ) -> dict[str, Any]:
     """ONE search load, read by the route LinkedIn SERVED. Lane search-fix26.
 
-    ``_read_cards`` with two vetoes and a fallback, and the reason it is not
-    ``_read_cards`` is that both vetoes need the LANDING, which that shared
-    helper only publishes. See ``linkedin_server/job_search_route.py`` for the
-    measurements each branch rests on.
+    What the shared helper ``_read_cards`` did, plus two vetoes and a
+    fallback. It was never that helper because both vetoes need the
+    LANDING, which that helper only published; this search was its last
+    caller, so the helper is deleted (READ-CARDS-DELETION, 2026-11-26). See
+    ``linkedin_server/job_search_route.py`` for the measurements each branch
+    rests on.
 
     * **CLASSIC** -- the harvest it always ran. A harvest that produced no row
       is REFUSED unless the page drew LinkedIn's own empty state, and no
@@ -5706,7 +5674,7 @@ async def _read_job_search(
     * **ANYTHING ELSE** refuses, naming the landing as a SHAPE.
 
     ``url`` in every refusal is the ASKED-FOR address, never the landing --
-    the rule ``_read_cards`` follows, ruled in
+    the rule the deleted ``_read_cards`` followed, ruled in
     ``_audit/2026-09-21-the-field-beside-the-message.md``.
     """
     hint = "open the url yourself and compare with what this reports"

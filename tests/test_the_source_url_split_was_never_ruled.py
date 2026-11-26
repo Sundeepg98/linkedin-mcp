@@ -250,10 +250,11 @@ DECLARED: dict[tuple[str, str], tuple[str, int]] = {
     ("server.py", "linkedin_recruiter_insights"): (SHAPED, 1),
     ("server.py", "linkedin_messaging_presence"): (SHAPED, 1),
     # --- UNMEASURED: raw, and nobody has measured what the surface emits -----
-    # Internal helpers, so the landed url is whatever their THREE callers
-    # supplied. A helper cannot be ruled on without ruling on its callers, and
-    # that is a measurement nobody has taken.
-    ("server.py", "_read_cards"): (UNMEASURED, 1),
+    # Internal helpers, so the landed url is whatever their callers supplied.
+    # A helper cannot be ruled on without ruling on its callers, and that is a
+    # measurement nobody has taken. (``_read_cards`` sat here until
+    # 2026-11-26, when it was deleted with no caller left: READ-CARDS-DELETION,
+    # lane infra26.)
     ("server.py", "_read_tracker"): (UNMEASURED, 1),
     # 2026-11-26 (lane search-fix26): the job search's helper, which took over
     # `linkedin_search_jobs`'s call of `_read_cards`. TWO envelopes, one per

@@ -4115,9 +4115,10 @@ def _census_function_source() -> str:
 #: is a statement about what has been MEASURED, not a clearance.
 TOOLS_WITH_A_RAW_SOURCE_URL = frozenset(
     {
-        "_read_cards",
         # 2026-11-26 (lane search-fix26): the job search's helper since it
         # took over that call; it lands where `_read_cards` landed for it.
+        # (`_read_cards` itself left this list the same day, deleted with no
+        # caller left: READ-CARDS-DELETION, lane infra26.)
         "_read_job_search",
         "_read_tracker",
         "linkedin_new_messages",
