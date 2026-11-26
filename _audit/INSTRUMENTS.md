@@ -12996,7 +12996,7 @@ sections 2 and "Live session 12, the run".
 A wrapper OUTSIDE the harness's own counter, so a shipped tool's loads pass
 it too: the session's refusals first (the ceiling, five searches, 20 s); then,
 under the job pipeline's pinned store's lock, `budget.call_refusal(events,
-"live_census", None, 1, now)`; on None, ONE `linkedin_call` record is appended
+"live_census", None, 1, now)`; on None, ONE of the ledger's LinkedIn call records is appended
 and only then is the load made. A spacing refusal waits the seconds it names,
 once; every other refusal stops the phase and never waits; no pin, a pin or
 store that cannot be read, or an unreadable line, refuses. SHOWN FAILING: eight

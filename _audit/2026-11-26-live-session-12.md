@@ -153,8 +153,8 @@ UNVERIFIED.
    harness's counter, so a shipped tool's own loads (E1's) pass it too: the
    session's own refusals first (the ceiling, the five searches, 20 s); then,
    under the store's lock, `budget.call_refusal(events, "live_census", None, 1,
-   now)`; on None ONE `linkedin_call` record (platform `linkedin`, `loads` 1,
-   kind `live_census`, the capture key, no address) is appended, and only then
+   now)`; on None ONE of the ledger's LinkedIn call records (platform `linkedin`,
+   `loads` 1, kind `live_census`, the capture key, no address) is appended, and only then
    is the load made. A spacing refusal waits the seconds it names, ONCE, then
    asks again; any other refusal stops the phase (a budget refusal sheds from
    the bottom of the plan, never waits). A press that loads a document is
@@ -685,3 +685,11 @@ rather than moved:
 
 NOT RUN locally, by the standing rules: the full suite (lane CI runs it on
 `ci/live-s12`).
+
+**Lane CI, first run** (45867937888, the close-out's head `0796e7a`): failure,
+1 test -- `tests/test_an_asserted_name_resolves.py::test_no_new_asserted_name_is_absent`.
+This record and INSTRUMENTS section 110 named the pinned ledger's record type
+in backticks, which the checker reads as a TOOL name resolving nowhere; it is a
+record type, not a tool. Fixed at the cause: both sentences reworded to "the
+ledger's LinkedIn call records", the checker untouched. The same test ran red
+locally on the unfixed tree first, then green.
