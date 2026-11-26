@@ -924,3 +924,32 @@ browser was started in the close-out.
   cell a decision load, so J 31's own step is not read off it: J 31 is a BUILD
   row on master and the end-of-wave integration moves it).
   `scripts/check_next_step.py`: GREEN.
+* **One guard narrowed, red first.** `tests/test_fixtures_hold_only_synthetic_people.py`
+  convicted 27 sites in the three skeletons of his profile: LinkedIn's label
+  "Send" as the WHOLE aria-label of a member link on his activity cards (9 per
+  capture). The guard already skipped that word as a member link's first
+  visible text (session 2's skeletons); its label slot now skips the same
+  closed words, compared whole. Its new control was run red before the change
+  and green after: "Send" alone is skipped; an invented name in that label, or
+  after the word, is still convicted.
+* **INSTRUMENTS section 103** registers the runner's five checks (each shown
+  failing offline, then held live).
+
+### Gates, and the certification
+
+| gate | result |
+|---|---|
+| the pre-commit identity gate, on the staged close-out | 55 files against 226 spellings: 0 hits (and 1 file, 0 hits, on the fix that followed) |
+| `tests/test_no_committed_identity.py`, on the committed tree | 1213 passed |
+| `tests/test_fixtures_hold_only_synthetic_people.py` | 73 passed, in 2 min 31 s: over the 2-minute cap, because the guard sweeps every tracked fixture |
+| `tests/test_live_lane_session_2_harness.py`, its fixture guards | 10 passed |
+| `tests/test_the_audit_index_is_derived.py`; `tests/test_the_register_numbers_are_unique.py` | 33 passed; 6 passed |
+| `scripts/check_next_step.py`; `scripts/check_cited_shas_resolve.py`; `scripts/census_completion.py --check` | GREEN; every cited SHA resolves; every headline figure matches its pin |
+| the three derived views | `--write`, then `--check` clean |
+| **lane CI, first run** (45754866614, the close-out's head `5b33e54`) | **failure, 1 test**: `test_every_candidate_pair_is_declared_or_triaged` -- section 103 cited this record two lines from the word "false", which the guard reads as an undeclared correction. It was none; the sentence was reworded |
+| **lane CI, second run** (45755837753, the head `c47bba6`) | **success: 6 jobs, 5 min 59 s** |
+
+**NOT RUN locally, by the standing rules:** the full suite (CI runs it on the
+lane's ci/ ref). **No census row was moved** by this lane, and no merge was
+made into this branch. The integrator takes this branch's head as the fifth
+merge of integration 3.
