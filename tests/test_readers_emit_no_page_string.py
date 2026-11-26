@@ -1450,6 +1450,15 @@ WHAT_WOULD_DRIVE_IT: dict[str, str] = {
         "label, back only inside the person records. A shipped_drives double "
         "is not built."
     ),
+    # Lane build-msg2, 2026-11-26: the conversation menu's closing wait.
+    "conversation_menu:_wait_for_closed": (
+        "NOT A PAGE READER: a bounded wait that returns how many polls it took "
+        "and decides nothing; whether the menu closed is read by "
+        "conversation_menu.preview_press after it, which the harness drives "
+        "clean, and tests/test_conversation_menu.py drives the wait over live "
+        "session 11's thread page with the menu open and Escape both closing "
+        "it and not."
+    ),
 }
 
 #: The verdicts that mean a drive never reached its success path.

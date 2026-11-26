@@ -1726,7 +1726,17 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # SANCTIONED_MUTATIONS e9d953efc8ab8d0e -> c51296e034af63eb, 15 -> 16 -- the trial click of
     # job_alert_switch.trial_press, a READ declared on the list with its
     # argument and budget beside it in readonly.py. No refusal moved.
-    "SANCTIONED_MUTATIONS": "c51296e034af63eb",
+    # RE-FROZEN 2026-11-26 (lane build-msg2, census M M26, M M27, M M29,
+    # M M31): ONE digest moved, SANCTIONED_MUTATIONS c51296e034af63eb ->
+    # 7671871060412a70, 16 -> 18 -- conversation_menu's preview press, its one
+    # click (``_open``) and its one Escape (``_close``), a READ declared on
+    # CONVERSATION-MENU-PREVIEW-PRESS with its argument beside the entries.
+    # ATTRIBUTION, with this file's ast_digest: readonly.py minus exactly those
+    # two entry lines hashes to c51296e034af63eb on this key, and the other
+    # seventeen pinned digests are byte-identical to master 3c656df's. No
+    # refusal moved. (WRITE_VERBS gained "mute" in the same change; it is not
+    # a key of this dict.)
+    "SANCTIONED_MUTATIONS": "7671871060412a70",
     # PINNED FROM 2026-09-24, lane G's merge of master: the replacement scan's
     # four tables (unchanged since lane G built them; pinned late, see PINNED)
     # and the scanner's sanctioned list, born with ONE entry -- the live

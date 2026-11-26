@@ -160,6 +160,9 @@ _TARGETS: dict[str, object] = {
     # spelling ``search_alert_switch.query_for`` composes from his keywords
     # and location. Declared shapes, not his data.
     "job_search": "keywords=some+role&location=somewhere",
+    # 2026-11-26, lane build-msg2 (M M26, M M27, M M29, M M31): one
+    # conversation's thread id alone, for the acts on its own options menu.
+    "thread_id": "2-SYNTHETICTHREADAAAA==",
 }
 
 

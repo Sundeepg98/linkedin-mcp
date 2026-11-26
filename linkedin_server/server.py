@@ -1,4 +1,17 @@
-"""The tool surface: ninety-one tools, twenty-four of which write to LinkedIn.
+"""The tool surface: ninety-six tools, twenty-nine of which write to LinkedIn.
+
+THE NINETY-SECOND TO NINETY-SIXTH ARE WRITES, 2026-11-26, on lane build-msg2
+(census ``M M26``, ``M M27``, ``M M29``, ``M M31``; ruling
+CONVERSATION-MENU-PREVIEW-PRESS): ``linkedin_mute_conversation`` and its
+inverse ``linkedin_unmute_conversation``, ``linkedin_mark_conversation_unread``,
+``linkedin_archive_conversation`` and ``linkedin_delete_conversation``, each
+an act on ONE conversation's own options menu, the conversation named by its
+thread id. The preview opens that one menu by the sanctioned preview press --
+read, nothing pressed inside it, closed on Escape -- behind the receipt guard;
+the confirmed press re-reads the word and refuses on the inverse. The delete
+is receipt-only: nothing confirms it, and a confirmation it draws is never
+answered. Measured off the registry, not summed. The headline read
+"ninety-one tools, twenty-four of which write" until then.
 
 THE NINETY-FIRST IS A READ, 2026-11-26, at integration 4's merge of lane
 readers-msg26 (census ``M C93``, ruling CONTENT-VERTICAL-NOT-ALL-RESULTS):
@@ -452,9 +465,9 @@ assigned to anybody -- it waits for whoever next runs the suite, and in the
 meantime the pin goes on asserting the old number with full confidence.
 
 THE NUMBERS ABOVE ARE DERIVED NOW, and that is a statement about a test rather
-than about an intention. Ninety-one is ``len(await mcp.list_tools())``,
+than about an intention. Ninety-six is ``len(await mcp.list_tools())``,
 pinned in ``test_server_surface.py`` by
-``test_the_surface_is_exactly_the_ninety_one_tools``; the split is pinned by
+``test_the_surface_is_exactly_the_ninety_six_tools``; the split is pinned by
 ``tests/test_prose_that_makes_a_claim.py::test_the_server_docstring_numbers_are_derived``,
 which reads THESE WORDS and fails if any of the three disagrees with the
 registry.
@@ -467,9 +480,11 @@ POINTER to it was dangling, so a reader who followed it found nothing and
 would reasonably conclude these numbers are unchecked. A citation is a claim
 like any other.
 The surface splits three ways and the split is the part a reader actually
-needs: SIXTY-FOUR read, TWENTY-FOUR write, and THREE are write-shaped,
-registered, gated and unable to act. Sixty-four plus twenty-four plus three is
-ninety-one. (Sixty-three, twenty-four and three, summing to ninety, until
+needs: SIXTY-FOUR read, TWENTY-NINE write, and THREE are write-shaped,
+registered, gated and unable to act. Sixty-four plus twenty-nine plus three is
+ninety-six. (Sixty-four, twenty-four and three, summing to ninety-one, until
+lane build-msg2's five acts on one conversation's own menu, 2026-11-26.
+Sixty-three, twenty-four and three, summing to ninety, until
 integration 4's merge of lane readers-msg26's content search, 2026-11-26; that
 lane's branch read fifty-seven, twenty-four and three, summing to eighty-four.
 Fifty-eight, twenty-four and three, summing to eighty-five, until
@@ -657,11 +672,13 @@ the moment ``update_profile_field`` was given an address while still refusing.
 always meant: an address is not a permission.
 
 NOTE THE ACTION THAT HAS NO TOOL. ``writes.SANCTIONED_WRITES`` holds
-TWENTY-EIGHT actions where this surface registers TWENTY-SEVEN write-shaped tools, and
+THIRTY-THREE actions where this surface registers THIRTY-TWO write-shaped tools, and
 the missing one is ``set_open_to_work``: it is sanctioned, it is refused by
-``_refuse_unperformable``, and no tool was ever registered for it. So twenty-seven
-counts TOOLS and twenty-eight counts ACTIONS, and a reader comparing the two
-numbers is not looking at a discrepancy. (TWENTY-SIX and TWENTY-FIVE on master
+``_refuse_unperformable``, and no tool was ever registered for it. So thirty-two
+counts TOOLS and thirty-three counts ACTIONS, and a reader comparing the two
+numbers is not looking at a discrepancy. (TWENTY-EIGHT and TWENTY-SEVEN until
+lane build-msg2's five acts on one conversation's own menu, 2026-11-26, added
+five to each. TWENTY-SIX and TWENTY-FIVE on master
 at lane build-jmn26's base, 4c62196, measured off that tree's registry -- this
 sentence still read twenty-three and twenty-two there, three behind each, the
 three refusing tools of lane builds-26 never added to it -- until that lane's
@@ -1265,7 +1282,7 @@ mcp = FastMCP(
     instructions=(
         "A window onto the operator's OWN LinkedIn account, driven by his own "
         "signed-in browser on his own machine. Most tools read and change "
-        "nothing. TWENTY-FOUR WRITE: linkedin_save_job, "
+        "nothing. TWENTY-NINE WRITE: linkedin_save_job, "
         "linkedin_unsave_job, linkedin_unfollow_company, "
         "linkedin_follow_company, linkedin_apply_job, "
         "linkedin_update_setting, linkedin_react_to_item, "
@@ -1277,7 +1294,10 @@ mcp = FastMCP(
         "linkedin_message_from_profile, linkedin_send_attachment, "
         "linkedin_set_admitted_setting, linkedin_withdraw_reaction, "
         "linkedin_set_similar_jobs_alert, linkedin_unset_similar_jobs_alert, "
-        "linkedin_set_search_job_alert and linkedin_unset_search_job_alert. "
+        "linkedin_set_search_job_alert, linkedin_unset_search_job_alert, "
+        "linkedin_mute_conversation, linkedin_unmute_conversation, "
+        "linkedin_mark_conversation_unread, linkedin_archive_conversation and "
+        "linkedin_delete_conversation. "
         "ONE MORE IS WRITE-SHAPED AND REFUSES: linkedin_set_tracker_stage, the "
         "stage move on a saved job, whose control -- an item in the tracker "
         "row's overflow menu -- has never been captured; it reads his Saved "
@@ -1319,6 +1339,15 @@ mcp = FastMCP(
         "search on and off -- the search named by its keywords and an "
         "optional location, his own saved search, each the other's inverse; "
         "offer the pair together, set then unset. "
+        "THE TWENTY-FIFTH TO TWENTY-NINTH act on ONE conversation he names by "
+        "its thread id, through that conversation's own options menu: "
+        "linkedin_mute_conversation and its inverse "
+        "linkedin_unmute_conversation, linkedin_mark_conversation_unread (its "
+        "way back is opening the conversation, linkedin_open_thread with "
+        "allow_unread=True), linkedin_archive_conversation (no restore is "
+        "built here) and linkedin_delete_conversation, which nothing brings "
+        "back and nothing confirms -- offer it only on his explicit order for "
+        "a conversation he names. "
         "THE SIXTEENTH, linkedin_withdraw_from_group, leaves one group he "
         "names by its NUMERIC id, never by a group's name; no join is built "
         "here, so offer it only for a group he names -- and not his last "
@@ -12447,6 +12476,10 @@ async def linkedin_server_info(verbose: bool = False) -> dict[str, Any]:
                 "composer's suggestions, which opens none), "
                 "linkedin_open_thread, linkedin_send_reply and "
                 "linkedin_send_attachment (only the conversation you name by "
+                "id), and linkedin_mute_conversation, "
+                "linkedin_unmute_conversation, linkedin_mark_conversation_unread, "
+                "linkedin_archive_conversation and linkedin_delete_conversation "
+                "(the composer's list, then only the conversation you name by "
                 "id). Whether any of those loads clears the messaging badge "
                 "is unmeasured.",
                 "loading /mynetwork/ ITSELF would consume the pending-"
@@ -13918,6 +13951,190 @@ async def linkedin_search_content(keywords: str) -> dict[str, Any]:
 
 
 # ---- end lane readers-msg26 ----
+
+
+# ---- lane build-msg2 ----
+# Census M M26, M M27, M M29 and M M31 (lane build-msg2, 2026-11-26): one
+# conversation's own options menu, read by the sanctioned preview press and
+# acted on through it (CONVERSATION-MENU-PREVIEW-PRESS). Every tool this lane
+# registers is in this one contiguous block; the menu itself is read and
+# pressed in ``linkedin_server/conversation_menu.py``, through ``writes``.
+
+
+def _thread_id_refusal() -> dict[str, Any]:
+    """A thread id these acts cannot address, refused before any page loads."""
+    return {
+        "error": "bad_argument",
+        "message": (
+            "a conversation is named by its thread id -- the part of its address "
+            "after /messaging/thread/, copied from your own browser: a digit "
+            "first, then letters, digits, '-', '_', '=' and '%'. The value given "
+            "is not one, and it is not repeated here. Nothing was loaded."
+        ),
+        "performed": False,
+    }
+
+
+@mcp.tool()
+async def linkedin_mute_conversation(thread_id: str, confirm_token: str = "") -> dict[str, Any]:
+    """Mute ONE conversation you name by its thread id -- a WRITE.
+
+    Presses "Mute" in that conversation's own options menu, which silences
+    your notifications for it; nobody else is told. Census row ``M M29``. Same
+    two-step shape as ``linkedin_save_job``: no ``confirm_token``, no action --
+    you get a block to read and a token that works ONCE, only for this
+    conversation, only for this verb, within two minutes.
+
+    THE PREVIEW opens nothing while any conversation in your list reads unread
+    (the receipt guard ``linkedin_open_thread`` applies), then opens the
+    conversation you named, checks the browser landed on it, and opens its
+    menu -- the one in the list row LinkedIn marks active -- by the sanctioned
+    preview press: its words counted, nothing inside it pressed, closed on
+    Escape and read closed. A menu drawing "Unmute" is already muted and is
+    refused (that is ``linkedin_unmute_conversation``).
+
+    THE CONFIRMED PRESS opens the same menu, re-reads the word, and presses
+    "Mute" only when it is drawn exactly once and "Unmute" not at all. A fresh
+    render's menu is then read again: "Unmute" means muted. That word is
+    derived -- no capture holds a muted menu -- so the first supervised use
+    measures it.
+
+    Args:
+        thread_id: the part of the conversation's address after
+            /messaging/thread/, copied from your own browser.
+        confirm_token: leave empty to preview. Pass the token from that
+            preview to actually mute it.
+    """
+    try:
+        if not threads.valid_thread_id(thread_id):
+            return _thread_id_refusal()
+        return await _write_tool("mute_conversation", str(thread_id).strip(), confirm_token)
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_unmute_conversation(thread_id: str, confirm_token: str = "") -> dict[str, Any]:
+    """Unmute ONE conversation you name by its thread id -- a WRITE, the inverse
+    of ``linkedin_mute_conversation``.
+
+    Presses "Unmute" in that conversation's own options menu. Same two steps
+    and the same gates as the mute: the receipt guard, the landing, the
+    sanctioned preview press reading the menu's word. A menu drawing "Mute" is
+    not muted and is refused. "Unmute" is derived -- no capture holds a muted
+    conversation's menu -- so the first supervised round trip measures it.
+    Census row ``M M29``.
+
+    Args:
+        thread_id: the part of the conversation's address after
+            /messaging/thread/, copied from your own browser.
+        confirm_token: leave empty to preview. Pass the token from that
+            preview to actually unmute it.
+    """
+    try:
+        if not threads.valid_thread_id(thread_id):
+            return _thread_id_refusal()
+        return await _write_tool("unmute_conversation", str(thread_id).strip(), confirm_token)
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_mark_conversation_unread(thread_id: str, confirm_token: str = "") -> dict[str, Any]:
+    """Mark ONE conversation you name by its thread id as unread -- a WRITE.
+
+    Presses "Mark as unread" in that conversation's own options menu; it
+    changes only your inbox. Census row ``M M31``. Same two steps and the same
+    gates as ``linkedin_mute_conversation``: the receipt guard, the landing,
+    the sanctioned preview press reading the menu's word. A menu drawing "Mark
+    as read" is already unread and is refused.
+
+    THE VERIFICATION READS THE MENU IN PLACE, without loading the conversation
+    again: LinkedIn is believed to mark a conversation read when it is opened,
+    which would undo this. For the same reason THE WAY BACK IS TO OPEN IT:
+    ``linkedin_open_thread(thread_id, allow_unread=True)`` -- your opt-in,
+    because the receipt guard will see this conversation's row unread and
+    cannot tell it from a message you have not read.
+
+    Args:
+        thread_id: the part of the conversation's address after
+            /messaging/thread/, copied from your own browser.
+        confirm_token: leave empty to preview. Pass the token from that
+            preview to actually mark it unread.
+    """
+    try:
+        if not threads.valid_thread_id(thread_id):
+            return _thread_id_refusal()
+        return await _write_tool("mark_conversation_unread", str(thread_id).strip(), confirm_token)
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_archive_conversation(thread_id: str, confirm_token: str = "") -> dict[str, Any]:
+    """Archive ONE conversation you name by its thread id -- a WRITE.
+
+    Presses "Archive" in that conversation's own options menu, which moves it
+    out of your default list into the Archived folder; nobody else is told.
+    Census row ``M M27``. Same two steps and the same gates as
+    ``linkedin_mute_conversation``; anything but "Archive" drawn exactly once
+    is refused.
+
+    THIS SERVER CANNOT RESTORE IT YET: the restore lives in the Archived
+    folder, whose rows' menus have never been captured (census ``M M28``).
+    Restore it by hand there. After the press the conversation's own address
+    is rendered fresh: its menu still drawing "Archive" means it did not land;
+    the list drawing rows and none of them marked active is the derived sign
+    it did.
+
+    Args:
+        thread_id: the part of the conversation's address after
+            /messaging/thread/, copied from your own browser.
+        confirm_token: leave empty to preview. Pass the token from that
+            preview to actually archive it.
+    """
+    try:
+        if not threads.valid_thread_id(thread_id):
+            return _thread_id_refusal()
+        return await _write_tool("archive_conversation", str(thread_id).strip(), confirm_token)
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_delete_conversation(thread_id: str, confirm_token: str = "") -> dict[str, Any]:
+    """Delete ONE conversation you name by its thread id -- a WRITE with no inverse.
+
+    Presses "Delete conversation" in that conversation's own options menu.
+    Census row ``M M26``. USE IT ONLY ON YOUR EXPLICIT ORDER FOR A
+    CONVERSATION YOU NAME: nothing this server knows of brings a deleted
+    conversation back.
+
+    RECEIPT-ONLY. Same preview as ``linkedin_mute_conversation`` -- the
+    receipt guard, the landing, the sanctioned preview press reading "Delete
+    conversation" in the menu. The confirmed press re-reads that word and
+    presses it, and then presses NOTHING ELSE: what LinkedIn draws next -- a
+    confirmation or the deletion itself -- has never been captured, so a
+    confirmation is counted in the receipt and never answered. ``performed``
+    comes back "unknown" by declaration; the receipt's ``menu_gate`` says what
+    the press drew. If it drew a confirmation, the conversation was NOT
+    deleted.
+
+    Args:
+        thread_id: the part of the conversation's address after
+            /messaging/thread/, copied from your own browser.
+        confirm_token: leave empty to preview. Pass the token from that
+            preview to actually press "Delete conversation".
+    """
+    try:
+        if not threads.valid_thread_id(thread_id):
+            return _thread_id_refusal()
+        return await _write_tool("delete_conversation", str(thread_id).strip(), confirm_token)
+    except Exception as exc:
+        return _error(exc)
+
+
+# ---- end lane build-msg2 ----
 
 
 def main() -> None:  # pragma: no cover - process entry point

@@ -3,8 +3,14 @@
 An MCP server that shows you your own LinkedIn account data as structured tool
 results instead of pages you have to click through.
 
-**Ninety-one tools ship. Sixty-four read. Twenty-seven write. Three of those
+**Ninety-six tools ship. Sixty-four read. Thirty-two write. Three of those
 are write-shaped and unable to act.**
+(It read "Ninety-one tools ship. Sixty-four read. Twenty-seven write" until
+lane build-msg2, 2026-11-26: five writes act on ONE conversation he names by
+its thread id, through its own options menu -- mute, unmute, mark unread,
+archive, and a receipt-only delete -- each previewed by a sanctioned press that
+opens that one menu, reads it, presses nothing inside and closes it (census
+`M M26`, `M M27`, `M M29`, `M M31`).)
 (It read "Ninety tools ship. Sixty-three read. Twenty-seven write" until
 integration 4's merge of lane readers-msg26, 2026-11-26:
 `linkedin_search_content` searches posts by a keyword or a hashtag on the
@@ -808,7 +814,11 @@ renumbering. A read that changes something has to say so:
    `linkedin_list_conversations` (the composer's list, which opens none),
    `linkedin_messaging_presence` (the empty composer's suggestions, which
    opens none), `linkedin_open_thread`, `linkedin_send_reply` and
-   `linkedin_send_attachment` (only the conversation you name by id). Whether any of those loads clears the
+   `linkedin_send_attachment` (only the conversation you name by id), and
+   `linkedin_mute_conversation`, `linkedin_unmute_conversation`,
+   `linkedin_mark_conversation_unread`, `linkedin_archive_conversation` and
+   `linkedin_delete_conversation` (the composer's list, then only the
+   conversation you name by id). Whether any of those loads clears the
    messaging badge is
    unmeasured.
 4. **Three census surfaces may cost something merely by being opened**, and
@@ -1140,7 +1150,7 @@ linkedin_server/
   cdp_bridge.py              the recovery path: attach to a running Chrome
   dom.py                     the read-only harvesters and the control readers
   shape.py                   pure parsers and the result envelope
-  server.py                  the ninety-one tools
+  server.py                  the ninety-six tools
   errors.py
 tests/                       1393 tests, no network, no account
   fixtures/                  frozen LinkedIn markup, scrubbed

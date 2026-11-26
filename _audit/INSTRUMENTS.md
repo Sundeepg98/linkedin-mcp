@@ -12884,3 +12884,41 @@ The lane's scratch probes -- the keyed-shape word counter, the card mapper
 editors, the pin re-deriver -- and the exported base tree used for the
 red-first runs. Each answered one question once; the answers are in the
 record.
+
+## 109. A MENU IS READ BY A PRESS THAT PRESSES NOTHING INSIDE IT, AND A CONFIRMED PRESS RE-READS ITS WORD (build-msg2, 2026-11-26)
+
+**Registered 2026-11-26.** Full record: `_audit/2026-11-26-build-msg2.md`.
+Numbered 109, the next after master's 108; sibling build lanes may take the same
+number on their branches, and the integrator numbers the wave in merge order.
+
+### 109.1 A STATE THAT EXISTS ONLY WHILE A MENU IS OPEN IS READ BY OPENING IT AND NOTHING ELSE
+
+A conversation's options menu draws its items only while open, so its state
+cannot be read without a press. The preview press opens the ONE menu the active
+marker binds to the conversation he named, counts its words inside the page from
+a closed vocabulary, presses nothing inside it, closes it on Escape and reads it
+closed -- and a menu left open is no reading at all. Its two calls are declared
+mutations; the acts press through the write's one click site.
+
+    A PRESS THAT READS MAY OPEN AND CLOSE; IT MAY NOT CHOOSE.
+
+### 109.2 THE CONFIRMED PRESS RE-READS THE WORD, AND "IT DID NOT HAPPEN" IS ITS OWN ANSWER
+
+The word is re-read in the menu the confirmed press opened, and the item is
+pressed only when its word is drawn exactly once and its inverse not at all;
+otherwise the menu is closed by its own trigger. A refused item answers
+`not_changed_by_this_call`, never the destination state the menu may already
+read, so an act that was already done is never reported as done by this call.
+
+### 109.3 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `tests/test_conversation_menu.py`; `linkedin_server/conversation_menu.py`; `tests/conversation_menu_worlds.py` | on the base tree `3c656df` the file fails at collection (`ImportError: cannot import name 'conversation_menu'`); with the module present and `writes` unwired, 11 failed and 8 passed (`'mute_conversation' is not a sanctioned write`); green 19 passed. Inside the file: the act's inverse word removed makes the gate proceed on a menu reading the conversation already muted; no active row is refused with zero presses on the page's own counter; Escape not closing the menu makes every verdict unknown; a menu already muted at click time is closed by its trigger with no item pressed and `performed` false; the unread mark's verification is read back with no load after the press |
+| `scripts/_build_msg2_word_skeletons.py` (the provenance of the five `tests/fixtures/live11/*_words.html` composer skeletons) | refuses, writing nothing, unless each keyed skeleton's tracked copy is the committed capture, and refuses any declared word that matches no keyed shape; a fixed point (`--check`: all five match on a second run) |
+
+### 109.4 DECLARED DISPOSABLE
+
+The lane's scratch probes -- the menu and list counters, the keyed-word matcher
+(matched candidate words and counts only), the census editors -- and the
+exported base tree used for the red-first runs.

@@ -376,6 +376,23 @@ REACHED: dict[str, tuple[str, str, str]] = {
         WITHDRAW_MARKUP,
         str(writes._target_for(spec_for_action("withdraw_reaction"), REACTED_ITEM)),
     ),
+    # 2026-11-26 (census M M26, M M27, M M29, M M31; lane build-msg2). A
+    # TRACKED capture, live session 11's load 40 with the menu CLOSED: the
+    # one active row holding its one collapsed trigger. These five declare
+    # ``click_from_state`` -- the click-time gate reads the TRIGGER, and the
+    # word is re-read inside the menu the press opens -- so the check below
+    # compares the click-time reading against that declared field.
+    **{
+        action: (
+            "tests/fixtures/live11/msg_thread.html",
+            markup("live11/msg_thread"),
+            "2-SYNTHETICTHREADAAAA==",
+        )
+        for action in (
+            "mute_conversation", "unmute_conversation", "mark_conversation_unread",
+            "archive_conversation", "delete_conversation",
+        )
+    },
 }
 
 #: WHAT THIS INSTRUMENT CANNOT REACH, WITH THE REASON -- AND THE REASON IS NOT
@@ -502,7 +519,12 @@ async def _live(over, action, *, spec=None, anchor=None):
 _WORLDS_THAT_REACH_OUT = frozenset({"set_similar_jobs_alert", "unset_similar_jobs_alert",
                                     # 2026-11-25, lane build-jmn26: session 2's search
                                     # is a tracked copy too, its addresses https://x/...
-                                    "set_search_job_alert", "unset_search_job_alert"})
+                                    "set_search_job_alert", "unset_search_job_alert",
+                                    # 2026-11-26, lane build-msg2: session 11's thread
+                                    # page is a tracked copy too.
+                                    "mute_conversation", "unmute_conversation",
+                                    "mark_conversation_unread", "archive_conversation",
+                                    "delete_conversation"})
 
 
 async def _over_refusing_every_request(html: str, work):
@@ -684,8 +706,11 @@ def test_every_performable_action_is_either_reached_or_declared_unreachable():
     # pair beside the reaction pair's inverse, each reached over its own tests' surface. MEASURED.
     # 22 -> 24 ON LANE BUILD-JMN26 (2026-11-25): the search-alert pair, reached
     # over session 2's tracked search and its derived on world. MEASURED.
-    assert len(PERFORMABLE) == 24, sorted(PERFORMABLE)
-    assert len(REACHED) == 24, sorted(REACHED)
+    # 24 -> 29 ON LANE BUILD-MSG2 (2026-11-26): the five acts on one
+    # conversation's own menu, reached over session 11's tracked thread page,
+    # menu closed. MEASURED.
+    assert len(PERFORMABLE) == 29, sorted(PERFORMABLE)
+    assert len(REACHED) == 29, sorted(REACHED)
     assert len(CANNOT_REACH) == 0, sorted(CANNOT_REACH)
 
 

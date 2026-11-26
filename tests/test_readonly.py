@@ -168,6 +168,8 @@ def test_the_sanctioned_list_is_exactly_these_calls():
         ("linkedin_server/cdp_download.py", "capture_download", "cdp_session"),
         ("linkedin_server/cdp_download.py", "reset_download_behaviour", "cdp_session"),
         ("linkedin_server/job_alert_switch.py", "trial_press", "click"),
+        ("linkedin_server/conversation_menu.py", "_open", "click"),
+        ("linkedin_server/conversation_menu.py", "_close", "press"),
     )
     # EIGHT FROM 2026-09-23: ``reveal.reveal``'s one click, the first press
     # admitted BY NAME -- per control, in reveal.DECIDED_REVEALS, on a recorded
@@ -187,7 +189,11 @@ def test_the_sanctioned_list_is_exactly_these_calls():
     # SIXTEEN, 2026-10-10 (lane B4): ``job_alert_switch.trial_press``'s one
     # trial click, a READ declared on the list (its argument and its budget
     # are beside the entry in readonly.py).
-    assert len(readonly.SANCTIONED_MUTATIONS) == 16
+    # SEVENTEEN AND EIGHTEEN, 2026-11-26 (lane build-msg2): conversation_menu's
+    # PREVIEW PRESS -- one click on the active row's trigger and one Escape --
+    # a READ declared on CONVERSATION-MENU-PREVIEW-PRESS (argument beside the
+    # entries in readonly.py).
+    assert len(readonly.SANCTIONED_MUTATIONS) == 18
     # THE KINDS ARE ASSERTED SEPARATELY, because the count alone would let a
     # click be swapped for a fill without moving the number, and those are
     # different capabilities: a click presses what is already there, a fill
@@ -224,8 +230,10 @@ def test_the_sanctioned_list_is_exactly_these_calls():
         "click",
         "click",
         "click",
+        "click",
         "evaluate",
         "fill",
+        "press",
         "press",
         "press",
         "select_option",
@@ -320,7 +328,9 @@ def test_the_package_contains_exactly_as_many_mutating_calls_as_are_listed():
     # sessions -- met the scanner lane G had widened to see them, and was
     # declared on D4-NO-OWN-BROWSER-CONTEXT (see the entries' argument).
     # SIXTEEN, 2026-10-10 (lane B4): the trial click, a read declared.
-    assert total == len(readonly.SANCTIONED_MUTATIONS) == 16, total
+    # EIGHTEEN, 2026-11-26 (lane build-msg2): conversation_menu's preview press,
+    # its one click and its one Escape, a read declared.
+    assert total == len(readonly.SANCTIONED_MUTATIONS) == 18, total
 
 
 def test_the_partition_conserves_every_hit():

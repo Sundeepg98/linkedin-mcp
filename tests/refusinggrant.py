@@ -150,6 +150,12 @@ SYNTHETIC_RAW_TARGETS: dict[str, Any] = {
     # the KeyError stopped every writes reader being driven for ANY spec --
     # measured on that lane's first local run, as the rows above record.
     "job_search": "keywords=example+harness+search&location=example+harness+place",
+    # ONE CONVERSATION'S THREAD ID ALONE (the conversation-menu acts, lane
+    # build-msg2, 2026-11-26), the shape ``threads.valid_thread_id`` admits.
+    # Missing, the KeyError stopped every writes reader being driven for ANY
+    # spec -- measured on that lane's first leak-harness run, as the rows
+    # above record.
+    "thread_id": "2-SYNTHETICHARNESSTHREAD==",
 }
 
 #: The harness's own upload root, made once per process on first use and

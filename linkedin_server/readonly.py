@@ -4320,6 +4320,30 @@ SANCTIONED_MUTATIONS: tuple[tuple[str, str, str], ...] = (
     # ``writes.perform`` would make can reach the switch at all, the finding
     # of live session 8 on the same LinkedIn toggle (P B9).
     ("linkedin_server/job_alert_switch.py", "trial_press", "click"),
+    # THE SEVENTEENTH AND EIGHTEENTH, 2026-11-26 (lane build-msg2, census
+    # M M26, M M27, M M29, M M31): ``conversation_menu``'s PREVIEW PRESS, A
+    # READ DECLARED HERE, on ruling CONVERSATION-MENU-PREVIEW-PRESS (the
+    # orchestrator, 14:10, registered at integration 4): "open that one
+    # options menu bound to the named conversation, read the item's word,
+    # press nothing inside, close on Escape, verify closed". Its precedent,
+    # named by the ruling, is the sixteenth entry above.
+    #
+    #   click   conversation_menu._open -- the ONE trigger in the ONE list row
+    #           wearing the active marker on the conversation he named,
+    #           pressed strictly, and only after ``_ready_to_open`` found that
+    #           shape collapsed with no item drawn;
+    #   press   conversation_menu._close -- the ONE Escape that closes the menu
+    #           it opened, only while the menu reads open.
+    #
+    # WHY IT IS ARGUABLE RATHER THAN A WIDENING. Both are reached from
+    # ``conversation_menu.preview_press`` alone; the trigger is a disclosure
+    # (``aria-expanded``) and nothing inside the menu is ever pressed by it --
+    # every word is counted inside the page, by exact name, from a closed
+    # vocabulary; and its verdict reads ``unknown`` unless the menu reads
+    # closed again afterwards. The acts themselves press through
+    # ``writes.perform``'s one click site and nowhere else.
+    ("linkedin_server/conversation_menu.py", "_open", "click"),
+    ("linkedin_server/conversation_menu.py", "_close", "press"),
 )
 
 
@@ -4561,6 +4585,14 @@ WRITE_VERBS: tuple[str, ...] = (
     # every registered tool description, "react" appears as a whole word in
     # exactly ONE -- the tool named for it. Zero false positives.
     "react",
+    # ADDED 2026-11-26 (lane build-msg2), on the same evidence the line above
+    # was added on: ``linkedin_mute_conversation`` and its inverse
+    # ``linkedin_unmute_conversation`` are sanctioned writes, and before this
+    # line ``name_implies_write`` returned False for both. MEASURED BEFORE
+    # ADDING: "mute" appeared as a whole word in ZERO lines of server.py, so
+    # the docstring check this list also feeds fires only on the two tools
+    # named for it. "unmute" is reached through the negation prefix.
+    "mute",
 )
 
 #: A THIRD RESIDUE, measured the same day, and the record of what was done

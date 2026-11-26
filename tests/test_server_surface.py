@@ -1,4 +1,12 @@
-"""The tool surface: ninety-one tools, sixty-four of which do not write.
+"""The tool surface: ninety-six tools, sixty-four of which do not write.
+
+**IT READ "ninety-one tools, sixty-four of which do not write" UNTIL LANE
+BUILD-MSG2 (2026-11-26) ADDED FIVE WRITES**: ``linkedin_mute_conversation``,
+``linkedin_unmute_conversation``, ``linkedin_mark_conversation_unread``,
+``linkedin_archive_conversation`` and ``linkedin_delete_conversation`` (census
+M M26, M M27, M M29, M M31), the acts on one conversation's own options menu,
+so the non-write count holds at sixty-four. Measured off this branch's
+registry, not summed.
 
 **IT READ "ninety tools, sixty-three of which do not write" UNTIL INTEGRATION
 4'S MERGE OF LANE READERS-MSG26 (2026-11-26)**: one READ,
@@ -224,6 +232,13 @@ SANCTIONED_WRITE_TOOLS = frozenset(SANCTIONED_WRITES) & {
     # alert switch, set and unset, each the other's inverse.
     "linkedin_set_search_job_alert",
     "linkedin_unset_search_job_alert",
+    # 2026-11-26 (lane build-msg2, census M M26, M M27, M M29, M M31): the
+    # five acts on one conversation's own options menu.
+    "linkedin_mute_conversation",
+    "linkedin_unmute_conversation",
+    "linkedin_mark_conversation_unread",
+    "linkedin_archive_conversation",
+    "linkedin_delete_conversation",
     # THE FIFTEENTH, 2026-09-24 (census rows M M10 and, by D6, M M17; the
     # fourteenth on lane L5's branch, before lane L7's merge landed): a
     # reply inside a conversation he names by thread id. Its NAME announces
@@ -592,6 +607,13 @@ EXPECTED_TOOLS = {
     # alert switch, set and unset, each the other's inverse.
     "linkedin_set_search_job_alert",
     "linkedin_unset_search_job_alert",
+    # 2026-11-26 (lane build-msg2, census M M26, M M27, M M29, M M31): the
+    # five acts on one conversation's own options menu.
+    "linkedin_mute_conversation",
+    "linkedin_unmute_conversation",
+    "linkedin_mark_conversation_unread",
+    "linkedin_archive_conversation",
+    "linkedin_delete_conversation",
     "linkedin_publish_post",
     "linkedin_comment_on_item",
     # THE THIRTY-SIXTH, 2026-09-03. A READ that SHIPS REFUSING: the read
@@ -806,8 +828,13 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_ninety_one_tools(tools):
-    """RENAMED AGAIN AT INTEGRATION 4'S MERGE OF LANE READERS-MSG26 (2026-11-26),
+async def test_the_surface_is_exactly_the_ninety_six_tools(tools):
+    """RENAMED AGAIN ON LANE BUILD-MSG2 (2026-11-26), to ``..._ninety_six_tools``:
+    five WRITES, the acts on one conversation's own options menu (census M M26,
+    M M27, M M29, M M31), beside the ninety-one. MEASURED off this branch's
+    registry, not summed; the name moved with the pin.
+
+    RENAMED AGAIN AT INTEGRATION 4'S MERGE OF LANE READERS-MSG26 (2026-11-26),
     to ``..._ninety_one_tools``: one READ, ``linkedin_search_content`` (census
     M C93), beside the ninety. MEASURED off the merged registry, not summed;
     the name moved with the pin. (Lane readers-msg26's branch named it
@@ -1376,7 +1403,10 @@ async def test_the_surface_is_exactly_the_ninety_one_tools(tools):
     # linkedin_search_content, a READ beside the ninety (its branch read
     # eighty-four), so the split moves on its read side. MEASURED off
     # mcp.list_tools() on the merged tree, not summed.
-    assert len(tools) == 91
+    # NINETY-SIX ON LANE BUILD-MSG2 (2026-11-26): five WRITES, the acts on one
+    # conversation's own options menu, so the split moves on its write side.
+    # MEASURED off mcp.list_tools() on this branch, not summed.
+    assert len(tools) == 96
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -1410,6 +1440,20 @@ async def test_the_surface_is_exactly_the_ninety_one_tools(tools):
         # alert switch, set and unset, each the other's inverse.
         "linkedin_set_search_job_alert",
         "linkedin_unset_search_job_alert",
+        # 2026-11-26 (lane build-msg2, census M M26, M M27, M M29, M M31):
+        # the five acts on one conversation's own options menu.
+        "linkedin_mute_conversation",
+        "linkedin_unmute_conversation",
+        "linkedin_mark_conversation_unread",
+        "linkedin_archive_conversation",
+        "linkedin_delete_conversation",
+    # 2026-11-26 (lane build-msg2, census M M26, M M27, M M29, M M31): the
+    # five acts on one conversation's own options menu.
+    "linkedin_mute_conversation",
+    "linkedin_unmute_conversation",
+    "linkedin_mark_conversation_unread",
+    "linkedin_archive_conversation",
+    "linkedin_delete_conversation",
         "linkedin_send_reply",
         "linkedin_withdraw_from_group",
         "linkedin_connect_from_profile",
@@ -1644,8 +1688,11 @@ async def test_the_surface_is_exactly_the_ninety_one_tools(tools):
     # and the write side is unmoved (its branch read fifty-seven beside
     # eighty-four); this second copy of the total moves to the measured
     # ninety-one with the first test's pin. MEASURED, never summed.
+    # STILL SIXTY-FOUR ON LANE BUILD-MSG2 (2026-11-26): its five tools are
+    # WRITES, so the non-write count holds and this second copy of the total
+    # moves to the measured ninety-six with the first test's pin.
     assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 64
-    assert len(tools) == 91
+    assert len(tools) == 96
 
 
 def test_the_read_that_was_nearly_named_a_write():
@@ -1755,6 +1802,20 @@ async def test_the_exemption_covers_only_the_names_on_it(tools):
         # alert switch, set and unset, each the other's inverse.
         "linkedin_set_search_job_alert",
         "linkedin_unset_search_job_alert",
+        # 2026-11-26 (lane build-msg2, census M M26, M M27, M M29, M M31):
+        # the five acts on one conversation's own options menu.
+        "linkedin_mute_conversation",
+        "linkedin_unmute_conversation",
+        "linkedin_mark_conversation_unread",
+        "linkedin_archive_conversation",
+        "linkedin_delete_conversation",
+    # 2026-11-26 (lane build-msg2, census M M26, M M27, M M29, M M31): the
+    # five acts on one conversation's own options menu.
+    "linkedin_mute_conversation",
+    "linkedin_unmute_conversation",
+    "linkedin_mark_conversation_unread",
+    "linkedin_archive_conversation",
+    "linkedin_delete_conversation",
         "linkedin_send_reply",
         "linkedin_withdraw_from_group",
         "linkedin_connect_from_profile",
@@ -2191,12 +2252,18 @@ async def test_server_info_stops_claiming_read_only_once_writes_are_on(monkeypat
     # deriving it from PERFORMABLE would make the test agree with any change.
     assert info["writes_available"] == [
         "apply_job",
+        # 2026-11-26 (lane build-msg2), typed here by hand: an act on one
+        # conversation's own options menu (census M M26, M27, M29, M31).
+        "archive_conversation",
         # TENTH, 2026-09-01. Typed here by hand like its nine siblings.
         "comment_on_item",
         # SIXTEENTH, 2026-09-27 (census N 4 by D6; lane L5's follow-up), typed
         # here by hand like its fifteen siblings: Connect on the profile of a
         # person he names by link or member id, never by name.
         "connect_from_profile",
+        # 2026-11-26 (lane build-msg2), typed here by hand: an act on one
+        # conversation's own options menu (census M M26, M27, M29, M31).
+        "delete_conversation",
         "follow_company",
         # THIRTEENTH, 2026-09-23 (census row N 47), typed here by hand like
         # its twelve siblings: a follow performed on the organisation Page root,
@@ -2206,10 +2273,16 @@ async def test_server_info_stops_claiming_read_only_once_writes_are_on(monkeypat
         # hand like its thirteen siblings: "I'm interested", pressed in one
         # posting's About-the-company card, aimed by the card's own employer.
         "mark_company_interest",
+        # 2026-11-26 (lane build-msg2), typed here by hand: an act on one
+        # conversation's own options menu (census M M26, M27, M29, M31).
+        "mark_conversation_unread",
         # SEVENTEENTH, 2026-09-27 (census M M1; lane L5's follow-up), typed
         # here by hand like its sixteen siblings: Message on the profile of a
         # person he names, typing only for a first-degree connection.
         "message_from_profile",
+        # 2026-11-26 (lane build-msg2), typed here by hand: an act on one
+        # conversation's own options menu (census M M26, M27, M29, M31).
+        "mute_conversation",
         # NINTH, same day, and the first that TYPES. Typed here by hand like
         # its eight siblings, because a derived list would admit the tenth
         # silently.
@@ -2249,6 +2322,9 @@ async def test_server_info_stops_claiming_read_only_once_writes_are_on(monkeypat
         # set and unset, each the other's inverse.
         "set_similar_jobs_alert",
         "unfollow_company",
+        # 2026-11-26 (lane build-msg2), typed here by hand: an act on one
+        # conversation's own options menu (census M M26, M27, M29, M31).
+        "unmute_conversation",
         "unsave_job",
         "unset_search_job_alert",
         "unset_similar_jobs_alert",
@@ -2289,6 +2365,9 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
     info = await linkedin_server_info(verbose=True)
     assert info["writes_sanctioned"] == [
         "apply_job",
+        # 2026-11-26 (lane build-msg2), typed here by hand: an act on one
+        # conversation's own options menu (census M M26, M27, M29, M31).
+        "archive_conversation",
         # THE TENTH, 2026-09-01, and the only one that ships EXPECTING TO
         # REFUSE: its submit control has never been observed, so the gate
         # finds it by arrival after the fill and stops with the observation
@@ -2297,6 +2376,9 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
         # THE SIXTEENTH, 2026-09-27 (census N 4 by D6). Typed by hand, as this
         # list requires, by the lane that built it.
         "connect_from_profile",
+        # 2026-11-26 (lane build-msg2), typed here by hand: an act on one
+        # conversation's own options menu (census M M26, M27, M29, M31).
+        "delete_conversation",
         "follow_company",
         # THE THIRTEENTH, 2026-09-23 (census row N 47). Typed by hand, as this
         # list requires, by the lane that built it.
@@ -2304,9 +2386,15 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
         # THE FOURTEENTH, 2026-09-24 (census row P I14). Typed by hand, as
         # this list requires, at the merge of the lane that built it.
         "mark_company_interest",
+        # 2026-11-26 (lane build-msg2), typed here by hand: an act on one
+        # conversation's own options menu (census M M26, M27, M29, M31).
+        "mark_conversation_unread",
         # THE SEVENTEENTH, 2026-09-27 (census M M1). Typed by hand, as this
         # list requires, by the lane that built it.
         "message_from_profile",
+        # 2026-11-26 (lane build-msg2), typed here by hand: an act on one
+        # conversation's own options menu (census M M26, M27, M29, M31).
+        "mute_conversation",
         # THE NINTH, same day, and the FIRST THAT TYPES -- one page.fill
         # inside perform, which grew readonly.SANCTIONED_MUTATIONS from two
         # entries to three, the first growth that is not a click.
@@ -2341,6 +2429,9 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
         # set and unset, each the other's inverse.
         "set_similar_jobs_alert",
         "unfollow_company",
+        # 2026-11-26 (lane build-msg2), typed here by hand: an act on one
+        # conversation's own options menu (census M M26, M27, M29, M31).
+        "unmute_conversation",
         "unsave_job",
         "unset_search_job_alert",
         "unset_similar_jobs_alert",
@@ -2742,6 +2833,10 @@ async def test_the_server_instructions_name_every_write_that_ships():
         # TWENTY-THREE AND TWENTY-FOUR ON LANE BUILD-JMN26 (2026-11-25): the
         # search-alert pair beside the twenty-two; only twenty-four is reached.
         23: "twenty-three", 24: "twenty-four",
+        # TWENTY-NINE FROM LANE BUILD-MSG2 (2026-11-26): the five acts on one
+        # conversation's own menu, the map extended the same way.
+        25: "twenty-five", 26: "twenty-six", 27: "twenty-seven",
+        28: "twenty-eight", 29: "twenty-nine",
     }
     assert f"{words[len(writes.PERFORMABLE)]} write" in text
     for action in writes.PERFORMABLE:
@@ -3066,6 +3161,9 @@ async def test_server_info_reports_irreversibility_before_a_caller_commits(
         # PRESSED: the preview loads that person's profile, which may show him
         # among their viewers, and both specs' residue says so.
         "connect_from_profile",
+        # 2026-11-26 (lane build-msg2, census M M26), typed here by hand:
+        # a conversation's delete, receipt-only, which nothing brings back.
+        "delete_conversation",
         "message_from_profile",
         "publish_post",
         # THE NINTH, 2026-10-10 (lane U), TYPED BY HAND AS THIS LIST DEMANDS,

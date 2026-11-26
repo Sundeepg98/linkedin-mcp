@@ -458,7 +458,14 @@ AFTER_LANE_READERS_MSG26_CONTENT_SEARCH = (119, {"R": 9, "W": 107, "R+W": 3})
 #: 119 - 1 = 118, writes 107 - 1.
 AFTER_LANE_READERS_MSG26_FOOTER = (118, {"R": 9, "W": 106, "R+W": 3})
 
-EXPECTED_NOW = AFTER_LANE_READERS_MSG26_FOOTER
+#: ON LANE BUILD-MSG2 (2026-11-26), MEASURED with this tree's guard: `M26`,
+#: `M27`, `M29` and `M31` -- four WRITES -- left GAP, COVERED-UNFIRED on the
+#: acts on one conversation's own options menu
+#: (`_audit/2026-11-26-build-msg2.md` section 2). 118 - 4 = 114, writes
+#: 106 - 4.
+AFTER_LANE_BUILD_MSG2_CONVERSATION_MENU = (114, {"R": 9, "W": 102, "R+W": 3})
+
+EXPECTED_NOW = AFTER_LANE_BUILD_MSG2_CONVERSATION_MENU
 
 
 def test_the_headline_split_is_the_one_the_report_quotes():
