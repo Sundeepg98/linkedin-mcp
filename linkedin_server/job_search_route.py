@@ -507,7 +507,7 @@ def _card_when(card: _Node, stack: _Node) -> tuple[Optional[str], bool]:
     return visible, match.group(1) == "Reposted"
 
 
-def _read_card(card: _Node) -> Optional[dict[str, Any]]:
+def _read_ai_card(card: _Node) -> Optional[dict[str, Any]]:
     key = CARD_KEY.match(card.attrs.get("componentkey") or "")
     if key is None:
         return None
@@ -607,7 +607,7 @@ def read_ai_search(html: str) -> dict[str, Any]:
     seen: set[str] = set()
     unparsed = 0
     for card in cards:
-        row = _read_card(card)
+        row = _read_ai_card(card)
         if row is None:
             unparsed += 1
             continue
