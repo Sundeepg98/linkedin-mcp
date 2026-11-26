@@ -87,21 +87,21 @@ J 163	J	W	-	BUILD:tests/fixtures/live8/recommended.html	MEASURED	_audit/2026-11-
 J 166	J	R	-	CAPTURE:admit-products-product	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/products/placeholder-product/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
 J 167	J	R	-	CAPTURE:admit-showcase-showcase	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/showcase/placeholder-showcase/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
 M C2	M	W	R3	SIBLING:M C12	NAMED	_audit/_census/messaging-and-content.md::which is why the two rows close together or not at all
-M C3	M	W	R3	SIBLING:lane-U	NAMED	_audit/2026-09-28-rulings-build-classes.md::`FILE-UPLOAD-UNSANCTIONED` is therefore a stale label.
-M C4	M	W	R3	SIBLING:lane-U	NAMED	_audit/2026-09-28-rulings-build-classes.md::`FILE-UPLOAD-UNSANCTIONED` is therefore a stale label.
-M C5	M	W	R3	SIBLING:lane-U	NAMED	_audit/2026-09-28-rulings-build-classes.md::`FILE-UPLOAD-UNSANCTIONED` is therefore a stale label.
-M C6	M	W	R3	SIBLING:lane-U	NAMED	_audit/2026-09-28-rulings-build-classes.md::`FILE-UPLOAD-UNSANCTIONED` is therefore a stale label.
-M C7	M	W	R3	SIBLING:lane-U	NAMED	_audit/2026-09-28-rulings-build-classes.md::`FILE-UPLOAD-UNSANCTIONED` is therefore a stale label.
+M C3	M	W	R3	BUILD:tests/fixtures/live11/u_post_media_open.html	MEASURED	_audit/2026-11-26-readers-msg26.md::THE INPUT THE ROWS' OLD READING NEVER SAW IS DRAWN ; RULING:FILE-UPLOAD-OPENED ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
+M C4	M	W	R3	BUILD:tests/fixtures/live11/u_post_media_open.html	MEASURED	_audit/2026-11-26-readers-msg26.md::THE INPUT THE ROWS' OLD READING NEVER SAW IS DRAWN ; RULING:FILE-UPLOAD-OPENED ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
+M C5	M	W	R3	CAPTURE:U-POST-DOCUMENT	MEASURED	_audit/2026-11-26-readers-msg26.md::the document control sits behind `More` ; RULING:L1-D3-MEDIA-CHOOSER-INTERCEPTED
+M C6	M	W	R3	SIBLING:M C5	NAMED	M C6 ; M C5
+M C7	M	W	R3	SIBLING:M C3	NAMED	M C7 ; M C3
 M C8	M	W	R3	TARGET:the poll question and options he names	INFERRED	M C8 ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
 M C9	M	W	R3	TARGET:the occasion and the words he names	NAMED	_audit/_census/messaging-and-content.md::Celebrate an occasion
 M C10	M	W	R3	TARGET:a member he names to mention	INFERRED	RULING:MENTION-COMPOSITION-RULING ; RULING:OPERATOR-NAMES-THE-TARGET
 M C11	M	W	R3	SIBLING:M C1	INFERRED	RULING:D6-CAPABILITY-OVER-AFFORDANCE ; M C1
 M C12	M	W	R3	TARGET:the words of a draft he names	INFERRED	RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS ; M C12
 M C13	M	W	R3	TARGET:a post he names to schedule	NAMED	_audit/_census/messaging-and-content.md::Schedule post is a button opening a modal nobody has opened
-M C14	M	R	-	CAPTURE:sharebox-scheduled	NAMED	RULING:CAPTURE-PRESS-UNDER-PROBE-RULE ; _audit/_census/messaging-and-content.md::no link from the composer reaches the scheduled list
-M C15	M	W	R3	CAPTURE:sharebox-scheduled	NAMED	RULING:CAPTURE-PRESS-UNDER-PROBE-RULE ; _audit/_census/messaging-and-content.md::no link from the composer reaches the scheduled list
-M C16	M	W	R3	CAPTURE:sharebox-scheduled	NAMED	RULING:CAPTURE-PRESS-UNDER-PROBE-RULE ; _audit/_census/messaging-and-content.md::no link from the composer reaches the scheduled list
-M C17	M	W	R3	CAPTURE:sharebox-scheduled	NAMED	RULING:CAPTURE-PRESS-UNDER-PROBE-RULE ; _audit/_census/messaging-and-content.md::no link from the composer reaches the scheduled list
+M C14	M	R	-	BUILD:tests/fixtures/live11/sharebox_scheduled_list_open.html	NAMED	_audit/2026-09-28-lane-k-ledger.md::YES, as a shipped read: open the post ; RULING:ABSENT-ON-HIS-ACCOUNT-PER-ROW
+M C15	M	W	R3	PRECONDITION:a post he has scheduled	MEASURED	_audit/2026-11-26-readers-msg26.md::No scheduled posts yet ; RULING:MEASURED-ABSENT-OR-PRECONDITION
+M C16	M	W	R3	PRECONDITION:a post he has scheduled	MEASURED	_audit/2026-11-26-readers-msg26.md::No scheduled posts yet ; RULING:MEASURED-ABSENT-OR-PRECONDITION
+M C17	M	W	R3	PRECONDITION:a post he has scheduled	MEASURED	_audit/2026-11-26-readers-msg26.md::No scheduled posts yet ; RULING:MEASURED-ABSENT-OR-PRECONDITION
 M C18	M	W	R3	CAPTURE:own-post-reactions	INFERRED	_audit/2026-10-10-lane-b3-messaging-build.md::never a composer or an editor ; _audit/2026-09-28-lane-k-ledger.md::the step is TARGET, not RULING ; RULING:HIS-OWN-CURATION-NOT-OUTWARD
 M C19	M	W	R3	TARGET:a post of his he names for deletion	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::| C6 | `delete_own_post` ; RULING:OPERATOR-NAMES-THE-TARGET
 M C20	M	W	R3	TARGET:an item he names to repost	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::| C1 | `repost_item` ; RULING:OPERATOR-NAMES-THE-TARGET
@@ -122,12 +122,12 @@ M C36	M	W	R1	CAPTURE:feed-menus	NAMED	_audit/_census/messaging-and-content.md::a
 M C37	M	W	R1	CAPTURE:feed-menus	NAMED	_audit/_census/write-classes.tsv::queued:SAVED-POSTS-SURFACE ; M C36
 M C39	M	R	-	CAPTURE:comments-metric-spelling	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/analytics/creator/content/?metricType=x ; RULING:READ-PAST-AN-ACT-SUBSTRING
 M C42	M	R	-	TARGET:another member's post he names, by link	NAMED	_audit/_census/read-addresses.tsv::THE ROW HOLDS FOR OTHER PEOPLE'S POSTS ONLY
-M C44	M	W	R3	CAPTURE:article-composer	NAMED	RULING:ARTICLE-COMPOSER-CAPTURE ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
+M C44	M	W	R3	CAPTURE:C-MSG26-4	NAMED	_audit/2026-09-28-lane-k-ledger.md::YES, as ONE CAPTURE, nothing typed: ; RULING:ARTICLE-COMPOSER-CAPTURE
 M C45	M	W	R3	SIBLING:lane-U	NAMED	_audit/2026-09-28-rulings-build-classes.md::`FILE-UPLOAD-UNSANCTIONED` is therefore a stale label.
-M C46	M	W	R3	CAPTURE:article-composer	NAMED	RULING:ARTICLE-COMPOSER-CAPTURE ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
+M C46	M	W	R3	CAPTURE:C-MSG26-4	NAMED	_audit/2026-09-28-lane-k-ledger.md::YES, as ONE CAPTURE, nothing typed: ; RULING:ARTICLE-COMPOSER-CAPTURE
 M C47	M	R+W	-	CAPTURE:article-composer	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/pulse/drafts/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
 M C49	M	W	R3	PRECONDITION:an article he has published	INFERRED	M C49 ; M C77
-M C50	M	W	R3	CAPTURE:article-composer	NAMED	RULING:ARTICLE-COMPOSER-CAPTURE ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
+M C50	M	W	R3	CAPTURE:C-MSG26-4	NAMED	_audit/2026-09-28-lane-k-ledger.md::YES, as ONE CAPTURE, nothing typed: ; RULING:ARTICLE-COMPOSER-CAPTURE
 M C51	M	W	R3	PRECONDITION:a newsletter he authors	INFERRED	_audit/_census/read-addresses.tsv::the page listing his newsletters links no analytics address
 M C52	M	W	R3	SIBLING:N 34	MEASURED	tests/fixtures/live11/unfollowed.html ; N 34
 M C54	M	W	R3	TARGET:the words of a collaborative post he names	INFERRED	_audit/_census/messaging-and-content.md::the post composer is an address already loaded
@@ -137,20 +137,20 @@ M C57	M	W	R3	TARGET:the event he names to create (title and time)	INFERRED	RULIN
 M C58	M	W	R3	TARGET:an event he names	NAMED	_audit/_census/read-addresses.tsv::ADMITTED 2026-09-23 BY A REVIEW: COMMIT (lane L1): one event by its NUMERIC id ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
 M C61	M	W	R3	CAPTURE:C-B5-1	NAMED	_audit/2026-10-10-lane-b5-groups-build.md::| C-B5-1 | N 63, M C61 | ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
 M C62	M	W	R3	TARGET:a group he has a pending request to join	NAMED	_audit/_census/write-classes.tsv::queued:GROUP-REQUEST-PENDING ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
-M C64	M	W	R3	CAPTURE:C-B5-4	NAMED	_audit/2026-10-10-lane-b5-groups-build.md::| C-B5-4 | M C64 | ; RULING:ARTICLE-COMPOSER-CAPTURE ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
+M C64	M	W	R3	BUILD:tests/fixtures/live11/group_composer_open.html	MEASURED	_audit/2026-11-26-readers-msg26.md::the same share-box modal ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS ; RULING:B5-GROUP-COMPOSER-OPENS-EMPTY
 M C65	M	W	R3	SIBLING:M C25	INFERRED	RULING:D6-CAPABILITY-OVER-AFFORDANCE ; M C25
 M C66	M	W	R2	TARGET:a member he names to mention	INFERRED	RULING:MENTION-COMPOSITION-RULING ; RULING:OPERATOR-NAMES-THE-TARGET
 M C67	M	W	R3	TARGET:a group post or comment of his he names	INFERRED	RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS ; M C67
 M C68	M	W	R3	TARGET:a group he names that holds posts for admin approval	INFERRED	RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS ; M C68
 M C69	M	W	R3	CAPTURE:C-B5-3	NAMED	_audit/2026-10-10-lane-b5-groups-build.md::| C-B5-3 | N 168, M C69 | ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
-M C70	M	R	-	CAPTURE:admit-search-results-content	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/search/results/content/ ; RULING:CONTENT-VERTICAL-NOT-ALL-RESULTS
+M C70	M	R	-	CAPTURE:C-MSG26-1	MEASURED	_audit/_census/capture-queue.tsv::draws Posts, Sort by, Date posted, Content type, From member and All filters, and no group facet ; RULING:CONTENT-VERTICAL-NOT-ALL-RESULTS
 M C73	M	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 M C76	M	W	R3	PRECONDITION:an invitation to contribute to a collaborative article	INFERRED	M C76
 M C77	M	W	R3	PRECONDITION:an article he has published	INFERRED	M C49 ; M C77
-M C78	M	W	R3	CAPTURE:article-composer	NAMED	RULING:ARTICLE-COMPOSER-CAPTURE ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
+M C78	M	W	R3	CAPTURE:C-MSG26-4	NAMED	_audit/2026-09-28-lane-k-ledger.md::YES, as ONE CAPTURE, nothing typed: ; RULING:ARTICLE-COMPOSER-CAPTURE
 M C79	M	W	R1	RULING:Q-NAME-BEARING-ADDRESS-REDACTION	INFERRED	_audit/_census/messaging-and-content.md::`/pulse/` stays refused ; RULING:READ-PAST-AN-ACT-SUBSTRING
 M C80	M	W	R3	CAPTURE:admit-newsletters-id	NAMED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/newsletters/1234567890/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
-M C81	M	W	R3	CAPTURE:article-composer	NAMED	RULING:ARTICLE-COMPOSER-CAPTURE ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
+M C81	M	W	R3	CAPTURE:C-MSG26-4	NAMED	_audit/2026-09-28-lane-k-ledger.md::YES, as ONE CAPTURE, nothing typed: ; RULING:ARTICLE-COMPOSER-CAPTURE
 M C82	M	W	R3	CAPTURE:admit-newsletters-id	NAMED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/newsletters/1234567890/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
 M C83	M	R	-	PRECONDITION:a newsletter he authors	INFERRED	_audit/_census/read-addresses.tsv::the page listing his newsletters links no analytics address
 M C84	M	W	R3	PRECONDITION:two or more newsletters he authors	INFERRED	M C84
@@ -162,7 +162,6 @@ M C89	M	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 M C90	M	W	R3	CAPTURE:C-B3-2	INFERRED	_audit/2026-10-10-lane-b3-messaging-build.md::the first place to look, in the same capture ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE ; RULING:HIS-OWN-CURATION-NOT-OUTWARD
 M C91	M	W	R3	SIBLING:M C32	INFERRED	RULING:D6-CAPABILITY-OVER-AFFORDANCE ; M C32
 M C92	M	W	R3	TARGET:an event he names	NAMED	_audit/_census/read-addresses.tsv::ADMITTED 2026-09-23 BY A REVIEW: COMMIT (lane L1): one event by its NUMERIC id ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
-M C93	M	R	-	CAPTURE:admit-search-results-content	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/search/results/content/?keywords=placeholder ; RULING:CONTENT-VERTICAL-NOT-ALL-RESULTS
 M C94	M	W	R2	TARGET:a post and a connection he names	INFERRED	RULING:OPERATOR-NAMES-THE-TARGET ; M C94
 M C97	M	W	R3	CAPTURE:C-I3-1	MEASURED	_audit/2026-11-25-build-jmn26.md::WORD-MEASURED ON TODAY'S CAPTURES ; RULING:PAGE-MAY-VETO-NEVER-SUPPLY
 M C100	M	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
@@ -171,40 +170,39 @@ M M2	M	W	R2	TARGET:a non-connection he names (the act stops at the composer)	NAM
 M M3	M	W	R2	TARGET:a non-connection he names (the act stops at the composer)	NAMED	_audit/2026-09-24-lane-l5-messaging.md::| C-P5 | the composer a NON-connection gets ; RULING:OPERATOR-NAMES-THE-TARGET
 M M5	M	W	R2	TARGET:a non-connection he names (the act stops at the composer)	NAMED	_audit/2026-09-24-lane-l5-messaging.md::| C-P5 | the composer a NON-connection gets ; RULING:OPERATOR-NAMES-THE-TARGET
 M M6	M	W	R2	TARGET:a non-connection he names (the act stops at the composer)	NAMED	_audit/2026-09-24-lane-l5-messaging.md::| C-P5 | the composer a NON-connection gets ; RULING:OPERATOR-NAMES-THE-TARGET
-M M7	M	W	R3	CAPTURE:messaging-guarded	NAMED	_audit/_census/read-addresses.tsv::No committed source names a message-requests address
-M M8	M	W	R3	CAPTURE:messaging-guarded	NAMED	_audit/_census/read-addresses.tsv::No committed source names a message-requests address
-M M9	M	R	-	CAPTURE:messaging-guarded	NAMED	_audit/_census/read-addresses.tsv::No committed source names a message-requests address
+M M7	M	W	R3	PRECONDITION:a pending message request in his inbox	INFERRED	_audit/2026-11-26-readers-msg26.md::LinkedIn draws its requests entry only while a request is pending ; RULING:MEASURED-ABSENT-OR-PRECONDITION
+M M8	M	W	R3	PRECONDITION:a pending message request in his inbox	INFERRED	_audit/2026-11-26-readers-msg26.md::LinkedIn draws its requests entry only while a request is pending ; RULING:MEASURED-ABSENT-OR-PRECONDITION
+M M9	M	R	-	PRECONDITION:a message request he has declined	INFERRED	_audit/2026-11-26-readers-msg26.md::LinkedIn draws its requests entry only while a request is pending ; RULING:MEASURED-ABSENT-OR-PRECONDITION
 M M11	M	W	R2	TARGET:a conversation he names whose last message is his, under 60 minutes old	NAMED	_audit/2026-09-24-lane-l5-messaging.md::**C6 -- the per-message menu on his OWN message** ; RULING:OPERATOR-NAMES-THE-TARGET
 M M12	M	W	R3	TARGET:a conversation he names whose last message is his, under 60 minutes old	NAMED	_audit/2026-09-24-lane-l5-messaging.md::**C6 -- the per-message menu on his OWN message** ; RULING:OPERATOR-NAMES-THE-TARGET
 M M13	M	W	R2	TARGET:a message he names and the person to forward it to	INFERRED	RULING:OPERATOR-NAMES-THE-TARGET ; M M13
 M M16	M	W	R2	TARGET:a conversation he names, to send a GIF in (a tile press may send at once)	NAMED	_audit/2026-10-10-lane-b3-messaging-build.md::itself an act at a recipient he names ; _audit/2026-09-28-lane-k-ledger.md::the step is TARGET, not RULING ; RULING:OPERATOR-NAMES-THE-TARGET
 M M19	M	W	R2	SIBLING:lane-U	INFERRED	linkedin_server/uploads.py ; _audit/2026-09-28-rulings-build-classes.md::`FILE-UPLOAD-UNSANCTIONED` is therefore a stale label.
-M M20	M	W	R2	CAPTURE:msg-thread-footer	NAMED	_audit/2026-10-10-lane-b3-messaging-build.md::NEEDS-CAPTURE: an opened conversation, ideally one already read ; _audit/2026-09-24-lane-l5-messaging.md::**C7 -- where the video-meeting control lives** ; RULING:OWN-INBOX-READS-COVERED-BY-B
 M M21	M	W	R2	TARGET:two or more connections he names for a group chat	INFERRED	RULING:OPERATOR-NAMES-THE-TARGET ; M M21
 M M22	M	W	R3	TARGET:a group conversation he is in, named by him	INFERRED	RULING:OPERATOR-NAMES-THE-TARGET ; M M22
 M M23	M	W	R2	TARGET:a group conversation he is in, named by him	INFERRED	RULING:OPERATOR-NAMES-THE-TARGET ; M M22
 M M24	M	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 M M25	M	W	R3	TARGET:a group conversation he is in, named by him	INFERRED	RULING:OPERATOR-NAMES-THE-TARGET ; M M22
-M M26	M	W	R3	CAPTURE:C-B3-1	NAMED	_audit/2026-10-10-lane-b3-messaging-build.md::NEEDS-CAPTURE (one capture serves all four) ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE ; RULING:OWN-INBOX-READS-COVERED-BY-B
-M M27	M	W	R3	CAPTURE:C-B3-1	NAMED	_audit/2026-10-10-lane-b3-messaging-build.md::NEEDS-CAPTURE (one capture serves all four) ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE ; RULING:OWN-INBOX-READS-COVERED-BY-B
-M M28	M	R+W	-	CAPTURE:messaging-guarded	NAMED	RULING:CAPTURE-PRESS-UNDER-PROBE-RULE ; _audit/_census/read-addresses.tsv::no archive pill among the seven sanctioned
-M M29	M	W	R3	CAPTURE:C-B3-1	NAMED	_audit/2026-10-10-lane-b3-messaging-build.md::NEEDS-CAPTURE (one capture serves all four) ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE ; RULING:OWN-INBOX-READS-COVERED-BY-B
+M M26	M	W	R3	BUILD:tests/fixtures/live11/c_b3_1_menu_open.html	NAMED	_audit/2026-09-28-lane-k-ledger.md::RECEIPT-ONLY behind the grant ; RULING:OUTWARD-CLASSES-BUILT-BEHIND-GRANTS ; RULING:OWN-INBOX-READS-COVERED-BY-B
+M M27	M	W	R3	BUILD:tests/fixtures/live11/c_b3_1_menu_open.html	NAMED	_audit/2026-09-28-lane-k-ledger.md::YES, a sanctioned PREVIEW press, on the ; RULING:HIS-OWN-CURATION-NOT-OUTWARD ; RULING:OWN-INBOX-READS-COVERED-BY-B
+M M28	M	R+W	-	CAPTURE:messaging-guarded	MEASURED	_audit/2026-11-26-readers-msg26.md::the control that restores one is not on disk ; RULING:VIEW-SWITCH-PRESS-RESTORED
+M M29	M	W	R3	BUILD:tests/fixtures/live11/c_b3_1_menu_open.html	NAMED	_audit/2026-09-28-lane-k-ledger.md::YES, a sanctioned PREVIEW press, on the ; RULING:HIS-OWN-CURATION-NOT-OUTWARD ; RULING:OWN-INBOX-READS-COVERED-BY-B
 M M30	M	W	R3	TARGET:a conversation he has starred himself	NAMED	_audit/2026-09-24-lane-l5-messaging.md::**C10 -- the star's ON label** ; RULING:OPERATOR-NAMES-THE-TARGET
-M M31	M	W	R3	CAPTURE:C-B3-1	NAMED	_audit/2026-10-10-lane-b3-messaging-build.md::NEEDS-CAPTURE (one capture serves all four) ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE ; RULING:OWN-INBOX-READS-COVERED-BY-B
-M M34	M	R	-	CAPTURE:messaging-guarded	NAMED	RULING:CAPTURE-PRESS-UNDER-PROBE-RULE ; _audit/_census/read-addresses.tsv::the press ruling refuses typing outright
+M M31	M	W	R3	BUILD:tests/fixtures/live11/c_b3_1_menu_open.html	NAMED	_audit/2026-09-28-lane-k-ledger.md::YES, a sanctioned PREVIEW press, on the ; RULING:HIS-OWN-CURATION-NOT-OUTWARD ; RULING:OWN-INBOX-READS-COVERED-BY-B
+M M34	M	R	-	CAPTURE:messaging-guarded	NAMED	_audit/2026-09-28-lane-k-ledger.md::CAPTURE FIRST: one capture load that ; RULING:D1-SEARCH-AS-READS
 M M35	M	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 M M36	M	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 M M37	M	W	R3	SIBLING:lane-S	NAMED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD ; RULING:MESSAGING-SETTINGS-CAPABILITY-LEVEL
 M M38	M	W	R3	TARGET:a real message he names to report	NAMED	_audit/2026-09-28-rulings-build-classes.md::a report is never fired for a proof unless he names a real item to report
 M M39	M	W	R3	RULING:Q-AWAY-MESSAGE	NAMED	_audit/_census/messaging-and-content.md::a message composed and approved IN ADVANCE is not a reply he did not read
-M M40	M	W	R2	CAPTURE:msg-thread-footer	NAMED	_audit/2026-10-10-lane-b3-messaging-build.md::NEEDS-CAPTURE: an opened conversation, ideally one already read ; RULING:OWN-INBOX-READS-COVERED-BY-B
+M M40	M	W	R2	CAPTURE:msg-thread-footer	MEASURED	_audit/2026-11-26-readers-msg26.md::that conversation's last message is HIS ; RULING:OWN-INBOX-READS-COVERED-BY-B
 M M41	M	W	R3	SIBLING:lane-S	NAMED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD ; RULING:MESSAGING-SETTINGS-CAPABILITY-LEVEL
 M M42	M	W	R3	SIBLING:lane-S	NAMED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD ; RULING:MESSAGING-SETTINGS-CAPABILITY-LEVEL
 M M46	M	W	R3	SIBLING:lane-S	NAMED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD ; RULING:MESSAGING-SETTINGS-CAPABILITY-LEVEL
 M M47	M	W	R2	TARGET:a Recruiter InMail he has already read	NAMED	_audit/2026-09-24-lane-l5-messaging.md::**C2 -- a Recruiter InMail's response controls** ; RULING:OPERATOR-NAMES-THE-TARGET
 M M48	M	W	R3	TARGET:a conversation he names whose last message is his, under 60 minutes old	NAMED	_audit/2026-09-24-lane-l5-messaging.md::**C6 -- the per-message menu on his OWN message** ; RULING:OPERATOR-NAMES-THE-TARGET
 M M50	M	W	R3	SIBLING:lane-S	NAMED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD ; RULING:MESSAGING-SETTINGS-CAPABILITY-LEVEL
-M M51	M	W	R2	CAPTURE:msg-thread-footer	NAMED	_audit/2026-10-10-lane-b3-messaging-build.md::NEEDS-CAPTURE: an opened conversation, ideally one already read ; RULING:OWN-INBOX-READS-COVERED-BY-B
+M M51	M	W	R2	CAPTURE:msg-thread-footer	MEASURED	_audit/2026-11-26-readers-msg26.md::that conversation's last message is HIS ; RULING:OWN-INBOX-READS-COVERED-BY-B
 M M52	M	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 N 3	N	W	R2	SIBLING:N 1	INFERRED	RULING:D6-CAPABILITY-OVER-AFFORDANCE ; N 1
 N 5	N	W	R2	TARGET:a member he names to invite, with a note	NAMED	_audit/2026-09-24-lane-l5-messaging.md::| C-P3 | the invitation dialog ; RULING:OPERATOR-NAMES-THE-TARGET
@@ -450,7 +448,7 @@ P K6	P	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 P K7	P	W	R3	CAPTURE:admit-mypreferences-d-verifications	INFERRED	_audit/_census/profile.md::the verification management surface has never been captured
 P K8	P	R	-	PRECONDITION:a Top Voice badge awarded to his account	NAMED	tests/fixtures/live8/in_me.html ; _audit/2026-10-10-lane-b1-profile-build.md::MEASURED-ABSENT FOR
 P K9	P	W	R3	PRECONDITION:a Top Voice badge	NAMED	_audit/_census/write-classes.tsv::queued:NO-TOP-VOICE-BADGE
-P L3	P	W	R3	CAPTURE:article-composer	NAMED	RULING:ARTICLE-COMPOSER-CAPTURE ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
+P L3	P	W	R3	CAPTURE:C-MSG26-4	NAMED	_audit/2026-09-28-lane-k-ledger.md::YES, as ONE CAPTURE, nothing typed: ; RULING:ARTICLE-COMPOSER-CAPTURE
 P L4	P	R	-	PRECONDITION:a newsletter he authors	INFERRED	_audit/_census/read-addresses.tsv::the page listing his newsletters links no analytics address
 P L7	P	R	-	CAPTURE:creator-hub-on-the-dashboard	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/creator-hub/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
 P M1	P	W	R3	CAPTURE:C-RJ26-3	MEASURED	_audit/2026-11-26-readers-jobs26.md::THE OPTIONS MENU IS WHERE FIVE ROWS WAIT. ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE

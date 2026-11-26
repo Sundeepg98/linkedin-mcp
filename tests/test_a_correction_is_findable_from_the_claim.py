@@ -289,6 +289,49 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "in the ledger record does not hold while leaving the record unmarked."
     ),
 
+    # 2026-11-26, lane readers-msg26. READ, not inferred from the filenames:
+    # every line citing the lane's record was listed with the matched words in
+    # its two-line window, and none sits in the lane's own note (a scan of each
+    # note's text alone: zero hits).
+    ("messaging-and-content.md", "2026-11-26-readers-msg26.md"): (
+        "A ROW'S MOVE OR NEXT STEP RECORDED, NOT A CORRECTION. Rows `C93`, "
+        "`C70`, `M20`, `M40`, `M51`, `M7`, `M8`, `M9`, `M28` and `M34` each "
+        "gained one dated note citing the lane's record -- `C93`'s move to "
+        "COVERED-UNFIRED on the content search reader, `C70`'s reading that the "
+        "same capture draws no group facet and its re-pointed capture, `M20`'s "
+        "move to MEASURED-ABSENT on the first opened conversation's footer, "
+        "`M40` and `M51`'s re-aimed capture, the three requests rows' "
+        "PRECONDITION, `M28`'s re-aimed capture, `M34`'s question, and line "
+        "6's nine (`C14`'s question, `C15`-`C17`'s PRECONDITION, `C3` and "
+        "`C4`'s build, `C5`'s capture, `C6` and `C7` riding them), and line "
+        "4's five (`C44`, `C46`, `C50`, `C78`, `C81`, each on the article "
+        "composer's question), line 7's four (`M26`, `M27`, `M29`, `M31`, on "
+        "the conversation menu's question) and `C64`'s build -- and none "
+        "says anything in that record does not hold. The matched words are "
+        "older text: `C70`'s own 2026-09-21 paragraph ('TWO CORRECTIONS', 'A "
+        "PLAUSIBLE WRONG ANSWER', 'is **False** for'), row `C72`'s cell two "
+        "lines below it, row `M18`'s cell ('correction', 'stale') two lines "
+        "above `M20`, row `M6`'s ('corrected') above `M7` and `M8`, row `M30`'s "
+        "('wrong') below `M28`, row `M35`'s ('corrected') below `M34`, and the "
+        "2026-09-20 paragraph `C3`-`C7` each carry ('WENT STALE', 'carries the "
+        "correction', 'Overturning it'), row `C45`'s ('correction', 'stale') "
+        "beside `C44` and `C46`, row `C52`'s two lines below `C50`, row "
+        "`M24`'s ('false') two lines above `M26`, and row `M30`'s ('wrong') "
+        "beside `M29` and `M31`. "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** a messaging row saying something "
+        "in the lane's record does not hold while leaving the record unmarked."
+    ),
+
+    ("profile.md", "2026-11-26-readers-msg26.md"): (
+        "A ROW'S NEXT STEP RECORDED, NOT A CORRECTION. Row `L3` gained one "
+        "dated note citing the lane's record -- what the article composer "
+        "draws closed and the question it waits on -- and corrects nothing in "
+        "it. The matched word is the row's own 2026-09-21 sentence ('no "
+        "published cell is false of any of them'). **WHAT WOULD MAKE THIS "
+        "ENTRY WRONG:** a profile row saying something in the lane's record "
+        "does not hold while leaving the record unmarked."
+    ),
+
     # 2026-11-25, lane build-jmn26. TABLE-ROW PROXIMITY, read and not inferred
     # from the filenames: every line citing the lane's record was listed with
     # the matched words in its two-line window, and none sits in the lane's own

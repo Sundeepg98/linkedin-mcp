@@ -2065,6 +2065,10 @@ DRIVEN_TO["company_people_insights:read_people_insights"] = RETURNS_RECORDS
 # path returns one people record per row read, beside the row's relation, so
 # the plant comes back inside a record and nowhere else.
 DRIVEN_TO["followers_list:read_followers_list"] = RETURNS_RECORDS
+# THE CONTENT SEARCH (2026-11-26, lane readers-msg26, census M C93): its
+# success path returns one post record per card, its author a person record,
+# so the plant comes back inside a record and nowhere else.
+DRIVEN_TO["content_search:read_content_results"] = RETURNS_RECORDS
 
 
 @pytest.mark.parametrize("key", sorted(shipped_drives.DRIVES))
@@ -2269,6 +2273,13 @@ FIXTURE_BREAKS: dict[str, dict[str, str]] = {
         "fixture": "live11/in_me_profile.html",
         "needle": 'href="https://www.linkedin.com/in/x/edit/',
         "into": 'href="https://www.linkedin.com/in/x/view/',
+    },
+    # 2026-11-26 (lane readers-msg26): the measured name of the content
+    # search's results screen, the premise every card is found under.
+    "content_search:read_content_results": {
+        "fixture": "live11/search_content_posts.html",
+        "needle": 'data-sdui-screen="com.linkedin.sdui.flagshipnav.search.SearchResultsContent"',
+        "into": 'data-sdui-screen="com.linkedin.sdui.flagshipnav.search.SearchResultsOther"',
     },
 }
 

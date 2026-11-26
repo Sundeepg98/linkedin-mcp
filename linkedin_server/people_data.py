@@ -691,6 +691,10 @@ class Category:
 #: pending invitation's member), ``linkedin_my_following_list`` (the people he
 #: follows) and ``linkedin_my_unfollowed_list`` (the members he unfollowed:
 #: a name and no link, because the page draws none).
+#: ``linkedin_search_content`` joined on 2026-11-26 (lane readers-msg26,
+#: census ``M C93``, ruling CONTENT-VERTICAL-NOT-ALL-RESULTS): the result
+#: cards of ONE content search page, each a :class:`Post` whose author is a
+#: person record, no opt-in -- which posts a search drew is its whole answer.
 PEOPLE_TOOLS: frozenset[str] = frozenset(
     {
         "linkedin_group_members",
@@ -719,6 +723,8 @@ PEOPLE_TOOLS: frozenset[str] = frozenset(
         "linkedin_sent_invitations",
         "linkedin_my_following_list",
         "linkedin_my_unfollowed_list",
+        # 2026-11-26 (lane readers-msg26, census M C93): one content search page.
+        "linkedin_search_content",
     }
 )
 

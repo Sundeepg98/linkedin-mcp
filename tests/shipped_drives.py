@@ -1786,6 +1786,70 @@ async def read_people_insights_as_shipped(page: Any) -> Any:
 
 
 # ---------------------------------------------------------------------------
+# content_search:read_content_results -- the content search's cards (M C93)
+# ---------------------------------------------------------------------------
+
+#: The fixture, and the shapes this drive rests on: the measured screen name,
+#: a card's heading, its words box and its more control, the degree line, and
+#: a synthetic author and word line, as drawn.
+CONTENT_SEARCH = "live11/search_content_posts.html"
+CONTENT_SEARCH_DRAWN = (
+    'data-sdui-screen="com.linkedin.sdui.flagshipnav.search.SearchResultsContent"',
+    "\nFeed post\n",
+    'data-testid="expandable-text-box"',
+    'data-testid="expandable-text-button"',
+    "\n&#8226; 3rd+\n",
+    "\nKai Example\n",
+    "\nExample post words 1.1\n",
+)
+
+#: Each text the builder made synthetic -- an author's name, a line of a
+#: post's words, a hashtag: the texts this drive answers as the plant.
+_SYNTHETIC_CONTENT = re.compile(
+    r"^(?:Kai Example|Juno Fixture|Lea Sample|Example post words [0-9]+\.[0-9]+"
+    r"|#exampletopic[0-9]+)$"
+)
+
+
+async def read_content_results_as_shipped(page: Any) -> Any:
+    """``read_content_results`` as ``linkedin_search_content`` calls it -- on
+    the page it was handed, no argument but the page -- over the planted page
+    drawn as the content search live session 11 captured.
+
+    THE SIGNATURE DRIVE reads the screen, a card and its heading, and keeps
+    nothing: the planted heading is the plant, not LinkedIn's "Feed post", so
+    the card is skipped (``not_a_post``) -- NO_RECORD.
+
+    THE SKELETON: ``tests/fixtures/live11/search_content_posts.html``
+    (``scripts/_build_content_search_skeleton.py``): the session-11 capture,
+    its screen name, headings, test hooks and degree lines measured against
+    the session key, its authors and their words synthetic.
+    ``tests/test_content_search.py`` runs this reader over it in a real engine
+    and asserts three post records.
+
+    THE DOUBLE is ``tests/skeleton_page.SkeletonPage`` over that document:
+    every locator is answered from the markup LinkedIn drew, and every text the
+    builder made synthetic is answered as the plant. So each post record that
+    comes back carries the plant in its author's name and its words, inside
+    the record -- and the degree line, which is LinkedIn's, is not planted.
+    """
+    from linkedin_server import content_search
+    from tests.skeleton_page import SkeletonPage, parse
+
+    markup = _drawn(CONTENT_SEARCH, *CONTENT_SEARCH_DRAWN)
+
+    def answer(text: str) -> str:
+        return PLANT if _SYNTHETIC_CONTENT.match(text.strip()) else text
+
+    skeleton = SkeletonPage(
+        page, parse(markup),
+        url="https://www.linkedin.com/search/results/content/?keywords=x",
+        answer_text=answer,
+    )
+    return await content_search.read_content_results(skeleton)
+
+
+# ---------------------------------------------------------------------------
 # followers_list:read_followers_list -- his own follower list (P L2b)
 # ---------------------------------------------------------------------------
 
@@ -2088,6 +2152,10 @@ DRIVES: dict[str, Callable[..., Any]] = {
     # 2026-11-26 (lane selfprofile26): his own profile's edit controls, over
     # session 11's landing, the capture the structural self signal rests on.
     "self_profile:read_edit_routes": read_edit_routes_as_shipped,
+    # 2026-11-26 (lane readers-msg26, census M C93): the content search's
+    # result cards over live session 11's skeleton; its success path is post
+    # records whose author is a person record.
+    "content_search:read_content_results": read_content_results_as_shipped,
 }
 
 #: As far as a press. Run by the guard, so the reads before the press are

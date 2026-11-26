@@ -220,10 +220,15 @@ def test_the_split_is_the_one_the_lane_report_quotes():
     orchestrator's ruling ABSENT-ON-HIS-ACCOUNT-PER-ROW of 2026-11-25 made
     `P A14` and `P A15` MEASURED-ABSENT (no editor capture draws either
     control), so both lines leave the table. Both R3 (profile-edit).
-    372 - 2 = 370 = 16 R1 + 34 R2 + 320 R3."""
+    372 - 2 = 370 = 16 R1 + 34 R2 + 320 R3.
+
+    369 ON LANE READERS-MSG26 (2026-11-26), MEASURED: `M M20` MEASURED-ABSENT
+    (the first opened conversation on disk draws no video-meeting control),
+    so its line leaves the table. R2 (message-send).
+    370 - 1 = 369 = 16 R1 + 33 R2 + 320 R3."""
     rows, _ = cwc.load()
     split = cwc.split(rows)
-    assert (split["R1"], split["R2"], split["R3"]) == (16, 34, 320)
+    assert (split["R1"], split["R2"], split["R3"]) == (16, 33, 320)
     assert split["R1:built"] + split["R1:queued"] == split["R1"]
 
 

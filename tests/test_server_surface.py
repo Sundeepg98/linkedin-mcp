@@ -1,4 +1,10 @@
-"""The tool surface: ninety tools, sixty-three of which do not write.
+"""The tool surface: ninety-one tools, sixty-four of which do not write.
+
+**IT READ "ninety tools, sixty-three of which do not write" UNTIL INTEGRATION
+4'S MERGE OF LANE READERS-MSG26 (2026-11-26)**: one READ,
+``linkedin_search_content`` (census M C93), the content search vertical.
+Measured off the merged registry, not summed. (Lane readers-msg26's branch
+read "eighty-four tools, fifty-seven of which do not write".)
 
 **IT READ "eighty-five tools, fifty-eight of which do not write" UNTIL
 INTEGRATION 4'S MERGE OF LANE READERS-NET26 (2026-11-26)**: five READS,
@@ -341,6 +347,11 @@ EXPECTED_TOOLS = {
     # presses; the groups page's Join control is never read.
     "linkedin_search_groups",
     "linkedin_search_events",
+    # THE EIGHTY-FOURTH, 2026-11-26 (lane readers-msg26, ruling
+    # CONTENT-VERTICAL-NOT-ALL-RESULTS): a READ of one content search results
+    # page composed from a keyword alone, its cards read as people_data.Post
+    # records (census M C93). It presses nothing and is on no write table.
+    "linkedin_search_content",
     # THE SIXTY-SECOND, 2026-10-10 (lane B3, ruling
     # THIRD-PARTY-TEXT-AT-RUNTIME): a READ of ONE item's own words off the
     # permalink its caller's key names, returned inside one people_data.Post
@@ -795,8 +806,14 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_ninety_tools(tools):
-    """RENAMED AGAIN AT INTEGRATION 4'S MERGE OF LANE READERS-NET26 (2026-11-26),
+async def test_the_surface_is_exactly_the_ninety_one_tools(tools):
+    """RENAMED AGAIN AT INTEGRATION 4'S MERGE OF LANE READERS-MSG26 (2026-11-26),
+    to ``..._ninety_one_tools``: one READ, ``linkedin_search_content`` (census
+    M C93), beside the ninety. MEASURED off the merged registry, not summed;
+    the name moved with the pin. (Lane readers-msg26's branch named it
+    ``..._eighty_four_tools`` while its count read eighty-four.)
+
+    RENAMED AGAIN AT INTEGRATION 4'S MERGE OF LANE READERS-NET26 (2026-11-26),
     to ``..._ninety_tools``: five READS -- ``linkedin_received_invitations``,
     ``linkedin_sent_invitations``, ``linkedin_my_following_list``,
     ``linkedin_my_unfollowed_list`` and ``linkedin_my_advertising_data``
@@ -1355,7 +1372,11 @@ async def test_the_surface_is_exactly_the_ninety_tools(tools):
     # five READS beside the eighty-five (its branch read eighty-eight), so the
     # split moves on its read side and the write set holds. MEASURED off
     # mcp.list_tools() on the merged tree, not summed.
-    assert len(tools) == 90
+    # NINETY-ONE AT INTEGRATION 4'S MERGE OF LANE READERS-MSG26 (2026-11-26):
+    # linkedin_search_content, a READ beside the ninety (its branch read
+    # eighty-four), so the split moves on its read side. MEASURED off
+    # mcp.list_tools() on the merged tree, not summed.
+    assert len(tools) == 91
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -1618,8 +1639,13 @@ async def test_the_surface_is_exactly_the_ninety_tools(tools):
     # write side is unmoved (its branch read sixty-one beside eighty-eight);
     # this second copy of the total moves to the measured ninety with the first
     # test's pin. MEASURED on the merged tree, never summed.
-    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 63
-    assert len(tools) == 90
+    # SIXTY-FOUR AT INTEGRATION 4'S MERGE OF LANE READERS-MSG26 (2026-11-26):
+    # linkedin_search_content is a READ, so the non-write count moves by one
+    # and the write side is unmoved (its branch read fifty-seven beside
+    # eighty-four); this second copy of the total moves to the measured
+    # ninety-one with the first test's pin. MEASURED, never summed.
+    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 64
+    assert len(tools) == 91
 
 
 def test_the_read_that_was_nearly_named_a_write():

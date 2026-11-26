@@ -691,8 +691,14 @@ def test_a_non_ascii_word_survives_the_copy_as_a_reference() -> None:
 #: lane's five word skeletons (`scripts/_build_live11_word_skeletons.py`, each
 #: the committed copy with LinkedIn's words written where their keyed shapes
 #: matched), beside the 48.
+#: `live11` 49 ON LANE READERS-MSG26 (2026-11-26), the count on disk: M C93's
+#: content search with its measured words kept by keyed shape and its people
+#: synthetic (`scripts/_build_content_search_skeleton.py`), beside the 48.
+#: Both kept AT INTEGRATION 4'S MERGE OF LANE READERS-MSG26 (2026-11-26),
+#: re-counted on the merged tree's disk: live11 54 (the 48, readers-jobs26's five
+#: word skeletons and readers-msg26's content search).
 LIVE_FIXTURE_COUNTS = {"live1": 5, "live2": 30, "live3": 14, "live4": 4, "live5": 1, "live7": 1, "live8": 7, "live9": 1,
-                       "live11": 53}
+                       "live11": 54}
 
 
 @pytest.mark.parametrize("session_dir", sorted(LIVE_FIXTURE_COUNTS))

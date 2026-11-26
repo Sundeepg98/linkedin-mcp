@@ -169,6 +169,10 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_save_job": ("confirm_token", "job_id"),
     "linkedin_saved_jobs": ("limit",),
     "linkedin_search_appearances": (),
+    # 2026-11-26, lane readers-msg26: census M C93, banked in the same commit
+    # (GAP -> COVERED-UNFIRED) -- the content search vertical, read over live
+    # session 11's capture.
+    "linkedin_search_content": ("keywords",),
     # 2026-10-10, lane B2: census N 161 and N 179, REPORTED to the lane's lead
     # rather than banked -- the census is the lead's to move at merge.
     "linkedin_search_events": ("keywords",),
@@ -762,8 +766,14 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: 88 and 134). THE CENSUS DECISION, IN THE LANE'S CENSUS COMMIT: `N 13`, `N 9`,
 #: `N 38`, `N 39` and `P P15` GAP -> COVERED-UNFIRED on them, never fired. See
 #: `_audit/2026-11-26-readers-net26.md`.
-PINNED_TOOL_COUNT = 90
-PINNED_PARAMETER_COUNT = 136
+#: **AT INTEGRATION 4'S MERGE OF LANE READERS-MSG26 (2026-11-26): 91 TOOLS AND
+#: 137 PARAMETERS** -- `linkedin_search_content(keywords)`, one READ and one
+#: parameter, beside the ninety and 136, counted off the merged registry, never
+#: summed (the lane's branch read 84 and 135). THE CENSUS DECISION, IN THE
+#: LANE'S OWN COMMIT: `M C93` GAP -> COVERED-UNFIRED on it, never fired. See
+#: `_audit/2026-11-26-readers-msg26.md`.
+PINNED_TOOL_COUNT = 91
+PINNED_PARAMETER_COUNT = 137
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:

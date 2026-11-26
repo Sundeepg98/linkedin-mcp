@@ -446,7 +446,19 @@ AFTER_LANE_B3_ITEM_TEXT = (122, {"R": 12, "W": 107, "R+W": 3})
 #: reads 12 - 2.
 AFTER_LANE_B3_CHILD_READS = (120, {"R": 10, "W": 107, "R+W": 3})
 
-EXPECTED_NOW = AFTER_LANE_B3_CHILD_READS
+#: ON LANE READERS-MSG26 (2026-11-26), MEASURED with this tree's guard:
+#: `C93` -- a READ -- left GAP, COVERED-UNFIRED on the content search
+#: vertical (`linkedin_search_content`; `_audit/2026-11-26-readers-msg26.md`
+#: section 2). 120 - 1 = 119, reads 10 - 1.
+AFTER_LANE_READERS_MSG26_CONTENT_SEARCH = (119, {"R": 9, "W": 107, "R+W": 3})
+
+#: AND `M20` -- a WRITE -- left GAP the same day, MEASURED-ABSENT under
+#: MEASURED-ABSENT-OR-PRECONDITION (no video-meeting control on the first
+#: opened conversation on disk; the same record, section 3).
+#: 119 - 1 = 118, writes 107 - 1.
+AFTER_LANE_READERS_MSG26_FOOTER = (118, {"R": 9, "W": 106, "R+W": 3})
+
+EXPECTED_NOW = AFTER_LANE_READERS_MSG26_FOOTER
 
 
 def test_the_headline_split_is_the_one_the_report_quotes():

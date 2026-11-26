@@ -172,6 +172,11 @@ DECLARED: dict[tuple[str, str], tuple[str, int]] = {
     ("company_tabs.py", "read_insights_tab"): (WITHHELD, 1),
     ("company_tabs.py", "read_posts_tab"): (WITHHELD, 1),
     ("application_settings.py", "read_application_settings"): (WITHHELD, 2),
+    # 2026-11-26 (lane readers-msg26, census M C93): the content search's
+    # two refusals of an uncorroborated zero -- no results screen, or a screen
+    # with no card. No url; the landing described in the hint by
+    # dom._landing_note, as the readers above do.
+    ("content_search.py", "read_content_results"): (WITHHELD, 2),
     # --- ASKED_FOR: the seven tool-side raises ----------------------------
     # `url` is this helper's own parameter, composed by its caller
     # (`linkedin_search_jobs._search_url`) out of BASE_URL and urlencode.
@@ -587,14 +592,18 @@ def test_the_twenty_are_still_twenty():
     # server.py raise on an uncorroborated zero with their own module's
     # admitted constant as `url` -- the address their tool requested -- so
     # ASKED_FOR is 7 -> 12. MEASURED off this table, not summed.
-    # THIRTY-SEVEN AT INTEGRATION 4'S MERGE OF THE THREE LANES (2026-11-26):
-    # search-fix26, readers-jobs26 and readers-net26, every site of each kept,
-    # the tally MEASURED off the merged table, not summed: {WITHHELD 19,
-    # ASKED_FOR 17, PASSTHROUGH 1, NO_ADDRESS_IN_SCOPE 10}.
-    assert tally[WITHHELD] == 19, tally
+    # TWENTY-THREE ON LANE READERS-MSG26 (2026-11-26): the content search's
+    # reader raises twice under the WITHHELD ruling with the same describer --
+    # no results screen, or a screen with no card -- so WITHHELD is 15.
+    # MEASURED off this table, not summed.
+    # THIRTY-NINE AT INTEGRATION 4'S MERGE OF THE FOUR LANES (2026-11-26):
+    # search-fix26, readers-jobs26, readers-net26 and readers-msg26, every site
+    # of each kept, the tally MEASURED off the merged table, not summed:
+    # {WITHHELD 21, ASKED_FOR 17, PASSTHROUGH 1, NO_ADDRESS_IN_SCOPE 10}.
+    assert tally[WITHHELD] == 21, tally
     assert tally[ASKED_FOR] == 17, tally
     assert tally[PASSTHROUGH] == 1, tally
-    assert tally[WITHHELD] + tally[ASKED_FOR] + tally[PASSTHROUGH] == 37, tally
+    assert tally[WITHHELD] + tally[ASKED_FOR] + tally[PASSTHROUGH] == 39, tally
     assert tally[NO_ADDRESS_IN_SCOPE] == 10, tally
 
 
