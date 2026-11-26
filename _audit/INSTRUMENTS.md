@@ -12884,3 +12884,90 @@ The lane's scratch probes -- the keyed-shape word counter, the card mapper
 editors, the pin re-deriver -- and the exported base tree used for the
 red-first runs. Each answered one question once; the answers are in the
 record.
+
+## 109. A CALLER IS COUNTED ONLY ONCE ITS NAME IS BOUND, A CEILING IS A COUNTER, AND A RAW PAGE IS JUDGED AS IT IS WRITTEN (infra26, 2026-11-26)
+
+**Registered 2026-11-26.** Full record: `_audit/2026-11-26-infra26.md`.
+Numbered 109, the next free number on base `3c656df`. Sibling wave-3 lanes
+may take 109 too, so renumber at the merge.
+
+### 109.1 The AST caller census
+
+`scripts/caller_census.py` answers "who can reach this one function?" for
+deletion rulings such as READ-CARDS-DELETION. It BINDS each reference to a
+module before it counts it:
+
+* COUNTED: a bare call or a value in the defining module, an attribute on any
+  import spelling, `getattr`/`hasattr`/`setattr`/`delattr` with the literal
+  name, and an import (relative spellings resolved).
+* COUNTED, because a reference that cannot be bound is never dropped: an
+  unbindable receiver, and an unreadable file.
+* LISTED, NOT COUNTED: a same-named function in another module, and a string
+  mention, which a reader classifies.
+
+`tests/test_caller_census.py` shows it failing on 13 planted channels. It
+also shows the sibling and the string listed and not counted, a clean
+package passing, and an extra root read. Its deletion assertion was red on
+`3c656df`.
+
+    A GREP FINDS A NAME. A CENSUS FINDS A CALLER ONLY AFTER IT HAS BOUND THE
+    NAME TO THE MODULE IT CAME FROM.
+
+### 109.2 The per-call navigation ceiling
+
+`linkedin_server/call_ceiling.py`: a fastmcp middleware arms a per-call
+budget for every `tools/call`. `LinkedInBrowser.goto` counts each load
+against it (`count_load`) after its doors and before its rate slot, and it
+refuses the fourth load unmade,
+naming the count, the ceiling and the page family. The one declared fan-out
+is the search's places, capped at `jobfilter.MAX_LOCATIONS`; its single call
+site is pinned. Outside a tool call nothing is counted: the live runner loads
+many pages in one browser session, which is why the scope is the tool call
+and not the session. `tests/test_navigation_ceiling.py` drives a planted tool
+through a real fastmcp `Client`. On the tree before `goto` spent, its fourth
+load reached the page, and 7 of 12 tests failed.
+
+    A CEILING NOTHING COUNTS IS A SENTENCE. COUNT IT WHERE EVERY LOAD
+    PASSES, SCOPE IT TO WHAT THE RULING BOUNDS, AND NAME THE ONE EXCEPTION.
+
+### 109.3 The synthetic-people guard: one parse, and a scoped mode
+
+`tests/test_fixtures_hold_only_synthetic_people.py` now parses its corpus
+once per process: 75 s became 14 s here, and the assertions are unchanged.
+`--people-guard-scope=changed` reads only the fixtures changed since the
+merge base. It skips the corpus-wide tests by name, and skips loudly over an
+empty set. It falls back to the full sweep on anything it cannot classify,
+including a change to the guard's own rules. CI passes no option, and a test
+pins that. Shown failing by five selection mutants, each red, and by a staged
+real-looking plant that both modes convicted on the real repository.
+
+    A SCOPED GATE SAYS WHAT IT DID NOT READ, AND READS EVERYTHING WHEN IT
+    CANNOT TELL WHAT A CHANGE TOUCHES.
+
+### 109.4 PEOPLE-GATE v2
+
+`scripts/people_gate.py` judges the HTML string a capture is about to write,
+under the orchestrator's six rules of 2026-11-26 14:05. It keeps v1's
+member-link count (103.4), now read off the string, and counts name slots
+through the fixture guard's own reader. That closes 107.5's defect once the
+runner takes the two-line change in the record (section 4.5). His identity
+is held as digests, learned from his own navigation photo and entity, and
+carried across pages by a cache tied to his slug. MEASURED on session 11's
+five clean raws: judged alone, four server-driven pages withheld his own
+avatar as somebody else's; taught by one page that carries his entity, all
+five were kept. `tests/test_people_gate.py` rebuilds the two page shapes
+that broke v1 from rawsweep26's names-free counts. v1's rule keeps both; v2
+withholds both. 16 of 16 mutants are red, three of them only after the
+first run left them green and a control was added for each.
+
+    A GATE THAT CANNOT TELL HIS OWN FACE FROM A STRANGER'S WITHHOLDS BOTH.
+    TEACH IT HIS IDENTITY ONCE, FROM THE PAGE THAT CARRIES IT, AND KEEP ONLY
+    DIGESTS OF IT.
+
+### 109.5 Declared disposable
+
+The lane's scratch scripts are disposable. They are the navigation and
+session runners over the pipeline repository's static census, the
+own-identity and glued-token probes, the real-raw measurement, the item-3
+demonstration, the two mutant runners and an ASCII rewriter. Each answered
+one question once, and the answers are in the record.

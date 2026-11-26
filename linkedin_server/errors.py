@@ -63,3 +63,15 @@ class WriteAttemptError(LinkedInReaderError):
     """
 
     kind = "write_attempt_blocked"
+
+
+class NavigationCeilingError(LinkedInReaderError):
+    """A tool call asked for more page loads than its ceiling allows.
+
+    Raised by ``call_ceiling.spend`` from inside ``LinkedInBrowser.goto``
+    BEFORE the load: the page is never requested. The message names what
+    was seen (loads made, the ceiling, the refused page's family) and never
+    the address. NAVIGATION-CEILING-MADE-TRUE, 2026-11-26.
+    """
+
+    kind = "navigation_ceiling"

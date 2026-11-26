@@ -780,6 +780,7 @@ from linkedin_server import (
     analytics_hub,
     anchors,
     buildinfo,
+    call_ceiling,
     cdp_bridge,
     coerce,
     collections_page,
@@ -845,6 +846,7 @@ from linkedin_server.config import (
     MIN_NAVIGATION_INTERVAL_S,
     NOTIFICATIONS_DEFAULT_LIMIT,
     NOTIFICATIONS_MAX_LIMIT,
+    PAGE_AND_ITS_FALLBACK,
     SEARCH_DEFAULT_LIMIT,
     SEARCH_MAX_LIMIT,
     SERVER_NAME,
@@ -1523,6 +1525,11 @@ mcp = FastMCP(
     ),
 )
 
+#: AT MOST MAX_NAVIGATIONS_PER_CALL PAGE LOADS PER TOOL CALL, ENFORCED: every
+#: tools/call runs with its own budget, which BROWSER.goto spends and refuses
+#: past. NAVIGATION-CEILING-MADE-TRUE (2026-11-26); see call_ceiling.py.
+mcp.add_middleware(call_ceiling.PerCallCeiling())
+
 
 # ---------------------------------------------------------------------------
 # EVERY ANSWER SAYS SO WHEN THIS PROCESS IS STALE
@@ -1640,40 +1647,6 @@ def _clamp(value: Optional[int], default: int, maximum: int) -> int:
     except (TypeError, ValueError):
         return default
     return max(1, min(value, maximum))
-
-
-async def _read_cards(
-    url: str,
-    *,
-    href_pattern: str,
-    parser,
-    limit: int,
-    surface: str,
-    allow_empty: bool = False,
-) -> dict[str, Any]:
-    """One page load, one harvest, one shaping pass. The shape of every list tool."""
-    async with BROWSER.session() as page:
-        final_url = await BROWSER.goto(page, url)
-        assert_not_authwall(final_url, surface=surface)
-        records = await dom.harvest_linked_cards(
-            page, href_pattern=href_pattern, max_items=limit * 3
-        )
-        if not allow_empty:
-            # THE REQUESTED ADDRESS, NOT THE LANDED ONE. `url` is this
-            # function's own parameter and `test_navigation_is_never_derived`
-            # is the standing proof that no navigation target in this package
-            # is page-derived, so it is a string this package or its caller
-            # composed. `final_url` is `BROWSER.goto`'s return, which is
-            # `page.url` -- a string LinkedIn chose, published by
-            # `server._error` with no scrubber. Ruled ASKED_FOR in
-            # _audit/2026-09-21-the-field-beside-the-message.md; the contract
-            # "open the same page by hand" is honoured better by the address
-            # that travels the same redirect than by its endpoint.
-            dom.require_rows(records, url=url, surface=surface)
-        rows, dropped = dom.parse_all(records, parser)
-        return shape.envelope(
-            rows, limit=limit, source_url=final_url, dropped=dropped
-        )
 
 
 async def _read_tracker(
@@ -2606,7 +2579,7 @@ async def linkedin_who_viewed_me(
             # BOUND BEFORE THE NAVIGATION ON PURPOSE: if `goto` raises, the
             # requested address is still the one that was tried.
             last_requested_url = ""
-            for attempt, url in enumerate(urls[:MAX_NAVIGATIONS_PER_CALL], start=1):
+            for attempt, url in enumerate(urls[:PAGE_AND_ITS_FALLBACK], start=1):
                 last_requested_url = url
                 last_url = await BROWSER.goto(page, url)
                 assert_not_authwall(last_url, surface="profile views")
@@ -5682,10 +5655,12 @@ async def _read_job_search(
 ) -> dict[str, Any]:
     """ONE search load, read by the route LinkedIn SERVED. Lane search-fix26.
 
-    ``_read_cards`` with two vetoes and a fallback, and the reason it is not
-    ``_read_cards`` is that both vetoes need the LANDING, which that shared
-    helper only publishes. See ``linkedin_server/job_search_route.py`` for the
-    measurements each branch rests on.
+    What the shared helper ``_read_cards`` did, plus two vetoes and a
+    fallback. It was never that helper because both vetoes need the
+    LANDING, which that helper only published; this search was its last
+    caller, so the helper is deleted (READ-CARDS-DELETION, 2026-11-26). See
+    ``linkedin_server/job_search_route.py`` for the measurements each branch
+    rests on.
 
     * **CLASSIC** -- the harvest it always ran. A harvest that produced no row
       is REFUSED unless the page drew LinkedIn's own empty state, and no
@@ -5706,7 +5681,7 @@ async def _read_job_search(
     * **ANYTHING ELSE** refuses, naming the landing as a SHAPE.
 
     ``url`` in every refusal is the ASKED-FOR address, never the landing --
-    the rule ``_read_cards`` follows, ruled in
+    the rule the deleted ``_read_cards`` followed, ruled in
     ``_audit/2026-09-21-the-field-beside-the-message.md``.
     """
     hint = "open the url yourself and compare with what this reports"
@@ -5839,9 +5814,11 @@ async def linkedin_search_jobs(
     Runs the search LinkedIn's own jobs page runs and reads the rendered
     results: title, company, location, job id and link.
 
-    One page load per call, no scrolling and no auto-paging. capped in the
-    result tells you the limit trimmed the rows, and page_had tells you how
-    many the page actually held.
+    One page load per call, or one per place when `locations` names several
+    (at most five, the one declared exception to the per-call ceiling of
+    three), with no scrolling and no auto-paging. capped in the result tells
+    you the limit trimmed the rows, and page_had tells you how many the page
+    actually held.
 
     THE WINDOW IS SEVEN POSTINGS PER CALL, AND THAT IS A MEASUREMENT, NOT A
     LIMIT YOU SET. Every load returns the seven job cards this reader can see
@@ -6036,6 +6013,9 @@ async def linkedin_search_jobs(
         if plan["state"] == "refused":
             return {"error": "bad_argument", "message": plan["why"]}
         places: list[str] = plan["places"]
+        # THE ONE DECLARED EXCEPTION to the per-call ceiling: one load per
+        # place, capped at jobfilter.MAX_LOCATIONS (NAVIGATION-CEILING-MADE-TRUE).
+        call_ceiling.allow_fan_out(len(places))
 
         # EVERY PARAMETER EXCEPT THE LOCATION. The location is spliced in per
         # search below, at the index it has always occupied -- second, right

@@ -233,13 +233,28 @@ MIN_NAVIGATION_INTERVAL_S = float(
     os.environ.get("LINKEDIN_MIN_INTERVAL_S", "20.0")
 )
 
-#: A data tool performs ONE page load. There is no scroll loop, no "next
-#: page" walk, no background refresh. Paging is the operator's call, one
-#: deliberate tool call at a time (see the ``start`` argument on search).
-#: The single exception is the profile reader, which loads a second page for
-#: the full skills list when asked, and reports ``pages_loaded: 2`` when it
-#: does. Nothing may exceed this ceiling.
-MAX_NAVIGATIONS_PER_CALL = 2
+#: AT MOST THREE PAGE LOADS PER TOOL CALL, ENFORCED. ``browser.goto`` counts
+#: one load per navigation against a per-call budget that
+#: ``call_ceiling.PerCallCeiling`` arms around every MCP tool call, and it
+#: refuses the fourth BEFORE loading it (NAVIGATION-CEILING-MADE-TRUE, ruled
+#: 2026-11-26). It is the MEASURED maximum: 31 tools reach 3, among them
+#: every write (a preview read and the act), the group memberships reader and
+#: both profile editors. Until 2026-11-26 this read 2 with "Nothing may exceed
+#: this ceiling", and nothing enforced it. There is still no scroll loop, no
+#: "next page" walk and no background refresh: paging is the operator's call,
+#: one deliberate tool call at a time (the ``start`` argument on search). The
+#: ONE DECLARED EXCEPTION is ``linkedin_search_jobs`` with ``locations``: one
+#: load per place, at most ``jobfilter.MAX_LOCATIONS`` (5), declared through
+#: ``call_ceiling.allow_fan_out`` by that tool alone.
+MAX_NAVIGATIONS_PER_CALL = 3
+
+#: A PEOPLE READER reads one page and, at most, its one fallback address --
+#: never paging. ``linkedin_who_viewed_me``'s two addresses are bounded by
+#: this, and ``tests/test_a_people_reader_reads_one_page.py`` holds every
+#: navigating loop a people tool reaches to it. It was
+#: ``MAX_NAVIGATIONS_PER_CALL`` until that ceiling became the measured 3, and it
+#: was split out then so the ceiling could rise without the people loop rising.
+PAGE_AND_ITS_FALLBACK = 2
 
 #: Close the browser after this long with no tool call, releasing the profile
 #: lock. A window left open for hours is a session left exposed for hours.

@@ -408,3 +408,23 @@ def _caplog_can_hear_the_linkedin_logger(caplog):
         yield caplog
     finally:
         package_logger.removeHandler(caplog.handler)
+
+
+def pytest_addoption(parser):
+    """THE SYNTHETIC-PEOPLE GUARD'S SCOPED LOCAL MODE (lane infra26, 2026-11-26).
+
+    ``--people-guard-scope=changed`` makes
+    ``tests/test_fixtures_hold_only_synthetic_people.py`` read only the tracked
+    fixtures changed since the merge base with ``--people-guard-base``
+    (default ``origin/master``), so a lane's local gate is O(its change). The
+    default, ``all``, is the full sweep, and CI passes neither option, so CI
+    keeps sweeping every tracked fixture. That file's "THE SCOPED LOCAL MODE"
+    section states what the scoped mode does not run.
+    """
+    group = parser.getgroup("people-guard", "the synthetic-people fixture guard")
+    group.addoption("--people-guard-scope", choices=("all", "changed"), default="all",
+                    help="all (default, what CI runs) or changed: only the tracked "
+                         "fixtures changed since the merge base with --people-guard-base")
+    group.addoption("--people-guard-base", default="origin/master",
+                    help="the ref the scoped mode measures change against "
+                         "(default origin/master)")
