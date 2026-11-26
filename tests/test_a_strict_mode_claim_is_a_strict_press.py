@@ -84,6 +84,10 @@ PINNED_STRICT_PRESS_ACTIONS = frozenset(
         "accept_invitation_to_connect",
         "ignore_invitation_to_connect",
         "withdraw_invitation",
+        # SIXTEEN since lane build-net2 (2026-11-26, census N 154): the
+        # permalink's one control-menu trigger, then the one item in the
+        # menu it owns, shown in tests/test_mark_not_interested.py.
+        "mark_not_interested",
         "follow_company",
         # 2026-10-10, lane S: the generic settings writer's press is aimed by
         # the control's exact name, which its gate required drawn once.

@@ -731,8 +731,12 @@ def test_the_action_set_is_the_one_this_file_was_measured_against():
     # tab; the Sent tab), worded without "My Network", which the invitation
     # pair owns; the three ``_VERIFIED_FROM`` rows are one row (a fresh render of
     # the same tab). None holds a phrase another action owns.
-    assert len(writes.PERFORMABLE) == 27, (
-        "writes.PERFORMABLE holds %d actions, not the 27 this file was "
+    # TWENTY-EIGHT ON THE SAME LANE: ``mark_not_interested``. Its two rows were
+    # read: its ``_WHERE_TO_LOOK`` value is his feed, which no other row names,
+    # and its ``_VERIFIED_FROM`` row reads the permalink IN PLACE; neither holds
+    # a phrase another action owns.
+    assert len(writes.PERFORMABLE) == 28, (
+        "writes.PERFORMABLE holds %d actions, not the 28 this file was "
         "measured against: %s. Re-derive the phrase owners in this file for "
         "the new action, then update this count."
         % (len(writes.PERFORMABLE), sorted(writes.PERFORMABLE))

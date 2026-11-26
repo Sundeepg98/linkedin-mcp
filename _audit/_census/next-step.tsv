@@ -299,7 +299,6 @@ N 149	N	W	R3	SIBLING:M M38	NAMED	N 149 ; M M38
 N 150	N	W	R3	TARGET:a conversation thread he names to report	NAMED	_audit/_census/network.md::THE QUEUED RE-FILE MUST NOT BE EXECUTED ON THIS ROW
 N 151	N	W	R3	TARGET:a system-flagged message he names to mark safe	NAMED	_audit/_census/network.md::the only row in section M whose act is to undo a report
 N 153	N	W	R3	SIBLING:N 154	MEASURED	tests/fixtures/live11/permalink_member_post_menu_open.html ; N 154
-N 154	N	W	R3	BUILD:tests/fixtures/live11/permalink_member_post_menu_open.html	MEASURED	tests/fixtures/live11/permalink_member_post_menu_open.html ; RULING:HIS-OWN-CURATION-NOT-OUTWARD
 N 156	N	W	R2	TARGET:a non-connection he names (the act stops at the composer)	NAMED	_audit/2026-09-24-lane-l5-messaging.md::| C-P5 | the composer a NON-connection gets ; RULING:OPERATOR-NAMES-THE-TARGET
 N 158	N	W	R2	TARGET:a non-connection he names (the act stops at the composer)	NAMED	_audit/2026-09-24-lane-l5-messaging.md::| C-P5 | the composer a NON-connection gets ; RULING:OPERATOR-NAMES-THE-TARGET
 N 159	N	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD

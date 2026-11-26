@@ -1,4 +1,14 @@
-"""The tool surface: ninety-four tools, twenty-seven of which write to LinkedIn.
+"""The tool surface: ninety-five tools, twenty-eight of which write to LinkedIn.
+
+THE NINETY-FIFTH IS A WRITE, 2026-11-26 (lane build-net2, census ``N 154``;
+``N 153`` rides it, on live session 11's permalink of a member's post):
+``linkedin_mark_not_interested``, one feed item he names by its urn marked
+"Not interested" from that item's own control menu on its permalink, under
+HIS-OWN-CURATION-NOT-OUTWARD. It presses the menu's one trigger and then the
+one item inside the menu that trigger owns by id -- two presses through the
+one click site -- and reads the result IN PLACE, because the undo LinkedIn
+draws is drawn once. Measured off this branch's registry, not summed. The
+headline read "ninety-four tools, twenty-seven of which write" until then.
 
 THE NINETY-SECOND TO NINETY-FOURTH ARE WRITES, 2026-11-26 (lane build-net2,
 census ``N 15``, ``N 16`` and ``N 10``, on live session 11's captures):
@@ -463,9 +473,9 @@ assigned to anybody -- it waits for whoever next runs the suite, and in the
 meantime the pin goes on asserting the old number with full confidence.
 
 THE NUMBERS ABOVE ARE DERIVED NOW, and that is a statement about a test rather
-than about an intention. Ninety-four is ``len(await mcp.list_tools())``,
+than about an intention. Ninety-five is ``len(await mcp.list_tools())``,
 pinned in ``test_server_surface.py`` by
-``test_the_surface_is_exactly_the_ninety_four_tools``; the split is pinned by
+``test_the_surface_is_exactly_the_ninety_five_tools``; the split is pinned by
 ``tests/test_prose_that_makes_a_claim.py::test_the_server_docstring_numbers_are_derived``,
 which reads THESE WORDS and fails if any of the three disagrees with the
 registry.
@@ -478,9 +488,11 @@ POINTER to it was dangling, so a reader who followed it found nothing and
 would reasonably conclude these numbers are unchecked. A citation is a claim
 like any other.
 The surface splits three ways and the split is the part a reader actually
-needs: SIXTY-FOUR read, TWENTY-SEVEN write, and THREE are write-shaped,
-registered, gated and unable to act. Sixty-four plus twenty-seven plus three is
-ninety-four. (Sixty-four, twenty-four and three, summing to ninety-one, until
+needs: SIXTY-FOUR read, TWENTY-EIGHT write, and THREE are write-shaped,
+registered, gated and unable to act. Sixty-four plus twenty-eight plus three is
+ninety-five. (Sixty-four, twenty-seven and three, summing to ninety-four, until
+lane build-net2's Not interested, 2026-11-26. Sixty-four, twenty-four and
+three, summing to ninety-one, until
 lane build-net2's three invitation answers, 2026-11-26. Sixty-three,
 twenty-four and three, summing to ninety, until
 integration 4's merge of lane readers-msg26's content search, 2026-11-26; that
@@ -670,11 +682,13 @@ the moment ``update_profile_field`` was given an address while still refusing.
 always meant: an address is not a permission.
 
 NOTE THE ACTION THAT HAS NO TOOL. ``writes.SANCTIONED_WRITES`` holds
-THIRTY-ONE actions where this surface registers THIRTY write-shaped tools, and
-the missing one is ``set_open_to_work``: it is sanctioned, it is refused by
-``_refuse_unperformable``, and no tool was ever registered for it. So thirty
-counts TOOLS and thirty-one counts ACTIONS, and a reader comparing the two
-numbers is not looking at a discrepancy. (TWENTY-EIGHT and TWENTY-SEVEN until
+THIRTY-TWO actions where this surface registers THIRTY-ONE write-shaped tools,
+and the missing one is ``set_open_to_work``: it is sanctioned, it is refused by
+``_refuse_unperformable``, and no tool was ever registered for it. So thirty-one
+counts TOOLS and thirty-two counts ACTIONS, and a reader comparing the two
+numbers is not looking at a discrepancy. (THIRTY-ONE and THIRTY until lane
+build-net2's Not interested, 2026-11-26, added one to each. TWENTY-EIGHT and
+TWENTY-SEVEN until
 lane build-net2's three invitation answers, 2026-11-26, added three to each.
 TWENTY-SIX and TWENTY-FIVE on master
 at lane build-jmn26's base, 4c62196, measured off that tree's registry -- this
@@ -1280,7 +1294,7 @@ mcp = FastMCP(
     instructions=(
         "A window onto the operator's OWN LinkedIn account, driven by his own "
         "signed-in browser on his own machine. Most tools read and change "
-        "nothing. TWENTY-SEVEN WRITE: linkedin_save_job, "
+        "nothing. TWENTY-EIGHT WRITE: linkedin_save_job, "
         "linkedin_unsave_job, linkedin_unfollow_company, "
         "linkedin_follow_company, linkedin_apply_job, "
         "linkedin_update_setting, linkedin_react_to_item, "
@@ -1294,8 +1308,9 @@ mcp = FastMCP(
         "linkedin_set_similar_jobs_alert, linkedin_unset_similar_jobs_alert, "
         "linkedin_set_search_job_alert, linkedin_unset_search_job_alert, "
         "linkedin_accept_invitation_to_connect, "
-        "linkedin_ignore_invitation_to_connect and "
-        "linkedin_withdraw_invitation. "
+        "linkedin_ignore_invitation_to_connect, "
+        "linkedin_withdraw_invitation and "
+        "linkedin_mark_not_interested. "
         "ONE MORE IS WRITE-SHAPED AND REFUSES: linkedin_set_tracker_stage, the "
         "stage move on a saved job, whose control -- an item in the tracker "
         "row's overflow menu -- has never been captured; it reads his Saved "
@@ -1348,6 +1363,15 @@ mcp = FastMCP(
         "only for an invitation he names. Each presses one control and "
         "nothing in any dialog it draws: the withdraw's documented "
         "confirmation is expected to stop its first use. "
+        "THE TWENTY-EIGHTH, linkedin_mark_not_interested, marks ONE feed "
+        "item he names by its urn -- as linkedin_read_named_profile's "
+        "activity_items returns a member's posts -- 'Not interested' from "
+        "that item's own control menu on its "
+        "permalink: curation of his own feed, and nobody is told. It "
+        "presses the menu's trigger and the one item in the menu that "
+        "trigger owns, nothing more; the undo LinkedIn draws is drawn "
+        "once and never pressed here, so if he changes his mind he "
+        "presses it himself while it is drawn. "
         "THE SIXTEENTH, linkedin_withdraw_from_group, leaves one group he "
         "names by its NUMERIC id, never by a group's name; no join is built "
         "here, so offer it only for a group he names -- and not his last "
@@ -14055,6 +14079,43 @@ async def linkedin_withdraw_invitation(
     """
     try:
         return await _write_tool("withdraw_invitation", profile, confirm_token)
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_mark_not_interested(
+    item: str, confirm_token: str = ""
+) -> dict[str, Any]:
+    """Mark ONE feed item you name "Not interested" -- a WRITE to your own feed, from the item's own menu.
+
+    Opens the permalink of the item whose urn you give
+    (``/feed/update/<urn>/``), presses that item's own control menu -- the one
+    trigger LinkedIn draws with its fixed "Open control menu" prefix -- and
+    presses "Not interested" ONLY if it is the one such item on the page and it
+    sits in the menu that trigger owns. Curation of your own feed
+    (HIS-OWN-CURATION-NOT-OUTWARD): nobody is told. Same two steps and gates as
+    ``linkedin_save_job``: no ``confirm_token``, no action. Census row ``N 154``.
+
+    YOU NAME THE ITEM BY ITS URN (``urn:li:activity:<digits>`` and its kin),
+    as ``linkedin_read_named_profile``'s ``activity_items`` returns a member's
+    posts -- never by its author or words; the page may only refuse it. The
+    item's author is never read.
+
+    THE UNDO IS LINKEDIN'S AND IS DRAWN ONCE. What the press draws has never
+    been captured, so the result is read IN PLACE: an ``Undo`` drawn where the
+    item was means it is hidden; the menu still open with its item means it
+    was not pressed; anything else is ``unknown`` -- look at your feed, do not
+    retry. This server never presses the undo; press it yourself while it is
+    drawn if you change your mind.
+
+    Args:
+        item: the item's urn, e.g. ``urn:li:activity:<digits>``.
+        confirm_token: leave empty to preview. Pass the token from that
+            preview to actually press.
+    """
+    try:
+        return await _write_tool("mark_not_interested", item, confirm_token)
     except Exception as exc:
         return _error(exc)
 

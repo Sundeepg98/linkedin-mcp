@@ -1318,7 +1318,8 @@ PINNED = {
     #: 247 ON LANE READERS-MSG26 (2026-11-26), MEASURED: `M M20` GAP -> MEASURED-ABSENT, under MEASURED-ABSENT-OR-PRECONDITION: the first opened conversation on disk draws no video-meeting control, every footer and header control accounted for (`_audit/2026-11-26-readers-msg26.md` section 3) (was 246).
     #: MEASURED AT INTEGRATION 4'S MERGE OF READERS-MSG26 (2026-11-26) on the merged tree, never summed (the figures above are each lane's own).
     #: 265 ON LANE BUILD-NET2 (2026-11-26), MEASURED: `N 15`, `N 16` and `N 10` GAP -> COVERED-UNFIRED, one pending invitation he names accepted, ignored or withdrawn on his invitation manager (`linkedin_accept_invitation_to_connect`, `linkedin_ignore_invitation_to_connect`, `linkedin_withdraw_invitation`; `_audit/2026-11-26-build-net2.md`) (was 262).
-    "adjudicated": 265,
+    #: 266 ON LANE BUILD-NET2'S SECOND BUILD (2026-11-26), MEASURED: `N 154` GAP -> COVERED-UNFIRED, one feed item he names marked Not interested from that item's own permalink menu (`linkedin_mark_not_interested`; `_audit/2026-11-26-build-net2.md`) (was 265).
+    "adjudicated": 266,
     #: THE LIVE LANE'S FOUR ROWS, RE-DERIVED AT EACH OF ITS MERGES OF MASTER
     #: (2026-09-24; last over lane S): four rows fired live and banked
     #: (`_audit/2026-09-23-live-lane-session-1.md`). `P G6` COVERED-UNFIRED ->
@@ -1447,7 +1448,8 @@ PINNED = {
     #: 161 ON LANE READERS-MSG26 (2026-11-26), MEASURED: `M C93` GAP -> COVERED-UNFIRED, the content search vertical read over live session 11's capture (`linkedin_search_content`; `_audit/2026-11-26-readers-msg26.md`) (was 160).
     #: MEASURED AT INTEGRATION 4'S MERGE OF READERS-MSG26 (2026-11-26) on the merged tree, never summed (the figures above are each lane's own).
     #: 177 ON LANE BUILD-NET2 (2026-11-26), MEASURED: `N 15`, `N 16` and `N 10` GAP -> COVERED-UNFIRED, one pending invitation he names accepted, ignored or withdrawn on his invitation manager (`linkedin_accept_invitation_to_connect`, `linkedin_ignore_invitation_to_connect`, `linkedin_withdraw_invitation`; `_audit/2026-11-26-build-net2.md`) (was 174).
-    "delivered_broad": 177,
+    #: 178 ON LANE BUILD-NET2'S SECOND BUILD (2026-11-26), MEASURED: `N 154` GAP -> COVERED-UNFIRED, one feed item he names marked Not interested from that item's own permalink menu (`linkedin_mark_not_interested`; `_audit/2026-11-26-build-net2.md`) (was 177).
+    "delivered_broad": 178,
     #: 79 since the live lane's merge (see `adjudicated`): P G6, N 134, P O3
     #: and M C72 COVERED-PROVEN.
     #: 75 and 21 since the bucket-1 merge: `M C41` fired live and moved from
@@ -1600,7 +1602,8 @@ PINNED = {
     #: 527 ON LANE READERS-MSG26 (2026-11-26), MEASURED: `M M20` GAP -> MEASURED-ABSENT, under MEASURED-ABSENT-OR-PRECONDITION: the first opened conversation on disk draws no video-meeting control, every footer and header control accounted for (`_audit/2026-11-26-readers-msg26.md` section 3) (was 528).
     #: MEASURED AT INTEGRATION 4'S MERGE OF READERS-MSG26 (2026-11-26) on the merged tree, never summed (the figures above are each lane's own).
     #: 510 ON LANE BUILD-NET2 (2026-11-26), MEASURED: `N 15`, `N 16` and `N 10` GAP -> COVERED-UNFIRED, one pending invitation he names accepted, ignored or withdrawn on his invitation manager (`linkedin_accept_invitation_to_connect`, `linkedin_ignore_invitation_to_connect`, `linkedin_withdraw_invitation`; `_audit/2026-11-26-build-net2.md`) (was 513).
-    "gap": 510,
+    #: 509 ON LANE BUILD-NET2'S SECOND BUILD (2026-11-26), MEASURED: `N 154` GAP -> COVERED-UNFIRED, one feed item he names marked Not interested from that item's own permalink menu (`linkedin_mark_not_interested`; `_audit/2026-11-26-build-net2.md`) (was 510).
+    "gap": 509,
     #: 18 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: `M M1` built (`linkedin_message_from_profile`).
     #: 16 ON LANE L5'S ORDER OF 2026-09-27 23:36, MEASURED:
     #: `linkedin_send_message` RETIRED (aimed by a name): `M M2` to GAP and `N
@@ -1744,7 +1747,8 @@ PINNED = {
     #: 44 ON LANE READERS-MSG26 (2026-11-26), MEASURED: `M C93` GAP -> COVERED-UNFIRED, the content search vertical read over live session 11's capture (`linkedin_search_content`; `_audit/2026-11-26-readers-msg26.md`) (was 43).
     #: MEASURED AT INTEGRATION 4'S MERGE OF READERS-MSG26 (2026-11-26) on the merged tree, never summed (the figures above are each lane's own).
     #: 59 ON LANE BUILD-NET2 (2026-11-26), MEASURED: `N 15`, `N 16` and `N 10` GAP -> COVERED-UNFIRED, one pending invitation he names accepted, ignored or withdrawn on his invitation manager (`linkedin_accept_invitation_to_connect`, `linkedin_ignore_invitation_to_connect`, `linkedin_withdraw_invitation`; `_audit/2026-11-26-build-net2.md`) (was 56).
-    "unfired": 59,
+    #: 60 ON LANE BUILD-NET2'S SECOND BUILD (2026-11-26), MEASURED: `N 154` GAP -> COVERED-UNFIRED, one feed item he names marked Not interested from that item's own permalink menu (`linkedin_mark_not_interested`; `_audit/2026-11-26-build-net2.md`) (was 59).
+    "unfired": 60,
     #: 104 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     #: 101 AT LANE S'S NAMES ADOPTION (2026-09-27), MEASURED: `N 79`, `N 172`
@@ -1858,7 +1862,8 @@ PINNED = {
     #: 358 ON LANE READERS-MSG26 (2026-11-26), MEASURED: `M M20` GAP -> MEASURED-ABSENT, under MEASURED-ABSENT-OR-PRECONDITION: the first opened conversation on disk draws no video-meeting control, every footer and header control accounted for (`_audit/2026-11-26-readers-msg26.md` section 3) (was 359).
     #: MEASURED AT INTEGRATION 4'S MERGE OF READERS-MSG26 (2026-11-26) on the merged tree, never summed (the figures above are each lane's own). GIT MERGED THIS ONE CLEAN AND WRONG: readers-net26 ended at 358 from 359 (`N 6`) and readers-msg26 at 358 from 359 (`M M20`), so both sides' value lines read the same and the text merge kept one move; MEASURED: 357.
     #: 354 ON LANE BUILD-NET2 (2026-11-26), MEASURED: `N 15`, `N 16` and `N 10` GAP -> COVERED-UNFIRED, one pending invitation he names accepted, ignored or withdrawn on his invitation manager (`linkedin_accept_invitation_to_connect`, `linkedin_ignore_invitation_to_connect`, `linkedin_withdraw_invitation`; `_audit/2026-11-26-build-net2.md`) (was 357).
-    "gap_write": 354,
+    #: 353 ON LANE BUILD-NET2'S SECOND BUILD (2026-11-26), MEASURED: `N 154` GAP -> COVERED-UNFIRED, one feed item he names marked Not interested from that item's own permalink menu (`linkedin_mark_not_interested`; `_audit/2026-11-26-build-net2.md`) (was 354).
+    "gap_write": 353,
     #: All 54 are `jobs.md`, which has no per-row R/W column (56 until the
     #: lane-L3 merge built J 18 and J 39). Not a coincidence
     #: and not a defect in the finder: it is the whole of that slice's still-GAP
@@ -2236,7 +2241,8 @@ PINNED = {
     #: with `M C35` (+1), held by OPERATOR-NAMES-THE-TARGET.
     #: 17 ON LANE READERS-NET26'S ROUND 2 (2026-11-26), MEASURED: `N 6` GAP -> COVERED-UNFIRED, discharged by CALLER-COMPOSITION-UNDER-D6 on `linkedin_sent_invitations` and `linkedin_connect_from_profile` (the orchestrator's answer to Q-REINVITE-COMPOSITION; `_audit/2026-11-26-readers-net26.md`, round 2): held by OPERATOR-NAMES-THE-TARGET (see PINNED_B1_ROWS).
     #: 20 ON LANE BUILD-NET2 (2026-11-26), MEASURED: `N 15`, `N 16` and `N 10` GAP -> COVERED-UNFIRED, one pending invitation he names accepted, ignored or withdrawn on his invitation manager (`linkedin_accept_invitation_to_connect`, `linkedin_ignore_invitation_to_connect`, `linkedin_withdraw_invitation`; `_audit/2026-11-26-build-net2.md`): held by OPERATOR-NAMES-THE-TARGET (see PINNED_B1_ROWS) (was 17).
-    "b1_standing": 20,
+    #: 21 ON LANE BUILD-NET2'S SECOND BUILD (2026-11-26), MEASURED: `N 154` GAP -> COVERED-UNFIRED, one feed item he names marked Not interested from that item's own permalink menu (`linkedin_mark_not_interested`; `_audit/2026-11-26-build-net2.md`): held by OPERATOR-NAMES-THE-TARGET (see PINNED_B1_ROWS) (was 20).
+    "b1_standing": 21,
     "b1_relayed": 0,
     "b1_pending": 0,
     #: 22 AT THE ORCHESTRATOR'S MERGE OF LANE D (2026-09-27), MEASURED: lane D
@@ -2568,10 +2574,14 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
     #: received tab or withdrawn on his Sent tab, built offline on live session
     #: 11's captures and never fired. Each is an act toward the member on the
     #: other end, so each fires only at an invitation he names.
+    #: `N 154` entered ON THE SAME LANE'S SECOND BUILD (2026-11-26), MEASURED:
+    #: one feed item he names by its urn marked Not interested from its own
+    #: permalink menu, built offline on session 11's capture, never fired;
+    #: the tool never picks an item, so it fires only at one he names.
     "OPERATOR-NAMES-THE-TARGET": (
         "J 128",
         "M C1", "M C25", "M C32", "M C35", "M C63", "M M10", "M M14", "M M15", "M M18",
-        "N 1", "N 2", "N 4", "N 6", "N 10", "N 15", "N 16", "N 47", "N 64",
+        "N 1", "N 2", "N 4", "N 6", "N 10", "N 15", "N 16", "N 47", "N 64", "N 154",
         "P I14",
     ),
     #: `J 18` and `J 39` entered with the lane-L3 merge, 2026-09-23: reads

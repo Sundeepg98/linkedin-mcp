@@ -35,6 +35,7 @@
     "linkedin_login_browser": "not_driven:never read the page",
     "linkedin_logout": "not_driven:never read the page",
     "linkedin_mark_company_interest": "not_driven:never read the page",
+    "linkedin_mark_not_interested": "not_driven:never read the page",
     "linkedin_message_from_profile": "not_driven:never read the page",
     "linkedin_messaging_presence": "not_driven:never read the page",
     "linkedin_my_activity_items": "not_driven:never read the page",

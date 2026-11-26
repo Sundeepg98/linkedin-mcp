@@ -12928,10 +12928,42 @@ the row is still pending.
 |---|---|
 | `linkedin_server/invitation_acts.py`, `tests/test_invitation_acts.py` | on the base tree `3c656df` the file fails at collection (no module `invitation_acts`); green 16 passed. Eight mutations, each weakening one check and restoring the file byte for byte: seven RED at once -- the no-other-member predicate, any button count, the `wants to connect` line, two rows of one member, any drop read as an answer, an unsafe segment, a dialog read as nothing -- and ONE GREEN, the tab strip's check: on the two captures the rows' shapes alone kept the tabs apart. A world was added (the received page with its strip's Sent link current, its rows still drawn) and the same mutation is RED |
 | `tests/shipped_drives.py` drives `invitation_acts:read_rows`, `read_state`, `read_after_press` | each premise broken in `FIXTURE_BREAKS` (LinkedIn's word in the fixture changed): the drive raises and the guard records it not driven, never clean |
+| `linkedin_server/feed_curation.py`, `tests/test_mark_not_interested.py` | on the base tree `3c656df` the file fails at collection (no module `feed_curation`); green 10 passed. Eight mutations, each weakening one check and restoring the file byte for byte, all eight RED and each a FAILED, never an error: the owned-portal relation dropped, the owned-menu count not required, any number of visible items passed, two triggers read as one, an open menu read as the closed item, no undo read as not done, the undo never read, and `perform` pressing the item by its word with the gate ignored |
+| `scripts/_build_live11_net2_word_skeletons.py`, `tests/test_live11_net2_word_fixtures.py` | the fixture held to its tracked copy token by token; the restorer's list losing `Not interested` is RED (a ninth mutation), and the file's own can-fail test takes `Not interested` off the word list and finds the difference nothing explains |
 
 ### 109.4 DECLARED DISPOSABLE
 
 The lane's scratch probes -- the keyed-shape word counter, the trigger-label
 shape probe, the id-shaped attribute census, the search-box shape census, the
-selector checker, the census cell editor, the mutation runner. Each answered
+selector checker, the census cell editor, the mutation runner -- and, for
+`N 154`, `N 95` and the CI run, the search input's attribute-name probe,
+the navigation-taint probes and the batch and step runners. Each answered
 one question once; the answers are in the record.
+
+### 109.5 The menu a pressed trigger owns, by id
+
+`linkedin_server/feed_curation.py` presses an item's control menu by
+LinkedIn's fixed trigger prefix and then the menu's `Not interested` ONLY
+inside the portal whose id the pressed trigger's own anchor names in
+`aria-owns` -- the relation session 11's permalink draws, never a position.
+Its verification is IN PLACE, because the undo LinkedIn draws is drawn once:
+an `Undo` (DERIVED) is hidden, the menu still open with its item unpressed is
+not done, anything else unknown -- never "not done".
+`tests/test_mark_not_interested.py` holds it over the real captures (the
+closed permalink and the open one with its menu words put back), with the
+trigger's label planted after LinkedIn's measured prefix, and is shown failing
+by eight mutations, every one RED (the entries table, 109.3).
+
+    A MENU IS AN ITEM'S ONLY WHERE THE PRESSED CONTROL NAMES IT; AN UNDO
+    DRAWN ONCE IS READ WHERE IT IS DRAWN, AND NOT SEEING IT IS NOT A NO.
+
+### 109.6 The second word restorer
+
+`scripts/_build_live11_net2_word_skeletons.py` puts LinkedIn's menu words back
+into the permalink's tracked copy through readers-jobs26's own
+`_build_live11_word_skeletons.build` (imported: a word only at its keyed
+shape, a declared word matching nowhere refused), naming the keyed skeleton
+and the committed copy apart because their file names differ, and refusing
+unless the skeleton's tracked copy IS the committed one.
+`tests/test_live11_net2_word_fixtures.py` holds the fixture to its copy token
+by token and is shown failing by taking `Not interested` off its word list, RED.

@@ -115,6 +115,8 @@ from tests.test_send_attachment import CAPTURED as ATTACHMENT_THREAD
 from tests.test_leave_group import GROUPS_LEAVE_ID, GROUPS_LEAVE_MARKUP
 from tests.test_invitation_acts import MEMBER as INVITATION_MEMBER  # noqa: E402
 from tests.test_invitation_acts import WORLD as INVITATION_WORLD  # noqa: E402
+from tests.test_mark_not_interested import CLOSED as NOT_INTERESTED_CLOSED  # noqa: E402
+from tests.test_mark_not_interested import URN as NOT_INTERESTED_URN  # noqa: E402
 from tests.test_named_profile_route import LINK as NAMED_PROFILE_LINK
 from tests.test_named_profile_route import PROFILE as NAMED_PROFILE
 from tests.test_result_verification_block import SHAREBOX_MARKUP
@@ -353,6 +355,15 @@ REACHED: dict[str, tuple[str, str, str]] = {
         INVITATION_WORLD["withdraw_invitation"],
         "https://www.linkedin.com/in/" + INVITATION_MEMBER["withdraw_invitation"] + "/",
     ),
+    # 2026-11-26 (census row ``N 154``; lane build-net2). A TRACKED capture,
+    # session 11's permalink of a member's post, its one trigger labelled with
+    # LinkedIn's measured prefix and a synthetic name: the preview and the click
+    # read it through ONE verdict, ``feed_curation.read_state``.
+    "mark_not_interested": (
+        "tests/test_mark_not_interested.py",
+        NOT_INTERESTED_CLOSED,
+        NOT_INTERESTED_URN,
+    ),
     # THE EIGHTEENTH, 2026-10-10 (census ``P O17``, lane S, settings). THE
     # REAL PAGE: the live lane's capture of "Share profile updates" as a
     # tracked skeleton. The preview and the click read its one switch
@@ -529,7 +540,8 @@ _WORLDS_THAT_REACH_OUT = frozenset({"set_similar_jobs_alert", "unset_similar_job
                                     # invitation tabs are tracked copies too.
                                     "accept_invitation_to_connect",
                                     "ignore_invitation_to_connect",
-                                    "withdraw_invitation"})
+                                    "withdraw_invitation",
+                                    "mark_not_interested"})
 
 
 async def _over_refusing_every_request(html: str, work):
@@ -713,8 +725,10 @@ def test_every_performable_action_is_either_reached_or_declared_unreachable():
     # over session 2's tracked search and its derived on world. MEASURED.
     # 24 -> 27 ON LANE BUILD-NET2 (2026-11-26): the three invitation answers,
     # reached over session 11's two tracked tabs. MEASURED.
-    assert len(PERFORMABLE) == 27, sorted(PERFORMABLE)
-    assert len(REACHED) == 27, sorted(REACHED)
+    # 27 -> 28 ON THE SAME LANE: ``mark_not_interested``, reached over session
+    # 11's tracked permalink. MEASURED.
+    assert len(PERFORMABLE) == 28, sorted(PERFORMABLE)
+    assert len(REACHED) == 28, sorted(REACHED)
     assert len(CANNOT_REACH) == 0, sorted(CANNOT_REACH)
 
 

@@ -215,6 +215,7 @@ from linkedin_server import (
     company_interest,
     dom,
     endorse_skill,
+    feed_curation,
     field_restore,
     group_leave,
     invitation_acts,
@@ -1372,6 +1373,79 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "after-press reading is the confirmation's capture, and the confirm "
             "press is built on it in a later change. Nothing past the Withdraw "
             "link is pressed before then."
+        ),
+    ),
+    # LANE BUILD-NET2, 2026-11-26: ONE FEED ITEM HE NAMES MARKED "NOT
+    # INTERESTED" (census ``N 154``; ``N 153`` rides it), from the item's own
+    # control menu on its PERMALINK -- the urn he names IS the address, the aim
+    # lane B2 found missing on /feed/. Under HIS-OWN-CURATION-NOT-OUTWARD. The
+    # selectors and verdicts live in ``feed_curation``; this entry and the
+    # arms below delegate. MEASURED on live session 11's permalink of a
+    # member's post (load 29), the menu's words put back by keyed shape. Two
+    # presses through the one click site -- the trigger, then the item, the
+    # second appended only by a gate that finds it in the menu the pressed
+    # trigger owns -- and the verification is IN PLACE, because the undo
+    # LinkedIn draws is drawn once.
+    "linkedin_mark_not_interested": WriteSpec(
+        action="mark_not_interested",
+        tool_name="linkedin_mark_not_interested",
+        url_template=feed_curation.URL_TEMPLATE,
+        url_pattern=re.compile(
+            r"^https://www\.linkedin\.com/feed/update/urn:li:[A-Za-z]+:[0-9]+/$"
+        ),
+        exempt_substring=None,
+        summary=(
+            "Mark one feed item you name by its urn 'Not interested', from that "
+            "item's own control menu on its permalink."
+        ),
+        from_state=feed_curation.SHOWN,
+        to_state=feed_curation.HIDDEN,
+        target_kind="item_urn",
+        state_from="feed_item_menu",
+        direction_source=(
+            "the item's own permalink, /feed/update/<the urn you name>/ -- the "
+            "page this action presses on, at one page load. MEASURED on live "
+            "session 11 (load 29): one control-menu trigger in the page's main, "
+            "found by LinkedIn's fixed 'Open control menu' prefix (the rest of "
+            "its label names the author and is never read); pressed, it owns, "
+            "by id, a portal whose menu draws 'Not interested' as one of seven "
+            "items. The gate requires exactly one such trigger, closed."
+        ),
+        wrong_state_note=(
+            "Not a toggle. A permalink drawing no control menu, or more than "
+            "one, or one already open, is not the item you named in the state "
+            "this act starts from -- so nothing is pressed."
+        ),
+        reversibility="STILL-UNKNOWN whether the undo LinkedIn draws restores the item",
+        reversibility_measured=False,
+        reversibility_class="STILL-UNKNOWN",
+        reversibility_evidence=(
+            "NOT MEASURED. No capture holds the page after 'Not interested'; the "
+            "undo LinkedIn is expected to draw in the item's place has never "
+            "been seen."
+        ),
+        reversible_by=(
+            "LinkedIn's own Undo, drawn once in the item's place right after the "
+            "press -- by him, by hand, while it is drawn; this server does not "
+            "press it, because no capture holds it. After that, NOT through "
+            "this server."
+        ),
+        residue=(
+            "WHAT PRESSING 'Not interested' DRAWS IS UNMEASURED: the undo's word "
+            "is DERIVED ('Undo'), and whether LinkedIn hides an item on its own "
+            "permalink at all is unseen. The verification reads the page IN "
+            "PLACE: an Undo drawn is the act's only proof; no Undo, with the menu "
+            "closed, is unknown -- never 'not done'. A dialog is counted and "
+            "never answered. What the mark changes in his feed's ranking is "
+            "LinkedIn's. HIS-OWN-CURATION-NOT-OUTWARD proves the act with its "
+            "inverse; the inverse, pressing that undo, waits on the undo's "
+            "capture -- the first supervised press records it."
+        ),
+        reversibility_procedure=(
+            "One supervised press on an item HE NAMES by urn: the after-press "
+            "reading records the undo LinkedIn draws, by closed words; the undo "
+            "press is then built on that capture and the two proven together in "
+            "one session, read back."
         ),
     ),
     "linkedin_set_open_to_work": WriteSpec(
@@ -4808,6 +4882,10 @@ STRICT_PRESS_ACTIONS: frozenset[str] = NAMED_PROFILE_ACTIONS | frozenset(
         "accept_invitation_to_connect",
         "ignore_invitation_to_connect",
         "withdraw_invitation",
+        # 2026-11-26 (lane build-net2, N 154): the one trigger in the
+        # permalink's main, then the one item in the menu it owns, each
+        # counted as exactly one; a second match at press time throws.
+        "mark_not_interested",
         "follow_company",
         "send_invitation",
         # Lane S, 2026-10-10: the generic settings writer's press is aimed by
@@ -6472,6 +6550,28 @@ async def observe(
             same_page_as_action=True,
         )
 
+    if spec.state_from == "feed_item_menu":
+        # ONE load, of the permalink the urn he names composes (lane
+        # build-net2, 2026-11-26, N 154): the item's own page, where the urn
+        # IS the address. The reading is COUNTS ONLY, by LinkedIn's fixed
+        # trigger prefix (``feed_curation.read_state``); the author is never
+        # read. A landing off that permalink reads ``unknown``.
+        url = str(spec.url_template or "").format(target=target)
+        landed = await _load(navigator, page, url, surface="feed item")
+        facts, state, why = await feed_curation.read_state(
+            page, landed_elsewhere=str(landed).rstrip("/") != url.rstrip("/")
+        )
+        return _record(
+            spec,
+            target=target,
+            facts=facts,
+            facts_url=url,
+            state=state,
+            state_why=why,
+            state_url=url,
+            same_page_as_action=True,
+        )
+
     if spec.state_from == settings_writer.STATE_FROM:
         # ONE load, of the admitted page the click lands on (lane S,
         # 2026-10-10). The address is the registry's CONSTANT for the page's
@@ -7695,6 +7795,27 @@ PERFORMABLE: frozenset[str] = frozenset(
         "accept_invitation_to_connect",
         "ignore_invitation_to_connect",
         "withdraw_invitation",
+        # ONE FEED ITEM HE NAMES MARKED "NOT INTERESTED", 2026-11-26 (lane
+        # build-net2, census row N 154; N 153 rides it), under
+        # HIS-OWN-CURATION-NOT-OUTWARD:
+        #
+        #   a measured surface   the item's own permalink, /feed/update/<urn>/,
+        #                        on the read allowlist and loaded live in
+        #                        session 11 (load 29) by the urn its menu carried
+        #   a measured anchor    LinkedIn's "Open control menu" trigger prefix,
+        #                        pressed there live; the menu's own
+        #                        "Not interested", verified by keyed shape
+        #   an aimable target    the one trigger in the page's main, then the
+        #                        one item inside the portal that trigger owns
+        #                        by id -- each strict at its press
+        #   a real verification  IN PLACE: the undo LinkedIn draws once; no
+        #                        undo reads unknown, never "not done"
+        #   no new permission    TWO presses through perform()'s one click
+        #                        site, the second appended only by a gate
+        #
+        # WHAT IT CANNOT SAY is the undo's word (DERIVED: "Undo"); its
+        # first supervised press records it. ENABLING IS NOT FIRING.
+        "mark_not_interested",
         # THE THIRTEENTH, 2026-09-23, census row ``N 47``, and the first write
         # added under the operator's reversible-first-round class since the
         # round's own three. Every clause the others needed is true of it:
@@ -8463,6 +8584,12 @@ def anchor_label_for(
         # the row whose member links name the profile he gave; its aria-label
         # carries the member's name and is never read.
         return invitation_acts.CONTROL[spec.action][1]
+    if spec.action == "mark_not_interested":
+        # THE ITEM THAT MARKS IT, exact, LinkedIn's whole word in the item's
+        # own menu, verified by keyed shape (lane build-net2, N 154). The
+        # FIRST press is the menu's trigger, aimed by LinkedIn's fixed
+        # prefix; the rest of its label names the author and is never read.
+        return feed_curation.NOT_INTERESTED
     if spec.action == "follow_company_page":
         # A PREFIX, like the unfollow's, and for the same reason: LinkedIn
         # writes the Page's own name into the label, which makes it a strong
@@ -8845,6 +8972,8 @@ _WRITE_SURFACE_FOR_ACTION: dict[str, str] = {
     "accept_invitation_to_connect": "your invitation manager's received tab",
     "ignore_invitation_to_connect": "your invitation manager's received tab",
     "withdraw_invitation": "your invitation manager's Sent tab",
+    # 2026-11-26 (lane build-net2, N 154): the item's own permalink.
+    "mark_not_interested": "the feed item's own permalink",
     # 2026-09-27: addressed by a person's link, acting on HIS OWN profile's
     # suggestion rail -- the page the press lands on, not the linked one.
     "send_invitation": "your own profile's suggestion rail",
@@ -8918,6 +9047,8 @@ _WHERE_TO_LOOK: dict[str, str] = {
     "accept_invitation_to_connect": "your invitation manager's received tab, and your connections list",
     "ignore_invitation_to_connect": "your invitation manager's received tab",
     "withdraw_invitation": "your invitation manager's Sent tab",
+    # 2026-11-26 (lane build-net2, N 154): where a hidden item stops showing.
+    "mark_not_interested": "your LinkedIn feed, where that item stops being shown",
     # Lane S, 2026-10-10: the one page that renders the value is the page that
     # sets it, under Settings and Privacy, named in the preview.
     "set_admitted_setting": "that page under Settings and Privacy, named in the preview",
@@ -9150,6 +9281,16 @@ _VERIFIED_FROM["accept_invitation_to_connect"] = (
 )
 _VERIFIED_FROM["ignore_invitation_to_connect"] = _VERIFIED_FROM["accept_invitation_to_connect"]
 _VERIFIED_FROM["withdraw_invitation"] = _VERIFIED_FROM["accept_invitation_to_connect"]
+# 2026-11-26 (lane build-net2, N 154).
+_VERIFIED_FROM["mark_not_interested"] = (
+    "IN PLACE, on the permalink the press was made on, before any "
+    "navigation: the undo LinkedIn draws in a hidden item's place is drawn "
+    "once, and HIS-OWN-CURATION-NOT-OUTWARD proves the act only through it. "
+    "Its word is DERIVED ('Undo'), never captured, so an undo read is its "
+    "first reading; no undo with the menu closed answers unknown -- never "
+    "'not done' -- and only the menu still open with its item unpressed "
+    "answers not done."
+)
 _VERIFIED_FROM["follow_company_page"] = (
     "a DIFFERENT surface from the one clicked: Manage Pages, where a followed "
     "Page is a row keyed by the same numeric id this action was granted on. "
@@ -9790,6 +9931,17 @@ async def _live_control(
         if state != invitation_acts.PENDING:
             return (state, why, "")
         return (state, why, invitation_acts.control_selector(spec.action, segment))
+
+    if spec.action == "mark_not_interested":
+        # THE SAME READING AND VERDICT THE PREVIEW TOOK, on the permalink the
+        # press is about to land on (lane build-net2, N 154). The selector is
+        # the FIRST press only -- the one trigger by LinkedIn's fixed prefix,
+        # pressed strictly; "Not interested" is appended later by
+        # ``feed_curation.menu_item_gate``, or not at all.
+        _facts, state, why = await feed_curation.read_state(page)
+        if state != feed_curation.SHOWN:
+            return (state, why, "")
+        return (state, why, feed_curation.TRIGGER)
 
     if spec.action == "update_profile_field":
         # THE ONE SWITCH IN THIS FAMILY, P B9 (2026-09-24): the Premium
@@ -11133,6 +11285,17 @@ async def _verify_after(
             "is not what was read.",
             url,
         )
+
+    if spec.action == "mark_not_interested":
+        # IN PLACE (lane build-net2, N 154): the undo LinkedIn draws is drawn
+        # once, so the page the press was made on is read again where it is,
+        # with no navigation. An Undo drawn is hidden (DERIVED word); the
+        # menu still open with its item is not done; else unknown.
+        url = str(spec.url_template).format(target=url_target_of(spec, grant.target))
+        _facts, state, why = feed_curation.verification_verdict(
+            await feed_curation.read_item(page)
+        )
+        return (state, why, url)
 
     if spec.action in (
         "accept_invitation_to_connect",
@@ -12558,6 +12721,10 @@ async def perform(
     # for ``invitation_acts.ACTIONS`` only: counts and closed words, read
     # before anything navigates. See ``invitation_acts.read_after_press``.
     invitation_after_press: Optional[dict[str, Any]] = None
+    # THE CURATION GATE (lane build-net2, 2026-11-26, N 154): what the menu
+    # drew after the trigger press, and what "Not interested" left.
+    curation_gate: Optional[dict[str, Any]] = None
+    curation_after_press: Optional[dict[str, Any]] = None
     # THE UNFOLLOW'S CONFIRMATION GATE (2026-10-10), read after its press: what
     # the press drew, and whether the confirm control may be pressed.
     unfollow_confirm_gate: Optional[dict[str, Any]] = None
@@ -13138,6 +13305,20 @@ async def perform(
                     # taken. The verification's fresh render decides.
                     menu_after_press = group_leave.after_press_note(
                         await group_leave.read_after_press(page, grant.target)
+                    )
+                elif spec.action == "mark_not_interested" and clicks_made == 1:
+                    # THE TRIGGER OPENED A MENU (lane build-net2, N 154): the item
+                    # is appended to this same queue only if a fresh read finds
+                    # exactly one visible "Not interested" and it is inside the
+                    # menu this trigger owns, by id.
+                    curation_gate = await feed_curation.menu_item_gate(page)
+                    if curation_gate["proceed"]:
+                        click_plan.append(curation_gate["selector"])
+                elif spec.action == "mark_not_interested" and clicks_made == 2:
+                    # THE ITEM WAS PRESSED. What it left, read before anything
+                    # else -- counts only; nothing more is pressed.
+                    curation_after_press = feed_curation.after_press_note(
+                        await feed_curation.read_item(page)
                     )
                 elif spec.action in invitation_acts.ACTIONS and clicks_made == 1:
                     # THE ONE PRESS WAS MADE (lane build-net2, 2026-11-26).
@@ -13948,6 +14129,20 @@ async def perform(
         # and one sentence -- no name. For the withdraw, its first supervised
         # use makes this block the capture of LinkedIn's confirmation.
         "invitation_after_press": invitation_after_press,
+        # WHAT THE CURATION GATE SAW (lane build-net2, N 154), for
+        # ``mark_not_interested`` only: counts and sentences, no author.
+        "curation_gate": (
+            None
+            if curation_gate is None
+            else {
+                "proceeded": bool(curation_gate.get("proceed")),
+                "refused_condition": curation_gate.get("refused_condition"),
+                "why": curation_gate.get("why"),
+                "observed": curation_gate.get("observed"),
+                "polls": curation_gate.get("polls"),
+                "after_the_item_press": curation_after_press,
+            }
+        ),
         # WHAT THE UNFOLLOW'S PRESS DREW (2026-10-10), for that action only:
         # counts, closed words and shaped names, never a Page's name. Null for
         # every other action.

@@ -1,4 +1,9 @@
-"""The tool surface: ninety-four tools, sixty-four of which do not write.
+"""The tool surface: ninety-five tools, sixty-four of which do not write.
+
+**IT READ "ninety-four tools, sixty-four of which do not write" UNTIL LANE
+BUILD-NET2'S SECOND BUILD (2026-11-26)**: ``linkedin_mark_not_interested``
+(census N 154), one feed item he names marked Not interested from its own
+permalink menu, a WRITE, so the non-write count holds at sixty-four.
 
 **IT READ "ninety-one tools, sixty-four of which do not write" UNTIL LANE
 BUILD-NET2 (2026-11-26) ADDED THREE WRITES**:
@@ -284,6 +289,9 @@ SANCTIONED_WRITE_TOOLS = frozenset(SANCTIONED_WRITES) & {
     "linkedin_accept_invitation_to_connect",
     "linkedin_ignore_invitation_to_connect",
     "linkedin_withdraw_invitation",
+    # 2026-11-26 (lane build-net2, census N 154): Not interested on one feed
+    # item he names. Its NAME announces the write ("mark").
+    "linkedin_mark_not_interested",
 }
 
 #: THE DOCSTRING EXEMPTION IS THE SAME SET AS THE NAME EXEMPTION, and it took
@@ -720,6 +728,7 @@ EXPECTED_TOOLS = {
     "linkedin_accept_invitation_to_connect",
     "linkedin_ignore_invitation_to_connect",
     "linkedin_withdraw_invitation",
+    "linkedin_mark_not_interested",
     # THE FIFTY-EIGHTH AND FIFTY-NINTH, 2026-09-27 (lane L5's follow-up, at
     # its merge of master 52b55b6), two WRITES: see SANCTIONED_WRITE_TOOLS.
     "linkedin_connect_from_profile",
@@ -826,8 +835,11 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_ninety_four_tools(tools):
-    """RENAMED AGAIN ON LANE BUILD-NET2 (2026-11-26), to ``..._ninety_four_tools``:
+async def test_the_surface_is_exactly_the_ninety_five_tools(tools):
+    """RENAMED AGAIN ON LANE BUILD-NET2 (2026-11-26), to ``..._ninety_five_tools``:
+    ``linkedin_mark_not_interested`` (census N 154) beside the ninety-four.
+
+    RENAMED AGAIN ON LANE BUILD-NET2 (2026-11-26), to ``..._ninety_four_tools``:
     three WRITES -- ``linkedin_accept_invitation_to_connect``,
     ``linkedin_ignore_invitation_to_connect`` and ``linkedin_withdraw_invitation``
     (census N 15, N 16, N 10) -- beside the ninety-one. MEASURED off this
@@ -1405,7 +1417,8 @@ async def test_the_surface_is_exactly_the_ninety_four_tools(tools):
     # NINETY-FOUR ON LANE BUILD-NET2 (2026-11-26): three WRITES, so the split
     # moves on its write side and the non-write count holds at sixty-four.
     # MEASURED off mcp.list_tools().
-    assert len(tools) == 94
+    # NINETY-FIVE ON THE SAME LANE: linkedin_mark_not_interested, a WRITE.
+    assert len(tools) == 95
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -1457,6 +1470,7 @@ async def test_the_surface_is_exactly_the_ninety_four_tools(tools):
         "linkedin_accept_invitation_to_connect",
         "linkedin_ignore_invitation_to_connect",
         "linkedin_withdraw_invitation",
+        "linkedin_mark_not_interested",
     }
     # THE NON-WRITE COUNT MOVES TO SIXTEEN, and the reason is NOT the reason
     # it moved last time. The comment here said: "THE READ COUNT MOVES OFF
@@ -1680,7 +1694,7 @@ async def test_the_surface_is_exactly_the_ninety_four_tools(tools):
     # SIXTY-FOUR HOLDS ON LANE BUILD-NET2 (2026-11-26): its three tools are
     # WRITES; this second copy of the total moves to the measured ninety-four.
     assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 64
-    assert len(tools) == 94
+    assert len(tools) == 95
 
 
 def test_the_read_that_was_nearly_named_a_write():
@@ -1808,6 +1822,7 @@ async def test_the_exemption_covers_only_the_names_on_it(tools):
         "linkedin_accept_invitation_to_connect",
         "linkedin_ignore_invitation_to_connect",
         "linkedin_withdraw_invitation",
+        "linkedin_mark_not_interested",
     }
     # The probe has to be genuinely sanctioned for this to test the thing it
     # claims to. A name nobody ever specced would only show that made-up names
@@ -2249,6 +2264,8 @@ async def test_server_info_stops_claiming_read_only_once_writes_are_on(monkeypat
         # hand like its thirteen siblings: "I'm interested", pressed in one
         # posting's About-the-company card, aimed by the card's own employer.
         "mark_company_interest",
+        # 2026-11-26 (lane build-net2, census N 154), typed here by hand.
+        "mark_not_interested",
         # SEVENTEENTH, 2026-09-27 (census M M1; lane L5's follow-up), typed
         # here by hand like its sixteen siblings: Message on the profile of a
         # person he names, typing only for a first-degree connection.
@@ -2352,6 +2369,8 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
         # THE FOURTEENTH, 2026-09-24 (census row P I14). Typed by hand, as
         # this list requires, at the merge of the lane that built it.
         "mark_company_interest",
+        # 2026-11-26 (lane build-net2, census N 154), typed here by hand.
+        "mark_not_interested",
         # THE SEVENTEENTH, 2026-09-27 (census M M1). Typed by hand, as this
         # list requires, by the lane that built it.
         "message_from_profile",
@@ -2794,6 +2813,8 @@ async def test_the_server_instructions_name_every_write_that_ships():
         # TWENTY-FIVE TO TWENTY-SEVEN ON LANE BUILD-NET2 (2026-11-26): the three
         # invitation answers beside the twenty-four; only twenty-seven is reached.
         25: "twenty-five", 26: "twenty-six", 27: "twenty-seven",
+        # TWENTY-EIGHT ON THE SAME LANE: mark_not_interested.
+        28: "twenty-eight",
     }
     assert f"{words[len(writes.PERFORMABLE)]} write" in text
     for action in writes.PERFORMABLE:

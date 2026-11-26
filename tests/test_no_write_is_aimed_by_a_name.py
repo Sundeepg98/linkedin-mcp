@@ -295,6 +295,7 @@ KNOWN_WRITE_TOOLS = frozenset(
         "linkedin_accept_invitation_to_connect",
         "linkedin_ignore_invitation_to_connect",
         "linkedin_withdraw_invitation",
+        "linkedin_mark_not_interested",
         "linkedin_publish_post",
         "linkedin_comment_on_item",
         "linkedin_react_to_item",

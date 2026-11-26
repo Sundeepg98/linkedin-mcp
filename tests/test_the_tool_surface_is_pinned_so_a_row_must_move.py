@@ -219,6 +219,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_accept_invitation_to_connect": ("confirm_token", "profile"),
     "linkedin_ignore_invitation_to_connect": ("confirm_token", "profile"),
     "linkedin_withdraw_invitation": ("confirm_token", "profile"),
+    "linkedin_mark_not_interested": ("confirm_token", "item"),
 }
 
 #: 44 tools and 61 parameters at the pin. Asserted rather than assumed, so a
@@ -784,8 +785,12 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: registry. THE CENSUS DECISION, IN THE SAME COMMIT: `N 15`, `N 16` and `N 10`
 #: GAP -> COVERED-UNFIRED on them, never fired. See
 #: `_audit/2026-11-26-build-net2.md`.
-PINNED_TOOL_COUNT = 94
-PINNED_PARAMETER_COUNT = 143
+#: **95 TOOLS AND 145 PARAMETERS ON THE SAME LANE** --
+#: `linkedin_mark_not_interested(item, confirm_token)`, one WRITE of two
+#: parameters. THE CENSUS DECISION, IN THE SAME COMMIT: `N 154` GAP ->
+#: COVERED-UNFIRED on it, never fired.
+PINNED_TOOL_COUNT = 95
+PINNED_PARAMETER_COUNT = 145
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:
