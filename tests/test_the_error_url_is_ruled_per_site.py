@@ -188,6 +188,19 @@ DECLARED: dict[tuple[str, str], tuple[str, int]] = {
     # that redirect and asserted the resolved slug reached `$.url`. It passed
     # for as long as the leak existed. It is inverted now.
     ("server.py", "linkedin_my_profile"): (ASKED_FOR, 1),
+    # --- ASKED_FOR: lane readers-net26's five readers (2026-11-26) ---------
+    # Each raises on a zero it cannot corroborate, and passes as `url` its own
+    # module's admitted constant -- the one address its tool requested
+    # (`invitation_manager.RECEIVED_URL` / `SENT_URL`,
+    # `following_list.FOLLOWING_URL`, `unfollowed_list.UNFOLLOWED_URL`,
+    # `advertising_data.ADS_URL`), BASE_URL plus a fixed path and nothing
+    # else, so the operator can open the same page by hand. Never the landing:
+    # each reader holds the page and never reads its url.
+    ("invitation_manager.py", "read_received_invitations"): (ASKED_FOR, 1),
+    ("invitation_manager.py", "read_sent_invitations"): (ASKED_FOR, 1),
+    ("following_list.py", "read_following_list"): (ASKED_FOR, 1),
+    ("unfollowed_list.py", "read_unfollowed_list"): (ASKED_FOR, 1),
+    ("advertising_data.py", "read_advertising_data"): (ASKED_FOR, 1),
     # --- NO_ADDRESS_IN_SCOPE: selector builders ---------------------------
     # Pure string builders. None takes a page or a url, so none of them could
     # publish an address if it tried. Declared so the guard's coverage is the
@@ -545,10 +558,14 @@ def test_the_twenty_are_still_twenty():
     # send_message, RETIRED on lane L5's order of 23:36 because it was aimed by
     # a name. 12 -> 11 WITHHELD, 20 -> 19 in all, 12 -> 10 out of scope.
     # TWENTY-ONE AT LANE S'S MERGE (above): 11 -> 13 WITHHELD.
+    # TWENTY-SIX AT LANE READERS-NET26 (2026-11-26): five readers outside
+    # server.py raise on an uncorroborated zero with their own module's
+    # admitted constant as `url` -- the address their tool requested -- so
+    # ASKED_FOR is 7 -> 12. MEASURED off this table, not summed.
     assert tally[WITHHELD] == 13, tally
-    assert tally[ASKED_FOR] == 7, tally
+    assert tally[ASKED_FOR] == 12, tally
     assert tally[PASSTHROUGH] == 1, tally
-    assert tally[WITHHELD] + tally[ASKED_FOR] + tally[PASSTHROUGH] == 21, tally
+    assert tally[WITHHELD] + tally[ASKED_FOR] + tally[PASSTHROUGH] == 26, tally
     assert tally[NO_ADDRESS_IN_SCOPE] == 10, tally
 
 

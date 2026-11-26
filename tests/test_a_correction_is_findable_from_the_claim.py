@@ -352,7 +352,7 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
     # vocabulary and window, and every match placed: all in older text, in a
     # cell or a neighbour; none in a note of this lane.
     ("network.md", "2026-11-26-readers-net26.md"): (
-        "FIVE MOVES AND TWENTY-TWO NOTES, NOT A CORRECTION. Rows 9, 13, 38, 39 "
+        "FIVE MOVES AND NINETEEN NOTES, NOT A CORRECTION. Rows 9, 13, 38, 39 "
         "and 161 gained the paragraph that moves them, and rows 6, 10 to 12, "
         "14 to 19, 21, 37, 40, 43, 51, 95, 153, 154 and 200 one note each "
         "naming the step session 11's capture now gives them; each cites this "

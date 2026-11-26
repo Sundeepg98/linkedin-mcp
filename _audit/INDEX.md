@@ -1920,7 +1920,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-11-25 | [2026-11-25-live-session-11.md](2026-11-25-live-session-11.md) | Live session 11 -- campaign L1, the capture session: the prep, written offline |  |
 | 2026-11-25 | [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md) | Orchestrator rulings of 2026-11-25 (from 22:30 IST), registered at integration 3 | corrects x1 |
 | 2026-11-26 | [2026-11-26-integration-3.md](2026-11-26-integration-3.md) | Integration 3, 2026-11-26: five certified heads onto master, and the rulings since 2026-11-25 22:30 |  |
-| 2026-11-26 | [2026-11-26-readers-net26.md](2026-11-26-readers-net26.md) | Lane readers-net26, 2026-11-26: the network rows live session 11 captured -- five readers built, one fire banked, twenty-seven next steps re-pointed |  |
+| 2026-11-26 | [2026-11-26-readers-net26.md](2026-11-26-readers-net26.md) | Lane readers-net26, 2026-11-26: the network rows live session 11 captured -- five readers built, one fire banked, twenty-six next steps re-pointed |  |
 | 2026-11-26 | [2026-11-26-rulings-search-route.md](2026-11-26-rulings-search-route.md) | Orchestrator rulings of 2026-11-26 (01:20 IST): the job search's route, registered at integration 3 |  |
 
 ## 6. What the scan rejected, could not join, or had to repair
