@@ -483,7 +483,12 @@ def _jobs_page(row: dict[str, str]) -> str:
 def _admitted_unheld_jobs_row(row: dict[str, str]) -> bool:
     import ruling_holds as rh
 
+    # NOT ALREADY READER, since integration 6 (2026-11-26): `J 1`, `J 20` and
+    # `J 40` returned to GAP gated READER on the AI route, and the first of them
+    # heads the table, so a plant of READER on it changed nothing and the
+    # control reported itself broken -- which is what it is for.
     return (row["class"] == "ADMITTED" and _jobs_page(row).endswith("/")
+            and row["gate"] != "READER"
             and rh.surface_hold(_jobs_page(row)) is None)
 
 

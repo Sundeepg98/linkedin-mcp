@@ -1127,6 +1127,25 @@ can return an ad's urn to him WITHOUT pressing ads he did not name. Option
 (b) is declined: it presses the menus of ads he did not name, for a low-value
 row. Row `N 200`: next step this question, held, until the reopener is met.
 
+### Q-MEDIA-POST-AUDIENCE -- a photo or a video on the composer whose audience is unread
+
+Added 2026-11-26 at integration 6, from lane build-msg2's question 2
+(`_audit/2026-11-26-build-msg2.md`, section 6). Rows: `M C3` and `M C4` (`M C6`
+and `M C7` ride `M C5` and `M C3`). The media control is drawn on the feed's
+composer, `/preload/sharebox/`, the composer `linkedin_publish_post` types into
+-- and that tool refuses before minting anything (`audience_unread`): the
+composer's audience control is unread, so nothing here can say who a post
+would reach. The lane asked: "DOES THE FEED POST'S AUDIENCE REFUSAL BIND A
+MEDIA POST?" -- and, if it were built, whether `perform` may hand a file over
+after a press that only opens a dialog, against the drain's stated "before
+any click" order.
+
+**Answered 2026-11-26 by the orchestrator** (22:33, registered at integration
+6): MEDIA-POST-SAME-REFUSAL. The audience is unread, and there is no upload
+after a press; `M C3`, `M C4`, `M C6` and `M C7` stay GAP and cite the
+ruling. Reopener: an audience the server can read. Rows `M C3` and `M C4`:
+next step this question, held, until the reopener is met.
+
 ## 8. Preconditions and purposes
 
 PRECONDITION rows stay GAP; each waits on something he does not hold.

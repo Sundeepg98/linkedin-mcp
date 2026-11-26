@@ -1342,7 +1342,8 @@ PINNED = {
     #: 268 ON LANE BUILD-MSG2'S GROUP POST (2026-11-26), MEASURED: `M C64` GAP -> COVERED-UNFIRED, a post in one group he names (`linkedin_publish_group_post`, EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS; `_audit/2026-11-26-build-msg2.md`) (was 267).
     #: 269 ON LANE BUILD-MSG2'S ROUND 2 (2026-11-26), MEASURED: `M M28` SPLIT on the orchestrator's ruling M-M28-SPLITS (round 2, to be registered at integration 6): the view half stayed `M M28`, COVERED-UNFIRED on `linkedin_archived_conversations`; the restore half entered as `M M54`, GAP, W (`_audit/2026-11-26-build-msg2.md` section 10) (was 268).
     #: 281 AT INTEGRATION 6'S MERGE OF LANE BUILD-MSG2 (2026-11-26), MEASURED on the merged tree by --check, never summed: the three lanes' moves above, together.
-    "adjudicated": 281,
+    #: 259 AT INTEGRATION 6'S REGISTRATION (2026-11-26), MEASURED by --check, never summed: RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE returned the 22 rows of search26's section 4.5 to GAP (21 COVERED-PROVEN, J 31 COVERED-UNFIRED), and FAILED-REPROOF-DEMOTES moved M C41 COVERED-PROVEN -> COVERED-UNFIRED.
+    "adjudicated": 259,
     #: THE LIVE LANE'S FOUR ROWS, RE-DERIVED AT EACH OF ITS MERGES OF MASTER
     #: (2026-09-24; last over lane S): four rows fired live and banked
     #: (`_audit/2026-09-23-live-lane-session-1.md`). `P G6` COVERED-UNFIRED ->
@@ -1483,7 +1484,8 @@ PINNED = {
     #: 180 ON LANE BUILD-MSG2'S GROUP POST (2026-11-26), MEASURED: `M C64` GAP -> COVERED-UNFIRED, a post in one group he names (`linkedin_publish_group_post`, EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS; `_audit/2026-11-26-build-msg2.md`) (was 179).
     #: 181 ON LANE BUILD-MSG2'S ROUND 2 (2026-11-26), MEASURED: `M M28` SPLIT on the orchestrator's ruling M-M28-SPLITS (round 2, to be registered at integration 6): the view half stayed `M M28`, COVERED-UNFIRED on `linkedin_archived_conversations`; the restore half entered as `M M54`, GAP, W (`_audit/2026-11-26-build-msg2.md` section 10) (was 180).
     #: 193 AT INTEGRATION 6'S MERGE OF LANE BUILD-MSG2 (2026-11-26), MEASURED on the merged tree by --check, never summed: the three lanes' moves above, together.
-    "delivered_broad": 193,
+    #: 171 AT INTEGRATION 6'S REGISTRATION (2026-11-26), MEASURED by --check, never summed: RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE returned the 22 rows of search26's section 4.5 to GAP (21 COVERED-PROVEN, J 31 COVERED-UNFIRED), and FAILED-REPROOF-DEMOTES moved M C41 COVERED-PROVEN -> COVERED-UNFIRED.
+    "delivered_broad": 171,
     #: 79 since the live lane's merge (see `adjudicated`): P G6, N 134, P O3
     #: and M C72 COVERED-PROVEN.
     #: 75 and 21 since the bucket-1 merge: `M C41` fired live and moved from
@@ -1526,7 +1528,8 @@ PINNED = {
     #: 117 AT LANE B2's MERGE OF ORIGIN/MASTER 6c65815, MEASURED on the
     #: merged tree, not summed: the live lane's 115 with lane B2's `N 80` and `N 133`.
     #: 118 ON LANE READERS-NET26 (2026-11-26), MEASURED: `N 9`, `N 13`, `N 38`, `N 39` and `P P15` GAP -> COVERED-UNFIRED (readers built on live session 11's captures), `N 161` COVERED-UNFIRED -> COVERED-PROVEN (session 11's fire, banked; `_audit/2026-11-26-readers-net26.md`): `N 161` joined COVERED-PROVEN.
-    "delivered_strict": 118,
+    #: 96 AT INTEGRATION 6'S REGISTRATION (2026-11-26), MEASURED by --check, never summed: RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE returned the 22 rows of search26's section 4.5 to GAP (21 COVERED-PROVEN, J 31 COVERED-UNFIRED), and FAILED-REPROOF-DEMOTES moved M C41 COVERED-PROVEN -> COVERED-UNFIRED.
+    "delivered_strict": 96,
     #: The live lane's merge: N 134, P O3 and M C72 left GAP.
     #: Lane D's merge: N 132 left GAP, for COVERED-UNFIRED under D6.
     #: 544 AT THE ORCHESTRATOR'S MERGE OF LANE D (2026-09-27), MEASURED: lane D
@@ -1646,7 +1649,8 @@ PINNED = {
     #: 508 ON LANE BUILD-MSG2'S TWO READS (2026-11-26), MEASURED: `M C14` GAP -> COVERED-UNFIRED, his scheduled posts list read behind the composer's schedule button (`linkedin_scheduled_posts`, SCHEDULED-LIST-AS-A-SHIPPED-READ; `_audit/2026-11-26-build-msg2.md`) (was 509).
     #: 507 ON LANE BUILD-MSG2'S GROUP POST (2026-11-26), MEASURED: `M C64` GAP -> COVERED-UNFIRED, a post in one group he names (`linkedin_publish_group_post`, EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS; `_audit/2026-11-26-build-msg2.md`) (was 508).
     #: 496 AT INTEGRATION 6'S MERGE OF LANE BUILD-MSG2 (2026-11-26), MEASURED on the merged tree by --check, never summed: the three lanes' moves above, together.
-    "gap": 496,
+    #: 518 AT INTEGRATION 6'S REGISTRATION (2026-11-26), MEASURED by --check, never summed: RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE returned the 22 rows of search26's section 4.5 to GAP (21 COVERED-PROVEN, J 31 COVERED-UNFIRED), and FAILED-REPROOF-DEMOTES moved M C41 COVERED-PROVEN -> COVERED-UNFIRED.
+    "gap": 518,
     #: 18 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: `M M1` built (`linkedin_message_from_profile`).
     #: 16 ON LANE L5'S ORDER OF 2026-09-27 23:36, MEASURED:
     #: `linkedin_send_message` RETIRED (aimed by a name): `M M2` to GAP and `N
@@ -1962,7 +1966,8 @@ PINNED = {
     #: 85 ON LANE BUILD-JOBS2 (2026-11-26), MEASURED: `J 74`, `J 76`, `P M7` and `P M8` GAP -> COVERED-UNFIRED, his application settings page's two switches admitted by name for writing under APPLICATION-SETTINGS-WRITE (`linkedin_set_admitted_setting`; `_audit/2026-11-26-build-jobs2.md` section 2) (was 87).
     #: 84 ON LANE BUILD-JOBS2 (2026-11-26), MEASURED: `J 163` GAP -> COVERED-UNFIRED, the recommendations feedback pair built as a receipt-only write under J-163-RECEIPT-ONLY-WRITE (`linkedin_send_recommendations_feedback`; `_audit/2026-11-26-build-jobs2.md` section 5) (was 85).
     #: 83 ON LANE BUILD-JOBS2 (2026-11-26), MEASURED: `J 109` GAP -> COVERED-UNFIRED, a Page's Life tab read by `linkedin_company_page_tab(tab="life")` over session 11's capture (`_audit/2026-11-26-build-jobs2.md` section 7) (was 84).
-    "gap_unknown": 83,
+    #: 105 AT INTEGRATION 6'S REGISTRATION (2026-11-26), MEASURED by --check, never summed: RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE returned the 22 rows of search26's section 4.5 to GAP (21 COVERED-PROVEN, J 31 COVERED-UNFIRED), and FAILED-REPROOF-DEMOTES moved M C41 COVERED-PROVEN -> COVERED-UNFIRED.
+    "gap_unknown": 105,
     "gap_ambiguous": 0,
     #: BUCKET 3, MEASURED 2026-09-23 (`_audit/2026-09-23-bucket3-addresses.md`),
     #: counted off `_audit/_census/read-addresses.tsv`, whose every verdict
@@ -2512,7 +2517,8 @@ PINNED = {
     #: 85 ON LANE BUILD-JOBS2 (2026-11-26), MEASURED: `J 74`, `J 76`, `P M7` and `P M8` GAP -> COVERED-UNFIRED, his application settings page's two switches admitted by name for writing under APPLICATION-SETTINGS-WRITE (`linkedin_set_admitted_setting`; `_audit/2026-11-26-build-jobs2.md` section 2) (was 87).
     #: 84 ON LANE BUILD-JOBS2 (2026-11-26), MEASURED: `J 163` GAP -> COVERED-UNFIRED, the recommendations feedback pair built as a receipt-only write under J-163-RECEIPT-ONLY-WRITE (`linkedin_send_recommendations_feedback`; `_audit/2026-11-26-build-jobs2.md` section 5) (was 85).
     #: 83 ON LANE BUILD-JOBS2 (2026-11-26), MEASURED: `J 109` GAP -> COVERED-UNFIRED, a Page's Life tab read by `linkedin_company_page_tab(tab="life")` over session 11's capture (`_audit/2026-11-26-build-jobs2.md` section 7) (was 84).
-    "jobs_gap": 83,
+    #: 105 AT INTEGRATION 6'S REGISTRATION (2026-11-26), MEASURED by --check, never summed: RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE returned the 22 rows of search26's section 4.5 to GAP (21 COVERED-PROVEN, J 31 COVERED-UNFIRED), and FAILED-REPROOF-DEMOTES moved M C41 COVERED-PROVEN -> COVERED-UNFIRED.
+    "jobs_gap": 105,
     #: 40 AT LANE S'S OFFLINE FRONTIER (2026-09-28), MEASURED: the five rows
     #: bucket 3 called blocked on nothing, taken one by one. `M M53`, `N 195`
     #: and `P S5` (three R rows ADMITTED and gated READER) and `J 107` (the one
@@ -2537,7 +2543,8 @@ PINNED = {
     #: 26 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `J 106`, `J 113` and `J 165` GAP -> COVERED-UNFIRED, one tab of a Page (About, Insights, Events) read by `linkedin_company_page_tab` over session 11's captures (was 29).
     #: 25 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `J 168` GAP -> COVERED-UNFIRED, the Page's posts read off its root by `linkedin_company_page_tab(tab="posts")` over session 9's Posts view (was 26).
     #: 24 ON LANE BUILD-JOBS2 (2026-11-26), MEASURED: `J 109` GAP -> COVERED-UNFIRED, a Page's Life tab read by `linkedin_company_page_tab(tab="life")` over session 11's capture (`_audit/2026-11-26-build-jobs2.md` section 7) (was 25).
-    "jobs_dir_r": 24,
+    #: 45 AT INTEGRATION 6'S REGISTRATION (2026-11-26), MEASURED by --check, never summed: RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE returned the 22 rows of search26's section 4.5 to GAP (21 COVERED-PROVEN, J 31 COVERED-UNFIRED), and FAILED-REPROOF-DEMOTES moved M C41 COVERED-PROVEN -> COVERED-UNFIRED.
+    "jobs_dir_r": 45,
     #: 60 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: `J 69` and
     #: `J 87`, both W.
     #: 58 ON LANE K's APPLICATION OF THE RULINGS OF 2026-10-10, MEASURED: `J
@@ -2547,7 +2554,8 @@ PINNED = {
     #: 53 ON LANE BUILD-JOBS2 (2026-11-26), MEASURED: `J 74`, `J 76`, `P M7` and `P M8` GAP -> COVERED-UNFIRED, his application settings page's two switches admitted by name for writing under APPLICATION-SETTINGS-WRITE (`linkedin_set_admitted_setting`; `_audit/2026-11-26-build-jobs2.md` section 2) (was 55).
     #: 52 ON LANE BUILD-JOBS2 (2026-11-26), MEASURED: `J 163` GAP -> COVERED-UNFIRED, the recommendations feedback pair built as a receipt-only write under J-163-RECEIPT-ONLY-WRITE (`linkedin_send_recommendations_feedback`; `_audit/2026-11-26-build-jobs2.md` section 5) (was 53).
     #: 53 ON LANE BUILD-JOBS2 (2026-11-26), MEASURED: `J 37` split under COMPOUND-ROW-SPLITS-ONLY-ON-STATE (J-37-SPLITS, round 2): the list half COVERED-UNFIRED on `linkedin_job_alerts`, the manage half `J 170` entered GAP (`_audit/2026-11-26-build-jobs2.md` section 17) (was 52).
-    "jobs_dir_w": 53,
+    #: 54 AT INTEGRATION 6'S REGISTRATION (2026-11-26), MEASURED by --check, never summed: RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE returned the 22 rows of search26's section 4.5 to GAP (21 COVERED-PROVEN, J 31 COVERED-UNFIRED), and FAILED-REPROOF-DEMOTES moved M C41 COVERED-PROVEN -> COVERED-UNFIRED.
+    "jobs_dir_w": 54,
     #: 7 AT INTEGRATION 3 (2026-11-26), MEASURED on the merged tree after the orchestrator's rulings of 2026-11-25 applied: `J 153`, `J 155`, `J 159` EXCLUDED-RULED (OUTSIDE-THE-PRODUCT-PURPOSE) and their side-table lines removed; `J 110`'s Home half COVERED-UNFIRED and its line re-keyed to `J 168`, the Posts half, still R and ADMITTED: `J 155`, R+W, left.
     #: 6 ON LANE BUILD-JOBS2 (2026-11-26), MEASURED: `J 37` split under COMPOUND-ROW-SPLITS-ONLY-ON-STATE (J-37-SPLITS, round 2): the list half COVERED-UNFIRED on `linkedin_job_alerts`, the manage half `J 170` entered GAP (`_audit/2026-11-26-build-jobs2.md` section 17) (was 7).
     "jobs_dir_rw": 6,
@@ -2579,7 +2587,8 @@ PINNED = {
     #: 24 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `J 168` GAP -> COVERED-UNFIRED, the Page's posts read off its root by `linkedin_company_page_tab(tab="posts")` over session 9's Posts view (was 25).
     #: 23 ON LANE BUILD-JOBS2 (2026-11-26), MEASURED: `J 109` GAP -> COVERED-UNFIRED, a Page's Life tab read by `linkedin_company_page_tab(tab="life")` over session 11's capture (`_audit/2026-11-26-build-jobs2.md` section 7) (was 24).
     #: 22 ON LANE BUILD-JOBS2 (2026-11-26), MEASURED: `J 37` split under COMPOUND-ROW-SPLITS-ONLY-ON-STATE (J-37-SPLITS, round 2): the list half COVERED-UNFIRED on `linkedin_job_alerts`, the manage half `J 170` entered GAP (`_audit/2026-11-26-build-jobs2.md` section 17) (was 23).
-    "jobs_admitted": 22,
+    #: 43 AT INTEGRATION 6'S REGISTRATION (2026-11-26), MEASURED by --check, never summed: RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE returned the 22 rows of search26's section 4.5 to GAP (21 COVERED-PROVEN, J 31 COVERED-UNFIRED), and FAILED-REPROOF-DEMOTES moved M C41 COVERED-PROVEN -> COVERED-UNFIRED.
+    "jobs_admitted": 43,
     #: 11 ON LANE A'S J 38 BUILD (2026-10-10), MEASURED: `J 38` GAP -> COVERED-UNFIRED by D6 --
     #: an alert's delivered job ids, read off the notifications page (never fired).
     #: 11 AT LANE A'S MERGE OF MASTER 71d83ca (2026-10-10), MEASURED on the
@@ -2603,7 +2612,8 @@ PINNED = {
     #: shipped page and never fired, so they leave buckets 3 and 1-by-side and
     #: enter bucket 1 held by no ruling. `P K1` stays GAP and is re-gated
     #: READER -> MEASURE: no capture draws its section.
-    "jobs_blocked_on_nothing": 0,
+    #: 3 AT INTEGRATION 6'S REGISTRATION (2026-11-26), MEASURED by --check, never summed: RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE returned the 22 rows of search26's section 4.5 to GAP (21 COVERED-PROVEN, J 31 COVERED-UNFIRED), and FAILED-REPROOF-DEMOTES moved M C41 COVERED-PROVEN -> COVERED-UNFIRED.
+    "jobs_blocked_on_nothing": 3,
 }
 
 #: BUCKET 1, ROW BY ROW -- the control that goes RED WHEN A ROW MOVES, and
@@ -2909,8 +2919,14 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
         #: alert switch, set and unset (`linkedin_set_search_job_alert` and its
         #: inverse), his own curation (HIS-OWN-CURATION-NOT-OUTWARD: proven with
         #: its inverse in one session), built over session 2's real search and
-        #: never fired. No ruling holds it.
-        "J 31",
+        #: never fired. No ruling holds it. IT LEFT at integration 6, 2026-11-26:
+        #: back to GAP by RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE, the classic page it
+        #: was built on retired (live session 12, load 3).
+        #: `M C41` entered at integration 6, 2026-11-26, by FAILED-REPROOF-DEMOTES:
+        #: his own activity feed (`linkedin_my_activity_items`), COVERED-PROVEN since
+        #: 2026-09-23, whose scheduled re-proof failed in live session 12 (E1, loads
+        #: 1 and 2, refused self_assertion_unreadable). A read; no ruling holds it.
+        "M C41",
         #: `J 110` and `N 102` entered at integration 3, 2026-11-26, on the
         #: orchestrator's rulings of 2026-11-25: `J 110`'s Home half
         #: (J-110-SPLITS-HOME-AND-POSTS), an organisation Page root's own

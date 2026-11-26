@@ -45,15 +45,13 @@ SCRIPT = REPO / "scripts" / "check_banked_evidence_is_reachable.py"
 #: paths. So this is not an inherited mess being counted down: the generator
 #: is live, and a row banked today can land here tomorrow. That is exactly what
 #: a two-way ratchet is for.
+#: NARROWED AT INTEGRATION 6, 2026-11-26, by seven: `jobs.md` 9, 11, 12, 13, 14,
+#: 15 and 151 returned to GAP by RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE (live
+#: session 12, load 3), and a GAP row is not banked, so this guard no longer
+#: reads them. Their gitignored citations are still in their cells, in the
+#: classic proofs each keeps as history; nothing was committed or fixed.
 PINNED = {
-    ("_audit/_census/jobs.md", "9", "COVERED-PROVEN"),
-    ("_audit/_census/jobs.md", "11", "COVERED-PROVEN"),
-    ("_audit/_census/jobs.md", "12", "COVERED-PROVEN"),
-    ("_audit/_census/jobs.md", "13", "COVERED-PROVEN"),
-    ("_audit/_census/jobs.md", "14", "COVERED-PROVEN"),
-    ("_audit/_census/jobs.md", "15", "COVERED-PROVEN"),
     ("_audit/_census/jobs.md", "27", "COVERED-PROVEN"),
-    ("_audit/_census/jobs.md", "151", "COVERED-PROVEN"),
     ("_audit/_census/network.md", "136", "MEASURED-ABSENT"),
     #: TWO MORE AT THE LIVE LANE'S MERGE, 2026-09-24, and the same generator
     #: at work: `M C72` and `N 134` were proven live and banked, and a banked
@@ -399,7 +397,9 @@ def test_every_unreachable_artifact_is_named_and_classified(measured):
     # 18 since the live lane's merge, 2026-09-24: 15 plus C72's one and 134's
     # two, all in kept prior readings (see PINNED). 20 since lane B2's D6
     # discharge of N 133, 2026-10-10: its cell's two kept prior readings.
-    assert len(bad) == 20, [str(a) for a in bad]
+    # 8 SINCE INTEGRATION 6, 2026-11-26, MEASURED: the seven jobs rows that
+    # returned to GAP left the banked states with their twelve (see PINNED).
+    assert len(bad) == 8, [str(a) for a in bad]
     assert {a.verdict for a in bad} == {"GITIGNORED"}, sorted({a.verdict for a in bad})
     assert all(a.path.startswith("_audit/_scratch/") for a in bad), bad
 

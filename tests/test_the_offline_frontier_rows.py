@@ -58,6 +58,12 @@ BANKED_AGAIN = {("network.md", "195"), ("profile.md", "S5"),
 BANKED_OPENING = ("**FIRED AND BANKED 2026-09-28 (the live lane's session 2).**",
                   "**FIRED AND BANKED 2026-09-28 (the live lane's session 3).**")
 
+#: MOVED AGAIN, 2026-11-26: `J 107` returned to GAP at integration 6 by RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
+#: -- live session 12's load 3 showed the classic search no longer serves. Its
+#: cell still opens on the banking paragraph and keeps the frontier's move; the
+#: state is GAP, and its directions line is back, on the AI route.
+RETURNED_TO_GAP = {("jobs.md", "107")}
+
 #: The row not built, and why.
 NOT_BUILT = ("profile.md", "K1")
 NOT_BUILT_OPENED = "**NOT BLOCKED ON NOTHING, 2026-09-28 (lane S, the offline frontier):"
@@ -88,7 +94,7 @@ def _table(name: str) -> list[dict[str, str]]:
 def test_a_moved_row_opens_on_its_move_and_names_what_it_rests_on(key):
     state, notes = _row(*key)
     if key in BANKED_AGAIN:
-        assert state == "COVERED-PROVEN", (key, state)
+        assert state == ("GAP" if key in RETURNED_TO_GAP else "COVERED-PROVEN"), (key, state)
         assert notes.startswith(BANKED_OPENING), key
         assert notes.find(OPENED) > 0, (key, "the frontier's move no longer follows the banking")
     else:
@@ -105,9 +111,15 @@ def test_a_moved_read_row_has_left_the_address_table(key):
     assert ADDRESS_KEYS[key] not in keys, key
 
 
-def test_the_jobs_row_has_left_the_directions_table():
-    keys = {(r["slice"], r["row"]) for r in _table("jobs-directions.tsv")}
-    assert ("J", "107") not in keys
+def test_the_jobs_row_is_back_in_the_directions_table_on_the_ai_route():
+    """It left on 2026-09-28 and came back on 2026-11-26 (RETURNED_TO_GAP).
+
+    Renamed from ``..._has_left_the_directions_table`` at integration 6: the row
+    is GAP again, so the table must hold it, its read half on the AI route.
+    """
+    lines = [r for r in _table("jobs-directions.tsv") if (r["slice"], r["row"]) == ("J", "107")]
+    assert len(lines) == 1, lines
+    assert lines[0]["address"].startswith("https://www.linkedin.com/jobs/search-results/"), lines[0]["address"]
 
 
 def test_THIS_CONTROL_CAN_FAIL_the_table_reader_finds_a_row_that_is_there():

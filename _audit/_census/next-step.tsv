@@ -1,12 +1,32 @@
 row	slice	dir	class	next	basis	source
+J 1	J	R	-	BUILD:tests/fixtures/ai_search/jobs_search_ai.html	MEASURED	_audit/2026-11-26-live-session-12.md::REDIRECTED to the AI route ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
+J 2	J	R	-	CAPTURE:C-SRCH-3f	MEASURED	_audit/2026-11-26-live-session-12.md::REDIRECTED to the AI route ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
+J 3	J	R	-	CAPTURE:C-SRCH-2	MEASURED	_audit/2026-11-26-live-session-12.md::REDIRECTED to the AI route ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
+J 4	J	R	-	CAPTURE:C-SRCH-3a	MEASURED	_audit/2026-11-26-live-session-12.md::REDIRECTED to the AI route ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
+J 5	J	R	-	CAPTURE:C-SRCH-3a	MEASURED	_audit/2026-11-26-live-session-12.md::REDIRECTED to the AI route ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
+J 6	J	R	-	CAPTURE:C-SRCH-3a	MEASURED	_audit/2026-11-26-live-session-12.md::REDIRECTED to the AI route ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
+J 7	J	R	-	CAPTURE:C-SRCH-3e	MEASURED	_audit/2026-11-26-live-session-12.md::REDIRECTED to the AI route ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
+J 8	J	R	-	CAPTURE:C-SRCH-4	MEASURED	_audit/2026-11-26-live-session-12.md::REDIRECTED to the AI route ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
+J 9	J	R	-	CAPTURE:C-SRCH-3a	MEASURED	_audit/2026-11-26-live-session-12.md::REDIRECTED to the AI route ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
+J 10	J	R	-	CAPTURE:C-SRCH-5	MEASURED	_audit/2026-11-26-live-session-12.md::REDIRECTED to the AI route ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
+J 11	J	R	-	CAPTURE:C-SRCH-3a	MEASURED	_audit/2026-11-26-live-session-12.md::REDIRECTED to the AI route ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
+J 12	J	R	-	CAPTURE:C-SRCH-3d	MEASURED	_audit/2026-11-26-live-session-12.md::REDIRECTED to the AI route ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
+J 13	J	R	-	CAPTURE:C-SRCH-3e	MEASURED	_audit/2026-11-26-live-session-12.md::REDIRECTED to the AI route ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
+J 14	J	R	-	CAPTURE:C-SRCH-3e	MEASURED	_audit/2026-11-26-live-session-12.md::REDIRECTED to the AI route ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
+J 15	J	R	-	CAPTURE:C-SRCH-3a	MEASURED	_audit/2026-11-26-live-session-12.md::REDIRECTED to the AI route ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
 J 16	J	R	-	CAPTURE:admit-jobs-search-results-keywords	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/jobs/search-results/?keywords=placeholder ; RULING:READ-PAST-AN-ACT-SUBSTRING
+J 17	J	R	-	CAPTURE:C-SRCH-2	MEASURED	_audit/2026-11-26-live-session-12.md::REDIRECTED to the AI route ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
+J 18	J	R	-	SIBLING:J 3	MEASURED	_audit/2026-11-26-live-session-12.md::REDIRECTED to the AI route ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
 J 19	J	W	-	TARGET:his order to clear his recent job searches, the press being the act	MEASURED	_audit/2026-11-25-build-jmn26.md::What the press opens -- a confirmation, or nothing ; RULING:J-19-BUILT-BEHIND-THE-GRANT
+J 20	J	R	-	BUILD:tests/fixtures/ai_search/jobs_search_ai.html	MEASURED	_audit/2026-11-26-live-session-12.md::REDIRECTED to the AI route ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
 J 28	J	W	-	TARGET:a job posting he names to report as closed	NAMED	_audit/2026-09-28-rulings-build-classes.md::a report is never fired for a proof unless he names a real item to report
+J 31	J	W	-	BUILD:tests/fixtures/ai_search/jobs_search_ai.html	MEASURED	_audit/2026-11-26-live-session-12.md::REDIRECTED to the AI route ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
 J 32	J	W	-	TARGET:a company Page he names, to create a job alert from	INFERRED	RULING:OPERATOR-NAMES-THE-TARGET ; J 32
 J 33	J	W	-	TARGET:a job alert of his he names	INFERRED	RULING:HIS-OWN-CURATION-NOT-OUTWARD ; J 33
 J 34	J	W	-	TARGET:a job alert of his he names	INFERRED	RULING:HIS-OWN-CURATION-NOT-OUTWARD ; J 33
 J 35	J	W	-	SIBLING:lane-S	NAMED	_audit/_census/jobs-directions.tsv::Alert frequency is a setting ; RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 J 36	J	W	-	SIBLING:lane-S	NAMED	_audit/_census/jobs-directions.tsv::Alert delivery channel is a setting ; RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
+J 40	J	R	-	BUILD:tests/fixtures/ai_search/jobs_search_ai.html	MEASURED	_audit/2026-11-26-live-session-12.md::REDIRECTED to the AI route ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
 J 41	J	W	-	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 J 53	J	W	-	CAPTURE:C-JMN-1	MEASURED	_audit/2026-11-25-build-jmn26.md::No capture of the Archived tab with a row exists ; RULING:HIS-OWN-CURATION-NOT-OUTWARD
 J 54	J	W	-	TARGET:a tracked job of his he names	INFERRED	RULING:HIS-OWN-CURATION-NOT-OUTWARD ; J 54
@@ -46,8 +66,10 @@ J 97	J	W	-	SIBLING:P I9	INFERRED	P I9
 J 98	J	W	-	SIBLING:P I13	INFERRED	P I13
 J 99	J	W	-	SIBLING:P I12	NAMED	_audit/_census/jobs.md::Container: `P I12`
 J 100	J	W	-	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
+J 107	J	R	-	CAPTURE:C-SRCH-5	MEASURED	_audit/2026-11-26-live-session-12.md::REDIRECTED to the AI route ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
 J 111	J	R	-	CAPTURE:C-RJ26-2	MEASURED	_audit/2026-11-26-readers-jobs26.md::That organisation has no ; RULING:READ-PAST-AN-ACT-SUBSTRING
 J 112	J	R	-	TARGET:a school Page he names	NAMED	_audit/_census/read-addresses.tsv::UNDER THE WHO/WHICH RULE, EXTENDED ; RULING:OPERATOR-NAMES-THE-TARGET
+J 151	J	R	-	CAPTURE:C-SRCH-2	MEASURED	_audit/2026-11-26-live-session-12.md::REDIRECTED to the AI route ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
 J 169	J	R	-	CAPTURE:C-RJ26-1	MEASURED	_audit/2026-11-26-readers-jobs26.md::sits behind the job-openings card's ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
 J 170	J	W	-	BUILD:tests/fixtures/live11/jobs_alerts_manager.html	NAMED	_audit/2026-11-26-build-jobs2.md::the detail line and the row button are not read ; RULING:COMPOUND-ROW-SPLITS-ONLY-ON-STATE ; RULING:HIS-OWN-CURATION-NOT-OUTWARD
 J 115	J	R+W	-	CAPTURE:C-JMN-3	MEASURED	_audit/2026-11-25-build-jmn26.md::NEITHER CAPTURED POSTING DRAWS ONE ; RULING:OPERATOR-NAMES-THE-TARGET
@@ -83,8 +105,8 @@ J 160	J	R	-	BUILD:tests/fixtures/live11/career_insights.html	MEASURED	_audit/202
 J 166	J	R	-	CAPTURE:admit-products-product	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/products/placeholder-product/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
 J 167	J	R	-	CAPTURE:admit-showcase-showcase	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/showcase/placeholder-showcase/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
 M C2	M	W	R3	SIBLING:M C12	NAMED	_audit/_census/messaging-and-content.md::which is why the two rows close together or not at all
-M C3	M	W	R3	BUILD:tests/fixtures/live11/u_post_media_open.html	MEASURED	_audit/2026-11-26-readers-msg26.md::THE INPUT THE ROWS' OLD READING NEVER SAW IS DRAWN ; RULING:FILE-UPLOAD-OPENED ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
-M C4	M	W	R3	BUILD:tests/fixtures/live11/u_post_media_open.html	MEASURED	_audit/2026-11-26-readers-msg26.md::THE INPUT THE ROWS' OLD READING NEVER SAW IS DRAWN ; RULING:FILE-UPLOAD-OPENED ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
+M C3	M	W	R3	RULING:Q-MEDIA-POST-AUDIENCE	MEASURED	_audit/2026-11-26-build-msg2.md::THE AUDIENCE IS UNREAD ON THIS COMPOSER ; RULING:MEDIA-POST-SAME-REFUSAL
+M C4	M	W	R3	RULING:Q-MEDIA-POST-AUDIENCE	MEASURED	_audit/2026-11-26-build-msg2.md::THE AUDIENCE IS UNREAD ON THIS COMPOSER ; RULING:MEDIA-POST-SAME-REFUSAL
 M C5	M	W	R3	CAPTURE:U-POST-DOCUMENT	MEASURED	_audit/2026-11-26-readers-msg26.md::the document control sits behind `More` ; RULING:L1-D3-MEDIA-CHOOSER-INTERCEPTED
 M C6	M	W	R3	SIBLING:M C5	NAMED	M C6 ; M C5
 M C7	M	W	R3	SIBLING:M C3	NAMED	M C7 ; M C3

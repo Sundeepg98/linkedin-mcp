@@ -322,6 +322,41 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "in the lane's record does not hold while leaving the record unmarked."
     ),
 
+    # 2026-11-26, integration 6. READ, not inferred from the filenames: the
+    # notes are this integration's own, one per moved row.
+    ("jobs.md", "2026-11-26-live-session-12.md"): (
+        "A CENSUS MOVE UNDER A REGISTERED RULING, NOT A CORRECTION OF THE RECORD. "
+        "Integration 6 returned 22 jobs rows to GAP by "
+        "RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE, and each row's one dated note "
+        "cites the session record's load 3 as the trigger; none says anything in "
+        "that record does not hold. The matched words are the note's own 'no "
+        "longer serves', about LinkedIn's classic page, and the rows' older "
+        "paragraphs. **WHAT WOULD MAKE THIS ENTRY WRONG:** a jobs row saying "
+        "something in the session record does not hold while leaving the "
+        "record unmarked."
+    ),
+    ("jobs.md", "2026-11-26-rulings-search-route.md"): (
+        "A RULING APPLIED, NOT A CORRECTION OF THE RULINGS RECORD. The same 22 "
+        "notes quote RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE from its document and "
+        "apply it; nothing in that document is said not to hold. **WHAT WOULD "
+        "MAKE THIS ENTRY WRONG:** a jobs row saying that ruling's text is stale "
+        "while leaving its document unmarked."
+    ),
+    ("messaging-and-content.md", "2026-11-26-live-session-12.md"): (
+        "A CENSUS MOVE UNDER A REGISTERED RULING, NOT A CORRECTION OF THE RECORD. "
+        "Row `C41` gained one dated note citing the session record's E1, loads 1 "
+        "and 2, as its failed re-proof; its 'DEMOTED' is about the row's state, "
+        "and nothing in the record is said not to hold. **WHAT WOULD MAKE THIS "
+        "ENTRY WRONG:** a messaging row saying something in the session record "
+        "does not hold while leaving the record unmarked."
+    ),
+    ("messaging-and-content.md", "2026-11-26-rulings-integration-6.md"): (
+        "A RULING APPLIED, NOT A CORRECTION OF THE RULINGS RECORD. Row `C41`'s "
+        "note quotes FAILED-REPROOF-DEMOTES from its document and applies it. "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** a messaging row saying that "
+        "ruling's text is stale while leaving its document unmarked."
+    ),
+
     # 2026-11-26, lane build-msg2. READ, not inferred from the filenames: found
     # by the lane's CI run 45826381044; every line citing the lane's record was
     # listed with the matched words in its two-line window, and none sits in

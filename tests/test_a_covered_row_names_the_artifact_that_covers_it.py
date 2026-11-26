@@ -80,8 +80,13 @@ COVERED_ROWS: dict[tuple[str, str], tuple[str, str]] = {
     # reverting to GAP, and it also catches a row being promoted without
     # anybody saying so. A pin that only notices downgrades would have let an
     # unannounced upgrade through, and those are the ones that inflate a count.
+    #: J 10, J 151 AND J 18 RETURNED TO GAP AT INTEGRATION 6, 2026-11-26, by RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
+    #: (live session 12, load 3: the classic search redirected to the AI
+    #: route). Each pin is MOVED to GAP rather than removed, this table's own
+    #: rule: a later wave that re-proves one on the AI route must say so here.
     ("jobs.md", "10"): (
-        "COVERED-PROVEN",
+        "GAP",
+        "returned to GAP 2026-11-26 (the classic page retired); before that, "
         "the company filter, FIRED 2026-09-20: an id resolved off a real "
         "posting, fed back to the search tool, filtered vs unfiltered "
         "overlapping in only 1 of 7 against a drift floor of 2",
@@ -93,7 +98,8 @@ COVERED_ROWS: dict[tuple[str, str], tuple[str, str]] = {
         "rather than defaulting",
     ),
     ("jobs.md", "151"): (
-        "COVERED-PROVEN",
+        "GAP",
+        "returned to GAP 2026-11-26 (the classic page retired); before that, "
         "multi-location search, FIRED 2026-09-20: 2 searches, 12 rows, 12 "
         "distinct ids, all carrying found_in, attributed to 2 places",
     ),
@@ -147,8 +153,9 @@ COVERED_ROWS: dict[tuple[str, str], tuple[str, str]] = {
     # each on lane L3's bank condition for it, and the pins move with them in
     # the same commit, as this table asks.
     ("jobs.md", "18"): (
-        "COVERED-PROVEN",
-        "recent job searches, read off the jobs home by "
+        "GAP",
+        "returned to GAP 2026-11-26 (its re-run half rode the retired classic "
+        "page); before that, recent job searches, read off the jobs home by "
         "linkedin_recent_job_searches; FIRED 2026-09-28: 6 searches, every one "
         "with its keywords, the list's label seen, the page not redirected",
     ),
