@@ -155,6 +155,12 @@ ADMITTED_OWN_TEXT: dict[str, tuple[str, str]] = {
         HIS_OWN_AUTHORED,
         "/jobs/application-settings/: each stored resume's file name, which he uploaded",
     ),
+    # 2026-11-26, lane build-jobs2 (census J 37): the ruling's second example,
+    # "his job-alert keywords".
+    "linkedin_job_alerts": (
+        HIS_OWN_AUTHORED,
+        "/jobs/jam/: each job alert's search_keywords, the query he typed",
+    ),
 }
 
 

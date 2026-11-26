@@ -150,6 +150,9 @@ SYNTHETIC_RAW_TARGETS: dict[str, Any] = {
     # the KeyError stopped every writes reader being driven for ANY spec --
     # measured on that lane's first local run, as the rows above record.
     "job_search": "keywords=example+harness+search&location=example+harness+place",
+    # HIS ANSWER (the recommendations feedback, lane build-jobs2, 2026-11-26):
+    # one of the two closed words ``job_feedback.canonical_answer`` admits.
+    "recommendations_feedback": "no",
 }
 
 #: The harness's own upload root, made once per process on first use and

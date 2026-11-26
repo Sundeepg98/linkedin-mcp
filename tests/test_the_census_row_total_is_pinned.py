@@ -125,13 +125,17 @@ import pin_census_rows as P  # noqa: E402
 #: split from `J 114` under COMPOUND-ROW-SPLITS-ONLY-ON-STATE by the
 #: orchestrator's ruling J-114-SPLITS: the built facet stayed `J 114`
 #: (COVERED-UNFIRED), the three unbuilt facets entered GAP.
-PINNED_ROW_TOTAL = 775
+#: 775 -> 776 ON LANE BUILD-JOBS2'S ROUND 2 (2026-11-26), MEASURED: `J 170`
+#: entered, split from `J 37` under COMPOUND-ROW-SPLITS-ONLY-ON-STATE by the
+#: orchestrator's ruling J-37-SPLITS: the list half stayed `J 37`
+#: (COVERED-UNFIRED), the manage half entered GAP.
+PINNED_ROW_TOTAL = 776
 
 #: Per slice, because a delta of zero across four slices is reachable by two
 #: errors cancelling -- one row added to `jobs.md` and one dropped from
 #: `network.md` sum to the same total and are not the same census.
 PINNED_SLICE_ROWS = {
-    "J": 168,   # jobs.md                    (150 + 16 + 1 + 1, J 168, J 169)
+    "J": 169,   # jobs.md                    (150 + 16 + 1 + 1 + 1, J 168, J 169, J 170)
     "P": 237,   # profile.md                 (203 + 10 + 22 + 1 + 1, P A23b, P O17)
     "M": 154,   # messaging-and-content.md   (142 + 11 + 1, M C35b)
     "N": 216,   # network.md                 (209 + 6 + 1, N 26b)

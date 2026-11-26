@@ -177,6 +177,15 @@ DECLARED: dict[tuple[str, str], tuple[str, int]] = {
     # with no card. No url; the landing described in the hint by
     # dom._landing_note, as the readers above do.
     ("content_search.py", "read_content_results"): (WITHHELD, 2),
+    # 2026-11-26 (lane build-jobs2, census J 37): the alert manager's two
+    # refusals of an uncorroborated zero -- no manager headed with LinkedIn's
+    # words, or a manager with no readable row. Handed a page and never a url;
+    # the landing described in the hint by dom._landing_note.
+    ("job_alerts_manager.py", "read_alert_manager"): (WITHHELD, 2),
+    # 2026-11-26 (lane build-jobs2, census J 109): the Life tab's refusal of
+    # an uncorroborated zero -- no Life module drawn. Handed a page and never
+    # a url; the landing described in the hint, as its sibling tabs do.
+    ("company_tabs.py", "read_life_tab"): (WITHHELD, 1),
     # --- ASKED_FOR: the seven tool-side raises ----------------------------
     # (``_read_cards``'s one raise left this table on 2026-11-26, when the
     # helper was deleted with no caller left: READ-CARDS-DELETION, lane
@@ -604,10 +613,18 @@ def test_the_twenty_are_still_twenty():
     # THIRTY-EIGHT ON LANE INFRA26 (2026-11-26): ``server._read_cards`` was
     # deleted with no caller left (READ-CARDS-DELETION), and its one ASKED_FOR
     # raise with it: ASKED_FOR 17 -> 16. MEASURED off this table, not summed.
-    assert tally[WITHHELD] == 21, tally
+    # FORTY-ONE ON LANE BUILD-JOBS2 (2026-11-26): the alert manager's two
+    # WITHHELD raises (census J 37), so WITHHELD is 23. MEASURED off this table.
+    # FORTY-TWO ON THE SAME LANE: the Life tab's one WITHHELD raise (census
+    # J 109), so WITHHELD is 24. MEASURED off this table.
+    # FORTY-ONE AT LANE BUILD-JOBS2'S MERGE OF MASTER f4fa447 (2026-11-26):
+    # infra26's deletion and this lane's three raises, every site of each
+    # kept, the tally MEASURED off the merged table, not summed:
+    # {WITHHELD 24, ASKED_FOR 16, PASSTHROUGH 1, NO_ADDRESS_IN_SCOPE 10}.
+    assert tally[WITHHELD] == 24, tally
     assert tally[ASKED_FOR] == 16, tally
     assert tally[PASSTHROUGH] == 1, tally
-    assert tally[WITHHELD] + tally[ASKED_FOR] + tally[PASSTHROUGH] == 38, tally
+    assert tally[WITHHELD] + tally[ASKED_FOR] + tally[PASSTHROUGH] == 41, tally
     assert tally[NO_ADDRESS_IN_SCOPE] == 10, tally
 
 

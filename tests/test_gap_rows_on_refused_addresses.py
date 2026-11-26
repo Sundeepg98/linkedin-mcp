@@ -163,7 +163,13 @@ SCRIPT = ROOT / "scripts" / "check_gap_rows_on_refused_addresses.py"
 #: "settings"). Each stays GAP on the step its own cell names -- `N 11` a
 #: PRECONDITION, the five an admission by name -- under
 #: INCIDENTAL-CAPTURE-IS-NOT-A-RULING. No boundary entry changed.
-EXPECTED_GAP_ROWS = 78
+#: 77 ON LANE BUILD-JOBS2 (2026-11-26), MEASURED: one removed, none added.
+#: `J 74` left GAP for COVERED-UNFIRED (his application settings page admitted
+#: by name for writing); its cell backticks `/mypreferences/d/categories/`,
+#: refused on that substring. The lane's other four moved rows (`J 76`,
+#: `P M7`, `P M8`, `J 163`) name no refused address in backticks, and its notes
+#: on `J 19` and `J 37` backtick none. No boundary entry changed.
+EXPECTED_GAP_ROWS = 77
 
 
 def _run(*args: str) -> subprocess.CompletedProcess:

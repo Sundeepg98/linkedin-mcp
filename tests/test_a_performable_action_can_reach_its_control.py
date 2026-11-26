@@ -160,6 +160,9 @@ _TARGETS: dict[str, object] = {
     # spelling ``search_alert_switch.query_for`` composes from his keywords
     # and location. Declared shapes, not his data.
     "job_search": "keywords=some+role&location=somewhere",
+    # 2026-11-26, lane build-jobs2 (J 163): his answer, one of the two
+    # buttons the feedback block draws.
+    "recommendations_feedback": "yes",
 }
 
 

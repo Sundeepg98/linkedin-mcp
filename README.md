@@ -3,8 +3,22 @@
 An MCP server that shows you your own LinkedIn account data as structured tool
 results instead of pages you have to click through.
 
-**Ninety-one tools ship. Sixty-four read. Twenty-seven write. Three of those
+**Ninety-four tools ship. Sixty-five read. Twenty-nine write. Four of those
 are write-shaped and unable to act.**
+(It read "Ninety-three tools ship. Sixty-four read" until lane build-jobs2's
+read, 2026-11-26: `linkedin_job_alerts` (census `J 37`, its list half)
+returns your job alerts as LinkedIn's own alert manager lists them -- each
+alert's keywords and the names of its filters, one page and no press.)
+(It read "Ninety-two tools ship. Sixty-four read. Twenty-eight write" until
+lane build-jobs2's second write, 2026-11-26:
+`linkedin_send_recommendations_feedback` (census `J 163`) sends your yes or
+no to the question under your recommended jobs -- receipt-only, no inverse,
+fired only on your order.)
+(It read "Ninety-one tools ship. Sixty-four read. Twenty-seven write. Three of
+those are write-shaped" until lane build-jobs2, 2026-11-26:
+`linkedin_set_recent_job_searches_cleared` (census `J 19`) reads the recent
+job searches card on your jobs home and refuses, because what its Clear press
+opens has never been captured; it fires only on your order.)
 (It read "Ninety tools ship. Sixty-three read. Twenty-seven write" until
 integration 4's merge of lane readers-msg26, 2026-11-26:
 `linkedin_search_content` searches posts by a keyword or a hashtag on the
@@ -1152,7 +1166,7 @@ linkedin_server/
   cdp_bridge.py              the recovery path: attach to a running Chrome
   dom.py                     the read-only harvesters and the control readers
   shape.py                   pure parsers and the result envelope
-  server.py                  the ninety-one tools
+  server.py                  the ninety-four tools
   errors.py
 tests/                       1393 tests, no network, no account
   fixtures/                  frozen LinkedIn markup, scrubbed

@@ -770,6 +770,9 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         # (census J 31), sanctioned and performable in the same move.
         "set_search_job_alert",
         "unset_search_job_alert",
+        # LANE BUILD-JOBS2, 2026-11-26: the recommendations feedback press
+        # (census J 163), receipt-only, sanctioned and performable in one move.
+        "send_recommendations_feedback",
         # SIXTEEN FROM LANE L5'S MERGE OF MASTER 66aaa95, the same day (fifteen
         # on the lane's branch): the reply inside a conversation he names
         # (census M M10), sanctioned and performable in the same move.
@@ -808,6 +811,10 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         # per-skill control has never been captured.
         "endorse_skill",
         "withdraw_endorsement",
+        # LANE BUILD-JOBS2, 2026-11-26: sanctioned and NOT performable --
+        # clearing his recent job searches (census J 19), refusing until the
+        # dialog its press opens is captured (J-19-BUILT-BEHIND-THE-GRANT).
+        "set_recent_job_searches_cleared",
     }
     # THREE UNTIL 2026-08-25, four until 2026-08-30, five since. This line read
     # ``{"save_job", "unsave_job", "unfollow_company"}``.
@@ -922,6 +929,9 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         # (census J 31), sanctioned and performable in the same move.
         "set_search_job_alert",
         "unset_search_job_alert",
+        # LANE BUILD-JOBS2, 2026-11-26: the recommendations feedback press
+        # (census J 163), receipt-only, sanctioned and performable in one move.
+        "send_recommendations_feedback",
         # THE FIFTEENTH, 2026-09-24 (the fourteenth on lane L5's branch), and
         # the first write that CONFIRMS ITSELF
         # FROM THE SURFACE A PERSON READS: a reply inside a conversation he
@@ -996,6 +1006,8 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         "set_tracker_stage",
         "endorse_skill",
         "withdraw_endorsement",
+        # LANE BUILD-JOBS2, 2026-11-26 (census J 19), by registration again.
+        "set_recent_job_searches_cleared",
     }
     # AND EVERY ONE OF THEM MUST SAY WHY, individually. The dict is keyed by
     # action, so a fourteenth spec that is not performable and writes no
@@ -1024,6 +1036,8 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
     # refusing action, its refusal itemised by name.
     assert set(writes._NINE_REFUSALS) == {
         "set_tracker_stage", "endorse_skill", "withdraw_endorsement",
+        # LANE BUILD-JOBS2, 2026-11-26 (census J 19).
+        "set_recent_job_searches_cleared",
     }, sorted(writes._NINE_REFUSALS)
     for action in sanctioned_actions - writes.PERFORMABLE:
         if action == "set_open_to_work":
@@ -1105,6 +1119,8 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         "set_tracker_stage",
         "endorse_skill",
         "withdraw_endorsement",
+        # LANE BUILD-JOBS2, 2026-11-26: refusing (census J 19), the same.
+        "set_recent_job_searches_cleared",
     }
     # AND THE ONE THAT LEFT, asserted rather than left as an absence -- the
     # same treatment apply got when its surface was measured.
@@ -1437,8 +1453,13 @@ async def test_exactly_the_performable_writes_are_registered():
     #       profile he names through the named-profile door and count the
     #       endorse-shaped buttons; refuse because no capture holds the
     #       per-skill control in either state.
+    #   linkedin_set_recent_job_searches_cleared  (lane build-jobs2, 2026-11-26,
+    #       census J 19) reads the jobs home -- the card headed Recent job
+    #       searches, its one Clear button, its searches, counted -- and
+    #       refuses because what the press opens has never been captured.
     assert grant_incapable == [
         "linkedin_endorse_skill",
+        "linkedin_set_recent_job_searches_cleared",
         "linkedin_set_tracker_stage",
         "linkedin_withdraw_endorsement",
     ], (
@@ -1499,6 +1520,9 @@ _UNMEASURED_REVERSIBILITY = {
     # both BUILT, the on shape never captured.
     "set_search_job_alert",
     "unset_search_job_alert",
+    # 2026-11-26 (lane build-jobs2, J 163). No answer has been sent or
+    # watched; nothing that withdraws one is drawn.
+    "send_recommendations_feedback",
     # 2026-09-24. Whether LinkedIn lets a sent reply be recalled has never
     # been observed. This comment used to add "and recalling one is
     # destruction this server may not perform at any confirm level either
@@ -1536,6 +1560,8 @@ _UNMEASURED_REVERSIBILITY = {
     "set_tracker_stage",
     "endorse_skill",
     "withdraw_endorsement",
+    # 2026-11-26 (lane build-jobs2, J 19). No clear has been made or watched.
+    "set_recent_job_searches_cleared",
 }
 
 REVERSIBILITY_CLASS = {
@@ -1575,6 +1601,8 @@ REVERSIBILITY_CLASS = {
     # 2026-11-25 (lane build-jmn26). STILL-UNKNOWN, both: see _UNMEASURED_REVERSIBILITY.
     "set_search_job_alert": "STILL-UNKNOWN",
     "unset_search_job_alert": "STILL-UNKNOWN",
+    # 2026-11-26 (lane build-jobs2). See _UNMEASURED_REVERSIBILITY.
+    "send_recommendations_feedback": "STILL-UNKNOWN",
     # 2026-09-27. STILL-UNKNOWN whether a group left can be rejoined; it
     # carries irreversible=True regardless, because no join is built here and
     # an approval-gated group needs a manager to let him back in.
@@ -1592,6 +1620,8 @@ REVERSIBILITY_CLASS = {
     "set_tracker_stage": "STILL-UNKNOWN",
     "endorse_skill": "STILL-UNKNOWN",
     "withdraw_endorsement": "STILL-UNKNOWN",
+    # 2026-11-26 (lane build-jobs2): see _UNMEASURED_REVERSIBILITY.
+    "set_recent_job_searches_cleared": "STILL-UNKNOWN",
 }
 
 #: Which actions have had their reversibility MEASURED. Split out from the
@@ -1618,6 +1648,7 @@ REVERSIBILITY_MEASURED = {
     "unset_similar_jobs_alert": False,
     "set_search_job_alert": False,
     "unset_search_job_alert": False,
+    "send_recommendations_feedback": False,
     "send_reply": False,
     "send_attachment": False,
     "withdraw_from_group": False,
@@ -1628,6 +1659,7 @@ REVERSIBILITY_MEASURED = {
     "set_tracker_stage": False,
     "endorse_skill": False,
     "withdraw_endorsement": False,
+    "set_recent_job_searches_cleared": False,
 }
 
 def test_the_two_reversibility_tables_agree_with_each_other():

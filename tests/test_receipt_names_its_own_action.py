@@ -725,8 +725,13 @@ def test_the_action_set_is_the_one_this_file_was_measured_against():
     # search, or his job alerts), a sanctioned shared pair above; the two
     # ``_VERIFIED_FROM`` rows are one row (a fresh render of the search). Neither
     # holds a phrase another action owns.
-    assert len(writes.PERFORMABLE) == 24, (
-        "writes.PERFORMABLE holds %d actions, not the 24 this file was "
+    # TWENTY-FIVE ON LANE BUILD-JOBS2 (2026-11-26): ``send_recommendations_
+    # feedback`` (J 163). Its one ``_WHERE_TO_LOOK`` row was read against
+    # every owned phrase -- 'the question under the list on your recommended
+    # jobs' holds none -- and it has no ``_VERIFIED_FROM`` row: its outcome is
+    # declared unverifiable, so the receipt prints the declaration instead.
+    assert len(writes.PERFORMABLE) == 25, (
+        "writes.PERFORMABLE holds %d actions, not the 25 this file was "
         "measured against: %s. Re-derive the phrase owners in this file for "
         "the new action, then update this count."
         % (len(writes.PERFORMABLE), sorted(writes.PERFORMABLE))

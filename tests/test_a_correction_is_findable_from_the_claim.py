@@ -361,6 +361,20 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "something in the lane's record does not hold while leaving the record "
         "unmarked."
     ),
+    # 2026-11-26, lane build-jobs2. TABLE-ROW PROXIMITY, read and not
+    # inferred: the lane's notes were scanned alone for the vocabulary (zero
+    # hits) and each line citing its record was read with its window.
+    ("jobs.md", "2026-11-26-build-jobs2.md"): (
+        "A ROW'S MOVE OR BUILD RECORDED, NOT A CORRECTION. Rows `19`, `74` and "
+        "`76` each gained one dated note citing lane build-jobs2's record -- "
+        "what was built for the row, and its move to COVERED-UNFIRED or its "
+        "re-pointed step -- and none says anything in that record does not "
+        "hold. The matched words are older text in neighbouring rows: `17`'s "
+        "'The impossibility half above is false' and `18`'s 'PRICED ON THE "
+        "WRONG ADDRESS', within two lines of `19`. **WHAT WOULD MAKE THIS "
+        "ENTRY WRONG:** a jobs row saying something in the lane's record does "
+        "not hold while leaving the record unmarked."
+    ),
     ("profile.md", "2026-11-26-readers-jobs26.md"): (
         "A ROW'S MOVE OR NEXT STEP RECORDED, NOT A CORRECTION. Rows `M1` to "
         "`M8` and `M12` each gained one dated note citing lane readers-jobs26's "

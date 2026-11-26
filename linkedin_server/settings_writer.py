@@ -18,17 +18,19 @@ booleans through Playwright's role engine; no page text is returned, and the
 one value a select holds is compared in this process and never put on a
 receipt.
 
-THE ADMISSION RULE, AND WHY THE REGISTRY HOLDS ONE PAGE.
+THE ADMISSION RULE, AND WHY THE REGISTRY HOLDS TWO PAGES.
 ``ONE-NAMED-SETTINGS-PAGE-AT-A-TIME`` (the operator, 2026-08-31): *"ONE NAMED
 settings page below /mypreferences/d/ is admitted, one at a time"*, and
 ``MESSAGING-SETTINGS-CAPABILITY-LEVEL`` makes that capability-level: a setting
 is admitted BY NAME or not at all, whatever its address. So a page enters
 :data:`ADMITTED_PAGES` only by its NAME -- the heading LinkedIn draws on it --
 with every control on it described from a REAL capture of that page, never
-from a help article or a guess. Today one page qualifies: "Share profile
-updates", whose capture (the live lane's session 2, 2026-09-28) is the tracked
-skeleton ``tests/fixtures/live2/setting.html``, and whose address the read
-boundary already admits for reading by the same ruling's application. Every
+from a help article or a guess, each page in its own commit. Two pages
+qualify: "Share profile updates", whose capture (the live lane's session 2,
+2026-09-28) is the tracked skeleton ``tests/fixtures/live2/setting.html``; and,
+since 2026-11-26 (lane build-jobs2, APPLICATION-SETTINGS-WRITE), "Resumes and
+application data", his job application settings, captured in session 11.
+The read boundary admits each address for reading by its own line. Every
 other settings row waits on its page's capture; ``_audit/2026-09-28-lane-s-
 settings.md`` holds the capture queue.
 
@@ -53,7 +55,7 @@ from dataclasses import dataclass
 from typing import Any, Optional
 from urllib.parse import urlsplit
 
-from linkedin_server import coerce, profile_editor
+from linkedin_server import application_settings, coerce, profile_editor
 from linkedin_server.dom import _SELECTOR_UNSAFE, settings_radio_label_selector
 from linkedin_server.errors import WriteAttemptError
 
@@ -189,6 +191,14 @@ class AdmittedPage:
     capture: str
     #: Which ruling's application admitted it, and when.
     admitted_by: str
+    #: THE FORBIDDEN SUBSTRINGS THIS PAGE'S ADDRESS TRIPS that the write spec's
+    #: own ``exempt_substrings`` do not excuse -- measured with the shipped
+    #: ``readonly._FORBIDDEN_URL_SUBSTRINGS`` -- excused by the WRITE door for
+    #: this one address alone, by equality, and for no other address
+    #: (:func:`write_door_excusals`). Empty for a page that trips nothing more.
+    #: Lane build-jobs2, 2026-11-26, for the application settings page, whose
+    #: address carries ``/jobs/application``.
+    write_excused: frozenset[str] = frozenset()
 
 
 #: "Share profile updates" -- the one page with a real capture. MEASURED on
@@ -256,8 +266,120 @@ SHARE_PROFILE_UPDATES = AdmittedPage(
     ),
 )
 
-#: EVERY admitted page. One, until another page's capture admits it by name.
-ADMITTED_PAGES: tuple[AdmittedPage, ...] = (SHARE_PROFILE_UPDATES,)
+#: "Resumes and application data" -- his job application settings, the second
+#: page admitted for writing (lane build-jobs2, 2026-11-26), applying
+#: APPLICATION-SETTINGS-WRITE (the orchestrator, 2026-11-26): "admitted in
+#: principle (his own switches, a reversible on/off pair behind the grant,
+#: proven by a live round trip)". MEASURED on the live lane's session-11
+#: capture (load 11), its LinkedIn words written by keyed shape: the page's
+#: ``role="main"`` region draws the heading "Resumes and application data" and
+#: TWO ``input[role=switch][type=checkbox]``, each named by its own ``<label
+#: for>`` -- the labels ``application_settings.SWITCHES`` reads them by -- both
+#: ``aria-checked="true"``, and NO Save: each switch stores on its own press.
+#: Its resume cards, their options menus and its upload control are not
+#: controls this writer sets (a file input and a button are refused by name).
+#:
+#: THE ADDRESS is the read boundary's admitted line for it, exactly, and it
+#: trips two forbidden entries: "settings", which the write spec excuses for
+#: every admitted page, and "/jobs/application", the first commit's fence
+#: against applying, which :attr:`AdmittedPage.write_excused` excuses for THIS
+#: address alone. Applying stays refused everywhere else: the press gate, the
+#: read door's exemption for this one address, and every other write spec are
+#: unchanged.
+APPLICATION_SETTINGS = AdmittedPage(
+    name="Resumes and application data",
+    address=application_settings.PAGE_URL,
+    save_label=None,
+    controls=(
+        AdmittedControl(
+            label="Allow LinkedIn to save your resumes and answers",
+            kind=SWITCH,
+            values=SWITCH_VALUES,
+            meanings=(
+                (
+                    SWITCH_ON,
+                    "LinkedIn saves the resumes he uploads and his answers to "
+                    "application questions, to reuse when he applies (its own "
+                    "sentence: he may change his answers with each application)",
+                ),
+                (
+                    SWITCH_OFF,
+                    "LinkedIn does not save his resumes and answers by this "
+                    "setting; what turning it off does to the resumes and answers "
+                    "ALREADY saved is NOT MEASURED",
+                ),
+            ),
+            # The switch is his; nobody else sees its state or what it saves.
+            visible_to_others=False,
+            live_proof=LIVE_PROOF_ALLOWED,
+            live_proof_why=(
+                "a switch of his own account that is not a credential, holds "
+                "one of two values, is put back by pressing it again, and records "
+                "no personal attribute -- WITH ONE UNMEASURED RESIDUE, held by "
+                "while_changed: whether turning it off removes what it saved"
+            ),
+            # ``J 76`` and its twin in the profile slice, ``P M7``.
+            rows=("J 76", "P M7"),
+            while_changed=(
+                "turning it OFF may remove the resumes and answers LinkedIn "
+                "already saved -- unmeasured -- so a live proof reads his stored "
+                "resumes (linkedin_application_settings) before the press and "
+                "after the restore, and any resume missing after is STOP-ALL"
+            ),
+        ),
+        AdmittedControl(
+            label="Allow recruiters to view your resumes",
+            kind=SWITCH,
+            values=SWITCH_VALUES,
+            meanings=(
+                (
+                    SWITCH_ON,
+                    "hirers can view skills and experiences from the resumes he "
+                    "chooses to share, when they search and view profiles and "
+                    "evaluate applicants through LinkedIn's hiring tools (its "
+                    "own sentence)",
+                ),
+                (
+                    SWITCH_OFF,
+                    "hirers are not shown his resume data by this setting",
+                ),
+            ),
+            # What it changes is what RECRUITERS see of him, so its live proof
+            # restores it inside the same minute and reads it before and after
+            # (lane S's class VISIBLE for J 74 / P M8).
+            visible_to_others=True,
+            live_proof=LIVE_PROOF_ALLOWED,
+            live_proof_why=(
+                "a switch of his own account that is not a credential, holds "
+                "one of two values and is put back exactly by pressing it "
+                "again; what it changes shows to recruiters, so it is restored "
+                "inside the same minute"
+            ),
+            # ``J 74`` and its twin in the profile slice, ``P M8``.
+            rows=("J 74", "P M8"),
+            while_changed=(
+                "while it reads off, recruiters are not shown his resume data, "
+                "so the restore runs inside the same minute and nothing runs "
+                "between"
+            ),
+        ),
+    ),
+    capture=(
+        "the live lane's capture of 2026-11-25 (session 11, load 11), tracked "
+        "as the skeleton tests/fixtures/live11/application_settings.html, its "
+        "LinkedIn words measured by keyed shape in tests/fixtures/live11/application_settings_words.html"
+    ),
+    admitted_by=(
+        "APPLICATION-SETTINGS-WRITE (the orchestrator, 2026-11-26), under "
+        "HIS-OWN-SETTINGS-NOT-OUTWARD; the address read-admitted by "
+        "NAMED-SETTINGS-PAGES-RATIFIED (2026-10-10); the write, lane "
+        "build-jobs2, 2026-11-26"
+    ),
+    write_excused=frozenset({"/jobs/application"}),
+)
+
+#: EVERY admitted page, each by its name, each from its own capture.
+ADMITTED_PAGES: tuple[AdmittedPage, ...] = (SHARE_PROFILE_UPDATES, APPLICATION_SETTINGS)
 
 
 def _squash(text: Any) -> str:
@@ -379,38 +501,73 @@ def resolve_target(canonical: str, join: str) -> tuple[AdmittedPage, AdmittedCon
     return page, control, value
 
 
-def audiences() -> dict[str, str]:
-    """The write spec's ``audiences``: every admitted control's values, keyed
-    by the value as the generic branches expect, each with its page, control
-    and meaning. PURE.
+#: How a target's VALUE half is joined to its setting half: the spelling
+#: ``writes.TARGET_JOIN`` holds, written here because this module imports
+#: nothing from ``writes`` (``tests/test_application_settings_write.py``
+#: holds the two equal).
+TARGET_JOIN_SPELLING = " :: "
 
-    REFUSES A COLLISION. Keyed by the bare value, two admitted controls that
-    both hold "on" would overwrite one another in a dict with no error, and a
-    generic branch would print the wrong control's meaning (a cold review's
-    finding, latent while one control is admitted). So a second control whose
-    value spells the same word with a different meaning raises here, at
-    import, and the registry has to be keyed some other way before it can be
-    admitted.
+
+def audience_key(admitted: AdmittedPage, control: AdmittedControl, value: str) -> str:
+    """One ``audiences`` key: the whole canonical target, case-folded. PURE."""
+    return (
+        admitted.name + SETTING_JOIN + control.label + TARGET_JOIN_SPELLING + value
+    ).casefold()
+
+
+def audiences() -> dict[str, str]:
+    """The write spec's ``audiences``: every admitted control's values, each
+    with its page, control and meaning. PURE.
+
+    RE-KEYED 2026-11-26 (lane build-jobs2), BY THE WHOLE TARGET -- ``<page> /
+    <control> :: <value>``, case-folded -- where it was keyed by the bare value.
+    Keyed by the bare value, two admitted controls that both hold "on" would
+    overwrite one another in a dict with no error and a generic branch would
+    print the wrong control's meaning (a cold review's finding), so this
+    builder refused the second such control at import -- and the application
+    settings page draws two switches, both "on"/"off". Keyed by the target,
+    two controls cannot share a key, and each sentence names its own control.
+
+    WHAT THE KEYS ARE FOR. This action's own arms in ``writes._direction`` and
+    ``writes.valid_from`` judge a reading against ITS control's closed set and
+    never reach the generic branches; a generic branch that is reached asks
+    about a bare reading ("on"), which no key spells, so it REFUSES -- it cannot
+    print any control's meaning for a value it cannot attribute.
+
+    STILL REFUSES A DUPLICATE: the same page, control and value admitted twice
+    is a registry error, raised at import.
     """
     out: dict[str, str] = {}
     for admitted in ADMITTED_PAGES:
         for control in admitted.controls:
             for value, sentence in control.meanings:
-                key = value.casefold()
-                text_for = (
+                key = audience_key(admitted, control, value)
+                if key in out:
+                    raise ValueError(
+                        f"the value {value!r} of {control.label!r} on "
+                        f"{admitted.name!r} is admitted twice; a page and its "
+                        "control are admitted once."
+                    )
+                out[key] = (
                     f"{admitted.name}{SETTING_JOIN}{control.label}: "
                     + (sentence or "his own setting")
                 )
-                if key in out and out[key] != text_for:
-                    raise ValueError(
-                        f"two admitted controls hold the value {value!r} with "
-                        "different meanings; the write spec's audiences are "
-                        "keyed by the bare value and would overwrite one "
-                        "another. Key them some other way before admitting "
-                        "the second."
-                    )
-                out[key] = text_for
     return out
+
+
+def write_door_excusals() -> tuple[tuple[str, frozenset[str]], ...]:
+    """``(address, substrings)`` for every admitted page whose address trips a
+    forbidden entry the write spec's own exemptions do not excuse. PURE.
+
+    The write door (``writes.assert_write_url``) excuses each set for its own
+    address ONLY, compared by equality with the address the grant rebuilds --
+    never by shape, never for another address, never for another action.
+    """
+    return tuple(
+        (admitted.address, admitted.write_excused)
+        for admitted in ADMITTED_PAGES
+        if admitted.write_excused
+    )
 
 
 def meaning_of(control: AdmittedControl, value: str) -> str:

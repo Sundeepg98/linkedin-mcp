@@ -1,4 +1,16 @@
-"""The tool surface: ninety-one tools, sixty-four of which do not write.
+"""The tool surface: ninety-four tools, sixty-five of which do not write.
+
+**IT READ "ninety-three tools, sixty-four of which do not write" UNTIL LANE
+BUILD-JOBS2'S READ (2026-11-26)**: ``linkedin_job_alerts`` (census J 37, the
+list half), his job alerts off LinkedIn's alert manager.
+
+**IT READ "ninety-two tools, sixty-four of which do not write" UNTIL LANE
+BUILD-JOBS2'S SECOND WRITE (2026-11-26)**: ``linkedin_send_recommendations_feedback``
+(census J 163), a receipt-only WRITE, so the non-write count holds.
+
+**IT READ "ninety-one tools, sixty-four of which do not write" UNTIL LANE
+BUILD-JOBS2 (2026-11-26)**: one WRITE-SHAPED tool, ``linkedin_set_recent_job_searches_cleared``
+(census J 19), sanctioned and refusing, so the non-write count holds.
 
 **IT READ "ninety tools, sixty-three of which do not write" UNTIL INTEGRATION
 4'S MERGE OF LANE READERS-MSG26 (2026-11-26)**: one READ,
@@ -224,6 +236,9 @@ SANCTIONED_WRITE_TOOLS = frozenset(SANCTIONED_WRITES) & {
     # alert switch, set and unset, each the other's inverse.
     "linkedin_set_search_job_alert",
     "linkedin_unset_search_job_alert",
+    # 2026-11-26 (lane build-jobs2, census J 163): the receipt-only
+    # feedback press under his recommended jobs.
+    "linkedin_send_recommendations_feedback",
     # THE FIFTEENTH, 2026-09-24 (census rows M M10 and, by D6, M M17; the
     # fourteenth on lane L5's branch, before lane L7's merge landed): a
     # reply inside a conversation he names by thread id. Its NAME announces
@@ -269,6 +284,8 @@ SANCTIONED_WRITE_TOOLS = frozenset(SANCTIONED_WRITES) & {
     # 2026-11-24 (lane builds-26): the endorsement pair, refusing.
     "linkedin_endorse_skill",
     "linkedin_withdraw_endorsement",
+    # 2026-11-26 (lane build-jobs2): sanctioned and REFUSING (census J 19).
+    "linkedin_set_recent_job_searches_cleared",
 }
 
 #: THE DOCSTRING EXEMPTION IS THE SAME SET AS THE NAME EXEMPTION, and it took
@@ -592,6 +609,9 @@ EXPECTED_TOOLS = {
     # alert switch, set and unset, each the other's inverse.
     "linkedin_set_search_job_alert",
     "linkedin_unset_search_job_alert",
+    # 2026-11-26 (lane build-jobs2, census J 163): the receipt-only
+    # feedback press under his recommended jobs.
+    "linkedin_send_recommendations_feedback",
     "linkedin_publish_post",
     "linkedin_comment_on_item",
     # THE THIRTY-SIXTH, 2026-09-03. A READ that SHIPS REFUSING: the read
@@ -722,6 +742,11 @@ EXPECTED_TOOLS = {
     # 2026-11-24 (lane builds-26): two WRITES that refuse (P E4, P E5).
     "linkedin_endorse_skill",
     "linkedin_withdraw_endorsement",
+    # 2026-11-26 (lane build-jobs2): a WRITE that refuses (census J 19).
+    "linkedin_set_recent_job_searches_cleared",
+    # 2026-11-26 (lane build-jobs2): a READ -- his job alerts off LinkedIn's
+    # alert manager on the jobs home (census J 37, the list half).
+    "linkedin_job_alerts",
 }
 
 #: Names a reader must never grow. Listed explicitly so that adding one is a
@@ -1376,7 +1401,14 @@ async def test_the_surface_is_exactly_the_ninety_one_tools(tools):
     # linkedin_search_content, a READ beside the ninety (its branch read
     # eighty-four), so the split moves on its read side. MEASURED off
     # mcp.list_tools() on the merged tree, not summed.
-    assert len(tools) == 91
+    # NINETY-TWO ON LANE BUILD-JOBS2 (2026-11-26): linkedin_set_recent_job_searches_cleared,
+    # a WRITE that refuses (census J 19), so the split moves on its write
+    # side and the non-write count holds. MEASURED off mcp.list_tools().
+    # NINETY-THREE ON THE SAME LANE: linkedin_send_recommendations_feedback,
+    # a WRITE (census J 163). MEASURED off mcp.list_tools().
+    # NINETY-FOUR ON THE SAME LANE: linkedin_job_alerts, a READ (census J 37),
+    # so the split moves on its read side. MEASURED off mcp.list_tools().
+    assert len(tools) == 94
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -1410,6 +1442,9 @@ async def test_the_surface_is_exactly_the_ninety_one_tools(tools):
         # alert switch, set and unset, each the other's inverse.
         "linkedin_set_search_job_alert",
         "linkedin_unset_search_job_alert",
+        # 2026-11-26 (lane build-jobs2, census J 163): the receipt-only
+        # feedback press under his recommended jobs.
+        "linkedin_send_recommendations_feedback",
         "linkedin_send_reply",
         "linkedin_withdraw_from_group",
         "linkedin_connect_from_profile",
@@ -1424,6 +1459,8 @@ async def test_the_surface_is_exactly_the_ninety_one_tools(tools):
         # 2026-11-24 (lane builds-26): the endorsement pair, refusing.
         "linkedin_endorse_skill",
         "linkedin_withdraw_endorsement",
+        # 2026-11-26 (lane build-jobs2): sanctioned and REFUSING (census J 19).
+        "linkedin_set_recent_job_searches_cleared",
     }
     # THE NON-WRITE COUNT MOVES TO SIXTEEN, and the reason is NOT the reason
     # it moved last time. The comment here said: "THE READ COUNT MOVES OFF
@@ -1644,8 +1681,12 @@ async def test_the_surface_is_exactly_the_ninety_one_tools(tools):
     # and the write side is unmoved (its branch read fifty-seven beside
     # eighty-four); this second copy of the total moves to the measured
     # ninety-one with the first test's pin. MEASURED, never summed.
-    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 64
-    assert len(tools) == 91
+    # NINETY-TWO ON LANE BUILD-JOBS2 (2026-11-26): a refusing write, so the
+    # non-write count holds at sixty-four. MEASURED, never summed.
+    # NINETY-THREE ON THE SAME LANE: one WRITE more, the non-write count holds.
+    # NINETY-FOUR AND SIXTY-FIVE ON THE SAME LANE: linkedin_job_alerts, a READ.
+    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 65
+    assert len(tools) == 94
 
 
 def test_the_read_that_was_nearly_named_a_write():
@@ -1755,6 +1796,9 @@ async def test_the_exemption_covers_only_the_names_on_it(tools):
         # alert switch, set and unset, each the other's inverse.
         "linkedin_set_search_job_alert",
         "linkedin_unset_search_job_alert",
+        # 2026-11-26 (lane build-jobs2, census J 163): the receipt-only
+        # feedback press under his recommended jobs.
+        "linkedin_send_recommendations_feedback",
         "linkedin_send_reply",
         "linkedin_withdraw_from_group",
         "linkedin_connect_from_profile",
@@ -1769,6 +1813,8 @@ async def test_the_exemption_covers_only_the_names_on_it(tools):
         # 2026-11-24 (lane builds-26): the endorsement pair, refusing.
         "linkedin_endorse_skill",
         "linkedin_withdraw_endorsement",
+        # 2026-11-26 (lane build-jobs2): sanctioned and REFUSING (census J 19).
+        "linkedin_set_recent_job_searches_cleared",
     }
     # The probe has to be genuinely sanctioned for this to test the thing it
     # claims to. A name nobody ever specced would only show that made-up names
@@ -2229,6 +2275,10 @@ async def test_server_info_stops_claiming_read_only_once_writes_are_on(monkeypat
         # read can confirm a sent invitation -- and it is the second
         # performable action that cannot be undone.
         "send_invitation",
+        # THE TWENTY-FIFTH, 2026-11-26 (lane build-jobs2, census J 163), typed
+        # here by hand: his yes or no to the question under his recommended
+        # jobs -- receipt-only, no inverse, fired only on his order.
+        "send_recommendations_feedback",
         # (THE TWELFTH, send_message, 2026-09-02 to 2026-09-27: RETIRED on
         # lane L5's order of 23:36 -- it was aimed by a name typed into the
         # composer's typeahead, and it never sent.)
@@ -2323,6 +2373,10 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
         # THE EIGHTH, same day, and the first write on this surface that
         # reaches another person AND cannot confirm its own outcome.
         "send_invitation",
+        # THE TWENTY-FIFTH, 2026-11-26 (lane build-jobs2, census J 163), typed
+        # here by hand: his yes or no to the question under his recommended
+        # jobs -- receipt-only, no inverse, fired only on his order.
+        "send_recommendations_feedback",
         # (THE TWELFTH, send_message, 2026-09-02 to 2026-09-27: RETIRED on
         # lane L5's order of 23:36 -- it was aimed by a name typed into the
         # composer's typeahead, and it never sent.)
@@ -2411,9 +2465,11 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
     # notice a member arriving.
     # set_tracker_stage JOINED 2026-11-24 (lane builds-26): sanctioned and
     # refusing for want of a capture of the control it would press.
+    # set_recent_job_searches_cleared JOINED 2026-11-26 (lane build-jobs2,
+    # census J 19): refusing until the dialog its press opens is captured.
     assert set(not_performed) == {
         "set_open_to_work", "set_tracker_stage", "endorse_skill",
-        "withdraw_endorsement",
+        "withdraw_endorsement", "set_recent_job_searches_cleared",
     }
     assert "update_setting" not in set(not_performed)
     # update_profile_field LEFT THIS FIELD ON 2026-09-02 by shipping, which is
@@ -2742,6 +2798,9 @@ async def test_the_server_instructions_name_every_write_that_ships():
         # TWENTY-THREE AND TWENTY-FOUR ON LANE BUILD-JMN26 (2026-11-25): the
         # search-alert pair beside the twenty-two; only twenty-four is reached.
         23: "twenty-three", 24: "twenty-four",
+        # TWENTY-FIVE ON LANE BUILD-JOBS2 (2026-11-26): the receipt-only
+        # feedback press (J 163). The KeyError named the count, as designed.
+        25: "twenty-five",
     }
     assert f"{words[len(writes.PERFORMABLE)]} write" in text
     for action in writes.PERFORMABLE:
@@ -2818,8 +2877,11 @@ async def test_the_server_instructions_name_every_write_that_ships():
     # RE-POPULATED 2026-11-24 (lane builds-26), as foretold: the first
     # sanctioned-and-refusing action with a registered tool since
     # send_message, looked at and named in the instructions.
+    # AND ONE MORE 2026-11-26 (lane build-jobs2, census J 19), looked at and
+    # named in the instructions beside the three.
     assert examined == {
         "set_tracker_stage", "endorse_skill", "withdraw_endorsement",
+        "set_recent_job_searches_cleared",
     }, examined
     # AND THE CLAIM THAT NAMED THEM AS REFUSING HAD TO BE CORRECTED. It said
     # "none of them can act" of a set that is now empty, and a sentence
@@ -3077,6 +3139,10 @@ async def test_server_info_reports_irreversibility_before_a_caller_commits(
         # unmeasured.
         "send_attachment",
         "send_invitation",
+        # THE TWENTY-FIFTH, 2026-11-26 (lane build-jobs2, census J 163), typed
+        # here by hand: his yes or no to the question under his recommended
+        # jobs -- receipt-only, no inverse, fired only on his order.
+        "send_recommendations_feedback",
         # (THE FIFTH, send_message, 2026-09-02 to 2026-09-27 -- the most
         # irreversible-in-audience action in the design, and the only entry
         # that could spend an InMail credit nobody here can count. RETIRED on

@@ -1,4 +1,4 @@
-"""Read ONE tab of an organisation's Page -- its About tab or its Events tab.
+"""Read ONE tab of an organisation's Page -- its About, Events, Insights or Life tab, or its posts.
 
 Census rows ``J 106`` (*Company Page About tab (size, industry, locations)*)
 and ``J 165`` (*Company Page Events tab: the events a company hosts*). Lane
@@ -6,7 +6,11 @@ readers-jobs26, 2026-11-26, over the live lane's session-11 captures of both
 tabs (loads 20 and 21), tracked as ``tests/fixtures/live11/company_about.html``
 and ``company_events.html`` and, with LinkedIn's words measured by keyed shape,
 as ``company_about_words.html`` and ``company_events_words.html``
-(``scripts/_build_live11_word_skeletons.py``).
+(``scripts/_build_live11_word_skeletons.py``). The Insights tab (``J 113``)
+and the posts (``J 168``) joined on the same lane; the LIFE tab (``J 109``)
+on lane build-jobs2, the same day, over session 11's capture of it (load 22),
+``tests/fixtures/live11/company_life.html`` and ``company_life_words.html``
+(``scripts/_build_jobs2_word_skeletons.py``).
 
 ## THE RULINGS IT READS UNDER
 
@@ -42,6 +46,28 @@ events planned`` -- and ``Past events``, six event anchors to
 (``Tue, Nov 11, 2025, 3:30 PM`` in form) and the title. A button reading
 ``Show more events`` is drawn under the list; it is never pressed.
 
+THE LIFE TAB. The Page navigation marks ``Life`` current. Each module carries
+a ``data-view-name`` of LinkedIn's own (:data:`LIFE_MODULES`). The trending
+module's ``h3`` reads ``Trending employee content`` over a carousel: ONE
+wrapper article holding TWO item articles and eight empty slots. Each item
+draws two links to its author's profile outside its words -- the picture,
+and the name block, whose one ``aria-hidden`` span inside a ``dir`` span is
+the name -- and ONE link to its permalink that holds its words (and, on one
+item, a see-more control). An ``h3`` reading ``Company spotlights`` opens the section holding
+three spotlights, each an ``h4`` title with ONE paragraph beside it (a second
+paragraph sits inside the spotlight's video player). The photo module's
+``h3`` reads ``Company photos`` over two drawn photos. The interest card
+draws one button reading ``I<U+2019>m interested`` -- never pressed.
+
+THE LIFE TAB'S PEOPLE are read under NAMES-AT-RUNTIME exactly as the content
+search reads its cards (``content_search``): each trending item leaves as a
+``people_data.Post`` whose author is a ``people_data.Person`` -- the name and
+the profile link, read off the item's own header, re-read after the words so
+a reused item cannot pair one post's words with another's author -- and its
+canonical permalink and words. NEVER READ: the headline, the time line, the
+degree line (not measured on this capture), any ``aria-label`` (each names
+the author), the social counts, the featured members' cards (drawn empty).
+
 ## THE ZERO RULE
 
 A tab that yields nothing is a finding only when the page corroborates it:
@@ -49,7 +75,9 @@ the Upcoming card's own sentence corroborates NO upcoming event, and nothing
 corroborates an empty Past card or an About card with no recognised term.
 An uncorroborated zero raises ``ExtractionFailedError`` -- in this module's
 own words, never the page's -- so a broken read can never pass for "this
-organisation has none".
+organisation has none". On the Life tab a page drawing none of its modules
+raises; a trending carousel that has drawn no item yet answers ``posts``
+``None`` -- unread -- never an empty list.
 
 ## THE PAGE MAY VETO, NEVER SUPPLY
 
@@ -86,6 +114,7 @@ TAB_SEGMENTS: dict[str, str] = {
     "about": "about",
     "events": "events",
     "insights": "insights",
+    "life": "life",
     "posts": "",
 }
 TAB_QUERIES: dict[str, str] = {"insights": "?insightType=HEADCOUNT"}
@@ -765,6 +794,281 @@ async def read_posts_tab(page: Any) -> dict[str, Any]:
     return out
 
 
+# ---------------------------------------------------------------------------
+# The Life tab (J 109)
+# ---------------------------------------------------------------------------
+
+#: The modules a Life tab draws, each by the ``data-view-name`` LinkedIn gives
+#: it, MEASURED on session 11's capture (load 22): one hero video, one
+#: featured-members module (its three cards drawn empty), one trending
+#: carousel, one interest card, three spotlights and one photo carousel. Each
+#: is COUNTED by its key; only the trending items, the spotlights, the photo
+#: count and the interest button are read.
+LIFE_MODULES: dict[str, str] = {
+    "hero_media": "org-member-life-hero-image",
+    "featured_members": "org-member-life-page-featured-members",
+    "trending_employee_content": "org-member-life-trending-employee-content",
+    "interest_pipeline": "org-member-life-interest-pipeline",
+    "company_spotlight": "org-member-life-company-spotlight",
+    "company_photos": "org-member-life-company-photos",
+}
+
+#: The headings each read section is corroborated by, MEASURED by keyed shape:
+#: the trending carousel's own ``h3``, the ``h3`` that opens the section the
+#: spotlights sit in, and the photo carousel's own ``h3``. A section whose
+#: heading does not read exactly so is NOT READ, whatever its module name.
+TRENDING_HEADING = "Trending employee content"
+SPOTLIGHTS_HEADING = "Company spotlights"
+PHOTOS_HEADING = "Company photos"
+
+#: The interest button, by its module name and its text, MEASURED (LinkedIn's
+#: curly apostrophe, built with ``chr`` so this file stays ASCII). Reported
+#: drawn, NEVER PRESSED: it tells the Page's recruiters he is interested.
+INTERESTED_CTA = "org-member-life-interest-pipeline-interested-cta"
+INTERESTED = "I" + chr(0x2019) + "m interested"
+
+#: One photo of the carousel, by its module name: counted, never opened.
+OPEN_PHOTO = "org-member-life-company-photos-open-photo"
+
+#: Inside the trending module, MEASURED: THREE ``role="article"`` elements --
+#: one wrapper holding the carousel, and two items (eight more slots drawn
+#: empty: the carousel loads them as it moves). An ITEM is an article that
+#: holds no other article. Each item draws two member links to its author
+#: outside its words -- the picture, and the name block, which holds three
+#: ``aria-hidden`` spans and exactly ONE of them inside a ``dir`` span: the
+#: name (the other two, the supplementary line and the headline, sit in
+#: none) -- and ONE link to its own permalink
+#: (``/feed/update/urn:li:activity:<id>/``) that holds the words, and on one
+#: item a see-more control after them.
+LIFE_ITEM = '[role="article"]'
+LIFE_MEMBER_LINKS = 'a[href*="/in/"]'
+LIFE_PERMALINKS = 'a[href*="/feed/update/"]'
+LIFE_NAME = 'span[dir="ltr"] span[aria-hidden="true"]'
+
+#: THE BOUNDS: articles attempted, posts kept, spotlights read.
+LIFE_ARTICLES_READ = 40
+TRENDING_POSTS = 25
+SPOTLIGHTS_READ = 12
+
+#: The closed reasons an article is not returned, in the order checked.
+TRENDING_SKIP_REASONS: tuple[str, ...] = (
+    "not_visible",
+    "holds_other_items",
+    "not_one_permalink",
+    "not_one_author_block",
+    "more_than_one_profile",
+    "no_member_author",
+    "changed_while_read",
+    "no_words",
+)
+
+
+def _life_view(name: str) -> str:
+    return f'main [data-view-name="{name}"]'
+
+
+async def _profiles_outside(item: Any, box: Any, failed: list[int]) -> list[tuple[Any, Optional[str]]]:
+    """``(link, profile)`` for each member link in the item, less as many as
+    the words hold for each profile -- a member MENTIONED in the words is not
+    part of the author's block. ``content_search``'s rule, on Ember markup."""
+    inside: list[Optional[str]] = []
+    links = box.locator(LIFE_MEMBER_LINKS)
+    for index in range(min(await _count(links, failed), MAX_PARTS)):
+        inside.append(people_data.canonical_profile_link(
+            await _attribute(links.nth(index), "href", failed)))
+    outside: list[tuple[Any, Optional[str]]] = []
+    links = item.locator(LIFE_MEMBER_LINKS)
+    for index in range(min(await _count(links, failed), MAX_PARTS)):
+        link = links.nth(index)
+        profile = people_data.canonical_profile_link(await _attribute(link, "href", failed))
+        if profile in inside:
+            inside.remove(profile)
+            continue
+        outside.append((link, profile))
+    return outside
+
+
+async def _name_block(outside: list[tuple[Any, Optional[str]]], failed: list[int]) -> Optional[tuple[Any, Optional[str]]]:
+    """The ONE member link outside the words holding exactly one name span
+    (:data:`LIFE_NAME`) -- the name block -- or ``None`` when there is not
+    exactly one such link."""
+    blocks = [(link, profile) for link, profile in outside
+              if await _count(link.locator(LIFE_NAME), failed) == 1]
+    return blocks[0] if len(blocks) == 1 else None
+
+
+def _without_the_more_text(words: str, more: str) -> str:
+    words = words.rstrip()
+    if more and words.endswith(more):
+        return words[: len(words) - len(more)].rstrip()
+    return words
+
+
+async def _read_trending_item(item: Any, failed: list[int]) -> tuple[Any, bool]:
+    """One article: a :class:`people_data.Post`, or the
+    :data:`TRENDING_SKIP_REASONS` entry that stopped it; and whether it draws
+    a see-more control."""
+    try:
+        visible = await item.is_visible()
+    except Exception:  # noqa: BLE001 -- counted; the message may quote the page
+        failed[0] += 1
+        visible = False
+    if not visible:
+        return "not_visible", False
+    if await _count(item.locator(LIFE_ITEM), failed):
+        return "holds_other_items", False
+    permalinks = item.locator(LIFE_PERMALINKS)
+    if await _count(permalinks, failed) != 1:
+        return "not_one_permalink", False
+    box = permalinks.nth(0)
+    mores = box.locator("button")
+    more_drawn = await _count(mores, failed) == 1
+    outside = await _profiles_outside(item, box, failed)
+    block = await _name_block(outside, failed)
+    if block is None:
+        return "not_one_author_block", more_drawn
+    author, profile = block
+    if {named for _link, named in outside} != {profile}:
+        return "more_than_one_profile", more_drawn
+    person = people_data.Person.from_page(
+        name=await _text(author.locator(LIFE_NAME), failed), href=profile)
+    if person is None or person.link is None:
+        return "no_member_author", more_drawn
+    words = (await _text(box, failed) or "")[: 4 * people_data.CAPS["text"]]
+    if more_drawn:
+        words = _without_the_more_text(words, collapsed(await _text(mores.nth(0), failed)))
+    # THE AUTHOR AGAIN, AFTER THE WORDS: an item the carousel reused
+    # meanwhile would pair one post's words with another post's author.
+    again = await _name_block(await _profiles_outside(item, box, failed), failed)
+    if again is None or again[1] != profile:
+        return "changed_while_read", more_drawn
+    if not collapsed(words):
+        return "no_words", more_drawn
+    post = people_data.Post.from_page(
+        author=person, href=await _attribute(box, "href", failed), text=words)
+    if post is None:
+        return "no_member_author", more_drawn
+    return post, more_drawn
+
+
+async def _read_trending(module: Any, failed: list[int]) -> dict[str, Any]:
+    heads = [collapsed(t) for t in await _texts(module.locator("h3"), failed, 8)]
+    out: dict[str, Any] = {
+        "heading_matched": heads.count(TRENDING_HEADING) == 1,
+        "posts": None,
+        "articles_seen": 0,
+        "skipped": {reason: 0 for reason in TRENDING_SKIP_REASONS},
+        "more_controls_drawn": 0,
+        "posts_beyond_bound": 0,
+    }
+    if not out["heading_matched"]:
+        return out
+    items = module.locator(LIFE_ITEM)
+    out["articles_seen"] = await _count(items, failed)
+    posts: list[dict[str, Any]] = []
+    for index in range(min(out["articles_seen"], LIFE_ARTICLES_READ)):
+        verdict, more_drawn = await _read_trending_item(items.nth(index), failed)
+        if isinstance(verdict, str):
+            out["skipped"][verdict] += 1
+            continue
+        out["more_controls_drawn"] += 1 if more_drawn else 0
+        if len(posts) >= TRENDING_POSTS:
+            out["posts_beyond_bound"] += 1
+            continue
+        posts.append(verdict.envelope())
+    # A CAROUSEL THAT DREW NO ITEM YET IS UNREAD, never "no trending content":
+    # the list is returned only when an item was drawn to read or to skip.
+    drawn = len(posts) + out["posts_beyond_bound"] + sum(
+        n for reason, n in out["skipped"].items() if reason != "holds_other_items")
+    out["posts"] = posts if drawn else None
+    return out
+
+
+async def _read_spotlights(headings: Any, failed: list[int]) -> Optional[dict[str, Any]]:
+    """The spotlights under the ONE ``h3`` of ``headings`` reading
+    :data:`SPOTLIGHTS_HEADING`; ``None`` when no heading reads so."""
+    texts = await _texts(headings, failed, MAX_PARTS)
+    matched = [i for i, t in enumerate(texts) if collapsed(t) == SPOTLIGHTS_HEADING]
+    if not matched:
+        return None
+    out: dict[str, Any] = {
+        "heading_matched": len(matched) == 1,
+        "spotlights": [],
+        "withheld": 0,
+        "beyond_bound": 0,
+    }
+    if len(matched) != 1:
+        return out
+    # THE SECTION IS THE HEADING'S PARENT, as the About card is the Overview
+    # heading's; each spotlight inside it is found by its module name.
+    section = headings.nth(matched[0]).locator("xpath=..")
+    rows = section.locator('[data-view-name="%s"]' % LIFE_MODULES["company_spotlight"])
+    total = await _count(rows, failed)
+    out["beyond_bound"] = max(0, total - SPOTLIGHTS_READ)
+    for index in range(min(total, SPOTLIGHTS_READ)):
+        titles = rows.nth(index).locator("h4")
+        if await _count(titles, failed) != 1:
+            out["withheld"] += 1
+            continue
+        # MEASURED: a spotlight holds TWO paragraphs, one inside its video
+        # player's dialog -- so its words are the ONE paragraph under the
+        # title's own parent, never "the paragraph" of the spotlight.
+        bodies = await _texts(titles.nth(0).locator("xpath=..").locator("p"), failed, 4)
+        title = _prose_record(await _text(titles.nth(0), failed), "life_spotlight_title")
+        body = _prose_record(bodies[0], "life_spotlight_body") if len(bodies) == 1 else None
+        if title is None and body is None:
+            out["withheld"] += 1
+            continue
+        out["spotlights"].append({"title": title, "body": body})
+    return out
+
+
+async def read_life_tab(page: Any) -> dict[str, Any]:
+    """The Life tab ``page`` already shows: which modules it drew, its
+    trending items as post records, its spotlights as the Page's prose, how
+    many photos it drew, and whether it offers the interest button.
+
+    Raises ``ExtractionFailedError`` when the page drew none of the modules
+    this reader knows -- a zero nothing on the page corroborates.
+    """
+    failed = [0]
+    out: dict[str, Any] = {
+        "tab": "life",
+        "view": await current_tab(page, failed),
+        "modules": {},
+        "trending": None,
+        "spotlights": None,
+        "photos": None,
+        "interest_offered": False,
+    }
+    for key, name in LIFE_MODULES.items():
+        out["modules"][key] = await _count(page.locator(_life_view(name)), failed)
+    if out["modules"]["trending_employee_content"] == 1:
+        out["trending"] = await _read_trending(
+            page.locator(_life_view(LIFE_MODULES["trending_employee_content"])), failed)
+    out["spotlights"] = await _read_spotlights(page.locator("main h3"), failed)
+    if out["modules"]["company_photos"] == 1:
+        module = page.locator(_life_view(LIFE_MODULES["company_photos"]))
+        heads = [collapsed(t) for t in await _texts(module.locator("h3"), failed, 8)]
+        out["photos"] = {
+            "heading_matched": heads.count(PHOTOS_HEADING) == 1,
+            "drawn": await _count(module.locator('[data-view-name="%s"]' % OPEN_PHOTO), failed),
+        }
+    buttons = page.locator(_life_view(INTERESTED_CTA))
+    if await _count(buttons, failed) == 1:
+        out["interest_offered"] = collapsed(await _text(buttons.nth(0), failed)) == INTERESTED
+    out["reads_failed"] = failed[0]
+    if not any(out["modules"].values()):
+        raise ExtractionFailedError(
+            "the Life tab drew none of the modules this reader knows, and "
+            "nothing on the page says the organisation's Life tab is empty; "
+            "reporting an empty tab here would be indistinguishable from a "
+            f"broken read (view read {out['view']!r}).",
+            hint=dom._landing_note(page),
+        )
+    return out
+
+
 #: The reader for each tab, by its token. The tool calls each one BY NAME
 #: (``server.linkedin_company_page_tab``), so the guards that follow calls by
 #: name -- the reachability inventory and the people-reader derivation -- find
@@ -773,5 +1077,6 @@ READERS = {
     "about": read_about_tab,
     "events": read_events_tab,
     "insights": read_insights_tab,
+    "life": read_life_tab,
     "posts": read_posts_tab,
 }

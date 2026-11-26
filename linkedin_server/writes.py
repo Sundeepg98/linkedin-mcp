@@ -219,11 +219,13 @@ from linkedin_server import (
     group_leave,
     item_author,
     job_alert_switch,
+    job_feedback,
     landing,
     named_profile,
     people_data,
     people_seam,
     profile_editor,
+    recent_searches_clear,
     search_alert_switch,
     settings_writer,
     shape,
@@ -497,6 +499,15 @@ class WriteSpec:
     #: replace it, and :func:`assert_write_url` still refuses every entry not
     #: named here, by equality.
     exempt_substrings: tuple[str, ...] = ()
+    #: A FORBIDDEN SUBSTRING EXCUSED AT ONE ADDRESS ONLY: ``(address,
+    #: substrings)`` pairs, each set excused for a url EQUAL to its address and
+    #: for no other (lane build-jobs2, 2026-11-26, APPLICATION-SETTINGS-WRITE).
+    #: The settings writer's second admitted page lives at
+    #: ``/jobs/application-settings/``, which carries ``/jobs/application`` --
+    #: the first commit's fence against applying -- and a spec-wide excusal of
+    #: that word would follow the action to any address its pattern ever
+    #: admits. Keyed by the address, it cannot. Empty for every other action.
+    exempt_substrings_at: tuple[tuple[str, frozenset[str]], ...] = ()
 
 
 #: The complete set of writes this server may ever perform without a new,
@@ -2134,6 +2145,10 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
         # which trips two forbidden entries; both are excused by equality, as
         # the read door's own exemption for that address excuses both.
         exempt_substrings=("/settings/", "settings"),
+        # THE SECOND ADMITTED PAGE (lane build-jobs2, 2026-11-26,
+        # APPLICATION-SETTINGS-WRITE), /jobs/application-settings/, also trips
+        # "/jobs/application"; the registry excuses it for THAT address alone.
+        exempt_substrings_at=settings_writer.write_door_excusals(),
         summary="Change ONE control on ONE admitted settings page of his own account.",
         from_state=None,
         to_state=None,
@@ -2168,10 +2183,11 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
         reversibility_class="STILL-UNKNOWN",
         reversibility_evidence=(
             "THE ROUND TRIP HAS NOT BEEN PERFORMED LIVE on any admitted page. "
-            "What is measured: the one admitted page's capture draws its one "
-            "switch, readable off, and no Save (the press stores). The live "
-            "proof the ruling prescribes -- read, benign value, read back, "
-            "restore the exact original, read back -- is planned in "
+            "What is measured: each admitted page's capture draws its switches "
+            "readable -- Share profile updates one, off; Resumes and application "
+            "data two, on -- and neither page draws a Save (the press stores). "
+            "The live proof the ruling prescribes -- read, benign value, read "
+            "back, restore the exact original, read back -- is planned in "
             "_audit/2026-09-28-lane-s-settings.md and run by the live lane."
         ),
         reversible_by=(
@@ -3041,6 +3057,155 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "destination tab, and moved back."
         ),
     ),
+    # LANE BUILD-JOBS2, 2026-11-26 (census row ``J 19``, ruled
+    # J-19-BUILT-BEHIND-THE-GRANT): clearing his recent job searches on the
+    # jobs home. SANCTIONED AND NOT PERFORMABLE -- the ``set_tracker_stage``
+    # shape -- because what the Clear press opens has never been captured.
+    # Its preview reads the jobs home for itself
+    # (``_read_recent_searches_clear``) and prints what it saw; ``mint``
+    # refuses it a grant at issue, and its own refusal in ``_NINE_REFUSALS``
+    # names the capture that would lift it.
+    "linkedin_set_recent_job_searches_cleared": WriteSpec(
+        action="set_recent_job_searches_cleared",
+        tool_name="linkedin_set_recent_job_searches_cleared",
+        url_template=None,
+        url_pattern=None,
+        exempt_substring=None,
+        summary=(
+            "Clear the recent job searches listed on your jobs home "
+            "(census J 19)."
+        ),
+        from_state=recent_searches_clear.SEARCHES_LISTED,
+        to_state="searches_cleared",
+        target_kind="self",
+        state_from="jobs_home_recent_searches",
+        direction_source=(
+            "your jobs home, /jobs/jam/, read by this gate: the one card "
+            "headed 'Recent job searches', the one button in it whose own text "
+            "reads 'Clear', and the searches its list draws -- counted, never "
+            "read out. WHAT THE PRESS OPENS IS NOT READ: no capture shows it "
+            "(measured on tests/fixtures/live2/j18_words.html, session 2's "
+            "jobs home with LinkedIn's words written by keyed shape)."
+        ),
+        wrong_state_note=(
+            "This act starts from a jobs home whose recent-searches card draws "
+            "its Clear button and at least one search. A card that cannot be "
+            "found, a second Clear button, or an empty list is not read as "
+            "anything to clear: an empty card has never been captured."
+        ),
+        reversibility="STILL-UNKNOWN whether anything restores a cleared search history",
+        reversibility_measured=False,
+        reversibility_class="STILL-UNKNOWN",
+        reversibility_evidence=(
+            "NOT MEASURED: no clear has been made or watched, and what the "
+            "Clear press opens has never been captured. No control that puts "
+            "a cleared search back is drawn on the captured jobs home."
+        ),
+        reversible_by=(
+            "NOT this server: nothing here restores a search. By hand, he can "
+            "run each search again, which re-enters it in the history; whether "
+            "its alert badge returns with it is unmeasured."
+        ),
+        residue=(
+            "UNMEASURED: whether clearing the history also touches the job "
+            "alerts the searches carry (three of six carried the alert badge "
+            "on the J 18 fire), and whether LinkedIn asks to confirm. Treated "
+            "as having no inverse until a capture says otherwise."
+        ),
+        irreversible=True,
+        reversibility_procedure=(
+            "The press, ONCE, AT HIS ORDER -- the capture this act waits on: "
+            "press Clear on the jobs home and read whatever it opens WITHOUT "
+            "confirming it, then close it on Escape and read the card again. "
+            "Then a reader requiring exactly that dialog's confirm control, and "
+            "a verification reading the card after it."
+        ),
+    ),
+    # LANE BUILD-JOBS2, 2026-11-26 (census row ``J 163``, ruled
+    # J-163-RECEIPT-ONLY-WRITE): answering the question LinkedIn draws under
+    # his recommended jobs, yes or no. PERFORMABLE, behind writes_enabled()
+    # and the single-use grant, fired only on his order. RECEIPT-ONLY: no
+    # inverse exists and no capture shows what an answer leaves, so the
+    # outcome is DECLARED unverifiable and the receipt records what the page
+    # draws after the press. The readings live in ``job_feedback``.
+    "linkedin_send_recommendations_feedback": WriteSpec(
+        action="send_recommendations_feedback",
+        tool_name="linkedin_send_recommendations_feedback",
+        url_template=job_feedback.PAGE_URL,
+        url_pattern=job_feedback.URL_PATTERN,
+        exempt_substring=None,
+        summary=(
+            "Answer the question LinkedIn draws under your recommended jobs -- "
+            "are you finding what you're looking for? -- yes or no "
+            "(census J 163)."
+        ),
+        from_state=job_feedback.ASKED,
+        to_state=job_feedback.ANSWERED,
+        target_kind="recommendations_feedback",
+        state_from="recommendations_feedback",
+        direction_source=(
+            "your recommended jobs, /jobs/collections/recommended/, read by "
+            "this gate on the page the press lands on: the one feedback block "
+            "LinkedIn names jobs-search-list-feedback, its heading 'Are these "
+            "results helpful?' and its sentence once each, and its two buttons "
+            "-- 'Are you finding what you're looking for? No', then '... Yes' "
+            "-- once each (measured on tests/fixtures/live8/recommended_words.html, "
+            "session 8's recommended jobs with LinkedIn's words written by "
+            "keyed shape)."
+        ),
+        wrong_state_note=(
+            "This act starts from the question drawn and unanswered: the one "
+            "block, its heading, its sentence and its two buttons once each. "
+            "A page that draws anything else is not answered -- a block "
+            "already answered, or redrawn, is not read as the question."
+        ),
+        reversibility="IRREVERSIBLE as far as anything measured shows: no control withdraws an answer",
+        reversibility_measured=False,
+        reversibility_class="STILL-UNKNOWN",
+        reversibility_evidence=(
+            "NOT MEASURED: no answer has been sent or watched. The capture "
+            "draws the two buttons and nothing that withdraws an answer; what "
+            "the block draws after one is unmeasured, so whether LinkedIn "
+            "offers an undo there is unknown."
+        ),
+        reversible_by=(
+            "NOBODY, as far as is measured: no control that withdraws an "
+            "answer is drawn, and this server builds none "
+            "(J-163-RECEIPT-ONLY-WRITE: no inverse exists)."
+        ),
+        residue=(
+            "The answer tunes his own recommendations; no other member is "
+            "told. UNMEASURED: what the block draws after the press, and "
+            "whether LinkedIn asks again later. The receipt records the "
+            "block's counts right after the press -- the record the ruling "
+            "calls this row's proof."
+        ),
+        irreversible=True,
+        unverifiable=Unverifiable(
+            surface_that_would_confirm=(
+                "the feedback block on /jobs/collections/recommended/ after an "
+                "answer -- what LinkedIn draws there once the question is "
+                "answered, which no capture shows"
+            ),
+            why_it_cannot=(
+                "nothing has ever been seen to show an answered block, so no "
+                "reader knows what an answer leaves, and a comparison against "
+                "a state no reader can return would be a check that cannot "
+                "pass."
+            ),
+            what_he_must_do=(
+                "Open your recommended jobs and look at the block under the "
+                "list. The receipt's after_press block records its counts right "
+                "after the press: whether the question is still drawn, and how "
+                "many of each button."
+            ),
+        ),
+        reversibility_procedure=(
+            "None is possible: the act has no inverse "
+            "(J-163-RECEIPT-ONLY-WRITE). Its proof is the press itself, ONCE, "
+            "AT HIS ORDER, with the render it leaves recorded."
+        ),
+    ),
     # LANE BUILDS-26, 2026-11-24 (census rows ``P E4`` / ``N 111``, and the
     # inverse ``P E5`` / ``N 113``): endorsing one skill of a member he names,
     # and withdrawing that endorsement -- built in ONE change so the inverse
@@ -3595,12 +3760,20 @@ def assert_write_url(url: str, grant: WriteGrant) -> str:
 
     # The forbidden list is NOT shortened for writes. Each action may exempt
     # exactly one entry, by equality, and everything else still refuses.
+    # A PER-ADDRESS EXCUSAL (lane build-jobs2, 2026-11-26) is looked up by the
+    # url's EQUALITY with its address -- the url was rebuilt from the grant two
+    # checks above -- so it excuses nothing at any other address.
+    excused_here: frozenset[str] = frozenset()
+    for address, substrings in spec.exempt_substrings_at:
+        if url == address:
+            excused_here = substrings
     lowered = url.lower()
     for bad in readonly._FORBIDDEN_URL_SUBSTRINGS:
         if (
             bad in lowered
             and bad != spec.exempt_substring
             and bad not in spec.exempt_substrings
+            and bad not in excused_here
         ):
             raise WriteAttemptError(
                 f"write blocked: {url!r} contains {bad!r}, which this action "
@@ -4424,6 +4597,18 @@ def _target_for(spec: WriteSpec, target: Any) -> str:
                 f"given is not one: {why}"
             )
         return query
+    if spec.target_kind == "recommendations_feedback":
+        # HIS ANSWER, YES OR NO (2026-11-26, lane build-jobs2, J 163): one of
+        # the two buttons the feedback block draws, from his own argument --
+        # the press is chosen by it from a closed table, never built from it.
+        # The refusal describes the shape and never repeats the value.
+        answer, why = job_feedback.canonical_answer(raw)
+        if answer is None:
+            raise WriteAttemptError(
+                f"{spec.action!r} is addressed by his answer to the question "
+                f"under his recommended jobs, and the value given is not one: {why}"
+            )
+        return answer
     if spec.target_kind == "self":
         if raw.casefold() not in {"self", "me", ""}:
             raise WriteAttemptError(
@@ -4586,6 +4771,9 @@ STRICT_PRESS_ACTIONS: frozenset[str] = NAMED_PROFILE_ACTIONS | frozenset(
         # counted in the one alert toggle; a second match at press time throws.
         "set_search_job_alert",
         "unset_search_job_alert",
+        # 2026-11-26 (lane build-jobs2, J 163): the one button naming his
+        # answer inside the one feedback block; a second match throws.
+        "send_recommendations_feedback",
         "mark_company_interest",
         "follow_company_page",
         "update_profile_field",
@@ -5967,6 +6155,23 @@ async def _read_tracker_stage_row(
     return facts, state, why
 
 
+async def _read_recent_searches_clear(
+    page: Any, spec: WriteSpec, *, target: str
+) -> tuple[dict[str, Any], str, str]:
+    """``set_recent_job_searches_cleared``' preview read: the jobs home's Clear.
+
+    LANE BUILD-JOBS2, 2026-11-26 (census ``J 19``). Counts only, off the one
+    load ``observe`` made: the card headed 'Recent job searches', its one
+    Clear button, and how many searches it lists
+    (``recent_searches_clear.read_clear_control``). ``confirm_dialog_read`` is
+    ``False`` in the facts rather than left to be inferred: what the press
+    opens has never been captured, and that is the refusal's ground.
+    """
+    reading = await recent_searches_clear.read_clear_control(page)
+    state, why = recent_searches_clear.state_of(reading)
+    return dict(reading), state, why
+
+
 #: WHICH SURFACE EACH REFUSING ACTION READS, and it is chosen by the SPEC's own
 #: ``state_from`` rather than by anything a caller passes -- the same rule the
 #: four original actions follow. Each entry is (url, surface name for the
@@ -6010,6 +6215,12 @@ _SURFACE_READS: dict[str, tuple[str, str, Any]] = {
     # LANE BUILDS-26, 2026-11-24: the Saved tab, for ``set_tracker_stage`` --
     # a refusing action, so its preview reads and prints and mints nothing.
     "tracker_saved_row": (SAVED_LIST_URL, "saved jobs", _read_tracker_stage_row),
+    # LANE BUILD-JOBS2, 2026-11-26: the jobs home, for the refusing
+    # ``set_recent_job_searches_cleared`` (census J 19) -- it reads, prints and
+    # mints nothing.
+    "jobs_home_recent_searches": (
+        recent_searches_clear.HOME_URL, "jobs home", _read_recent_searches_clear,
+    ),
 }
 
 
@@ -6184,6 +6395,34 @@ async def observe(
             )
         switch, state, why = await search_alert_switch.read_state(page)
         facts = {"alert_switch": switch}
+        return _record(
+            spec,
+            target=target,
+            facts=facts,
+            facts_url=landed,
+            state=state,
+            state_why=why,
+            state_url=landed,
+            same_page_as_action=True,
+        )
+
+    if spec.state_from == "recommendations_feedback":
+        # ONE load, of the page the press lands on (lane build-jobs2, J 163):
+        # his recommended jobs, a constant address. The landing vetoes by
+        # raising, and nothing derived from it is bound to a name (the
+        # navigation guard's rule, measured by lane build-jmn26).
+        url = str(spec.url_template or "").format(target=url_target_of(spec, target))
+        landed = await _load(navigator, page, url, surface="recommended jobs")
+        if not job_feedback.landed_on_page(landed):
+            raise WriteAttemptError(
+                "the page that loaded is not your recommended jobs, so the "
+                "question under its list is not read and nothing was minted. "
+                "THE LANDING IS WITHHELD rather than named; what is safe to "
+                f"say about it -- {landing.withheld(landed)}."
+            )
+        reading = await job_feedback.read_block(page)
+        state, why = job_feedback.state_of(reading)
+        facts = {"feedback_block": reading, "press": job_feedback.ANSWERS[target]}
         return _record(
             spec,
             target=target,
@@ -6888,6 +7127,12 @@ def _render(
             "follow. This surface has no pagination control, so the rest were "
             "not shown and could not have been."
         )
+    elif spec.target_kind == "self" and spec.state_from == "jobs_home_recent_searches":
+        # HIS OWN JOBS HOME, NOT HIS PROFILE (lane build-jobs2, J 19): the
+        # "self" kind's branch below names his profile, which this act never
+        # touches. What the page showed is counts only.
+        where["whose"] = "your own jobs home: the recent job searches card"
+        where["what_the_page_showed"] = observation.facts
     elif spec.target_kind == "self":
         where["whose"] = "your own LinkedIn profile"
         where["name"] = observation.facts.get("name")
@@ -6900,6 +7145,14 @@ def _render(
         where["search"] = search_alert_switch.describe(observation.target)
         where["target"] = observation.target
         where["what_the_page_showed"] = observation.facts
+    elif spec.target_kind == "recommendations_feedback":
+        # HIS ANSWER AND THE BUTTON IT PRESSES (lane build-jobs2, J 163): the
+        # words are LinkedIn's, from the module's closed table; what the page
+        # showed is counts only.
+        where["whose"] = "your own recommended jobs: the question under the list"
+        where["answer"] = observation.target
+        where["press"] = observation.facts.get("press")
+        where["what_the_page_showed"] = observation.facts.get("feedback_block")
     elif spec.target_kind == "group_id":
         # THE ID YOU NAMED AND THE COUNTS THE PAGE GAVE -- AND NO NAME. Every
         # other block names its target in words he can check; this one cannot,
@@ -7660,6 +7913,22 @@ PERFORMABLE: frozenset[str] = frozenset(
         # origin is DERIVED. ENABLING IS NOT FIRING: no grant was issued.
         "set_search_job_alert",
         "unset_search_job_alert",
+        # THE RECOMMENDATIONS FEEDBACK, 2026-11-26 (lane build-jobs2, census
+        # row J 163), RECEIPT-ONLY under J-163-RECEIPT-ONLY-WRITE:
+        #
+        #   a measured surface   /jobs/collections/recommended/, which the
+        #                        read boundary admits
+        #   a measured anchor    the block LinkedIn names
+        #                        jobs-search-list-feedback, its heading, its
+        #                        sentence and its two buttons (session 8)
+        #   an aimable target    the one button naming his answer, strict
+        #   NO verification      declared unverifiable: no capture shows an
+        #                        answered block; the receipt records what the
+        #                        page draws after the press
+        #   no new permission    the click is perform()'s existing one
+        #
+        # ENABLING IS NOT FIRING: it fires only on his order.
+        "send_recommendations_feedback",
     }
 )
 
@@ -8164,6 +8433,11 @@ def anchor_label_for(
         # wearing LinkedIn's class -- and the reader requires this word on that
         # toggle before it reads any state.
         return search_alert_switch.WORD
+    if spec.action == "send_recommendations_feedback":
+        # THE BUTTON'S OWN WORDS, exact, MEASURED by keyed shape on session 8's
+        # recommended jobs (lane build-jobs2, J 163), chosen by his answer from
+        # the module's closed table.
+        return job_feedback.ANSWERS.get(str(target or "").strip())
     if spec.action == "withdraw_from_group":
         # THE ITEM THAT PERFORMS THE LEAVE, exact, measured on all five
         # membership rows' menus. The FIRST press is the row's disclosure, and
@@ -8394,6 +8668,22 @@ _NINE_REFUSALS: dict[str, str] = {
         "endorsement from him, the endorsed label read without pressing; then "
         "an anchor on that label and a fresh render reading it gone. Under the "
         "round-trip rule this is the half proven first."
+    ),
+    # LANE BUILD-JOBS2, 2026-11-26 (census J 19, J-19-BUILT-BEHIND-THE-GRANT):
+    # refusing until its confirm dialog is captured, as the ruling says.
+    "set_recent_job_searches_cleared": (
+        "set_recent_job_searches_cleared is sanctioned and cannot be performed: what "
+        "its press opens has never been captured. MEASURED on "
+        "tests/fixtures/live2/j18_words.html, session 2's jobs home with "
+        "LinkedIn's words written by keyed shape: exactly 1 card headed "
+        "'Recent job searches', exactly 1 button in it whose own text reads "
+        "'Clear', and 6 searches listed under it. Whether the press asks to "
+        "confirm, and with what control, has never been read, and the act has "
+        "no inverse. WHAT WOULD LIFT IT: the press, ONCE, AT HIS ORDER, with "
+        "whatever it opens read and closed on Escape and nothing confirmed "
+        "(J-19-BUILT-BEHIND-THE-GRANT: it fires only on his order); then a "
+        "reader requiring exactly that dialog's confirm control, and a "
+        "verification reading the card after it."
     ),
 }
 
@@ -8648,6 +8938,9 @@ _WHERE_TO_LOOK: dict[str, str] = {
     # LinkedIn's alerts page too, which he can open himself.
     "set_search_job_alert": "the 'Set alert' switch at the head of that search's results, or your job alerts",
     "unset_search_job_alert": "the 'Set alert' switch at the head of that search's results, or your job alerts",
+    # 2026-11-26 (lane build-jobs2, J 163). The block under the list on his
+    # recommended jobs: the one place the answer could show.
+    "send_recommendations_feedback": "the question under the list on your recommended jobs",
 }
 
 #: THE ACTIONS THAT ARE ACTUAL TOGGLES, for the one sentence that is only true
@@ -8965,6 +9258,17 @@ def _assert_landed_on_target(
                 "keywords and location name, and the browser landed somewhere "
                 "that is not that search. THE LANDING IS WITHHELD rather than "
                 f"named; what is safe to say about it -- {landing.withheld(landed)}."
+            )
+        return
+    if spec.state_from == "recommendations_feedback":
+        # HIS RECOMMENDED JOBS, BY THEIR PATH (lane build-jobs2, J 163).
+        # Anywhere else VETOES the press.
+        if not job_feedback.landed_on_page(landed):
+            raise WriteAttemptError(
+                "refusing to click: this answer is for the question under your "
+                "recommended jobs, and the browser landed somewhere that is not "
+                "that page. THE LANDING IS WITHHELD rather than named; what is "
+                f"safe to say about it -- {landing.withheld(landed)}."
             )
         return
     if spec.state_from == "company_page":
@@ -9430,6 +9734,17 @@ async def _live_control(
         if state not in (search_alert_switch.ALERT_OFF, search_alert_switch.ALERT_ON):
             return (state, why, "")
         return (state, why, search_alert_switch.SWITCH)
+
+    if spec.action == "send_recommendations_feedback":
+        # THE SAME READER THE PREVIEW USED, ON THE SAME PAGE: freshness, not a
+        # second source (lane build-jobs2, J 163). The landing was checked by
+        # ``_assert_landed_on_target``; the block is re-read, and the selector
+        # is the one button naming his answer inside it, strict at the press.
+        reading = await job_feedback.read_block(page)
+        state, why = job_feedback.state_of(reading)
+        if state != job_feedback.ASKED:
+            return (state, why, "")
+        return (state, why, job_feedback.press_selector(grant.target))
 
     if spec.action == "withdraw_from_group":
         # THE SAME READING AND THE SAME VERDICT THE PREVIEW TOOK, on the Groups
@@ -12990,6 +13305,22 @@ async def perform(
         except Exception:  # noqa: BLE001 - a measurement, not a gate
             newly_observed_reaction_labels = None
 
+    # WHAT THE PRESS LEFT ON THE PAGE, for the one RECEIPT-ONLY write (lane
+    # build-jobs2, J 163, J-163-RECEIPT-ONLY-WRITE: "proven by that press").
+    # Its outcome is declared unverifiable, so ``_verify_after`` read nothing
+    # and the page is still the render the press left; this reads it in
+    # place -- counts and booleans only -- for the receipt. A MEASUREMENT,
+    # NEVER A GATE: nothing below reads it to decide anything, and a failed
+    # read is ``None``.
+    feedback_after_press: Optional[dict[str, Any]] = None
+    if spec.action == "send_recommendations_feedback":
+        try:
+            feedback_after_press = job_feedback.after_press(
+                await job_feedback.read_block(page)
+            )
+        except Exception:  # noqa: BLE001 - a measurement, not a gate
+            feedback_after_press = None
+
     # THREE OUTCOMES, DECIDED BY THE VERIFICATION AND NOT BY THE CLICK.
     #
     # An earlier draft of this branched on ``click_error`` as well, and both of
@@ -13198,6 +13529,13 @@ async def perform(
         "target": target_block,
         "performed": performed,
         **({"restore": restore_block} if restore_block is not None else {}),
+        # THE RECEIPT-ONLY RECORD (lane build-jobs2, J 163): what the page drew
+        # right after the press, the record the ruling calls the row's proof.
+        **(
+            {"after_press": feedback_after_press}
+            if spec.action == "send_recommendations_feedback"
+            else {}
+        ),
         # THE SETTINGS WRITER'S PRESS, read around it (lane S, 2026-10-10):
         # the wait, whether only that control moved, the Save gate, and STOP
         # on any press a page that stores on the press did not pass.

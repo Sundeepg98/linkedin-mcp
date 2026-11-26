@@ -1039,6 +1039,27 @@ on his explicit order for a conversation he names, and refusing otherwise.
 Rows `M M26`, `M M27`, `M M29`, `M M31`: next step `BUILD` on
 `tests/fixtures/live11/c_b3_1_menu_open.html`.
 
+### Q-J37-SPLITS -- a compound row whose list half is built and whose manage half is not
+
+Added 2026-11-26 by lane build-jobs2 (`_audit/2026-11-26-build-jobs2.md`,
+section 6). Row: `J 37`, "List and manage all alerts". The list half is
+built on session 11's capture of the alert manager --
+`linkedin_job_alerts`, each alert's keywords and the names of its filters --
+and the manage half is not: the row button's label and what it opens have
+never been measured, and editing or deleting an alert is the `J 33` and
+`J 34` capability, each waiting on an alert he names. The halves now need
+different STATES (COVERED-UNFIRED and GAP), which is
+COMPOUND-ROW-SPLITS-ONLY-ON-STATE's ground, and `J-114-SPLITS` split the same
+shape. The question: split `J 37` -- the list half COVERED-UNFIRED on the new
+read, the manage half the next free numeric id, GAP, resting on `J 33` and
+`J 34` -- or hold it whole and GAP until the manage half is built?
+
+ANSWERED 2026-11-26 by the orchestrator, `J-37-SPLITS` (integration 6
+registers it): SPLIT under COMPOUND-ROW-SPLITS-ONLY-ON-STATE, the `J 114` /
+`J 169` precedent. Applied by lane build-jobs2's round 2: `J 37` keeps the
+list half, COVERED-UNFIRED on `linkedin_job_alerts`; the manage half is
+`J 170`, GAP, next step BUILD (the alert edits).
+
 ## 8. Preconditions and purposes
 
 PRECONDITION rows stay GAP; each waits on something he does not hold.

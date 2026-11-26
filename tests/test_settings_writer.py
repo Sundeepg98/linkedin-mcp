@@ -105,7 +105,12 @@ THE_CONTROL = THE_PAGE.controls[0]
 
 
 def test_one_page_is_admitted_and_it_is_the_captured_one():
-    assert [p.name for p in sw.ADMITTED_PAGES] == ["Share profile updates"]
+    # TWO SINCE 2026-11-26 (lane build-jobs2, APPLICATION-SETTINGS-WRITE): his
+    # application settings page joined, by its own heading and its own
+    # session-11 capture, held by tests/test_application_settings_write.py.
+    # This test keeps holding the first page's record.
+    assert [p.name for p in sw.ADMITTED_PAGES] == [
+        "Share profile updates", "Resumes and application data"]
     assert THE_PAGE.address == profile_editor.ACCOUNT_SETTING_URL
     # The record names its capture in a SENTENCE (the package's rule for
     # naming a tracked file); the skeleton it names exists and is this file's.
@@ -303,18 +308,32 @@ def test_a_snapshot_is_readable_only_whole():
 
 
 def test_the_audiences_are_every_value_with_its_control_and_a_collision_is_refused(monkeypatch):
+    # RE-KEYED 2026-11-26 (lane build-jobs2) BY THE WHOLE TARGET, where the
+    # keys were the bare values "on" and "off": the application settings page
+    # draws two more switches holding the same two words.
+    monkeypatch.setattr(sw, "ADMITTED_PAGES", (THE_PAGE,))
     assert sw.audiences() == {
-        "on": "Share profile updates / Share key profile updates: "
-              + sw.meaning_of(THE_CONTROL, "on"),
-        "off": "Share profile updates / Share key profile updates: "
-               + sw.meaning_of(THE_CONTROL, "off"),
+        "share profile updates / share key profile updates :: on":
+            "Share profile updates / Share key profile updates: "
+            + sw.meaning_of(THE_CONTROL, "on"),
+        "share profile updates / share key profile updates :: off":
+            "Share profile updates / Share key profile updates: "
+            + sw.meaning_of(THE_CONTROL, "off"),
     }
-    # A SECOND SWITCH WITH ITS OWN MEANING FOR "on" would overwrite the first
-    # in a dict keyed by the bare value; the builder raises instead.
+    # A SECOND SWITCH WITH ITS OWN MEANING FOR "on" overwrote the first in a
+    # dict keyed by the bare value, and the builder raised; keyed by the
+    # target, each keeps its own sentence.
     other = dataclasses.replace(
         SYN_SWITCH, meanings=(("on", "something else entirely"), ("off", "x")))
     second = dataclasses.replace(THE_PAGE, name="Another page", controls=(other,))
     monkeypatch.setattr(sw, "ADMITTED_PAGES", (THE_PAGE, second))
+    both = sw.audiences()
+    assert both["another page / synthetic alerts :: on"] == (
+        "Another page / Synthetic alerts: something else entirely")
+    assert both["share profile updates / share key profile updates :: on"].endswith(
+        sw.meaning_of(THE_CONTROL, "on"))
+    # THE SAME CONTROL ADMITTED TWICE still raises, at import.
+    monkeypatch.setattr(sw, "ADMITTED_PAGES", (THE_PAGE, THE_PAGE))
     with pytest.raises(ValueError):
         sw.audiences()
 

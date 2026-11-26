@@ -1354,6 +1354,29 @@ WHAT_WOULD_DRIVE_IT: dict[str, str] = {
         "answers are states, the caller's id and booleans, so a drive would "
         "come back clean."
     ),
+    # LANE BUILD-JOBS2, 2026-11-26 (census J 19): the jobs home's Clear card,
+    # and the refusing write's thin wrapper over it.
+    "recent_searches_clear:read_clear_control": (
+        "WORDS: it finds a section by its h2's words (Recent job searches), "
+        "a button in it by its own text span (Clear) and the li items of the "
+        "list labelled with the heading; the planted page answers every text "
+        "with the plant, so no card is found and the reading is an empty "
+        "shape. Its success path runs in a headless browser over "
+        "tests/fixtures/live2/j18_words.html in "
+        "tests/test_recent_searches_clear.py: "
+        "test_the_card_its_clear_button_and_its_searches_are_read_off_the_capture "
+        "reads one card, one button, one list and six searches. Its answers "
+        "are counts and one boolean, so a drive would come back clean."
+    ),
+    "writes:_read_recent_searches_clear": (
+        "WORDS: a thin wrapper over recent_searches_clear.read_clear_control "
+        "and its verdict, so it misses its success path on the planted page "
+        "for exactly that reader's reason. Its success path runs in a headless "
+        "browser in tests/test_recent_searches_clear.py: "
+        "test_the_preview_reads_the_jobs_home_once_and_issues_no_token. Its "
+        "answers are counts, one boolean and a state, so a drive would come "
+        "back clean."
+    ),
     "writes:_read_tracker_membership": (
         "WORDS: it keys on a tracker tab's count in LinkedIn's tab strip, read "
         "from main's text, and its rows come from dom.harvest_linked_cards, a "
@@ -2069,6 +2092,12 @@ DRIVEN_TO["followers_list:read_followers_list"] = RETURNS_RECORDS
 # success path returns one post record per card, its author a person record,
 # so the plant comes back inside a record and nowhere else.
 DRIVEN_TO["content_search:read_content_results"] = RETURNS_RECORDS
+# A PAGE'S LIFE TAB (2026-11-26, lane build-jobs2, census J 109): its success
+# path returns its trending items as post records, each author a person
+# record, and its spotlights as the Page's prose -- the plant, which the
+# drive answers for every text the capture reduced, comes back inside those
+# records and nowhere else.
+DRIVEN_TO["company_tabs:read_life_tab"] = RETURNS_RECORDS
 
 
 @pytest.mark.parametrize("key", sorted(shipped_drives.DRIVES))
@@ -2280,6 +2309,13 @@ FIXTURE_BREAKS: dict[str, dict[str, str]] = {
         "fixture": "live11/search_content_posts.html",
         "needle": 'data-sdui-screen="com.linkedin.sdui.flagshipnav.search.SearchResultsContent"',
         "into": 'data-sdui-screen="com.linkedin.sdui.flagshipnav.search.SearchResultsOther"',
+    },
+    # 2026-11-26 (lane build-jobs2, census J 109): the trending module's own
+    # name, the premise its items are found under.
+    "company_tabs:read_life_tab": {
+        "fixture": "live11/company_life_words.html",
+        "needle": 'data-view-name="org-member-life-trending-employee-content"',
+        "into": 'data-view-name="org-member-life-trending-other"',
     },
 }
 

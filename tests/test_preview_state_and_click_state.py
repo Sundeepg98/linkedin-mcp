@@ -286,6 +286,15 @@ REACHED: dict[str, tuple[str, str, str]] = {
         SEARCH_ALERT_ON_WORLD,
         SEARCH_ALERT_QUERY,
     ),
+    # 2026-11-26 (census row ``J 163``, lane build-jobs2). A TRACKED capture,
+    # live session 8's recommended jobs with the feedback block's words written
+    # by keyed shape: the pair reads asked, and the preview and the click read
+    # it through ONE verdict, ``job_feedback.state_of``.
+    "send_recommendations_feedback": (
+        "tests/fixtures/live8/recommended_words.html",
+        markup("live8/recommended_words"),
+        "yes",
+    ),
     # THE FIFTEENTH, 2026-09-24 (census row ``M M10``; the fourteenth on
     # lane L5's branch, before lane L7's merge landed). A SYNTHETIC
     # conversation whose STRUCTURE is measured -- the composer's own
@@ -502,7 +511,10 @@ async def _live(over, action, *, spec=None, anchor=None):
 _WORLDS_THAT_REACH_OUT = frozenset({"set_similar_jobs_alert", "unset_similar_jobs_alert",
                                     # 2026-11-25, lane build-jmn26: session 2's search
                                     # is a tracked copy too, its addresses https://x/...
-                                    "set_search_job_alert", "unset_search_job_alert"})
+                                    "set_search_job_alert", "unset_search_job_alert",
+                                    # 2026-11-26, lane build-jobs2: session 8's
+                                    # recommended jobs, a tracked copy too.
+                                    "send_recommendations_feedback"})
 
 
 async def _over_refusing_every_request(html: str, work):
@@ -684,8 +696,10 @@ def test_every_performable_action_is_either_reached_or_declared_unreachable():
     # pair beside the reaction pair's inverse, each reached over its own tests' surface. MEASURED.
     # 22 -> 24 ON LANE BUILD-JMN26 (2026-11-25): the search-alert pair, reached
     # over session 2's tracked search and its derived on world. MEASURED.
-    assert len(PERFORMABLE) == 24, sorted(PERFORMABLE)
-    assert len(REACHED) == 24, sorted(REACHED)
+    # 24 -> 25 ON LANE BUILD-JOBS2 (2026-11-26): the receipt-only feedback press
+    # (J 163), reached over session 8's tracked recommended jobs. MEASURED.
+    assert len(PERFORMABLE) == 25, sorted(PERFORMABLE)
+    assert len(REACHED) == 25, sorted(REACHED)
     assert len(CANNOT_REACH) == 0, sorted(CANNOT_REACH)
 
 
@@ -730,8 +744,12 @@ def test_the_multi_state_actions_are_the_two_this_file_names():
     assert multi == ["set_admitted_setting", "update_setting"], multi
     # And each enumeration is not empty, or the audiences branch is vacuous.
     assert spec_for_action("update_setting").audiences
+    # KEYED BY THE WHOLE TARGET SINCE 2026-11-26 (lane build-jobs2), where it
+    # was the bare values: two admitted pages hold "on" and "off" on three
+    # switches. Its own arms never reach the generic branch, which a bare
+    # reading would now find no key in and refuse.
     admitted_values = {
-        value.casefold()
+        writes.settings_writer.audience_key(page, control, value)
         for page in writes.settings_writer.ADMITTED_PAGES
         for control in page.controls
         for value in control.values

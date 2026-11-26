@@ -198,6 +198,17 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     # 2026-10-10, lane S (settings): ONE control on ONE admitted settings
     # page, behind the single-use grant. Census P O17 moves; see the pin note.
     "linkedin_set_admitted_setting": ("confirm_token", "control", "settings_page", "value"),
+    # 2026-11-26, lane build-jobs2: SANCTIONED AND REFUSING -- clearing his
+    # recent job searches. Census J 19 does NOT move: what the press opens has
+    # never been captured (J-19-BUILT-BEHIND-THE-GRANT).
+    "linkedin_set_recent_job_searches_cleared": ("confirm_token",),
+    # 2026-11-26, lane build-jobs2: the receipt-only feedback press. Census
+    # J 163 GAP -> COVERED-UNFIRED on it, never fired.
+    "linkedin_send_recommendations_feedback": ("answer", "confirm_token"),
+    # 2026-11-26, lane build-jobs2: his job alerts off the alert manager.
+    # Census J 37 does NOT move: its manage half is unbuilt (the record's
+    # question asks whether the row splits).
+    "linkedin_job_alerts": (),
     # 2026-11-24, lane builds-26: SANCTIONED AND REFUSING -- the stage move on
     # a saved job. Census J 54 does NOT move: its control has never been
     # captured; the cell names that capture as its held-by.
@@ -772,8 +783,17 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: summed (the lane's branch read 84 and 135). THE CENSUS DECISION, IN THE
 #: LANE'S OWN COMMIT: `M C93` GAP -> COVERED-UNFIRED on it, never fired. See
 #: `_audit/2026-11-26-readers-msg26.md`.
-PINNED_TOOL_COUNT = 91
-PINNED_PARAMETER_COUNT = 137
+#: **ON LANE BUILD-JOBS2 (2026-11-26): 92 TOOLS AND 138 PARAMETERS** --
+#: `linkedin_set_recent_job_searches_cleared(confirm_token)`, a sanctioned write
+#: that refuses; census `J 19` keeps its state (what the press opens has never
+#: been captured). Counted off the registry, never summed.
+#: **ON THE SAME LANE: 93 TOOLS AND 140 PARAMETERS** --
+#: `linkedin_send_recommendations_feedback(answer, confirm_token)`, a write;
+#: census `J 163` GAP -> COVERED-UNFIRED on it. Counted off the registry.
+#: **ON THE SAME LANE: 94 TOOLS AND 140 PARAMETERS** -- `linkedin_job_alerts()`,
+#: a read with no parameter. Counted off the registry.
+PINNED_TOOL_COUNT = 94
+PINNED_PARAMETER_COUNT = 140
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:
