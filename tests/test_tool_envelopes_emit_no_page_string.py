@@ -155,6 +155,12 @@ ADMITTED_OWN_TEXT: dict[str, tuple[str, str]] = {
         HIS_OWN_AUTHORED,
         "/jobs/application-settings/: each stored resume's file name, which he uploaded",
     ),
+    # 2026-11-26 (lane build-net2, census N 95, SEARCH-BOX-TYPEAHEAD-DISCLOSURE,
+    # which names this ruling): his own search box's recent searches.
+    "linkedin_recent_searches": (
+        HIS_OWN_AUTHORED,
+        "/feed/, its search box's recent-searches group: each recent search's keywords, which he typed",
+    ),
 }
 
 

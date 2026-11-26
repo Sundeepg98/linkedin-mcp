@@ -2296,6 +2296,10 @@ FIXTURE_BREAKS: dict[str, dict[str, str]] = {
         "fixture": "synthetic/live11_invitations_sent_words.html",
         "needle": ">\nWithdraw\n<", "into": ">\nXxxxxxxx\n<",
     },
+    "search_typeahead:disclose_recent_searches": {
+        "fixture": "live11/feed_menus.html",
+        "needle": 'role="search"', "into": 'role="xxxxxx"',
+    },
 }
 
 ALL_DRIVES = {**shipped_drives.DRIVES, **shipped_drives.TO_THE_PRESS}

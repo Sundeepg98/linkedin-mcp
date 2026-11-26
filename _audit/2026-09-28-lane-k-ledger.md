@@ -1039,6 +1039,43 @@ on his explicit order for a conversation he names, and refusing otherwise.
 Rows `M M26`, `M M27`, `M M29`, `M M31`: next step `BUILD` on
 `tests/fixtures/live11/c_b3_1_menu_open.html`.
 
+### Q-SEARCH-BOX-PRESS-SHAPE -- a press shape the search box does not wear
+
+Added 2026-11-26 by lane build-net2 (`_audit/2026-11-26-build-net2.md`,
+section 4). Row: `N 95`. Its step, from lane readers-net26, is "the search
+box's sanctioned press first, then a reader of that listbox over the capture".
+The global search box's input carries neither sanctioned press shape -- no
+`aria-expanded`, no `aria-haspopup`, no role -- on session 11's three feed
+captures. `press.py` makes a third shape a RULING REQUEST with a measured
+blast radius. Measured over the 176 tracked HTML fixtures, counts only: an
+input carrying `aria-autocomplete` inside `role=search` is 63 elements, one on
+each of 63 pages; the same input outside `role=search` is 78 elements in 57
+files, the typeaheads of forms and filters. The question: may a press of
+`[role=search] input[aria-autocomplete]` -- one element a page -- open the
+recent-searches listbox so a read can take it over the capture, re-running a
+search staying the caller passing its keywords to a search tool (D6)? (The
+nearest ruling, MESSAGE-SEARCH-CAPTURE-FIRST, contemplates a SEARCH-BOX-TYPING
+shape for his inbox search only after a capture; this row types nothing.) Or
+does `N 95` stay GAP?
+
+**Answered 2026-11-26 by the orchestrator** (relayed to lane build-net2;
+registration owed at integration 6): YES, as SEARCH-BOX-TYPEAHEAD-DISCLOSURE,
+on the lane's measured anchors. A module of its own, one closed table, one
+`readonly.SANCTIONED_MUTATIONS` entry (the lane's build holds TWO lines, the
+click and the Escape, because that list keys a call by its kind; the lane
+asked, its record section 4 says how). The target is
+`[role=search] input[aria-autocomplete]` on an admitted page, refused at
+runtime if the match count is 0 or 2 or more, naming the count. NOTHING is
+typed: a typing attempt is refused. Only the listbox's recent-searches group
+is read, located by its own structure, under HIS-OWN-TEXT-AT-RUNTIME; the
+people options are never read or returned. Closed by Escape, and the listbox
+verified gone. Condition 3, the structural argument that a typeahead opening
+sends nothing outward, is accepted. Red first, with three controls: an
+`aria-autocomplete` input outside `role=search` refused; a second matching
+input refusing; an attempt to read the people options failing the test. Row
+`N 95`: built and COVERED-UNFIRED on `linkedin_recent_searches` (the lane's
+record, section 4).
+
 ### Q-AD-HIDE-AIM -- an ad he names, when no reader returns one
 
 Added 2026-11-26 by lane build-net2 (`_audit/2026-11-26-build-net2.md`,

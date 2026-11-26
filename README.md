@@ -3,8 +3,13 @@
 An MCP server that shows you your own LinkedIn account data as structured tool
 results instead of pages you have to click through.
 
-**Ninety-five tools ship. Sixty-four read. Thirty-one write. Three of those
+**Ninety-six tools ship. Sixty-five read. Thirty-one write. Three of those
 are write-shaped and unable to act.**
+(It read "Ninety-five tools ship. Sixty-four read" until lane build-net2's
+third build, 2026-11-26: `linkedin_recent_searches` returns your recent
+searches as your own search box lists them (census `N 95`) -- one click on
+the box, its recent-searches group read alone, and Escape. It types nothing,
+and the people the same list draws are never returned.)
 (It read "Ninety-four tools ship. Sixty-four read. Thirty write" until
 lane build-net2's second build, 2026-11-26: `linkedin_mark_not_interested`
 marks one feed item you name by its urn "Not interested" from that item's
@@ -1155,7 +1160,7 @@ linkedin_server/
   cdp_bridge.py              the recovery path: attach to a running Chrome
   dom.py                     the read-only harvesters and the control readers
   shape.py                   pure parsers and the result envelope
-  server.py                  the ninety-five tools
+  server.py                  the ninety-six tools
   errors.py
 tests/                       1393 tests, no network, no account
   fixtures/                  frozen LinkedIn markup, scrubbed

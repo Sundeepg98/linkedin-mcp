@@ -2163,6 +2163,60 @@ async def invitation_after_press_as_shipped(page: Any) -> Any:
     )
 
 
+# ---------------------------------------------------------------------------
+# search_typeahead -- the search box's recent searches (N 95)
+# ---------------------------------------------------------------------------
+
+
+class _NoneDrawn(_Over):
+    """A locator the closed box draws nothing for: its count, read, is 0."""
+
+    async def count(self) -> int:
+        await self._wrapped.count()  # the read, counted
+        return 0
+
+
+class _TheFeedWithItsBoxClosed(_AtTheAddress):
+    """The feed as its captures draw it before any press: the planted page,
+    but the box's listboxes and the page's dialogs drawn NONE."""
+
+    def __init__(self, wrapped: Any, url: str, closed: tuple[str, ...]) -> None:
+        super().__init__(wrapped, url)
+        self._closed = closed
+
+    def locator(self, selector: Any, *args: Any, **kwargs: Any) -> Any:
+        located = self._wrapped.locator(selector, *args, **kwargs)  # the read, counted
+        return _NoneDrawn(located) if selector in self._closed else located
+
+
+async def recent_searches_to_the_press(page: Any) -> Any:
+    """``search_typeahead.disclose_recent_searches`` as
+    ``linkedin_recent_searches`` takes it, on the feed it loads.
+
+    THE SIGNATURE DRIVE: the planted page answers every count 1, so the box
+    reads already open and the reader refuses before any press.
+
+    AS FAR AS THE PRESS: the closed box the feed's captures draw -- one search
+    input of the target's shape, no listbox drawn and none owned
+    (``tests/fixtures/live11/feed_menus.html``, checked here) -- then the
+    click, which the planted locator refuses. The listbox, the recent group
+    and the Escape are not reached offline: ``tests/test_search_typeahead.py``
+    drives them in an engine over the open capture.
+    """
+    from linkedin_server import search_typeahead
+
+    markup = _drawn("live11/feed_menus.html", 'role="search"', "aria-autocomplete=")
+    if 'role="listbox"' in markup:
+        raise AssertionError("the closed feed capture draws a listbox; its box is not closed")
+    at = _TheFeedWithItsBoxClosed(
+        page,
+        search_typeahead.PAGE_URL,
+        (search_typeahead.LISTBOXES_VISIBLE, search_typeahead.OWNED_LISTBOX,
+         search_typeahead.DIALOGS_VISIBLE),
+    )
+    return await search_typeahead.disclose_recent_searches(at, search_typeahead.PAGE_URL)
+
+
 DRIVES: dict[str, Callable[..., Any]] = {
     "dom:read_company_home": read_company_home_as_shipped,
     "dom:read_any_save_control_label": read_any_save_control_label_as_shipped,
@@ -2235,4 +2289,7 @@ TO_THE_PRESS: dict[str, Callable[..., Any]] = {
     # by the capture of that pill open; no capture shows the option checked.
     "server:_profile_views_switch": profile_views_switch_to_the_option,
     "view_switch:apply_and_restore": profile_views_switch_to_the_option,
+    # 2026-11-26 (lane build-net2, N 95): the feed's search box, closed as
+    # its captures draw it, as far as the click that opens it.
+    "search_typeahead:disclose_recent_searches": recent_searches_to_the_press,
 }

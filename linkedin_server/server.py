@@ -1,4 +1,13 @@
-"""The tool surface: ninety-five tools, twenty-eight of which write to LinkedIn.
+"""The tool surface: ninety-six tools, twenty-eight of which write to LinkedIn.
+
+THE NINETY-SIXTH IS A READ, 2026-11-26 (lane build-net2, census ``N 95``, on
+SEARCH-BOX-TYPEAHEAD-DISCLOSURE): ``linkedin_recent_searches``, his recent
+searches as his own search box lists them -- the feed loaded once, its one
+search input clicked once, the list it opens read for its recent-searches
+group alone, and Escape. It types nothing and chooses nothing, and the
+people the same list draws never leave. Measured off this branch's
+registry, not summed. The headline read "ninety-five tools, twenty-eight of
+which write" until then.
 
 THE NINETY-FIFTH IS A WRITE, 2026-11-26 (lane build-net2, census ``N 154``;
 ``N 153`` rides it, on live session 11's permalink of a member's post):
@@ -473,9 +482,9 @@ assigned to anybody -- it waits for whoever next runs the suite, and in the
 meantime the pin goes on asserting the old number with full confidence.
 
 THE NUMBERS ABOVE ARE DERIVED NOW, and that is a statement about a test rather
-than about an intention. Ninety-five is ``len(await mcp.list_tools())``,
+than about an intention. Ninety-six is ``len(await mcp.list_tools())``,
 pinned in ``test_server_surface.py`` by
-``test_the_surface_is_exactly_the_ninety_five_tools``; the split is pinned by
+``test_the_surface_is_exactly_the_ninety_six_tools``; the split is pinned by
 ``tests/test_prose_that_makes_a_claim.py::test_the_server_docstring_numbers_are_derived``,
 which reads THESE WORDS and fails if any of the three disagrees with the
 registry.
@@ -488,9 +497,11 @@ POINTER to it was dangling, so a reader who followed it found nothing and
 would reasonably conclude these numbers are unchecked. A citation is a claim
 like any other.
 The surface splits three ways and the split is the part a reader actually
-needs: SIXTY-FOUR read, TWENTY-EIGHT write, and THREE are write-shaped,
-registered, gated and unable to act. Sixty-four plus twenty-eight plus three is
-ninety-five. (Sixty-four, twenty-seven and three, summing to ninety-four, until
+needs: SIXTY-FIVE read, TWENTY-EIGHT write, and THREE are write-shaped,
+registered, gated and unable to act. Sixty-five plus twenty-eight plus three is
+ninety-six. (Sixty-four, twenty-eight and three, summing to ninety-five, until
+lane build-net2's recent searches, 2026-11-26. Sixty-four, twenty-seven and
+three, summing to ninety-four, until
 lane build-net2's Not interested, 2026-11-26. Sixty-four, twenty-four and
 three, summing to ninety-one, until
 lane build-net2's three invitation answers, 2026-11-26. Sixty-three,
@@ -1294,7 +1305,12 @@ mcp = FastMCP(
     instructions=(
         "A window onto the operator's OWN LinkedIn account, driven by his own "
         "signed-in browser on his own machine. Most tools read and change "
-        "nothing. TWENTY-EIGHT WRITE: linkedin_save_job, "
+        "nothing. ONE READ CLICKS: linkedin_recent_searches clicks his own "
+        "search box once, reads the recent searches its list draws -- "
+        "keywords he typed, never the people the same list names -- and "
+        "closes it with Escape; to run one again, pass its keywords to the "
+        "search tool for its vertical. "
+        "TWENTY-EIGHT WRITE: linkedin_save_job, "
         "linkedin_unsave_job, linkedin_unfollow_company, "
         "linkedin_follow_company, linkedin_apply_job, "
         "linkedin_update_setting, linkedin_react_to_item, "
@@ -14116,6 +14132,49 @@ async def linkedin_mark_not_interested(
     """
     try:
         return await _write_tool("mark_not_interested", item, confirm_token)
+    except Exception as exc:
+        return _error(exc)
+
+
+from linkedin_server import search_typeahead  # noqa: E402 -- lane build-net2's one block
+
+
+@mcp.tool()
+async def linkedin_recent_searches() -> dict[str, Any]:
+    """Your recent searches, as LinkedIn's own search box lists them. ONE page load, ONE click, ONE Escape.
+
+    Loads your feed, clicks its search box once -- the one
+    ``[role=search] input[aria-autocomplete]`` on the page, refused unless
+    there is exactly one -- reads the recent-searches group of the list it
+    opens, and closes it with Escape, checking that it closed. Census row
+    ``N 95``, on SEARCH-BOX-TYPEAHEAD-DISCLOSURE.
+
+    WHAT COMES BACK, under ``recent_searches``: each search's ``keywords``,
+    the words you typed into your own search box (returned to you under
+    HIS-OWN-TEXT-AT-RUNTIME, never stored), and its ``vertical`` (``jobs``,
+    ``all``, or ``other`` for any other results page). To run one again, pass
+    its keywords to the search tool for its vertical; this tool opens no
+    address it read.
+
+    WHAT NEVER COMES BACK: the people you viewed recently, which the same list
+    draws -- no name, no link, no count of them -- LinkedIn's suggestions, or
+    anything else on the page.
+
+    IT TYPES NOTHING AND CHOOSES NOTHING: no key but Escape, no Enter, no
+    option of the list -- not a search, not a suggestion, not "Clear all".
+    A box that does not close is reported as ``did_not_close`` and what it
+    read is withheld; look at the page.
+    """
+    try:
+        async with BROWSER.session() as page:
+            landed = await BROWSER.goto(page, search_typeahead.PAGE_URL)
+            _authwall_refusal_without_the_landing(landed, surface="feed")
+            typeahead_reading = await search_typeahead.disclose_recent_searches(page, landed)
+            return {
+                "ok": not typeahead_reading.get("refused"),
+                "pages_loaded": 1,
+                **typeahead_reading,
+            }
     except Exception as exc:
         return _error(exc)
 

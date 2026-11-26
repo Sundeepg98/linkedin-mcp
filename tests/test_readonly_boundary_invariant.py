@@ -1726,7 +1726,15 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # SANCTIONED_MUTATIONS e9d953efc8ab8d0e -> c51296e034af63eb, 15 -> 16 -- the trial click of
     # job_alert_switch.trial_press, a READ declared on the list with its
     # argument and budget beside it in readonly.py. No refusal moved.
-    "SANCTIONED_MUTATIONS": "c51296e034af63eb",
+    # RE-FROZEN 2026-11-26 (lane build-net2, census N 95): ONE digest moved,
+    # SANCTIONED_MUTATIONS c51296e034af63eb -> b7ef8ab795d32162, 16 -> 18 --
+    # search_typeahead._press's click and its Escape, a READ's disclosure of
+    # his own search box on SEARCH-BOX-TYPEAHEAD-DISCLOSURE, argued beside the
+    # entries in readonly.py. ATTRIBUTION, with this file's ast_digest:
+    # readonly.py minus exactly the 16 lines of those entries and their
+    # argument hashes to c51296e034af63eb; every other digest is unchanged.
+    # A PERMISSION was declared; no refusal moved.
+    "SANCTIONED_MUTATIONS": "b7ef8ab795d32162",
     # PINNED FROM 2026-09-24, lane G's merge of master: the replacement scan's
     # four tables (unchanged since lane G built them; pinned late, see PINNED)
     # and the scanner's sanctioned list, born with ONE entry -- the live

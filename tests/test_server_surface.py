@@ -1,4 +1,8 @@
-"""The tool surface: ninety-five tools, sixty-four of which do not write.
+"""The tool surface: ninety-six tools, sixty-five of which do not write.
+
+**IT READ "ninety-five tools, sixty-four of which do not write" UNTIL LANE
+BUILD-NET2'S THIRD BUILD (2026-11-26)**: ``linkedin_recent_searches``
+(census N 95), his recent searches read from his own search box, a READ.
 
 **IT READ "ninety-four tools, sixty-four of which do not write" UNTIL LANE
 BUILD-NET2'S SECOND BUILD (2026-11-26)**: ``linkedin_mark_not_interested``
@@ -729,6 +733,7 @@ EXPECTED_TOOLS = {
     "linkedin_ignore_invitation_to_connect",
     "linkedin_withdraw_invitation",
     "linkedin_mark_not_interested",
+    "linkedin_recent_searches",
     # THE FIFTY-EIGHTH AND FIFTY-NINTH, 2026-09-27 (lane L5's follow-up, at
     # its merge of master 52b55b6), two WRITES: see SANCTIONED_WRITE_TOOLS.
     "linkedin_connect_from_profile",
@@ -835,8 +840,11 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_ninety_five_tools(tools):
-    """RENAMED AGAIN ON LANE BUILD-NET2 (2026-11-26), to ``..._ninety_five_tools``:
+async def test_the_surface_is_exactly_the_ninety_six_tools(tools):
+    """RENAMED AGAIN ON LANE BUILD-NET2 (2026-11-26), to ``..._ninety_six_tools``:
+    ``linkedin_recent_searches`` (census N 95), a read, beside the ninety-five.
+
+    RENAMED AGAIN ON LANE BUILD-NET2 (2026-11-26), to ``..._ninety_five_tools``:
     ``linkedin_mark_not_interested`` (census N 154) beside the ninety-four.
 
     RENAMED AGAIN ON LANE BUILD-NET2 (2026-11-26), to ``..._ninety_four_tools``:
@@ -1418,7 +1426,8 @@ async def test_the_surface_is_exactly_the_ninety_five_tools(tools):
     # moves on its write side and the non-write count holds at sixty-four.
     # MEASURED off mcp.list_tools().
     # NINETY-FIVE ON THE SAME LANE: linkedin_mark_not_interested, a WRITE.
-    assert len(tools) == 95
+    # NINETY-SIX ON ITS THIRD BUILD: linkedin_recent_searches, a READ.
+    assert len(tools) == 96
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -1693,8 +1702,8 @@ async def test_the_surface_is_exactly_the_ninety_five_tools(tools):
     # ninety-one with the first test's pin. MEASURED, never summed.
     # SIXTY-FOUR HOLDS ON LANE BUILD-NET2 (2026-11-26): its three tools are
     # WRITES; this second copy of the total moves to the measured ninety-four.
-    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 64
-    assert len(tools) == 95
+    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 65
+    assert len(tools) == 96
 
 
 def test_the_read_that_was_nearly_named_a_write():

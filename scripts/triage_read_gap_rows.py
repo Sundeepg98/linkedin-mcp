@@ -232,9 +232,10 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
                               "filter vocabulary"),
     # N 94 LEFT 2026-09-24: lane S composes several locations into one
     # search from the tool's arguments (COVERED-UNFIRED, a FILTER row).
-    "N 95":("ADDRESS", "ABSENT", "no search-history address is admitted and "
-                                  "none is refused either; the row is also "
-                                  "unrouted in the blocker map"),
+    # N 95 LEFT 2026-11-26: lane build-net2 built its read on
+    # SEARCH-BOX-TYPEAHEAD-DISCLOSURE over live session 11's capture of the
+    # box open (COVERED-UNFIRED), so its line goes, as a line whose row left
+    # GAP must.
     "N 99": ("RULING", "", "the school root is admitted and the alumni tab is "
                            "refused by the member-roster cause; overturning "
                            "that is a decision"),

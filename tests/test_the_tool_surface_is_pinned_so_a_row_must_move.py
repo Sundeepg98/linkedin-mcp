@@ -220,6 +220,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_ignore_invitation_to_connect": ("confirm_token", "profile"),
     "linkedin_withdraw_invitation": ("confirm_token", "profile"),
     "linkedin_mark_not_interested": ("confirm_token", "item"),
+    "linkedin_recent_searches": (),
 }
 
 #: 44 tools and 61 parameters at the pin. Asserted rather than assumed, so a
@@ -789,7 +790,10 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: `linkedin_mark_not_interested(item, confirm_token)`, one WRITE of two
 #: parameters. THE CENSUS DECISION, IN THE SAME COMMIT: `N 154` GAP ->
 #: COVERED-UNFIRED on it, never fired.
-PINNED_TOOL_COUNT = 95
+#: **96 TOOLS AND 145 PARAMETERS ON ITS THIRD BUILD** --
+#: `linkedin_recent_searches()`, one READ of no parameter. THE CENSUS
+#: DECISION, IN THE SAME COMMIT: `N 95` GAP -> COVERED-UNFIRED on it.
+PINNED_TOOL_COUNT = 96
 PINNED_PARAMETER_COUNT = 145
 
 

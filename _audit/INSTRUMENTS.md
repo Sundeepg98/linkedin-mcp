@@ -12930,6 +12930,7 @@ the row is still pending.
 | `tests/shipped_drives.py` drives `invitation_acts:read_rows`, `read_state`, `read_after_press` | each premise broken in `FIXTURE_BREAKS` (LinkedIn's word in the fixture changed): the drive raises and the guard records it not driven, never clean |
 | `linkedin_server/feed_curation.py`, `tests/test_mark_not_interested.py` | on the base tree `3c656df` the file fails at collection (no module `feed_curation`); green 10 passed. Eight mutations, each weakening one check and restoring the file byte for byte, all eight RED and each a FAILED, never an error: the owned-portal relation dropped, the owned-menu count not required, any number of visible items passed, two triggers read as one, an open menu read as the closed item, no undo read as not done, the undo never read, and `perform` pressing the item by its word with the gate ignored |
 | `scripts/_build_live11_net2_word_skeletons.py`, `tests/test_live11_net2_word_fixtures.py` | the fixture held to its tracked copy token by token; the restorer's list losing `Not interested` is RED (a ninth mutation), and the file's own can-fail test takes `Not interested` off the word list and finds the difference nothing explains |
+| `linkedin_server/search_typeahead.py`, `tests/test_search_typeahead.py` | on the base tree `3c656df` the file fails at collection (no module `search_typeahead`); green 16 passed. Ten mutations, 10 RED, each a FAILED: two matching inputs read as one; the role=search scope dropped from the target; an open box pressed anyway; a group whose links are not all searches passes; a group under its own heading passes; the parser falls back to a link's own path (reads the people); a step outside the table is pressed as a key; a box that stays open read as closed; a click that opened nothing is Escaped; the restorer's list loses 'search-results' |
 
 ### 109.4 DECLARED DISPOSABLE
 
@@ -12967,3 +12968,21 @@ and the committed copy apart because their file names differ, and refusing
 unless the skeleton's tracked copy IS the committed one.
 `tests/test_live11_net2_word_fixtures.py` holds the fixture to its copy token
 by token and is shown failing by taking `Not interested` off its word list, RED.
+
+### 109.7 The search box's typeahead, disclosed and closed
+
+`linkedin_server/search_typeahead.py` presses ONE control on SEARCH-BOX-TYPEAHEAD-DISCLOSURE:
+the one `[role=search] input[aria-autocomplete]` on the feed, refused unless
+it matches exactly once (the count named), opened with one click, read for the
+recent-searches group of the listbox it owns -- located by its own structure,
+a group with no heading of its own whose every option holds one search link --
+and closed with one Escape, the closure verified. A click that opens nothing
+is not Escaped; nothing is typed, because the one drain point takes a step
+from a two-entry table and refuses any other. `tests/test_search_typeahead.py`
+holds it over session 11's open capture with its address word put back by
+keyed shape, synthetic keywords and a NEEDLE planted in the people group, and
+a world that answers presses as LinkedIn's box does; it is shown failing by
+ten mutations, every one RED (the entries table, 109.3).
+
+    A PRESS THAT OPENS A LIST IS ANSWERED BY ONE GROUP OF IT, FOUND BY ITS
+    SHAPE; THE REST OF THE LIST NEVER CROSSES, AND ITS CLOSING IS SHOWN.

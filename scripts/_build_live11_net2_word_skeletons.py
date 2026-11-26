@@ -1,12 +1,18 @@
 """Write lane build-net2's word fixtures from live session 11's KEYED skeletons: the tracked copy, with LinkedIn's own fixed words put back where the keyed shape proves them.
 
-Kept as the PROVENANCE of the fixture lane build-net2 builds ``N 154``'s hide
-over, 2026-11-26:
+Kept as the PROVENANCE of the fixtures lane build-net2 builds over,
+2026-11-26:
 
     tests/fixtures/synthetic/live11_permalink_menu_words.html
         a member's post's permalink with the item's own control menu OPEN
         (session 11, load 29; tracked copy
-        ``tests/fixtures/live11/permalink_member_post_menu_open.html``)
+        ``tests/fixtures/live11/permalink_member_post_menu_open.html``) --
+        ``N 154``'s hide
+    tests/fixtures/synthetic/live11_search_box_words.html
+        the feed with its global search box's typeahead OPEN (session 11,
+        load 28; tracked copy ``tests/fixtures/live11/feed_search_box_open.html``)
+        -- ``N 95``'s recent searches; its one ADDRESS word, ``search-results``,
+        sits inside a link, where the builder writes it like any other shape
 
 THE METHOD IS ``scripts/_build_live11_word_skeletons.py``'s, IMPORTED, NOT
 REWRITTEN: its :func:`build` replaces a keyed shape by a word ONLY where the
@@ -19,12 +25,13 @@ copy's (``..._menu_open``), so each entry names both. It refuses unless the
 skeleton's tracked copy IS the committed one, so the input is shown to be the
 capture the repository already holds.
 
-THE WORDS ARE CLOSED: :data:`SPEC`, each one of LinkedIn's menu items, read on
-the keyed skeleton by keyed shape before it was listed (counts only; lane
-build-net2's record, section 3). ``Save`` is already on the harness's
-``FURNITURE`` list and survives in the tracked copy. A person's name, the
-post's words, the trigger's label (it names the author) -- never: nothing here
-tests one. No argument takes a word.
+THE WORDS ARE CLOSED: :data:`SPEC`, each one of LinkedIn's fixed words -- a
+menu item, a heading, an address word -- read on the keyed skeleton by keyed
+shape before it was listed (counts only; lane build-net2's record, sections 3
+and 4). ``Save`` is already on the harness's ``FURNITURE`` list and survives
+in the tracked copy. A person's name, the post's words, a search's keywords,
+the trigger's label (it names the author) -- never: nothing here tests one.
+No argument takes a word.
 
     python scripts/_build_live11_net2_word_skeletons.py --session-dir <dir> [--check]
 
@@ -56,6 +63,16 @@ SPEC: dict[str, tuple[str, str, tuple[str, ...]]] = {
         "permalink_member_post_menu-open",
         "permalink_member_post_menu_open",
         ("Copy link to post", "Embed this post", "Not interested", "Report post"),
+    ),
+    # N 95: the feed with the global search box's typeahead open (load 28).
+    # The recent jobs search's own address word -- the path segment
+    # ``search-results``, which the tracked copy reduces to x -- and the
+    # listbox's three fixed words: its heading, its clear-all option and the
+    # suggestions' heading.
+    "live11_search_box_words": (
+        "feed_search_box-open",
+        "feed_search_box_open",
+        ("search-results", "Recent", "Clear all", "Try searching for"),
     ),
 }
 
