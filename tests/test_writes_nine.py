@@ -70,6 +70,7 @@ from __future__ import annotations
 import dataclasses
 import json
 import re
+from pathlib import Path
 
 import pytest
 
@@ -497,6 +498,17 @@ def _dm_page(
 
 DARK_MODE_MARKUP = _dm_page()
 
+#: THE JOBS HOME, lane build-jobs2 (census J 19): session 2's capture with
+#: LinkedIn's words written by keyed shape -- one card headed "Recent job
+#: searches", its one Clear button, six searches. Its stylesheets, images and
+#: frames point at the capture's reduced host, which a browser would try to
+#: fetch, so each such address is turned into an inline ``data:`` one here:
+#: this harness serves pages with no route of its own, and nothing the reader
+#: counts is a resource.
+JOBS_HOME_WORDS = (
+    Path(__file__).parent / "fixtures" / "live2" / "j18_words.html"
+).read_text(encoding="ascii").replace('"https://x/', '"data:,')
+
 
 def _nine_pages() -> dict[str, str]:
     """All three surfaces at once, so a reader asking for the wrong one is
@@ -512,6 +524,10 @@ def _nine_pages() -> dict[str, str]:
         # LANE BUILDS-26: the profile the endorsement pair names, through the
         # named-profile door (FixtureNavigator accepts the door's keyword).
         NAMED_LINK: NAMED_PROFILE_MARKUP,
+        # LANE BUILD-JOBS2, 2026-11-26: the jobs home the refusing
+        # ``set_recent_job_searches_cleared`` reads -- session 2's capture with
+        # LinkedIn's words written by keyed shape (census J 19).
+        writes.recent_searches_clear.HOME_URL: JOBS_HOME_WORDS,
     }
 
 
@@ -565,6 +581,8 @@ TARGETS: dict[str, object] = {
     # LANE BUILDS-26: a named person's profile LINK and one skill.
     "endorse_skill": {"profile": NAMED_LINK, "skill": "Node.js"},
     "withdraw_endorsement": {"profile": NAMED_LINK, "skill": "Node.js"},
+    # LANE BUILD-JOBS2, 2026-11-26: his own jobs home, no id (census J 19).
+    "set_recent_job_searches_cleared": "self",
 }
 
 #: A clean value for every component name the five composite kinds use, so a
@@ -1542,7 +1560,9 @@ def test_every_surface_these_actions_read_is_already_on_the_read_boundary():
     # equality below would have refused it as an orphan otherwise.
     # FIVE SINCE 2026-11-24 (lane builds-26): ``tracker_saved_row``, claimed
     # by the refusing ``set_tracker_stage`` -- the equality below holds it.
-    assert len(writes._SURFACE_READS) == 5
+    # SIX SINCE 2026-11-26 (lane build-jobs2): ``jobs_home_recent_searches``,
+    # claimed by the refusing ``set_recent_job_searches_cleared`` (census J 19).
+    assert len(writes._SURFACE_READS) == 6
     covered = set(REFUSING) | set(LIFTED)
     state_froms = {spec_for_action(a).state_from for a in covered}
     # THIS WAS A FLAT EQUALITY UNTIL 2026-09-02 and it could not survive

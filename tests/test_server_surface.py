@@ -1,4 +1,8 @@
-"""The tool surface: ninety-one tools, sixty-four of which do not write.
+"""The tool surface: ninety-two tools, sixty-four of which do not write.
+
+**IT READ "ninety-one tools, sixty-four of which do not write" UNTIL LANE
+BUILD-JOBS2 (2026-11-26)**: one WRITE-SHAPED tool, ``linkedin_set_recent_job_searches_cleared``
+(census J 19), sanctioned and refusing, so the non-write count holds.
 
 **IT READ "ninety tools, sixty-three of which do not write" UNTIL INTEGRATION
 4'S MERGE OF LANE READERS-MSG26 (2026-11-26)**: one READ,
@@ -269,6 +273,8 @@ SANCTIONED_WRITE_TOOLS = frozenset(SANCTIONED_WRITES) & {
     # 2026-11-24 (lane builds-26): the endorsement pair, refusing.
     "linkedin_endorse_skill",
     "linkedin_withdraw_endorsement",
+    # 2026-11-26 (lane build-jobs2): sanctioned and REFUSING (census J 19).
+    "linkedin_set_recent_job_searches_cleared",
 }
 
 #: THE DOCSTRING EXEMPTION IS THE SAME SET AS THE NAME EXEMPTION, and it took
@@ -722,6 +728,8 @@ EXPECTED_TOOLS = {
     # 2026-11-24 (lane builds-26): two WRITES that refuse (P E4, P E5).
     "linkedin_endorse_skill",
     "linkedin_withdraw_endorsement",
+    # 2026-11-26 (lane build-jobs2): a WRITE that refuses (census J 19).
+    "linkedin_set_recent_job_searches_cleared",
 }
 
 #: Names a reader must never grow. Listed explicitly so that adding one is a
@@ -1376,7 +1384,10 @@ async def test_the_surface_is_exactly_the_ninety_one_tools(tools):
     # linkedin_search_content, a READ beside the ninety (its branch read
     # eighty-four), so the split moves on its read side. MEASURED off
     # mcp.list_tools() on the merged tree, not summed.
-    assert len(tools) == 91
+    # NINETY-TWO ON LANE BUILD-JOBS2 (2026-11-26): linkedin_set_recent_job_searches_cleared,
+    # a WRITE that refuses (census J 19), so the split moves on its write
+    # side and the non-write count holds. MEASURED off mcp.list_tools().
+    assert len(tools) == 92
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -1424,6 +1435,8 @@ async def test_the_surface_is_exactly_the_ninety_one_tools(tools):
         # 2026-11-24 (lane builds-26): the endorsement pair, refusing.
         "linkedin_endorse_skill",
         "linkedin_withdraw_endorsement",
+        # 2026-11-26 (lane build-jobs2): sanctioned and REFUSING (census J 19).
+        "linkedin_set_recent_job_searches_cleared",
     }
     # THE NON-WRITE COUNT MOVES TO SIXTEEN, and the reason is NOT the reason
     # it moved last time. The comment here said: "THE READ COUNT MOVES OFF
@@ -1644,8 +1657,10 @@ async def test_the_surface_is_exactly_the_ninety_one_tools(tools):
     # and the write side is unmoved (its branch read fifty-seven beside
     # eighty-four); this second copy of the total moves to the measured
     # ninety-one with the first test's pin. MEASURED, never summed.
+    # NINETY-TWO ON LANE BUILD-JOBS2 (2026-11-26): a refusing write, so the
+    # non-write count holds at sixty-four. MEASURED, never summed.
     assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 64
-    assert len(tools) == 91
+    assert len(tools) == 92
 
 
 def test_the_read_that_was_nearly_named_a_write():
@@ -1769,6 +1784,8 @@ async def test_the_exemption_covers_only_the_names_on_it(tools):
         # 2026-11-24 (lane builds-26): the endorsement pair, refusing.
         "linkedin_endorse_skill",
         "linkedin_withdraw_endorsement",
+        # 2026-11-26 (lane build-jobs2): sanctioned and REFUSING (census J 19).
+        "linkedin_set_recent_job_searches_cleared",
     }
     # The probe has to be genuinely sanctioned for this to test the thing it
     # claims to. A name nobody ever specced would only show that made-up names
@@ -2411,9 +2428,11 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
     # notice a member arriving.
     # set_tracker_stage JOINED 2026-11-24 (lane builds-26): sanctioned and
     # refusing for want of a capture of the control it would press.
+    # set_recent_job_searches_cleared JOINED 2026-11-26 (lane build-jobs2,
+    # census J 19): refusing until the dialog its press opens is captured.
     assert set(not_performed) == {
         "set_open_to_work", "set_tracker_stage", "endorse_skill",
-        "withdraw_endorsement",
+        "withdraw_endorsement", "set_recent_job_searches_cleared",
     }
     assert "update_setting" not in set(not_performed)
     # update_profile_field LEFT THIS FIELD ON 2026-09-02 by shipping, which is
@@ -2818,8 +2837,11 @@ async def test_the_server_instructions_name_every_write_that_ships():
     # RE-POPULATED 2026-11-24 (lane builds-26), as foretold: the first
     # sanctioned-and-refusing action with a registered tool since
     # send_message, looked at and named in the instructions.
+    # AND ONE MORE 2026-11-26 (lane build-jobs2, census J 19), looked at and
+    # named in the instructions beside the three.
     assert examined == {
         "set_tracker_stage", "endorse_skill", "withdraw_endorsement",
+        "set_recent_job_searches_cleared",
     }, examined
     # AND THE CLAIM THAT NAMED THEM AS REFUSING HAD TO BE CORRECTED. It said
     # "none of them can act" of a set that is now empty, and a sentence

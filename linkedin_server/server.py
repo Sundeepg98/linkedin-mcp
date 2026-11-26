@@ -1,4 +1,13 @@
-"""The tool surface: ninety-one tools, twenty-four of which write to LinkedIn.
+"""The tool surface: ninety-two tools, twenty-four of which write to LinkedIn.
+
+THE NINETY-SECOND IS WRITE-SHAPED AND REFUSES, 2026-11-26, on lane
+build-jobs2 (census ``J 19``, ruling J-19-BUILT-BEHIND-THE-GRANT):
+``linkedin_set_recent_job_searches_cleared``, clearing the recent job searches on
+his jobs home. It is sanctioned and gated, reads the jobs home, prints what it
+saw and mints no token: what the Clear press opens has never been captured,
+and it fires only on his order. Measured off the registry, not summed:
+twenty-four write and four are write-shaped. The headline read "ninety-one
+tools, twenty-four of which write" until then.
 
 THE NINETY-FIRST IS A READ, 2026-11-26, at integration 4's merge of lane
 readers-msg26 (census ``M C93``, ruling CONTENT-VERTICAL-NOT-ALL-RESULTS):
@@ -467,9 +476,11 @@ POINTER to it was dangling, so a reader who followed it found nothing and
 would reasonably conclude these numbers are unchecked. A citation is a claim
 like any other.
 The surface splits three ways and the split is the part a reader actually
-needs: SIXTY-FOUR read, TWENTY-FOUR write, and THREE are write-shaped,
-registered, gated and unable to act. Sixty-four plus twenty-four plus three is
-ninety-one. (Sixty-three, twenty-four and three, summing to ninety, until
+needs: SIXTY-FOUR read, TWENTY-FOUR write, and FOUR are write-shaped,
+registered, gated and unable to act. Sixty-four plus twenty-four plus four is
+ninety-two. (Sixty-four, twenty-four and three, summing to ninety-one, until
+lane build-jobs2's refusing ``linkedin_set_recent_job_searches_cleared``,
+2026-11-26. Sixty-three, twenty-four and three, summing to ninety, until
 integration 4's merge of lane readers-msg26's content search, 2026-11-26; that
 lane's branch read fifty-seven, twenty-four and three, summing to eighty-four.
 Fifty-eight, twenty-four and three, summing to eighty-five, until
@@ -657,11 +668,13 @@ the moment ``update_profile_field`` was given an address while still refusing.
 always meant: an address is not a permission.
 
 NOTE THE ACTION THAT HAS NO TOOL. ``writes.SANCTIONED_WRITES`` holds
-TWENTY-EIGHT actions where this surface registers TWENTY-SEVEN write-shaped tools, and
+TWENTY-NINE actions where this surface registers TWENTY-EIGHT write-shaped tools, and
 the missing one is ``set_open_to_work``: it is sanctioned, it is refused by
-``_refuse_unperformable``, and no tool was ever registered for it. So twenty-seven
-counts TOOLS and twenty-eight counts ACTIONS, and a reader comparing the two
-numbers is not looking at a discrepancy. (TWENTY-SIX and TWENTY-FIVE on master
+``_refuse_unperformable``, and no tool was ever registered for it. So twenty-eight
+counts TOOLS and twenty-nine counts ACTIONS, and a reader comparing the two
+numbers is not looking at a discrepancy. (TWENTY-EIGHT and TWENTY-SEVEN until
+lane build-jobs2's refusing ``set_recent_job_searches_cleared``, 2026-11-26, added
+one to each. TWENTY-SIX and TWENTY-FIVE on master
 at lane build-jmn26's base, 4c62196, measured off that tree's registry -- this
 sentence still read twenty-three and twenty-two there, three behind each, the
 three refusing tools of lane builds-26 never added to it -- until that lane's
@@ -1286,7 +1299,11 @@ mcp = FastMCP(
         "linkedin_withdraw_endorsement, one skill of a person he names by "
         "profile link, never a name; each loads that profile, names whom it "
         "resolved to, counts the endorse-shaped buttons and refuses, because "
-        "the per-skill control has never been captured. "
+        "the per-skill control has never been captured. AND ONE MORE: "
+        "linkedin_set_recent_job_searches_cleared, clearing the recent job "
+        "searches on his jobs home; it reads the card and its Clear button "
+        "and refuses, because what that press opens has never been captured, "
+        "and it fires only on his order. "
         "THE NINETEENTH, linkedin_set_admitted_setting, changes ONE control "
         "on ONE settings page of his own account that is admitted by name, "
         "one page at a time; two are admitted: Share profile updates, whose "
@@ -9752,6 +9769,14 @@ _WHY_NOT_PERFORMED: dict[str, str] = {
         "loads the profile he names, counts the endorse-shaped buttons, and "
         "refuses; it is the half the round-trip rule proves first."
     ),
+    # LANE BUILD-JOBS2, 2026-11-26 (census J 19): sanctioned and refusing
+    # until the dialog its press opens is captured, at his order.
+    "set_recent_job_searches_cleared": (
+        "what the jobs home's Clear press opens has never been captured -- a "
+        "confirmation or nothing -- and a cleared history has no inverse. The "
+        "preview reads the card, its one Clear button and its searches, and "
+        "refuses; mint declines a grant at issue."
+    ),
 }
 
 
@@ -13929,6 +13954,43 @@ async def linkedin_search_content(keywords: str) -> dict[str, Any]:
 
 
 # ---- end lane readers-msg26 ----
+
+
+# ===========================================================================
+# lane build-jobs2, 2026-11-26 -- census J 19 (and the rows its later commits
+# add here). ONE contiguous block: this lane's tools, each over a real capture.
+# ===========================================================================
+
+
+@mcp.tool()
+async def linkedin_set_recent_job_searches_cleared(confirm_token: str = "") -> dict[str, Any]:
+    """Delete the recent job searches on your jobs home -- a write, and it REFUSES today.
+
+    Census row ``J 19``, ruled ``J-19-BUILT-BEHIND-THE-GRANT``: built behind the
+    grant, refusing until its confirm dialog is captured, and it fires only on
+    your order. THIS TOOL CANNOT PERFORM, and it says why rather than guessing:
+    the jobs home draws the card headed "Recent job searches" with one "Clear"
+    button (session 2's capture), and what that press opens -- a confirmation,
+    or nothing -- has never been captured. Nothing here restores a cleared
+    history.
+
+    WHAT A CALL DOES. Your jobs home is read live, once: the card, its one
+    Clear button, and how many searches it lists, counted and never read out
+    (``linkedin_recent_job_searches`` returns the searches themselves). NO
+    CONFIRM TOKEN IS ISSUED, at any step: the block is a warning, and its
+    refusal names the capture that would lift it.
+
+    Args:
+        confirm_token: accepted for the shape every write shares; no token is
+            ever issued for this tool, so none can be redeemed.
+    """
+    try:
+        return await _write_tool("set_recent_job_searches_cleared", "self", confirm_token)
+    except Exception as exc:
+        return _error(exc)
+
+
+# ---- end lane build-jobs2 ----
 
 
 def main() -> None:  # pragma: no cover - process entry point

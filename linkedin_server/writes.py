@@ -224,6 +224,7 @@ from linkedin_server import (
     people_data,
     people_seam,
     profile_editor,
+    recent_searches_clear,
     search_alert_switch,
     settings_writer,
     shape,
@@ -3053,6 +3054,70 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "items WITHOUT pressing one -- the capture this act waits on. Then "
             "one supervised move of a job he names, read back on the "
             "destination tab, and moved back."
+        ),
+    ),
+    # LANE BUILD-JOBS2, 2026-11-26 (census row ``J 19``, ruled
+    # J-19-BUILT-BEHIND-THE-GRANT): clearing his recent job searches on the
+    # jobs home. SANCTIONED AND NOT PERFORMABLE -- the ``set_tracker_stage``
+    # shape -- because what the Clear press opens has never been captured.
+    # Its preview reads the jobs home for itself
+    # (``_read_recent_searches_clear``) and prints what it saw; ``mint``
+    # refuses it a grant at issue, and its own refusal in ``_NINE_REFUSALS``
+    # names the capture that would lift it.
+    "linkedin_set_recent_job_searches_cleared": WriteSpec(
+        action="set_recent_job_searches_cleared",
+        tool_name="linkedin_set_recent_job_searches_cleared",
+        url_template=None,
+        url_pattern=None,
+        exempt_substring=None,
+        summary=(
+            "Clear the recent job searches listed on your jobs home "
+            "(census J 19)."
+        ),
+        from_state=recent_searches_clear.SEARCHES_LISTED,
+        to_state="searches_cleared",
+        target_kind="self",
+        state_from="jobs_home_recent_searches",
+        direction_source=(
+            "your jobs home, /jobs/jam/, read by this gate: the one card "
+            "headed 'Recent job searches', the one button in it whose own text "
+            "reads 'Clear', and the searches its list draws -- counted, never "
+            "read out. WHAT THE PRESS OPENS IS NOT READ: no capture shows it "
+            "(measured on tests/fixtures/live2/j18_words.html, session 2's "
+            "jobs home with LinkedIn's words written by keyed shape)."
+        ),
+        wrong_state_note=(
+            "This act starts from a jobs home whose recent-searches card draws "
+            "its Clear button and at least one search. A card that cannot be "
+            "found, a second Clear button, or an empty list is not read as "
+            "anything to clear: an empty card has never been captured."
+        ),
+        reversibility="STILL-UNKNOWN whether anything restores a cleared search history",
+        reversibility_measured=False,
+        reversibility_class="STILL-UNKNOWN",
+        reversibility_evidence=(
+            "NOT MEASURED: no clear has been made or watched, and what the "
+            "Clear press opens has never been captured. No control that puts "
+            "a cleared search back is drawn on the captured jobs home."
+        ),
+        reversible_by=(
+            "NOT this server: nothing here restores a search. By hand, he can "
+            "run each search again, which re-enters it in the history; whether "
+            "its alert badge returns with it is unmeasured."
+        ),
+        residue=(
+            "UNMEASURED: whether clearing the history also touches the job "
+            "alerts the searches carry (three of six carried the alert badge "
+            "on the J 18 fire), and whether LinkedIn asks to confirm. Treated "
+            "as having no inverse until a capture says otherwise."
+        ),
+        irreversible=True,
+        reversibility_procedure=(
+            "The press, ONCE, AT HIS ORDER -- the capture this act waits on: "
+            "press Clear on the jobs home and read whatever it opens WITHOUT "
+            "confirming it, then close it on Escape and read the card again. "
+            "Then a reader requiring exactly that dialog's confirm control, and "
+            "a verification reading the card after it."
         ),
     ),
     # LANE BUILDS-26, 2026-11-24 (census rows ``P E4`` / ``N 111``, and the
@@ -5989,6 +6054,23 @@ async def _read_tracker_stage_row(
     return facts, state, why
 
 
+async def _read_recent_searches_clear(
+    page: Any, spec: WriteSpec, *, target: str
+) -> tuple[dict[str, Any], str, str]:
+    """``set_recent_job_searches_cleared``' preview read: the jobs home's Clear.
+
+    LANE BUILD-JOBS2, 2026-11-26 (census ``J 19``). Counts only, off the one
+    load ``observe`` made: the card headed 'Recent job searches', its one
+    Clear button, and how many searches it lists
+    (``recent_searches_clear.read_clear_control``). ``confirm_dialog_read`` is
+    ``False`` in the facts rather than left to be inferred: what the press
+    opens has never been captured, and that is the refusal's ground.
+    """
+    reading = await recent_searches_clear.read_clear_control(page)
+    state, why = recent_searches_clear.state_of(reading)
+    return dict(reading), state, why
+
+
 #: WHICH SURFACE EACH REFUSING ACTION READS, and it is chosen by the SPEC's own
 #: ``state_from`` rather than by anything a caller passes -- the same rule the
 #: four original actions follow. Each entry is (url, surface name for the
@@ -6032,6 +6114,12 @@ _SURFACE_READS: dict[str, tuple[str, str, Any]] = {
     # LANE BUILDS-26, 2026-11-24: the Saved tab, for ``set_tracker_stage`` --
     # a refusing action, so its preview reads and prints and mints nothing.
     "tracker_saved_row": (SAVED_LIST_URL, "saved jobs", _read_tracker_stage_row),
+    # LANE BUILD-JOBS2, 2026-11-26: the jobs home, for the refusing
+    # ``set_recent_job_searches_cleared`` (census J 19) -- it reads, prints and
+    # mints nothing.
+    "jobs_home_recent_searches": (
+        recent_searches_clear.HOME_URL, "jobs home", _read_recent_searches_clear,
+    ),
 }
 
 
@@ -6910,6 +6998,12 @@ def _render(
             "follow. This surface has no pagination control, so the rest were "
             "not shown and could not have been."
         )
+    elif spec.target_kind == "self" and spec.state_from == "jobs_home_recent_searches":
+        # HIS OWN JOBS HOME, NOT HIS PROFILE (lane build-jobs2, J 19): the
+        # "self" kind's branch below names his profile, which this act never
+        # touches. What the page showed is counts only.
+        where["whose"] = "your own jobs home: the recent job searches card"
+        where["what_the_page_showed"] = observation.facts
     elif spec.target_kind == "self":
         where["whose"] = "your own LinkedIn profile"
         where["name"] = observation.facts.get("name")
@@ -8416,6 +8510,22 @@ _NINE_REFUSALS: dict[str, str] = {
         "endorsement from him, the endorsed label read without pressing; then "
         "an anchor on that label and a fresh render reading it gone. Under the "
         "round-trip rule this is the half proven first."
+    ),
+    # LANE BUILD-JOBS2, 2026-11-26 (census J 19, J-19-BUILT-BEHIND-THE-GRANT):
+    # refusing until its confirm dialog is captured, as the ruling says.
+    "set_recent_job_searches_cleared": (
+        "set_recent_job_searches_cleared is sanctioned and cannot be performed: what "
+        "its press opens has never been captured. MEASURED on "
+        "tests/fixtures/live2/j18_words.html, session 2's jobs home with "
+        "LinkedIn's words written by keyed shape: exactly 1 card headed "
+        "'Recent job searches', exactly 1 button in it whose own text reads "
+        "'Clear', and 6 searches listed under it. Whether the press asks to "
+        "confirm, and with what control, has never been read, and the act has "
+        "no inverse. WHAT WOULD LIFT IT: the press, ONCE, AT HIS ORDER, with "
+        "whatever it opens read and closed on Escape and nothing confirmed "
+        "(J-19-BUILT-BEHIND-THE-GRANT: it fires only on his order); then a "
+        "reader requiring exactly that dialog's confirm control, and a "
+        "verification reading the card after it."
     ),
 }
 

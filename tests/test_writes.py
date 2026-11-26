@@ -808,6 +808,10 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         # per-skill control has never been captured.
         "endorse_skill",
         "withdraw_endorsement",
+        # LANE BUILD-JOBS2, 2026-11-26: sanctioned and NOT performable --
+        # clearing his recent job searches (census J 19), refusing until the
+        # dialog its press opens is captured (J-19-BUILT-BEHIND-THE-GRANT).
+        "set_recent_job_searches_cleared",
     }
     # THREE UNTIL 2026-08-25, four until 2026-08-30, five since. This line read
     # ``{"save_job", "unsave_job", "unfollow_company"}``.
@@ -996,6 +1000,8 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         "set_tracker_stage",
         "endorse_skill",
         "withdraw_endorsement",
+        # LANE BUILD-JOBS2, 2026-11-26 (census J 19), by registration again.
+        "set_recent_job_searches_cleared",
     }
     # AND EVERY ONE OF THEM MUST SAY WHY, individually. The dict is keyed by
     # action, so a fourteenth spec that is not performable and writes no
@@ -1024,6 +1030,8 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
     # refusing action, its refusal itemised by name.
     assert set(writes._NINE_REFUSALS) == {
         "set_tracker_stage", "endorse_skill", "withdraw_endorsement",
+        # LANE BUILD-JOBS2, 2026-11-26 (census J 19).
+        "set_recent_job_searches_cleared",
     }, sorted(writes._NINE_REFUSALS)
     for action in sanctioned_actions - writes.PERFORMABLE:
         if action == "set_open_to_work":
@@ -1105,6 +1113,8 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         "set_tracker_stage",
         "endorse_skill",
         "withdraw_endorsement",
+        # LANE BUILD-JOBS2, 2026-11-26: refusing (census J 19), the same.
+        "set_recent_job_searches_cleared",
     }
     # AND THE ONE THAT LEFT, asserted rather than left as an absence -- the
     # same treatment apply got when its surface was measured.
@@ -1437,8 +1447,13 @@ async def test_exactly_the_performable_writes_are_registered():
     #       profile he names through the named-profile door and count the
     #       endorse-shaped buttons; refuse because no capture holds the
     #       per-skill control in either state.
+    #   linkedin_set_recent_job_searches_cleared  (lane build-jobs2, 2026-11-26,
+    #       census J 19) reads the jobs home -- the card headed Recent job
+    #       searches, its one Clear button, its searches, counted -- and
+    #       refuses because what the press opens has never been captured.
     assert grant_incapable == [
         "linkedin_endorse_skill",
+        "linkedin_set_recent_job_searches_cleared",
         "linkedin_set_tracker_stage",
         "linkedin_withdraw_endorsement",
     ], (
@@ -1536,6 +1551,8 @@ _UNMEASURED_REVERSIBILITY = {
     "set_tracker_stage",
     "endorse_skill",
     "withdraw_endorsement",
+    # 2026-11-26 (lane build-jobs2, J 19). No clear has been made or watched.
+    "set_recent_job_searches_cleared",
 }
 
 REVERSIBILITY_CLASS = {
@@ -1592,6 +1609,8 @@ REVERSIBILITY_CLASS = {
     "set_tracker_stage": "STILL-UNKNOWN",
     "endorse_skill": "STILL-UNKNOWN",
     "withdraw_endorsement": "STILL-UNKNOWN",
+    # 2026-11-26 (lane build-jobs2): see _UNMEASURED_REVERSIBILITY.
+    "set_recent_job_searches_cleared": "STILL-UNKNOWN",
 }
 
 #: Which actions have had their reversibility MEASURED. Split out from the
@@ -1628,6 +1647,7 @@ REVERSIBILITY_MEASURED = {
     "set_tracker_stage": False,
     "endorse_skill": False,
     "withdraw_endorsement": False,
+    "set_recent_job_searches_cleared": False,
 }
 
 def test_the_two_reversibility_tables_agree_with_each_other():

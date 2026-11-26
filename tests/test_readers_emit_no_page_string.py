@@ -1354,6 +1354,29 @@ WHAT_WOULD_DRIVE_IT: dict[str, str] = {
         "answers are states, the caller's id and booleans, so a drive would "
         "come back clean."
     ),
+    # LANE BUILD-JOBS2, 2026-11-26 (census J 19): the jobs home's Clear card,
+    # and the refusing write's thin wrapper over it.
+    "recent_searches_clear:read_clear_control": (
+        "WORDS: it finds a section by its h2's words (Recent job searches), "
+        "a button in it by its own text span (Clear) and the li items of the "
+        "list labelled with the heading; the planted page answers every text "
+        "with the plant, so no card is found and the reading is an empty "
+        "shape. Its success path runs in a headless browser over "
+        "tests/fixtures/live2/j18_words.html in "
+        "tests/test_recent_searches_clear.py: "
+        "test_the_card_its_clear_button_and_its_searches_are_read_off_the_capture "
+        "reads one card, one button, one list and six searches. Its answers "
+        "are counts and one boolean, so a drive would come back clean."
+    ),
+    "writes:_read_recent_searches_clear": (
+        "WORDS: a thin wrapper over recent_searches_clear.read_clear_control "
+        "and its verdict, so it misses its success path on the planted page "
+        "for exactly that reader's reason. Its success path runs in a headless "
+        "browser in tests/test_recent_searches_clear.py: "
+        "test_the_preview_reads_the_jobs_home_once_and_issues_no_token. Its "
+        "answers are counts, one boolean and a state, so a drive would come "
+        "back clean."
+    ),
     "writes:_read_tracker_membership": (
         "WORDS: it keys on a tracker tab's count in LinkedIn's tab strip, read "
         "from main's text, and its rows come from dom.harvest_linked_cards, a "
