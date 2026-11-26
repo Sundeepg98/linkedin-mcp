@@ -8,8 +8,10 @@ The measured maximum is now the ceiling, and this module enforces it.
 
 HOW. Every MCP ``tools/call`` runs inside :class:`PerCallCeiling`, a fastmcp
 middleware that server.py registers once. It arms a per-call budget in a
-context variable. ``browser.LinkedInBrowser.goto`` spends one load from that
-budget BEFORE it waits for the rate slot or touches the page, and the load
+context variable. ``browser.LinkedInBrowser.goto`` counts each load against
+that budget (:func:`count_load`, not "spend": that verb is the grant
+model's, held to ``writes.perform`` alone) BEFORE it waits for the rate slot
+or touches the page, and the load
 that would exceed the budget is REFUSED there, with a
 :class:`~linkedin_server.errors.NavigationCeilingError` naming what it saw:
 the loads already made, the ceiling, and the refused page's family (its
@@ -85,7 +87,7 @@ def allow_fan_out(loads: int) -> int:
     return budget.limit
 
 
-def spend(url: str) -> None:
+def count_load(url: str) -> None:
     """Count one page load against the armed budget, or refuse it unloaded.
 
     Called by ``LinkedInBrowser.goto`` after its door and before its rate slot.

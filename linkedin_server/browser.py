@@ -18,7 +18,7 @@ What this module guarantees, and why each guarantee exists:
   page loads on one human's account.
 
 * **At most three page loads per tool call.** :meth:`LinkedInBrowser.goto`
-  spends each load from the budget ``call_ceiling.PerCallCeiling`` arms
+  counts each load against the budget ``call_ceiling.PerCallCeiling`` arms
   around every MCP tool call, and it refuses the load past
   :data:`config.MAX_NAVIGATIONS_PER_CALL` before making it. Outside a tool
   call, for the live lane's runner and the probes, nothing is counted
@@ -603,11 +603,11 @@ class LinkedInBrowser:
             assert_named_profile_url(url)
         else:
             assert_read_url(url)
-        # THE PER-CALL CEILING, spent AFTER the doors (a refused address costs
+        # THE PER-CALL CEILING, counted AFTER the doors (a refused address costs
         # nothing) and BEFORE the rate slot and the page: a load over the
         # ceiling is refused unloaded. Counts only inside an MCP tool call
         # (call_ceiling.PerCallCeiling); NAVIGATION-CEILING-MADE-TRUE.
-        call_ceiling.spend(url)
+        call_ceiling.count_load(url)
         await self.wait_for_rate_slot()
         try:
             await page.goto(url, wait_until="domcontentloaded", timeout=NAV_TIMEOUT_MS)

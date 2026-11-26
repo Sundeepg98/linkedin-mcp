@@ -12916,8 +12916,9 @@ package passing, and an extra root read. Its deletion assertion was red on
 ### 109.2 The per-call navigation ceiling
 
 `linkedin_server/call_ceiling.py`: a fastmcp middleware arms a per-call
-budget for every `tools/call`. `LinkedInBrowser.goto` spends it after its
-doors and before its rate slot, and it refuses the fourth load unmade,
+budget for every `tools/call`. `LinkedInBrowser.goto` counts each load
+against it (`count_load`) after its doors and before its rate slot, and it
+refuses the fourth load unmade,
 naming the count, the ceiling and the page family. The one declared fan-out
 is the search's places, capped at `jobfilter.MAX_LOCATIONS`; its single call
 site is pinned. Outside a tool call nothing is counted: the live runner loads

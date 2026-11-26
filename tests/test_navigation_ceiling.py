@@ -111,13 +111,13 @@ def test_a_fan_out_outside_a_tool_call_does_nothing_and_never_lowers_a_budget():
         assert call_ceiling.allow_fan_out(2) == 4
 
 
-def test_spend_refuses_with_the_ceiling_error_and_counts_the_loads():
+def test_count_load_refuses_with_the_ceiling_error_and_counts_the_loads():
     with call_ceiling.per_call(2):
-        call_ceiling.spend(FEED)
-        call_ceiling.spend(FEED)
+        call_ceiling.count_load(FEED)
+        call_ceiling.count_load(FEED)
         assert call_ceiling.made() == 2
         with pytest.raises(NavigationCeilingError):
-            call_ceiling.spend(FEED)
+            call_ceiling.count_load(FEED)
         assert call_ceiling.made() == 2
     assert call_ceiling.made() is None
 
@@ -148,15 +148,15 @@ def test_the_fan_out_has_one_caller_and_it_is_the_search_over_its_places():
     assert callers == [("server.py", "linkedin_search_jobs", "len(places)")], callers
 
 
-def test_goto_spends_before_the_rate_slot_and_the_page():
-    """Read with ast: the spend is the first thing after the doors."""
+def test_goto_counts_the_load_before_the_rate_slot_and_the_page():
+    """Read with ast: the count is the first thing after the doors."""
     tree = ast.parse((REPO / "linkedin_server" / "browser.py").read_text(encoding="utf-8"))
     goto = next(n for n in ast.walk(tree) if isinstance(n, ast.AsyncFunctionDef) and n.name == "goto")
     order = [ast.unparse(s) for s in goto.body if not isinstance(s, ast.Expr)
              or not isinstance(s.value, ast.Constant)]
-    spend = next(i for i, s in enumerate(order) if "call_ceiling.spend(url)" in s)
+    counted = next(i for i, s in enumerate(order) if "call_ceiling.count_load(url)" in s)
     slot = next(i for i, s in enumerate(order) if "wait_for_rate_slot" in s)
-    assert spend < slot, order[:4]
+    assert counted < slot, order[:4]
 
 
 def test_no_statement_claims_a_lower_ceiling():

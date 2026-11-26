@@ -390,7 +390,7 @@ def _full_name(value: str) -> Optional[str]:
     return v if len(v.split()) >= 2 else None
 
 
-def learn_own(page: _Page, objs: list[Any], slug: str, *, member_ids: Iterable[str] = (),
+def learn_own(doc: _Page, objs: list[Any], slug: str, *, member_ids: Iterable[str] = (),
               photo_ids: Iterable[str] = (), names: Iterable[str] = (),
               known: Optional[Own] = None) -> Own:
     """His identity from what this page draws of him, plus what is known.
@@ -408,10 +408,10 @@ def learn_own(page: _Page, objs: list[Any], slug: str, *, member_ids: Iterable[s
         ids |= known.member_ids
         photos |= known.photo_ids
         forms |= known.names
-    for alt in page.me_alts:
+    for alt in doc.me_alts:
         if _full_name(alt):
             forms.add(_h(_full_name(alt)))
-    for src in page.me_srcs:
+    for src in doc.me_srcs:
         m = MEDIA_ASSET.search(src)
         if m:
             photos.add(_h(m.group("id")))
@@ -570,15 +570,15 @@ def judge(html: str, *, slug: str = "", page_url: str = "", page_key: str = "",
     counts = {rule: 0 for rule in RULES}
     reasons: list[str] = []
     try:
-        page = _Page()
-        page.feed(html)
-        page.close()
+        doc = _Page()
+        doc.feed(html)
+        doc.close()
     except Exception:  # noqa: BLE001 - a page that cannot be parsed withholds
         counts["PARSE"] = 1
         return Verdict(WITHHOLD, ("PARSE: the page could not be parsed",), counts, _digest(html))
-    objs = _json_blocks(page.code)
+    objs = _json_blocks(doc.code)
     known = read_own_cache(own_cache, slug)
-    own = learn_own(page, objs, slug, member_ids=member_ids, photo_ids=photo_ids, names=names,
+    own = learn_own(doc, objs, slug, member_ids=member_ids, photo_ids=photo_ids, names=names,
                     known=known)
     learned = own.member_ids or own.photo_ids or own.names
     if own_cache is not None and own.slug and learned and (
@@ -591,7 +591,7 @@ def judge(html: str, *, slug: str = "", page_url: str = "", page_key: str = "",
 
     # R2: profile-display assets in DOM images, the string, and payloads.
     photos = set()
-    for src in page.img_srcs:
+    for src in doc.img_srcs:
         m = MEDIA_ASSET.search(src or "")
         if m and m.group("kind").startswith("profile-display"):
             photos.add(m.group("id"))
@@ -615,12 +615,12 @@ def judge(html: str, *, slug: str = "", page_url: str = "", page_key: str = "",
     counts["R3"] = a11y
 
     # R4: link-less social-proof lines, in text, labels and payload strings.
-    orgs = set(page.org_texts)
+    orgs = set(doc.org_texts)
     for o in objs:
         for d in _dicts(o):
             if _type_of(d).endswith(_ORG_TYPES) and isinstance(d.get("name"), str):
                 orgs.add(norm(d["name"]).lower())
-    sources = list(page.texts) + list(page.labels)
+    sources = list(doc.texts) + list(doc.labels)
     for o in objs:
         sources.extend(_strings(o))
     proof = 0
@@ -642,7 +642,7 @@ def judge(html: str, *, slug: str = "", page_url: str = "", page_key: str = "",
     counts["R5"] = int(by_address) + int(by_payload)
 
     # L1: member links that are not his (v1's rule, on the string).
-    counts["L1"] = len({s for s in page.member_slugs if s not in ("me", own.slug)})
+    counts["L1"] = len({s for s in doc.member_slugs if s not in ("me", own.slug)})
 
     # N1: the repo guard's person slots and profile-card name slots.
     slot_values = _name_slot_values(html, own.slug)
@@ -651,7 +651,7 @@ def judge(html: str, *, slug: str = "", page_url: str = "", page_key: str = "",
         reasons.append("N1 name-slots: the fixture guard's slot reader could not run, so "
                        "nothing was cleared")
     else:
-        counts["N1"] = sum(1 for v in list(slot_values) + page.name_slots
+        counts["N1"] = sum(1 for v in list(slot_values) + doc.name_slots
                            if norm(v) and not own.has_name(v) and not is_reduced_to_shape(v))
 
     sentences = {

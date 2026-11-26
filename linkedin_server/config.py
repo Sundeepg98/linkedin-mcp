@@ -233,8 +233,8 @@ MIN_NAVIGATION_INTERVAL_S = float(
     os.environ.get("LINKEDIN_MIN_INTERVAL_S", "20.0")
 )
 
-#: AT MOST THREE PAGE LOADS PER TOOL CALL, ENFORCED. ``browser.goto`` spends
-#: one load per navigation from a per-call budget that
+#: AT MOST THREE PAGE LOADS PER TOOL CALL, ENFORCED. ``browser.goto`` counts
+#: one load per navigation against a per-call budget that
 #: ``call_ceiling.PerCallCeiling`` arms around every MCP tool call, and it
 #: refuses the fourth BEFORE loading it (NAVIGATION-CEILING-MADE-TRUE, ruled
 #: 2026-11-26). It is the MEASURED maximum: 31 tools reach 3, among them
