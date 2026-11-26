@@ -97,6 +97,12 @@ EXPECTED_TOOLS = (
     # 2026-10-10, lane B4: a READ of an organisation People tab's insight
     # cards (census J 108), the first tool to open a roster address.
     "linkedin_company_people_insights",
+    # 2026-11-26, lane readers-jobs26: a READ of one tab of a Page -- About,
+    # Events or Insights (census J 106, J 113, J 165).
+    "linkedin_company_page_tab",
+    # 2026-11-26, lane readers-jobs26: a READ of his resumes and application
+    # data page (census P M2).
+    "linkedin_application_settings",
     # 2026-10-10, lane B1 (lb1-audience): a READ, his follower count and
     # demographics off one admitted page; census P L1, banked at merge.
     "linkedin_audience_analytics",
@@ -462,4 +468,7 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # EIGHTY-THREE AT INTEGRATION 3'S MERGE OF LANE BUILD-JMN26, 2026-11-26: the
     # search-alert pair beside the eighty-one, measured off the merged registry,
     # not summed.
-    assert len(_tool_names()) == 83
+    # EIGHTY-FOUR ON LANE READERS-JOBS26 (2026-11-26): one tab of a Page, a
+    # read, measured off this branch's registry.
+    # EIGHTY-FIVE ON THE SAME LANE: his application settings page, a read.
+    assert len(_tool_names()) == 85

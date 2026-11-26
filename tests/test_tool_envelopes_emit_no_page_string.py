@@ -136,6 +136,28 @@ RETURNS_RECORDS = "returns_records"
 #: authwall gate sees the address the tool asked for.
 SAFE_LANDING = "https://www.linkedin.com/feed/"
 
+#: THE ONE DOOR INTO THE TEXT INVENTORY, AND IT IS NARROW (2026-11-26, the
+#: orchestrator's ruling HIS-OWN-TEXT-AT-RUNTIME, answering lane
+#: readers-jobs26's question 2): a tool may return text HE authored or uploaded
+#: on his OWN account -- his stored resume file names, his job alerts' query
+#: words -- to his own session at runtime. Fixtures carry synthetic stand-ins;
+#: tracked files, tests, CI and console never hold the real values.
+#:
+#: NARROW IN THREE WAYS, each held by a test below: a tool enters only BY NAME,
+#: with the page it reads and the fields it returns; its one reason is
+#: :data:`HIS_OWN_AUTHORED`, so an aggregate or a third party's words cannot be
+#: filed here; and no tool in ``people_data.PEOPLE_TOOLS`` -- the tools whose
+#: answer is OTHER members' words -- may hold the door, so third-party text keeps
+#: its one channel, the record.
+HIS_OWN_AUTHORED = "text he authored or uploaded on his own account"
+ADMITTED_OWN_TEXT: dict[str, tuple[str, str]] = {
+    "linkedin_application_settings": (
+        HIS_OWN_AUTHORED,
+        "/jobs/application-settings/: each stored resume's file name, which he uploaded",
+    ),
+}
+
+
 def _error_kinds() -> frozenset[str]:
     """Every value ``server._error`` can put in ``error``. Discovered, not listed.
 
@@ -590,7 +612,7 @@ def test_the_driven_set_has_not_silently_shrunk(verdicts):
     )
     assert not regressed, "these stopped being driven: %s" % ", ".join(regressed)
     # THE LEGACY TEXT INVENTORY MAY SHRINK AND MAY NOT GROW (2026-09-24).
-    ratchet = text_ratchet(recorded, live)
+    ratchet = text_ratchet(recorded, live, ADMITTED_OWN_TEXT)
     assert not ratchet, (
         "the page-text inventory moved: %s. A page string leaves only through a "
         "people_data record: a NEW text path must return records instead; a "
@@ -598,6 +620,36 @@ def test_the_driven_set_has_not_silently_shrunk(verdicts):
         "be regenerated so the inventory shrinks; LOST RECORDS means a "
         "converted tool fell back." % "; ".join(ratchet)
     )
+
+
+def test_the_own_text_door_admits_by_name_and_for_his_own_text_only():
+    """HIS-OWN-TEXT-AT-RUNTIME's door, held narrow: each entry's reason is the
+    one own-text reason and names the page and the fields; no people tool --
+    whose answer is other members' words -- holds it."""
+    from linkedin_server import people_data
+
+    for tool, (reason, scope) in ADMITTED_OWN_TEXT.items():
+        assert reason == HIS_OWN_AUTHORED, tool
+        assert scope.startswith("/") and ": " in scope, tool
+    assert not set(ADMITTED_OWN_TEXT) & set(people_data.PEOPLE_TOOLS)
+
+
+def test_the_own_text_door_opens_for_its_tool_and_no_other():
+    """RED FIRST, the door's control: the same new text path is refused for a
+    tool the door does not name -- a third party's text arriving through any
+    other tool stays a new text path -- and admitted for the one it names."""
+    was = {"linkedin_application_settings": CLEAN, "linkedin_planted_third_party": CLEAN}
+    now = {"linkedin_application_settings": RETURNS_TEXT, "linkedin_planted_third_party": RETURNS_TEXT}
+    shut = text_ratchet(was, now)
+    assert sorted(shut) == [
+        "new text path: linkedin_application_settings (clean -> returns_text)",
+        "new text path: linkedin_planted_third_party (clean -> returns_text)",
+    ]
+    opened = text_ratchet(was, now, ADMITTED_OWN_TEXT)
+    assert opened == ["new text path: linkedin_planted_third_party (clean -> returns_text)"]
+    assert text_paths_a_baseline_may_not_record(was, now, ADMITTED_OWN_TEXT) == [
+        "linkedin_planted_third_party"
+    ]
 
 
 def records_outside_the_people_tools(rows: list[dict[str, Any]]) -> list[str]:
@@ -654,7 +706,7 @@ def write_baseline() -> dict[str, Any]:
     if BASELINE_PATH.exists():
         committed = json.loads(BASELINE_PATH.read_text(encoding="utf-8"))["tools"]
     new_text = text_paths_a_baseline_may_not_record(
-        committed, {row["tool"]: row["verdict"] for row in rows}
+        committed, {row["tool"]: row["verdict"] for row in rows}, ADMITTED_OWN_TEXT
     )
     if new_text:
         raise SystemExit(

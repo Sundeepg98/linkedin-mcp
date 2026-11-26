@@ -7,9 +7,8 @@ J 33	J	W	-	TARGET:a job alert of his he names	INFERRED	RULING:HIS-OWN-CURATION-N
 J 34	J	W	-	TARGET:a job alert of his he names	INFERRED	RULING:HIS-OWN-CURATION-NOT-OUTWARD ; J 33
 J 35	J	W	-	SIBLING:lane-S	NAMED	_audit/_census/jobs-directions.tsv::Alert frequency is a setting ; RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 J 36	J	W	-	SIBLING:lane-S	NAMED	_audit/_census/jobs-directions.tsv::Alert delivery channel is a setting ; RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
-J 37	J	R+W	-	CAPTURE:jobs-alerts-manager	NAMED	RULING:CAPTURE-PRESS-UNDER-PROBE-RULE ; _audit/_census/jobs-directions.tsv::whether that list carries EVERY alert is unmeasured
+J 37	J	R+W	-	BUILD:tests/fixtures/live11/jobs_alerts_manager.html	MEASURED	_audit/2026-11-26-readers-jobs26.md::IT DRAWS THE ; RULING:NAMES-AT-RUNTIME
 J 41	J	W	-	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
-J 52	J	R	-	CAPTURE:admit-jobs-tracker-stage-clicked-apply	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/jobs-tracker/?stage=clicked_apply ; RULING:READ-PAST-AN-ACT-SUBSTRING
 J 53	J	W	-	CAPTURE:C-JMN-1	MEASURED	_audit/2026-11-25-build-jmn26.md::No capture of the Archived tab with a row exists ; RULING:HIS-OWN-CURATION-NOT-OUTWARD
 J 54	J	W	-	TARGET:a tracked job of his he names	INFERRED	RULING:HIS-OWN-CURATION-NOT-OUTWARD ; J 54
 J 55	J	W	-	TARGET:a tracked job of his he names	MEASURED	_audit/2026-11-25-build-jmn26.md::CAPTURE-PRESS-UNDER-PROBE-RULE never opens ; RULING:HIS-OWN-CURATION-NOT-OUTWARD
@@ -23,11 +22,10 @@ J 65	J	W	-	TARGET:a job with a multi-step Easy Apply he names to apply to	NAMED	
 J 68	J	W	-	TARGET:a job with a multi-step Easy Apply he names to apply to	NAMED	_audit/_census/jobs.md::Easy Apply, MULTI-STEP form (a posting that draws Next) ; RULING:OPERATOR-NAMES-THE-TARGET
 J 69	J	W	-	TARGET:a draft application of his he names to discard	INFERRED	RULING:OPERATOR-NAMES-THE-TARGET ; J 69
 J 70	J	W	-	SIBLING:lane-U	NAMED	_audit/2026-09-28-rulings-build-classes.md::`FILE-UPLOAD-UNSANCTIONED` is therefore a stale label.
-J 71	J	R+W	-	CAPTURE:admit-jobs-application-settings	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/jobs/application-settings/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
-J 72	J	R	-	CAPTURE:admit-jobs-application-settings	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/jobs/application-settings/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
-J 73	J	R	-	CAPTURE:admit-jobs-application-settings	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/jobs/application-settings/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
+J 71	J	R+W	-	CAPTURE:C-RJ26-3	MEASURED	_audit/2026-11-26-readers-jobs26.md::THE OPTIONS MENU IS WHERE FIVE ROWS WAIT. ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
+J 72	J	R	-	CAPTURE:C-RJ26-3	MEASURED	_audit/2026-11-26-readers-jobs26.md::THE OPTIONS MENU IS WHERE FIVE ROWS WAIT. ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
+J 73	J	R	-	TARGET:a job he applied to, and its poster	MEASURED	_audit/2026-11-26-readers-jobs26.md::THE PAGE TIES NO RESUME TO AN APPLICATION. ; RULING:OPERATOR-NAMES-THE-TARGET
 J 74	J	W	-	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
-J 75	J	W	-	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 J 76	J	W	-	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 J 78	J	W	-	RULING:Q-AI-GENERATING-LOADS	INFERRED	_audit/_census/jobs-directions.tsv::Create cover letter ; RULING:READ-PAST-AN-ACT-SUBSTRING
 J 79	J	W	-	TARGET:a job he names to mark Top Choice (one of three monthly marks, not refunded)	INFERRED	RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS ; J 79
@@ -51,13 +49,10 @@ J 97	J	W	-	SIBLING:P I9	INFERRED	P I9
 J 98	J	W	-	SIBLING:P I13	INFERRED	P I13
 J 99	J	W	-	SIBLING:P I12	NAMED	_audit/_census/jobs.md::Container: `P I12`
 J 100	J	W	-	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
-J 106	J	R	-	CAPTURE:admit-company-org-about	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/company/placeholder-org/about/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
-J 109	J	R	-	CAPTURE:admit-company-org-life	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/company/placeholder-org/life/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
-J 168	J	R	-	BUILD:tests/fixtures/live9/company_root_posts_view.html	MEASURED	_audit/2026-11-25-build-jmn26.md::So the Home half is delivered unfired ; RULING:THIRD-PARTY-TEXT-AT-RUNTIME
-J 111	J	R	-	CAPTURE:admit-company-org-products	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/company/placeholder-org/products/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
+J 109	J	R	-	BUILD:tests/fixtures/live11/company_life.html	MEASURED	_audit/2026-11-26-readers-jobs26.md::over a carousel of ; RULING:THIRD-PARTY-TEXT-AT-RUNTIME
+J 111	J	R	-	CAPTURE:C-RJ26-2	MEASURED	_audit/2026-11-26-readers-jobs26.md::That organisation has no ; RULING:READ-PAST-AN-ACT-SUBSTRING
 J 112	J	R	-	TARGET:a school Page he names	NAMED	_audit/_census/read-addresses.tsv::UNDER THE WHO/WHICH RULE, EXTENDED ; RULING:OPERATOR-NAMES-THE-TARGET
-J 113	J	R	-	CAPTURE:admit-company-org-insights-insighttype-headcount	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/company/placeholder-org/insights/?insightType=HEADCOUNT ; RULING:READ-PAST-AN-ACT-SUBSTRING
-J 114	J	R	-	CAPTURE:admit-company-org-insights-insighttype-headcount	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/company/placeholder-org/insights/?insightType=HEADCOUNT ; RULING:READ-PAST-AN-ACT-SUBSTRING
+J 169	J	R	-	CAPTURE:C-RJ26-1	MEASURED	_audit/2026-11-26-readers-jobs26.md::sits behind the job-openings card's ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
 J 115	J	R+W	-	CAPTURE:C-JMN-3	MEASURED	_audit/2026-11-25-build-jmn26.md::NEITHER CAPTURED POSTING DRAWS ONE ; RULING:OPERATOR-NAMES-THE-TARGET
 J 116	J	R	-	RULING:Q-AI-GENERATING-LOADS	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/preload/guideOverlay/?interop=guideOverlay&query=Show+match+details ; RULING:READ-PAST-AN-ACT-SUBSTRING
 J 117	J	R	-	RULING:Q-AI-GENERATING-LOADS	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/preload/guideOverlay/?interop=guideOverlay&query=Show+match+details ; RULING:READ-PAST-AN-ACT-SUBSTRING
@@ -87,9 +82,8 @@ J 152	J	R	-	CAPTURE:admit-learning	MEASURED	_audit/_census/jobs-directions.tsv::
 J 154	J	R	-	CAPTURE:admit-learning-me-my-library	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/learning/me/my-library/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
 J 156	J	R+W	-	CAPTURE:admit-learning-career-journey	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/learning/career-journey/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
 J 157	J	W	-	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
-J 160	J	R	-	CAPTURE:admit-explore-career-insights	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/explore-career-insights/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
+J 160	J	R	-	BUILD:tests/fixtures/live11/career_insights.html	MEASURED	_audit/2026-11-26-readers-jobs26.md::the people and the companies the ; RULING:NAMES-AT-RUNTIME
 J 163	J	W	-	BUILD:tests/fixtures/live8/recommended.html	MEASURED	_audit/2026-11-25-build-jmn26.md::THE PRESS IS ONE-SHOT. There is no inverse to build ; RULING:HIS-OWN-CURATION-NOT-OUTWARD ; RULING:OUTSIDE-THE-PRODUCT-PURPOSE
-J 165	J	R	-	CAPTURE:admit-company-org-events	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/company/placeholder-org/events/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
 J 166	J	R	-	CAPTURE:admit-products-product	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/products/placeholder-product/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
 J 167	J	R	-	CAPTURE:admit-showcase-showcase	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/showcase/placeholder-showcase/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
 M C2	M	W	R3	SIBLING:M C12	NAMED	_audit/_census/messaging-and-content.md::which is why the two rows close together or not at all
@@ -464,17 +458,15 @@ P K9	P	W	R3	PRECONDITION:a Top Voice badge	NAMED	_audit/_census/write-classes.ts
 P L3	P	W	R3	CAPTURE:article-composer	NAMED	RULING:ARTICLE-COMPOSER-CAPTURE ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
 P L4	P	R	-	PRECONDITION:a newsletter he authors	INFERRED	_audit/_census/read-addresses.tsv::the page listing his newsletters links no analytics address
 P L7	P	R	-	CAPTURE:creator-hub-on-the-dashboard	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/creator-hub/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
-P M1	P	W	R3	CAPTURE:admit-jobs-application-settings	NAMED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/jobs/application-settings/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
-P M2	P	R	-	CAPTURE:admit-jobs-application-settings	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/jobs/application-settings/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
-P M3	P	W	R3	CAPTURE:admit-jobs-application-settings	INFERRED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/jobs/application-settings/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
-P M4	P	R	-	CAPTURE:admit-jobs-application-settings	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/jobs/application-settings/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
-P M5	P	R	-	CAPTURE:admit-jobs-application-settings	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/jobs/application-settings/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
-P M6	P	R+W	-	CAPTURE:admit-jobs-application-settings	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/jobs/application-settings/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
+P M1	P	W	R3	CAPTURE:C-RJ26-3	MEASURED	_audit/2026-11-26-readers-jobs26.md::THE OPTIONS MENU IS WHERE FIVE ROWS WAIT. ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
+P M3	P	W	R3	CAPTURE:C-RJ26-3	MEASURED	_audit/2026-11-26-readers-jobs26.md::THE OPTIONS MENU IS WHERE FIVE ROWS WAIT. ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
+P M4	P	R	-	CAPTURE:C-RJ26-3	MEASURED	_audit/2026-11-26-readers-jobs26.md::THE OPTIONS MENU IS WHERE FIVE ROWS WAIT. ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
+P M5	P	R	-	TARGET:a job he applied to, and its poster	MEASURED	_audit/2026-11-26-readers-jobs26.md::THE PAGE TIES NO RESUME TO AN APPLICATION. ; RULING:OPERATOR-NAMES-THE-TARGET
 P M7	P	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 P M8	P	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 P M10	P	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 P M11	P	R+W	-	RULING:Q-RESUME-BUILDER	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/resume-builder/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
-P M12	P	R	-	CAPTURE:admit-jobs-application-settings	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/jobs/application-settings/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
+P M12	P	R	-	SIBLING:J 147	MEASURED	_audit/2026-11-26-readers-jobs26.md::that is row `J 147`'s capability
 P N4	P	W	R3	SIBLING:lane-S	NAMED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD ; RULING:CREDENTIAL-SETTINGS-NEED-THE-OPERATOR
 P N5	P	W	R3	SIBLING:lane-S	NAMED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD ; RULING:CREDENTIAL-SETTINGS-NEED-THE-OPERATOR
 P N6	P	W	R3	SIBLING:lane-S	NAMED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD ; RULING:CREDENTIAL-SETTINGS-NEED-THE-OPERATOR

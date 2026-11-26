@@ -714,14 +714,15 @@ def _tracker_stage_calls_the_reader(server_src: str) -> bool:
 
 
 def test_the_tracker_stage_chain_is_still_whole() -> None:
-    """``J 50`` and ``J 51`` (lane A, 2026-10-10): tool -> stage table ->
-    the tracker's own reader. Both rows claim COVERED-UNFIRED on it."""
+    """``J 50`` and ``J 51`` (lane A, 2026-10-10) and ``J 52`` (lane
+    readers-jobs26, 2026-11-26): tool -> stage table -> the tracker's own
+    reader. All three rows claim COVERED-UNFIRED on it."""
     from linkedin_server import server
 
     stages = getattr(server, "TRACKER_STAGES_LANE_A", {})
-    for stage in ("interview", "archived"):
+    for stage in ("interview", "archived", "clicked_apply"):
         assert stage in stages, (
-            f"the tool no longer reads the {stage} stage; census J 50/J 51 "
+            f"the tool no longer reads the {stage} stage; census J 50/J 51/J 52 "
             "claim COVERED-UNFIRED on it")
     assert _tracker_stage_calls_the_reader(_source("server.py")), (
         "linkedin_tracker_stage no longer hands its stage to _read_tracker; "
@@ -737,3 +738,59 @@ def test_control_the_tracker_stage_chain_convicts_a_dropped_reader() -> None:
                + source[start:].replace("await _read_tracker(",
                                         "await _read_tracker_gone(", 1))
     assert not _tracker_stage_calls_the_reader(mutated)
+
+
+def _page_tab_calls(server_src: str) -> set[str]:
+    """The ``company_tabs`` readers ``linkedin_company_page_tab`` calls by name."""
+    tree = ast.parse(server_src)
+    for node in ast.walk(tree):
+        if isinstance(node, ast.AsyncFunctionDef) and node.name == "linkedin_company_page_tab":
+            return {
+                inner.func.attr
+                for inner in ast.walk(node)
+                if isinstance(inner, ast.Call)
+                and isinstance(inner.func, ast.Attribute)
+                and ast.unparse(inner.func.value) == "company_tabs"
+                and inner.func.attr.startswith("read_")
+            }
+    return set()
+
+
+def test_the_page_tab_chain_is_still_whole() -> None:
+    """``J 106``, ``J 113``, ``J 165`` and ``J 168`` (lane readers-jobs26,
+    2026-11-26): the tool -> each tab's own reader. The four rows claim
+    COVERED-UNFIRED on it."""
+    from linkedin_server import company_tabs
+
+    assert _page_tab_calls(_source("server.py")) == {
+        "read_about_tab", "read_events_tab", "read_insights_tab", "read_posts_tab",
+    }, "linkedin_company_page_tab no longer calls every tab's reader; J 106/J 113/J 165/J 168's chain is broken"
+    for name in ("read_about_tab", "read_events_tab", "read_insights_tab", "read_posts_tab"):
+        assert callable(getattr(company_tabs, name, None)), name
+
+
+def test_control_the_page_tab_chain_convicts_a_dropped_reader() -> None:
+    """SHOWN FAILING against a MUTATED COPY: one reader call renamed away."""
+    source = _source("server.py")
+    start = source.index("async def linkedin_company_page_tab(")
+    mutated = source[:start] + source[start:].replace(
+        "company_tabs.read_events_tab(", "company_tabs.read_events_gone(", 1)
+    assert _page_tab_calls(source) == {
+        "read_about_tab", "read_events_tab", "read_insights_tab", "read_posts_tab"}
+    assert _page_tab_calls(mutated) == {
+        "read_about_tab", "read_insights_tab", "read_posts_tab", "read_events_gone"}
+
+
+def test_the_application_settings_chain_is_still_whole() -> None:
+    """``P M2`` (lane readers-jobs26, 2026-11-26): the tool -> the page's
+    reader. The row claims COVERED-UNFIRED on it."""
+    tree = ast.parse(_source("server.py"))
+    calls = {
+        ast.unparse(inner.func)
+        for node in ast.walk(tree)
+        if isinstance(node, ast.AsyncFunctionDef) and node.name == "linkedin_application_settings"
+        for inner in ast.walk(node)
+        if isinstance(inner, ast.Call)
+    }
+    assert "application_settings.read_application_settings" in calls, (
+        "linkedin_application_settings no longer calls its reader; P M2's chain is broken")
