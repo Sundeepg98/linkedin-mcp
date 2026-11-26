@@ -5598,11 +5598,12 @@ async def _read_job_search(
       capture has shown the classic one, so today every zero refuses. It used
       to come back as ``results: []`` with a note blaming the filters.
     * **AI** -- the fallback (``Q-SEARCH-ROUTE-POLICY``). ``refused_on_ai``
-      names the arguments the AI route has not been measured honouring; any
-      one of them refuses, before a row is shaped. Otherwise the landing must
-      carry the keywords asked for, and the cards are read by
-      ``job_search_route.read_ai_search``. NO SECOND LOAD: the page read is the
-      one the classic request landed on (``Q-FILTER-FIRES-SEARCH-CAP``).
+      names the arguments the AI route has not been measured honouring. The
+      page is read once by ``job_search_route.read_ai_search`` (the refusal
+      reports the Easy Apply toggle it drew), and any one of those arguments
+      refuses before any row is returned. Otherwise the landing must carry the
+      keywords asked for. NO SECOND LOAD: the page read is the one the classic
+      request landed on (``Q-FILTER-FIRES-SEARCH-CAP``).
     * **ANYTHING ELSE** refuses, naming the landing as a SHAPE.
 
     ``url`` in every refusal is the ASKED-FOR address, never the landing --
