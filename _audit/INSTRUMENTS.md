@@ -12432,7 +12432,7 @@ answers are in `_audit/2026-10-26-lane-ci-defect.md`, "Second pass".
 The live lane's session-11 runner (`runner_s11.py`, kept in the live lane's
 gitignored `_state/live11/tools/`, beside its offline checks): five checks, each
 SHOWN FAILING offline on a synthetic page before it was trusted, then held live
-from load 28 to load 40 with no false stop. The record is
+from load 28 to load 40, every press closing on its own evidence. The record is
 `_audit/2026-11-25-live-session-11.md`, "E10" and "Instruments".
 
 ### 103.1 The close rule, by the opening's own evidence
