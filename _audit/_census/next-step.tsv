@@ -9,7 +9,6 @@ J 35	J	W	-	SIBLING:lane-S	NAMED	_audit/_census/jobs-directions.tsv::Alert freque
 J 36	J	W	-	SIBLING:lane-S	NAMED	_audit/_census/jobs-directions.tsv::Alert delivery channel is a setting ; RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 J 37	J	R+W	-	CAPTURE:jobs-alerts-manager	NAMED	RULING:CAPTURE-PRESS-UNDER-PROBE-RULE ; _audit/_census/jobs-directions.tsv::whether that list carries EVERY alert is unmeasured
 J 41	J	W	-	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
-J 52	J	R	-	CAPTURE:admit-jobs-tracker-stage-clicked-apply	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/jobs-tracker/?stage=clicked_apply ; RULING:READ-PAST-AN-ACT-SUBSTRING
 J 53	J	W	-	CAPTURE:C-JMN-1	MEASURED	_audit/2026-11-25-build-jmn26.md::No capture of the Archived tab with a row exists ; RULING:HIS-OWN-CURATION-NOT-OUTWARD
 J 54	J	W	-	TARGET:a tracked job of his he names	INFERRED	RULING:HIS-OWN-CURATION-NOT-OUTWARD ; J 54
 J 55	J	W	-	TARGET:a tracked job of his he names	MEASURED	_audit/2026-11-25-build-jmn26.md::CAPTURE-PRESS-UNDER-PROBE-RULE never opens ; RULING:HIS-OWN-CURATION-NOT-OUTWARD

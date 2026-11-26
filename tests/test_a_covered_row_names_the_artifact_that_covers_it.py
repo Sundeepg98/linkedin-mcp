@@ -714,14 +714,15 @@ def _tracker_stage_calls_the_reader(server_src: str) -> bool:
 
 
 def test_the_tracker_stage_chain_is_still_whole() -> None:
-    """``J 50`` and ``J 51`` (lane A, 2026-10-10): tool -> stage table ->
-    the tracker's own reader. Both rows claim COVERED-UNFIRED on it."""
+    """``J 50`` and ``J 51`` (lane A, 2026-10-10) and ``J 52`` (lane
+    readers-jobs26, 2026-11-26): tool -> stage table -> the tracker's own
+    reader. All three rows claim COVERED-UNFIRED on it."""
     from linkedin_server import server
 
     stages = getattr(server, "TRACKER_STAGES_LANE_A", {})
-    for stage in ("interview", "archived"):
+    for stage in ("interview", "archived", "clicked_apply"):
         assert stage in stages, (
-            f"the tool no longer reads the {stage} stage; census J 50/J 51 "
+            f"the tool no longer reads the {stage} stage; census J 50/J 51/J 52 "
             "claim COVERED-UNFIRED on it")
     assert _tracker_stage_calls_the_reader(_source("server.py")), (
         "linkedin_tracker_stage no longer hands its stage to _read_tracker; "

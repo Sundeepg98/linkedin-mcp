@@ -1293,7 +1293,8 @@ PINNED = {
     #: 237 ON LANE BUILD-JMN26 (2026-11-25), MEASURED: `J 31` GAP -> COVERED-UNFIRED, the search-alert pair built behind the grant on session 2's real search (was 236).
     #: MEASURED AT INTEGRATION 3'S MERGE OF BUILD-JMN26 (2026-11-26) on the merged tree, never summed (the figures above are each lane's own).
     #: 245 AT INTEGRATION 3 (2026-11-26), MEASURED on the merged tree after the orchestrator's rulings of 2026-11-25 applied: `J 153`, `J 155`, `J 159` EXCLUDED-RULED (OUTSIDE-THE-PRODUCT-PURPOSE), `P A14`, `P A15` MEASURED-ABSENT, `N 102` and `J 110`'s Home half COVERED-UNFIRED, `J 168` (the Posts half) entered GAP: +3 EXCLUDED-RULED, +2 MEASURED-ABSENT, +2 COVERED-UNFIRED (`N 102`, `J 110`).
-    "adjudicated": 245,
+    #: 246 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `J 52` GAP -> COVERED-UNFIRED, the clicked_apply stage read by the shipped tracker tool over session 11's capture of its own page (was 245).
+    "adjudicated": 246,
     #: THE LIVE LANE'S FOUR ROWS, RE-DERIVED AT EACH OF ITS MERGES OF MASTER
     #: (2026-09-24; last over lane S): four rows fired live and banked
     #: (`_audit/2026-09-23-live-lane-session-1.md`). `P G6` COVERED-UNFIRED ->
@@ -1411,7 +1412,8 @@ PINNED = {
     #: 157 ON LANE BUILD-JMN26 (2026-11-25), MEASURED: `J 31` GAP -> COVERED-UNFIRED, the search-alert pair built behind the grant on session 2's real search (was 156).
     #: MEASURED AT INTEGRATION 3'S MERGE OF BUILD-JMN26 (2026-11-26) on the merged tree, never summed (the figures above are each lane's own).
     #: 160 AT INTEGRATION 3 (2026-11-26), MEASURED on the merged tree after the orchestrator's rulings of 2026-11-25 applied: `J 153`, `J 155`, `J 159` EXCLUDED-RULED (OUTSIDE-THE-PRODUCT-PURPOSE), `P A14`, `P A15` MEASURED-ABSENT, `N 102` and `J 110`'s Home half COVERED-UNFIRED, `J 168` (the Posts half) entered GAP: `N 102` and `J 110` COVERED-UNFIRED.
-    "delivered_broad": 160,
+    #: 161 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `J 52` GAP -> COVERED-UNFIRED, the clicked_apply stage read by the shipped tracker tool over session 11's capture of its own page (was 160).
+    "delivered_broad": 161,
     #: 79 since the live lane's merge (see `adjudicated`): P G6, N 134, P O3
     #: and M C72 COVERED-PROVEN.
     #: 75 and 21 since the bucket-1 merge: `M C41` fired live and moved from
@@ -1552,7 +1554,8 @@ PINNED = {
     #: 536 ON LANE BUILD-JMN26 (2026-11-25), MEASURED: `J 31` GAP -> COVERED-UNFIRED, the search-alert pair built behind the grant on session 2's real search (was 537).
     #: MEASURED AT INTEGRATION 3'S MERGE OF BUILD-JMN26 (2026-11-26) on the merged tree, never summed (the figures above are each lane's own).
     #: 529 AT INTEGRATION 3 (2026-11-26), MEASURED on the merged tree after the orchestrator's rulings of 2026-11-25 applied: `J 153`, `J 155`, `J 159` EXCLUDED-RULED (OUTSIDE-THE-PRODUCT-PURPOSE), `P A14`, `P A15` MEASURED-ABSENT, `N 102` and `J 110`'s Home half COVERED-UNFIRED, `J 168` (the Posts half) entered GAP: -7 rows left GAP, +1 entered (`J 168`).
-    "gap": 529,
+    #: 528 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `J 52` GAP -> COVERED-UNFIRED, the clicked_apply stage read by the shipped tracker tool over session 11's capture of its own page (was 529).
+    "gap": 528,
     #: 18 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: `M M1` built (`linkedin_message_from_profile`).
     #: 16 ON LANE L5'S ORDER OF 2026-09-27 23:36, MEASURED:
     #: `linkedin_send_message` RETIRED (aimed by a name): `M M2` to GAP and `N
@@ -1685,7 +1688,8 @@ PINNED = {
     #: 40 ON LANE BUILD-JMN26 (2026-11-25), MEASURED: `J 31` GAP -> COVERED-UNFIRED, the search-alert pair built behind the grant on session 2's real search (was 39).
     #: MEASURED AT INTEGRATION 3'S MERGE OF BUILD-JMN26 (2026-11-26) on the merged tree, never summed (the figures above are each lane's own).
     #: 43 AT INTEGRATION 3 (2026-11-26), MEASURED on the merged tree after the orchestrator's rulings of 2026-11-25 applied: `J 153`, `J 155`, `J 159` EXCLUDED-RULED (OUTSIDE-THE-PRODUCT-PURPOSE), `P A14`, `P A15` MEASURED-ABSENT, `N 102` and `J 110`'s Home half COVERED-UNFIRED, `J 168` (the Posts half) entered GAP: `N 102` and `J 110` COVERED-UNFIRED.
-    "unfired": 43,
+    #: 44 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `J 52` GAP -> COVERED-UNFIRED, the clicked_apply stage read by the shipped tracker tool over session 11's capture of its own page (was 43).
+    "unfired": 44,
     #: 104 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     #: 101 AT LANE S'S NAMES ADOPTION (2026-09-27), MEASURED: `N 79`, `N 172`
@@ -1818,7 +1822,8 @@ PINNED = {
     #: 97 ON LANE BUILD-JMN26 (2026-11-25), MEASURED: `J 108` GAP -> COVERED-UNFIRED, the People tab insight reader lane B4 built and integration 2 merged (was 98).
     #: 96 ON LANE BUILD-JMN26 (2026-11-25), MEASURED: `J 31` GAP -> COVERED-UNFIRED, the search-alert pair built behind the grant on session 2's real search (was 97).
     #: 93 AT INTEGRATION 3 (2026-11-26), MEASURED on the merged tree after the orchestrator's rulings of 2026-11-25 applied: `J 153`, `J 155`, `J 159` EXCLUDED-RULED (OUTSIDE-THE-PRODUCT-PURPOSE), `P A14`, `P A15` MEASURED-ABSENT, `N 102` and `J 110`'s Home half COVERED-UNFIRED, `J 168` (the Posts half) entered GAP: `J 153`, `J 155`, `J 159` left the still-GAP jobs rows; `J 168` took `J 110`'s place.
-    "gap_unknown": 93,
+    #: 92 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `J 52` GAP -> COVERED-UNFIRED, the clicked_apply stage read by the shipped tracker tool over session 11's capture of its own page (was 93).
+    "gap_unknown": 92,
     "gap_ambiguous": 0,
     #: BUCKET 3, MEASURED 2026-09-23 (`_audit/2026-09-23-bucket3-addresses.md`),
     #: counted off `_audit/_census/read-addresses.tsv`, whose every verdict
@@ -2251,7 +2256,8 @@ PINNED = {
     #: 24 ON LANE BUILD-JMN26 (2026-11-25), MEASURED: `J 31` GAP -> COVERED-UNFIRED, the search-alert pair built behind the grant on session 2's real search (was 23).
     #: MEASURED AT INTEGRATION 3'S MERGE OF BUILD-JMN26 (2026-11-26) on the merged tree, never summed (the figures above are each lane's own).
     #: 27 AT INTEGRATION 3 (2026-11-26), MEASURED on the merged tree after the orchestrator's rulings of 2026-11-25 applied: `J 153`, `J 155`, `J 159` EXCLUDED-RULED (OUTSIDE-THE-PRODUCT-PURPOSE), `P A14`, `P A15` MEASURED-ABSENT, `N 102` and `J 110`'s Home half COVERED-UNFIRED, `J 168` (the Posts half) entered GAP: `J 110` and `N 102` entered bucket 1, held by no ruling (see PINNED_B1_ROWS).
-    "b1_no_ruling": 27,
+    #: 28 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `J 52` GAP -> COVERED-UNFIRED, the clicked_apply stage read by the shipped tracker tool over session 11's capture of its own page (was 27).
+    "b1_no_ruling": 28,
     #: 7 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
     #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
     #: 4 AT THE LIVE LANE'S MERGE OF MASTER c2825a4 (2026-09-28), MEASURED on the
@@ -2325,7 +2331,8 @@ PINNED = {
     #: 97 ON LANE BUILD-JMN26 (2026-11-25), MEASURED: `J 108` GAP -> COVERED-UNFIRED, the People tab insight reader lane B4 built and integration 2 merged (was 98).
     #: 96 ON LANE BUILD-JMN26 (2026-11-25), MEASURED: `J 31` GAP -> COVERED-UNFIRED, the search-alert pair built behind the grant on session 2's real search (was 97).
     #: 93 AT INTEGRATION 3 (2026-11-26), MEASURED on the merged tree after the orchestrator's rulings of 2026-11-25 applied: `J 153`, `J 155`, `J 159` EXCLUDED-RULED (OUTSIDE-THE-PRODUCT-PURPOSE) and their side-table lines removed; `J 110`'s Home half COVERED-UNFIRED and its line re-keyed to `J 168`, the Posts half, still R and ADMITTED: `J 153`, `J 155`, `J 159` left the still-GAP jobs rows; `J 168` took `J 110`'s place (equals `gap_unknown`, 93).
-    "jobs_gap": 93,
+    #: 92 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `J 52` GAP -> COVERED-UNFIRED, the clicked_apply stage read by the shipped tracker tool over session 11's capture of its own page (was 93).
+    "jobs_gap": 92,
     #: 40 AT LANE S'S OFFLINE FRONTIER (2026-09-28), MEASURED: the five rows
     #: bucket 3 called blocked on nothing, taken one by one. `M M53`, `N 195`
     #: and `P S5` (three R rows ADMITTED and gated READER) and `J 107` (the one
@@ -2346,7 +2353,8 @@ PINNED = {
     #: MEASURED AT INTEGRATION 2'S MERGE OF LANE A (2026-11-24) on the merged tree, never summed (the figures above are each lane's own).
     #: 32 ON LANE BUILD-JMN26 (2026-11-25), MEASURED: `J 108` GAP -> COVERED-UNFIRED, the People tab insight reader lane B4 built and integration 2 merged (was 33).
     #: 30 AT INTEGRATION 3 (2026-11-26), MEASURED on the merged tree after the orchestrator's rulings of 2026-11-25 applied: `J 153`, `J 155`, `J 159` EXCLUDED-RULED (OUTSIDE-THE-PRODUCT-PURPOSE) and their side-table lines removed; `J 110`'s Home half COVERED-UNFIRED and its line re-keyed to `J 168`, the Posts half, still R and ADMITTED: `J 153` and `J 159`, both R, left; `J 168` is R as `J 110` was.
-    "jobs_dir_r": 30,
+    #: 29 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `J 52` GAP -> COVERED-UNFIRED, the clicked_apply stage read by the shipped tracker tool over session 11's capture of its own page (was 30).
+    "jobs_dir_r": 29,
     #: 60 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: `J 69` and
     #: `J 87`, both W.
     #: 58 ON LANE K's APPLICATION OF THE RULINGS OF 2026-10-10, MEASURED: `J
@@ -2378,7 +2386,8 @@ PINNED = {
     #: 30 AT LANE A'S MERGE OF MASTER 71d83ca (2026-10-10), MEASURED on the
     #: merged tree: lane K's rulings and this branch's moves, each above.
     #: 29 ON LANE BUILD-JMN26 (2026-11-25), MEASURED: `J 108` GAP -> COVERED-UNFIRED, the People tab insight reader lane B4 built and integration 2 merged (was 30).
-    "jobs_admitted": 29,
+    #: 28 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `J 52` GAP -> COVERED-UNFIRED, the clicked_apply stage read by the shipped tracker tool over session 11's capture of its own page (was 29).
+    "jobs_admitted": 28,
     #: 11 ON LANE A'S J 38 BUILD (2026-10-10), MEASURED: `J 38` GAP -> COVERED-UNFIRED by D6 --
     #: an alert's delivered job ids, read off the notifications page (never fired).
     #: 11 AT LANE A'S MERGE OF MASTER 71d83ca (2026-10-10), MEASURED on the
@@ -2577,6 +2586,11 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
         #: the Interview and Archived lists through linkedin_tracker_stage;
         #: never fired. Reads no ruling holds.
         "J 50", "J 51",
+        #: `J 52` entered on lane readers-jobs26 (2026-11-26): the clicked_apply
+        #: list through the same tool, read as a corroborated empty list over
+        #: session 11's capture of the stage's own page; never fired. A read
+        #: no ruling holds.
+        "J 52",
         #: `J 107` and `M M53` entered with lane S's offline frontier,
         #: 2026-09-28, fired at session 2 without banking, and LEFT at
         #: session 3 (2026-09-28), fired again and banked -- with `N 194`.

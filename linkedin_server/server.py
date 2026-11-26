@@ -5034,9 +5034,10 @@ async def linkedin_tracker_stage(
     as empty only when LinkedIn's own count for that tab says zero and the
     page draws its empty state; otherwise it is reported as a failed read,
     never as "you have none". LinkedIn draws the Archived tab WITHOUT a count,
-    and no clicked_apply tab at all on the captures this was built on, so an
-    empty list on either is a failure, not an answer -- the conservative
-    direction.
+    so an empty archived list is a failure, not an answer -- the conservative
+    direction. The clicked_apply stage's own page (captured 2026-11-25) draws
+    its tab WITH a count and its empty state, so an empty clicked_apply list
+    is believed on the same rule as the interview stage's.
 
     This tool opens one page and reads it. It presses nothing, changes no
     stage and moves no job between lists.

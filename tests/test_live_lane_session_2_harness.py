@@ -687,8 +687,12 @@ def test_a_non_ascii_word_survives_the_copy_as_a_reference() -> None:
 #: `tracked_copy`; the runner's diagnostic skeletons stayed in gitignored state.
 #: Both kept AT INTEGRATION 3'S FIFTH MERGE (2026-11-26), each re-counted on the
 #: merged tree's disk: live2 30, live11 48.
+#: `live11` 49 ON LANE READERS-JOBS26 (2026-11-26), the count on disk: the
+#: lane's word skeletons (`scripts/_build_live11_word_skeletons.py`, each the
+#: committed copy with LinkedIn's words written where their keyed shapes
+#: matched), beside the 48.
 LIVE_FIXTURE_COUNTS = {"live1": 5, "live2": 30, "live3": 14, "live4": 4, "live5": 1, "live7": 1, "live8": 7, "live9": 1,
-                       "live11": 48}
+                       "live11": 49}
 
 
 @pytest.mark.parametrize("session_dir", sorted(LIVE_FIXTURE_COUNTS))
