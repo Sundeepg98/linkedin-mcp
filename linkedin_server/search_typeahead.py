@@ -382,7 +382,10 @@ async def _press(target: Any, step: str) -> None:
         await target.click(timeout=CLICK_TIMEOUT_MS)
         return
     if step == "close":
-        await target.press(STEPS["close"], timeout=CLICK_TIMEOUT_MS)
+        # THE KEY IS WRITTEN HERE, LITERALLY, AND IT IS THE ONE IN ``STEPS``:
+        # the read-path gate (tests/test_messaging_overview.py) reads a press
+        # site's own text and admits it only as a dismissal it can see.
+        await target.press("Escape", timeout=CLICK_TIMEOUT_MS)
         return
     raise WriteAttemptError(
         f"refusing step {step!r}: the search box's typeahead is opened with one "
