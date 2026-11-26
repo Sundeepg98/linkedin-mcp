@@ -1065,7 +1065,8 @@ PINNED = {
     #: 773 AT THE INTEGRATION MERGE OF LANE NP ONTO LANES S AND B5 (2026-10-10), MEASURED on the merged tree: lane S's `P O17` and
     #: lane NP's `M C35b` are two rows, never summed.
     #: 774 AT INTEGRATION 3 (2026-11-26), MEASURED on the merged tree after the orchestrator's rulings of 2026-11-25 applied: `J 153`, `J 155`, `J 159` EXCLUDED-RULED (OUTSIDE-THE-PRODUCT-PURPOSE), `P A14`, `P A15` MEASURED-ABSENT, `N 102` and `J 110`'s Home half COVERED-UNFIRED, `J 168` (the Posts half) entered GAP: `J 168` entered, split from `J 110` (COMPOUND-ROW-SPLITS-ONLY-ON-STATE).
-    "stated_rows": 774,
+    #: 775 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `J 114` split under COMPOUND-ROW-SPLITS-ONLY-ON-STATE (J-114-SPLITS): the built facet, the Insights function table, COVERED-UNFIRED; `J 169`, its three unbuilt facets, entered GAP (was 774).
+    "stated_rows": 775,
     #: 762 = 704 stated rows + 58 declared collapses, computed at HEAD. NOT the
     #: published 761 and NOT the counter docstring's 760: those two differ only
     #: by a `- 2 stateless` term whose two rows are already outside the 704.
@@ -1100,7 +1101,8 @@ PINNED = {
     #: 786 ON THE ORCHESTRATOR'S CALL OF 2026-10-10 15:45 (lane NP), MEASURED:
     #: `M C35b` entered (see `stated_rows`); no collapse moved.
     #: 787 AT INTEGRATION 3 (2026-11-26), MEASURED on the merged tree after the orchestrator's rulings of 2026-11-25 applied: `J 153`, `J 155`, `J 159` EXCLUDED-RULED (OUTSIDE-THE-PRODUCT-PURPOSE), `P A14`, `P A15` MEASURED-ABSENT, `N 102` and `J 110`'s Home half COVERED-UNFIRED, `J 168` (the Posts half) entered GAP: `J 168` entered.
-    "capabilities": 787,
+    #: 788 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `J 114` split under COMPOUND-ROW-SPLITS-ONLY-ON-STATE (J-114-SPLITS): the built facet, the Insights function table, COVERED-UNFIRED; `J 169`, its three unbuilt facets, entered GAP (was 787).
+    "capabilities": 788,
     #: 741 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: the achievable
     #: move, with `O6-O20`'s 14 unchanged.
     #: 742 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: `N 2` left the exclusions.
@@ -1121,7 +1123,8 @@ PINNED = {
     #: MEASURED AT INTEGRATION 2'S MERGE OF LANE A (2026-11-24) on the merged tree, never summed (the figures above are each lane's own).
     #: 719 AT INTEGRATION 3 (2026-11-26), MEASURED on the merged tree after the orchestrator's rulings of 2026-11-25 applied: `J 153`, `J 155`, `J 159` EXCLUDED-RULED (OUTSIDE-THE-PRODUCT-PURPOSE), `P A14`, `P A15` MEASURED-ABSENT, `N 102` and `J 110`'s Home half COVERED-UNFIRED, `J 168` (the Posts half) entered GAP: 5 out of scope, `J 168` in.
     #: 717 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `P M2` GAP -> COVERED-UNFIRED (his stored resumes, `linkedin_application_settings`), and `J 75` and `P M6` GAP -> MEASURED-ABSENT (not offered on the page they waited on), all on session 11's capture of his application settings page (was 719).
-    "capabilities_achievable": 717,
+    #: 718 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `J 114` split under COMPOUND-ROW-SPLITS-ONLY-ON-STATE (J-114-SPLITS): the built facet, the Insights function table, COVERED-UNFIRED; `J 169`, its three unbuilt facets, entered GAP (was 717).
+    "capabilities_achievable": 718,
     #: 43 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: 29 rows returned
     #: to GAP when OUTWARD-CLASSES-BUILT-BEHIND-GRANTS retired their key, and
     #: `P P2` at the merge (-30); `P N27` and `P P2` then EXCLUDED-RULED on
@@ -1168,7 +1171,8 @@ PINNED = {
     #: MEASURED AT INTEGRATION 2'S MERGE OF LANE A (2026-11-24) on the merged tree, never summed (the figures above are each lane's own).
     #: 706 AT INTEGRATION 3 (2026-11-26), MEASURED on the merged tree after the orchestrator's rulings of 2026-11-25 applied: `J 153`, `J 155`, `J 159` EXCLUDED-RULED (OUTSIDE-THE-PRODUCT-PURPOSE), `P A14`, `P A15` MEASURED-ABSENT, `N 102` and `J 110`'s Home half COVERED-UNFIRED, `J 168` (the Posts half) entered GAP: 5 rows left the achievable surface, `J 168` joined it.
     #: 704 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `P M2` GAP -> COVERED-UNFIRED (his stored resumes, `linkedin_application_settings`), and `J 75` and `P M6` GAP -> MEASURED-ABSENT (not offered on the page they waited on), all on session 11's capture of his application settings page (was 706).
-    "achievable": 704,
+    #: 705 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `J 114` split under COMPOUND-ROW-SPLITS-ONLY-ON-STATE (J-114-SPLITS): the built facet, the Insights function table, COVERED-UNFIRED; `J 169`, its three unbuilt facets, entered GAP (was 704).
+    "achievable": 705,
     #: 205 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
     #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
     #: 179 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: the 30 returned
@@ -1300,7 +1304,8 @@ PINNED = {
     #: 249 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `J 106`, `J 113` and `J 165` GAP -> COVERED-UNFIRED, one tab of a Page (About, Insights, Events) read by `linkedin_company_page_tab` over session 11's captures (was 246).
     #: 252 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `P M2` GAP -> COVERED-UNFIRED (his stored resumes, `linkedin_application_settings`), and `J 75` and `P M6` GAP -> MEASURED-ABSENT (not offered on the page they waited on), all on session 11's capture of his application settings page (was 249).
     #: 253 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `J 168` GAP -> COVERED-UNFIRED, the Page's posts read off its root by `linkedin_company_page_tab(tab="posts")` over session 9's Posts view (was 252).
-    "adjudicated": 253,
+    #: 254 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `J 114` split under COMPOUND-ROW-SPLITS-ONLY-ON-STATE (J-114-SPLITS): the built facet, the Insights function table, COVERED-UNFIRED; `J 169`, its three unbuilt facets, entered GAP (was 253).
+    "adjudicated": 254,
     #: THE LIVE LANE'S FOUR ROWS, RE-DERIVED AT EACH OF ITS MERGES OF MASTER
     #: (2026-09-24; last over lane S): four rows fired live and banked
     #: (`_audit/2026-09-23-live-lane-session-1.md`). `P G6` COVERED-UNFIRED ->
@@ -1422,7 +1427,8 @@ PINNED = {
     #: 164 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `J 106`, `J 113` and `J 165` GAP -> COVERED-UNFIRED, one tab of a Page (About, Insights, Events) read by `linkedin_company_page_tab` over session 11's captures (was 161).
     #: 165 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `P M2` GAP -> COVERED-UNFIRED (his stored resumes, `linkedin_application_settings`), and `J 75` and `P M6` GAP -> MEASURED-ABSENT (not offered on the page they waited on), all on session 11's capture of his application settings page (was 164).
     #: 166 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `J 168` GAP -> COVERED-UNFIRED, the Page's posts read off its root by `linkedin_company_page_tab(tab="posts")` over session 9's Posts view (was 165).
-    "delivered_broad": 166,
+    #: 167 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `J 114` split under COMPOUND-ROW-SPLITS-ONLY-ON-STATE (J-114-SPLITS): the built facet, the Insights function table, COVERED-UNFIRED; `J 169`, its three unbuilt facets, entered GAP (was 166).
+    "delivered_broad": 167,
     #: 79 since the live lane's merge (see `adjudicated`): P G6, N 134, P O3
     #: and M C72 COVERED-PROVEN.
     #: 75 and 21 since the bucket-1 merge: `M C41` fired live and moved from
@@ -1704,7 +1710,8 @@ PINNED = {
     #: 47 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `J 106`, `J 113` and `J 165` GAP -> COVERED-UNFIRED, one tab of a Page (About, Insights, Events) read by `linkedin_company_page_tab` over session 11's captures (was 44).
     #: 48 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `P M2` GAP -> COVERED-UNFIRED (his stored resumes, `linkedin_application_settings`), and `J 75` and `P M6` GAP -> MEASURED-ABSENT (not offered on the page they waited on), all on session 11's capture of his application settings page (was 47).
     #: 49 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `J 168` GAP -> COVERED-UNFIRED, the Page's posts read off its root by `linkedin_company_page_tab(tab="posts")` over session 9's Posts view (was 48).
-    "unfired": 49,
+    #: 50 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `J 114` split under COMPOUND-ROW-SPLITS-ONLY-ON-STATE (J-114-SPLITS): the built facet, the Insights function table, COVERED-UNFIRED; `J 169`, its three unbuilt facets, entered GAP (was 49).
+    "unfired": 50,
     #: 104 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     #: 101 AT LANE S'S NAMES ADOPTION (2026-09-27), MEASURED: `N 79`, `N 172`
@@ -2280,7 +2287,8 @@ PINNED = {
     #: 31 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `J 106`, `J 113` and `J 165` GAP -> COVERED-UNFIRED, one tab of a Page (About, Insights, Events) read by `linkedin_company_page_tab` over session 11's captures (was 28).
     #: 32 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `P M2` GAP -> COVERED-UNFIRED (his stored resumes, `linkedin_application_settings`), and `J 75` and `P M6` GAP -> MEASURED-ABSENT (not offered on the page they waited on), all on session 11's capture of his application settings page (was 31).
     #: 33 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `J 168` GAP -> COVERED-UNFIRED, the Page's posts read off its root by `linkedin_company_page_tab(tab="posts")` over session 9's Posts view (was 32).
-    "b1_no_ruling": 33,
+    #: 34 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `J 114` split under COMPOUND-ROW-SPLITS-ONLY-ON-STATE (J-114-SPLITS): the built facet, the Insights function table, COVERED-UNFIRED; `J 169`, its three unbuilt facets, entered GAP (was 33).
+    "b1_no_ruling": 34,
     #: 7 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
     #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
     #: 4 AT THE LIVE LANE'S MERGE OF MASTER c2825a4 (2026-09-28), MEASURED on the
@@ -2632,6 +2640,10 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
         #: `J 168` entered on the same lane: the Page's own posts, read off
         #: its root's Posts view (session 9) by the same tool; never fired.
         "J 168",
+        #: `J 114` entered on the same lane at its split (J-114-SPLITS,
+        #: 2026-11-26): the built facet, the Insights tab's function table,
+        #: read by the same tool; never fired. Its unbuilt facets are `J 169`.
+        "J 114",
         #: `P M2` entered on the same lane (2026-11-26): his stored resumes,
         #: each by type and date, read off his own application settings page
         #: by `linkedin_application_settings` over session 11's capture; never

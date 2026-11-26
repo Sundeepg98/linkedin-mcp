@@ -648,5 +648,48 @@ The later heads' runs are in section 16 and the final report.
 
 ## 16. Certification
 
-The final head and its lane CI run are in the lane's final report: a commit
-cannot carry its own run.
+Round 1's head, `7c5969f`, was certified by lane CI run 45772883625 (success,
+six jobs, 9m45s). The final head and its run are in the lane's final report:
+a commit cannot carry its own run.
+
+---
+
+## 17. Round 2: the orchestrator's three answers, applied
+
+The orchestrator answered sections 14's three questions on 2026-11-26
+(integration 4 registers the rulings).
+
+- `J-114-SPLITS`: YES, on the `J 110` -> `J 168` precedent. `J 114` keeps the
+  built facet ("distribution and growth by function"), COVERED-UNFIRED, never
+  fired; the three unbuilt facets ("headcount over time, notable alumni, job
+  openings by seniority") enter as `J 169`, GAP, next step `C-RJ26-1`, which
+  now lists `J 169`. The population moves 774 -> 775 (`jobs.md` 167 -> 168
+  rows), re-derived by `scripts/pin_census_rows.py --write` and
+  `census_completion.py`; `J 114` joins `PINNED_B1_ROWS[NO_RULING]`.
+- `HIS-OWN-TEXT-AT-RUNTIME`: YES. The tool-envelope guard gains ONE door,
+  `ADMITTED_OWN_TEXT`, naming each tool, the page it reads and the fields it
+  returns, with one reason; no people tool may hold it. RED FIRST, its control:
+  the same new text path is refused for a tool the door does not name and
+  admitted for the one it does (a third party's text arriving through any
+  other tool stays a new text path). The reader guard's own door,
+  `ADMITTED_TEXT`, is NOT used: it admits only a reader a shipped drive takes
+  to its success path, and the planted page drives this one to its raise, so
+  it is recorded `not_driven` and needs no door (an entry added first failed
+  `test_a_reader_joins_the_text_inventory_only_by_the_ruling`, "an admission
+  must be earned by a drive", and was withdrawn). `P M2`'s reader now returns each stored
+  resume's `file_name`, sanitised and bounded; the scope clause of section
+  3.1 is lifted, and the tests plant synthetic names (one with a zero-width
+  space, which comes back removed).
+- `APPLICATION-SETTINGS-WRITE`: ADMITTED IN PRINCIPLE -- his own switches, a
+  reversible on/off pair, behind the grant, proven by a live round trip. THE
+  BUILD IS DEFERRED to the first build lane after integration 4: the write
+  door's excusal is in `readonly.py`, which lane admit5-26's held branch has
+  changed. Not built here, and `readonly.py` is not edited. `J 74`, `J 76`,
+  `P M7`, `P M8` keep their next step.
+
+NOT REACHED IN ROUND 2, each still at the next step section 9 gives it, and
+nothing of any of them half-built on this branch: `J 37` (the alert list, on
+its capture; its query words may now leave through the door above, by its
+tool's own entry), `J 109`, `J 160`, `J 19` and `J 163` (section 8). This
+lane's context ran out before them; the round's three answers are applied
+and certified instead.

@@ -32,13 +32,14 @@ DOCX, PDF (5MB)``. No Save button: the page stores each switch on its own.
 
 * Each switch: its KEY (this module's), and ``on``, ``off`` or ``unknown``,
   read off the input its own label names (``for``), never by position.
-* Each resume: its file TYPE (``pdf``, ``docx`` or ``doc``, the name's own
-  suffix, compared in this process), WHICH date the card shows (``last_used``
-  or ``uploaded``) and that date as an ISO date. THE FILE'S NAME NEVER
-  LEAVES: it is his, but no declared channel carries his own document names
-  (``people_data`` records are other members' words, and the tool-envelope
-  inventory of page text may not grow), so the name is read only to take its
-  suffix. The options button's label, which repeats the name, is never read.
+* Each resume: its FILE NAME, its file TYPE (``pdf``, ``docx`` or ``doc``, the
+  name's own suffix), WHICH date the card shows (``last_used`` or
+  ``uploaded``) and that date as an ISO date. THE NAME LEAVES UNDER
+  HIS-OWN-TEXT-AT-RUNTIME (the orchestrator, 2026-11-26): a file he uploaded
+  to his own account, returned to his own session at runtime, sanitised and
+  bounded, never stored; the tool-envelope guard admits it through its one
+  narrow door, ``ADMITTED_OWN_TEXT``. The options button's label, which
+  repeats the name, is never read.
 * The upload control: whether one is drawn, and the types and size its rule
   names, parsed into a closed list and an integer.
 
@@ -58,8 +59,12 @@ import re
 from typing import Any, Optional
 from urllib.parse import urlsplit
 
-from linkedin_server import dom
+from linkedin_server import dom, people_data
 from linkedin_server.errors import ExtractionFailedError
+
+#: The most characters of a file name returned: LinkedIn's own cap is not
+#: measured, and a name longer than this is cut, never refused.
+FILE_NAME_CAP = 255
 
 #: The page's one address: the read boundary's admitted line for it, exactly.
 PAGE_URL = "https://www.linkedin.com/jobs/application-settings/"
@@ -234,7 +239,8 @@ async def read_application_settings(page: Any) -> dict[str, Any]:
     names = main.locator("h3")
     for index in range(min(await _count(names, failed), MAX_PARTS)):
         name = names.nth(index)
-        kind = resume_type(await _text(name, failed))
+        file_name = await _text(name, failed)
+        kind = resume_type(file_name)
         card = name.locator("xpath=..")
         dated = [date_of(await _text(card.locator("p").nth(i), failed))
                  for i in range(min(await _count(card.locator("p"), failed), 4))]
@@ -242,7 +248,12 @@ async def read_application_settings(page: Any) -> dict[str, Any]:
         if kind is None or len(dated) != 1:
             out["resume_cards_withheld"] += 1
             continue
-        out["resumes"].append({"type": kind, "date_shown": dated[0][0], "date": dated[0][1]})
+        out["resumes"].append({
+            "file_name": people_data.sanitise(file_name, cap=FILE_NAME_CAP),
+            "type": kind,
+            "date_shown": dated[0][0],
+            "date": dated[0][1],
+        })
     out["resume_count"] = len(out["resumes"])
     out["reads_failed"] = failed[0]
     if not out["page_heading_drawn"]:

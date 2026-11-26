@@ -12956,11 +12956,11 @@ async def linkedin_application_settings() -> dict[str, Any]:
       ``share_resume_data_with_hirers``, the page's two switches by LinkedIn's
       own labels for them, each ``on``, ``off`` or ``unknown``, read off the
       input its own label names.
-    * ``resumes``: one entry per stored resume, its file ``type`` (``pdf``,
-      ``docx``, ``doc`` or ``other``), which date its card shows
-      (``last_used`` or ``uploaded``) and that ``date``. THE FILE NAMES ARE
-      NOT RETURNED: no declared channel carries your own document names, so
-      a name is read only to take its suffix.
+    * ``resumes``: one entry per stored resume, its ``file_name`` (a file you
+      uploaded, returned to you under HIS-OWN-TEXT-AT-RUNTIME: sanitised,
+      bounded, never stored), its file ``type`` (``pdf``, ``docx``, ``doc`` or
+      ``other``), which date its card shows (``last_used`` or ``uploaded``)
+      and that ``date``.
     * ``file_control``: whether the page draws its file control for a new
       resume, and the file types and size its rule names.
 

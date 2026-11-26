@@ -52,7 +52,7 @@ J 100	J	W	-	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 J 109	J	R	-	BUILD:tests/fixtures/live11/company_life.html	MEASURED	_audit/2026-11-26-readers-jobs26.md::over a carousel of ; RULING:THIRD-PARTY-TEXT-AT-RUNTIME
 J 111	J	R	-	CAPTURE:C-RJ26-2	MEASURED	_audit/2026-11-26-readers-jobs26.md::That organisation has no ; RULING:READ-PAST-AN-ACT-SUBSTRING
 J 112	J	R	-	TARGET:a school Page he names	NAMED	_audit/_census/read-addresses.tsv::UNDER THE WHO/WHICH RULE, EXTENDED ; RULING:OPERATOR-NAMES-THE-TARGET
-J 114	J	R	-	CAPTURE:C-RJ26-1	MEASURED	_audit/2026-11-26-readers-jobs26.md::sits behind the job-openings card's ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
+J 169	J	R	-	CAPTURE:C-RJ26-1	MEASURED	_audit/2026-11-26-readers-jobs26.md::sits behind the job-openings card's ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
 J 115	J	R+W	-	CAPTURE:C-JMN-3	MEASURED	_audit/2026-11-25-build-jmn26.md::NEITHER CAPTURED POSTING DRAWS ONE ; RULING:OPERATOR-NAMES-THE-TARGET
 J 116	J	R	-	RULING:Q-AI-GENERATING-LOADS	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/preload/guideOverlay/?interop=guideOverlay&query=Show+match+details ; RULING:READ-PAST-AN-ACT-SUBSTRING
 J 117	J	R	-	RULING:Q-AI-GENERATING-LOADS	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/preload/guideOverlay/?interop=guideOverlay&query=Show+match+details ; RULING:READ-PAST-AN-ACT-SUBSTRING

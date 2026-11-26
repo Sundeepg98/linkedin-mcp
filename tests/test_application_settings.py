@@ -79,10 +79,10 @@ def test_the_page_returns_both_switches_and_every_resume_without_its_name():
         "share_resume_data_with_hirers": "on",
     }
     assert result["resumes"] == [
-        {"type": "pdf", "date_shown": "last_used", "date": "2025-09-02"},
-        {"type": "pdf", "date_shown": "last_used", "date": "2025-10-14"},
-        {"type": "docx", "date_shown": "uploaded", "date": "2025-08-30"},
-        {"type": "doc", "date_shown": "uploaded", "date": "2024-01-05"},
+        {"file_name": "Example resume.pdf", "type": "pdf", "date_shown": "last_used", "date": "2025-09-02"},
+        {"file_name": "Example resume two.pdf", "type": "pdf", "date_shown": "last_used", "date": "2025-10-14"},
+        {"file_name": "Example cv.docx", "type": "docx", "date_shown": "uploaded", "date": "2025-08-30"},
+        {"file_name": "Example cv old.doc", "type": "doc", "date_shown": "uploaded", "date": "2024-01-05"},
     ]
     assert result["resume_count"] == 4 and result["resume_cards_withheld"] == 0
     assert result["file_control"] == {
@@ -91,11 +91,16 @@ def test_the_page_returns_both_switches_and_every_resume_without_its_name():
     assert result["switch_labels_unrecognised"] == 0 and result["reads_failed"] == 0
 
 
-def test_no_file_name_leaves_in_any_field():
-    planted = [(MARKER + " " + n, d) for n, d in RESUMES]
+def test_a_file_name_leaves_only_as_its_resume_entry_and_sanitised():
+    """HIS-OWN-TEXT-AT-RUNTIME: the name he uploaded comes back in its own
+    entry's ``file_name`` and nowhere else, its invisible characters removed;
+    the options button's label, which repeats it, is never read."""
+    planted = [(n.replace("Example", "Example" + chr(0x200B)), d) for n, d in RESUMES]
     result, _ = run(settings_markup(planted))
-    assert result["resume_count"] == 4
-    assert all("Example" not in text and "Markersurname" not in text for text in strings_in(result))
+    assert [r["file_name"] for r in result["resumes"]] == [n for n, _d in RESUMES]
+    others = [t for key, value in result.items() if key != "resumes" for t in strings_in(value)]
+    assert all("Example" not in text for text in others)
+    assert all("Show options" not in text for text in strings_in(result))
 
 
 def test_a_switch_reads_its_own_input_not_the_one_beside_it():
@@ -129,10 +134,9 @@ def test_cards_whose_dates_do_not_read_are_withheld_and_the_zero_raises():
     assert "4 card(s) seen and withheld" in str(caught.value)
 
 
-def test_an_unknown_suffix_is_other_and_the_name_still_does_not_leave():
+def test_an_unknown_suffix_is_other():
     result, _ = run(settings_markup([("Example notes.txt", d) for _n, d in RESUMES]))
     assert {r["type"] for r in result["resumes"]} == {"other"}
-    assert all("notes" not in text for text in strings_in(result))
 
 
 @pytest.mark.parametrize("landed,ok", [

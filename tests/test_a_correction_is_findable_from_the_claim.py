@@ -308,7 +308,7 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
     ),
     ("jobs.md", "2026-11-26-readers-jobs26.md"): (
         "A ROW'S MOVE OR NEXT STEP RECORDED, NOT A CORRECTION. Rows `37`, `52`, "
-        "`70` to `76`, `106`, `109`, `111`, `113`, `114`, `160`, `165` and `168` "
+        "`70` to `76`, `106`, `109`, `111`, `113`, `114`, `160`, `165`, `168` and `169` "
         "each gained one dated note citing "
         "lane readers-jobs26's record -- what the row's session-11 capture "
         "draws, and its move to COVERED-UNFIRED or its re-pointed step -- and "
