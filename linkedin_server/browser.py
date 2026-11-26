@@ -10,8 +10,10 @@ What this module guarantees, and why each guarantee exists:
   this process. Nothing here fans out, and nothing runs on a timer.
 
 * **Spacing between navigations.** :data:`config.MIN_NAVIGATION_INTERVAL_S`
-  is enforced globally. This is throttling, not disguise -- it is a flat
-  minimum interval, deliberately not jittered or randomised to resemble
+  -- 20 s by default since 2026-11-26, the ruled pace -- is enforced
+  globally, between every two navigations this process makes, inside one
+  tool call as well as across them. This is throttling, not disguise -- it is
+  a flat minimum interval, deliberately not jittered or randomised to resemble
   anything. Its only job is to stop a burst of tool calls becoming a burst of
   page loads on one human's account.
 
@@ -86,6 +88,16 @@ from linkedin_server.readonly import (
 )
 
 _HEADLESS_ENV = "LINKEDIN_HEADLESS"
+
+#: THE RATE SLOT'S CLOCK AND SLEEPER, held as module attributes for one
+#: reason: so a test can run the slot on a fake clock instead of sleeping the
+#: ruled 20 s for real. ``tests/conftest.py`` does, for every test, and the
+#: production code computes the same wait either way. Both halves of the slot
+#: -- the wait before a navigation and the stamp after it -- read THIS clock,
+#: never ``time.monotonic`` directly, or a fake would be compared against a
+#: real reading. Nothing in the package rebinds them.
+_rate_clock = time.monotonic
+_rate_sleep = asyncio.sleep
 
 
 def _headless() -> bool:
@@ -526,10 +538,10 @@ class LinkedInBrowser:
 
         Returns the number of seconds waited, so tools can report it.
         """
-        gap = time.monotonic() - self._last_navigation_at
+        gap = _rate_clock() - self._last_navigation_at
         wait = MIN_NAVIGATION_INTERVAL_S - gap
         if self._last_navigation_at and wait > 0:
-            await asyncio.sleep(wait)
+            await _rate_sleep(wait)
             return round(wait, 2)
         return 0.0
 
@@ -602,7 +614,7 @@ class LinkedInBrowser:
                 "address can carry what was searched for or whom it names)"
             ) from exc
         finally:
-            self._last_navigation_at = time.monotonic()
+            self._last_navigation_at = _rate_clock()
 
         # One bounded wait for the single-page app to fill the list in. Not a
         # poll loop, and not a scroll -- whatever rendered by now is the result.

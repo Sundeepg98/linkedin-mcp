@@ -28,6 +28,7 @@ and the only way to catch that is to count the requests.
 
 from __future__ import annotations
 
+import asyncio
 import json
 from typing import Any, Optional
 
@@ -279,6 +280,85 @@ def patched_navigation(monkeypatch):
 
     monkeypatch.setattr(browser_module.BROWSER, "goto", fake_goto)
     return navigations
+
+
+class FakeRateClock:
+    """The rate slot's clock for tests: a sleep moves time on, nothing waits.
+
+    ``LinkedInBrowser.goto`` spaces navigations by
+    ``config.MIN_NAVIGATION_INTERVAL_S``, the ruled 20 s by default since
+    2026-11-26. On this clock the production code still computes every wait;
+    the wait is RECORDED in ``sleeps`` and added to ``now`` instead of slept,
+    so a test can assert the 20 s exactly and never spend them.
+
+    IT STARTS FAR FROM ZERO ON PURPOSE. The slot reads a
+    ``_last_navigation_at`` of 0.0 as "never navigated", so a clock starting
+    at 0.0 would stamp the first load as no load at all and silently skip
+    the wait before the second.
+    """
+
+    def __init__(self, start: float = 1_000_000.0) -> None:
+        self.now = start
+        self.sleeps: list[float] = []
+        #: The clock and sleeper production had bound before this test
+        #: replaced them, for ``real_rate_clock`` to put back.
+        self.production: tuple[Any, Any] = (None, None)
+
+    def monotonic(self) -> float:
+        return self.now
+
+    async def sleep(self, seconds: float) -> None:
+        self.sleeps.append(seconds)
+        self.now += seconds
+        await asyncio.sleep(0)  # still a yield point, as the real one is
+
+
+@pytest.fixture(autouse=True)
+def rate_clock(request, monkeypatch):
+    """EVERY TEST RUNS THE RATE SLOT ON A FAKE CLOCK, FROM A COLD SLOT.
+
+    Two things this stops, and the default made both expensive: at 20 s
+    between navigations (``config.MIN_NAVIGATION_INTERVAL_S`` since
+    2026-11-26, the ruled pace; 3 s before),
+
+    * a test that navigates a real ``LinkedInBrowser`` twice would sleep the
+      full interval for real, once per extra load; and
+    * a stamp one test left on the module singleton ``BROWSER`` would make the
+      NEXT test's first load wait -- an order-dependent cost, since xdist's
+      ``--dist loadfile`` orders files by the shard plan. Each test starts on
+      a cold slot, as a fresh server process does.
+
+    A test that must see the production sleeper asks for ``real_rate_clock``.
+    A test that slept on this clock carries the junit property
+    ``rate_slot_fake_sleep_s`` -- the seconds it would have slept for real --
+    so CI's junit names every test that relies on it.
+    """
+    from linkedin_server import browser as browser_module
+
+    clock = FakeRateClock()
+    clock.production = (browser_module._rate_clock, browser_module._rate_sleep)
+    monkeypatch.setattr(browser_module, "_rate_clock", clock.monotonic)
+    monkeypatch.setattr(browser_module, "_rate_sleep", clock.sleep)
+    browser_module.BROWSER._last_navigation_at = 0.0
+    yield clock
+    if clock.sleeps:
+        request.node.user_properties.append(
+            ("rate_slot_fake_sleep_s", round(sum(clock.sleeps), 2))
+        )
+
+
+@pytest.fixture
+def real_rate_clock(rate_clock, monkeypatch):
+    """Opt OUT of the fake rate clock: this test sleeps the slot for real.
+
+    For the few tests that prove the production sleeper actually sleeps --
+    with a small interval of their own, never the ruled 20 s.
+    """
+    from linkedin_server import browser as browser_module
+
+    clock, sleep = rate_clock.production
+    monkeypatch.setattr(browser_module, "_rate_clock", clock)
+    monkeypatch.setattr(browser_module, "_rate_sleep", sleep)
 
 
 @pytest.fixture(autouse=True)
