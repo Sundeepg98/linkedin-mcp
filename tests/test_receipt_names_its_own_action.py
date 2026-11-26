@@ -748,8 +748,13 @@ def test_the_action_set_is_the_one_this_file_was_measured_against():
     # shares one value, a sanctioned pair above. The four ``_VERIFIED_FROM``
     # rows (mute's shared by unmute; delete declares itself unverifiable)
     # hold no phrase another action owns.
-    assert len(writes.PERFORMABLE) == 29, (
-        "writes.PERFORMABLE holds %d actions, not the 29 this file was "
+    # THIRTY ON THE SAME LANE: ``publish_group_post`` (census M C64). Its one
+    # row was read: ``_WHERE_TO_LOOK`` names the group's own feed, a place no
+    # other action owns; it declares itself unverifiable and carries no
+    # ``_VERIFIED_FROM`` row (this file's own rule, which refused the first
+    # version of it for carrying one).
+    assert len(writes.PERFORMABLE) == 30, (
+        "writes.PERFORMABLE holds %d actions, not the 30 this file was "
         "measured against: %s. Re-derive the phrase owners in this file for "
         "the new action, then update this count."
         % (len(writes.PERFORMABLE), sorted(writes.PERFORMABLE))

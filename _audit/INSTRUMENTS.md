@@ -13027,16 +13027,31 @@ second load. Anything drawn after a close stops every further press.
 
     A COUNT NOBODY HAS SEEN DRAWN IS UNKNOWN, NOT ZERO.
 
-### 110.5 THE ENTRIES
+### 110.5 A COMPOSER IS TOLD APART BY WHAT IT LACKS, AND ITS AUDIENCE BY ITS OWN TRIGGER
+
+Two composers share one modal and one editor. The group's is told from the
+feed's by the control it does NOT draw -- Schedule post -- because the class
+proposed as a positive marker is drawn on both; and who would see a group
+post is read off the trigger's own words, matched exactly, so a trigger
+saying anything else is never pressed. His words go in only after the
+opened gate, and Post only after a second gate reads exactly those words.
+Each gate reads after a bounded wait that decides nothing, and the waits
+are shown to matter the only way a wait can be: with the bound at zero,
+the same late-drawing worlds are refused.
+
+    WHEN NO MARK IS UNIQUE, THE ABSENCE OF THE OTHER'S MARK IS THE MARK.
+
+### 110.6 THE ENTRIES
 
 | path | shown failing by |
 |---|---|
 | `tests/test_conversation_menu.py`; `linkedin_server/conversation_menu.py`; `tests/conversation_menu_worlds.py` | on the base tree `3c656df` the file fails at collection (`ImportError: cannot import name 'conversation_menu'`); with the module present and `writes` unwired, 11 failed and 8 passed (`'set_conversation_muted' is not a sanctioned write`); green 19 passed. Inside the file: the act's inverse word removed makes the gate proceed on a menu reading the conversation already muted; no active row is refused with zero presses on the page's own counter; Escape not closing the menu makes every verdict unknown; a menu already muted at click time is closed by its trigger with no item pressed and `performed` false; the unread mark's verification is read back with no load after the press |
 | `tests/test_messaging_folders.py`; `linkedin_server/messaging_folders.py`; `tests/messaging_folder_worlds.py` | on the base tree the file fails at collection (`ImportError: cannot import name 'messaging_folders'`); with the module present and unwired, 2 failed and 14 passed, and `tests/test_readonly.py` fired on the undeclared click; green 16 passed. Inside the file: the Archived choice reduced makes the pill open and close with nothing chosen; a choice the page ignores reads as not switched, never as an empty folder; a page that keeps Archived reads not restored, loudest; a list that comes back with one row a placeholder reads not restored though the pill reads right; an address that moves on the choice reads not restored; another address, two pills or a dropdown already open are refused with zero presses on the page's own counter |
 | `tests/test_scheduled_posts.py`; `linkedin_server/scheduled_posts.py`; `tests/scheduled_posts_worlds.py` | on the base tree the file fails at collection (`ImportError: cannot import name 'scheduled_posts'`); its first run failed 10, seven on a real defect the capture test caught (an exact-text match on a button whose word sits in a child span matched nothing); unwired, 3 failed and 10 passed; green 13 passed. Inside the file: the empty headline taken away reads unknown, not zero; a composer opening with text stops with zero presses; a dialog or a toast after the close reads not closed and not ok; a schedule dialog that never opens reads no list and still closes |
+| `tests/test_group_composer.py`; `linkedin_server/group_composer.py`; `tests/group_composer_worlds.py` | on the base tree the file fails at collection (`ImportError: cannot import name 'group_composer'`); with the module present and `writes` unwired, 11 failed and 1 passed (the capture test); green 16 passed. Inside the file: a composer drawing Schedule post, one holding a draft and one that never opens are each refused after the trigger with zero words typed and Post never pressed; a Post that never turns on and words changed as they land each leave Post unpressed; the FEED's own composer, real markup, is refused by the group's gate; a wrong landing at the act presses nothing; a group named by its name is refused without the name in the refusal; a composer or a Post arriving late is waited for, and with the bound at zero the same worlds are refused |
 | `scripts/_build_msg2_word_skeletons.py` (the provenance of the five `tests/fixtures/live11/*_words.html` composer skeletons) | refuses, writing nothing, unless each keyed skeleton's tracked copy is the committed capture, and refuses any declared word that matches no keyed shape; a fixed point (`--check`: all five match on a second run) |
 
-### 110.6 DECLARED DISPOSABLE
+### 110.7 DECLARED DISPOSABLE
 
 The lane's scratch probes -- the menu and list counters, the keyed-word matcher
 (matched candidate words and counts only), the census editors -- and the

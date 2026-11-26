@@ -94,6 +94,11 @@ PINNED_STRICT_PRESS_ACTIONS = frozenset(
         "mark_conversation_unread",
         "set_conversation_archived",
         "set_conversation_deleted",
+        # EIGHTEEN on the same lane (census M C64): the group's share-box
+        # trigger, then Post inside the one composer it opened, each counted
+        # once by its gate (group_composer), shown in
+        # tests/test_group_composer.py.
+        "publish_group_post",
     }
 )
 

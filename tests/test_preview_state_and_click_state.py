@@ -393,6 +393,17 @@ REACHED: dict[str, tuple[str, str, str]] = {
             "set_conversation_archived", "set_conversation_deleted",
         )
     },
+    # 2026-11-26 (census M C64; lane build-msg2). A TRACKED capture, live
+    # session 11's load 36 with LinkedIn's words put back by keyed shape: the
+    # group page's one closed share box and its one "Start a public post"
+    # trigger -- the one reading the preview and the click-time gate both
+    # take; the composer is read only after the press opens it.
+    "publish_group_post": (
+        "tests/fixtures/live11/group_member_words.html",
+        markup("live11/group_member_words"),
+        str(writes._target_for(spec_for_action("publish_group_post"),
+                               {"group": "10001", "text": "A synthetic group post."})),
+    ),
 }
 
 #: WHAT THIS INSTRUMENT CANNOT REACH, WITH THE REASON -- AND THE REASON IS NOT
@@ -524,7 +535,9 @@ _WORLDS_THAT_REACH_OUT = frozenset({"set_similar_jobs_alert", "unset_similar_job
                                     # page is a tracked copy too.
                                     "set_conversation_muted", "unset_conversation_muted",
                                     "mark_conversation_unread", "set_conversation_archived",
-                                    "set_conversation_deleted"})
+                                    "set_conversation_deleted",
+                                    # the same lane: session 11's group page.
+                                    "publish_group_post"})
 
 
 async def _over_refusing_every_request(html: str, work):
@@ -709,8 +722,10 @@ def test_every_performable_action_is_either_reached_or_declared_unreachable():
     # 24 -> 29 ON LANE BUILD-MSG2 (2026-11-26): the five acts on one
     # conversation's own menu, reached over session 11's tracked thread page,
     # menu closed. MEASURED.
-    assert len(PERFORMABLE) == 29, sorted(PERFORMABLE)
-    assert len(REACHED) == 29, sorted(REACHED)
+    # 29 -> 30 ON THE SAME LANE: the group post, reached over session 11's
+    # tracked group page with its share box closed. MEASURED.
+    assert len(PERFORMABLE) == 30, sorted(PERFORMABLE)
+    assert len(REACHED) == 30, sorted(REACHED)
     assert len(CANNOT_REACH) == 0, sorted(CANNOT_REACH)
 
 

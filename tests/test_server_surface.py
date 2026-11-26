@@ -1,4 +1,9 @@
-"""The tool surface: ninety-eight tools, sixty-six of which do not write.
+"""The tool surface: ninety-nine tools, sixty-six of which do not write.
+
+**IT READ "ninety-eight tools, sixty-six of which do not write" UNTIL LANE
+BUILD-MSG2 (2026-11-26) ADDED ONE WRITE**: ``linkedin_publish_group_post``
+(census M C64), so the non-write count holds at sixty-six. Measured off
+this branch's registry, not summed.
 
 **IT READ "ninety-six tools, sixty-four of which do not write" UNTIL LANE
 BUILD-MSG2 (2026-11-26) ADDED TWO READS**: ``linkedin_archived_conversations``
@@ -246,6 +251,9 @@ SANCTIONED_WRITE_TOOLS = frozenset(SANCTIONED_WRITES) & {
     "linkedin_mark_conversation_unread",
     "linkedin_set_conversation_archived",
     "linkedin_set_conversation_deleted",
+    # 2026-11-26 (lane build-msg2, census M C64): a post in one group he
+    # names.
+    "linkedin_publish_group_post",
     # THE FIFTEENTH, 2026-09-24 (census rows M M10 and, by D6, M M17; the
     # fourteenth on lane L5's branch, before lane L7's merge landed): a
     # reply inside a conversation he names by thread id. Its NAME announces
@@ -621,6 +629,9 @@ EXPECTED_TOOLS = {
     "linkedin_mark_conversation_unread",
     "linkedin_set_conversation_archived",
     "linkedin_set_conversation_deleted",
+    # 2026-11-26 (lane build-msg2, census M C64): a WRITE, a post in one
+    # group he names; see SANCTIONED_WRITE_TOOLS.
+    "linkedin_publish_group_post",
     "linkedin_publish_post",
     "linkedin_comment_on_item",
     # THE THIRTY-SIXTH, 2026-09-03. A READ that SHIPS REFUSING: the read
@@ -843,8 +854,13 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_ninety_eight_tools(tools):
-    """RENAMED AGAIN ON THE SAME LANE, to ``..._ninety_eight_tools``: two READS,
+async def test_the_surface_is_exactly_the_ninety_nine_tools(tools):
+    """RENAMED AGAIN ON THE SAME LANE, to ``..._ninety_nine_tools``: one WRITE,
+    ``linkedin_publish_group_post`` (census M C64), beside the ninety-eight.
+    MEASURED off this branch's registry, not summed; the name moved with the
+    pin.
+
+    RENAMED AGAIN ON THE SAME LANE, to ``..._ninety_eight_tools``: two READS,
     ``linkedin_archived_conversations`` and ``linkedin_scheduled_posts``
     (census M M28's view half, M C14), each behind one declared press, beside
     the ninety-six. MEASURED off this branch's registry, not summed; the name
@@ -1429,7 +1445,9 @@ async def test_the_surface_is_exactly_the_ninety_eight_tools(tools):
     # MEASURED off mcp.list_tools() on this branch, not summed.
     # NINETY-EIGHT ON THE SAME LANE: two READS, each behind one declared
     # press, so the split moves on its read side. MEASURED, not summed.
-    assert len(tools) == 98
+    # NINETY-NINE ON THE SAME LANE: one WRITE, so the split moves on its
+    # write side. MEASURED, not summed.
+    assert len(tools) == 99
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -1470,6 +1488,9 @@ async def test_the_surface_is_exactly_the_ninety_eight_tools(tools):
         "linkedin_mark_conversation_unread",
         "linkedin_set_conversation_archived",
         "linkedin_set_conversation_deleted",
+        # 2026-11-26 (lane build-msg2, census M C64): a post in one group he
+        # names.
+        "linkedin_publish_group_post",
         "linkedin_send_reply",
         "linkedin_withdraw_from_group",
         "linkedin_connect_from_profile",
@@ -1710,8 +1731,10 @@ async def test_the_surface_is_exactly_the_ninety_eight_tools(tools):
     # SIXTY-SIX ON THE SAME LANE: its two READS move the non-write count by
     # two, and this second copy of the total moves to the measured
     # ninety-eight with the first test's pin.
+    # STILL SIXTY-SIX ON THE SAME LANE: the group post is a WRITE, and this
+    # second copy of the total moves to the measured ninety-nine.
     assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 66
-    assert len(tools) == 98
+    assert len(tools) == 99
 
 
 def test_the_read_that_was_nearly_named_a_write():
@@ -1828,6 +1851,9 @@ async def test_the_exemption_covers_only_the_names_on_it(tools):
         "linkedin_mark_conversation_unread",
         "linkedin_set_conversation_archived",
         "linkedin_set_conversation_deleted",
+        # 2026-11-26 (lane build-msg2, census M C64): a post in one group he
+        # names.
+        "linkedin_publish_group_post",
         "linkedin_send_reply",
         "linkedin_withdraw_from_group",
         "linkedin_connect_from_profile",
@@ -2289,6 +2315,9 @@ async def test_server_info_stops_claiming_read_only_once_writes_are_on(monkeypat
         # NINTH, same day, and the first that TYPES. Typed here by hand like
         # its eight siblings, because a derived list would admit the tenth
         # silently.
+        # 2026-11-26 (lane build-msg2, census M C64), typed here by hand: a
+        # post in one group he names, receipt-only.
+        "publish_group_post",
         "publish_post",
         # SEVENTH, 2026-09-01, and the first admitted with a blocker still
         # OPEN rather than measured away: which reaction the toggle applies
@@ -2401,6 +2430,9 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
         # THE NINTH, same day, and the FIRST THAT TYPES -- one page.fill
         # inside perform, which grew readonly.SANCTIONED_MUTATIONS from two
         # entries to three, the first growth that is not a click.
+        # 2026-11-26 (lane build-msg2, census M C64), typed here by hand: a
+        # post in one group he names, receipt-only.
+        "publish_group_post",
         "publish_post",
         # ADDED DELIBERATELY, 2026-09-01. This list is spelled out rather than
         # derived from writes.PERFORMABLE precisely so that a new write cannot
@@ -2849,6 +2881,8 @@ async def test_the_server_instructions_name_every_write_that_ships():
         # conversation's own menu, the map extended the same way.
         25: "twenty-five", 26: "twenty-six", 27: "twenty-seven",
         28: "twenty-eight", 29: "twenty-nine",
+        # THIRTY ON THE SAME LANE: the group post (census M C64).
+        30: "thirty",
     }
     assert f"{words[len(writes.PERFORMABLE)]} write" in text
     for action in writes.PERFORMABLE:
@@ -3174,6 +3208,9 @@ async def test_server_info_reports_irreversibility_before_a_caller_commits(
         # among their viewers, and both specs' residue says so.
         "connect_from_profile",
         "message_from_profile",
+        # 2026-11-26 (lane build-msg2, census M C64), typed here by hand: a
+        # post in one group he names, receipt-only.
+        "publish_group_post",
         "publish_post",
         # THE NINTH, 2026-10-10 (lane U), TYPED BY HAND AS THIS LIST DEMANDS,
         # AND THE DECISION IT RECORDS: a FILE FROM THIS MACHINE lands in a
@@ -3210,7 +3247,7 @@ async def test_server_info_reports_irreversibility_before_a_caller_commits(
         "withdraw_from_group",
     ], (
         "the permanent things this server performs are typed in here by "
-        "whoever added one. AN ELEVENTH arriving is a decision, not a diff."
+        "whoever added one. A TWELFTH arriving is a decision, not a diff."
     )
     # THE SECOND ARRIVED ON 2026-09-01 AND IT IS DIFFERENT IN KIND, which is
     # why this is written out rather than the list quietly growing by one.

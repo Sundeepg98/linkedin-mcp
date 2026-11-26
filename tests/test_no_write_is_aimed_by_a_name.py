@@ -186,6 +186,14 @@ TARGET_KIND_CLASS: dict[str, tuple[str, str]] = {
     # five acts on one conversation's own options menu, addressed by its
     # thread id ALONE -- the same shape-checked id send_reply's subject half
     # is, never read off a page.
+    # 2026-11-26 (lane build-msg2, census M C64): the group post, a group's
+    # NUMERIC id and his words; a name or slug is refused by shape and never
+    # repeated (group_leave.checked_group_id).
+    "group_and_text": (
+        "id",
+        "the group post: the numeric group id the caller supplies, "
+        "shape-checked, never read off a page; a name is refused",
+    ),
     "thread_id": (
         "id",
         "the conversation-menu acts: a thread id the caller supplies, "

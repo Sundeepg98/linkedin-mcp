@@ -778,6 +778,9 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         "mark_conversation_unread",
         "set_conversation_archived",
         "set_conversation_deleted",
+        # LANE BUILD-MSG2, the same day: a post in one group he names (census
+        # M C64), sanctioned and performable in the same move.
+        "publish_group_post",
         # SIXTEEN FROM LANE L5'S MERGE OF MASTER 66aaa95, the same day (fifteen
         # on the lane's branch): the reply inside a conversation he names
         # (census M M10), sanctioned and performable in the same move.
@@ -938,6 +941,9 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         "mark_conversation_unread",
         "set_conversation_archived",
         "set_conversation_deleted",
+        # LANE BUILD-MSG2, the same day: a post in one group he names (census
+        # M C64), sanctioned and performable in the same move.
+        "publish_group_post",
         # THE FIFTEENTH, 2026-09-24 (the fourteenth on lane L5's branch), and
         # the first write that CONFIRMS ITSELF
         # FROM THE SURFACE A PERSON READS: a reply inside a conversation he
@@ -1524,6 +1530,9 @@ _UNMEASURED_REVERSIBILITY = {
     "mark_conversation_unread",
     "set_conversation_archived",
     "set_conversation_deleted",
+    # 2026-11-26 (lane build-msg2, census M C64). Whether a group post can be
+    # deleted has never been observed; no delete is built.
+    "publish_group_post",
     # 2026-09-24. Whether LinkedIn lets a sent reply be recalled has never
     # been observed. This comment used to add "and recalling one is
     # destruction this server may not perform at any confirm level either
@@ -1607,6 +1616,8 @@ REVERSIBILITY_CLASS = {
     "mark_conversation_unread": "STILL-UNKNOWN",
     "set_conversation_archived": "STILL-UNKNOWN",
     "set_conversation_deleted": "STILL-UNKNOWN",
+    # 2026-11-26 (lane build-msg2). STILL-UNKNOWN: see _UNMEASURED_REVERSIBILITY.
+    "publish_group_post": "STILL-UNKNOWN",
     # 2026-09-27. STILL-UNKNOWN whether a group left can be rejoined; it
     # carries irreversible=True regardless, because no join is built here and
     # an approval-gated group needs a manager to let him back in.
@@ -1655,6 +1666,7 @@ REVERSIBILITY_MEASURED = {
     "mark_conversation_unread": False,
     "set_conversation_archived": False,
     "set_conversation_deleted": False,
+    "publish_group_post": False,
     "send_reply": False,
     "send_attachment": False,
     "withdraw_from_group": False,

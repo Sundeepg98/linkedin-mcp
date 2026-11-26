@@ -589,6 +589,9 @@ CLEAN_COMPONENT = {
     "file": "clean-example.png",
     # 2026-11-24, lane builds-26: the endorsement pair's content half.
     "skill": "Node.js",
+    # 2026-11-26, lane build-msg2: the group post's subject, a group's
+    # NUMERIC id -- a name is refused by shape. Invented digits.
+    "group": "10001",
 }
 
 #: THE TWO CONTENTS OF A FILE KIND (lane U, ``thread_and_file``): two files

@@ -163,6 +163,9 @@ _TARGETS: dict[str, object] = {
     # 2026-11-26, lane build-msg2 (M M26, M M27, M M29, M M31): one
     # conversation's thread id alone, for the acts on its own options menu.
     "thread_id": "2-SYNTHETICTHREADAAAA==",
+    # 2026-11-26, lane build-msg2 (M C64): one group's invented digits and
+    # invented words, for the group post.
+    "group_and_text": {"group": "10001", "text": "A synthetic group post."},
 }
 
 

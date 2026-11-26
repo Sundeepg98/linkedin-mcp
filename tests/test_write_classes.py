@@ -230,10 +230,13 @@ def test_the_split_is_the_one_the_lane_report_quotes():
     365 ON LANE BUILD-MSG2 (2026-11-26), MEASURED: `M M26`, `M M27`, `M M29`
     and `M M31` COVERED-UNFIRED (the acts on one conversation's own options
     menu), so their four lines leave the table. All R3 (messaging-manage, and
-    delete-or-withdraw-own for M M26). 369 - 4 = 365 = 16 R1 + 33 R2 + 316 R3."""
+    delete-or-withdraw-own for M M26). 369 - 4 = 365 = 16 R1 + 33 R2 + 316 R3.
+    364 ON THE SAME LANE, MEASURED: `M C64` COVERED-UNFIRED (a post in one
+    group he names), so its R3 line leaves the table. 365 - 1 = 364 = 16 R1 +
+    33 R2 + 315 R3."""
     rows, _ = cwc.load()
     split = cwc.split(rows)
-    assert (split["R1"], split["R2"], split["R3"]) == (16, 33, 316)
+    assert (split["R1"], split["R2"], split["R3"]) == (16, 33, 315)
     assert split["R1:built"] + split["R1:queued"] == split["R1"]
 
 

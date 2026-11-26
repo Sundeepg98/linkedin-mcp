@@ -1,4 +1,13 @@
-"""The tool surface: ninety-eight tools, twenty-nine of which write to LinkedIn.
+"""The tool surface: ninety-nine tools, thirty of which write to LinkedIn.
+
+THE NINETY-NINTH IS A WRITE, 2026-11-26, on lane build-msg2 (census ``M C64``,
+EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS): ``linkedin_publish_group_post``
+publishes his words in ONE group he names by its numeric id. The preview
+loads the group's page and presses nothing; the confirmed press opens its
+share box by the trigger that says "Start a public post", types only into
+one EMPTY group composer that draws no Schedule post, and presses Post only
+when the editor holds exactly his words. Receipt-only: what Post leaves in
+a group has never been drawn.
 
 THE NINETY-SEVENTH AND NINETY-EIGHTH ARE READS, 2026-11-26, on lane
 build-msg2, each behind ONE declared press of its own:
@@ -477,9 +486,9 @@ assigned to anybody -- it waits for whoever next runs the suite, and in the
 meantime the pin goes on asserting the old number with full confidence.
 
 THE NUMBERS ABOVE ARE DERIVED NOW, and that is a statement about a test rather
-than about an intention. Ninety-eight is ``len(await mcp.list_tools())``,
+than about an intention. Ninety-nine is ``len(await mcp.list_tools())``,
 pinned in ``test_server_surface.py`` by
-``test_the_surface_is_exactly_the_ninety_eight_tools``; the split is pinned by
+``test_the_surface_is_exactly_the_ninety_nine_tools``; the split is pinned by
 ``tests/test_prose_that_makes_a_claim.py::test_the_server_docstring_numbers_are_derived``,
 which reads THESE WORDS and fails if any of the three disagrees with the
 registry.
@@ -492,9 +501,11 @@ POINTER to it was dangling, so a reader who followed it found nothing and
 would reasonably conclude these numbers are unchecked. A citation is a claim
 like any other.
 The surface splits three ways and the split is the part a reader actually
-needs: SIXTY-SIX read, TWENTY-NINE write, and THREE are write-shaped,
-registered, gated and unable to act. Sixty-six plus twenty-nine plus three is
-ninety-eight. (Sixty-four, twenty-nine and three, summing to ninety-six,
+needs: SIXTY-SIX read, THIRTY write, and THREE are write-shaped,
+registered, gated and unable to act. Sixty-six plus thirty plus three is
+ninety-nine. (Sixty-six, twenty-nine and three, summing to ninety-eight,
+until lane build-msg2's group post, 2026-11-26. Sixty-four, twenty-nine and
+three, summing to ninety-six,
 until lane build-msg2's two reads behind one declared press each, the
 Archived folder and the scheduled posts list, 2026-11-26. Sixty-four,
 twenty-four and three, summing to ninety-one, until
@@ -687,11 +698,13 @@ the moment ``update_profile_field`` was given an address while still refusing.
 always meant: an address is not a permission.
 
 NOTE THE ACTION THAT HAS NO TOOL. ``writes.SANCTIONED_WRITES`` holds
-THIRTY-THREE actions where this surface registers THIRTY-TWO write-shaped tools, and
+THIRTY-FOUR actions where this surface registers THIRTY-THREE write-shaped tools, and
 the missing one is ``set_open_to_work``: it is sanctioned, it is refused by
-``_refuse_unperformable``, and no tool was ever registered for it. So thirty-two
-counts TOOLS and thirty-three counts ACTIONS, and a reader comparing the two
-numbers is not looking at a discrepancy. (TWENTY-EIGHT and TWENTY-SEVEN until
+``_refuse_unperformable``, and no tool was ever registered for it. So thirty-three
+counts TOOLS and thirty-four counts ACTIONS, and a reader comparing the two
+numbers is not looking at a discrepancy. (THIRTY-THREE and THIRTY-TWO until
+lane build-msg2's group post, 2026-11-26, added one to each. TWENTY-EIGHT and
+TWENTY-SEVEN until
 lane build-msg2's five acts on one conversation's own menu, 2026-11-26, added
 five to each. TWENTY-SIX and TWENTY-FIVE on master
 at lane build-jmn26's base, 4c62196, measured off that tree's registry -- this
@@ -1299,7 +1312,7 @@ mcp = FastMCP(
     instructions=(
         "A window onto the operator's OWN LinkedIn account, driven by his own "
         "signed-in browser on his own machine. Most tools read and change "
-        "nothing. TWENTY-NINE WRITE: linkedin_save_job, "
+        "nothing. THIRTY WRITE: linkedin_save_job, "
         "linkedin_unsave_job, linkedin_unfollow_company, "
         "linkedin_follow_company, linkedin_apply_job, "
         "linkedin_update_setting, linkedin_react_to_item, "
@@ -1313,8 +1326,8 @@ mcp = FastMCP(
         "linkedin_set_similar_jobs_alert, linkedin_unset_similar_jobs_alert, "
         "linkedin_set_search_job_alert, linkedin_unset_search_job_alert, "
         "linkedin_set_conversation_muted, linkedin_unset_conversation_muted, "
-        "linkedin_mark_conversation_unread, linkedin_set_conversation_archived and "
-        "linkedin_set_conversation_deleted. "
+        "linkedin_mark_conversation_unread, linkedin_set_conversation_archived, "
+        "linkedin_set_conversation_deleted and linkedin_publish_group_post. "
         "ONE MORE IS WRITE-SHAPED AND REFUSES: linkedin_set_tracker_stage, the "
         "stage move on a saved job, whose control -- an item in the tracker "
         "row's overflow menu -- has never been captured; it reads his Saved "
@@ -1365,6 +1378,11 @@ mcp = FastMCP(
         "built here) and linkedin_set_conversation_deleted, which nothing brings "
         "back and nothing confirms -- offer it only on his explicit order for "
         "a conversation he names. "
+        "THE THIRTIETH, linkedin_publish_group_post, posts his exact words in "
+        "ONE group he names by its NUMERIC id, never a group's name, to the "
+        "group's public feed: it presses the share box only where its trigger "
+        "says 'Start a public post', and nothing confirms the post, so offer "
+        "it only for a group and words he names, and tell him to look. "
         "THE SIXTEENTH, linkedin_withdraw_from_group, leaves one group he "
         "names by its NUMERIC id, never by a group's name; no join is built "
         "here, so offer it only for a group he names -- and not his last "
@@ -13962,6 +13980,9 @@ async def linkedin_search_content(keywords: str) -> dict[str, Any]:
 # And census M C14: his scheduled posts list, behind the composer's schedule
 # button (SCHEDULED-LIST-AS-A-SHIPPED-READ), in
 # ``linkedin_server/scheduled_posts.py``.
+# And census M C64: a post in one group he names, behind the grant
+# (EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS), through ``writes`` and
+# ``linkedin_server/group_composer.py``.
 
 from linkedin_server import messaging_folders, scheduled_posts  # noqa: E402 -- lane build-msg2's one block
 
@@ -14227,6 +14248,53 @@ async def linkedin_scheduled_posts() -> dict[str, Any]:
                 if reopened.get("empty") is True:
                     reclosed = await scheduled_posts.close_composer(page)
         return scheduled_posts.scheduled_result(reading, reopened, reclosed)
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_publish_group_post(
+    group_id: str, text: str, confirm_token: str = ""
+) -> dict[str, Any]:
+    """Publish a post in ONE LinkedIn group you name by its numeric id -- a WRITE.
+
+    Under your own name, to the group's PUBLIC feed: the group page's share
+    box says "Start a public post", and this presses it only when it says
+    exactly that. Census row ``M C64``. Same two-step shape as
+    ``linkedin_save_job``: no ``confirm_token``, no action -- you get a block
+    to read, with your words printed in full, and a token that works ONCE,
+    only for this group and these words, within two minutes.
+
+    THE PREVIEW loads the group's page and presses nothing. It refuses unless
+    the browser landed on the group you named and the page draws exactly one
+    closed share box with that one trigger. Name the group by the numeric id
+    ``linkedin_group_memberships`` returns; a name is refused and never
+    repeated.
+
+    THE CONFIRMED PRESS opens the box with its trigger, and types your words
+    only into ONE empty composer -- one editor, blank, and Post drawn disabled
+    -- that draws no Schedule post (the feed composer's mark, which the
+    group's does not draw). Post is pressed only when the editor holds EXACTLY
+    your words and Post has turned on. Anything else stops with nothing
+    published; words already typed stay in the composer.
+
+    RECEIPT-ONLY: what Post leaves inside a group -- the post in its feed, or
+    a notice that it waits for a manager's approval -- has never been
+    captured, so the outcome is declared unverifiable and the receipt counts
+    what the page drew after the press. Open the group to look. Irreversible
+    in audience: a deletion would not un-read it, and no delete is built here.
+
+    Args:
+        group_id: the group's numeric id, as linkedin_group_memberships
+            returns it.
+        text: the exact words to post.
+        confirm_token: leave empty to preview. Pass the token from that
+            preview to actually post.
+    """
+    try:
+        return await _write_tool(
+            "publish_group_post", {"group": group_id, "text": text}, confirm_token
+        )
     except Exception as exc:
         return _error(exc)
 

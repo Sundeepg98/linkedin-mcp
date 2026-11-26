@@ -472,7 +472,13 @@ AFTER_LANE_BUILD_MSG2_CONVERSATION_MENU = (114, {"R": 9, "W": 102, "R+W": 3})
 #: reads 9 - 1.
 AFTER_LANE_BUILD_MSG2_SCHEDULED_LIST = (113, {"R": 8, "W": 102, "R+W": 3})
 
-EXPECTED_NOW = AFTER_LANE_BUILD_MSG2_SCHEDULED_LIST
+#: ON THE SAME LANE, MEASURED with this tree's guard: `C64` -- a WRITE -- left
+#: GAP, COVERED-UNFIRED on a post in one group he names
+#: (`_audit/2026-11-26-build-msg2.md` section 4). 113 - 1 = 112, writes
+#: 102 - 1.
+AFTER_LANE_BUILD_MSG2_GROUP_POST = (112, {"R": 8, "W": 101, "R+W": 3})
+
+EXPECTED_NOW = AFTER_LANE_BUILD_MSG2_GROUP_POST
 
 
 def test_the_headline_split_is_the_one_the_report_quotes():

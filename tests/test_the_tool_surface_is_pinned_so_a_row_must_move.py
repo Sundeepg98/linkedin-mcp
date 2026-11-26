@@ -138,6 +138,9 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     # scheduled posts list (census M C14).
     "linkedin_archived_conversations": ("include_names",),
     "linkedin_scheduled_posts": (),
+    # Lane build-msg2, the same day (census M C64): a post in one group he
+    # names, by its digits and his words.
+    "linkedin_publish_group_post": ("confirm_token", "group_id", "text"),
     "linkedin_message_from_profile": ("confirm_token", "profile", "text"),
     "linkedin_my_activity_items": (),
     "linkedin_my_applications": ("limit",),
@@ -800,8 +803,13 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: `M M28` STAYS GAP -- its view half is the Archived read, its restore half
 #: waits on a capture, and whether the row splits is the orchestrator's.
 #: See `_audit/2026-11-26-build-msg2.md`.
-PINNED_TOOL_COUNT = 98
-PINNED_PARAMETER_COUNT = 148
+#: **ON THE SAME LANE: 99 TOOLS AND 151 PARAMETERS** -- one WRITE,
+#: `linkedin_publish_group_post(group_id, text, confirm_token)`, beside the
+#: ninety-eight and 148, counted off `mcp.list_tools()`, never summed. THE
+#: CENSUS DECISION, IN THE SAME COMMIT: `M C64` GAP -> COVERED-UNFIRED on it,
+#: never fired. See `_audit/2026-11-26-build-msg2.md`.
+PINNED_TOOL_COUNT = 99
+PINNED_PARAMETER_COUNT = 151
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:

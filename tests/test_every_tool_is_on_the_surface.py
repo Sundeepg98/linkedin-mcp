@@ -492,4 +492,6 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # NINETY-EIGHT ON THE SAME LANE: two READS, each behind one declared
     # press -- linkedin_archived_conversations (M M28's view half) and
     # linkedin_scheduled_posts (M C14) -- measured off this branch's registry.
-    assert len(_tool_names()) == 98
+    # NINETY-NINE ON THE SAME LANE: one WRITE, linkedin_publish_group_post
+    # (M C64), measured off this branch's registry.
+    assert len(_tool_names()) == 99

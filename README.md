@@ -3,8 +3,14 @@
 An MCP server that shows you your own LinkedIn account data as structured tool
 results instead of pages you have to click through.
 
-**Ninety-eight tools ship. Sixty-six read. Thirty-two write. Three of those
+**Ninety-nine tools ship. Sixty-six read. Thirty-three write. Three of those
 are write-shaped and unable to act.**
+(It read "Ninety-eight tools ship. Sixty-six read. Thirty-two write" until
+lane build-msg2's group post, 2026-11-26: `linkedin_publish_group_post`
+posts his exact words in ONE group he names by its numeric id, behind the
+grant -- the share box pressed only where its trigger says "Start a public
+post", his words typed only into one empty group composer, Post pressed
+only when the editor holds exactly them; receipt-only (census `M C64`).)
 (It read "Ninety-six tools ship. Sixty-four read. Thirty-two write" until
 lane build-msg2's two reads, 2026-11-26, each behind one declared press of
 its own: `linkedin_archived_conversations` switches the composer's list to
@@ -1172,7 +1178,7 @@ linkedin_server/
   cdp_bridge.py              the recovery path: attach to a running Chrome
   dom.py                     the read-only harvesters and the control readers
   shape.py                   pure parsers and the result envelope
-  server.py                  the ninety-eight tools
+  server.py                  the ninety-nine tools
   errors.py
 tests/                       1393 tests, no network, no account
   fixtures/                  frozen LinkedIn markup, scrubbed

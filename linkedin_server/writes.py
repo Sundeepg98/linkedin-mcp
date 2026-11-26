@@ -217,7 +217,9 @@ from linkedin_server import (
     dom,
     endorse_skill,
     field_restore,
+    group_composer,
     group_leave,
+    group_page,
     item_author,
     job_alert_switch,
     landing,
@@ -3487,6 +3489,84 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "records what the press draws."
         ),
     ),
+    # A POST IN ONE GROUP HE NAMES (lane build-msg2, 2026-11-26; census M C64),
+    # on EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS and the capture
+    # B5-GROUP-COMPOSER-OPENS-EMPTY sanctioned: the group page's closed share
+    # box, its trigger pressed, his words typed into the composer it opened,
+    # Post pressed. See ``linkedin_server/group_composer.py``.
+    "linkedin_publish_group_post": WriteSpec(
+        action="publish_group_post",
+        tool_name="linkedin_publish_group_post",
+        # THE GROUP'S OWN PAGE, BY ITS DIGITS. ``url_target_of`` hands the
+        # template the SUBJECT half of the target only -- his words never
+        # enter a navigation.
+        url_template="https://www.linkedin.com/groups/{target}/",
+        url_pattern=re.compile(r"^https://www\.linkedin\.com/groups/[0-9]{1,20}/$"),
+        exempt_substring=None,
+        summary=(
+            "Publish a post in one LinkedIn group you name by its numeric id, "
+            "under your own name."
+        ),
+        from_state=group_composer.BOX_CLOSED,
+        to_state="group_post_published",
+        target_kind="group_and_text",
+        state_from=group_composer.STATE_FROM,
+        unverifiable=Unverifiable(
+            surface_that_would_confirm=(
+                "the group's own feed, where a published post would be drawn, "
+                "or a notice that it waits for a group manager's approval"
+            ),
+            why_it_cannot=(
+                "what Post leaves inside a group has never been captured: a "
+                "post in the group's feed, or one held for a manager's "
+                "approval, are both possible and neither has been drawn on "
+                "any page this server holds. The receipt reads what the page "
+                "drew after the press, counted, and claims no post"
+            ),
+            what_he_must_do=(
+                "open the group and look for your post in its feed. If it is "
+                "not there, it may be waiting for a manager's approval"
+            ),
+        ),
+        direction_source=(
+            "the group page's closed share box, read live by this gate: one "
+            "box, its one 'Start a public post' button, no composer open "
+            "(live session 11, load 36). The composer that button opens was "
+            "captured EMPTY: one editor, Post drawn disabled, and no Schedule "
+            "post, which the feed's own composer draws and the group's does "
+            "not."
+        ),
+        wrong_state_note=(
+            "A group page with no share box is not a group he can post in, as "
+            "far as this server can tell, and nothing is pressed on it."
+        ),
+        reversibility="STILL-UNKNOWN whether a group post can be deleted through LinkedIn's own controls",
+        reversibility_measured=False,
+        reversibility_class="STILL-UNKNOWN",
+        reversibility_evidence=(
+            "NOT MEASURED. His own feed posts draw 'delete post' in their "
+            "control menu (the live lane, 2026-09-24); a group post's menu has "
+            "never been opened."
+        ),
+        reversible_by=(
+            "NOT YET through this server; by hand, he can open the post and "
+            "delete it. Deleting his own post is a class built behind the "
+            "grant -- outward_classes records delete_own_post as "
+            "NEEDS-CAPTURE -- and it is not built."
+        ),
+        residue=(
+            "IRREVERSIBLE IN AUDIENCE: a group post is read by the group's "
+            "members, and a deletion would remove the post, not what they "
+            "read or the notification that told them. The preview loads the "
+            "group's page and presses nothing; the act types his words only "
+            "into ONE empty composer the trigger opened."
+        ),
+        irreversible=True,
+        reversibility_procedure=(
+            "Capture the control menu on one group post he names for "
+            "deletion; then build delete_own_post on it, behind the grant."
+        ),
+    ),
     # ------------------------------------------------------ end lane build-msg2
 }
 
@@ -4193,6 +4273,12 @@ _COMPOSITE_TARGET_KINDS: dict[str, tuple[str, str]] = {
     # exactly as ``profile_and_text``'s is; the CONTENT is the skill, in his
     # own words, compared in the page and never typed.
     "profile_and_skill": ("profile", "skill"),
+    # 2026-11-26, lane build-msg2, ``publish_group_post`` (census M C64). The
+    # SUBJECT is the numeric id of the group he names -- checked by
+    # ``group_leave.checked_group_id``, whose refusal reports a SHAPE and never
+    # the value -- and only it reaches a url; the CONTENT is his post, typed
+    # and never composed here.
+    "group_and_text": ("group", "text"),
 }
 
 #: THE TARGET KINDS OF A NAMED PERSON'S PROFILE (2026-09-27). The one-part
@@ -4585,6 +4671,33 @@ def _composite_target(spec: WriteSpec, target: Any) -> str:
             + TARGET_JOIN
             + _clean_target_part(spec, second, content)
         )
+    if spec.target_kind == "group_and_text":
+        # THE SUBJECT IS A GROUP, CANONICAL AS ITS DIGITS (lane build-msg2,
+        # 2026-11-26). A group's NAME or slug is refused here, before a token
+        # exists, and the refusal never repeats it: a group named after a
+        # person makes it a person's name (``group_leave.checked_group_id``).
+        if isinstance(target, str) and target.count(TARGET_JOIN) == 1:
+            subject, _, content = target.partition(TARGET_JOIN)
+        elif isinstance(target, dict):
+            subject, content = target.get(first), target.get(second)
+        else:
+            raise WriteAttemptError(
+                f"{spec.action!r} is addressed by {first!r} AND {second!r} "
+                "together: the numeric id of the group you name and the exact "
+                "words, as a mapping of the two."
+            )
+        # THE COMPONENT RULES EVERY COMPOSITE KIND KEEPS COME FIRST -- empty,
+        # over the cap, the separator, a control character -- so this kind
+        # refuses exactly as its siblings do; only then the group's shape.
+        digits, why = group_leave.checked_group_id(_clean_target_part(spec, first, subject))
+        if digits is None:
+            raise WriteAttemptError(
+                f"{spec.action!r} is addressed by the numeric LinkedIn group id "
+                "-- as linkedin_group_memberships returns it -- and the value "
+                f"given is not one: {why} A name is not accepted here, and it "
+                "is not repeated here either."
+            )
+        return digits + TARGET_JOIN + _clean_target_part(spec, second, content)
     if isinstance(target, str) and target.count(TARGET_JOIN) == 1:
         # THE CANONICAL FORM IS A VALID SPELLING OF THE TARGET, and accepting
         # it is what makes this function IDEMPOTENT. It was not, and the
@@ -4953,6 +5066,10 @@ STRICT_PRESS_ACTIONS: frozenset[str] = NAMED_PROFILE_ACTIONS | frozenset(
         "mark_conversation_unread",
         "set_conversation_archived",
         "set_conversation_deleted",
+        # 2026-11-26 (lane build-msg2, census M C64): the group's share-box
+        # trigger, then Post inside the one modal it opened -- each counted
+        # once by its gate before it is pressed.
+        "publish_group_post",
     }
 )
 
@@ -6776,6 +6893,52 @@ async def observe(
             same_page_as_action=True,
         )
 
+    if spec.state_from == group_composer.STATE_FROM:
+        # ONE LOAD, OF THE GROUP HE NAMED, AND NO PRESS (lane build-msg2,
+        # 2026-11-26; census M C64). The address is the spec's own template
+        # filled with the SUBJECT half of the target -- the digits -- so his
+        # words never enter a navigation. THE LANDING VETOES BY RAISING,
+        # through a comparison's boolean: an id LinkedIn does not show him
+        # lands somewhere else, and a share box there is not his group's.
+        url = str(spec.url_template or "").format(target=url_target_of(spec, target))
+        landed = await _load(navigator, page, url, surface="group page")
+        if group_page.landed_on_the_same_group(landed, url_target_of(spec, target)) is not True:
+            raise WriteAttemptError(
+                "the browser did not land on the group you named, so its share "
+                "box was not read and nothing was minted. THE LANDING IS "
+                f"WITHHELD; what is safe to say about it -- {landing.withheld(landed)}."
+            )
+        box_reading = await group_composer.read_box(page)
+        state, why = group_composer.box_state(box_reading)
+        facts = {
+            "landed_on_the_named_group": True,
+            "share_box": {
+                key: box_reading.get(key) for key in ("boxes", "triggers", "modals", "error")
+            },
+            # WHO WOULD SEE IT, in LinkedIn's own words and nobody else's: the
+            # trigger is matched by its EXACT name, so a page whose trigger
+            # does not say "public" reads unknown and nothing is pressed. The
+            # composer's own audience entry is not read.
+            "audience": {
+                "trigger_words": group_composer.TRIGGER_WORDS,
+                "says": "public" if state == group_composer.BOX_CLOSED else "unknown",
+                "how": (
+                    "the share box's trigger, matched by its exact words; a "
+                    "trigger saying anything else is not pressed"
+                ),
+            },
+        }
+        return _record(
+            spec,
+            target=target,
+            facts=facts,
+            facts_url=url,
+            state=state,
+            state_why=why,
+            state_url=url,
+            same_page_as_action=True,
+        )
+
     if spec.state_from == conversation_menu.STATE_FROM:
         # TWO LOADS AND ONE SANCTIONED PREVIEW PRESS (lane build-msg2,
         # 2026-11-26; CONVERSATION-MENU-PREVIEW-PRESS).
@@ -8104,6 +8267,19 @@ PERFORMABLE: frozenset[str] = frozenset(
         "mark_conversation_unread",
         "set_conversation_archived",
         "set_conversation_deleted",
+        # 2026-11-26 (lane build-msg2, census M C64), on
+        # EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS: a post in one group he
+        # names, its composer opened by the group page's own trigger.
+        #
+        #   target               the group's digits and his words, one
+        #                        canonical string; only the digits reach a url
+        #   no new permission    perform()'s one click site twice (the
+        #                        trigger, then Post) and its fill site once
+        #   receipt-only         Unverifiable: what Post leaves in a group has
+        #                        never been drawn
+        #
+        # ENABLING IS NOT FIRING: no grant was issued.
+        "publish_group_post",
     }
 )
 
@@ -8628,6 +8804,11 @@ def anchor_label_for(
         # active row's trigger, aimed STRUCTURALLY; the item is pressed only
         # after ``conversation_menu.menu_item_gate`` re-reads this word.
         return conversation_menu.act_for(spec.action).word
+    if spec.action in GROUP_COMPOSER_ACTIONS:
+        # THE TRIGGER'S OWN WORDS, exact (lane build-msg2): 'Start a public
+        # post', MEASURED by keyed shape on live session 11's group page. The
+        # editor and Post are reached only through their gates afterwards.
+        return group_composer.TRIGGER_WORDS
     if spec.action == "follow_company_page":
         # A PREFIX, like the unfollow's, and for the same reason: LinkedIn
         # writes the Page's own name into the label, which makes it a strong
@@ -9018,6 +9199,8 @@ _WRITE_SURFACE_FOR_ACTION: dict[str, str] = {
     "mark_conversation_unread": "messaging thread",
     "set_conversation_archived": "messaging thread",
     "set_conversation_deleted": "messaging thread",
+    # 2026-11-26 (lane build-msg2, census M C64): the group page he names.
+    "publish_group_post": "group page",
 }
 
 
@@ -9121,6 +9304,8 @@ _WHERE_TO_LOOK: dict[str, str] = {
     "mark_conversation_unread": "your LinkedIn messages list, without opening the conversation",
     "set_conversation_archived": "your LinkedIn messages' Archived folder",
     "set_conversation_deleted": "your LinkedIn messages, for the conversation itself",
+    # 2026-11-26 (lane build-msg2, census M C64).
+    "publish_group_post": "the group's own feed, or its notice of a post awaiting approval",
 }
 
 #: THE ACTIONS THAT ARE ACTUAL TOGGLES, for the one sentence that is only true
@@ -9527,6 +9712,19 @@ def _assert_landed_on_target(
                 "that conversation. A reply box on any other page would reach "
                 "somebody else. THE LANDING IS WITHHELD rather than named; "
                 f"what is safe to say about it -- {landing.withheld(landed)}."
+            )
+        return
+    if spec.state_from == group_composer.STATE_FROM:
+        # ONE GROUP, BY ITS DIGITS (lane build-msg2): the share box pressed is
+        # the box on the page on screen, so that page must be the group the
+        # grant names -- compared as two digit runs, the landing never quoted.
+        if group_page.landed_on_the_same_group(landed, url_target_of(spec, grant.target)) is not True:
+            raise WriteAttemptError(
+                "refusing to press: this post is for the group your grant names, "
+                "and the browser landed somewhere that is not that group. A share "
+                "box on any other page would publish somewhere else. THE LANDING "
+                f"IS WITHHELD rather than named; what is safe to say about it -- "
+                f"{landing.withheld(landed)}."
             )
         return
     if spec.state_from == conversation_menu.STATE_FROM:
@@ -9942,6 +10140,19 @@ async def _live_control(
         if state not in (search_alert_switch.ALERT_OFF, search_alert_switch.ALERT_ON):
             return (state, why, "")
         return (state, why, search_alert_switch.SWITCH)
+
+    if spec.state_from == group_composer.STATE_FROM:
+        # THE CLOSED SHARE BOX AND ITS ONE TRIGGER (lane build-msg2, census
+        # M C64): the same reading the preview took, on the page the press is
+        # about to land on. The selector is the FIRST press only -- the
+        # trigger; his words go in only after ``group_composer.opened_gate``
+        # finds one empty group composer, and Post only after
+        # ``group_composer.post_gate`` reads exactly his words in it.
+        box_reading = await group_composer.read_box(page)
+        state, why = group_composer.box_state(box_reading)
+        if state != group_composer.BOX_CLOSED:
+            return (state, why, "")
+        return (state, why, group_composer.TRIGGER)
 
     if spec.state_from == conversation_menu.STATE_FROM:
         # THE TRIGGER, COLLAPSED, IN THE ONE ACTIVE ROW (lane build-msg2): the
@@ -11675,6 +11886,10 @@ TYPING_ACTIONS: frozenset[str] = frozenset(
         # OPEN_THEN_TYPE_ACTIONS -- and it is here because it types his words
         # into a composer, which is the claim this set makes.
         "message_from_profile",
+        # 2026-11-26 (lane build-msg2, census M C64): a post in one group he
+        # names. It types AFTER the trigger press opens the composer -- see
+        # GROUP_COMPOSER_ACTIONS -- and is here for the same reason.
+        "publish_group_post",
     }
 )
 
@@ -11689,6 +11904,16 @@ TYPING_ACTIONS: frozenset[str] = frozenset(
 #: until it was retired (2026-09-27), so forgetting a branch fails closed:
 #: the default is "do not type".
 OPEN_THEN_TYPE_ACTIONS: frozenset[str] = frozenset({"message_from_profile"})
+
+#: THE GROUP POST (lane build-msg2, 2026-11-26; census M C64): the same
+#: open-then-type shape as the set above, on its own gates. The group page's
+#: closed share box is pressed first; his words are queued INSIDE the click
+#: loop only when :func:`group_composer.opened_gate` finds exactly one EMPTY
+#: group composer (no Schedule post, the feed composer's mark), and Post only
+#: when :func:`group_composer.post_gate` reads exactly his words in it with
+#: Post turned on. A set of its own, so none of the named-profile gates the
+#: set above carries can reach it -- and forgetting a branch fails closed.
+GROUP_COMPOSER_ACTIONS: frozenset[str] = frozenset({"publish_group_post"})
 
 
 async def _first_contact_after_send(
@@ -12750,6 +12975,11 @@ async def perform(
     # THE UNFOLLOW'S CONFIRMATION GATE (2026-10-10), read after its press: what
     # the press drew, and whether the confirm control may be pressed.
     unfollow_confirm_gate: Optional[dict[str, Any]] = None
+    # THE GROUP COMPOSER'S OPENED GATE and what Post left, for
+    # GROUP_COMPOSER_ACTIONS only (lane build-msg2). Its Post gate is
+    # ``publish_gate``, the composer's own block.
+    group_opened: Optional[dict[str, Any]] = None
+    group_after_post: Optional[dict[str, Any]] = None
 
     # THE TYPING PLAN, and it is a QUEUE FOR THE SAME REASON THE CLICK PLAN IS.
     #
@@ -12781,6 +13011,12 @@ async def perform(
     select_plan: list[tuple[str, str]] = []
     if control_kind == "select_option":
         select_plan.append((selector, _text_component_of(spec, grant.target)))
+    elif spec.action in GROUP_COMPOSER_ACTIONS:
+        # NOTHING IS QUEUED BEFORE THE CLICK (lane build-msg2): the group's
+        # composer does not exist until its trigger is pressed, so the queue
+        # starts with that press alone, and his words are appended inside the
+        # loop only when ``group_composer.opened_gate`` proceeds.
+        pass
     elif spec.action in OPEN_THEN_TYPE_ACTIONS:
         # NOTHING IS QUEUED BEFORE THE CLICK (2026-09-27). The composer this
         # action types into does not exist until the Message press opens it,
@@ -13350,6 +13586,23 @@ async def perform(
                     else:
                         # THE CLOSE PRESS of a menu the gate would not act in.
                         closer_clicks += 1
+                elif spec.action in GROUP_COMPOSER_ACTIONS and clicks_made == 1:
+                    # THE TRIGGER OPENED THE GROUP'S COMPOSER, AND THAT
+                    # DISPATCHED NOTHING (lane build-msg2). His words are
+                    # queued only if exactly one EMPTY group composer opened.
+                    opener_clicks += 1
+                    await group_composer.wait_for_composer(page)
+                    group_opened = group_composer.opened_gate(
+                        await group_composer.read_composer(page)
+                    )
+                    if group_opened["proceed"]:
+                        fill_plan.append(
+                            (group_composer.EDITOR, _text_component_of(spec, grant.target))
+                        )
+                elif spec.action in GROUP_COMPOSER_ACTIONS and clicks_made == 2:
+                    # POST WAS PRESSED. What it left is read IN PLACE, counted,
+                    # before anything else; nothing it drew is pressed.
+                    group_after_post = await group_composer.read_after_post(page)
                 elif spec.action == "unfollow_company" and clicks_made == 1:
                     # THE UNFOLLOW WAS PRESSED, AND THAT PROVED NOTHING LIVE
                     # (2026-10-10, the live lane's session 7: one press, and the
@@ -13405,6 +13658,20 @@ async def perform(
                     )
                     if editor_save_gate["proceed"]:
                         click_plan.append(editor_save_gate["selector"])
+            elif spec.action in GROUP_COMPOSER_ACTIONS:
+                # THE GROUP COMPOSER, held to the reply's bar (lane build-msg2):
+                # one composer, one editor holding EXACTLY his words, Post now
+                # on, and still no Schedule post. Reported as ``publish_gate``.
+                # A bounded wait for Post to turn on comes first; it decides
+                # nothing.
+                await group_composer.wait_for_post_enabled(page)
+                publish_gate = group_composer.post_gate(
+                    await group_composer.read_composer(
+                        page, text=_text_component_of(spec, grant.target)
+                    )
+                )
+                if publish_gate["proceed"]:
+                    click_plan.append(publish_gate["selector"])
             elif spec.action in OPEN_THEN_TYPE_ACTIONS:
                 # THE COMPOSER THE PRESS OPENED, held to the reply's bar
                 # (2026-09-27): no recipient box, one editor, one Send, the
@@ -14138,6 +14405,21 @@ async def perform(
                 "observed": menu_gate.get("observed"),
                 "polls": menu_gate.get("polls"),
                 "after_the_item_press": menu_after_press,
+            }
+        ),
+        # WHAT THE GROUP COMPOSER'S OPENED GATE SAW, and what Post left, for
+        # GROUP_COMPOSER_ACTIONS only (lane build-msg2). COUNTS AND BOOLEANS;
+        # his words are compared in the page and never come back. Null for
+        # every other action. The Post gate is ``publish_gate`` above.
+        "group_composer_gate": (
+            None
+            if group_opened is None
+            else {
+                "proceeded": bool(group_opened.get("proceed")),
+                "refused_condition": group_opened.get("refused_condition"),
+                "why": group_opened.get("why"),
+                "observed": group_opened.get("observed"),
+                "after_post": group_after_post,
             }
         ),
         # WHAT THE UNFOLLOW'S PRESS DREW (2026-10-10), for that action only:
