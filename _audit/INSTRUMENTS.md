@@ -12591,3 +12591,59 @@ segments replaced), `digests.py` (the invariant test's own `ast_digest`, tree
 against base), `ledger_edit.py` (asserting edits to the two ledger tables) and
 `table68.py` (section 6's table from the ledgers on disk). Each answered one
 question once; the answers are in the record.
+
+## 103. A PRESS IS CLOSED BY ITS OWN EVIDENCE, AND A CLICK THAT CANNOT BE MADE IS A READING (live-s11, 2026-11-26)
+
+The live lane's session-11 runner (`runner_s11.py`, kept in the live lane's
+gitignored `_state/live11/tools/`, beside its offline checks): five checks, each
+SHOWN FAILING offline on a synthetic page before it was trusted, then held live
+from load 28 to load 40, every press closing on its own evidence. The record is
+`_audit/2026-11-25-live-session-11.md`, "E10" and "Instruments".
+
+### 103.1 The close rule, by the opening's own evidence
+
+A trigger whose `aria-expanded` FLIPPED on the press is closed when it reads its
+before-value again; any other opening is the set of popups that became visible
+on the press, held by REFERENCE (a JS handle, nothing written into the page),
+closed when each is hidden or gone; nothing flipped and nothing appeared is
+nothing opened, and is not Escaped (an Escape then would close the composer it
+sits in). MEASURED LIVE (load 27): a feed item's menu closed on Escape while the
+feed went on drawing itself, 11 popup containers at the load, 16 open, 15 after;
+a page-wide count of dialogs and of closed words gave that growth to the press.
+
+    A PAGE THAT KEEPS HYDRATING LENDS ITS GROWTH TO WHATEVER WAS PRESSED LAST.
+    JUDGE AN OPENING BY ITS OWN TRIGGER, OR BY THE ELEMENTS IT DREW.
+
+### 103.2 The not-actionable reading
+
+A visible control whose click's actionability wait times out (load 26: the
+feed's search input) is reported NOT PRESSED and nothing is Escaped; the search
+box falls back to a focus, the same disclosure. Shown failing: a covered button
+raised TimeoutError on the old runner and read "not pressed" on the new.
+
+### 103.3 The click site's document guard
+
+A document request during any press is an uncounted load: it is counted into
+the ledger by hand at once and the phase stops. Shown failing on a link press,
+counted into a fake ledger.
+
+### 103.4 The people gate
+
+Raw is kept only on a line whose save column asks for it AND whose page draws no
+member link other than `/in/me/` and his own slug: withheld on 11 of the
+session's 18 such loads, kept on 7. Shown failing on a planted page. It cannot
+see a person drawn without a profile link: stated, not smoothed.
+
+### 103.5 The keyword veto, scoped by class
+
+A keyword sharing a word with the identity key's classes that name him, the
+people he named, his places or employers, or equal to any key value as a whole
+phrase, is refused before any load. Shown failing first: the first version
+matched every class and refused two generic words that sit in a page he
+follows and in a denied-terms class.
+
+### 103.6 Declared disposable
+
+The session's offline page probes, member-link counter, patchers, item reader
+and summariser; each answered one question once, and the answers are in the
+record.

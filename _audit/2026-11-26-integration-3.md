@@ -1,4 +1,4 @@
-# Integration 3, 2026-11-26: four certified heads onto master, and the rulings since 2026-11-25 22:30
+# Integration 3, 2026-11-26: five certified heads onto master, and the rulings since 2026-11-25 22:30
 
 Integrator lane `integrator-26`, worktree at master 4c62196 (this lane's own
 integration-2 head, fast-forwarded and pushed, master CI green). Task: merge
@@ -397,11 +397,14 @@ strict 117; GAP 529; 774 rows published, 68 out of scope.
   page, the bare volunteering spelling, and the newsletter page on its drawn
   slug shape. Each is ruled admissible and needs its `readonly.py` admission,
   red-first, in the next admission pass. Twenty-one rows wait on them.
-- `in-me-profile`'s session column still reads 9, though build-p26's notes say
+- `in-me-profile`'s session column still read 9, though build-p26's notes say
   sessions 9 and 10 did not take it. Session 11's records edit the queue for
-  the loads they took, so the value is left for that merge.
+  the loads they took, so the value was left for that merge. It was settled
+  there (section 10).
 - `Q-SELF-PROFILE-QUERY-VARIANT` (`P A25`, `P D25`): a new ledger question
-  that LINKS-ARE-NOT-DISCLOSURES owes the orchestrator.
+  that LINKS-ARE-NOT-DISCLOSURES owes the orchestrator. It was ruled at 10:10
+  (SELF-PROFILE-QUERY-VARIANT-ADMITTED), and the ruling is registered with
+  lane admit5-26's merge, not in this integration (section 10).
 - The AI-generation rows, the article rows, `P M11`, `N 118` and `P E7`, each
   left in section 5 on the ruling's own words.
 
@@ -431,3 +434,76 @@ strict 117; GAP 529; 774 rows published, 68 out of scope.
   the fifth merge, every pin is re-derived on that tree, and `lane_ci` runs
   once more. Only that head goes to master.
 - UNRESOLVED: section 8's open items.
+
+## 10. The fifth merge: session 11 (lane live-s11)
+
+THE HEAD: `eed4de0` on live-s11's branch, based on 4c62196. Its lane CI run
+45756686631, read by head sha, passed with 6 of 6 jobs green. Session 11:
+- moved no census row;
+- wrote the `captured_already` and `plan` cells of 33 queue lines;
+- added one line, `C-SRCH-1`, for session 12;
+- copied 48 skeletons into `tests/fixtures/live11/`, counted in
+  `LIVE_FIXTURE_COUNTS`;
+- wrote INSTRUMENTS section 103;
+- narrowed the synthetic-people guard, red-first.
+
+Its record is `_audit/2026-11-25-live-session-11.md`. The orchestrator
+ruled at 10:10, and this pass registers NO ruling. SELF-PROFILE-QUERY-VARIANT-ADMITTED
+(`P D25`, `P A25`) lands with lane admit5-26's merge, because its row moves
+and the admission are one change. That lane is not part of integration 3.
+
+(merged 5, `eed4de0`, `--no-ff` onto `cc72332`.) Six conflicts, as
+`git merge-tree` predicted. The three derived views were each regenerated
+with its own `--write`, never hand-merged. The other three:
+
+- CAPTURE QUEUE, keyed by surface id: 88 lines (ours' 87 plus `C-SRCH-1`).
+  - Of session 11's 33 lines, 27 were moved by it alone and are taken whole.
+  - Six were moved by both sides: `article-composer`, `in-me-profile`,
+    `own-post-reactions`, `feed-menus`,
+    `admit-mynetwork-network-manager-people-follow-following` and
+    `admit-search-results-content`. The one cell both moved is `plan`. Ours
+    was the base plus an appended suffix (the rulings and rows this
+    integration's lanes added). Session 11's was its rewrite for the load it
+    took. SESSION 11'S RECORD WINS FOR THE LOAD IT TOOK, so the merged plan
+    is session 11's text followed by ours' suffix. Every other cell comes
+    from the side that moved it.
+  - No line session 11 edited had been deleted on this side (asserted).
+- `C-SRCH-1`: rank 105 on session 11's base, 116 here, because this side's
+  rank 105 is a build-jmn26 line. Session 11's record cites the rank on its
+  own base. The line's needs cell called `Q-RETIRED-ROUTE-ROWS` "to be
+  registered"; it now names the registered id,
+  RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE (section 4). Its one row, `J 31`, is
+  COVERED-UNFIRED on this tree. Its needs cell is a decision load, so
+  `check_next_step` reads no step off it, and the checker is green.
+- THE `in-me-profile` SESSION CELL, settled from session 11's record (section
+  8 left it for this merge). Session 11 took the line IN PART, at its load 3:
+  "the opener's menu (Save to PDF found); the photo button drew no dialog; Add
+  custom button not reached". Its hand-off "To session 12" lists "5's photo
+  editor and custom button" among the lines "each to be READ OFFLINE FIRST on
+  its new skeleton before another load is spent". So the cell now reads
+  "12, after an offline read of its session-11 skeleton". It was 9.
+- NOT settled, because it was not ordered: session 11 changed no session
+  cell. Of the other 32 lines it took, 11 still read 9, 16 read "after lane
+  A's merge", 3 read "once he names it" and 2 read 11. The session cut is
+  the queue's own arithmetic, which `check_next_step` names as NOT CHECKED.
+- INSTRUMENTS: section 103 follows ours' 99 to 102, so the tail reads 98 to
+  103.
+- `tests/test_live_lane_session_2_harness.py`: `LIVE_FIXTURE_COUNTS` keeps
+  build-jmn26's `live2` 30 and session 11's `live11` 48, each re-counted on
+  the merged tree's disk, with both comments.
+
+PINS: none moved. They were re-derived on the merged tree, never summed:
+- `census_completion.py --check`: "every headline figure matches its pin";
+- 774 rows published, 68 out of scope, 706 achievable;
+- DELIVERED broad 160 / 706 (22.7%), strict 117 (16.6%), GAP 529;
+- 83 tools and 134 parameters, measured as `len(await mcp.list_tools())`;
+- the rulings register still at 137.
+
+GATES on the merged tree, all green:
+- `census_completion`, the six table checkers and `triage_read_gap_rows`;
+- the three derived-view `--check`s;
+- fifteen scoped test files, sharded because the live flag was absent: 439
+  passed in 137 s. That is OVER the 2-minute cap by 17 s, measured and
+  recorded. The files were the harness and synthetic-people guards, the
+  queue and next-step tests, the register-number test, the derived-view
+  tests, and the corpus guards a record edit can trip.
