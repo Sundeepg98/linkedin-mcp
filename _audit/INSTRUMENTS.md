@@ -12426,3 +12426,35 @@ log), `report_on_real_logs.py` (the shipped `_report` over real logs, gh
 stubbed to return them), `resolve_instruments.py` (this register's 95/98 merge
 union) and the pytest banner-shape probe. Each answered one question once; the
 answers are in `_audit/2026-10-26-lane-ci-defect.md`, "Second pass".
+
+## 105. AN EMPTY READ IS REFUSED UNLESS THE PAGE SAID SO, AND A FIXTURE IS BUILT FROM A CLOSED ALPHABET (search-fix26, 2026-11-26)
+
+**Registered 2026-11-26.** Full record: `_audit/2026-11-26-search-fix26.md`.
+Numbered 105 by the brief, appended at the end; keep heading-number order.
+
+### 105.1 THE DEFECT THE TWO INSTRUMENTS CLOSE
+
+`linkedin_search_jobs` read `/jobs/search/` with the shipped harvest keyed on
+`/jobs/view/` links and `allow_empty=True`, and checked nothing about the
+landing. LinkedIn's AI job search draws no such link, so a redirect to it read
+as an empty shortlist. Measured red, before the wiring: the AI page's markup
+behind the classic address came back `{'count': 0, 'page_had': 0, ...}` with
+no error.
+
+    A ZERO IS AN ANSWER ONLY WHEN THE PAGE SAYS IT IS ONE. A READER THAT
+    CANNOT SEE THE PAGE AND A PAGE WITH NOTHING ON IT RETURN THE SAME LIST.
+
+### 105.2 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `linkedin_server/job_search_route.py` (`render_evidence`, `zero_is_believable`, `empty_states_for`; the vocabularies `CLASSIC_EMPTY_STATES` and `AI_EMPTY_STATES`, both EMPTY because no capture shows either page with no results) | `tests/test_job_search_route.py::test_the_ai_page_behind_the_classic_address_refuses_instead_of_returning_empty` (red before the wiring: an empty shortlist, no error) and `::test_the_ai_page_fed_to_the_real_classic_harvest_refuses` (the same in a real Chromium, nothing faked but the navigation); the control `::test_a_declared_wording_would_be_believed` shows a planted wording believed and the shipped empty vocabulary not, on one page. Before wiring: 26 failed, 44 passed. |
+| `scripts/_build_ai_job_search_skeleton.py` (`verify`, the positive closed-alphabet check over a built fixture: every output text and attribute value must be a declared form) | `tests/test_job_search_route.py::test_the_alphabet_check_refuses_a_planted_value`, five plants each refused (a name in a field, a name in a Dismiss label, a member-profile href, a non-synthetic posting id, an undeclared attribute); `::test_the_committed_fixture_passes_the_builders_alphabet` over `tests/fixtures/jobs_search_ai.html`. |
+
+### 105.3 DECLARED DISPOSABLE
+
+Three scratch probes: `card_tree.py` (an AI card's structure as tags and text
+classes), `anchor_check.py` (every structural anchor counted on the 25 raw
+cards: 25 of 25 each) and `reader_on_raw.py` (the shipped reader's shapes on
+the raw capture and on the fixture: identical). Each answered one question
+once; the answers are in the record, sections 3 and 5.
