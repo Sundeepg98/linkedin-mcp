@@ -679,7 +679,11 @@ def test_a_non_ascii_word_survives_the_copy_as_a_reference() -> None:
 #: `live9` 1 -- J 110's Posts-view skeleton, a directory its branch created
 #: and never listed; `live7` 1, lane B1's. Lane B3's and lane B1's `"live1": 2`
 #: were two different pairs that git merged as one equal edit.
-LIVE_FIXTURE_COUNTS = {"live1": 5, "live2": 29, "live3": 14, "live4": 4, "live5": 1, "live7": 1, "live8": 7, "live9": 1}
+#: `live11` (the live lane, session 11, 2026-11-26): 48 copies of that session's
+#: capture skeletons and their open states, each through this harness's own
+#: `tracked_copy`; the runner's diagnostic skeletons stayed in gitignored state.
+LIVE_FIXTURE_COUNTS = {"live1": 5, "live2": 29, "live3": 14, "live4": 4, "live5": 1, "live7": 1, "live8": 7, "live9": 1,
+                       "live11": 48}
 
 
 @pytest.mark.parametrize("session_dir", sorted(LIVE_FIXTURE_COUNTS))

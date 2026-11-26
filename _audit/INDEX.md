@@ -27,9 +27,9 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 281 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 241 |
-| distinct dates | 20 |
+| audit documents git tracks under `_audit` | 282 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 242 |
+| distinct dates | 21 |
 | documents with no level-1 heading | 2 |
 | `CORRECTS:` marker lines | 126 |
 | `CORRECTED BY:` marker lines | 126 |
@@ -39,7 +39,7 @@ are listed as `(undated)`; no date is taken from git history, because
 | documents at either end of a cross-document edge | 103 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
-| documents no correction marker touches at all | 176 |
+| documents no correction marker touches at all | 177 |
 | blockquoted markers naming ANOTHER document | 0 |
 | edges missing one of their two markers | 0 |
 | edges declared a different number of times in each direction | 2 |
@@ -1857,6 +1857,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-10-26 | [2026-10-26-integration-2.md](2026-10-26-integration-2.md) | Integration 2, 2026-10-26: five pending lane heads onto one certified head |  |
 | 2026-10-26 | [2026-10-26-lane-ci-defect.md](2026-10-26-lane-ci-defect.md) | 2026-10-26 lane-ci defect -- `wait` printed only the exit-code banner on a red run |  |
 | 2026-10-26 | [2026-10-26-ledger.md](2026-10-26-ledger.md) | Ledger pass, 2026-10-26: B5's six group rows onto their captures, B3's thirteen lines onto their real next steps |  |
+| 2026-11-25 | [2026-11-25-live-session-11.md](2026-11-25-live-session-11.md) | Live session 11 -- campaign L1, the capture session: the prep, written offline |  |
 
 ## 6. What the scan rejected, could not join, or had to repair
 
