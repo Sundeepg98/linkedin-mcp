@@ -833,8 +833,8 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 |---|---|---|
 | a heading naming a ruling | 148 | 314 |
 | a bold line opening on RULING/RULED | 66 | 155 |
-| the phrase THE RULING | 40 | 65 |
-| a named -RULING id | 43 | 112 |
+| the phrase THE RULING | 41 | 66 |
+| a named -RULING id | 44 | 114 |
 | the phrase standing ruling | 18 | 41 |
 | a lead or operator ruling in prose | 43 | 110 |
 

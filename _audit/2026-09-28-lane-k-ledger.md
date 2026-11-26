@@ -1039,6 +1039,33 @@ on his explicit order for a conversation he names, and refusing otherwise.
 Rows `M M26`, `M M27`, `M M29`, `M M31`: next step `BUILD` on
 `tests/fixtures/live11/c_b3_1_menu_open.html`.
 
+### Q-AD-HIDE-AIM -- an ad he names, when no reader returns one
+
+Added 2026-11-26 by lane build-net2 (`_audit/2026-11-26-build-net2.md`,
+section 5). Row: `N 200`. `Q-AD-HIDE-TARGET`'s answer, AD-HIDE-AT-HIS-NAMED-AD,
+builds the hide at an ad he names: "an urn a reader returned to him and he
+hands back". No shipped reader returns an ad's urn. The readers of item keys are
+`linkedin_my_activity_items` (his own posts) and `linkedin_read_named_profile`'s
+`activity_items` (a named member's posts); `linkedin_search_content` returns no
+link, and `linkedin_surface_census` substitutes urns out. On session 11's
+capture the ad's urn is drawn only inside its own menu (the Embed entry), after
+a press, on `/feed/`. An ad's own permalink -- `N 154`'s route, where the urn is
+the address -- has never been loaded, so whether it draws `Hide this ad` is
+unseen. The question: does `N 200` wait until a reader returns ad urns to him
+(a feed reader under FEED-CONTENT-READ-RULING) and an ad's permalink is
+captured with its menu open, then built in `mark_not_interested`'s shape? Or
+is it built now on the permalink route, aimed at an urn he names, though
+nothing he can read today hands him one? The lane's default, with no answer on
+disk: it waits. `Report ad` stays outward either way.
+
+**Answered 2026-11-26 by the orchestrator** (relayed to lane build-net2;
+registration owed at integration 6): AD-HIDE-AIM-HELD, option (a). `N 200`
+stays GAP with the lane's measurement recorded. Reopener: a sanctioned
+disclosure shape for the ad control-menu trigger, measured, so that a reader
+can return an ad's urn to him WITHOUT pressing ads he did not name. Option
+(b) is declined: it presses the menus of ads he did not name, for a low-value
+row. Row `N 200`: next step this question, held, until the reopener is met.
+
 ## 8. Preconditions and purposes
 
 PRECONDITION rows stay GAP; each waits on something he does not hold.
