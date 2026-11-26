@@ -12426,3 +12426,48 @@ log), `report_on_real_logs.py` (the shipped `_report` over real logs, gh
 stubbed to return them), `resolve_instruments.py` (this register's 95/98 merge
 union) and the pytest banner-shape probe. Each answered one question once; the
 answers are in `_audit/2026-10-26-lane-ci-defect.md`, "Second pass".
+
+
+## 104. A SELF SIGNAL IS A RELATION THE PAGE DRAWS, MEASURED ON EVERY CAPTURE BEFORE IT IS TRUSTED, AND SHOWN REFUSING EVERY OTHER PROFILE (selfprofile26, 2026-11-26)
+
+**Registered 2026-11-26.** Full record: `_audit/2026-11-26-selfprofile26.md`.
+Numbered 104 by the orchestrator's allocation, appended at the end; renumber at
+the merge if another lane took it.
+
+### 104.1 THE MARKER WENT AWAY AND FIVE GATES REFUSED HIM
+
+LinkedIn stopped writing `isSelfProfile` on the `/in/me/` landing (live session
+11, 2026-11-25). Every gate that anchored on it refused his own profile, and one
+of them -- the census's item veto -- named neither the parameter nor its
+constant, so a grep for the marker could not find it. The replacement signal is
+a RELATION, not a presence: an editor control whose href names THE MEMBER THE
+URL LANDED ON. It was measured on every capture on disk before anything was
+built on it (4 on the new landing and on each older self capture, 0 on each
+other member's), and the measurement is kept as a test that re-runs the shipped
+reader over those same captures.
+
+    A SIGNAL THAT REPLACES AN ASSERTION IS MEASURED ON EVERY CAPTURE FIRST,
+    AND EVERY LOOSENING OF IT IS A MUTATION SOME TEST MUST CATCH.
+
+### 104.2 THE ENTRY
+
+| path | shown failing by |
+|---|---|
+| `tests/test_self_profile_without_the_url_marker.py`; `linkedin_server/self_profile.py`; the new rows of `tests/test_activity_items.py` and `tests/test_press.py` | on the base tree `4c62196` every behavioural test refuses his real landing exactly as the live session did (`self_assertion_unreadable` from both editor tools, the activity tool and the census veto; `address_not_admitted` from the press gate; `self_assertion_not_true` from the live harness) and the module tests fail at import. Four mutations of `self_profile.py`, each run against the new file: ANY MEMBER ROOT IS SELF -> 9 failed, every control among them (another member's profile admitted by the editor gate, the activity reader, the census veto, the press gate and the harness); THE RELATION DROPPED -> 1 failed (`test_the_signal_on_every_tracked_profile_capture`, the re-landed landing reading 4/4/4); THE VETO DROPPED -> 3 failed; THE ACCESSIBLE NAME DROPPED -> 0 failed on the first run, so a control was ADDED (another member's real profile carrying a plain link to its own editor) and the rerun failed 3, the press gate admitting that profile among them |
+
+### 104.3 A MUTATION THAT NOTHING CATCHES IS A MISSING CONTROL
+
+The accessible-name requirement shipped before any test could fail without it:
+every capture's edit routes are named, so dropping the requirement changed no
+reading. The rule it exists for -- a member's own text linking to their own
+editor must establish nothing -- had no markup in the suite. The mutation run
+found that in 25 seconds; the remedy was a fixture, not a reasoned argument.
+
+### 104.4 DECLARED DISPOSABLE
+
+The lane's scratch probes (`anchor_census.py`, `edit_census.py`,
+`landed_relation.py`, `outside_main.py`), the fixture builder (`build_fixture.py`,
+one call of the harness's own `tracked_copy` over session 11's skeleton), the
+keyed-token comparisons against LinkedIn path words, the mutation driver
+(`mutate.py`), and the two scratch trees (the base export and the mutation
+copy). Each answered one question once; the answers are in the record.
