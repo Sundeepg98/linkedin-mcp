@@ -40,7 +40,7 @@ from pathlib import Path
 import pytest
 
 from linkedin_server import browser as browser_module
-from linkedin_server import dom, job_search_route as route
+from linkedin_server import dom, job_search_route as route, shape
 from linkedin_server.server import linkedin_search_jobs
 from tests.conftest import FakePage
 from tests.test_sdui_surfaces_fixture import _with_html
@@ -186,6 +186,30 @@ def test_easy_apply_is_the_cards_own_mark():
     rows = route.read_ai_search(_ai_html())["rows"]
     assert sum(1 for row in rows if row["easy_apply"] is True) == 8
     assert all(isinstance(row["easy_apply"], bool) for row in rows)
+
+
+def test_the_singular_verb_alumni_line_is_read_as_a_count():
+    """THE J40 FINDING, RED FIRST (lane search-fix26, second round).
+
+    The AI page draws the school-alumni insight on three cards. Two read
+    ``N school alumni work here``; the third, the fixture's card
+    ``4000000123``, reads ``N school alumni works here`` -- LinkedIn's
+    singular verb -- and ``shape.PROXIMITY_PHRASES`` did not carry that
+    spelling, so the row came back with no ``proximity`` at all. The reading
+    is integers only, as every proximity reading is.
+    """
+    rows = {row["job_id"]: row for row in route.read_ai_search(_ai_html())["rows"]}
+    count_read = shape.PROXIMITY_STATES.index("count_read")
+    school = shape.PROXIMITY_RELATIONS.index("school_alum")
+    for job_id in ("4000000105", "4000000114", "4000000123"):
+        reading = rows[job_id].get("proximity")
+        assert reading is not None, job_id
+        assert reading["state"] == count_read and reading["relation"] == school, (job_id, reading)
+        assert isinstance(reading["count"], int) and reading["count"] > 0, (job_id, reading)
+    # The same spelling, at the function, with a count this test chose.
+    assert shape.find_proximity(["1 school alumni works here"]) == {
+        "state": count_read, "relation": school, "count": 1,
+    }
 
 
 def test_the_posted_line_is_the_visible_age():
@@ -382,7 +406,6 @@ REFUSED_CASES = {
     "experience_level": {"experience_level": "mid_senior"},
     "job_type": {"job_type": "full_time"},
     "company_id": {"company_id": "5417062"},
-    "easy_apply": {"easy_apply": True},
     "under_ten_applicants": {"under_ten_applicants": True},
     "in_your_network": {"in_your_network": True},
     "fair_chance_employer": {"fair_chance_employer": True},
@@ -412,14 +435,112 @@ async def test_every_unmeasured_filter_refuses_by_name_on_the_ai_route(drive, ar
             assert value not in result["message"], "the refusal names the argument, not its value"
 
 
-async def test_the_easy_apply_refusal_reports_the_toggle_it_saw(drive):
+#: The eight synthetic posting ids whose cards draw their own "Easy Apply" mark
+#: in the fixture -- the same eight the raw capture drew it on.
+EASY_APPLY_IDS = [
+    row["job_id"]
+    for row in route.read_ai_search(
+        (Path(__file__).resolve().parent / "fixtures" / "ai_search" / "jobs_search_ai.html")
+        .read_text(encoding="ascii")
+    )["rows"]
+    if row["easy_apply"]
+]
+
+
+def test_the_fixture_draws_the_mark_on_eight_cards():
+    """Not vacuous: the post-filter below has something to keep and to drop."""
+    assert len(EASY_APPLY_IDS) == 8 and len(set(EASY_APPLY_IDS)) == 8
+
+
+async def test_easy_apply_on_the_ai_route_is_a_local_post_filter_on_each_cards_mark(drive):
+    """RULING AI-EASY-APPLY-POST-FILTER (orchestrator, 2026-11-26), RED FIRST.
+
+    ``easy_apply`` on the AI route is applied LOCALLY, to each card's own drawn
+    "Easy Apply" mark, from the one load, with no re-query -- and the output
+    says so: ``filter_mode`` and the count before and after. It is never
+    presented as LinkedIn's Easy Apply filter, whose toggle on this page stays
+    unmeasured and unpressed.
+    """
     page = _MarkupPage(evaluate_result=[], html=_ai_html())
+    page.redirect_to = AI_LANDING
+    navigations = drive(page)
+
+    result = await linkedin_search_jobs(keywords=KEYWORDS, easy_apply=True)
+
+    assert "error" not in result, result
+    assert result["route"] == route.AI
+    assert [row["job_id"] for row in result["results"]] == EASY_APPLY_IDS
+    assert all(row["easy_apply"] is True for row in result["results"])
+    assert result["easy_apply_post_filter"] == {
+        "filter_mode": "local_post_filter_on_card_mark",
+        "before": 25,
+        "after": 8,
+    }
+    assert result["count"] == 8 and result["page_had"] == 25, result
+    # ONE LOAD: the classic request, unchanged, and nothing after it.
+    assert len(navigations) == 1 and "f_AL=true" in navigations[0], navigations
+    # The toggle was neither pressed nor read as applied.
+    assert result["easy_apply_filter"] == {"drawn": True, "checked": False}
+    note = result["note"]
+    assert "locally" in note and "not LinkedIn's Easy Apply filter" in note, note
+
+
+async def test_a_post_filter_that_keeps_no_card_is_an_explained_empty(drive):
+    """Cards WERE read and none draws the mark: an empty list with its counts,
+    not a refusal -- the zero is explained by what the page drew."""
+    html = _ai_html().replace("<p>\nEasy Apply\n</p>", "<p>\nx\n</p>")
+    assert "<p>\nEasy Apply\n</p>" not in html and "Filter by Easy Apply" in html
+    page = _MarkupPage(evaluate_result=[], html=html)
     page.redirect_to = AI_LANDING
     drive(page)
 
     result = await linkedin_search_jobs(keywords=KEYWORDS, easy_apply=True)
 
+    assert "error" not in result, result
+    assert result["results"] == [] and result["count"] == 0
+    assert result["page_had"] == 25
+    assert result["easy_apply_post_filter"] == {
+        "filter_mode": "local_post_filter_on_card_mark",
+        "before": 25,
+        "after": 0,
+    }
+    assert "0 of the 25" in result["note"], result["note"]
+
+
+async def test_easy_apply_beside_an_unmeasured_filter_refuses_naming_only_that_filter(drive):
+    page = _MarkupPage(evaluate_result=[], html=_ai_html())
+    page.redirect_to = AI_LANDING
+    drive(page)
+
+    result = await linkedin_search_jobs(keywords=KEYWORDS, easy_apply=True, in_your_network=True)
+
+    assert result.get("error") == "extraction_failed", result
+    assert "Refused: in_your_network (" in result["message"], result["message"]
+    assert "easy_apply:" not in result["message"], "easy_apply is not refused on this route"
+    # The refusal still reports the toggle it saw.
     assert "Easy Apply toggle is drawn" in result["message"], result["message"]
+
+
+async def test_the_post_filter_is_never_applied_on_the_classic_route(drive):
+    page = _MarkupPage(evaluate_result=[SEARCH_CARD], html=None)
+    navigations = drive(page)
+
+    result = await linkedin_search_jobs(keywords=KEYWORDS, easy_apply=True)
+
+    assert "error" not in result, result
+    assert result["route"] == route.CLASSIC
+    assert "easy_apply_post_filter" not in result
+    assert "f_AL=true" in navigations[0], "classic carries LinkedIn's own measured filter"
+
+
+def test_the_post_filter_keeps_exactly_the_cards_that_draw_the_mark():
+    rows = route.read_ai_search(_ai_html())["rows"]
+    kept, receipt = route.easy_apply_post_filter(rows)
+    assert [row["job_id"] for row in kept] == EASY_APPLY_IDS
+    assert receipt == {"filter_mode": "local_post_filter_on_card_mark", "before": 25, "after": 8}
+    # A row with no mark, or a mark that is not True, is dropped, never guessed.
+    kept, receipt = route.easy_apply_post_filter([{"job_id": "1"}, {"job_id": "2", "easy_apply": "yes"}])
+    assert kept == [] and receipt["before"] == 2 and receipt["after"] == 0
 
 
 async def test_an_ai_page_for_other_keywords_is_not_returned(drive):
@@ -449,8 +570,12 @@ async def test_an_ai_page_with_no_card_refuses(drive):
 def test_the_ai_route_table_covers_every_parameter_the_tool_takes():
     """A parameter added to the tool must be classified for the AI route."""
     params = set(inspect.signature(linkedin_search_jobs).parameters)
-    classified = set(route.AI_ROUTE_HONOURED) | set(route.AI_ROUTE_UNMEASURED)
-    assert params - {"limit"} == classified
+    honoured = set(route.AI_ROUTE_HONOURED)
+    local = set(route.AI_ROUTE_LOCAL_FILTERS)
+    refused = set(route.AI_ROUTE_UNMEASURED)
+    # Three disjoint classes, and together every parameter but the local trim.
+    assert not (honoured & local or honoured & refused or local & refused)
+    assert params - {"limit"} == honoured | local | refused
 
 
 def test_an_argument_at_its_default_is_never_named():

@@ -36,7 +36,11 @@ two vetoes and the fallback that close it:
   not yet measured on it). :data:`AI_ROUTE_HONOURED` is the honoured set --
   ``keywords`` only, the one parameter a capture shows the AI route serving
   (live session 11, 2026-11-26, ``/jobs/search-results/?keywords=``, relation
-  SERVED). :func:`ai_route_refusals` names every other argument a call set.
+  SERVED). ``easy_apply`` is applied LOCALLY (ruling
+  ``AI-EASY-APPLY-POST-FILTER``): :func:`easy_apply_post_filter` keeps the
+  cards that draw their own Easy Apply mark and its receipt says so, and the
+  page's own toggle stays unmeasured and unpressed. :func:`ai_route_refusals`
+  names every other argument a call set.
   The fallback reads the page the classic request LANDED on and makes NO
   re-query, so a call still costs one search per place (ruling
   ``Q-FILTER-FIRES-SEARCH-CAP``: a filter-driven re-query would count as a
@@ -169,6 +173,21 @@ def landed_query_matches(url: Any, keywords: str) -> bool:
 #: LinkedIn at all -- it trims the rows this process returns.
 AI_ROUTE_HONOURED: tuple[str, ...] = ("keywords",)
 
+#: ARGUMENTS APPLIED LOCALLY, NEVER SENT AS A FILTER (ruling
+#: ``AI-EASY-APPLY-POST-FILTER``, the orchestrator's, 2026-11-26). One: each
+#: AI card draws its own "Easy Apply" mark (8 of 25 on the one capture,
+#: counted by two instruments), so ``easy_apply`` keeps the cards that draw it,
+#: from the page already loaded, with no re-query and no press. The page's own
+#: Easy Apply TOGGLE stays unmeasured: it is never pressed and never read as
+#: applied. :func:`easy_apply_post_filter` is the one place this happens, and
+#: its receipt says so in every result.
+AI_ROUTE_LOCAL_FILTERS: dict[str, str] = {
+    "easy_apply": "kept locally to the cards that draw their own Easy Apply mark; the page's Easy Apply toggle is unmeasured and never pressed",
+}
+
+#: The ``filter_mode`` every post-filter receipt carries, word for word.
+LOCAL_POST_FILTER_MODE = "local_post_filter_on_card_mark"
+
 #: EVERY OTHER ARGUMENT, with why it refuses on the AI route. Written from
 #: search26's record (``2026-11-26-new-job-search.md`` sections 2.5 and 3.2):
 #: LinkedIn's own 105 links into the AI route carry only ``f_TPR``, ``f_SAL``
@@ -184,7 +203,6 @@ AI_ROUTE_UNMEASURED: dict[str, str] = {
     "experience_level": "experience level is a drawn pill on the AI route; its address spelling is unmeasured",
     "job_type": "employment type is a drawn pill on the AI route; its address spelling is unmeasured",
     "company_id": "no capture shows an employer-scoped search on the AI route",
-    "easy_apply": "the AI page draws an Easy Apply toggle, but how it is spelled and whether it filters is unmeasured",
     "under_ten_applicants": "no capture shows this filter on the AI route",
     "in_your_network": "the AI page draws an In my network toggle; its address spelling is unmeasured",
     "fair_chance_employer": "no capture shows this filter on the AI route",
@@ -213,7 +231,9 @@ def ai_route_refusals(
 
     An argument at its default is not a filter and is never named. Returns
     names from :data:`AI_ROUTE_UNMEASURED`'s keys only -- the tool's
-    own parameter names, never a value the caller passed.
+    own parameter names, never a value the caller passed. ``easy_apply`` is
+    accepted and never named: it is a LOCAL filter on this route
+    (:data:`AI_ROUTE_LOCAL_FILTERS`), not a refused one.
     """
     chosen = {
         "location": bool(str(location or "").strip()),
@@ -223,7 +243,6 @@ def ai_route_refusals(
         "experience_level": bool(str(experience_level or "").strip()),
         "job_type": bool(str(job_type or "").strip()),
         "company_id": bool(str(company_id or "").strip()),
-        "easy_apply": bool(easy_apply),
         "under_ten_applicants": bool(under_ten_applicants),
         "in_your_network": bool(in_your_network),
         "fair_chance_employer": bool(fair_chance_employer),
@@ -238,6 +257,20 @@ def _as_int(value: Any) -> int:
         return int(value)
     except (TypeError, ValueError):
         return 0
+
+
+def easy_apply_post_filter(rows: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Keep the AI rows whose card drew its own "Easy Apply" mark, and say so.
+
+    LOCAL, and the receipt is part of the answer: ``filter_mode`` is
+    :data:`LOCAL_POST_FILTER_MODE`, with the count ``before`` and ``after``.
+    A row is kept only when its ``easy_apply`` is exactly ``True`` -- a row
+    with no mark, or anything else in the field, is dropped, never guessed.
+    This narrows the ONE window the load returned; it is not LinkedIn's Easy
+    Apply filter, so postings outside that window are never considered.
+    """
+    kept = [row for row in rows if row.get("easy_apply") is True]
+    return kept, {"filter_mode": LOCAL_POST_FILTER_MODE, "before": len(rows), "after": len(kept)}
 
 
 # ---------------------------------------------------------------------------
@@ -693,8 +726,8 @@ def fallback_refusal(refused: list[str], toggle: dict[str, Any], *, html_read: b
         "return a shortlist that was never filtered. Refused: "
         + ", ".join(refusing)
         + f" ({grounds}). The page's Easy Apply toggle is {drawn}. "
-        "Call again without the refused arguments for a keyword search; each "
-        "row then carries its card's own easy_apply mark."
+        "Call again without the refused arguments for a keyword search; "
+        "easy_apply is applied there locally, to each card's own mark."
     )
 
 

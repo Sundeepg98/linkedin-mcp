@@ -5625,6 +5625,7 @@ async def _read_job_search(
     keywords: str,
     limit: int,
     refused_on_ai: list[str],
+    easy_apply: bool = False,
 ) -> dict[str, Any]:
     """ONE search load, read by the route LinkedIn SERVED. Lane search-fix26.
 
@@ -5642,8 +5643,13 @@ async def _read_job_search(
       page is read once by ``job_search_route.read_ai_search`` (the refusal
       reports the Easy Apply toggle it drew), and any one of those arguments
       refuses before any row is returned. Otherwise the landing must carry the
-      keywords asked for. NO SECOND LOAD: the page read is the one the classic
-      request landed on (``Q-FILTER-FIRES-SEARCH-CAP``).
+      keywords asked for. ``easy_apply`` is applied LOCALLY here (ruling
+      ``AI-EASY-APPLY-POST-FILTER``): ``job_search_route.easy_apply_post_filter``
+      keeps the cards that draw their own mark, and its receipt rides in the
+      result as ``easy_apply_post_filter``. ``page_had`` stays the page's own
+      card count, so the receipt's ``before`` and the envelope agree. NO SECOND
+      LOAD: the page read is the one the classic request landed on
+      (``Q-FILTER-FIRES-SEARCH-CAP``).
     * **ANYTHING ELSE** refuses, naming the landing as a SHAPE.
 
     ``url`` in every refusal is the ASKED-FOR address, never the landing --
@@ -5727,17 +5733,27 @@ async def _read_job_search(
                         url=url,
                         hint=hint,
                     )
+            # A ZERO AFTER THE POST-FILTER IS AN ANSWER, unlike the zero above:
+            # cards WERE read, and none of them drew the mark. The receipt's
+            # counts are what make it one.
+            rows = reading["rows"]
+            extra: dict[str, Any] = {
+                "results_label": reading["total"],
+                "pager": reading["pager"],
+                "easy_apply_filter": reading["easy_apply_toggle"],
+            }
+            if easy_apply:
+                rows, extra["easy_apply_post_filter"] = (
+                    job_search_route.easy_apply_post_filter(reading["rows"])
+                )
             out = shape.envelope(
-                reading["rows"],
+                rows,
                 limit=limit,
                 source_url=final_url,
                 dropped=reading["unparsed"],
-                extra={
-                    "results_label": reading["total"],
-                    "pager": reading["pager"],
-                    "easy_apply_filter": reading["easy_apply_toggle"],
-                },
+                extra=extra,
             )
+            out["page_had"] = len(reading["rows"]) + reading["unparsed"]
             out["route"] = route
             return out
 
@@ -5805,10 +5821,14 @@ async def linkedin_search_jobs(
     reads whatever the load LANDED on, reported as ``route``: ``classic_search``,
     or ``ai_search`` when LinkedIn served its AI search instead. Classic is the
     PRIMARY route while it serves (ruling Q-SEARCH-ROUTE-POLICY). The AI route
-    is the FALLBACK and honours ``keywords`` ONLY: every other argument is
-    REFUSED there, by name, until a fire measures LinkedIn honouring it,
-    because a filter accepted and ignored puts an unfiltered shortlist in front
-    of you. A landing on any other page refuses, naming only its shape. AND A
+    is the FALLBACK and honours ``keywords``; ``easy_apply`` there is a LOCAL
+    post-filter on each card's own drawn Easy Apply mark, reported as
+    ``easy_apply_post_filter`` with the count before and after, and it is NOT
+    LinkedIn's Easy Apply filter (ruling AI-EASY-APPLY-POST-FILTER). Every other
+    argument is REFUSED there, by name, until a fire measures LinkedIn
+    honouring it, because a filter accepted and ignored puts an unfiltered
+    shortlist in front of you. A landing on any other page refuses, naming only
+    its shape. AND A
     ZERO IS NEVER SILENT: a page with no readable card is refused unless it drew
     LinkedIn's own no-results state, which no capture has shown yet -- so an
     empty search, or an offset past the end, is reported as a failure, never as
@@ -5914,7 +5934,10 @@ async def linkedin_search_jobs(
             a company slug and a slug is an organisation's name. Empty means no
             filter.
         easy_apply: only postings that apply through LinkedIn, never an
-            off-site ATS.
+            off-site ATS. On the classic route this is LinkedIn's own filter
+            (``f_AL``); on the AI fallback it is a LOCAL post-filter on each
+            card's own mark over the one window loaded, and the result says
+            so in ``easy_apply_post_filter``.
         under_ten_applicants: only postings LinkedIn reports as having fewer
             than ten applicants.
         in_your_network: only postings at companies where you have a
@@ -6125,6 +6148,7 @@ async def linkedin_search_jobs(
                         keywords=keywords,
                         limit=limit,
                         refused_on_ai=refused_on_ai,
+                        easy_apply=easy_apply,
                     ),
                 )
             )
@@ -6161,7 +6185,35 @@ async def linkedin_search_jobs(
         # there.
         routes = {read.get("route") for _place, read in reads}
         result["route"] = routes.pop() if len(routes) == 1 else None
-        if not result["results"]:
+        if result["route"] == job_search_route.AI:
+            # FIRST, AND BEFORE THE EMPTY BRANCH: an AI result can be empty only
+            # through the easy_apply post-filter, whose zero is an explained one
+            # (cards were read, none drew the mark), never a believed no-results
+            # page. The AI zero that is not explained refused upstream.
+            note = (
+                "LinkedIn served its AI job search in place of the classic one, "
+                "so this is the FALLBACK route (ruling Q-SEARCH-ROUTE-POLICY): "
+                "it honours keywords, applies easy_apply locally to each card's "
+                "own mark, and every other argument refuses there until a fire "
+                "measures LinkedIn honouring it. Its window was 25 cards on the "
+                "one load measured (2026-11-26). results_label is LinkedIn's own "
+                "capped label, not a count of matches, and its pager is buttons "
+                "with no address, so a next page cannot be asked for yet. Each "
+                "row's easy_apply is its card's own mark."
+            )
+            receipt = result.get("easy_apply_post_filter")
+            if receipt:
+                note += (
+                    " easy_apply was applied locally (ruling "
+                    "AI-EASY-APPLY-POST-FILTER): %d of the %d cards this load "
+                    "returned draw their own Easy Apply mark, and only those are "
+                    "returned. This is not LinkedIn's Easy Apply filter: the "
+                    "page's toggle is unmeasured and was not pressed, so postings "
+                    "outside this one window were never considered."
+                    % (int(receipt["after"]), int(receipt["before"]))
+                )
+            result["note"] = note
+        elif not result["results"]:
             # REACHABLE ONLY THROUGH A BELIEVED ZERO, and no zero is believed
             # until a capture supplies LinkedIn's own no-results wording
             # (``job_search_route.CLASSIC_EMPTY_STATES`` is empty). An
@@ -6171,18 +6223,6 @@ async def linkedin_search_jobs(
             result["note"] = (
                 "EMPTY, and confirmed empty: the page drew LinkedIn's own "
                 "no-results state. This is an empty result, not a failed read."
-            )
-        elif result["route"] == job_search_route.AI:
-            result["note"] = (
-                "LinkedIn served its AI job search in place of the classic one, "
-                "so this is the FALLBACK route (ruling Q-SEARCH-ROUTE-POLICY): "
-                "it honours keywords only, and every other argument refuses "
-                "there until a fire measures LinkedIn honouring it. Its window "
-                "was 25 cards on the one load measured (2026-11-26). "
-                "results_label is LinkedIn's own capped label, not a count of "
-                "matches, and its pager is buttons with no address, so a next "
-                "page cannot be asked for yet. Each row's easy_apply is its "
-                "card's own mark."
             )
         elif plan["state"] == "fanout":
             # THE FAN-OUT GETS ITS OWN NOTE BECAUSE THE SHORTFALL NOTE BELOW
