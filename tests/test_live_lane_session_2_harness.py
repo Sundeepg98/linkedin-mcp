@@ -716,8 +716,10 @@ def test_a_non_ascii_word_survives_the_copy_as_a_reference() -> None:
 #: (`scripts/_build_msg2_word_skeletons.py`), beside the 54.
 #: `live11` 61 AT INTEGRATION 6'S MERGE OF LANE BUILD-MSG2 (2026-11-26), re-counted on
 #: disk: build-jobs2's two word skeletons and build-msg2's five beside the 54.
+#: `live12` 47 AT INTEGRATION 6'S MERGE OF LANE LIVE-S12 (2026-11-26), counted on
+#: disk: session 12's tracked skeletons, beside the other sessions' counts.
 LIVE_FIXTURE_COUNTS = {"live1": 5, "live2": 31, "live3": 14, "live4": 4, "live5": 1, "live7": 1, "live8": 8, "live9": 1,
-                       "live11": 61}
+                       "live11": 61, "live12": 47}
 
 
 @pytest.mark.parametrize("session_dir", sorted(LIVE_FIXTURE_COUNTS))

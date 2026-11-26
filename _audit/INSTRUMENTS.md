@@ -13224,3 +13224,68 @@ The lane's scratch probes -- the menu and list counters, the keyed-word matcher
 (matched candidate words and counts only), the census editors -- and the
 exported base tree used for the red-first runs -- and the one-off rename and
 list re-sort scripts the CI fix of section 2.6 of the record ran.
+
+## 113. A LIVE LOAD IS RECORDED IN HIS ACCOUNT'S ONE LEDGER BEFORE IT IS MADE, AND THE PEOPLE GATE JUDGES THE STRING IT WRITES (live-s12, 2026-11-26)
+
+The live lane's session-12 runner (`runner_s12.py`, kept in the main
+checkout's gitignored `_state/live-runner/s12/`, beside its offline checks).
+Each instrument below was SHOWN FAILING offline before it was trusted --
+against session 11's runner, which lacks it, or against a mutant of the
+runner that disables only that guard -- and the record says where the
+session held it live. The record is `_audit/2026-11-26-live-session-12.md`,
+sections 2 and "Live session 12, the run". Numbered 110 on the lane's branch;
+renumbered 113 at integration 6, where lanes build-jobs2, build-net2 and
+build-msg2, merged first, had taken 110 to 112.
+
+### 113.1 The account meter around `BROWSER.goto` (BUDGET-ONE-ACCOUNT-40)
+
+A wrapper OUTSIDE the harness's own counter, so a shipped tool's loads pass
+it too: the session's refusals first (the ceiling, five searches, 20 s); then,
+under the job pipeline's pinned store's lock, `budget.call_refusal(events,
+"live_census", None, 1, now)`; on None, ONE of the ledger's LinkedIn call records is appended
+and only then is the load made. A spacing refusal waits the seconds it names,
+once; every other refusal stops the phase and never waits; no pin, a pin or
+store that cannot be read, or an unreadable line, refuses. SHOWN FAILING: eight
+checks red on session 11's runner (`gate_checks_s12.py`). HELD LIVE: 39 loads,
+39 records, the two ledgers agreeing; the closest two loads 22.3 s apart; the
+shipped re-proof tool's own two loads recorded through the same wrapper.
+
+    A BUDGET SHARED BY TWO DRIVERS IS KEPT IN ONE LEDGER, AND A LOAD IS
+    WRITTEN THERE BEFORE IT HAPPENS, NOT AFTER.
+
+### 113.2 PEOPLE-GATE v2, wired into the runner's `load()`
+
+Every page judged right after `page.content()`; the skeleton written first;
+the raw written only when the line asks for it, v1's live count reads 0, the
+verdict keeps it, and `verdict.covers(html)` proves the string judged is the
+string written. SHOWN FAILING: R1-R5 and N1 each planted alone on a page of
+his own, the untaught cache, and both R6 checks, red on session 11's runner.
+HELD LIVE: 37 pages judged, 0 raws kept -- the session proved no slug of his
+(the re-proof refused), so the gate learned no identity and withheld every raw
+it was asked for: fail closed, as designed.
+
+### 113.3 The hand count in both ledgers
+
+A press that loads a document is counted by hand in the session ledger AND
+the pinned store, and the phase stops. SHOWN FAILING on a link press against
+a fake store. Not exercised live: no press loaded a document.
+
+### 113.4 One click site, no typing site, one goto site
+
+Counted on the runner's syntax tree: (1, 0, 1). SHOWN FAILING: session 11's
+runner counts (1, 1, 1), its typing site among them.
+
+### 113.5 His Open-to-Work editor, pressed only as its ruling allows
+
+`otw_checks_s12.py`: the real `otw_capture` on synthetic profiles whose every
+selectable control records a click; six mutants each disable ONE guard (a
+reader that presses, a close that does not verify, a round trip that compares
+nothing, no save-drawn-pressed check, no commit-sign check, an aim that takes
+the page's first Edit), and each turns its own check red by assertion; the real
+runner passes 10 of 10, including `--attended` refused before any browser
+contact. Not exercised live: the re-proof's block kept the editor unpressed.
+
+**Disposable** (the lane's scratch folder): `aim_probe.py`,
+`aim_probe_keyed.py`, `e5_preread.py`, the newsletter and organisation-heading
+readers, and the history classifier behind E1's diagnosis. None was shown
+failing on a planted defect.
