@@ -8,9 +8,9 @@
 
 **THIS REGISTER IS NOT THE CORPUS AND DOES NOT CLAIM TO BE COMPLETE.** Read section 4 before concluding a question is unruled: the scan that keeps it honest reads ONE marker, and the ruling that caused this file to be written does not carry it.
 
-    rulings registered       96
-    documents scanned        284
-    RULED: declarations      82 claimed, 7 triaged, 0 unclaimed
+    rulings registered       137
+    documents scanned        287
+    RULED: declarations      123 claimed, 7 triaged, 0 unclaimed
 
 ---
 
@@ -52,6 +52,13 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 |---|---|---|---|---|
 | `ARTICLE-COMPOSER-CAPTURE` | One capture load of the article composer is permitted, with nothing typed and nothing published; an empty draft it may leave is his, private and deletable, and the capture records whether one appeared. | the article composer | 2026-10-10 | [2026-10-10-rulings-ledger-questions.md](2026-10-10-rulings-ledger-questions.md)<br>*2. One article-composer capture* |
 | `CAPTURE-PRESS-UNDER-PROBE-RULE` | A live-lane CAPTURE may press a disclosure control (a menu, a folder, a filter panel, a list) or type into a SEARCH box, never a composer or an editor, on a surface the press gate refuses, when nothing is committed: no save, send, submit, apply or confirm, and Escape closes what was opened. A shipped tool still needs its own per-surface basis entry. | presses and typing on a surface the gate refuses | 2026-10-10 | [2026-10-10-rulings-ledger-questions.md](2026-10-10-rulings-ledger-questions.md)<br>*1. A capture may press, under the probe rule* |
+| `B5-GROUP-COMPOSER-OPENS-EMPTY` | A capture may open a group's composer with nothing typed (capture C-B5-4), as ARTICLE-COMPOSER-CAPTURE allows for articles. | a group composer opened empty | 2026-11-25 | [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md)<br>*3. The owed registrations* |
+| `B5-INVITE-DIALOG-IS-A-LIST` | A group's invite dialog is a list and its filter is a search box (capture C-B5-3): reading them sends nothing. | a group's invite dialog | 2026-11-25 | [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md)<br>*3. The owed registrations* |
+| `EDITOR-TYPEAHEAD-SANCTIONED` | A capture may type a benign value from tool arguments into his own editor's autocomplete field, dismiss it with Cancel or Escape and re-read to prove nothing changed; any autosave sign stops everything. | his own editor's typeahead fields (P A11, P A13, P A17) | 2026-11-25 | [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md)<br>*5. Lane build-p26's four (22:50)* |
+| `LINKS-ARE-NOT-DISCLOSURES` | A link on his own profile is not a disclosure: the in-me-profile link presses for P D25 and P A25 are vetoed, and both rows go to a ruling on whether the self-profile query variant is admissible. | link presses on his own profile (P D25, P A25) | 2026-11-25 | [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md)<br>*5. Lane build-p26's four (22:50)* |
+| `OPEN-TO-WORK-EDITOR-ATTENDED-ONLY` | A capture may press his Open-to-Work Edit only in a session he attends: read the modal, close it, choose nothing, and round-trip read the card before and after; any change to the card stops everything. | his Open-to-Work editor | 2026-11-25 | [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md)<br>*6. Lane admit26's ten (23:35)* |
+| `OWN-PROFILE-SCROLL-SANCTIONED` | One scroll pass of his own profile per load is permitted, reading what renders and pressing nothing. | a scroll of his own profile (P D26) | 2026-11-25 | [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md)<br>*5. Lane build-p26's four (22:50)* |
+| `RESUME-BUILDER-UNDER-ARTICLE-COMPOSER-CAPTURE` | ARTICLE-COMPOSER-CAPTURE extends to LinkedIn's resume builder, since it serves the job search: one load, nothing typed, once a capture finds where LinkedIn draws it. | the resume builder (P M11) | 2026-11-25 | [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md)<br>*6. Lane admit26's ten (23:35)* |
 
 ### census convention
 
@@ -61,6 +68,96 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | `D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING` | A refusal written only into an allowlist comment is not a ruling: it makes no row EXCLUDED-RULED or CANNOT-DELIVER, and a row resting on one is GAP, blocked on the decision the refusal asks for, until that decision is registered. | refusals recorded only beside an allowlist entry | 2026-09-24 | [2026-09-24-rulings-search-verticals-rosters-passive-costs.md](2026-09-24-rulings-search-verticals-rosters-passive-costs.md)<br>*D3: is a reasoned allowlist refusal a ruling?* |
 | `D5-PASSIVE-COST-IS-NOT-A-ROW` | A consequence of an act with no control of its own is recorded on the act's row, and its own row is EXCLUDED-RULED as NOT-AN-ACT (N 171). A preference he sets is an act, a setting, and stays a GAP write row (N 183). | passive costs | 2026-09-24 | [2026-09-24-rulings-search-verticals-rosters-passive-costs.md](2026-09-24-rulings-search-verticals-rosters-passive-costs.md)<br>*D5: is a passive cost a capability row?* |
 | `WHO-WHICH-COUNTS-ARE-NOT-DELIVERY` | A row whose payload is WHO (people) or WHICH (items of other people's content) is not delivered by a count-only reader: GAP. Filters and aggregates are delivered by counts. The operator answered the names-and-titles question 2026-09-24 (NAMES-AT-RUNTIME): such rows now wait on a name-returning reader, not on the doctrine. | count-only readers | 2026-09-24 | [2026-09-24-rulings-notify-veto-and-who-which.md](2026-09-24-rulings-notify-veto-and-who-which.md)<br>*A count-only reader does not deliver WHO or WHICH* |
+
+### census row J 110 and its Posts half
+
+| id | what was ruled | binds | when | where (document / section) |
+|---|---|---|---|---|
+| `J-110-SPLITS-HOME-AND-POSTS` | J 110 splits under COMPOUND-ROW-SPLITS-ONLY-ON-STATE: the Home half goes to COVERED-UNFIRED, and the Posts half is built on the live9 capture. | census row J 110 and its Posts half | 2026-11-25 | [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md)<br>*7. Lane build-jmn26's four (23:40)* |
+
+### census row J 153
+
+| id | what was ruled | binds | when | where (document / section) |
+|---|---|---|---|---|
+| `COURSE-VIDEO-OUTSIDE-PURPOSE` | Watching a LinkedIn Learning course or video is EXCLUDED-RULED by OUTSIDE-THE-PRODUCT-PURPOSE. | census row J 153 | 2026-11-25 | [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md)<br>*6. Lane admit26's ten (23:35)* |
+
+### census row J 155
+
+| id | what was ruled | binds | when | where (document / section) |
+|---|---|---|---|---|
+| `AI-COACH-OUTSIDE-PURPOSE` | Asking LinkedIn Learning's AI coach is EXCLUDED-RULED by OUTSIDE-THE-PRODUCT-PURPOSE. | census row J 155 | 2026-11-25 | [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md)<br>*6. Lane admit26's ten (23:35)* |
+
+### census row J 159
+
+| id | what was ruled | binds | when | where (document / section) |
+|---|---|---|---|---|
+| `AD-LIBRARY-OUTSIDE-PURPOSE` | Searching LinkedIn's Ad Library is EXCLUDED-RULED by OUTSIDE-THE-PRODUCT-PURPOSE. | census row J 159 | 2026-11-25 | [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md)<br>*6. Lane admit26's ten (23:35)* |
+
+### census row J 163
+
+| id | what was ruled | binds | when | where (document / section) |
+|---|---|---|---|---|
+| `J-163-RECEIPT-ONLY-WRITE` | J 163 is a receipt-only write behind the grant, fired only on his order: no inverse exists, so the round-trip rule cannot apply, and the press itself is the proof. | a one-shot recommendation feedback | 2026-11-25 | [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md)<br>*7. Lane build-jmn26's four (23:40)* |
+
+### census row J 19
+
+| id | what was ruled | binds | when | where (document / section) |
+|---|---|---|---|---|
+| `J-19-BUILT-BEHIND-THE-GRANT` | J 19 is built behind the grant and refuses until its confirm dialog is captured; it fires only on his order. | clearing his recent job searches | 2026-11-25 | [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md)<br>*7. Lane build-jmn26's four (23:40)* |
+
+### census row M C18
+
+| id | what was ruled | binds | when | where (document / section) |
+|---|---|---|---|---|
+| `M-C18-EDITOR-OPENS-UNSAVED` | His answer for C-B5-4 covers opening his post editor unsaved, so M C18 becomes a cheap capture. | census row M C18 | 2026-11-25 | [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md)<br>*3. The owed registrations* |
+
+### census row M C29
+
+| id | what was ruled | binds | when | where (document / section) |
+|---|---|---|---|---|
+| `M-C29-DESIGN-FIRST` | M C29 is designed first and queued for the next build wave. | census row M C29 | 2026-11-25 | [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md)<br>*3. The owed registrations* |
+
+### census row M C97
+
+| id | what was ruled | binds | when | where (document / section) |
+|---|---|---|---|---|
+| `M-C97-LINK-KEYED-DELETE` | M C97's delete is keyed by the notification's link and refuses a link that matches more than one card; building it needs a live uniqueness capture first. | a notification delete | 2026-11-25 | [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md)<br>*3. The owed registrations* |
+
+### census row P O23
+
+| id | what was ruled | binds | when | where (document / section) |
+|---|---|---|---|---|
+| `P-O23-D5-ON-ITS-OWN-WORDS` | P O23 takes D5's NOT-AN-ACT only if D5's own words cover it, and the registering lane checks and quotes them. | census row P O23 | 2026-11-25 | [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md)<br>*2. The absence convention, and P O23* |
+
+### census rows J 61-J 65
+
+| id | what was ruled | binds | when | where (document / section) |
+|---|---|---|---|---|
+| `APPLY-DRY-WALK-FIRES-THE-STEP-ROWS` | A dry walk of the apply flow on a named posting, every step read back and the draft discarded and verified, fires the step rows J 61 to J 65; the submission row still needs a real send. | the apply flow's steps | 2026-11-25 | [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md)<br>*4. Lane apply-26's seven (22:40, the final head at 23:08)* |
+
+### census rows N 102 and J 108
+
+| id | what was ruled | binds | when | where (document / section) |
+|---|---|---|---|---|
+| `N-102-MOVES-WITH-J-108` | N 102 moves with J 108 as its sibling: there is no distinct capability (precedent N 173 / M C60). | census rows N 102 and J 108 | 2026-11-25 | [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md)<br>*7. Lane build-jmn26's four (23:40)* |
+
+### census rows N 63, M C61
+
+| id | what was ruled | binds | when | where (document / section) |
+|---|---|---|---|---|
+| `B5-RAIL-JOIN-DOES-NOT-DISCHARGE` | A Join button drawn in a page's side rail does not discharge N 63 or M C61: the target would come from the page. | census rows N 63, M C61 | 2026-11-25 | [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md)<br>*3. The owed registrations* |
+
+### census rows P A14, P A15, P K8
+
+| id | what was ruled | binds | when | where (document / section) |
+|---|---|---|---|---|
+| `ABSENT-ON-HIS-ACCOUNT-PER-ROW` | Per row, under the absence convention: a drawn and corroborated empty state answers a READ; a surface not offered to his account is MEASURED-ABSENT; a write needing data he lacks is PRECONDITION with a reopener. | census rows P A14, P A15, P K8 | 2026-11-25 | [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md)<br>*5. Lane build-p26's four (22:50)* |
+
+### census rows proven on the classic job search
+
+| id | what was ruled | binds | when | where (document / section) |
+|---|---|---|---|---|
+| `RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE` | Rows proven on the classic job search stay COVERED-PROVEN while it serves; once a capture shows it no longer serves, each returns to GAP with its next step on the AI route and a reopener. | census rows proven on the classic job search | 2026-11-26 | [2026-11-26-rulings-search-route.md](2026-11-26-rulings-search-route.md)<br>*3. The rows proven on the classic route* |
 
 ### census state
 
@@ -81,7 +178,15 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | `GEOLOCATION-BY-D6` | No browser geolocation permission is granted; searching jobs near him moves under D6 on the shipped location-parameter search, by the row's own bar. | searching from his current location | 2026-10-10 | [2026-10-10-rulings-ledger-questions.md](2026-10-10-rulings-ledger-questions.md)<br>*12. Location by D6, not by geolocation* |
 | `OUTSIDE-THE-PRODUCT-PURPOSE` | A row whose capability serves neither his job search nor his professional presence is EXCLUDED-RULED, reopened when he asks for it -- unless its own cell shows it tunes his job recommendations or his search. | rows outside the product's purpose | 2026-10-10 | [2026-10-10-rulings-ledger-questions.md](2026-10-10-rulings-ledger-questions.md)<br>*17. Rows outside the product's purpose* |
 | `P-A9-CANNOT-DELIVER` | The additional name's visibility is COVERED-CANNOT-DELIVER on the P A2 / P A4 precedent: its two switches carry the same label, so no route can aim one; reopened when LinkedIn draws a distinguishing name. | P A9 | 2026-10-10 | [2026-10-10-rulings-ledger-questions.md](2026-10-10-rulings-ledger-questions.md)<br>*14. A control no route can aim* |
+| `MEASURED-ABSENT-OR-PRECONDITION` | MEASURED-ABSENT means LinkedIn does not offer the capability to this account at all; PRECONDITION means it is offered but needs an account state he lacks, with a named reopener. | MEASURED-ABSENT against a GAP row waiting on a PRECONDITION | 2026-11-25 | [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md)<br>*2. The absence convention, and P O23* |
 | `EXCLUDED-RULED-ADMISSION` | A row is EXCLUDED-RULED only on one of FOUR written grounds: a forbidden-substring entry, a writes.PERMANENTLY_FORBIDDEN key, a WriteSpec refusing in its own words, or an audit passage measuring the capability unreachable. Anything a general mechanism merely happens to block is GAP with a NAMED BLOCKER. | the bar for EXCLUDED-RULED on every slice | ~2026-09-03 | [_census/network.md](_census/network.md)<br>*2. HOW A CAPABILITY WAS ASSIGNED A STATE* |
+
+### configuration
+
+| id | what was ruled | binds | when | where (document / section) |
+|---|---|---|---|---|
+| `JOBHUNT-HOME-KEEPS-ITS-MEANING` | JOBHUNT_HOME keeps jobcore's meaning, the directory holding jobhunt.json. | the JOBHUNT_HOME variable | 2026-11-25 | [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md)<br>*4. Lane apply-26's seven (22:40, the final head at 23:08)* |
+| `JOBHUNT-ROOT-RESOLUTION-ORDER` | The answer bank resolves JOBHUNT_ANSWER_BANK, then JOBHUNT_ROOT, then the .jobhunt-root walk-up (six parents, as jobcore); JOBHUNT_HOME is never read. | how the apply walker finds its answer bank | 2026-11-25 | [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md)<br>*4. Lane apply-26's seven (22:40, the final head at 23:08)* |
 
 ### decision routing
 
@@ -94,6 +199,12 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | id | what was ruled | binds | when | where (document / section) |
 |---|---|---|---|---|
 | `LIVE-BUDGET-40-LOADS` | A live session may use up to 40 LinkedIn page loads, serial, at least 20 seconds apart -- a ceiling, not a target; one browser driver at a time. | page loads per session | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md)<br>*The live-session budget* |
+
+### live loads
+
+| id | what was ruled | binds | when | where (document / section) |
+|---|---|---|---|---|
+| `FILTER-REQUERY-COUNTS-AS-A-SEARCH` | A re-query that a filter triggers counts as a search against the 5-per-session search cap. | the per-session search cap | 2026-11-26 | [2026-11-26-rulings-search-route.md](2026-11-26-rulings-search-route.md)<br>*2. The search budget* |
 
 ### live proofs
 
@@ -154,6 +265,13 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | `FIXED-UI-LABEL-MATCH` | The people search's Actively-hiring filter is matched by its exact LinkedIn UI label, a fixed product string, with a control showing a near-miss label is refused. | one search filter matched by its product label | 2026-10-10 | [2026-10-10-rulings-ledger-questions.md](2026-10-10-rulings-ledger-questions.md)<br>*11. One filter, matched by its fixed label* |
 | `THIRD-PARTY-TEXT-AT-RUNTIME` | A post's own text and an organisation Page's prose are returned at runtime as untrusted third-party text -- sanitised, bounded in length, never stored -- under PEOPLE-DATA-MITIGATIONS; the feed-content ruling still governs what is stored. | other people's text, returned at runtime | 2026-10-10 | [2026-10-10-rulings-ledger-questions.md](2026-10-10-rulings-ledger-questions.md)<br>*10. A post's text, and an organisation's prose, at runtime* |
 | `DOM-WAIVER-25-J110` | dom.py may hold a 25th waived page evaluate, solely J 110's page-root reader read (COMPANY_HOME_JS, moved verbatim from its branch), read-only and argued under THIRD-PARTY-TEXT-AT-RUNTIME; a 26th still needs its own ruling. | the dom.py waived-evaluate budget in tests/test_readonly.py, and its copy in tests/test_the_search_shape_reading.py | 2026-10-26 | [2026-10-26-integration-2.md](2026-10-26-integration-2.md)<br>*6. Orchestrator rulings, 2026-11-25* |
+| `NAME-BEARING-ADDRESS-REDACTION-SCOPE` | The redaction of a name-bearing address reaches every tracked or CI- or console-printed record, while gitignored raw state may hold the address; the newsletter page is admitted now on its drawn slug shape, and the article page after a capture spells it. | newsletter and article pages, and what records may hold their addresses | 2026-11-25 | [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md)<br>*6. Lane admit26's ten (23:35)* |
+| `ORG-NAME-AT-RUNTIME-LINK-IF-NUMERIC` | An organisation's name may return at runtime as third-party text, and its link only when the link is numeric; N 104's bar is still unmet, so it stays GAP. | organisation identity returned at runtime | 2026-11-25 | [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md)<br>*3. The owed registrations* |
+| `RECOMMENDATIONS-DETAIL-PAGE-ADMITTED` | The named /in/me/details/recommendations/ address is admitted (the interests-page precedent); its capture records where it lands. | his recommendations detail page | 2026-11-25 | [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md)<br>*6. Lane admit26's ten (23:35)* |
+| `SCREENING-QUESTION-RECORD` | An application's screening question is returned as a new people_data record type, ScreeningQuestion, under THIRD-PARTY-TEXT-AT-RUNTIME. | screening questions as third-party text | 2026-11-25 | [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md)<br>*4. Lane apply-26's seven (22:40, the final head at 23:08)* |
+| `VERIFICATIONS-PAGE-ADMITTED` | The exact /mypreferences/d/verifications address is admitted read-only, with zero presses and a per-address exemption for 'verification'; two-step verification stays refused. | his verifications page | 2026-11-25 | [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md)<br>*6. Lane admit26's ten (23:35)* |
+| `VOLUNTEERING-BARE-SPELLING-FIRST` | His volunteering-education page is tried in its bare spelling first, the capture recording where it lands; if it does not land, his own profileId comes from tool arguments at runtime and is never stored. | his volunteering-education page (P D24) | 2026-11-25 | [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md)<br>*6. Lane admit26's ten (23:35)* |
+| `SEARCH-ROUTE-CLASSIC-PRIMARY` | The classic job search is the primary route while it serves; the AI search page is the fallback, and it refuses every filter not measured on it. | the job search's route, classic or AI | 2026-11-26 | [2026-11-26-rulings-search-route.md](2026-11-26-rulings-search-route.md)<br>*1. The route* |
 
 ### reads and writes
 
@@ -167,6 +285,22 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | id | what was ruled | binds | when | where (document / section) |
 |---|---|---|---|---|
 | `D4-NO-OWN-BROWSER-CONTEXT` | The package does not create its own browser context; it attaches to the operator's signed-in browser. P C8's download transport goes through DevTools download behaviour on the attached browser, which creates no context. | browser contexts | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md)<br>*D4: the package's own browser context* |
+
+### the capture queue
+
+| id | what was ruled | binds | when | where (document / section) |
+|---|---|---|---|---|
+| `C-J68-IDS-KEPT` | The capture lines C-J68-1 to C-J68-3 keep their ids, in the census family J 60 to J 69. | the apply-flow captures | 2026-11-25 | [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md)<br>*4. Lane apply-26's seven (22:40, the final head at 23:08)* |
+
+### the live plan
+
+| id | what was ruled | binds | when | where (document / section) |
+|---|---|---|---|---|
+| `L1-D1-RIDERS-RIDE` | Live plan L1, D-1: both riders take their hosts' loads (C-B3-2 on the own-post-reactions load, C-B5-4 on C-B5-3's). | session 11's riders | 2026-11-25 | [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md)<br>*1. The live plan's L1 rulings (lane live-prep26's plan, session 11)* |
+| `L1-D2-GROUPS-FROM-HIS-MEMBERSHIPS` | Live plan L1, D-2 (b): the groups come from his memberships plus one groups search, which fires N 161. | which groups session 11 opens | 2026-11-25 | [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md)<br>*1. The live plan's L1 rulings (lane live-prep26's plan, session 11)* |
+| `L1-D3-MEDIA-CHOOSER-INTERCEPTED` | Live plan L1, D-3: a composer's media control may be pressed with the file chooser intercepted and never answered, then Escape. | composer media presses | 2026-11-25 | [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md)<br>*1. The live plan's L1 rulings (lane live-prep26's plan, session 11)* |
+| `L1-D4-NEUTRAL-READ-VALUES` | Live plan L1, D-4: read values are neutral -- session 2's organisation if recorded, else a large Page verified at runtime as not his employer, and generic keywords. | the values a session reads with | 2026-11-25 | [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md)<br>*1. The live plan's L1 rulings (lane live-prep26's plan, session 11)* |
+| `L3-OPENS-WITH-A-DRAFT-RESIDUE-READ` | Live session L3 opens with one read of the Draft tab, for any residue an earlier apply walk left. | session L3's first load | 2026-11-25 | [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md)<br>*4. Lane apply-26's seven (22:40, the final head at 23:08)* |
 
 ### verb
 
@@ -198,6 +332,8 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | `CONTACT-IMPORT-STAYS-MANUAL` | An address-book import or sync is not built: it uploads other people's contact data and completes on another domain's consent screen. EXCLUDED-RULED, reopened when he asks to import or sync his address book. | importing or syncing his address book | 2026-10-10 | [2026-10-10-rulings-ledger-questions.md](2026-10-10-rulings-ledger-questions.md)<br>*5. Contact import stays manual* |
 | `P-D29-BUILT-BEHIND-THE-GRANT` | Adding a LinkedIn Learning certificate to his profile is built behind the grant under EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS and never live-proven unless he names a certificate to add. | P D29 | 2026-10-10 | [2026-10-10-rulings-ledger-questions.md](2026-10-10-rulings-ledger-questions.md)<br>*15. A broadcast edit, built behind the grant* |
 | `SAFETY-REPORTS-STAY-MANUAL` | A harassment or safety report, an accusation filed through an off-product Help Center form, is not built: EXCLUDED-RULED, reopened when an in-product structured report exists or he names one. | safety reports | 2026-10-10 | [2026-10-10-rulings-ledger-questions.md](2026-10-10-rulings-ledger-questions.md)<br>*16. Safety reports stay manual* |
+| `AI-GENERATION-IS-A-NON-OUTWARD-WRITE` | A load that starts an AI generation on his own account, toward no person, is a non-outward write: allowed behind the grant, one capture per feature, with its quota effect recorded on the row. | AI generation loads on his own account | 2026-11-25 | [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md)<br>*6. Lane admit26's ten (23:35)* |
+| `REFUSED-APPLY-DISCARDS-ITS-DRAFT` | When linkedin_apply_job refuses mid-flow, it dismisses the flow, presses Discard and verifies the Draft tab holds nothing it left. | the apply flow's refusal path | 2026-11-25 | [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md)<br>*4. Lane apply-26's seven (22:40, the final head at 23:08)* |
 
 ---
 
@@ -257,6 +393,25 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | P I12 -> J99 | `CONTAINER-EXCLUSION-PROPAGATES-ONLY-IF-UNREACHABLE` |
 | P L2 -> L2 + L2b | `COMPOUND-ROW-SPLITS-ONLY-ON-STATE` |
 | press.disclose | `DISCLOSING-PRESS-PERMITTED` |
+| Q-ABSENT-ON-HIS-ACCOUNT | `ABSENT-ON-HIS-ACCOUNT-PER-ROW` |
+| Q-AD-LIBRARY-PURPOSE | `AD-LIBRARY-OUTSIDE-PURPOSE` |
+| Q-AI-COACH-QUESTION | `AI-COACH-OUTSIDE-PURPOSE` |
+| Q-AI-GENERATING-LOADS | `AI-GENERATION-IS-A-NON-OUTWARD-WRITE` |
+| Q-COURSE-VIDEO-PROGRESS | `COURSE-VIDEO-OUTSIDE-PURPOSE` |
+| Q-EDITOR-TYPEAHEAD | `EDITOR-TYPEAHEAD-SANCTIONED` |
+| Q-FILTER-FIRES-SEARCH-CAP | `FILTER-REQUERY-COUNTS-AS-A-SEARCH` |
+| Q-NAME-BEARING-ADDRESS-REDACTION | `NAME-BEARING-ADDRESS-REDACTION-SCOPE` |
+| Q-NOTIFICATION-KEY | `M-C97-LINK-KEYED-DELETE` |
+| Q-ONE-SHOT-FEEDBACK | `J-163-RECEIPT-ONLY-WRITE` |
+| Q-OPEN-TO-WORK-EDITOR | `OPEN-TO-WORK-EDITOR-ATTENDED-ONLY` |
+| Q-ORG-IDENTITY | `ORG-NAME-AT-RUNTIME-LINK-IF-NUMERIC` |
+| Q-OWN-PROFILE-SCROLL | `OWN-PROFILE-SCROLL-SANCTIONED` |
+| Q-RECOMMENDATIONS-DETAIL-PAGE | `RECOMMENDATIONS-DETAIL-PAGE-ADMITTED` |
+| Q-RESUME-BUILDER | `RESUME-BUILDER-UNDER-ARTICLE-COMPOSER-CAPTURE` |
+| Q-RETIRED-ROUTE-ROWS | `RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE` |
+| Q-SEARCH-ROUTE-POLICY | `SEARCH-ROUTE-CLASSIC-PRIMARY` |
+| Q-VERIFICATIONS-PAGE | `VERIFICATIONS-PAGE-ADMITTED` |
+| Q-VOLUNTEERING-PROFILE-ID | `VOLUNTEERING-BARE-SPELLING-FIRST` |
 | R11 | `MESSAGING-SETTINGS-CAPABILITY-LEVEL` |
 | R9 | `DO-NOT-OPEN-MESSAGING` |
 | request 1 | `CONVERSATION-OVERFLOW-BOTH-WAVES-RIGHT` |
@@ -274,6 +429,7 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | settings family | `MESSAGING-SETTINGS-CAPABILITY-LEVEL` |
 | split or leave whole | `COMPOUND-ROW-SPLITS-ONLY-ON-STATE` |
 | the 89 sub-expressions | `ERROR-MESSAGE-RULED-AT-THE-RAISE` |
+| the absence convention | `MEASURED-ABSENT-OR-PRECONDITION` |
 | THE BOUNDARY IS NOT A REASON | `BOUNDARY-IS-NOT-A-REASON` |
 | the census's own rule | `EXCLUDED-RULED-ADMISSION` |
 | the class-filter convention | `INCIDENTAL-CAPTURE-IS-NOT-A-RULING` |
@@ -306,13 +462,31 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 ## 3. NOTES ON INDIVIDUAL RULINGS
 
+**`ABSENT-ON-HIS-ACCOUNT-PER-ROW`** -- Orchestrator's call on lane build-p26, applying MEASURED-ABSENT-OR-PRECONDITION. Applied at integration 3: P A14 and P A15 to MEASURED-ABSENT (not drawn for his account), P K8 waiting on a PRECONDITION (a badge he lacks). Reopener: per row, the one the row names.
+
 **`ACCOUNT-DESTRUCTION-STAYS-MANUAL`** -- Orchestrator's call applying the operator's 08:11 principle; overridable. Decides P N27 and P P2, and adds a capability-level ground to P N28.
+
+**`AD-LIBRARY-OUTSIDE-PURPOSE`** -- Orchestrator's call on lane admit26, applying OUTSIDE-THE-PRODUCT-PURPOSE. Reopener: he asks.
+
+**`AI-COACH-OUTSIDE-PURPOSE`** -- Orchestrator's call on lane admit26, applying OUTSIDE-THE-PRODUCT-PURPOSE. Reopener: he asks.
+
+**`AI-GENERATION-IS-A-NON-OUTWARD-WRITE`** -- Orchestrator's call on lane admit26. Its 8 rows are left at their ruling step at integration 3: the read boundary still refuses their addresses, and the ledger has no capture class for a write behind the grant. Reopener: none stated.
+
+**`APPLY-DRY-WALK-FIRES-THE-STEP-ROWS`** -- Orchestrator's call on lane apply-26. Applies APPLY-FLOW-IS-THE-APPLICATION. Moves no row until the walk is fired. Reopener: none stated.
 
 **`APPLY-FLOW-IS-THE-APPLICATION`** -- Orchestrator's call; overridable. Decides J 82.
 
 **`ARTICLE-COMPOSER-CAPTURE`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable.
 
+**`B5-GROUP-COMPOSER-OPENS-EMPTY`** -- Lane B5's second answer, registered at integration 3. Applies ARTICLE-COMPOSER-CAPTURE. Reopener: none stated.
+
+**`B5-INVITE-DIALOG-IS-A-LIST`** -- Lane B5's third answer, registered at integration 3. Reopener: none stated.
+
+**`B5-RAIL-JOIN-DOES-NOT-DISCHARGE`** -- Lane B5's first answer, recorded 2026-10-10 19:18, registered at integration 3. Applies PAGE-MAY-VETO-NEVER-SUPPLY. Reopener: none stated.
+
 **`BOUNDARY-IS-NOT-A-REASON`** -- The application of EXCLUDED-RULED-ADMISSION that section 5.4a found. It quotes the census rule rather than restating it.
+
+**`C-J68-IDS-KEPT`** -- Orchestrator's call on lane apply-26. Applied at integration 3: the ids kept, the ranks renumbered on merge. Reopener: none stated.
 
 **`CALLER-COMPOSITION-UNDER-D6`** -- Orchestrator's call applying D6-CAPABILITY-OVER-AFFORDANCE; overridable.
 
@@ -327,6 +501,8 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 **`CONTAINER-EXCLUSION-PROPAGATES-ONLY-IF-UNREACHABLE`** -- Built ON `P I12` as a SOUND exclusion: *zero of 237 urls reach one* is ground four of EXCLUDED-RULED-ADMISSION. Two later documents call `P I12` a miscategorisation; see the register's DISPUTED note in the report for this wave.
 
 **`CONTENT-VERTICAL-NOT-ALL-RESULTS`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable.
+
+**`COURSE-VIDEO-OUTSIDE-PURPOSE`** -- Orchestrator's call on lane admit26, applying OUTSIDE-THE-PRODUCT-PURPOSE. Reopener: he asks.
 
 **`CREDENTIAL-ADJACENT-STAYS-REFUSED`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable. Rests on inference, not measurement.
 
@@ -346,6 +522,8 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 **`DOM-WAIVER-25-J110`** -- Orchestrator's call, answering integration 2's question about the budget move its J 110 fix made by commit (24 -> 25). Applies THIRD-PARTY-TEXT-AT-RUNTIME.
 
+**`EDITOR-TYPEAHEAD-SANCTIONED`** -- Orchestrator's call on lane build-p26. Moves P A11, P A13, P A17 to CAPTURE on C-B1a. Reopener: any autosave sign.
+
 **`ERROR-MESSAGE-RULED-AT-THE-RAISE`** -- THE SIBLING OF `ERROR-URL-ASKED-FOR-OR-NOTHING`, and it goes the OTHER WAY for a stated reason rather than by temperament. The url field could be ruled PER SITE because every value feeding it is an address this package composed or read; `$.message` cannot, because `_error` holds only `type(exc)` and `str(exc)` and the provenance of what that text QUOTES is not among them. So the ruling moves the decision to the raise, which is where the corpus had already put it three times without naming it: `coerce.py`, `press.disclose` and `landing.py`. It also DECLINES the sibling's own recommendation to make the twelve `dom.py` messages type-only -- all twelve are inside `tests/test_readers_emit_no_page_string.py`'s driven subject set and green (4 clean, 8 returns_text, 0 not_driven), so the payload class is already closed for them and type-only would delete twelve diagnoses to close a channel no needle travels. What it SHIPPED is the other end of the pipe: `tests/test_tool_envelopes_emit_no_page_string.py`, because the reader guard discovers only `async def` functions taking a `page` and the 48 tool bodies that funnel into `_error` are therefore outside it, permanently.
 
 **`ERROR-URL-ASKED-FOR-OR-NOTHING`** -- THE FAILURE-PATH COUNTERPART OF THE `source_url` SPLIT RULING in `tests/test_the_source_url_split_was_never_ruled.py`, which is NOT registered here because it lives as a test rather than as an audit passage. Same kind of value -- the address a read landed on -- in several of the SAME functions, and the two were ruled by different files that did not know about each other: `linkedin_my_profile` was declared SHAPED on its success path and published its landing raw on its failure path, in one function, for weeks. That ruling supplied the METHOD used here (a per-site declaration with a written reason, a count per site, a relay pinned as a relay, and drift failing in BOTH directions) and its prohibition is what stopped this wave wrapping all twenty: *wrapping a deliberate publication is as much a defect as leaking an accidental one.* The count each way is 12 withheld, 7 published, 1 relay.
@@ -357,6 +535,8 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 **`FEED-CONTENT-READ-RULING`** -- The ground `M C85`'s read half would rest on if that row were ever split -- see OPEN-QUESTIONS.
 
 **`FILE-UPLOAD-OPENED`** -- THE OPERATOR'S decision, made 2026-09-04. No committed source records his words: it is recorded by 615a5c4 and _audit/2026-09-20-the-decides.md section 1, and registered on that record. The date shown is the record's, 2026-09-20.
+
+**`FILTER-REQUERY-COUNTS-AS-A-SEARCH`** -- Orchestrator's call, applying D1-SEARCH-AS-READS's cap of 5 test searches per session. Moves no row. Reopener: none stated.
 
 **`FIXED-UI-LABEL-MATCH`** -- Orchestrator's call; overridable. Decides N 82.
 
@@ -372,11 +552,45 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 **`INCIDENTAL-CAPTURE-IS-NOT-A-RULING`** -- THIS IS THE ANSWER TWO WAVES ESCALATED AS UNDECIDED AND A THIRD RE-DERIVED. It carries the three-way GENERAL FORM table that the 2026-09-21 re-derivation reconstructed from measurement. Its own citation is the 2026-09-03 ledger passage, so the chain is: census rule -> ledger asks -> 09-05 applies -> 09-19 RULES -> 09-21 re-derives.
 
+**`J-110-SPLITS-HOME-AND-POSTS`** -- Orchestrator's call on lane build-jmn26, applying COMPOUND-ROW-SPLITS-ONLY-ON-STATE. Reopener: none stated.
+
+**`J-163-RECEIPT-ONLY-WRITE`** -- Orchestrator's call on lane build-jmn26; answers the ledger's Q-ONE-SHOT-FEEDBACK. Reopener: his order.
+
+**`J-19-BUILT-BEHIND-THE-GRANT`** -- Orchestrator's call on lane build-jmn26, applying OUTWARD-CLASSES-BUILT-BEHIND-GRANTS. Reopener: the confirm dialog's capture.
+
+**`JOBHUNT-HOME-KEEPS-ITS-MEANING`** -- Orchestrator's call on lane apply-26. Reopener: none stated.
+
+**`JOBHUNT-ROOT-RESOLUTION-ORDER`** -- Orchestrator's call on lane apply-26, refined on its final head. Reopener: none stated.
+
+**`L1-D1-RIDERS-RIDE`** -- Orchestrator's call on the live plan's question D-1. Reopener: none stated. Moves no row: it governs session 11's loads.
+
+**`L1-D2-GROUPS-FROM-HIS-MEMBERSHIPS`** -- Orchestrator's call on D-2. Reopener: none stated. Moves no row by itself; session 11's search fire is N 161's.
+
+**`L1-D3-MEDIA-CHOOSER-INTERCEPTED`** -- Orchestrator's call on D-3. Reopener: none stated. Moves no row: it governs session 11's presses.
+
+**`L1-D4-NEUTRAL-READ-VALUES`** -- Orchestrator's call on D-4. Reopener: none stated. Moves no row.
+
+**`L3-OPENS-WITH-A-DRAFT-RESIDUE-READ`** -- Orchestrator's call on lane apply-26. Reopener: none stated. Moves no row.
+
+**`LINKS-ARE-NOT-DISCLOSURES`** -- Orchestrator's call on lane build-p26, applying PAGE-MAY-VETO-NEVER-SUPPLY. Reopener: the ruling on the self-profile query variant.
+
 **`LIVE-BUDGET-40-LOADS`** -- Operator's words: "go, 40 loads is fine". Raised from 15 per wave, to feed one live lane from several offline build lanes.
+
+**`M-C18-EDITOR-OPENS-UNSAVED`** -- Orchestrator's call, applying B5-GROUP-COMPOSER-OPENS-EMPTY. Reopener: none stated.
+
+**`M-C29-DESIGN-FIRST`** -- Orchestrator's call. Reopener: the next build wave.
+
+**`M-C97-LINK-KEYED-DELETE`** -- Orchestrator's design call; answers the ledger's Q-NOTIFICATION-KEY. Reopener: the live uniqueness capture.
+
+**`MEASURED-ABSENT-OR-PRECONDITION`** -- Orchestrator's convention; overridable. Names N 118, P E7 and P K8 for reconciliation. Reopener: none stated.
 
 **`MEMBER-ROSTERS-AS-BOUNDED-READS`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable. Decides the roster question the 2026-09-05 refusal recorded in readonly.py and census cells but never registered (D3). Rows it held: N 165, N 188, N 189, J 108, N 102, N 99, N 177.
 
 **`MESSAGING-SETTINGS-CAPABILITY-LEVEL`** -- The ruling CANONICAL-RULING-ID was written about: one sentence wearing three names across three slices. Its census twin is `_audit/_census/profile.md`.
+
+**`N-102-MOVES-WITH-J-108`** -- Orchestrator's call on lane build-jmn26. Integration 2's section 6 had kept N 102 GAP; this ruling moves it, and that record carries the back-pointer. Reopener: none stated.
+
+**`NAME-BEARING-ADDRESS-REDACTION-SCOPE`** -- Orchestrator's call on lane admit26. Moves the five newsletter rows to ADMIT. Reopener: for the article page, a capture that spells its address.
 
 **`NAMED-ADDRESS-NEEDS-LOG-REDACTION`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR, applying PEOPLE-DATA-MITIGATIONS; overridable.
 
@@ -394,15 +608,23 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 **`NOTIFICATIONS-UNREAD-SPEND`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable. Registered under the id the census holds used for the open question, so the holds resolve to the answer.
 
+**`OPEN-TO-WORK-EDITOR-ATTENDED-ONLY`** -- Orchestrator's call on lane admit26. Moves its 11 rows to CAPTURE. Reopener: the card changing.
+
+**`ORG-NAME-AT-RUNTIME-LINK-IF-NUMERIC`** -- Orchestrator's answer of 2026-10-10 19:22, registered at integration 3. Applies THIRD-PARTY-TEXT-AT-RUNTIME. Reopener: N 104 meeting its own bar.
+
 **`OTHER-MEMBER-IDS-AS-READS`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable. Answers the other-members question N 172 was held on.
 
 **`OUTSIDE-THE-PRODUCT-PURPOSE`** -- Orchestrator's call applying the operator's rule that every feature must serve the product's core purpose; overridable.
 
 **`OUTWARD-CLASSES-BUILT-BEHIND-GRANTS`** -- Orchestrator's call applying the operator's 08:11 principle and OUTWARD-ACTS-NEED-THE-OPERATOR; overridable.
 
+**`OWN-PROFILE-SCROLL-SANCTIONED`** -- Orchestrator's call on lane build-p26. Reopener: none stated.
+
 **`P-A9-CANNOT-DELIVER`** -- Orchestrator's call; overridable. Measured on session 7's editor skeleton.
 
 **`P-D29-BUILT-BEHIND-THE-GRANT`** -- Orchestrator's call; overridable.
+
+**`P-O23-D5-ON-ITS-OWN-WORDS`** -- Orchestrator's call. Applied at integration 3: D5 covers a consequence with no control of its own, and O23's consequence has one (P O17's switch), so O23 stays GAP. Reopener: a change to D5's words.
 
 **`PAGE-MAY-VETO-NEVER-SUPPLY`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable. Reconciles the navigation guard with ownership checks; first applied to linkedin_surface_census feed_item.
 
@@ -418,13 +640,25 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 **`RECEIVED-INVITATIONS-READ-STAYS-ADMITTED`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR, applying D5-PASSIVE-COST-IS-NOT-A-ROW; overridable.
 
+**`RECOMMENDATIONS-DETAIL-PAGE-ADMITTED`** -- Orchestrator's call on lane admit26. Moves its 13 rows to ADMIT. Reopener: none stated.
+
+**`REFUSED-APPLY-DISCARDS-ITS-DRAFT`** -- Orchestrator's call on lane apply-26. Reopener: none stated.
+
 **`RELATION-REMOVALS-BUILT-BEHIND-GRANTS`** -- Orchestrator's call applying the operator's 08:11 principle and OUTWARD-ACTS-NEED-THE-OPERATOR; overridable. Decides N 29, N 141 and N A14, which lane L8 left outside the three classes.
+
+**`RESUME-BUILDER-UNDER-ARTICLE-COMPOSER-CAPTURE`** -- Orchestrator's call on lane admit26, applying ARTICLE-COMPOSER-CAPTURE. Reopener: a capture that finds where LinkedIn draws it.
+
+**`RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE`** -- Orchestrator's call on the classic search's retirement. Moves no row until a capture shows the classic search no longer serves; none has been taken. Reopener: none stated.
 
 **`REVEAL-BUTTON-IS-A-DISCLOSURE`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable.
 
 **`SAFETY-REPORTS-STAY-MANUAL`** -- Orchestrator's call; overridable. Decides N 152.
 
+**`SCREENING-QUESTION-RECORD`** -- Orchestrator's call on lane apply-26. Applies THIRD-PARTY-TEXT-AT-RUNTIME. Reopener: none stated.
+
 **`SEARCH-ADMISSION-APPROVED-FIVE-CONDITIONS`** -- Condition 2 was AMENDED the same day -- see SEARCH-CONDITION-2-CLOSED. The ruling bars FIRING, not READING; conflating the two cost a later wave a decision it did not need.
+
+**`SEARCH-ROUTE-CLASSIC-PRIMARY`** -- Orchestrator's call on the classic search's retirement (01:20 entry). Moves no row. Reopener: none stated.
 
 **`SELF-PROFILE-EDIT-NOTIFY-CONDITION-AMENDED`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable. Measured cause: the intro editor draws no named notify control (live lane session 1, lane L7).
 
@@ -440,7 +674,11 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 **`THIRD-PARTY-TEXT-AT-RUNTIME`** -- Orchestrator's call applying NAMES-AT-RUNTIME; overridable. Decides M C43 and J 110.
 
+**`VERIFICATIONS-PAGE-ADMITTED`** -- Orchestrator's call on lane admit26. Moves P K1 and P K7 to ADMIT. Reopener: none stated.
+
 **`VIEW-SWITCH-PRESS-RESTORED`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable.
+
+**`VOLUNTEERING-BARE-SPELLING-FIRST`** -- Orchestrator's call on lane admit26. Reopener: the bare spelling not landing.
 
 **`WHO-WHICH-COUNTS-ARE-NOT-DELIVERY`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable. Precedent: N 162 and N 180.
 
@@ -454,7 +692,7 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 | signal NOT scanned | files | lines |
 |---|---|---|
-| a heading naming a ruling | 136 | 295 |
+| a heading naming a ruling | 139 | 301 |
 | a bold line opening on RULING/RULED | 65 | 152 |
 | the phrase THE RULING | 39 | 64 |
 | a named -RULING id | 42 | 111 |
@@ -553,6 +791,16 @@ Every `RULED:` line in the corpus, and what became of it. An UNCLAIMED row fails
 | [2026-10-10-rulings-ledger-questions.md](2026-10-10-rulings-ledger-questions.md) | RULED: (orchestrator, 2026-10-10, applying the operator's rule that every feature must ser | `OUTSIDE-THE-PRODUCT-PURPOSE` |
 | [2026-10-10-rulings-named-profile-detail-pages.md](2026-10-10-rulings-named-profile-detail-pages.md) | RULED: (orchestrator, 2026-10-10, applying the operator's 08:01 YES to reading profiles he | `NAMED-PROFILE-DETAIL-PAGES` |
 | [2026-10-26-integration-2.md](2026-10-26-integration-2.md) | RULED: (orchestrator, 2026-11-25) DOM-WAIVER-25-J110 -- "dom.py may hold a 25th | `DOM-WAIVER-25-J110` |
+| [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md) | RULED: (orchestrator, 2026-11-25) L1-D1-RIDERS-RIDE -- "D-1 yes (both riders)". | `L1-D1-RIDERS-RIDE` |
+| [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md) | RULED: (orchestrator, 2026-11-25) MEASURED-ABSENT-OR-PRECONDITION -- "CONVENTION, | `MEASURED-ABSENT-OR-PRECONDITION` |
+| [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md) | RULED: (orchestrator, 2026-11-25) ORG-NAME-AT-RUNTIME-LINK-IF-NUMERIC -- the | `ORG-NAME-AT-RUNTIME-LINK-IF-NUMERIC` |
+| [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md) | RULED: (orchestrator, 2026-11-25) APPLY-DRY-WALK-FIRES-THE-STEP-ROWS -- "dry walk | `APPLY-DRY-WALK-FIRES-THE-STEP-ROWS` |
+| [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md) | RULED: (orchestrator, 2026-11-25) EDITOR-TYPEAHEAD-SANCTIONED -- "(a) | `EDITOR-TYPEAHEAD-SANCTIONED` |
+| [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md) | RULED: (orchestrator, 2026-11-25) RECOMMENDATIONS-DETAIL-PAGE-ADMITTED -- | `RECOMMENDATIONS-DETAIL-PAGE-ADMITTED` |
+| [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md) | RULED: (orchestrator, 2026-11-25) N-102-MOVES-WITH-J-108 -- "Q1 N 102 moves WITH | `N-102-MOVES-WITH-J-108` |
+| [2026-11-26-rulings-search-route.md](2026-11-26-rulings-search-route.md) | RULED: (orchestrator, 2026-11-26) SEARCH-ROUTE-CLASSIC-PRIMARY -- | `SEARCH-ROUTE-CLASSIC-PRIMARY` |
+| [2026-11-26-rulings-search-route.md](2026-11-26-rulings-search-route.md) | RULED: (orchestrator, 2026-11-26) FILTER-REQUERY-COUNTS-AS-A-SEARCH -- | `FILTER-REQUERY-COUNTS-AS-A-SEARCH` |
+| [2026-11-26-rulings-search-route.md](2026-11-26-rulings-search-route.md) | RULED: (orchestrator, 2026-11-26) RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE -- | `RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE` |
 
 ### 5.1 Triaged -- a declaration hit that is not a ruling made here
 

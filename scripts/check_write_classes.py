@@ -231,8 +231,14 @@ WRITE_CLASS_BUILT_STATES = ("COVERED-UNFIRED", "COVERED-PROVEN")
 #: known-OUT answer now, a built write keeping its line, and ``N 5`` -- still
 #: a write-direction GAP row, waiting on that route's first capture --
 #: takes its place.
-WRITE_CLASS_KNOWN_IN = ("M M6", "P A14", "N 5")
-WRITE_CLASS_KNOWN_OUT = ("N 1", "N 4", "P A1")
+#: ``P A14`` WAS A KNOWN-IN ANSWER UNTIL INTEGRATION 3 (2026-11-26), when the
+#: orchestrator's ruling ABSENT-ON-HIS-ACCOUNT-PER-ROW of 2026-11-25 made it
+#: MEASURED-ABSENT (no editor capture draws a postal-code control) and its
+#: line left the table. It is a known-OUT answer now, a write row ruled out of
+#: scope, and ``P A24`` -- a profile-edit row in the same section, still GAP,
+#: waiting on a PRECONDITION he lacks -- takes its place.
+WRITE_CLASS_KNOWN_IN = ("M M6", "P A24", "N 5")
+WRITE_CLASS_KNOWN_OUT = ("N 1", "N 4", "P A1", "P A14")
 
 _WC_DISPOSITION_RX = re.compile(r"^(built:[a-z_]+|queued:[A-Z0-9][A-Z0-9-]*|classify-only)$")
 #: A row id may be a RANGE, ``O6-O20``: `profile.md` collapses fifteen toggles

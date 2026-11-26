@@ -27,19 +27,19 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 285 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 245 |
-| distinct dates | 21 |
+| audit documents git tracks under `_audit` | 288 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 248 |
+| distinct dates | 22 |
 | documents with no level-1 heading | 2 |
-| `CORRECTS:` marker lines | 129 |
-| `CORRECTED BY:` marker lines | 129 |
-| distinct declared correction edges | 114 |
-| documents something later corrects | 54 |
-| documents that correct something | 77 |
-| documents at either end of a cross-document edge | 107 |
+| `CORRECTS:` marker lines | 130 |
+| `CORRECTED BY:` marker lines | 130 |
+| distinct declared correction edges | 115 |
+| documents something later corrects | 55 |
+| documents that correct something | 78 |
+| documents at either end of a cross-document edge | 109 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
-| documents no correction marker touches at all | 176 |
+| documents no correction marker touches at all | 177 |
 | blockquoted markers naming ANOTHER document | 0 |
 | edges missing one of their two markers | 0 |
 | edges declared a different number of times in each direction | 2 |
@@ -566,6 +566,14 @@ document is dead; it says one thing in it was overtaken and names what.
 - CORRECTED BY [2026-11-25-build-jmn26.md](2026-11-25-build-jmn26.md)
 
   > `Delete notification` is word-measured on today's captures as well: the keyed skeletons of live sessions 5 and 10 match it on every card (9 of 9, 10 of 10). The blocker, a card key a caller can pass, stands.
+
+### [2026-10-26-integration-2.md](2026-10-26-integration-2.md)
+
+2026-10-26 &middot; Integration 2, 2026-10-26: five pending lane heads onto one certified head
+
+- CORRECTED BY [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md)
+
+  > the orchestrator's later ruling N-102-MOVES-WITH-J-108 (lane build-jmn26's question 1) moves `N 102` with `J 108` as its sibling: lane build-jmn26 measured both readers on the same capture, so there is no distinct capability to rebuild, and the "stays GAP" outcome above no longer holds; integration 3 moved the row.
 
 ### [INSTRUMENTS.md](INSTRUMENTS.md)
 
@@ -1605,6 +1613,14 @@ reach is visible. The quoted reason here is the CORRECTOR's own
 
   > sections 6 and 12.7 gave eleven profile rows a BUILD step on a capture: `P A11`, `P A13`, `P A17` on `live4/editor.html`, `P A14`, `P A15` on `live7/editor.html`, `P A25` on a planned `live1/contact_info.html`, `P D25`, `P D26`, `P F1`, `P K8` on `live8/in_me.html` and `P S8` on `live8/keyskills.html`; read against those captures, none of the eleven has what its build needs (sections 2 and 4), and each takes the step its own measured reason names.
 
+### [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md)
+
+2026-11-25 &middot; Orchestrator rulings of 2026-11-25 (from 22:30 IST), registered at integration 3
+
+- CORRECTS [2026-10-26-integration-2.md](2026-10-26-integration-2.md)
+
+  > its section 6 recorded the orchestrator's earlier 2026-11-25 call that `N 102` "stays GAP", to be rebuilt under its own tool name if its distinct capability were wanted; the ruling below supersedes that outcome, because build-jmn26 measured that the two readers read the same carousel on the same capture, so there is no distinct capability, and `N 102` moves with `J 108`.
+
 ## 5. Every document, by date
 
 `CORRECTED` means at least one later document declares a correction of
@@ -1894,13 +1910,16 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-10-10 | [2026-10-10-rulings-named-profile-detail-pages.md](2026-10-10-rulings-named-profile-detail-pages.md) | Ruling, 2026-10-10: the detail pages of a profile he names |  |
 | 2026-10-26 | [2026-10-26-builds.md](2026-10-26-builds.md) | builds-26 -- tracker-stage + endorsement tools (offline) |  |
 | 2026-10-26 | [2026-10-26-fixes.md](2026-10-26-fixes.md) | 2026-10-26 -- fixes lane (fixes-26): three measured defects |  |
-| 2026-10-26 | [2026-10-26-integration-2.md](2026-10-26-integration-2.md) | Integration 2, 2026-10-26: five pending lane heads onto one certified head |  |
+| 2026-10-26 | [2026-10-26-integration-2.md](2026-10-26-integration-2.md) | Integration 2, 2026-10-26: five pending lane heads onto one certified head | **CORRECTED x1** |
 | 2026-10-26 | [2026-10-26-lane-ci-defect.md](2026-10-26-lane-ci-defect.md) | 2026-10-26 lane-ci defect -- `wait` printed only the exit-code banner on a red run |  |
 | 2026-10-26 | [2026-10-26-ledger.md](2026-10-26-ledger.md) | Ledger pass, 2026-10-26: B5's six group rows onto their captures, B3's thirteen lines onto their real next steps |  |
 | 2026-11-25 | [2026-11-25-admit26.md](2026-11-25-admit26.md) | Lane admit26: the ledger's ADMIT rows, address by address | corrects x1 |
 | 2026-11-25 | [2026-11-25-apply.md](2026-11-25-apply.md) | Lane apply-26: multi-step Easy Apply, phase A (offline) |  |
 | 2026-11-25 | [2026-11-25-build-jmn26.md](2026-11-25-build-jmn26.md) | build-jmn26, 2026-11-25: the J, M and N rows the ledger marked BUILD | corrects x1 |
 | 2026-11-25 | [2026-11-25-build-p26.md](2026-11-25-build-p26.md) | Lane build-p26, 2026-11-25: the profile slice's twelve BUILD rows -- one reader merged, eleven next steps re-pointed | corrects x1 |
+| 2026-11-25 | [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md) | Orchestrator rulings of 2026-11-25 (from 22:30 IST), registered at integration 3 | corrects x1 |
+| 2026-11-26 | [2026-11-26-integration-3.md](2026-11-26-integration-3.md) | Integration 3, 2026-11-26: four certified heads onto master, and the rulings since 2026-11-25 22:30 |  |
+| 2026-11-26 | [2026-11-26-rulings-search-route.md](2026-11-26-rulings-search-route.md) | Orchestrator rulings of 2026-11-26 (01:20 IST): the job search's route, registered at integration 3 |  |
 
 ## 6. What the scan rejected, could not join, or had to repair
 

@@ -863,6 +863,15 @@ builder, so that once a capture finds where LinkedIn draws it (the
 application-settings page, admitted, is the likeliest), one load of it may be
 taken -- or does it stay refused as a surface that may autosave?
 
+### Q-SELF-PROFILE-QUERY-VARIANT -- whether his own profile's self-profile spelling is a read address
+
+Owed to the orchestrator since integration 3 (2026-11-26), by its ruling LINKS-ARE-NOT-DISCLOSURES of
+2026-11-25: the `in-me-profile` capture's link presses for `P D25` ('Add section', a top-card link to his own
+profile carrying `?isSelfProfile=true`) and `P A25` ('Contact info', the top card's link to his contact-info
+overlay) are vetoed, because a link is not a disclosure and a page may veto a target, never supply one. The
+question both rows wait on: is the self-profile query variant of his own profile address admissible as a READ
+address in its own right? Rows: `P D25`, `P A25`.
+
 ## 8. Preconditions and purposes
 
 PRECONDITION rows stay GAP; each waits on something he does not hold.

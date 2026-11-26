@@ -117,13 +117,17 @@ import pin_census_rows as P  # noqa: E402
 #: -- see `_audit/2026-10-10-lane-np-named-profile.md`, E. No row left.
 #: 772 -> 773 AT THE INTEGRATION MERGE OF LANE NP ONTO LANES S AND B5 (2026-10-10), MEASURED: `P O17`
 #: and `M C35b`, one row each, two rows on the merged census.
-PINNED_ROW_TOTAL = 773
+#: 773 -> 774 AT INTEGRATION 3 (2026-11-26), MEASURED: `J 168` entered, split
+#: from `J 110` under COMPOUND-ROW-SPLITS-ONLY-ON-STATE by the orchestrator's
+#: ruling J-110-SPLITS-HOME-AND-POSTS (2026-11-25): the Home half stayed `J 110`
+#: (COVERED-UNFIRED), the Posts half entered GAP.
+PINNED_ROW_TOTAL = 774
 
 #: Per slice, because a delta of zero across four slices is reachable by two
 #: errors cancelling -- one row added to `jobs.md` and one dropped from
 #: `network.md` sum to the same total and are not the same census.
 PINNED_SLICE_ROWS = {
-    "J": 166,   # jobs.md                    (150 + 16)
+    "J": 167,   # jobs.md                    (150 + 16 + 1, J 168)
     "P": 237,   # profile.md                 (203 + 10 + 22 + 1 + 1, P A23b, P O17)
     "M": 154,   # messaging-and-content.md   (142 + 11 + 1, M C35b)
     "N": 216,   # network.md                 (209 + 6 + 1, N 26b)
