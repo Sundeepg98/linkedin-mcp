@@ -141,7 +141,12 @@ _MEASURED_VERDICTS: tuple[tuple[str, bool, str], ...] = (
     # ADMITTED 2026-10-10 (lane A, as categories/ads above): its own line
     # plus an exemption excusing "/unfollow" for this address alone.
     ("/mypreferences/d/unfollowed", True, "allowlist match"),
-    ("/mypreferences/d/verifications", False, "FORBIDDEN SUBSTRING 'verification'"),
+    # ADMITTED 2026-11-26 (lane admit5-26, VERIFICATIONS-PAGE-ADMITTED, a
+    # named settings page in its own commit): its own line plus an exemption
+    # excusing "verification" for this address alone; two-step verification
+    # and every other spelling stay refused on the word. It read
+    # FORBIDDEN SUBSTRING 'verification' until then.
+    ("/mypreferences/d/verifications", True, "allowlist match"),
 )
 
 #: THE ONE-LINE EDIT a future wave would most plausibly make to discharge
@@ -327,8 +332,10 @@ def test_a_settings_family_pattern_admits_exactly_these_and_no_more(monkeypatch)
 def test_the_denylisted_addresses_survive_the_widened_allowlist(monkeypatch):
     """Under the exact same widened allowlist as test 6 above, every address
     refused by a NAMED forbidden substring must stay refused: close-accounts,
-    hibernate-account, unfollowed, verifications, connected-microsoft-
-    accounts (via '/connect'), and every categories/ and settings/ path.
+    hibernate-account, connected-microsoft-accounts (via '/connect'), and
+    every categories/ and settings/ path no name admits. (unfollowed stood in
+    this list until 2026-10-10 and verifications until 2026-11-26; each is
+    admitted since by its own name, with its own exemption.)
 
     THIS IS THE CONTRAST THE WHOLE FILE EXISTS TO MAKE VISIBLE: a name-based
     refusal survives a widened allowlist because the forbidden-substring gate
@@ -343,15 +350,16 @@ def test_the_denylisted_addresses_survive_the_widened_allowlist(monkeypatch):
         for path, is_read, gate in _MEASURED_VERDICTS
         if not is_read and gate != "NO PATTERN MATCHES"
     ]
-    # Sanity on the fixture itself: this must be the 13 FORBIDDEN SUBSTRING
-    # rows (15 refused rows total, minus the 2 NO-PATTERN-MATCHES rows that
+    # Sanity on the fixture itself: this must be the 12 FORBIDDEN SUBSTRING
+    # rows (14 refused rows total, minus the 2 NO-PATTERN-MATCHES rows that
     # test 6 shows falling; 3 until lane admit26 admitted the Premium account
     # page by name). A file that silently lost a row here would make
     # the loop below assert nothing about it. 16 of 19 until 2026-10-10, when
     # lane A admitted categories/ads and unfollowed by name; 14 until
-    # 2026-11-25, when lane admit26 admitted categories/privacy by name.
-    assert len(still_named_refused) == 13, (
-        f"expected 13 forbidden-substring-refused addresses in "
+    # 2026-11-25, when lane admit26 admitted categories/privacy by name; 13
+    # until 2026-11-26, when lane admit5-26 admitted verifications by name.
+    assert len(still_named_refused) == 12, (
+        f"expected 12 forbidden-substring-refused addresses in "
         f"_MEASURED_VERDICTS, found {len(still_named_refused)}: "
         f"{sorted(still_named_refused)!r} -- a row's gate classification "
         "changed; fix _MEASURED_VERDICTS rather than this count"

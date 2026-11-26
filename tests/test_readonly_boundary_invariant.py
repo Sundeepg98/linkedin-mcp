@@ -1973,7 +1973,38 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # his job-seeker preferences page in the one spelling LinkedIn draws, with
     # its one query value, a named page in its own commit, no exemption --
     # every other key byte-identical.
-    "_ALLOWED_URL_PATTERNS": "17f048856f525ff3",
+    #
+    # 17f048856f525ff3 until 2026-11-26 (lane admit5-26, its first commit):
+    # one anchored line, his recommendations detail page in the /in/me/ form,
+    # on RECOMMENDATIONS-DETAIL-PAGE-ADMITTED (allowlist silence alone, no
+    # exemption). ATTRIBUTION, with this file's ast_digest: readonly.py at the
+    # lane's base 091f7d3 hashes to the prior pin on every key, and only this
+    # key moved (17 of 18 byte-identical). Record:
+    # _audit/2026-11-26-admit5-26.md.
+    #
+    # 2e7f989cb033beb7 until lane admit5-26's second commit: one anchored
+    # line, his Verifications settings page by name, on
+    # VERIFICATIONS-PAGE-ADMITTED, paired with one exemption below; the tree
+    # at the first commit hashes to the prior pins on every key, and only
+    # this key and the pattern-exemption key moved (16 of 18 byte-identical).
+    #
+    # d4cda7f60112d344 until lane admit5-26's third commit: one anchored
+    # line, the bare spelling of his "Open to" volunteering page, on
+    # VOLUNTEERING-BARE-SPELLING-FIRST (allowlist silence alone, no
+    # exemption); every other key byte-identical (17 of 18).
+    #
+    # d79f4b5ec440f640 until lane admit5-26's fourth commit: one anchored
+    # line, one newsletter's own page on its drawn slug SHAPE (title words, a
+    # hyphen, nineteen digits; no capital, dot, underscore or percent), on
+    # NAME-BEARING-ADDRESS-REDACTION-SCOPE, no exemption; every other key
+    # byte-identical (17 of 18).
+    #
+    # 88fe4122b84e54fd until lane admit5-26's fifth commit: one anchored
+    # line, his own profile in the /in/me/ form with exactly
+    # `?isSelfProfile=true`, on SELF-PROFILE-QUERY-VARIANT-ADMITTED (the
+    # orchestrator, 2026-11-26), no exemption; every other key byte-identical
+    # (17 of 18).
+    "_ALLOWED_URL_PATTERNS": "5d3109ee0aa96e48",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     # 419e64a3cd92ec7e until the same REVIEW: commit: a third entry, excusing
     # exactly {"/follow"} for exactly the anchored follower-list address.
@@ -1997,7 +2028,12 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # 08c29a59104b680c until lane admit26's fourth commit: one more, excusing
     # exactly {"/mypreferences/d/categories/"} for exactly his Data privacy
     # category page.
-    "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "56fec205ec8de3fe",
+    # 56fec205ec8de3fe until lane admit5-26's second commit (2026-11-26): one
+    # more, excusing exactly {"verification"} -- the one substring the
+    # address trips, measured -- for exactly his Verifications settings page,
+    # the per-address exemption VERIFICATIONS-PAGE-ADMITTED names; the
+    # forbidden tuple is unchanged at 33.
+    "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "8a0202843de29ce2",
     "_FORBIDDEN_URL_SUBSTRINGS": "b0291a66ec9bd51e",
     # 23aece1483afdee9 until 2026-09-19. See the re-freeze note above: eleven
     # detector classes added, zero removed, and the direction is pinned by

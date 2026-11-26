@@ -215,9 +215,15 @@ ADMISSIONS = (
             Sibling(f"{B}/in/me/opportunities/", None, "the Open-to root"),
             Sibling(f"{B}/in/someone-else/opportunities/services/education/",
                     None, "another member's page"),
-            Sibling(f"{B}/in/me/opportunities/volunteering/education/", None,
-                    "the volunteering page, drawn only with his own profile "
-                    "id in its query, so not admitted here"),
+            # The volunteering page's BARE spelling stood here until
+            # 2026-11-26, when lane admit5-26 admitted it on
+            # VOLUNTEERING-BARE-SPELLING-FIRST
+            # (tests/test_admit5_26_admissions.py). The spelling LinkedIn
+            # draws, his own profile id in its query, did not travel with it.
+            Sibling(f"{B}/in/me/opportunities/volunteering/education/"
+                    "?profileId=placeholder-id", None,
+                    "the volunteering page as drawn, his own profile id in its "
+                    "query, so not admitted here"),
             Sibling(f"{B}/in/me/opportunities/job-opportunities/edit/",
                     "/edit/", "the Open To Work editor's inferred address: "
                     "the editor has no address at all"),

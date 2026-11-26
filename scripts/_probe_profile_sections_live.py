@@ -143,7 +143,12 @@ story about rendering.
 ## THE ADJACENT RULING A FOURTH ATTEMPT MUST NOT WALK INTO
 
 ``/in/me/details/recommendations/`` is REFUSED by the read boundary -- measured
-here -- so the detail surface is not the route either. And SCROLL is ruled NOT
+here -- so the detail surface is not the route either. [AMENDED 2026-11-26:
+ADMITTED since, by its own line (lane admit5-26,
+RECOMMENDATIONS-DETAIL-PAGE-ADMITTED). This probe's print of it now reads
+``admitted=True``, and the detail page is the route the capture line
+``admit-in-me-details-recommendations`` takes; the sentence above stands as
+it was measured.] And SCROLL is ruled NOT
 SANCTIONED in this repository, so an approach that depends on rendering more of
 the page by scrolling is closed before it starts.
 

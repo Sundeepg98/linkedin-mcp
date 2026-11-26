@@ -1158,6 +1158,15 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     #                                records a page load writes its address as
     #                                a SHAPE, never the slug. Census M C101 is
     #                                GAP on that blocker until then.
+    #
+    #                                [AMENDED 2026-11-26, COMMENT ONLY:
+    #                                NAME-BEARING-ADDRESS-REDACTION-SCOPE
+    #                                answered that condition, and this page is
+    #                                admitted since ON ITS DRAWN SLUG SHAPE, by
+    #                                its own line in the LANE ADMIT5-26 block;
+    #                                every spelling off that shape stays
+    #                                refused, and the paragraphs above stand
+    #                                as their authors wrote them.]
     #     /newsletters/              the product root, which is a family
     #     /newsletters/<slug>/analytics/   census ``M C83``, ``P L4``
     #
@@ -2654,7 +2663,10 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # sibling's entry fires `saveAndFetchNextStep`, so the capture stops at
     # the first control (lane L7's capture C3). NOT HERE: the volunteering
     # page beside it, which LinkedIn draws only with his own profile id in its
-    # query (the record, section 5).
+    # query (the record, section 5). [AMENDED 2026-11-26, COMMENT ONLY: its
+    # BARE spelling is admitted since, by its own line in the LANE ADMIT5-26
+    # block, on VOLUNTEERING-BARE-SPELLING-FIRST; the drawn spelling carrying
+    # his profile id stays refused.]
     re.compile(r"^https://www\.linkedin\.com/in/me/opportunities/services/education/?$"),
     # His My Network page (census N 22, N 32, N 62, N 97, N 98), drawn in the
     # global nav of nearly every tracked live fixture and in the drawn-route
@@ -2722,6 +2734,142 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # no substring. Editing a preference is a write with its own spec; the
     # press gate refuses every control here.
     re.compile(r"^https://www\.linkedin\.com/jobs/preferences\?viewType=SEEKING_PREFERENCES$"),
+    # ======================================================================
+    # LANE ADMIT5-26 (2026-11-26) -- FIVE PAGES OF HIS OWN ACCOUNT, EACH ON A
+    # RULING THE ORCHESTRATOR HAS ALREADY MADE; this lane implements them and
+    # decides none. Record: `_audit/2026-11-26-admit5-26.md`, which carries
+    # each line's red-before and green-after evidence. Pinned, every control
+    # shown failing, in `tests/test_admit5_26_admissions.py` (lane admit26's
+    # harness, applied unchanged). Every line is exact and anchored; any
+    # paired exemption sits in a LANE ADMIT5-26 block at the end of
+    # `_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS`; the forbidden tuple is
+    # unchanged. Nothing in the package composes any of these addresses yet:
+    # each line decides what MAY be opened, and the first load is a capture's.
+    #
+    # His recommendations detail page (census N 121 to N 123, N 125 to N 128,
+    # P F1, P F5 to P F9). Ruling RECOMMENDATIONS-DETAIL-PAGE-ADMITTED (the
+    # orchestrator, 2026-11-25): "ADMIT the named /in/me/details/
+    # recommendations/ line (interests-page precedent); the capture records
+    # the landing." The spelling is NAMED, never drawn (session 8's first
+    # render of /in/me/ holds no Recommendations section), so this is the
+    # interests page's case exactly: its OWN line, never a fourth word in the
+    # measured skills|experience|education alternation above, the /in/me/
+    # form only, and a redirect on the first load is a finding the capture
+    # records, not a reason to drop the line. It trips no forbidden
+    # substring: refused by allowlist silence alone until now
+    # (READ-PAST-AN-ACT-SUBSTRING's second clause). NO QUERY: a received or
+    # given tab spelled as a query is a later admission, once a capture
+    # draws it. The page lists other people, so a reader owes
+    # NAMES-AT-RUNTIME and PEOPLE-DATA-MITIGATIONS (`recommendations.py`, the
+    # name-free shaper, ships unwired); writing, requesting or hiding a
+    # recommendation is a write with its own row, and the press gate refuses
+    # every control here.
+    re.compile(r"^https://www\.linkedin\.com/in/me/details/recommendations/?$"),
+    # His Verifications settings page (census P K1, P K7), BY NAME, in its
+    # own commit. Ruling VERIFICATIONS-PAGE-ADMITTED (the orchestrator,
+    # 2026-11-25): "ADMIT that exact address read-only, zero presses, a
+    # per-address exemption for "verification"; two-step-verification stays
+    # refused." DRAWN on the settings index as 'Verifications'
+    # (`completeness-annotations.tsv`, the index captured 2026-09-23; P K1's
+    # cell records the slashed spelling, so the line takes both). The address
+    # trips "verification" -- one of the six words the 2026-09-03 block added
+    # beside "password" and "two-factor" -- and nothing else, measured with
+    # every entry of the shipped tuple. THIS LINE IS HALF OF A TWO-GATE
+    # ADMISSION: the paired LANE ADMIT5-26 entry in
+    # `_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS` excuses exactly
+    # {"verification"} for exactly this anchored address, and NEITHER HALF
+    # ALONE ADMITS ANYTHING. "verification" keeps its full reach everywhere
+    # else: `/mypreferences/d/two-step-verification`, the ruling's own
+    # control, stays refused on it, as do the Premium hub's
+    # `/trust/verification/`, the singular, another case, a query, a sub-path
+    # and a longer leaf (`tests/test_admit5_26_admissions.py`). READ-ONLY,
+    # ZERO PRESSES: adding or removing a verification (P K7) is a write with
+    # its own row, and the press gate refuses every control on the page.
+    re.compile(r"^https://www\.linkedin\.com/mypreferences/d/verifications/?$"),
+    # His "Open to" volunteering page (census P D24), THE BARE SPELLING
+    # FIRST. Ruling VOLUNTEERING-BARE-SPELLING-FIRST (the orchestrator,
+    # 2026-11-25): "the bare spelling first, the capture recording the
+    # landing; if it does not land, profileId from tool arguments at runtime
+    # (his own id, never stored)." LinkedIn DRAWS the page only as this path
+    # with `?profileId=<his own profile id>` (both tracked top-card fixtures,
+    # the id replaced, and the raw capture; lane admit26's record, section
+    # 5). That drawn spelling is NOT admitted: a line for it would carry his
+    # id or admit any id, and the ruling takes it only if the bare one does
+    # not land, the id then from a tool's arguments. So this line is the
+    # bare path, the /in/me/ form only, both slash forms, no query, no
+    # sub-path, beside the services page admitted the same way; it trips no
+    # forbidden substring (READ-PAST-AN-ACT-SUBSTRING's second clause). The
+    # flow behind the page is entered by a press, and the press gate refuses
+    # every control: the capture reads shapes and stops at the first one
+    # (lane L7's capture C3).
+    re.compile(r"^https://www\.linkedin\.com/in/me/opportunities/volunteering/education/?$"),
+    # One newsletter's own page (census M C80, M C82, M C101, N 55, N 56), ON
+    # THE SLUG SHAPE LINKEDIN DRAWS. Ruling NAME-BEARING-ADDRESS-REDACTION-
+    # SCOPE (the orchestrator, 2026-11-25): the redaction "reaches every
+    # TRACKED or CI/console-printed record; gitignored raw state may hold the
+    # address. Newsletter page admitted now on its drawn slug shape; article
+    # page after a capture spells it." It answers the condition the
+    # subscriptions-root entry above records (NAMED-ADDRESS-NEEDS-LOG-
+    # REDACTION, 2026-10-10).
+    #
+    # THE SHAPE, MEASURED, never a slug: on the two gitignored raw captures of
+    # his subscribed-newsletters page in the main checkout, each of the five
+    # distinct newsletter anchors is `/newsletters/<title words>-<19 digits>/`
+    # -- lowercase letters, digits and hyphens, two or three words before the
+    # id, no query, the trailing slash -- read by a disposable scan that
+    # printed lengths and character classes only. So the segment is a CLOSED
+    # class: an alphanumeric first unit, at most a hundred more letters,
+    # digits and hyphens, a hyphen, and exactly nineteen ASCII digits. No
+    # capital, no dot, no underscore and NO PERCENT -- the encoded-dot lesson
+    # the roster lines record -- so no literal or encoded dot segment reaches
+    # a traversal; no query; no sub-path, so a newsletter's analytics (M C83,
+    # P L4, still unmeasured) and every act's spelling stay refused; the id
+    # alone and a title with no id stay refused, because neither is drawn.
+    #
+    # THE SLUG IS NAME-BEARING -- routinely its author's name -- so it never
+    # enters a tracked or CI-printed file: this line is a shape, every test
+    # slug is synthetic, and whatever composes the address takes the slug
+    # from the operator's arguments (PAGE-MAY-VETO-NEVER-SUPPLY; the capture
+    # is one load of a newsletter he names). NOTHING IN THE PACKAGE COMPOSES
+    # IT TODAY, and the first caller owes a refusal that does not echo it:
+    # `assert_read_url`'s own sentence quotes the address it refuses. A
+    # forbidden word in a title (a slug opening on "create", say) still
+    # refuses on its substring: the tuple keeps its full reach. Subscribing,
+    # sharing or reporting is a write with its own row, and the press gate
+    # refuses every control.
+    re.compile(r"^https://www\.linkedin\.com/newsletters/[a-z0-9][a-z0-9-]{0,99}-[0-9]{19}/?$"),
+    # His own profile with exactly ONE query parameter, `isSelfProfile=true`
+    # (census P D25). Ruling SELF-PROFILE-QUERY-VARIANT-ADMITTED (the
+    # orchestrator, 2026-11-26 10:10 IST; the record carries it for the
+    # integrator to register): the self-profile spelling of his OWN profile
+    # is a READ address in its own right, on four anchors --
+    #   (a) his own profile path only. This line is the /in/me/ form. The
+    #       spelling LinkedIn draws is the slug form (the tracked top card's
+    #       'Add section' anchors: `/in/<his slug>/?isSelfProfile=true`, a
+    #       slash before the query), and it is NOT a line here: a slug is
+    #       never stored in a tracked file, and a slug class would admit
+    #       every member's profile. His slug resolved at runtime from his
+    #       session would need a door of its own, which nothing builds today;
+    #   (b) `isSelfProfile=true` the only parameter: any other parameter or
+    #       value, another case, the key twice, a fragment, or no slash before
+    #       the query is refused;
+    #   (c) the server composes the address from this ruling, never from a
+    #       page's href (PAGE-MAY-VETO-NEVER-SUPPLY stands; this replaces the
+    #       link presses LINKS-ARE-NOT-DISCLOSURES vetoed);
+    #   (d) the landing must prove his own profile, or the read refuses. THIS
+    #       LINE CANNOT EXPRESS (d). It is owed by whatever loads the address
+    #       -- the capture first, any reader after it -- and it rests on the
+    #       self-profile recognition another lane is fixing (session 11: the
+    #       /in/me/ redirect no longer carries `isSelfProfile`).
+    # The ruling's controls, each refused (`tests/test_admit5_26_admissions.py`):
+    # the same query on another member's profile, and any extra parameter.
+    # Reopener: a capture showing the variant draws nothing the bare profile
+    # does not. It trips no forbidden substring -- allowlist silence alone, no
+    # exemption -- and nothing is pressed: the 'Add section' contents (P D25)
+    # are read as drawn. P A25's contact-info overlay is NOT this line: it is
+    # read by its own address, lane L1's `/in/me/overlay/contact-info/` line
+    # above, under the same self-only anchors, labels only.
+    re.compile(r"^https://www\.linkedin\.com/in/me/\?isSelfProfile=true$"),
 )
 
 #: Substrings that must never appear in a navigation target, checked before
@@ -3235,6 +3383,18 @@ _FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS: tuple[
     (
         re.compile(r"^https://www\.linkedin\.com/mypreferences/d/categories/privacy/?$"),
         frozenset({"/mypreferences/d/categories/"}),
+    ),
+    # LANE ADMIT5-26 (2026-11-26) -- the second gate of each pair whose first
+    # gate is the matching LANE ADMIT5-26 line in `_ALLOWED_URL_PATTERNS`; the
+    # argument and the ruling are written there. Each entry excuses exactly
+    # the substring(s) its address trips, measured with the shipped tuple,
+    # and nothing more; the tuple itself is unchanged.
+    #
+    # His Verifications settings page, tripping "verification" and nothing
+    # else -- the per-address exemption VERIFICATIONS-PAGE-ADMITTED names.
+    (
+        re.compile(r"^https://www\.linkedin\.com/mypreferences/d/verifications/?$"),
+        frozenset({"verification"}),
     ),
 )
 

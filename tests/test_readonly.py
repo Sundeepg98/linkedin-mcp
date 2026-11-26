@@ -2963,7 +2963,12 @@ MUST_STAY_UNREADABLE = (
     # paragraph it got.
     "https://www.linkedin.com/mypreferences/d/change-password",
     "https://www.linkedin.com/mypreferences/d/two-factor-authentication",
-    "https://www.linkedin.com/mypreferences/d/verifications",
+    # ``https://www.linkedin.com/mypreferences/d/verifications`` WAS HERE
+    # UNTIL 2026-11-26 and is now READABLE (lane admit5-26,
+    # VERIFICATIONS-PAGE-ADMITTED: that exact address, read-only, one
+    # exemption excusing "verification" for it alone). The member of its
+    # class the ruling names as staying refused stands in for it.
+    "https://www.linkedin.com/mypreferences/d/two-step-verification",
     "https://www.linkedin.com/mypreferences/d/member-cookies",
     "https://www.linkedin.com/mypreferences/d/job-application-accounts",
     "https://www.linkedin.com/mypreferences/d/profile-visibility-for-partners",

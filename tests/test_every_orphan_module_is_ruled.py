@@ -106,7 +106,12 @@ DELIBERATELY_UNWIRED: dict[str, str] = {
         "mechanical gap a page reader closes; the surface is UNMEASURED and "
         "the next attempt needs a different instrument, not more effort.** "
         "NOT PERMANENT, and the remaining hypothesis is written in that "
-        "probe's docstring."
+        "probe's docstring. AMENDED 2026-11-26 (lane admit5-26), the "
+        "author's text above left standing: the detail address is "
+        "ADMITTED since, by its own line on "
+        "RECOMMENDATIONS-DETAIL-PAGE-ADMITTED, so it is a route now; no "
+        "capture of it exists yet, so the surface is still unmeasured and "
+        "this module still has no caller."
     ),
     "intro_fields": (
         "LANDED 2026-09-19 (2ac9aea) FROM ANOTHER WAVE, and the ruling is its "
