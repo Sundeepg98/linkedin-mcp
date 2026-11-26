@@ -205,6 +205,19 @@ DECLARED: dict[tuple[str, str], tuple[str, int]] = {
     # that redirect and asserted the resolved slug reached `$.url`. It passed
     # for as long as the leak existed. It is inverted now.
     ("server.py", "linkedin_my_profile"): (ASKED_FOR, 1),
+    # --- ASKED_FOR: lane readers-net26's five readers (2026-11-26) ---------
+    # Each raises on a zero it cannot corroborate, and passes as `url` its own
+    # module's admitted constant -- the one address its tool requested
+    # (`invitation_manager.RECEIVED_URL` / `SENT_URL`,
+    # `following_list.FOLLOWING_URL`, `unfollowed_list.UNFOLLOWED_URL`,
+    # `advertising_data.ADS_URL`), BASE_URL plus a fixed path and nothing
+    # else, so the operator can open the same page by hand. Never the landing:
+    # each reader holds the page and never reads its url.
+    ("invitation_manager.py", "read_received_invitations"): (ASKED_FOR, 1),
+    ("invitation_manager.py", "read_sent_invitations"): (ASKED_FOR, 1),
+    ("following_list.py", "read_following_list"): (ASKED_FOR, 1),
+    ("unfollowed_list.py", "read_unfollowed_list"): (ASKED_FOR, 1),
+    ("advertising_data.py", "read_advertising_data"): (ASKED_FOR, 1),
     # --- NO_ADDRESS_IN_SCOPE: selector builders ---------------------------
     # Pure string builders. None takes a page or a url, so none of them could
     # publish an address if it tried. Declared so the guard's coverage is the
@@ -570,13 +583,18 @@ def test_the_twenty_are_still_twenty():
     # TWENTY-SEVEN ON LANE READERS-JOBS26 (2026-11-26): six raises in five
     # readers outside dom.py, each handed a page and never a url, each
     # describing its landing with dom._landing_note: 13 -> 19 WITHHELD.
-    # THIRTY-TWO AT INTEGRATION 4'S MERGE OF BOTH LANES (2026-11-26): every
-    # site of each kept, the tally MEASURED off the merged table, not summed:
-    # {WITHHELD 19, ASKED_FOR 12, PASSTHROUGH 1, NO_ADDRESS_IN_SCOPE 10}.
+    # TWENTY-SIX AT LANE READERS-NET26 (2026-11-26): five readers outside
+    # server.py raise on an uncorroborated zero with their own module's
+    # admitted constant as `url` -- the address their tool requested -- so
+    # ASKED_FOR is 7 -> 12. MEASURED off this table, not summed.
+    # THIRTY-SEVEN AT INTEGRATION 4'S MERGE OF THE THREE LANES (2026-11-26):
+    # search-fix26, readers-jobs26 and readers-net26, every site of each kept,
+    # the tally MEASURED off the merged table, not summed: {WITHHELD 19,
+    # ASKED_FOR 17, PASSTHROUGH 1, NO_ADDRESS_IN_SCOPE 10}.
     assert tally[WITHHELD] == 19, tally
-    assert tally[ASKED_FOR] == 12, tally
+    assert tally[ASKED_FOR] == 17, tally
     assert tally[PASSTHROUGH] == 1, tally
-    assert tally[WITHHELD] + tally[ASKED_FOR] + tally[PASSTHROUGH] == 32, tally
+    assert tally[WITHHELD] + tally[ASKED_FOR] + tally[PASSTHROUGH] == 37, tally
     assert tally[NO_ADDRESS_IN_SCOPE] == 10, tally
 
 

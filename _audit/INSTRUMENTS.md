@@ -12765,3 +12765,76 @@ call on a copy and the set loses it.
 The lane's keyed-shape matcher, its raw-capture UI reader, its outline
 printer and its census edit scripts, kept outside the repository; each
 answered its questions once, and the answers are in the record.
+
+## 107. A WORD THE SKELETON SHAPED IS PUT BACK ONLY WHERE ITS KEYED SHAPE PROVES IT, AND A HELPER THAT BUILDS RECORDS IS NAMED ONCE (readers-net26, 2026-11-26)
+
+Lane readers-net26 built five readers on live session 11's captures; the record
+is `_audit/2026-11-26-readers-net26.md`, section 7. Each entry below was shown
+failing first (its section 7.1: fourteen mutations, fourteen RED).
+
+### 107.1 The word restorer, held to the tracked copy token by token
+
+`scripts/_build_live11_word_fixtures.py` writes a tracked copy with LinkedIn's
+own words put back where, and only where, the session's KEYED skeleton proves
+them by keyed shape (FIXED-UI-LABEL-MATCH): a closed list per page, no argument
+that takes a word, ids converted before any word goes back, everything else
+reduced by the harness's own `tracked_copy`. With no words it reproduces each
+tracked copy byte for byte (3 of 3, on the box that holds the keys).
+`tests/test_live11_word_fixtures.py` holds the three fixtures to their copies
+token by token -- a token may differ only where the copy has `x` and the
+fixture a word of its own page's list -- and is shown failing by giving the
+received page another page's words. The builder's own test is shown failing by
+the mutation that skips the id pass.
+
+    A WORD THE SKELETON SHAPED IS NOT LOST: THE KEY THAT SHAPED IT CAN PROVE IT,
+    ONE CLOSED WORD AT A TIME, AND NEVER A NAME.
+
+### 107.2 The badge bracket's verdict
+
+`linkedin_server/badge_bracket.py` judges two readings of the pending-invitation
+badge around a `/mynetwork/` list: before unreadable opens nothing; after
+unreadable or moved withholds the sent tab and the following list; on the
+received tab a fall is its passive cost, returned. Pure; the label never leaves.
+`tests/test_badge_bracket.py` is shown failing by three mutations (each tab's
+rule flipped, the label kept) and drives the three tools over a browser that
+loads nothing.
+
+### 107.3 A name-based closure lends a builder to every function of that name
+
+`tests/test_readers_emit_no_page_string.py` takes "which readers build people
+records" from `tests/test_a_people_reader_reads_one_page.py`'s reference
+closure, which follows NAMES. A new `_row` that built a person record (this
+lane's first `unfollowed_list._row`) made `post_viewer_demographics`' own `_row`
+look like a builder, and that reader's committed `clean` verdict measured
+`not_driven` -- a regression in a module nobody touched, caught by the baseline's
+shrink check. Not a defect in the guard so much as its edge, written down: a
+helper that builds a record takes a name no other module uses.
+
+    A CLOSURE THAT FOLLOWS NAMES JOINS EVERY FUNCTION THAT SHARES ONE. NAME A
+    RECORD BUILDER ONCE IN THE PACKAGE, OR ANOTHER MODULE INHERITS ITS VERDICT.
+
+### 107.4 Declared disposable
+
+The lane's outline printer, label and slot probes, href-word probe, the two
+structure probes of the kept raw pages, the reader prototypes, the census,
+ledger and queue edit scripts, and the mutation runner; each answered one
+question once, and the answers are in the record.
+
+### 107.5 A defect in 103.4, the people gate, queued for the next live-lane owner
+
+103.4 keeps a raw page only where it draws no member link other than his own,
+and states its own blind spot: "It cannot see a person drawn without a profile
+link". Session 11 met it: `/mypreferences/d/unfollowed` draws 44 members, each
+a name in `[data-test-profile-card-name]` with NO profile link (measured on the
+kept raw: 0 profile addresses, 0 member urns in the 44 rows), so the gate read
+0 other members and the raw page, 44 third parties' names in it, was kept in
+the live lane's gitignored state. The orchestrator deleted it and every copy
+(UNFOLLOWED-RAW-DELETED, 2026-11-26); the tracked skeleton stays, every name
+slot in it `x`. RULED the same day, PEOPLE-GATE-COUNTS-NAME-SLOTS: the gate's
+next version counts a NAME SLOT -- a text node in a slot LinkedIn uses for a
+member's name, with or without a link -- as well as a profile link, and keeps
+no raw page that draws one. Not built here: the runner is the live lane's, in
+its gitignored state, and the next owner takes it with this entry.
+
+    A GATE THAT COUNTS LINKS COUNTS THE PEOPLE A PAGE LINKS, NOT THE PEOPLE IT
+    DRAWS. A NAME WITHOUT A LINK IS STILL A NAME.

@@ -1305,7 +1305,10 @@ PINNED = {
     #: 252 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `P M2` GAP -> COVERED-UNFIRED (his stored resumes, `linkedin_application_settings`), and `J 75` and `P M6` GAP -> MEASURED-ABSENT (not offered on the page they waited on), all on session 11's capture of his application settings page (was 249).
     #: 253 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `J 168` GAP -> COVERED-UNFIRED, the Page's posts read off its root by `linkedin_company_page_tab(tab="posts")` over session 9's Posts view (was 252).
     #: 254 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `J 114` split under COMPOUND-ROW-SPLITS-ONLY-ON-STATE (J-114-SPLITS): the built facet, the Insights function table, COVERED-UNFIRED; `J 169`, its three unbuilt facets, entered GAP (was 253).
-    "adjudicated": 254,
+    #: 250 ON LANE READERS-NET26 (2026-11-26), MEASURED: `N 9`, `N 13`, `N 38`, `N 39` and `P P15` GAP -> COVERED-UNFIRED (readers built on live session 11's captures), `N 161` COVERED-UNFIRED -> COVERED-PROVEN (session 11's fire, banked; `_audit/2026-11-26-readers-net26.md`): +5 rows left GAP.
+    #: 251 ON LANE READERS-NET26'S ROUND 2 (2026-11-26), MEASURED: `N 6` GAP -> COVERED-UNFIRED, discharged by CALLER-COMPOSITION-UNDER-D6 on `linkedin_sent_invitations` and `linkedin_connect_from_profile` (the orchestrator's answer to Q-REINVITE-COMPOSITION; `_audit/2026-11-26-readers-net26.md`, round 2).
+    #: MEASURED AT INTEGRATION 4'S MERGE OF READERS-NET26 (2026-11-26) on the merged tree, never summed (the figures above are each lane's own).
+    "adjudicated": 260,
     #: THE LIVE LANE'S FOUR ROWS, RE-DERIVED AT EACH OF ITS MERGES OF MASTER
     #: (2026-09-24; last over lane S): four rows fired live and banked
     #: (`_audit/2026-09-23-live-lane-session-1.md`). `P G6` COVERED-UNFIRED ->
@@ -1428,7 +1431,10 @@ PINNED = {
     #: 165 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `P M2` GAP -> COVERED-UNFIRED (his stored resumes, `linkedin_application_settings`), and `J 75` and `P M6` GAP -> MEASURED-ABSENT (not offered on the page they waited on), all on session 11's capture of his application settings page (was 164).
     #: 166 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `J 168` GAP -> COVERED-UNFIRED, the Page's posts read off its root by `linkedin_company_page_tab(tab="posts")` over session 9's Posts view (was 165).
     #: 167 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `J 114` split under COMPOUND-ROW-SPLITS-ONLY-ON-STATE (J-114-SPLITS): the built facet, the Insights function table, COVERED-UNFIRED; `J 169`, its three unbuilt facets, entered GAP (was 166).
-    "delivered_broad": 167,
+    #: 165 ON LANE READERS-NET26 (2026-11-26), MEASURED: `N 9`, `N 13`, `N 38`, `N 39` and `P P15` GAP -> COVERED-UNFIRED (readers built on live session 11's captures), `N 161` COVERED-UNFIRED -> COVERED-PROVEN (session 11's fire, banked; `_audit/2026-11-26-readers-net26.md`): +5 COVERED-UNFIRED from GAP.
+    #: 166 ON LANE READERS-NET26'S ROUND 2 (2026-11-26), MEASURED: `N 6` GAP -> COVERED-UNFIRED, discharged by CALLER-COMPOSITION-UNDER-D6 on `linkedin_sent_invitations` and `linkedin_connect_from_profile` (the orchestrator's answer to Q-REINVITE-COMPOSITION; `_audit/2026-11-26-readers-net26.md`, round 2).
+    #: MEASURED AT INTEGRATION 4'S MERGE OF READERS-NET26 (2026-11-26) on the merged tree, never summed (the figures above are each lane's own).
+    "delivered_broad": 173,
     #: 79 since the live lane's merge (see `adjudicated`): P G6, N 134, P O3
     #: and M C72 COVERED-PROVEN.
     #: 75 and 21 since the bucket-1 merge: `M C41` fired live and moved from
@@ -1470,7 +1476,8 @@ PINNED = {
     #: master carried (K's rulings, U's attachments).
     #: 117 AT LANE B2's MERGE OF ORIGIN/MASTER 6c65815, MEASURED on the
     #: merged tree, not summed: the live lane's 115 with lane B2's `N 80` and `N 133`.
-    "delivered_strict": 117,
+    #: 118 ON LANE READERS-NET26 (2026-11-26), MEASURED: `N 9`, `N 13`, `N 38`, `N 39` and `P P15` GAP -> COVERED-UNFIRED (readers built on live session 11's captures), `N 161` COVERED-UNFIRED -> COVERED-PROVEN (session 11's fire, banked; `_audit/2026-11-26-readers-net26.md`): `N 161` joined COVERED-PROVEN.
+    "delivered_strict": 118,
     #: The live lane's merge: N 134, P O3 and M C72 left GAP.
     #: Lane D's merge: N 132 left GAP, for COVERED-UNFIRED under D6.
     #: 544 AT THE ORCHESTRATOR'S MERGE OF LANE D (2026-09-27), MEASURED: lane D
@@ -1573,7 +1580,10 @@ PINNED = {
     #: 525 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `J 106`, `J 113` and `J 165` GAP -> COVERED-UNFIRED, one tab of a Page (About, Insights, Events) read by `linkedin_company_page_tab` over session 11's captures (was 528).
     #: 522 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `P M2` GAP -> COVERED-UNFIRED (his stored resumes, `linkedin_application_settings`), and `J 75` and `P M6` GAP -> MEASURED-ABSENT (not offered on the page they waited on), all on session 11's capture of his application settings page (was 525).
     #: 521 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `J 168` GAP -> COVERED-UNFIRED, the Page's posts read off its root by `linkedin_company_page_tab(tab="posts")` over session 9's Posts view (was 522).
-    "gap": 521,
+    #: 524 ON LANE READERS-NET26 (2026-11-26), MEASURED: `N 9`, `N 13`, `N 38`, `N 39` and `P P15` GAP -> COVERED-UNFIRED (readers built on live session 11's captures), `N 161` COVERED-UNFIRED -> COVERED-PROVEN (session 11's fire, banked; `_audit/2026-11-26-readers-net26.md`): -5.
+    #: 523 ON LANE READERS-NET26'S ROUND 2 (2026-11-26), MEASURED: `N 6` GAP -> COVERED-UNFIRED, discharged by CALLER-COMPOSITION-UNDER-D6 on `linkedin_sent_invitations` and `linkedin_connect_from_profile` (the orchestrator's answer to Q-REINVITE-COMPOSITION; `_audit/2026-11-26-readers-net26.md`, round 2).
+    #: MEASURED AT INTEGRATION 4'S MERGE OF READERS-NET26 (2026-11-26) on the merged tree, never summed (the figures above are each lane's own).
+    "gap": 515,
     #: 18 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: `M M1` built (`linkedin_message_from_profile`).
     #: 16 ON LANE L5'S ORDER OF 2026-09-27 23:36, MEASURED:
     #: `linkedin_send_message` RETIRED (aimed by a name): `M M2` to GAP and `N
@@ -1711,7 +1721,10 @@ PINNED = {
     #: 48 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `P M2` GAP -> COVERED-UNFIRED (his stored resumes, `linkedin_application_settings`), and `J 75` and `P M6` GAP -> MEASURED-ABSENT (not offered on the page they waited on), all on session 11's capture of his application settings page (was 47).
     #: 49 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `J 168` GAP -> COVERED-UNFIRED, the Page's posts read off its root by `linkedin_company_page_tab(tab="posts")` over session 9's Posts view (was 48).
     #: 50 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `J 114` split under COMPOUND-ROW-SPLITS-ONLY-ON-STATE (J-114-SPLITS): the built facet, the Insights function table, COVERED-UNFIRED; `J 169`, its three unbuilt facets, entered GAP (was 49).
-    "unfired": 50,
+    #: 47 ON LANE READERS-NET26 (2026-11-26), MEASURED: `N 9`, `N 13`, `N 38`, `N 39` and `P P15` GAP -> COVERED-UNFIRED (readers built on live session 11's captures), `N 161` COVERED-UNFIRED -> COVERED-PROVEN (session 11's fire, banked; `_audit/2026-11-26-readers-net26.md`): +5 entered, `N 161` left.
+    #: 48 ON LANE READERS-NET26'S ROUND 2 (2026-11-26), MEASURED: `N 6` GAP -> COVERED-UNFIRED, discharged by CALLER-COMPOSITION-UNDER-D6 on `linkedin_sent_invitations` and `linkedin_connect_from_profile` (the orchestrator's answer to Q-REINVITE-COMPOSITION; `_audit/2026-11-26-readers-net26.md`, round 2).
+    #: MEASURED AT INTEGRATION 4'S MERGE OF READERS-NET26 (2026-11-26) on the merged tree, never summed (the figures above are each lane's own).
+    "unfired": 55,
     #: 104 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     #: 101 AT LANE S'S NAMES ADOPTION (2026-09-27), MEASURED: `N 79`, `N 172`
@@ -1765,7 +1778,9 @@ PINNED = {
     #: 78 ON LANE BUILD-P26 (2026-11-25), MEASURED: `P L2b`, a read, left GAP (lane B1's child reader of his follower list, reviewed and merged; `_audit/2026-11-25-build-p26.md`).
     #: 77 AT INTEGRATION 3 (2026-11-26), MEASURED on the merged tree after the orchestrator's rulings of 2026-11-25 applied: `J 153`, `J 155`, `J 159` EXCLUDED-RULED (OUTSIDE-THE-PRODUCT-PURPOSE), `P A14`, `P A15` MEASURED-ABSENT, `N 102` and `J 110`'s Home half COVERED-UNFIRED, `J 168` (the Posts half) entered GAP: `N 102` left GAP.
     #: 75 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `P M2` GAP -> COVERED-UNFIRED (his stored resumes, `linkedin_application_settings`), and `J 75` and `P M6` GAP -> MEASURED-ABSENT (not offered on the page they waited on), all on session 11's capture of his application settings page (was 77).
-    "gap_read": 75,
+    #: 72 ON LANE READERS-NET26 (2026-11-26), MEASURED: `N 9`, `N 13`, `N 38`, `N 39` and `P P15` GAP -> COVERED-UNFIRED (readers built on live session 11's captures), `N 161` COVERED-UNFIRED -> COVERED-PROVEN (session 11's fire, banked; `_audit/2026-11-26-readers-net26.md`): five reads left GAP.
+    #: MEASURED AT INTEGRATION 4'S MERGE OF READERS-NET26 (2026-11-26) on the merged tree, never summed (the figures above are each lane's own).
+    "gap_read": 70,
     #: 151, not the 152 published by `_audit/2026-09-21-the-write-ceiling.md`.
     #: That document scoped itself to `profile.md`, `network.md` and
     #: `messaging-and-content.md`; measured at HEAD those three carry W 151 and
@@ -1817,7 +1832,8 @@ PINNED = {
     #: 365 with lane U's three rows (-3).
     #: 361 AT LANE B1'S MERGE OF ORIGIN/MASTER 0103810, MEASURED: master's figure with `P A22` GAP -> COVERED-UNFIRED (the Organization select, session 7).
     #: 359 AT INTEGRATION 3 (2026-11-26), MEASURED on the merged tree after the orchestrator's rulings of 2026-11-25 applied: `J 153`, `J 155`, `J 159` EXCLUDED-RULED (OUTSIDE-THE-PRODUCT-PURPOSE), `P A14`, `P A15` MEASURED-ABSENT, `N 102` and `J 110`'s Home half COVERED-UNFIRED, `J 168` (the Posts half) entered GAP: `P A14` and `P A15` left GAP.
-    "gap_write": 359,
+    #: 358 ON LANE READERS-NET26'S ROUND 2 (2026-11-26), MEASURED: `N 6` GAP -> COVERED-UNFIRED, discharged by CALLER-COMPOSITION-UNDER-D6 on `linkedin_sent_invitations` and `linkedin_connect_from_profile` (the orchestrator's answer to Q-REINVITE-COMPOSITION; `_audit/2026-11-26-readers-net26.md`, round 2): a write left GAP.
+    "gap_write": 358,
     #: All 54 are `jobs.md`, which has no per-row R/W column (56 until the
     #: lane-L3 merge built J 18 and J 39). Not a coincidence
     #: and not a defect in the finder: it is the whole of that slice's still-GAP
@@ -1983,7 +1999,9 @@ PINNED = {
     #: MEASURED AT INTEGRATION 2'S MERGE OF LANE B1 (2026-11-24) on the merged tree, never summed (the figures above are each lane's own).
     #: 46 AT INTEGRATION 3 (2026-11-26), MEASURED on the merged tree after the orchestrator's rulings of 2026-11-25 applied: `J 153`, `J 155`, `J 159` EXCLUDED-RULED (OUTSIDE-THE-PRODUCT-PURPOSE), `P A14`, `P A15` MEASURED-ABSENT, `N 102` and `J 110`'s Home half COVERED-UNFIRED, `J 168` (the Posts half) entered GAP: `N 102` left bucket 3.
     #: 44 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `P M2` GAP -> COVERED-UNFIRED (his stored resumes, `linkedin_application_settings`), and `J 75` and `P M6` GAP -> MEASURED-ABSENT (not offered on the page they waited on), all on session 11's capture of his application settings page (was 46).
-    "b3_admitted": 44,
+    #: 41 ON LANE READERS-NET26 (2026-11-26), MEASURED: `N 9`, `N 13`, `N 38`, `N 39` and `P P15`, five admitted reads, left GAP for COVERED-UNFIRED, and their address-table lines with them (`_audit/2026-11-26-readers-net26.md`).
+    #: MEASURED AT INTEGRATION 4'S MERGE OF READERS-NET26 (2026-11-26) on the merged tree, never summed (the figures above are each lane's own).
+    "b3_admitted": 39,
     #: 38 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     #: 40 ON LANE L5'S ORDER OF 2026-09-28 12:32, MEASURED: `N 30`, `N 31`, `N 65`
@@ -2189,7 +2207,8 @@ PINNED = {
     #: (OPERATOR-NAMES-THE-TARGET).
     #: 16 AT LANE NP'S MERGE OF MASTER 0103810 (2026-10-10), MEASURED: lane U's 15
     #: with `M C35` (+1), held by OPERATOR-NAMES-THE-TARGET.
-    "b1_standing": 16,
+    #: 17 ON LANE READERS-NET26'S ROUND 2 (2026-11-26), MEASURED: `N 6` GAP -> COVERED-UNFIRED, discharged by CALLER-COMPOSITION-UNDER-D6 on `linkedin_sent_invitations` and `linkedin_connect_from_profile` (the orchestrator's answer to Q-REINVITE-COMPOSITION; `_audit/2026-11-26-readers-net26.md`, round 2): held by OPERATOR-NAMES-THE-TARGET (see PINNED_B1_ROWS).
+    "b1_standing": 17,
     "b1_relayed": 0,
     "b1_pending": 0,
     #: 22 AT THE ORCHESTRATOR'S MERGE OF LANE D (2026-09-27), MEASURED: lane D
@@ -2288,7 +2307,9 @@ PINNED = {
     #: 32 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `P M2` GAP -> COVERED-UNFIRED (his stored resumes, `linkedin_application_settings`), and `J 75` and `P M6` GAP -> MEASURED-ABSENT (not offered on the page they waited on), all on session 11's capture of his application settings page (was 31).
     #: 33 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `J 168` GAP -> COVERED-UNFIRED, the Page's posts read off its root by `linkedin_company_page_tab(tab="posts")` over session 9's Posts view (was 32).
     #: 34 ON LANE READERS-JOBS26 (2026-11-26), MEASURED: `J 114` split under COMPOUND-ROW-SPLITS-ONLY-ON-STATE (J-114-SPLITS): the built facet, the Insights function table, COVERED-UNFIRED; `J 169`, its three unbuilt facets, entered GAP (was 33).
-    "b1_no_ruling": 34,
+    #: 31 ON LANE READERS-NET26 (2026-11-26), MEASURED: `N 9`, `N 13`, `N 38`, `N 39` and `P P15` GAP -> COVERED-UNFIRED (readers built on live session 11's captures), `N 161` COVERED-UNFIRED -> COVERED-PROVEN (session 11's fire, banked; `_audit/2026-11-26-readers-net26.md`): the five entered bucket 1 held by no ruling, `N 161` left it (see PINNED_B1_ROWS).
+    #: MEASURED AT INTEGRATION 4'S MERGE OF READERS-NET26 (2026-11-26) on the merged tree, never summed (the figures above are each lane's own).
+    "b1_no_ruling": 38,
     #: 7 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
     #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
     #: 4 AT THE LIVE LANE'S MERGE OF MASTER c2825a4 (2026-09-28), MEASURED on the
@@ -2506,10 +2527,16 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
     #: MEASURED: withdrawing his own reaction (`linkedin_withdraw_reaction`),
     #: built offline on the ruling of 14:14 and never fired. Held until he
     #: names the item -- his live proof is a reaction the same session placed.
+    #: `N 6` entered ON LANE READERS-NET26'S ROUND 2 (2026-11-26), MEASURED:
+    #: re-inviting a member whose earlier invitation expired, discharged by
+    #: CALLER-COMPOSITION-UNDER-D6 on `linkedin_sent_invitations` (is it still
+    #: pending?) and `linkedin_connect_from_profile` (send anew), the
+    #: orchestrator's answer to Q-REINVITE-COMPOSITION; never fired. Held as
+    #: `N 2` and `N 4` are: Connect fires only at a member he names.
     "OPERATOR-NAMES-THE-TARGET": (
         "J 128",
         "M C1", "M C25", "M C32", "M C35", "M C63", "M M10", "M M14", "M M15", "M M18",
-        "N 1", "N 2", "N 4", "N 47", "N 64",
+        "N 1", "N 2", "N 4", "N 6", "N 47", "N 64",
         "P I14",
     ),
     #: `J 18` and `J 39` entered with the lane-L3 merge, 2026-09-23: reads
@@ -2605,7 +2632,18 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
         #: never fired. RELEASED BY SELF-PROFILE-EDITS-NOT-OUTWARD, beside `P A8`.
         "P A22",
         "J 121", "J 122",
-        "N 20", "N 45", "N 161", "N 165", "N 177", "N 179", "N 197",
+        "N 20", "N 45", "N 165", "N 177", "N 179", "N 197",
+        #: `N 161` LEFT ON LANE READERS-NET26 (2026-11-26): fired at the live
+        #: lane's session 11 (load 34), 9 groups returned, every bar held --
+        #: banked COVERED-PROVEN on its cell's bar.
+        #: `N 9`, `N 13`, `N 38`, `N 39` and `P P15` entered on lane
+        #: readers-net26 (2026-11-26): his invitation manager's two tabs, the
+        #: people he follows, the members he unfollowed (each as people
+        #: records) and his Advertising data page (closed words), each read
+        #: off one admitted page over live session 11's capture of it; never
+        #: fired. NAMES-AT-RUNTIME and PEOPLE-DATA-MITIGATIONS permit and shape
+        #: the four people reads; none holds any of the five.
+        "N 9", "N 13", "N 38", "N 39", "P P15",
         #: `N 161` and `N 179` entered with lane B2, 2026-10-10: the groups and
         #: events searches return what they found as records
         #: (`linkedin_search_groups`, `linkedin_search_events`), built offline over

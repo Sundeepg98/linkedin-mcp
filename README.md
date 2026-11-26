@@ -3,8 +3,21 @@
 An MCP server that shows you your own LinkedIn account data as structured tool
 results instead of pages you have to click through.
 
-**Eighty-five tools ship. Fifty-eight read. Twenty-seven write. Three of those
+**Ninety tools ship. Sixty-three read. Twenty-seven write. Three of those
 are write-shaped and unable to act.**
+(It read "Eighty-five tools ship. Fifty-eight read. Twenty-seven write" until
+integration 4's merge of lane readers-net26, 2026-11-26: five reads, each of
+one admitted page and no press, built on live session 11's captures.
+`linkedin_received_invitations`
+and `linkedin_sent_invitations` read your invitation manager's two tabs --
+who invited you, and whom you invited and how long ago (census `N 13`,
+`N 9`); `linkedin_my_following_list` the people you follow (`N 38`); each
+of those three loads its page between two readings of the pending-invitation
+badge. `linkedin_my_unfollowed_list` reads the members you unfollowed, each a
+name with no link because the page draws none (`N 39`), and
+`linkedin_my_advertising_data` your Advertising data page's settings and
+their states, as closed words (`P P15`). Lane readers-net26's branch read
+"Eighty-eight tools ship. Sixty-one read.")
 (It read "Eighty-three tools ship. Fifty-six read. Twenty-seven write" until
 lane readers-jobs26, 2026-11-26: `linkedin_company_page_tab` (census `J 106`,
 `J 113`, `J 165`) reads one tab of an organisation's Page -- its About,
@@ -1121,7 +1134,7 @@ linkedin_server/
   cdp_bridge.py              the recovery path: attach to a running Chrome
   dom.py                     the read-only harvesters and the control readers
   shape.py                   pure parsers and the result envelope
-  server.py                  the eighty-five tools
+  server.py                  the ninety tools
   errors.py
 tests/                       1393 tests, no network, no account
   fixtures/                  frozen LinkedIn markup, scrubbed

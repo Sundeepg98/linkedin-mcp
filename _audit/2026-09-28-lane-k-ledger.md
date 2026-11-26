@@ -872,6 +872,66 @@ overlay) are vetoed, because a link is not a disclosure and a page may veto a ta
 question both rows wait on: is the self-profile query variant of his own profile address admissible as a READ
 address in its own right? Rows: `P D25`, `P A25`.
 
+### Q-REINVITE-COMPOSITION -- a re-invitation composed from two shipped tools
+
+Added 2026-11-26 by lane readers-net26 (`_audit/2026-11-26-readers-net26.md`,
+section 5). Row: `N 6`. Its cell's prerequisite -- the Sent manager admitted --
+is met, and the manager is read: `linkedin_sent_invitations` (row `N 9`) lists
+each pending invitation he sent, so one that expired is no longer listed; and
+sending anew is `linkedin_connect_from_profile` (rows `N 2`, `N 4`,
+COVERED-UNFIRED), which presses Connect only where the member's profile draws
+it. The question: is `N 6` discharged by CALLER-COMPOSITION-UNDER-D6 on those
+two tools, its state the weaker of them, COVERED-UNFIRED -- or does a
+re-invitation need an expiry LinkedIn itself draws, which no capture shows?
+
+ANSWERED 2026-11-26 by the orchestrator, applied in lane readers-net26's round
+2: YES -- discharged by CALLER-COMPOSITION-UNDER-D6 on those two tools, at the
+weaker state, COVERED-UNFIRED; LinkedIn's own re-invite cooldown is honoured,
+because `linkedin_connect_from_profile` presses only a Connect the profile
+draws, and Connect stays outward, fired only at a target he names. `N 6` left
+the ledger with it. Registered at integration 4.
+
+### Q-REFOLLOW-AIM -- a Follow button on a row that carries no member
+
+Added 2026-11-26 by lane readers-net26 (section 5 of its record). Rows:
+`N 40`, and `M C52` beside it. Each of the 44 rows of his unfollowed page
+(`/mypreferences/d/unfollowed`, session 11, load 9) draws one `Follow`
+button, and no row carries a member link or id -- measured on the kept raw
+page: 0 profile addresses and 0 member urns, the picture link without an
+href. So the only things that tell one row from another are the member's
+name and the row's position, and PEOPLE-DATA-MITIGATIONS item 6 forbids
+aiming a write by a name, NO-INDEX-PINNED-JUDGEMENTS by a position. The
+question: is the re-follow built from the member's own profile, which he
+names by link (THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET; row `N 34`'s route,
+unbuilt), the unfollowed list read only as a veto -- or held?
+
+ANSWERED 2026-11-26 by the orchestrator, applied in lane readers-net26's round
+2: build the re-follow from the member's OWN profile, which he names by link
+(THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET, `N 34`'s route); the unfollowed list is
+a read and a veto only, never a source of the target. `N 40` and `M C52` now read
+SIBLING `N 34`. Registered at integration 4.
+
+### Q-AD-HIDE-TARGET -- hiding an ad LinkedIn chose
+
+Added 2026-11-26 by lane readers-net26 (section 5 of its record). Row:
+`N 200`. Session 11 opened a promoted item's own control on the feed (load
+28): its menu draws `Hide this ad`, `Report ad` and `Why am I seeing this
+ad?` (keyed shape), the hide an action link. Lane B2's blocker (3) stands:
+the ad is LinkedIn's choice, and the only handle on it on the page is the urn
+its own `Embed this post` entry carries -- the page would supply the target
+(PAGE-MAY-VETO-NEVER-SUPPLY). The question: may a hide be aimed at an ad he
+names by that urn, read off his own feed by a reader and handed back by him,
+with its undo captured on the first supervised fire (HIS-OWN-CURATION-NOT-
+OUTWARD) -- or does an ad stay out of the curation class? The report half is
+an outward class either way, fired only at a real item he names.
+
+ANSWERED 2026-11-26 by the orchestrator, applied in lane readers-net26's round
+2: YES under HIS-OWN-CURATION-NOT-OUTWARD -- the ad is one he names, an urn a
+reader returned to him and he hands back; the tool never picks an ad itself;
+the hide's undo is captured on the first supervised fire; `Report ad` stays
+outward, fired only at a real item he names. `N 200` now reads BUILD behind the
+grant. Registered at integration 4.
+
 ## 8. Preconditions and purposes
 
 PRECONDITION rows stay GAP; each waits on something he does not hold.
@@ -891,6 +951,9 @@ NOT CHEAP, or not his to make:
 - a Top Voice badge: `P B8`, `P K9`;
 - an endorsement received: `P E6`, `N 114`;
 - a pending invitation to a group or an event: `N 164`, `N 182`;
+- a Page-follow invitation he has sent, pending -- his Sent tab draws only its
+  people category (session 11): `N 11`, `N 12` (lane readers-net26, 2026-11-26);
+- a received invitation carrying a personal note: `N 19` (the same lane);
 - a collaborative post or article he is part of: `M C55`, `M C56`, `M C76`;
 - a job change to share: `P I16`;
 - a name-pronunciation recording, which only the mobile app records: `P A23b`;

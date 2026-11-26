@@ -110,6 +110,15 @@ EXPECTED_TOOLS = (
     # 2026-11-25: a READ of his own follower list, each follower a people
     # record beside its relation; census P L2b.
     "linkedin_my_followers_list",
+    # 2026-11-26, lane readers-net26, each a READ of one admitted page built
+    # on live session 11's capture of it: his invitation manager's two tabs
+    # (census N 13, N 9), the people he follows (N 38), the members he
+    # unfollowed (N 39) and his Advertising data page (P P15).
+    "linkedin_received_invitations",
+    "linkedin_sent_invitations",
+    "linkedin_my_following_list",
+    "linkedin_my_unfollowed_list",
+    "linkedin_my_advertising_data",
 )
 
 
@@ -471,4 +480,7 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # EIGHTY-FOUR ON LANE READERS-JOBS26 (2026-11-26): one tab of a Page, a
     # read, measured off this branch's registry.
     # EIGHTY-FIVE ON THE SAME LANE: his application settings page, a read.
-    assert len(_tool_names()) == 85
+    # NINETY AT INTEGRATION 4'S MERGE OF LANE READERS-NET26 (2026-11-26): its
+    # five READS beside the eighty-five (its branch read eighty-eight), measured
+    # off the merged registry, not summed.
+    assert len(_tool_names()) == 90

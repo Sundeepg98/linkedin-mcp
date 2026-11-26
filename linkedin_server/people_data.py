@@ -684,6 +684,13 @@ class Category:
 #: payload is WHO) and joined at lane build-p26's merge of that branch,
 #: 2026-11-25: the members on the first render of his own follower list, each
 #: beside whether he follows that member back, no opt-in.
+#: Four joined on 2026-11-26 (lane readers-net26, each over live session 11's
+#: capture of its page, no opt-in): ``linkedin_received_invitations`` (each
+#: invitation's sender, a person record or, for a Page's newsletter
+#: invitation, an organisation record), ``linkedin_sent_invitations`` (each
+#: pending invitation's member), ``linkedin_my_following_list`` (the people he
+#: follows) and ``linkedin_my_unfollowed_list`` (the members he unfollowed:
+#: a name and no link, because the page draws none).
 PEOPLE_TOOLS: frozenset[str] = frozenset(
     {
         "linkedin_group_members",
@@ -707,6 +714,11 @@ PEOPLE_TOOLS: frozenset[str] = frozenset(
         # tab of a Page, read off ONE page -- its About tab's own prose in
         # OrganisationProse records, its Events tab's events as Event records.
         "linkedin_company_page_tab",
+        # 2026-11-26 (lane readers-net26): census N 13, N 9, N 38 and N 39.
+        "linkedin_received_invitations",
+        "linkedin_sent_invitations",
+        "linkedin_my_following_list",
+        "linkedin_my_unfollowed_list",
     }
 )
 
