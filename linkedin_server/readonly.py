@@ -2654,7 +2654,10 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # sibling's entry fires `saveAndFetchNextStep`, so the capture stops at
     # the first control (lane L7's capture C3). NOT HERE: the volunteering
     # page beside it, which LinkedIn draws only with his own profile id in its
-    # query (the record, section 5).
+    # query (the record, section 5). [AMENDED 2026-11-26, COMMENT ONLY: its
+    # BARE spelling is admitted since, by its own line in the LANE ADMIT5-26
+    # block, on VOLUNTEERING-BARE-SPELLING-FIRST; the drawn spelling carrying
+    # his profile id stays refused.]
     re.compile(r"^https://www\.linkedin\.com/in/me/opportunities/services/education/?$"),
     # His My Network page (census N 22, N 32, N 62, N 97, N 98), drawn in the
     # global nav of nearly every tracked live fixture and in the drawn-route
@@ -2774,6 +2777,23 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # ZERO PRESSES: adding or removing a verification (P K7) is a write with
     # its own row, and the press gate refuses every control on the page.
     re.compile(r"^https://www\.linkedin\.com/mypreferences/d/verifications/?$"),
+    # His "Open to" volunteering page (census P D24), THE BARE SPELLING
+    # FIRST. Ruling VOLUNTEERING-BARE-SPELLING-FIRST (the orchestrator,
+    # 2026-11-25): "the bare spelling first, the capture recording the
+    # landing; if it does not land, profileId from tool arguments at runtime
+    # (his own id, never stored)." LinkedIn DRAWS the page only as this path
+    # with `?profileId=<his own profile id>` (both tracked top-card fixtures,
+    # the id replaced, and the raw capture; lane admit26's record, section
+    # 5). That drawn spelling is NOT admitted: a line for it would carry his
+    # id or admit any id, and the ruling takes it only if the bare one does
+    # not land, the id then from a tool's arguments. So this line is the
+    # bare path, the /in/me/ form only, both slash forms, no query, no
+    # sub-path, beside the services page admitted the same way; it trips no
+    # forbidden substring (READ-PAST-AN-ACT-SUBSTRING's second clause). The
+    # flow behind the page is entered by a press, and the press gate refuses
+    # every control: the capture reads shapes and stops at the first one
+    # (lane L7's capture C3).
+    re.compile(r"^https://www\.linkedin\.com/in/me/opportunities/volunteering/education/?$"),
 )
 
 #: Substrings that must never appear in a navigation target, checked before

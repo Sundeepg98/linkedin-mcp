@@ -1987,7 +1987,12 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # VERIFICATIONS-PAGE-ADMITTED, paired with one exemption below; the tree
     # at the first commit hashes to the prior pins on every key, and only
     # this key and the pattern-exemption key moved (16 of 18 byte-identical).
-    "_ALLOWED_URL_PATTERNS": "d4cda7f60112d344",
+    #
+    # d4cda7f60112d344 until lane admit5-26's third commit: one anchored
+    # line, the bare spelling of his "Open to" volunteering page, on
+    # VOLUNTEERING-BARE-SPELLING-FIRST (allowlist silence alone, no
+    # exemption); every other key byte-identical (17 of 18).
+    "_ALLOWED_URL_PATTERNS": "d79f4b5ec440f640",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     # 419e64a3cd92ec7e until the same REVIEW: commit: a third entry, excusing
     # exactly {"/follow"} for exactly the anchored follower-list address.

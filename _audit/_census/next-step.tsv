@@ -402,7 +402,7 @@ P D20	P	W	R3	CAPTURE:in-me-profile	INFERRED	RULING:PROFILE-EDITOR-ADDRESSES-ALLO
 P D21	P	W	R3	CAPTURE:in-me-profile	INFERRED	RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
 P D22	P	W	R3	CAPTURE:in-me-profile	INFERRED	RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
 P D23	P	W	R3	CAPTURE:in-me-profile	INFERRED	RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
-P D24	P	W	R3	ADMIT:https://www.linkedin.com/in/me/opportunities/volunteering/education/	NAMED	_audit/_census/profile.md::Lifted by capture C3 (after that exact address is admitted ; RULING:READ-PAST-AN-ACT-SUBSTRING
+P D24	P	W	R3	CAPTURE:admit-in-me-opportunities-volunteering-education	NAMED	_audit/_census/profile.md::Lifted by capture C3 (after that exact address is admitted ; RULING:READ-PAST-AN-ACT-SUBSTRING
 P D25	P	R	-	RULING:Q-SELF-PROFILE-QUERY-VARIANT	INFERRED	_audit/2026-10-10-lane-b1-profile-build.md::(the three links) ; _audit/2026-11-25-build-p26.md::?isSelfProfile=true ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
 P D26	P	R	-	CAPTURE:in-me-profile	INFERRED	tests/fixtures/live8/in_me.html ; _audit/2026-09-05-the-scroll-ruling.md::A surface exists that has no ; RULING:SCROLL-NOT-SANCTIONED
 P D27	P	W	R3	CAPTURE:admit-in-me-edit-secondary-language	NAMED	_audit/_census/profile.md::/edit/secondary-language/ ; RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED

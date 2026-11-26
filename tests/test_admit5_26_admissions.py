@@ -180,6 +180,41 @@ ADMISSIONS = (
                     "the legacy settings tree"),
         ),
     ),
+    # ------------------------------------------------------------------
+    # HIS "OPEN TO" VOLUNTEERING PAGE, the bare spelling first: LinkedIn draws
+    # it only with his own profile id in its query, and the ruling takes the
+    # bare spelling first, the capture recording where it lands.
+    Admission(
+        key="open-to-volunteering-bare",
+        ruling="VOLUNTEERING-BARE-SPELLING-FIRST",
+        rows=("P D24",),
+        address=f"{B}/in/me/opportunities/volunteering/education/",
+        excused=frozenset(),
+        siblings=(
+            Sibling(f"{B}/in/me/opportunities/volunteering/education/"
+                    "?profileId=placeholder-id", None,
+                    "THE DRAWN SPELLING, his own profile id in its query: the "
+                    "ruling's second step, taken only if the bare one does not "
+                    "land, the id then from tool arguments and never stored"),
+            Sibling(f"{B}/in/me/opportunities/volunteering/education/?x=1", None,
+                    "a QUERY"),
+            Sibling(f"{B}/in/me/opportunities/volunteering/education/next/", None,
+                    "a SUB-PATH: a step inside the flow"),
+            Sibling(f"{B}/in/me/opportunities/volunteering/", None,
+                    "the family below it"),
+            Sibling(f"{B}/in/me/opportunities/volunteering/educationx/", None,
+                    "a longer leaf"),
+            Sibling(f"{B}/in/someone-else/opportunities/volunteering/education/",
+                    None, "another member's page"),
+            Sibling(f"{B}/in/me/opportunities/job-opportunities/edit/", "/edit/",
+                    "the Open To Work editor's inferred address: the editor has "
+                    "no address at all"),
+            Sibling(f"{B}/in/me/opportunities/hiring/education/", None,
+                    "the #Hiring item, a broadcast by nature"),
+            Sibling(f"{B}/in/me/opportunities/volunteering/education/x/../../../../"
+                    "../someone-else/", None, "a TRAVERSAL onto a third party"),
+        ),
+    ),
 )
 
 KEYS = [a.key for a in ADMISSIONS]
