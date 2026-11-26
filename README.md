@@ -3,8 +3,19 @@
 An MCP server that shows you your own LinkedIn account data as structured tool
 results instead of pages you have to click through.
 
-**Eighty-three tools ship. Fifty-six read. Twenty-seven write. Three of those
+**Eighty-eight tools ship. Sixty-one read. Twenty-seven write. Three of those
 are write-shaped and unable to act.**
+(It read "Eighty-three tools ship. Fifty-six read. Twenty-seven write" until
+lane readers-net26, 2026-11-26: five reads, each of one admitted page and no
+press, built on live session 11's captures. `linkedin_received_invitations`
+and `linkedin_sent_invitations` read your invitation manager's two tabs --
+who invited you, and whom you invited and how long ago (census `N 13`,
+`N 9`); `linkedin_my_following_list` the people you follow (`N 38`); each
+of those three loads its page between two readings of the pending-invitation
+badge. `linkedin_my_unfollowed_list` reads the members you unfollowed, each a
+name with no link because the page draws none (`N 39`), and
+`linkedin_my_advertising_data` your Advertising data page's settings and
+their states, as closed words (`P P15`).)
 (It read "Eighty-one tools ship. Fifty-six read. Twenty-five write" until
 integration 3's merge of lane build-jmn26, 2026-11-26:
 `linkedin_set_search_job_alert` and its inverse `linkedin_unset_search_job_alert`
@@ -1110,7 +1121,7 @@ linkedin_server/
   cdp_bridge.py              the recovery path: attach to a running Chrome
   dom.py                     the read-only harvesters and the control readers
   shape.py                   pure parsers and the result envelope
-  server.py                  the eighty-three tools
+  server.py                  the eighty-eight tools
   errors.py
 tests/                       1393 tests, no network, no account
   fixtures/                  frozen LinkedIn markup, scrubbed

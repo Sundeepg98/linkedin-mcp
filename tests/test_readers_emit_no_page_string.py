@@ -1403,6 +1403,53 @@ WHAT_WOULD_DRIVE_IT: dict[str, str] = {
         "answering those reads off the skeleton -- a drive in "
         "shipped_drives -- is not built."
     ),
+    # 2026-11-26, lane readers-net26: four people readers over live session
+    # 11's captures, each refusing on the planted page before a row is read.
+    "invitation_manager:read_received_invitations": (
+        "CAPTURE: the received tab, whose strip draws ONE link reading Sent "
+        "and NOT current -- the planted page counts every locator 1, so the "
+        "Sent link reads current and the reader refuses as not the received "
+        "side before any row is read. tests/fixtures/synthetic/"
+        "live11_invitations_words.html (session 11's capture, LinkedIn's "
+        "words restored by keyed shape) draws it, and tests/"
+        "test_invitation_manager.py drives this reader over it in a headless "
+        "browser, a name planted in every member link and every label and "
+        "coming back only inside the person records. A double answering "
+        "those reads off the skeleton -- a drive in shipped_drives -- is not "
+        "built."
+    ),
+    "invitation_manager:read_sent_invitations": (
+        "CAPTURE: the sent tab, its rows each holding one member link -- on "
+        "the planted page the strip reads the sent side and one row is "
+        "counted, but every href is the plant, which is no profile link, so "
+        "the row's member is unread and no record is built. tests/fixtures/synthetic/"
+        "live11_invitations_sent_words.html draws it, and tests/"
+        "test_invitation_manager.py drives this reader over it in a headless "
+        "browser with a name and headline planted, both back only inside the "
+        "person records. A shipped_drives double is not built."
+    ),
+    "following_list:read_following_list": (
+        "CAPTURE: the following list, each card a member link -- on the "
+        "planted page the strip reads the following side and one card is "
+        "counted, but its href is the plant, which is no profile link, so no "
+        "card yields a record. "
+        "tests/fixtures/live11/following.html (session 11's tracked copy) "
+        "draws it, and tests/test_following_and_unfollowed_lists.py drives "
+        "this reader over it in a headless browser, a name planted in every "
+        "name slot and every label, back only inside the person records. A "
+        "shipped_drives double is not built."
+    ),
+    "unfollowed_list:read_unfollowed_list": (
+        "CAPTURE: the unfollowed card, its rows each holding exactly one "
+        "Follow button -- on the planted page a row's button does not count "
+        "exactly one, so the row is not read and no record is built. "
+        "tests/fixtures/live11/unfollowed.html "
+        "(session 11's tracked copy) draws it, and tests/"
+        "test_following_and_unfollowed_lists.py drives this reader over it in "
+        "a headless browser, a name planted in every name slot and every "
+        "label, back only inside the person records. A shipped_drives double "
+        "is not built."
+    ),
 }
 
 #: The verdicts that mean a drive never reached its success path.

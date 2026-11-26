@@ -128,6 +128,13 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     # 2026-11-25: his own follower list, each follower a people record
     # beside its relation. Census P L2b.
     "linkedin_my_followers_list": (),
+    # 2026-11-26, lane readers-net26: five READS, no parameter each, built on
+    # live session 11's captures. Census N 13, N 9, N 38, N 39, P P15.
+    "linkedin_received_invitations": (),
+    "linkedin_sent_invitations": (),
+    "linkedin_my_following_list": (),
+    "linkedin_my_unfollowed_list": (),
+    "linkedin_my_advertising_data": (),
     "linkedin_my_profile": ("details", "include_skills"),
     "linkedin_new_messages": (),
     "linkedin_newsletter_subscriptions": (),
@@ -732,7 +739,15 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: PARAMETERS** -- the search-alert pair (three parameters each) beside
 #: build-p26's eighty-one tools and 128 parameters (its follower list takes
 #: none), counted on the merged registry, never summed.
-PINNED_TOOL_COUNT = 83
+#: **AT LANE READERS-NET26 (2026-11-26): 88 TOOLS AND 134 PARAMETERS** -- five
+#: READS taking no parameter, `linkedin_received_invitations()`,
+#: `linkedin_sent_invitations()`, `linkedin_my_following_list()`,
+#: `linkedin_my_unfollowed_list()` and `linkedin_my_advertising_data()`, beside
+#: the eighty-three and 134, counted off `mcp.list_tools()`, never summed. THE
+#: CENSUS DECISION, IN THE LANE'S CENSUS COMMIT: `N 13`, `N 9`, `N 38`, `N 39`
+#: and `P P15` GAP -> COVERED-UNFIRED on them, never fired. See
+#: `_audit/2026-11-26-readers-net26.md`.
+PINNED_TOOL_COUNT = 88
 PINNED_PARAMETER_COUNT = 134
 
 
