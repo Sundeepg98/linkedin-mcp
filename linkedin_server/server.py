@@ -1289,9 +1289,11 @@ mcp = FastMCP(
         "the per-skill control has never been captured. "
         "THE NINETEENTH, linkedin_set_admitted_setting, changes ONE control "
         "on ONE settings page of his own account that is admitted by name, "
-        "one page at a time; one is admitted, Share profile updates, whose "
+        "one page at a time; two are admitted: Share profile updates, whose "
         "switch governs whether LATER profile edits are shared with his "
-        "network. Like the eleventh, it returns the value it overwrote and "
+        "network, and Resumes and application data, whose two switches govern "
+        "whether LinkedIn saves his resumes and application answers and whether "
+        "recruiters can view his resumes. Like the eleventh, it returns the value it overwrote and "
         "the exact call that puts it back, and never runs that call itself. "
         "THE ELEVENTH verifies its own outcome by reading the field back, as "
         "the nineteenth reads its control back on a fresh load; it also "
@@ -11032,10 +11034,14 @@ async def linkedin_set_admitted_setting(
 
     ADMITTED BY NAME, ONE PAGE AT A TIME (ONE-NAMED-SETTINGS-PAGE-AT-A-TIME).
     A page is admitted by the heading LinkedIn draws on it, and only from a
-    real capture of it; a control by the exact label LinkedIn draws. One page
-    is admitted today: "Share profile updates", whose one control is the
-    switch "Share key profile updates" (values "on" and "off"). Anything else
-    is refused BEFORE a page is loaded, with the admitted pairs listed.
+    real capture of it; a control by the exact label LinkedIn draws. Two pages
+    are admitted today: "Share profile updates", whose one control is the
+    switch "Share key profile updates"; and, since 2026-11-26
+    (APPLICATION-SETTINGS-WRITE), "Resumes and application data", his job
+    application settings, whose two controls are the switches "Allow LinkedIn
+    to save your resumes and answers" and "Allow recruiters to view your
+    resumes". Every switch takes "on" or "off". Anything else is refused BEFORE
+    a page is loaded, with the admitted pairs listed.
 
     ONLY A SWITCH, A RADIO GROUP OR A SELECT. A typed field, an autocomplete,
     a button, a link or a file input is refused by name.
@@ -11045,14 +11051,19 @@ async def linkedin_set_admitted_setting(
     the requested value, and then EVERY other switch, checkbox, radio and
     select on the page must read exactly what it read before. Save is pressed
     only if that holds and the page draws one; a page that draws no Save --
-    the admitted one -- stores on the press, and the receipt says STOP if
+    both admitted ones -- stores on the press, and the receipt says STOP if
     another control moved. The verification is a fresh load of the page and a
     re-read of the control; ``performed`` is ``true``, ``false`` or
     ``"unknown"`` -- on ``"unknown"`` do not retry, open the page and look.
 
-    WHAT IT COSTS YOU. Nothing anyone else sees, for the admitted switch: it
-    governs whether LATER profile edits are shared with your network. The
-    receipt's ``restore`` block holds the exact call that puts the value back.
+    WHAT IT COSTS YOU. Nothing anyone else sees, for "Share key profile
+    updates" (it governs whether LATER profile edits are shared with your
+    network) and for the save-resumes switch. "Allow recruiters to view your
+    resumes" changes what RECRUITERS see of your resume data, so the preview
+    says other members can see it. What turning the save-resumes switch OFF
+    does to the resumes and answers LinkedIn already saved is not measured;
+    the preview says so. The receipt's ``restore`` block holds the exact call
+    that puts the value back.
 
     Args:
         settings_page: the admitted page's NAME, exactly as LinkedIn draws its

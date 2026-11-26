@@ -497,6 +497,15 @@ class WriteSpec:
     #: replace it, and :func:`assert_write_url` still refuses every entry not
     #: named here, by equality.
     exempt_substrings: tuple[str, ...] = ()
+    #: A FORBIDDEN SUBSTRING EXCUSED AT ONE ADDRESS ONLY: ``(address,
+    #: substrings)`` pairs, each set excused for a url EQUAL to its address and
+    #: for no other (lane build-jobs2, 2026-11-26, APPLICATION-SETTINGS-WRITE).
+    #: The settings writer's second admitted page lives at
+    #: ``/jobs/application-settings/``, which carries ``/jobs/application`` --
+    #: the first commit's fence against applying -- and a spec-wide excusal of
+    #: that word would follow the action to any address its pattern ever
+    #: admits. Keyed by the address, it cannot. Empty for every other action.
+    exempt_substrings_at: tuple[tuple[str, frozenset[str]], ...] = ()
 
 
 #: The complete set of writes this server may ever perform without a new,
@@ -2134,6 +2143,10 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
         # which trips two forbidden entries; both are excused by equality, as
         # the read door's own exemption for that address excuses both.
         exempt_substrings=("/settings/", "settings"),
+        # THE SECOND ADMITTED PAGE (lane build-jobs2, 2026-11-26,
+        # APPLICATION-SETTINGS-WRITE), /jobs/application-settings/, also trips
+        # "/jobs/application"; the registry excuses it for THAT address alone.
+        exempt_substrings_at=settings_writer.write_door_excusals(),
         summary="Change ONE control on ONE admitted settings page of his own account.",
         from_state=None,
         to_state=None,
@@ -2168,10 +2181,11 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
         reversibility_class="STILL-UNKNOWN",
         reversibility_evidence=(
             "THE ROUND TRIP HAS NOT BEEN PERFORMED LIVE on any admitted page. "
-            "What is measured: the one admitted page's capture draws its one "
-            "switch, readable off, and no Save (the press stores). The live "
-            "proof the ruling prescribes -- read, benign value, read back, "
-            "restore the exact original, read back -- is planned in "
+            "What is measured: each admitted page's capture draws its switches "
+            "readable -- Share profile updates one, off; Resumes and application "
+            "data two, on -- and neither page draws a Save (the press stores). "
+            "The live proof the ruling prescribes -- read, benign value, read "
+            "back, restore the exact original, read back -- is planned in "
             "_audit/2026-09-28-lane-s-settings.md and run by the live lane."
         ),
         reversible_by=(
@@ -3595,12 +3609,20 @@ def assert_write_url(url: str, grant: WriteGrant) -> str:
 
     # The forbidden list is NOT shortened for writes. Each action may exempt
     # exactly one entry, by equality, and everything else still refuses.
+    # A PER-ADDRESS EXCUSAL (lane build-jobs2, 2026-11-26) is looked up by the
+    # url's EQUALITY with its address -- the url was rebuilt from the grant two
+    # checks above -- so it excuses nothing at any other address.
+    excused_here: frozenset[str] = frozenset()
+    for address, substrings in spec.exempt_substrings_at:
+        if url == address:
+            excused_here = substrings
     lowered = url.lower()
     for bad in readonly._FORBIDDEN_URL_SUBSTRINGS:
         if (
             bad in lowered
             and bad != spec.exempt_substring
             and bad not in spec.exempt_substrings
+            and bad not in excused_here
         ):
             raise WriteAttemptError(
                 f"write blocked: {url!r} contains {bad!r}, which this action "

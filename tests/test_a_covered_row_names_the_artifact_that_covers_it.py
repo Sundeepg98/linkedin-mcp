@@ -794,3 +794,53 @@ def test_the_application_settings_chain_is_still_whole() -> None:
     }
     assert "application_settings.read_application_settings" in calls, (
         "linkedin_application_settings no longer calls its reader; P M2's chain is broken")
+
+
+#: The census rows the settings writer's second admitted page carries, by the
+#: label of the switch each row's cell names (lane build-jobs2, 2026-11-26).
+_APPLICATION_SETTINGS_ROWS: dict[str, tuple[str, ...]] = {
+    "Allow LinkedIn to save your resumes and answers": ("J 76", "P M7"),
+    "Allow recruiters to view your resumes": ("J 74", "P M8"),
+}
+
+
+def _settings_rows(pages) -> dict[str, tuple[str, ...]]:
+    """``{control label: rows}`` for the page named "Resumes and application
+    data" in ``pages``, or ``{}`` when no such page is admitted."""
+    for page in pages:
+        if page.name == "Resumes and application data":
+            return {control.label: tuple(control.rows) for control in page.controls}
+    return {}
+
+
+def test_the_application_settings_write_chain_is_still_whole() -> None:
+    """``J 74``, ``J 76``, ``P M7`` and ``P M8`` (lane build-jobs2, 2026-11-26,
+    APPLICATION-SETTINGS-WRITE): the tool -> the settings writer -> the
+    admitted page -> each switch, naming its rows. The four rows claim
+    COVERED-UNFIRED on it."""
+    from linkedin_server import server, settings_writer, writes
+
+    assert _settings_rows(settings_writer.ADMITTED_PAGES) == _APPLICATION_SETTINGS_ROWS, (
+        "the application settings page is no longer admitted with its two "
+        "switches; J 74/J 76/P M7/P M8's chain is broken")
+    assert callable(getattr(server, "linkedin_set_admitted_setting", None))
+    assert "set_admitted_setting" in writes.PERFORMABLE
+    for key in (("jobs.md", "74"), ("jobs.md", "76"), ("profile.md", "M7"), ("profile.md", "M8")):
+        slice_name, row = key
+        assert _states(slice_name).get(row) == "COVERED-UNFIRED", key
+
+
+def test_control_the_application_settings_chain_convicts_a_dropped_page() -> None:
+    """SHOWN FAILING against a MUTATED REGISTRY: the page removed, and one
+    switch's rows dropped."""
+    import dataclasses
+
+    from linkedin_server import settings_writer
+
+    pages = settings_writer.ADMITTED_PAGES
+    assert _settings_rows(pages) == _APPLICATION_SETTINGS_ROWS
+    assert _settings_rows(pages[:1]) != _APPLICATION_SETTINGS_ROWS
+    page = settings_writer.APPLICATION_SETTINGS
+    thinned = dataclasses.replace(
+        page, controls=(page.controls[0], dataclasses.replace(page.controls[1], rows=())))
+    assert _settings_rows((pages[0], thinned)) != _APPLICATION_SETTINGS_ROWS

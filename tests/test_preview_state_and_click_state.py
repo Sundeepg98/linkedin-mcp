@@ -730,8 +730,12 @@ def test_the_multi_state_actions_are_the_two_this_file_names():
     assert multi == ["set_admitted_setting", "update_setting"], multi
     # And each enumeration is not empty, or the audiences branch is vacuous.
     assert spec_for_action("update_setting").audiences
+    # KEYED BY THE WHOLE TARGET SINCE 2026-11-26 (lane build-jobs2), where it
+    # was the bare values: two admitted pages hold "on" and "off" on three
+    # switches. Its own arms never reach the generic branch, which a bare
+    # reading would now find no key in and refuse.
     admitted_values = {
-        value.casefold()
+        writes.settings_writer.audience_key(page, control, value)
         for page in writes.settings_writer.ADMITTED_PAGES
         for control in page.controls
         for value in control.values
