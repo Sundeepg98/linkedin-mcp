@@ -417,6 +417,31 @@ And for others:
 
 ## 10. The head and its CI
 
-The merged head carrying this record is pushed by `scripts/lane_ci.py push`, and
-its lane CI run is read by head sha. The result is written here by a
-record-only commit, which gets its own run.
+- THE MERGED HEAD: `264ee71`, the registration and this record over the
+  seventh merge `b36dfd5`, on master `7760a5f`. It holds pace20,
+  selfprofile26, admit5-26, search-fix26, readers-jobs26, readers-net26 and
+  readers-msg26, in that order, then the registration. `scripts/lane_ci.py
+  push` put it on `ci/integration4`. The pre-push sweep found 0 hits across
+  1716 blobs and 226 needles, over the 60 commits past master.
+- LANE CI: run 45802337721, read by head sha `264ee71` through
+  `lane_ci.py wait`: SUCCESS. The shard plan, all four pytest shards and the
+  totals job were green (6 of 6 jobs, 6m10s wall).
+- A FIRST PUSH of the same registration, `6ad045e`, also passed lane CI (run
+  45800078055, 6 of 6 jobs). Its commit message and its two records each
+  ended in stray trailing lines, so it was replaced on the ci ref before any
+  merge to master, and it is not in this history. `264ee71` differs from it in
+  the text of those two records only.
+- MEASURED on `264ee71`:
+  - DELIVERED broad 174 / 704 achievable (24.7%), strict 118 (16.8%);
+  - GAP 513;
+  - population 775 rows (71 out of scope);
+  - 91 tools and 137 parameters;
+  - 158 rulings registered.
+- The committed-blob identity test on that head: 1282 passed in 23 s.
+- `origin/master` read `7760a5f` at the fetch before each push.
+- This section is a record-only commit on top of that head. It gets its own
+  lane CI run, reported with it, so the head that goes to master is
+  certified. Master is the orchestrator's to fast-forward; this lane never
+  touches it.
+- UNRESOLVED: nothing in the merges. The items left on their rulings' own
+  words are in section 5, and the queue for the next lanes is in section 9.
