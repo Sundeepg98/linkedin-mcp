@@ -886,6 +886,20 @@ into his inbox's search box, read the rows the view draws as the list reader
 does, and clear the box -- or does the row wait on a capture that shows the
 search landing on an address of its own?
 
+### Q-SCHEDULED-LIST-PRESS -- a list of his own reached only through the post composer
+
+Added 2026-11-26 by lane readers-msg26 (`_audit/2026-11-26-readers-msg26.md`,
+section 5). Row: `M C14`. Live session 11 pressed the post composer's
+`Schedule post`, then `View all scheduled posts`, and LinkedIn drew a dialog
+headed `Scheduled posts` holding an empty state (`No scheduled posts yet`, a
+`Schedule` button) -- a list of his own, drawn and corroborated empty. No link
+reaches it and no address is drawn for it: both presses sit inside the
+composer, which the press module refuses for any shipped read, whatever the
+surface's admission (the autosave argument). The question: may a shipped
+read press those two controls, read the list -- an empty state counted as
+zero only when its headline is drawn -- and close it with nothing typed or
+scheduled, or does the row stay unreachable as a composer surface?
+
 ## 8. Preconditions and purposes
 
 PRECONDITION rows stay GAP; each waits on something he does not hold.

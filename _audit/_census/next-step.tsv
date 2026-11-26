@@ -93,21 +93,21 @@ J 165	J	R	-	CAPTURE:admit-company-org-events	MEASURED	_audit/_census/jobs-direct
 J 166	J	R	-	CAPTURE:admit-products-product	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/products/placeholder-product/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
 J 167	J	R	-	CAPTURE:admit-showcase-showcase	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/showcase/placeholder-showcase/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
 M C2	M	W	R3	SIBLING:M C12	NAMED	_audit/_census/messaging-and-content.md::which is why the two rows close together or not at all
-M C3	M	W	R3	SIBLING:lane-U	NAMED	_audit/2026-09-28-rulings-build-classes.md::`FILE-UPLOAD-UNSANCTIONED` is therefore a stale label.
-M C4	M	W	R3	SIBLING:lane-U	NAMED	_audit/2026-09-28-rulings-build-classes.md::`FILE-UPLOAD-UNSANCTIONED` is therefore a stale label.
-M C5	M	W	R3	SIBLING:lane-U	NAMED	_audit/2026-09-28-rulings-build-classes.md::`FILE-UPLOAD-UNSANCTIONED` is therefore a stale label.
-M C6	M	W	R3	SIBLING:lane-U	NAMED	_audit/2026-09-28-rulings-build-classes.md::`FILE-UPLOAD-UNSANCTIONED` is therefore a stale label.
-M C7	M	W	R3	SIBLING:lane-U	NAMED	_audit/2026-09-28-rulings-build-classes.md::`FILE-UPLOAD-UNSANCTIONED` is therefore a stale label.
+M C3	M	W	R3	BUILD:tests/fixtures/live11/u_post_media_open.html	MEASURED	_audit/2026-11-26-readers-msg26.md::THE INPUT THE ROWS' OLD READING NEVER SAW IS DRAWN ; RULING:FILE-UPLOAD-OPENED ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
+M C4	M	W	R3	BUILD:tests/fixtures/live11/u_post_media_open.html	MEASURED	_audit/2026-11-26-readers-msg26.md::THE INPUT THE ROWS' OLD READING NEVER SAW IS DRAWN ; RULING:FILE-UPLOAD-OPENED ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
+M C5	M	W	R3	CAPTURE:U-POST-DOCUMENT	MEASURED	_audit/2026-11-26-readers-msg26.md::the document control sits behind `More` ; RULING:L1-D3-MEDIA-CHOOSER-INTERCEPTED
+M C6	M	W	R3	SIBLING:M C5	NAMED	M C6 ; M C5
+M C7	M	W	R3	SIBLING:M C3	NAMED	M C7 ; M C3
 M C8	M	W	R3	TARGET:the poll question and options he names	INFERRED	M C8 ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
 M C9	M	W	R3	TARGET:the occasion and the words he names	NAMED	_audit/_census/messaging-and-content.md::Celebrate an occasion
 M C10	M	W	R3	TARGET:a member he names to mention	INFERRED	RULING:MENTION-COMPOSITION-RULING ; RULING:OPERATOR-NAMES-THE-TARGET
 M C11	M	W	R3	SIBLING:M C1	INFERRED	RULING:D6-CAPABILITY-OVER-AFFORDANCE ; M C1
 M C12	M	W	R3	TARGET:the words of a draft he names	INFERRED	RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS ; M C12
 M C13	M	W	R3	TARGET:a post he names to schedule	NAMED	_audit/_census/messaging-and-content.md::Schedule post is a button opening a modal nobody has opened
-M C14	M	R	-	CAPTURE:sharebox-scheduled	NAMED	RULING:CAPTURE-PRESS-UNDER-PROBE-RULE ; _audit/_census/messaging-and-content.md::no link from the composer reaches the scheduled list
-M C15	M	W	R3	CAPTURE:sharebox-scheduled	NAMED	RULING:CAPTURE-PRESS-UNDER-PROBE-RULE ; _audit/_census/messaging-and-content.md::no link from the composer reaches the scheduled list
-M C16	M	W	R3	CAPTURE:sharebox-scheduled	NAMED	RULING:CAPTURE-PRESS-UNDER-PROBE-RULE ; _audit/_census/messaging-and-content.md::no link from the composer reaches the scheduled list
-M C17	M	W	R3	CAPTURE:sharebox-scheduled	NAMED	RULING:CAPTURE-PRESS-UNDER-PROBE-RULE ; _audit/_census/messaging-and-content.md::no link from the composer reaches the scheduled list
+M C14	M	R	-	RULING:Q-SCHEDULED-LIST-PRESS	MEASURED	_audit/2026-11-26-readers-msg26.md::the press module refuses composers and editors ; RULING:ABSENT-ON-HIS-ACCOUNT-PER-ROW
+M C15	M	W	R3	PRECONDITION:a post he has scheduled	MEASURED	_audit/2026-11-26-readers-msg26.md::No scheduled posts yet ; RULING:MEASURED-ABSENT-OR-PRECONDITION
+M C16	M	W	R3	PRECONDITION:a post he has scheduled	MEASURED	_audit/2026-11-26-readers-msg26.md::No scheduled posts yet ; RULING:MEASURED-ABSENT-OR-PRECONDITION
+M C17	M	W	R3	PRECONDITION:a post he has scheduled	MEASURED	_audit/2026-11-26-readers-msg26.md::No scheduled posts yet ; RULING:MEASURED-ABSENT-OR-PRECONDITION
 M C18	M	W	R3	CAPTURE:own-post-reactions	INFERRED	_audit/2026-10-10-lane-b3-messaging-build.md::never a composer or an editor ; _audit/2026-09-28-lane-k-ledger.md::the step is TARGET, not RULING ; RULING:HIS-OWN-CURATION-NOT-OUTWARD
 M C19	M	W	R3	TARGET:a post of his he names for deletion	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::| C6 | `delete_own_post` ; RULING:OPERATOR-NAMES-THE-TARGET
 M C20	M	W	R3	TARGET:an item he names to repost	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::| C1 | `repost_item` ; RULING:OPERATOR-NAMES-THE-TARGET
