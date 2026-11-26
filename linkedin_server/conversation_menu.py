@@ -150,11 +150,11 @@ MENU_CLOSED: str = "menu_closed"
 #: muted is never reported as muted BY THIS CALL.
 NOT_CHANGED: str = "not_changed_by_this_call"
 
-MUTE: str = "mute_conversation"
-UNMUTE: str = "unmute_conversation"
+MUTE: str = "set_conversation_muted"
+UNMUTE: str = "unset_conversation_muted"
 MARK_UNREAD: str = "mark_conversation_unread"
-ARCHIVE: str = "archive_conversation"
-DELETE: str = "delete_conversation"
+ARCHIVE: str = "set_conversation_archived"
+DELETE: str = "set_conversation_deleted"
 
 
 @dataclass(frozen=True)

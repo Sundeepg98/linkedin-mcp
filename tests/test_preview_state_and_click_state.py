@@ -389,8 +389,8 @@ REACHED: dict[str, tuple[str, str, str]] = {
             "2-SYNTHETICTHREADAAAA==",
         )
         for action in (
-            "mute_conversation", "unmute_conversation", "mark_conversation_unread",
-            "archive_conversation", "delete_conversation",
+            "set_conversation_muted", "unset_conversation_muted", "mark_conversation_unread",
+            "set_conversation_archived", "set_conversation_deleted",
         )
     },
 }
@@ -522,9 +522,9 @@ _WORLDS_THAT_REACH_OUT = frozenset({"set_similar_jobs_alert", "unset_similar_job
                                     "set_search_job_alert", "unset_search_job_alert",
                                     # 2026-11-26, lane build-msg2: session 11's thread
                                     # page is a tracked copy too.
-                                    "mute_conversation", "unmute_conversation",
-                                    "mark_conversation_unread", "archive_conversation",
-                                    "delete_conversation"})
+                                    "set_conversation_muted", "unset_conversation_muted",
+                                    "mark_conversation_unread", "set_conversation_archived",
+                                    "set_conversation_deleted"})
 
 
 async def _over_refusing_every_request(html: str, work):

@@ -4585,14 +4585,6 @@ WRITE_VERBS: tuple[str, ...] = (
     # every registered tool description, "react" appears as a whole word in
     # exactly ONE -- the tool named for it. Zero false positives.
     "react",
-    # ADDED 2026-11-26 (lane build-msg2), on the same evidence the line above
-    # was added on: ``linkedin_mute_conversation`` and its inverse
-    # ``linkedin_unmute_conversation`` are sanctioned writes, and before this
-    # line ``name_implies_write`` returned False for both. MEASURED BEFORE
-    # ADDING: "mute" appeared as a whole word in ZERO lines of server.py, so
-    # the docstring check this list also feeds fires only on the two tools
-    # named for it. "unmute" is reached through the negation prefix.
-    "mute",
 )
 
 #: A THIRD RESIDUE, measured the same day, and the record of what was done

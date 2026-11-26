@@ -1,9 +1,9 @@
 """The tool surface: ninety-six tools, sixty-four of which do not write.
 
 **IT READ "ninety-one tools, sixty-four of which do not write" UNTIL LANE
-BUILD-MSG2 (2026-11-26) ADDED FIVE WRITES**: ``linkedin_mute_conversation``,
-``linkedin_unmute_conversation``, ``linkedin_mark_conversation_unread``,
-``linkedin_archive_conversation`` and ``linkedin_delete_conversation`` (census
+BUILD-MSG2 (2026-11-26) ADDED FIVE WRITES**: ``linkedin_set_conversation_muted``,
+``linkedin_unset_conversation_muted``, ``linkedin_mark_conversation_unread``,
+``linkedin_set_conversation_archived`` and ``linkedin_set_conversation_deleted`` (census
 M M26, M M27, M M29, M M31), the acts on one conversation's own options menu,
 so the non-write count holds at sixty-four. Measured off this branch's
 registry, not summed.
@@ -234,11 +234,11 @@ SANCTIONED_WRITE_TOOLS = frozenset(SANCTIONED_WRITES) & {
     "linkedin_unset_search_job_alert",
     # 2026-11-26 (lane build-msg2, census M M26, M M27, M M29, M M31): the
     # five acts on one conversation's own options menu.
-    "linkedin_mute_conversation",
-    "linkedin_unmute_conversation",
+    "linkedin_set_conversation_muted",
+    "linkedin_unset_conversation_muted",
     "linkedin_mark_conversation_unread",
-    "linkedin_archive_conversation",
-    "linkedin_delete_conversation",
+    "linkedin_set_conversation_archived",
+    "linkedin_set_conversation_deleted",
     # THE FIFTEENTH, 2026-09-24 (census rows M M10 and, by D6, M M17; the
     # fourteenth on lane L5's branch, before lane L7's merge landed): a
     # reply inside a conversation he names by thread id. Its NAME announces
@@ -609,11 +609,11 @@ EXPECTED_TOOLS = {
     "linkedin_unset_search_job_alert",
     # 2026-11-26 (lane build-msg2, census M M26, M M27, M M29, M M31): the
     # five acts on one conversation's own options menu.
-    "linkedin_mute_conversation",
-    "linkedin_unmute_conversation",
+    "linkedin_set_conversation_muted",
+    "linkedin_unset_conversation_muted",
     "linkedin_mark_conversation_unread",
-    "linkedin_archive_conversation",
-    "linkedin_delete_conversation",
+    "linkedin_set_conversation_archived",
+    "linkedin_set_conversation_deleted",
     "linkedin_publish_post",
     "linkedin_comment_on_item",
     # THE THIRTY-SIXTH, 2026-09-03. A READ that SHIPS REFUSING: the read
@@ -1442,18 +1442,11 @@ async def test_the_surface_is_exactly_the_ninety_six_tools(tools):
         "linkedin_unset_search_job_alert",
         # 2026-11-26 (lane build-msg2, census M M26, M M27, M M29, M M31):
         # the five acts on one conversation's own options menu.
-        "linkedin_mute_conversation",
-        "linkedin_unmute_conversation",
+        "linkedin_set_conversation_muted",
+        "linkedin_unset_conversation_muted",
         "linkedin_mark_conversation_unread",
-        "linkedin_archive_conversation",
-        "linkedin_delete_conversation",
-    # 2026-11-26 (lane build-msg2, census M M26, M M27, M M29, M M31): the
-    # five acts on one conversation's own options menu.
-    "linkedin_mute_conversation",
-    "linkedin_unmute_conversation",
-    "linkedin_mark_conversation_unread",
-    "linkedin_archive_conversation",
-    "linkedin_delete_conversation",
+        "linkedin_set_conversation_archived",
+        "linkedin_set_conversation_deleted",
         "linkedin_send_reply",
         "linkedin_withdraw_from_group",
         "linkedin_connect_from_profile",
@@ -1804,18 +1797,11 @@ async def test_the_exemption_covers_only_the_names_on_it(tools):
         "linkedin_unset_search_job_alert",
         # 2026-11-26 (lane build-msg2, census M M26, M M27, M M29, M M31):
         # the five acts on one conversation's own options menu.
-        "linkedin_mute_conversation",
-        "linkedin_unmute_conversation",
+        "linkedin_set_conversation_muted",
+        "linkedin_unset_conversation_muted",
         "linkedin_mark_conversation_unread",
-        "linkedin_archive_conversation",
-        "linkedin_delete_conversation",
-    # 2026-11-26 (lane build-msg2, census M M26, M M27, M M29, M M31): the
-    # five acts on one conversation's own options menu.
-    "linkedin_mute_conversation",
-    "linkedin_unmute_conversation",
-    "linkedin_mark_conversation_unread",
-    "linkedin_archive_conversation",
-    "linkedin_delete_conversation",
+        "linkedin_set_conversation_archived",
+        "linkedin_set_conversation_deleted",
         "linkedin_send_reply",
         "linkedin_withdraw_from_group",
         "linkedin_connect_from_profile",
@@ -2252,18 +2238,12 @@ async def test_server_info_stops_claiming_read_only_once_writes_are_on(monkeypat
     # deriving it from PERFORMABLE would make the test agree with any change.
     assert info["writes_available"] == [
         "apply_job",
-        # 2026-11-26 (lane build-msg2), typed here by hand: an act on one
-        # conversation's own options menu (census M M26, M27, M29, M31).
-        "archive_conversation",
         # TENTH, 2026-09-01. Typed here by hand like its nine siblings.
         "comment_on_item",
         # SIXTEENTH, 2026-09-27 (census N 4 by D6; lane L5's follow-up), typed
         # here by hand like its fifteen siblings: Connect on the profile of a
         # person he names by link or member id, never by name.
         "connect_from_profile",
-        # 2026-11-26 (lane build-msg2), typed here by hand: an act on one
-        # conversation's own options menu (census M M26, M27, M29, M31).
-        "delete_conversation",
         "follow_company",
         # THIRTEENTH, 2026-09-23 (census row N 47), typed here by hand like
         # its twelve siblings: a follow performed on the organisation Page root,
@@ -2280,9 +2260,6 @@ async def test_server_info_stops_claiming_read_only_once_writes_are_on(monkeypat
         # here by hand like its sixteen siblings: Message on the profile of a
         # person he names, typing only for a first-degree connection.
         "message_from_profile",
-        # 2026-11-26 (lane build-msg2), typed here by hand: an act on one
-        # conversation's own options menu (census M M26, M27, M29, M31).
-        "mute_conversation",
         # NINTH, same day, and the first that TYPES. Typed here by hand like
         # its eight siblings, because a derived list would admit the tenth
         # silently.
@@ -2314,6 +2291,15 @@ async def test_server_info_stops_claiming_read_only_once_writes_are_on(monkeypat
         # hand like its seventeen siblings: ONE control on ONE admitted
         # settings page, by its exact label, behind the single-use grant.
         "set_admitted_setting",
+        # 2026-11-26 (lane build-msg2), typed here by hand: an act on one
+        # conversation's own options menu (census M M26, M27, M29, M31).
+        "set_conversation_archived",
+        # 2026-11-26 (lane build-msg2), typed here by hand: an act on one
+        # conversation's own options menu (census M M26, M27, M29, M31).
+        "set_conversation_deleted",
+        # 2026-11-26 (lane build-msg2), typed here by hand: an act on one
+        # conversation's own options menu (census M M26, M27, M29, M31).
+        "set_conversation_muted",
         # 2026-11-25 (census J 31, lane build-jmn26), typed here by hand: a
         # job search's own alert switch, set and unset, each the other's inverse.
         "set_search_job_alert",
@@ -2322,10 +2308,10 @@ async def test_server_info_stops_claiming_read_only_once_writes_are_on(monkeypat
         # set and unset, each the other's inverse.
         "set_similar_jobs_alert",
         "unfollow_company",
+        "unsave_job",
         # 2026-11-26 (lane build-msg2), typed here by hand: an act on one
         # conversation's own options menu (census M M26, M27, M29, M31).
-        "unmute_conversation",
-        "unsave_job",
+        "unset_conversation_muted",
         "unset_search_job_alert",
         "unset_similar_jobs_alert",
         # SIXTH, 2026-08-31. The first write here that acts on neither a job
@@ -2365,9 +2351,6 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
     info = await linkedin_server_info(verbose=True)
     assert info["writes_sanctioned"] == [
         "apply_job",
-        # 2026-11-26 (lane build-msg2), typed here by hand: an act on one
-        # conversation's own options menu (census M M26, M27, M29, M31).
-        "archive_conversation",
         # THE TENTH, 2026-09-01, and the only one that ships EXPECTING TO
         # REFUSE: its submit control has never been observed, so the gate
         # finds it by arrival after the fill and stops with the observation
@@ -2376,9 +2359,6 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
         # THE SIXTEENTH, 2026-09-27 (census N 4 by D6). Typed by hand, as this
         # list requires, by the lane that built it.
         "connect_from_profile",
-        # 2026-11-26 (lane build-msg2), typed here by hand: an act on one
-        # conversation's own options menu (census M M26, M27, M29, M31).
-        "delete_conversation",
         "follow_company",
         # THE THIRTEENTH, 2026-09-23 (census row N 47). Typed by hand, as this
         # list requires, by the lane that built it.
@@ -2392,9 +2372,6 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
         # THE SEVENTEENTH, 2026-09-27 (census M M1). Typed by hand, as this
         # list requires, by the lane that built it.
         "message_from_profile",
-        # 2026-11-26 (lane build-msg2), typed here by hand: an act on one
-        # conversation's own options menu (census M M26, M27, M29, M31).
-        "mute_conversation",
         # THE NINTH, same day, and the FIRST THAT TYPES -- one page.fill
         # inside perform, which grew readonly.SANCTIONED_MUTATIONS from two
         # entries to three, the first growth that is not a click.
@@ -2421,6 +2398,15 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
         # THE EIGHTEENTH, 2026-10-10 (census P O17). Typed by hand, as this
         # list requires, by the lane that built it (lane S).
         "set_admitted_setting",
+        # 2026-11-26 (lane build-msg2), typed here by hand: an act on one
+        # conversation's own options menu (census M M26, M27, M29, M31).
+        "set_conversation_archived",
+        # 2026-11-26 (lane build-msg2), typed here by hand: an act on one
+        # conversation's own options menu (census M M26, M27, M29, M31).
+        "set_conversation_deleted",
+        # 2026-11-26 (lane build-msg2), typed here by hand: an act on one
+        # conversation's own options menu (census M M26, M27, M29, M31).
+        "set_conversation_muted",
         # 2026-11-25 (census J 31, lane build-jmn26), typed here by hand: a
         # job search's own alert switch, set and unset, each the other's inverse.
         "set_search_job_alert",
@@ -2429,10 +2415,10 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
         # set and unset, each the other's inverse.
         "set_similar_jobs_alert",
         "unfollow_company",
+        "unsave_job",
         # 2026-11-26 (lane build-msg2), typed here by hand: an act on one
         # conversation's own options menu (census M M26, M27, M29, M31).
-        "unmute_conversation",
-        "unsave_job",
+        "unset_conversation_muted",
         "unset_search_job_alert",
         "unset_similar_jobs_alert",
         # THE TWELFTH, 2026-09-02, on his ruling "I want all capabilities".
@@ -3161,9 +3147,6 @@ async def test_server_info_reports_irreversibility_before_a_caller_commits(
         # PRESSED: the preview loads that person's profile, which may show him
         # among their viewers, and both specs' residue says so.
         "connect_from_profile",
-        # 2026-11-26 (lane build-msg2, census M M26), typed here by hand:
-        # a conversation's delete, receipt-only, which nothing brings back.
-        "delete_conversation",
         "message_from_profile",
         "publish_post",
         # THE NINTH, 2026-10-10 (lane U), TYPED BY HAND AS THIS LIST DEMANDS,
@@ -3188,6 +3171,9 @@ async def test_server_info_reports_irreversibility_before_a_caller_commits(
         # It spends no credit this server can see, and whether LinkedIn meters
         # a reply inside an InMail conversation is UNMEASURED; its spec says so.
         "send_reply",
+        # 2026-11-26 (lane build-msg2, census M M26), typed here by hand:
+        # a conversation's delete, receipt-only, which nothing brings back.
+        "set_conversation_deleted",
         # THE SEVENTH, 2026-09-27 (lane L8, at its merge of master), TYPED BY
         # HAND AS THIS LIST DEMANDS, AND THE DECISION IT RECORDS: leaving a
         # group is permanent through this server. No join is built (census
@@ -3198,7 +3184,7 @@ async def test_server_info_reports_irreversibility_before_a_caller_commits(
         "withdraw_from_group",
     ], (
         "the permanent things this server performs are typed in here by "
-        "whoever added one. A TENTH arriving is a decision, not a diff."
+        "whoever added one. AN ELEVENTH arriving is a decision, not a diff."
     )
     # THE SECOND ARRIVED ON 2026-09-01 AND IT IS DIFFERENT IN KIND, which is
     # why this is written out rather than the list quietly growing by one.

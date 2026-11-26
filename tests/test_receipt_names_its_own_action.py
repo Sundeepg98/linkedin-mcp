@@ -284,8 +284,8 @@ _WHERE_TO_LOOK_OWNERS: dict[str, frozenset[str]] = {
     "LinkedIn messages": frozenset(
         {
             "send_reply", "message_from_profile", "send_attachment",
-            "mute_conversation", "unmute_conversation", "mark_conversation_unread",
-            "archive_conversation", "delete_conversation",
+            "set_conversation_muted", "unset_conversation_muted", "mark_conversation_unread",
+            "set_conversation_archived", "set_conversation_deleted",
         }
     ),
     # ADDED 2026-09-27 FOR ``withdraw_from_group`` (lane L8): his Groups page is where
@@ -330,7 +330,7 @@ _LEGITIMATE_SHARED_PLACES: frozenset[frozenset[str]] = frozenset(
         # THE MUTE PAIR, 2026-11-26 (lane build-msg2), by the same equality
         # edit: one item of one conversation's menu, both directions, settled
         # in that same menu.
-        frozenset({"mute_conversation", "unmute_conversation"}),
+        frozenset({"set_conversation_muted", "unset_conversation_muted"}),
     }
 )
 

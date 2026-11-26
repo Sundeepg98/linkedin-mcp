@@ -1734,8 +1734,7 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # ATTRIBUTION, with this file's ast_digest: readonly.py minus exactly those
     # two entry lines hashes to c51296e034af63eb on this key, and the other
     # seventeen pinned digests are byte-identical to master 3c656df's. No
-    # refusal moved. (WRITE_VERBS gained "mute" in the same change; it is not
-    # a key of this dict.)
+    # refusal moved.
     "SANCTIONED_MUTATIONS": "7671871060412a70",
     # PINNED FROM 2026-09-24, lane G's merge of master: the replacement scan's
     # four tables (unchanged since lane G built them; pinned late, see PINNED)

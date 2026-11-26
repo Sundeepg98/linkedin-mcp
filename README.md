@@ -815,9 +815,9 @@ renumbering. A read that changes something has to say so:
    `linkedin_messaging_presence` (the empty composer's suggestions, which
    opens none), `linkedin_open_thread`, `linkedin_send_reply` and
    `linkedin_send_attachment` (only the conversation you name by id), and
-   `linkedin_mute_conversation`, `linkedin_unmute_conversation`,
-   `linkedin_mark_conversation_unread`, `linkedin_archive_conversation` and
-   `linkedin_delete_conversation` (the composer's list, then only the
+   `linkedin_set_conversation_muted`, `linkedin_unset_conversation_muted`,
+   `linkedin_mark_conversation_unread`, `linkedin_set_conversation_archived` and
+   `linkedin_set_conversation_deleted` (the composer's list, then only the
    conversation you name by id). Whether any of those loads clears the
    messaging badge is
    unmeasured.

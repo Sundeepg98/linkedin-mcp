@@ -3173,9 +3173,9 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
     # arms below delegate. MEASURED on live session 11's load 40
     # (tests/fixtures/live11/msg_thread.html closed, c_b3_1_menu_open.html
     # open); every inverse word is DERIVED, and each spec says which.
-    "linkedin_mute_conversation": WriteSpec(
-        action="mute_conversation",
-        tool_name="linkedin_mute_conversation",
+    "linkedin_set_conversation_muted": WriteSpec(
+        action="set_conversation_muted",
+        tool_name="linkedin_set_conversation_muted",
         url_template="https://www.linkedin.com/messaging/thread/{target}/",
         url_pattern=re.compile(
             r"^https://www\.linkedin\.com/messaging/thread/"
@@ -3206,7 +3206,7 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
         wrong_state_note=(
             "This acts only on a menu drawing 'Mute'. One drawing 'Unmute' is "
             "already muted and is refused, not pressed: pressing it would "
-            "unmute, which is linkedin_unmute_conversation's act."
+            "unmute, which is linkedin_unset_conversation_muted's act."
         ),
         reversibility="STILL-UNKNOWN whether the same menu unmutes it again: the inverse is built, the muted menu is not measured",
         reversibility_measured=False,
@@ -3214,11 +3214,11 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
         reversibility_evidence=(
             "DERIVED, NOT MEASURED. One item carries both directions "
             "(data-view-name message-toolbar-dropdown-toggle-mute, measured) and "
-            "linkedin_unmute_conversation presses it from 'Unmute'. No capture "
+            "linkedin_unset_conversation_muted presses it from 'Unmute'. No capture "
             "holds a muted conversation's menu."
         ),
         reversible_by=(
-            "this server: linkedin_unmute_conversation, built in the same "
+            "this server: linkedin_unset_conversation_muted, built in the same "
             "change, presses the same item from 'Unmute'. By hand: the same "
             "menu, in your LinkedIn messages."
         ),
@@ -3239,9 +3239,9 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "STOP-ALL."
         ),
     ),
-    "linkedin_unmute_conversation": WriteSpec(
-        action="unmute_conversation",
-        tool_name="linkedin_unmute_conversation",
+    "linkedin_unset_conversation_muted": WriteSpec(
+        action="unset_conversation_muted",
+        tool_name="linkedin_unset_conversation_muted",
         url_template="https://www.linkedin.com/messaging/thread/{target}/",
         url_pattern=re.compile(
             r"^https://www\.linkedin\.com/messaging/thread/"
@@ -3259,30 +3259,30 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
         target_kind="thread_id",
         state_from=conversation_menu.STATE_FROM,
         direction_source=(
-            "the same conversation menu as linkedin_mute_conversation, opened "
+            "the same conversation menu as linkedin_set_conversation_muted, opened "
             "and read the same way; this acts only from 'Unmute', a word no "
             "capture holds -- DERIVED."
         ),
         wrong_state_note=(
             "This acts only on a menu drawing 'Unmute'. One drawing 'Mute' is "
             "not muted and is refused, not pressed: pressing it would mute, "
-            "which is linkedin_mute_conversation's act."
+            "which is linkedin_set_conversation_muted's act."
         ),
         reversibility="STILL-UNKNOWN whether the same menu mutes it again: the inverse is built, the muted menu is not measured",
         reversibility_measured=False,
         reversibility_class="STILL-UNKNOWN",
         reversibility_evidence="DERIVED, NOT MEASURED: the same item, the other direction.",
         reversible_by=(
-            "this server: linkedin_mute_conversation presses the same item "
+            "this server: linkedin_set_conversation_muted presses the same item "
             "from 'Mute'."
         ),
         residue=(
-            "the same as linkedin_mute_conversation's: nobody else is told, the "
+            "the same as linkedin_set_conversation_muted's: nobody else is told, the "
             "press's after-state is counted, and the preview opens the "
             "conversation behind the receipt guard."
         ),
         reversibility_procedure=(
-            "the same round trip as linkedin_mute_conversation, this half "
+            "the same round trip as linkedin_set_conversation_muted, this half "
             "second."
         ),
     ),
@@ -3306,7 +3306,7 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
         target_kind="thread_id",
         state_from=conversation_menu.STATE_FROM,
         direction_source=(
-            "the same conversation menu as linkedin_mute_conversation, opened "
+            "the same conversation menu as linkedin_set_conversation_muted, opened "
             "behind the receipt guard and read the same way. 'Mark as unread' "
             "is MEASURED (live session 11, on a conversation already read); "
             "'Mark as read' is DERIVED. The verification reads the menu IN "
@@ -3348,9 +3348,9 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "linkedin_list_conversations reading no unread row."
         ),
     ),
-    "linkedin_archive_conversation": WriteSpec(
-        action="archive_conversation",
-        tool_name="linkedin_archive_conversation",
+    "linkedin_set_conversation_archived": WriteSpec(
+        action="set_conversation_archived",
+        tool_name="linkedin_set_conversation_archived",
         url_template="https://www.linkedin.com/messaging/thread/{target}/",
         url_pattern=re.compile(
             r"^https://www\.linkedin\.com/messaging/thread/"
@@ -3368,7 +3368,7 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
         target_kind="thread_id",
         state_from=conversation_menu.STATE_FROM,
         direction_source=(
-            "the same conversation menu as linkedin_mute_conversation, opened "
+            "the same conversation menu as linkedin_set_conversation_muted, opened "
             "behind the receipt guard and read the same way. 'Archive' is "
             "MEASURED (data-view-name message-toolbar-dropdown-toggle-archive, "
             "live session 11). What an archived conversation's menu draws is "
@@ -3410,9 +3410,9 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "read; then a supervised round trip on a conversation HE names."
         ),
     ),
-    "linkedin_delete_conversation": WriteSpec(
-        action="delete_conversation",
-        tool_name="linkedin_delete_conversation",
+    "linkedin_set_conversation_deleted": WriteSpec(
+        action="set_conversation_deleted",
+        tool_name="linkedin_set_conversation_deleted",
         url_template="https://www.linkedin.com/messaging/thread/{target}/",
         url_pattern=re.compile(
             r"^https://www\.linkedin\.com/messaging/thread/"
@@ -3451,7 +3451,7 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             ),
         ),
         direction_source=(
-            "the same conversation menu as linkedin_mute_conversation, opened "
+            "the same conversation menu as linkedin_set_conversation_muted, opened "
             "behind the receipt guard and read the same way. 'Delete "
             "conversation' is MEASURED (live session 11); what pressing it "
             "draws is not."
@@ -4948,11 +4948,11 @@ STRICT_PRESS_ACTIONS: frozenset[str] = NAMED_PROFILE_ACTIONS | frozenset(
         # active row's one options trigger, then the one item named exactly
         # the act's word inside that row's menu -- each counted once by its
         # gate, so a second match at press time is something drawn since.
-        "mute_conversation",
-        "unmute_conversation",
+        "set_conversation_muted",
+        "unset_conversation_muted",
         "mark_conversation_unread",
-        "archive_conversation",
-        "delete_conversation",
+        "set_conversation_archived",
+        "set_conversation_deleted",
     }
 )
 
@@ -8099,11 +8099,11 @@ PERFORMABLE: frozenset[str] = frozenset(
         #
         # ENABLING IS NOT FIRING: no grant was issued. Delete fires only on his
         # explicit order for a conversation he names.
-        "mute_conversation",
-        "unmute_conversation",
+        "set_conversation_muted",
+        "unset_conversation_muted",
         "mark_conversation_unread",
-        "archive_conversation",
-        "delete_conversation",
+        "set_conversation_archived",
+        "set_conversation_deleted",
     }
 )
 
@@ -9013,11 +9013,11 @@ _WRITE_SURFACE_FOR_ACTION: dict[str, str] = {
     "set_admitted_setting": "the admitted settings page",
     # Lane build-msg2, 2026-11-26: the conversation he names, whose own menu
     # the act presses.
-    "mute_conversation": "messaging thread",
-    "unmute_conversation": "messaging thread",
+    "set_conversation_muted": "messaging thread",
+    "unset_conversation_muted": "messaging thread",
     "mark_conversation_unread": "messaging thread",
-    "archive_conversation": "messaging thread",
-    "delete_conversation": "messaging thread",
+    "set_conversation_archived": "messaging thread",
+    "set_conversation_deleted": "messaging thread",
 }
 
 
@@ -9116,11 +9116,11 @@ _WHERE_TO_LOOK: dict[str, str] = {
     # 2026-11-26 (lane build-msg2). The conversation's own menu in your
     # messages, which the verification re-reads -- or, for an archive and a
     # delete, the folder lists where a conversation goes.
-    "mute_conversation": "that conversation's own menu, in your LinkedIn messages",
-    "unmute_conversation": "that conversation's own menu, in your LinkedIn messages",
+    "set_conversation_muted": "that conversation's own menu, in your LinkedIn messages",
+    "unset_conversation_muted": "that conversation's own menu, in your LinkedIn messages",
     "mark_conversation_unread": "your LinkedIn messages list, without opening the conversation",
-    "archive_conversation": "your LinkedIn messages' Archived folder",
-    "delete_conversation": "your LinkedIn messages, for the conversation itself",
+    "set_conversation_archived": "your LinkedIn messages' Archived folder",
+    "set_conversation_deleted": "your LinkedIn messages, for the conversation itself",
 }
 
 #: THE ACTIONS THAT ARE ACTUAL TOGGLES, for the one sentence that is only true
@@ -9318,7 +9318,7 @@ _VERIFIED_FROM["follow_company_page"] = (
     "however many Pages he follows, so a follow that landed but whose row is "
     "not drawn is reported UNKNOWN, never as not having happened."
 )
-_VERIFIED_FROM["mute_conversation"] = (
+_VERIFIED_FROM["set_conversation_muted"] = (
     "THE CONVERSATION'S OWN MENU, READ AGAIN on a FRESH render of its address "
     "(lane build-msg2), by the same sanctioned preview press that read it "
     "before: opened, its words counted, nothing pressed inside it, closed on "
@@ -9326,7 +9326,7 @@ _VERIFIED_FROM["mute_conversation"] = (
     "ways -- 'Unmute' means muted, 'Mute' means it did not land. 'Unmute' is "
     "DERIVED: the first fire is its first capture."
 )
-_VERIFIED_FROM["unmute_conversation"] = _VERIFIED_FROM["mute_conversation"]
+_VERIFIED_FROM["unset_conversation_muted"] = _VERIFIED_FROM["set_conversation_muted"]
 _VERIFIED_FROM["mark_conversation_unread"] = (
     "THE CONVERSATION'S OWN MENU, READ AGAIN IN PLACE (lane build-msg2) -- on "
     "the page the press was made on, with no new load, because a load is "
@@ -9335,7 +9335,7 @@ _VERIFIED_FROM["mark_conversation_unread"] = (
     "did not land. 'Mark as read' is DERIVED: the first fire is its first "
     "capture."
 )
-_VERIFIED_FROM["archive_conversation"] = (
+_VERIFIED_FROM["set_conversation_archived"] = (
     "A FRESH RENDER OF THE CONVERSATION'S OWN ADDRESS (lane build-msg2). Its "
     "NEGATIVE is strong: the row still wearing the active marker and its menu "
     "still drawing 'Archive' means it did not land. Its positive is DERIVED: "
@@ -10897,10 +10897,10 @@ async def _verify_after(
             "unverifiable on its spec and say why."
         )
     if spec.action in (
-        "mute_conversation",
-        "unmute_conversation",
+        "set_conversation_muted",
+        "unset_conversation_muted",
         "mark_conversation_unread",
-        "archive_conversation",
+        "set_conversation_archived",
     ):
         # THE FOUR NAMES ARE WRITTEN OUT, as every branch here writes its own:
         # ``tests/test_unverifiable_outcomes.py`` reads this function for

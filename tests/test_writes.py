@@ -773,11 +773,11 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         # LANE BUILD-MSG2, 2026-11-26: the five acts on one conversation's
         # own options menu (census M M26, M M27, M M29, M M31), sanctioned
         # and performable in the same move.
-        "mute_conversation",
-        "unmute_conversation",
+        "set_conversation_muted",
+        "unset_conversation_muted",
         "mark_conversation_unread",
-        "archive_conversation",
-        "delete_conversation",
+        "set_conversation_archived",
+        "set_conversation_deleted",
         # SIXTEEN FROM LANE L5'S MERGE OF MASTER 66aaa95, the same day (fifteen
         # on the lane's branch): the reply inside a conversation he names
         # (census M M10), sanctioned and performable in the same move.
@@ -933,11 +933,11 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         # LANE BUILD-MSG2, 2026-11-26: the five acts on one conversation's
         # own options menu (census M M26, M M27, M M29, M M31), sanctioned
         # and performable in the same move.
-        "mute_conversation",
-        "unmute_conversation",
+        "set_conversation_muted",
+        "unset_conversation_muted",
         "mark_conversation_unread",
-        "archive_conversation",
-        "delete_conversation",
+        "set_conversation_archived",
+        "set_conversation_deleted",
         # THE FIFTEENTH, 2026-09-24 (the fourteenth on lane L5's branch), and
         # the first write that CONFIRMS ITSELF
         # FROM THE SURFACE A PERSON READS: a reply inside a conversation he
@@ -1221,28 +1221,7 @@ def _verb_is_admissible(verbs: set[str], original_verbs: set[str]) -> bool:
 #: ``uncomment`` and ``unreact`` still fail. It does not admit a third verb.
 #: And it does not admit a name mixing one of these with a verb that is
 #: inadmissible on its own, because the test is a SUBSET test.
-#:
-#: TWO MORE FROM 2026-11-26 (lane build-msg2), each arguing for itself the same
-#: way: ``mute`` and ``unmute``, the verbs ruling HIS-OWN-CURATION-NOT-OUTWARD
-#: names in its own list ("mute and unmute"), worn by
-#: ``linkedin_mute_conversation`` and its inverse. Renaming onto ``update`` or
-#: ``set`` would hide which way the act moves the conversation, and a mute is
-#: not an update. ``unmute`` is ENUMERATED here, not derived: the un-rule is
-#: still checked against the original baseline alone, so ``uncomment`` and
-#: ``unreact`` still fail. AND ``archive``, the same day, worn by
-#: ``linkedin_archive_conversation``: LinkedIn's own word on the item it
-#: presses, and the act ruling CONVERSATION-MENU-PREVIEW-PRESS answers for
-#: census M M27; it is not on the frozen baseline, and "update" or "set" would
-#: say nothing about where the conversation goes. No ``unarchive`` is admitted
-#: -- no restore is built. AND ``delete``, the same day, worn by
-#: ``linkedin_delete_conversation``: the class OUTWARD-CLASSES-BUILT-BEHIND-
-#: GRANTS builds ("delete or withdraw one of HIS OWN items"), ruled for this
-#: act by CONVERSATION-MENU-PREVIEW-PRESS ("DELETE CONVERSATION ... RECEIPT-ONLY
-#: behind the grant"). A delete renamed onto any baseline verb would hide that
-#: it has no inverse.
-_VERBS_ADMITTED_BY_RULING = frozenset(
-    {"comment", "react", "mute", "unmute", "archive", "delete"}
-)
+_VERBS_ADMITTED_BY_RULING = frozenset({"comment", "react"})
 
 
 def test_the_inverse_carve_out_admits_an_undo_and_nothing_else():
@@ -1277,9 +1256,7 @@ def test_the_ruling_carve_out_admits_exactly_two_verbs_and_no_derivative():
     one gets no credit for the admitted half.
     """
     original = {"follow", "save", "apply", "connect"}
-    assert _VERBS_ADMITTED_BY_RULING == {
-        "comment", "react", "mute", "unmute", "archive", "delete",
-    }
+    assert _VERBS_ADMITTED_BY_RULING == {"comment", "react"}
     assert _verb_is_admissible({"comment"}, original) is True
     assert _verb_is_admissible({"react"}, original) is True
     # A third verb from the same family is NOT admitted by association.
@@ -1542,11 +1519,11 @@ _UNMEASURED_REVERSIBILITY = {
     # unmute are BUILT and the muted menu never captured; the unread mark's
     # way back (opening it) is believed, not measured; archive's restore is
     # not built; delete has no inverse at all.
-    "mute_conversation",
-    "unmute_conversation",
+    "set_conversation_muted",
+    "unset_conversation_muted",
     "mark_conversation_unread",
-    "archive_conversation",
-    "delete_conversation",
+    "set_conversation_archived",
+    "set_conversation_deleted",
     # 2026-09-24. Whether LinkedIn lets a sent reply be recalled has never
     # been observed. This comment used to add "and recalling one is
     # destruction this server may not perform at any confirm level either
@@ -1625,11 +1602,11 @@ REVERSIBILITY_CLASS = {
     "unset_search_job_alert": "STILL-UNKNOWN",
     # 2026-11-26 (lane build-msg2). STILL-UNKNOWN, all five: see
     # _UNMEASURED_REVERSIBILITY.
-    "mute_conversation": "STILL-UNKNOWN",
-    "unmute_conversation": "STILL-UNKNOWN",
+    "set_conversation_muted": "STILL-UNKNOWN",
+    "unset_conversation_muted": "STILL-UNKNOWN",
     "mark_conversation_unread": "STILL-UNKNOWN",
-    "archive_conversation": "STILL-UNKNOWN",
-    "delete_conversation": "STILL-UNKNOWN",
+    "set_conversation_archived": "STILL-UNKNOWN",
+    "set_conversation_deleted": "STILL-UNKNOWN",
     # 2026-09-27. STILL-UNKNOWN whether a group left can be rejoined; it
     # carries irreversible=True regardless, because no join is built here and
     # an approval-gated group needs a manager to let him back in.
@@ -1673,11 +1650,11 @@ REVERSIBILITY_MEASURED = {
     "unset_similar_jobs_alert": False,
     "set_search_job_alert": False,
     "unset_search_job_alert": False,
-    "mute_conversation": False,
-    "unmute_conversation": False,
+    "set_conversation_muted": False,
+    "unset_conversation_muted": False,
     "mark_conversation_unread": False,
-    "archive_conversation": False,
-    "delete_conversation": False,
+    "set_conversation_archived": False,
+    "set_conversation_deleted": False,
     "send_reply": False,
     "send_attachment": False,
     "withdraw_from_group": False,

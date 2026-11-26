@@ -322,6 +322,24 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "in the lane's record does not hold while leaving the record unmarked."
     ),
 
+    # 2026-11-26, lane build-msg2. READ, not inferred from the filenames: found
+    # by the lane's CI run 45826381044; every line citing the lane's record was
+    # listed with the matched words in its two-line window, and none sits in
+    # the lane's own four notes (a scan of each note's text alone: zero hits).
+    ("messaging-and-content.md", "2026-11-26-build-msg2.md"): (
+        "TABLE-ROW PROXIMITY, NOT A CORRECTION OF THE RECORD. Rows `M26`, "
+        "`M27`, `M29` and `M31` each gained one dated note citing the lane's "
+        "record -- the move to COVERED-UNFIRED on the conversation's own "
+        "options menu -- and none says anything in that record does not hold. "
+        "The matched words sit on rows the lane did not write: `M24`'s boolean "
+        "`is_read_url=False` (the settings category measured refused, "
+        "2026-09-19) two lines above `M26`, and `M30`'s 'THE BLOCKER "
+        "ASSIGNMENT IS WRONG', about that row's own blocker, between `M29` and "
+        "`M31`. **WHAT WOULD MAKE THIS ENTRY WRONG:** a messaging row saying "
+        "something in the lane's record does not hold while leaving the record "
+        "unmarked."
+    ),
+
     ("profile.md", "2026-11-26-readers-msg26.md"): (
         "A ROW'S NEXT STEP RECORDED, NOT A CORRECTION. Row `L3` gained one "
         "dated note citing the lane's record -- what the article composer "

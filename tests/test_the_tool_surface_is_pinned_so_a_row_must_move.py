@@ -128,11 +128,11 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_unset_search_job_alert": ("confirm_token", "keywords", "location"),
     # Lane build-msg2, 2026-11-26 (census M M26, M M27, M M29, M M31): the
     # five acts on one conversation's own options menu, by its thread id.
-    "linkedin_mute_conversation": ("confirm_token", "thread_id"),
-    "linkedin_unmute_conversation": ("confirm_token", "thread_id"),
+    "linkedin_set_conversation_muted": ("confirm_token", "thread_id"),
+    "linkedin_unset_conversation_muted": ("confirm_token", "thread_id"),
     "linkedin_mark_conversation_unread": ("confirm_token", "thread_id"),
-    "linkedin_archive_conversation": ("confirm_token", "thread_id"),
-    "linkedin_delete_conversation": ("confirm_token", "thread_id"),
+    "linkedin_set_conversation_archived": ("confirm_token", "thread_id"),
+    "linkedin_set_conversation_deleted": ("confirm_token", "thread_id"),
     "linkedin_message_from_profile": ("confirm_token", "profile", "text"),
     "linkedin_my_activity_items": (),
     "linkedin_my_applications": ("limit",),
@@ -780,9 +780,9 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: LANE'S OWN COMMIT: `M C93` GAP -> COVERED-UNFIRED on it, never fired. See
 #: `_audit/2026-11-26-readers-msg26.md`.
 #: **AT LANE BUILD-MSG2 (2026-11-26): 96 TOOLS AND 147 PARAMETERS** -- five
-#: WRITES, `linkedin_mute_conversation`, `linkedin_unmute_conversation`,
-#: `linkedin_mark_conversation_unread`, `linkedin_archive_conversation` and
-#: `linkedin_delete_conversation` (`thread_id`, `confirm_token` each), beside
+#: WRITES, `linkedin_set_conversation_muted`, `linkedin_unset_conversation_muted`,
+#: `linkedin_mark_conversation_unread`, `linkedin_set_conversation_archived` and
+#: `linkedin_set_conversation_deleted` (`thread_id`, `confirm_token` each), beside
 #: the ninety-one and 137, counted off `mcp.list_tools()`, never summed. THE
 #: CENSUS DECISION, IN THE LANE'S CENSUS COMMIT: `M M26`, `M M27`, `M M29` and
 #: `M M31` GAP -> COVERED-UNFIRED on them, never fired. See

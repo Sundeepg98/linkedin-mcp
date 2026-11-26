@@ -369,9 +369,9 @@ async def test_a_wrong_landing_at_the_act_presses_nothing(writes_on, page):
 async def test_writes_off_refuses_before_any_load_and_a_bad_id_too(monkeypatch):
     monkeypatch.delenv(writes.WRITES_FLAG, raising=False)
     for name in (
-        "linkedin_mute_conversation", "linkedin_unmute_conversation",
-        "linkedin_mark_conversation_unread", "linkedin_archive_conversation",
-        "linkedin_delete_conversation",
+        "linkedin_set_conversation_muted", "linkedin_unset_conversation_muted",
+        "linkedin_mark_conversation_unread", "linkedin_set_conversation_archived",
+        "linkedin_set_conversation_deleted",
     ):
         tool = getattr(server, name)
         assert (await tool(THREAD))["error"] == "writes_disabled"

@@ -2,9 +2,9 @@
 
 THE NINETY-SECOND TO NINETY-SIXTH ARE WRITES, 2026-11-26, on lane build-msg2
 (census ``M M26``, ``M M27``, ``M M29``, ``M M31``; ruling
-CONVERSATION-MENU-PREVIEW-PRESS): ``linkedin_mute_conversation`` and its
-inverse ``linkedin_unmute_conversation``, ``linkedin_mark_conversation_unread``,
-``linkedin_archive_conversation`` and ``linkedin_delete_conversation``, each
+CONVERSATION-MENU-PREVIEW-PRESS): ``linkedin_set_conversation_muted`` and its
+inverse ``linkedin_unset_conversation_muted``, ``linkedin_mark_conversation_unread``,
+``linkedin_set_conversation_archived`` and ``linkedin_set_conversation_deleted``, each
 an act on ONE conversation's own options menu, the conversation named by its
 thread id. The preview opens that one menu by the sanctioned preview press --
 read, nothing pressed inside it, closed on Escape -- behind the receipt guard;
@@ -1295,9 +1295,9 @@ mcp = FastMCP(
         "linkedin_set_admitted_setting, linkedin_withdraw_reaction, "
         "linkedin_set_similar_jobs_alert, linkedin_unset_similar_jobs_alert, "
         "linkedin_set_search_job_alert, linkedin_unset_search_job_alert, "
-        "linkedin_mute_conversation, linkedin_unmute_conversation, "
-        "linkedin_mark_conversation_unread, linkedin_archive_conversation and "
-        "linkedin_delete_conversation. "
+        "linkedin_set_conversation_muted, linkedin_unset_conversation_muted, "
+        "linkedin_mark_conversation_unread, linkedin_set_conversation_archived and "
+        "linkedin_set_conversation_deleted. "
         "ONE MORE IS WRITE-SHAPED AND REFUSES: linkedin_set_tracker_stage, the "
         "stage move on a saved job, whose control -- an item in the tracker "
         "row's overflow menu -- has never been captured; it reads his Saved "
@@ -1341,11 +1341,11 @@ mcp = FastMCP(
         "offer the pair together, set then unset. "
         "THE TWENTY-FIFTH TO TWENTY-NINTH act on ONE conversation he names by "
         "its thread id, through that conversation's own options menu: "
-        "linkedin_mute_conversation and its inverse "
-        "linkedin_unmute_conversation, linkedin_mark_conversation_unread (its "
+        "linkedin_set_conversation_muted and its inverse "
+        "linkedin_unset_conversation_muted, linkedin_mark_conversation_unread (its "
         "way back is opening the conversation, linkedin_open_thread with "
-        "allow_unread=True), linkedin_archive_conversation (no restore is "
-        "built here) and linkedin_delete_conversation, which nothing brings "
+        "allow_unread=True), linkedin_set_conversation_archived (no restore is "
+        "built here) and linkedin_set_conversation_deleted, which nothing brings "
         "back and nothing confirms -- offer it only on his explicit order for "
         "a conversation he names. "
         "THE SIXTEENTH, linkedin_withdraw_from_group, leaves one group he "
@@ -12476,9 +12476,9 @@ async def linkedin_server_info(verbose: bool = False) -> dict[str, Any]:
                 "composer's suggestions, which opens none), "
                 "linkedin_open_thread, linkedin_send_reply and "
                 "linkedin_send_attachment (only the conversation you name by "
-                "id), and linkedin_mute_conversation, "
-                "linkedin_unmute_conversation, linkedin_mark_conversation_unread, "
-                "linkedin_archive_conversation and linkedin_delete_conversation "
+                "id), and linkedin_set_conversation_muted, "
+                "linkedin_unset_conversation_muted, linkedin_mark_conversation_unread, "
+                "linkedin_set_conversation_archived and linkedin_set_conversation_deleted "
                 "(the composer's list, then only the conversation you name by "
                 "id). Whether any of those loads clears the messaging badge "
                 "is unmeasured.",
@@ -13976,8 +13976,8 @@ def _thread_id_refusal() -> dict[str, Any]:
 
 
 @mcp.tool()
-async def linkedin_mute_conversation(thread_id: str, confirm_token: str = "") -> dict[str, Any]:
-    """Mute ONE conversation you name by its thread id -- a WRITE.
+async def linkedin_set_conversation_muted(thread_id: str, confirm_token: str = "") -> dict[str, Any]:
+    """Set ONE conversation you name MUTED, by its thread id -- a WRITE.
 
     Presses "Mute" in that conversation's own options menu, which silences
     your notifications for it; nobody else is told. Census row ``M M29``. Same
@@ -13991,7 +13991,7 @@ async def linkedin_mute_conversation(thread_id: str, confirm_token: str = "") ->
     menu -- the one in the list row LinkedIn marks active -- by the sanctioned
     preview press: its words counted, nothing inside it pressed, closed on
     Escape and read closed. A menu drawing "Unmute" is already muted and is
-    refused (that is ``linkedin_unmute_conversation``).
+    refused (that is ``linkedin_unset_conversation_muted``).
 
     THE CONFIRMED PRESS opens the same menu, re-reads the word, and presses
     "Mute" only when it is drawn exactly once and "Unmute" not at all. A fresh
@@ -14008,15 +14008,15 @@ async def linkedin_mute_conversation(thread_id: str, confirm_token: str = "") ->
     try:
         if not threads.valid_thread_id(thread_id):
             return _thread_id_refusal()
-        return await _write_tool("mute_conversation", str(thread_id).strip(), confirm_token)
+        return await _write_tool("set_conversation_muted", str(thread_id).strip(), confirm_token)
     except Exception as exc:
         return _error(exc)
 
 
 @mcp.tool()
-async def linkedin_unmute_conversation(thread_id: str, confirm_token: str = "") -> dict[str, Any]:
-    """Unmute ONE conversation you name by its thread id -- a WRITE, the inverse
-    of ``linkedin_mute_conversation``.
+async def linkedin_unset_conversation_muted(thread_id: str, confirm_token: str = "") -> dict[str, Any]:
+    """Unset the mute on ONE conversation you name by its thread id -- a
+    WRITE, the inverse of ``linkedin_set_conversation_muted``.
 
     Presses "Unmute" in that conversation's own options menu. Same two steps
     and the same gates as the mute: the receipt guard, the landing, the
@@ -14034,7 +14034,7 @@ async def linkedin_unmute_conversation(thread_id: str, confirm_token: str = "") 
     try:
         if not threads.valid_thread_id(thread_id):
             return _thread_id_refusal()
-        return await _write_tool("unmute_conversation", str(thread_id).strip(), confirm_token)
+        return await _write_tool("unset_conversation_muted", str(thread_id).strip(), confirm_token)
     except Exception as exc:
         return _error(exc)
 
@@ -14045,7 +14045,7 @@ async def linkedin_mark_conversation_unread(thread_id: str, confirm_token: str =
 
     Presses "Mark as unread" in that conversation's own options menu; it
     changes only your inbox. Census row ``M M31``. Same two steps and the same
-    gates as ``linkedin_mute_conversation``: the receipt guard, the landing,
+    gates as ``linkedin_set_conversation_muted``: the receipt guard, the landing,
     the sanctioned preview press reading the menu's word. A menu drawing "Mark
     as read" is already unread and is refused.
 
@@ -14071,13 +14071,13 @@ async def linkedin_mark_conversation_unread(thread_id: str, confirm_token: str =
 
 
 @mcp.tool()
-async def linkedin_archive_conversation(thread_id: str, confirm_token: str = "") -> dict[str, Any]:
+async def linkedin_set_conversation_archived(thread_id: str, confirm_token: str = "") -> dict[str, Any]:
     """Archive ONE conversation you name by its thread id -- a WRITE.
 
     Presses "Archive" in that conversation's own options menu, which moves it
     out of your default list into the Archived folder; nobody else is told.
     Census row ``M M27``. Same two steps and the same gates as
-    ``linkedin_mute_conversation``; anything but "Archive" drawn exactly once
+    ``linkedin_set_conversation_muted``; anything but "Archive" drawn exactly once
     is refused.
 
     THIS SERVER CANNOT RESTORE IT YET: the restore lives in the Archived
@@ -14096,13 +14096,13 @@ async def linkedin_archive_conversation(thread_id: str, confirm_token: str = "")
     try:
         if not threads.valid_thread_id(thread_id):
             return _thread_id_refusal()
-        return await _write_tool("archive_conversation", str(thread_id).strip(), confirm_token)
+        return await _write_tool("set_conversation_archived", str(thread_id).strip(), confirm_token)
     except Exception as exc:
         return _error(exc)
 
 
 @mcp.tool()
-async def linkedin_delete_conversation(thread_id: str, confirm_token: str = "") -> dict[str, Any]:
+async def linkedin_set_conversation_deleted(thread_id: str, confirm_token: str = "") -> dict[str, Any]:
     """Delete ONE conversation you name by its thread id -- a WRITE with no inverse.
 
     Presses "Delete conversation" in that conversation's own options menu.
@@ -14110,7 +14110,7 @@ async def linkedin_delete_conversation(thread_id: str, confirm_token: str = "") 
     CONVERSATION YOU NAME: nothing this server knows of brings a deleted
     conversation back.
 
-    RECEIPT-ONLY. Same preview as ``linkedin_mute_conversation`` -- the
+    RECEIPT-ONLY. Same preview as ``linkedin_set_conversation_muted`` -- the
     receipt guard, the landing, the sanctioned preview press reading "Delete
     conversation" in the menu. The confirmed press re-reads that word and
     presses it, and then presses NOTHING ELSE: what LinkedIn draws next -- a
@@ -14129,7 +14129,7 @@ async def linkedin_delete_conversation(thread_id: str, confirm_token: str = "") 
     try:
         if not threads.valid_thread_id(thread_id):
             return _thread_id_refusal()
-        return await _write_tool("delete_conversation", str(thread_id).strip(), confirm_token)
+        return await _write_tool("set_conversation_deleted", str(thread_id).strip(), confirm_token)
     except Exception as exc:
         return _error(exc)
 

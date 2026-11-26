@@ -89,11 +89,11 @@ PINNED_STRICT_PRESS_ACTIONS = frozenset(
         # M M29, M M31): the active row's one options trigger, then the one
         # item its gate re-read by its exact word (conversation_menu), shown
         # in tests/test_conversation_menu.py.
-        "mute_conversation",
-        "unmute_conversation",
+        "set_conversation_muted",
+        "unset_conversation_muted",
         "mark_conversation_unread",
-        "archive_conversation",
-        "delete_conversation",
+        "set_conversation_archived",
+        "set_conversation_deleted",
     }
 )
 
