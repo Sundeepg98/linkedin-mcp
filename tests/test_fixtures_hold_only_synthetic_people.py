@@ -585,10 +585,16 @@ def is_reduced_to_shape(value: str) -> bool:
 def violations(rel: str, text: str, accepted) -> list[str]:
     """One line per undeclared candidate. A PURE FUNCTION of its inputs, so the
     rule can be shown failing on a planted string without a planted file."""
+    return convict(rel, candidates_in(text), accepted)
+
+
+def convict(rel: str, found_in, accepted) -> list[str]:
+    """:func:`violations` on candidates already read -- the one rule, so the
+    full sweep can judge its once-parsed corpus without a second copy of it."""
     return [
         "%s:%d:%d [%s] undeclared value %s"
         % (rel, found.line, found.col, found.slot, fingerprint(found.value))
-        for found in candidates_in(text)
+        for found in found_in
         if found.value not in accepted and not is_reduced_to_shape(found.value)
     ]
 
@@ -616,11 +622,11 @@ def stale(declared, rendered) -> list[str]:
     return sorted(set(declared) - set(rendered))
 
 
-def tracked_fixtures() -> list[str]:
+def tracked_fixtures(repo: Path = REPO) -> list[str]:
     """Every fixture git tracks, as repo-relative posix paths."""
     proc = subprocess.run(
         ["git", "ls-files", "--", FIXTURE_ROOT],
-        cwd=str(REPO),
+        cwd=str(repo),
         capture_output=True,
         text=True,
     )
@@ -636,8 +642,121 @@ def _corpus() -> tuple[tuple[str, str], ...]:
     )
 
 
+@functools.lru_cache(maxsize=1)
+def _corpus_candidates() -> tuple[tuple[str, tuple[Candidate, ...]], ...]:
+    """Every tracked fixture's candidates, PARSED ONCE PER PROCESS.
+
+    ADDED 2026-11-26 (lane infra26). Every corpus-wide test below used to
+    re-parse the whole corpus (176 files, about 15 MB) for itself, and the
+    fifteen slot tests made that fifteen parses: 75 s of the file's 75 s on
+    this box, 2 min 31 s on a loaded one. :func:`candidates_in` is a pure
+    function of the text, so one parse answers them all; what each test
+    asserts is unchanged.
+    """
+    return tuple((rel, tuple(candidates_in(text))) for rel, text in _corpus())
+
+
 def _rendered() -> set[str]:
-    return {found.value for _rel, text in _corpus() for found in candidates_in(text)}
+    return {found.value for _rel, found_in in _corpus_candidates() for found in found_in}
+
+
+# ---------------------------------------------------------------------------
+# THE SCOPED LOCAL MODE: changed fixtures only (lane infra26, 2026-11-26)
+# ---------------------------------------------------------------------------
+#
+# ``pytest tests/test_fixtures_hold_only_synthetic_people.py
+# --people-guard-scope=changed [--people-guard-base=origin/master]``
+#
+# reads only the tracked fixtures that differ from the merge base of HEAD and
+# the base (committed, staged or edited in the tree), so a lane's local gate
+# costs what its change costs. THE DEFAULT IS THE FULL SWEEP, and CI passes no
+# option, so CI keeps sweeping every tracked fixture.
+#
+# What the scoped mode does NOT run, and says so in every skip: the four
+# corpus-wide tests (stale entries, the sweep's floor, every slot still
+# reading something, the staleness control), and the rule over every fixture
+# the change did not touch. A planted name in an UNCHANGED fixture is caught by
+# the full sweep on CI, never here. It FALLS BACK TO THE FULL SWEEP, loudly,
+# whenever it cannot classify the change: no merge base with the base ref, a
+# git call that fails, or a change to a file that decides what every fixture
+# is judged against (:data:`GUARD_SOURCES`). An EMPTY changed set is a skip
+# that names the base and its sha, never a pass.
+
+SCOPE_OPTION = "--people-guard-scope"
+BASE_OPTION = "--people-guard-base"
+DEFAULT_BASE = "origin/master"
+#: The files that hold the declared tables and the slot rules. A change to any
+#: of them re-judges EVERY fixture, so the scoped mode refuses to scope it.
+GUARD_SOURCES = (
+    "tests/test_fixtures_hold_only_synthetic_people.py",
+    "tests/test_a_person_name_is_never_a_literal.py",
+)
+
+
+class Selection(NamedTuple):
+    """Which tracked fixtures a run reads, and the sentence that says why."""
+
+    mode: str                 # "all" or "changed"
+    files: tuple[str, ...]
+    note: str
+
+
+def _git_lines(repo: Path, *args: str) -> Optional[list[str]]:
+    proc = subprocess.run(["git", *args], cwd=str(repo), capture_output=True, text=True)
+    if proc.returncode != 0:
+        return None
+    return [line.strip() for line in proc.stdout.splitlines() if line.strip()]
+
+
+def select_fixtures(scope: str, base: str = DEFAULT_BASE, repo: Path = REPO) -> Selection:
+    """The fixtures a run of the rule reads: all of them, or the changed ones."""
+    tracked = tracked_fixtures(repo)
+    full = "the full sweep: every tracked fixture (%d)" % len(tracked)
+    if scope != "changed":
+        return Selection("all", tuple(tracked), full)
+    found = _git_lines(repo, "merge-base", "HEAD", base)
+    if not found:
+        return Selection("all", tuple(tracked), "scoped mode FELL BACK to %s: no merge base "
+                         "of HEAD and %s" % (full, base))
+    merge_base = found[0]
+    changed: set[str] = set()
+    for args in (("diff", "--name-only", "--diff-filter=d", merge_base, "--"),
+                 ("diff", "--cached", "--name-only", "--diff-filter=d", merge_base, "--")):
+        lines = _git_lines(repo, *args)
+        if lines is None:
+            return Selection("all", tuple(tracked), "scoped mode FELL BACK to %s: git %s "
+                             "failed" % (full, " ".join(args[:2])))
+        changed.update(lines)
+    guard_changed = sorted(set(GUARD_SOURCES) & changed)
+    if guard_changed:
+        return Selection("all", tuple(tracked), "scoped mode FELL BACK to %s: the guard's "
+                         "own rules changed (%s)" % (full, ", ".join(guard_changed)))
+    files = tuple(rel for rel in tracked if rel in changed)
+    return Selection("changed", files, "scoped mode: %d of %d tracked fixtures changed since "
+                     "the merge base with %s (%s); the other %d are NOT read here -- the full "
+                     "sweep runs on CI" % (len(files), len(tracked), base, merge_base[:7],
+                                            len(tracked) - len(files)))
+
+
+def _selected_texts(selection: Selection, repo: Path = REPO) -> list[tuple[str, str]]:
+    if selection.mode == "all" and repo == REPO:
+        return list(_corpus())
+    return [(rel, (repo / rel).read_text(encoding="utf-8", errors="replace"))
+            for rel in selection.files]
+
+
+@pytest.fixture(scope="module")
+def people_guard_selection(request) -> Selection:
+    scope = request.config.getoption(SCOPE_OPTION, default="all") or "all"
+    base = request.config.getoption(BASE_OPTION, default=DEFAULT_BASE) or DEFAULT_BASE
+    return select_fixtures(scope, base)
+
+
+def _full_sweep_only(selection: Selection) -> None:
+    """Skip a corpus-wide test in the scoped mode, naming what did not run."""
+    if selection.mode != "all":
+        pytest.skip("NOT RUN in the scoped mode, which reads only changed fixtures: this "
+                    "test is about the whole corpus. " + selection.note)
 
 
 def _slot_id(slot: str) -> str:
@@ -650,20 +769,35 @@ def _slot_id(slot: str) -> str:
 # ---------------------------------------------------------------------------
 
 
-def test_tracked_fixtures_render_only_declared_synthetic_people():
-    """THE RULE. A person arrives in a fixture by being declared, or not at all."""
-    found = [
-        line for rel, text in _corpus() for line in violations(rel, text, ACCEPTED)
-    ]
-    assert found == [], render_failure(found)
+def test_tracked_fixtures_render_only_declared_synthetic_people(people_guard_selection):
+    """THE RULE. A person arrives in a fixture by being declared, or not at all.
+
+    Over every tracked fixture by default; over the changed ones only under
+    ``--people-guard-scope=changed`` (see THE SCOPED LOCAL MODE above).
+    """
+    selection = people_guard_selection
+    if not selection.files:
+        pytest.skip("NOTHING READ, NOTHING CLEARED: " + selection.note)
+    if selection.mode == "all":
+        found = [
+            line for rel, found_in in _corpus_candidates()
+            for line in convict(rel, found_in, ACCEPTED)
+        ]
+    else:
+        found = [
+            line for rel, text in _selected_texts(selection)
+            for line in violations(rel, text, ACCEPTED)
+        ]
+    assert found == [], render_failure(found) + "\n" + selection.note
 
 
-def test_every_declared_synthetic_person_is_still_rendered():
+def test_every_declared_synthetic_person_is_still_rendered(people_guard_selection):
     """A declared entry no tracked fixture renders is STALE, and goes.
 
     Printing the stale entries is safe: they are this file's own claims, on
     the table above already.
     """
+    _full_sweep_only(people_guard_selection)
     gone = stale(SYNTHETIC_PEOPLE | SYNTHETIC_GROUPS, _rendered())
     assert gone == [], (
         "declared in SYNTHETIC_PEOPLE or SYNTHETIC_GROUPS and rendered by no "
@@ -672,26 +806,29 @@ def test_every_declared_synthetic_person_is_still_rendered():
     )
 
 
-def test_the_sweep_reads_the_tracked_fixtures():
+def test_the_sweep_reads_the_tracked_fixtures(people_guard_selection):
     """A sweep over an empty listing is a green test that checked nothing."""
+    _full_sweep_only(people_guard_selection)
     listed = tracked_fixtures()
     assert len(listed) >= 25, listed
     assert all(rel.startswith(FIXTURE_ROOT + "/") for rel in listed), listed
-    assert sum(len(candidates_in(text)) for _rel, text in _corpus()) >= 20
+    assert sum(len(found_in) for _rel, found_in in _corpus_candidates()) >= 20
+    assert [rel for rel, _found_in in _corpus_candidates()] == listed
 
 
 @pytest.mark.parametrize("slot", MEASURED_SLOTS, ids=_slot_id)
-def test_every_measured_slot_still_reads_something(slot):
+def test_every_measured_slot_still_reads_something(slot, people_guard_selection):
     """A SLOT RULE THAT MATCHES NOTHING IS INDISTINGUISHABLE FROM A BROKEN ONE.
 
     Each slot was admitted because a tracked fixture uses it. If none does any
     more, either the rule broke or the slot left the corpus; both need a
     person to look, and neither may pass as green.
     """
+    _full_sweep_only(people_guard_selection)
     seen = sum(
         1
-        for _rel, text in _corpus()
-        for found in candidates_in(text)
+        for _rel, found_in in _corpus_candidates()
+        for found in found_in
         if found.slot == slot
     )
     assert seen >= 1, "no tracked fixture fills slot %r" % slot
@@ -895,9 +1032,10 @@ def test_a_name_on_the_invented_table_is_accepted_by_the_import():
     assert len(violations(PLANTED_PATH, planted, SYNTHETIC_PEOPLE)) == 1
 
 
-def test_a_declared_entry_no_fixture_renders_is_reported_stale():
+def test_a_declared_entry_no_fixture_renders_is_reported_stale(people_guard_selection):
     """The staleness rule, run against the REAL corpus with one planted
     declaration nothing renders."""
+    _full_sweep_only(people_guard_selection)
     assert stale(SYNTHETIC_PEOPLE | {PLANTED}, _rendered()) == [PLANTED]
 
 
@@ -1013,6 +1151,134 @@ def test_the_two_declared_tables_do_not_overlap():
     either entry, which is how a stale permission outlives its review."""
     assert sorted(SYNTHETIC_PEOPLE & INVENTED_NAMES) == []
     assert sorted(SYNTHETIC_GROUPS & (SYNTHETIC_PEOPLE | INVENTED_NAMES)) == []
+
+
+# ---------------------------------------------------------------------------
+# THE SCOPED MODE'S CONTROLS: both modes convict a planted real-looking name
+# ---------------------------------------------------------------------------
+
+#: INVENTED, REAL-LOOKING, AND UNDECLARED ON PURPOSE. Unlike :data:`PLANTED`,
+#: it reads like a person, so the two modes are shown convicting a name by its
+#: SLOT, not by an odd token. It is held under a name that ``PERSON_CONSTANTS``
+#: does not list, for the reason given at :data:`PLANTED`.
+REAL_LOOKING_PLANT = "Corwin Ashdale"
+PLANTED_DOCUMENT = PLANTS[MEMBER_TEXT].format(name=REAL_LOOKING_PLANT)
+CLEAN_DOCUMENT = "<p>Nothing in a person slot.</p>\n"
+NEW_FIXTURE = FIXTURE_ROOT + "/new_capture.html"
+OLD_FIXTURE = FIXTURE_ROOT + "/old_capture.html"
+
+
+def _tmp_git(repo: Path, *args: str) -> None:
+    subprocess.run(
+        ["git", "-c", "user.name=fixture", "-c", "user.email=fixture@example.invalid",
+         "-c", "commit.gpgsign=false", "-c", "core.autocrlf=false", *args],
+        cwd=str(repo), check=True, capture_output=True, text=True,
+    )
+
+
+def _repo_at_base(tmp_path: Path, files: dict) -> Path:
+    """A throwaway repository whose one commit is tagged by the branch ``base``."""
+    repo = tmp_path / "repo"
+    (repo / FIXTURE_ROOT).mkdir(parents=True)
+    _tmp_git(repo, "init", "-q")
+    for rel, text in files.items():
+        (repo / rel).parent.mkdir(parents=True, exist_ok=True)
+        (repo / rel).write_text(text, encoding="utf-8")
+    _tmp_git(repo, "add", "-A")
+    _tmp_git(repo, "commit", "-q", "-m", "base")
+    _tmp_git(repo, "branch", "base")
+    return repo
+
+
+def _convicted(selection: Selection, repo: Path) -> list[str]:
+    return [line for rel, text in _selected_texts(selection, repo)
+            for line in violations(rel, text, ACCEPTED)]
+
+
+def _assert_no_plant_token(found: list[str]) -> None:
+    message = render_failure(found)
+    for token in REAL_LOOKING_PLANT.split():
+        assert token not in message, "the failure printed the value it convicted"
+    assert fingerprint(REAL_LOOKING_PLANT) in message
+
+
+@pytest.mark.parametrize("how", ["staged", "committed"])
+def test_THIS_CONTROL_CAN_FAIL_both_modes_convict_a_new_planted_fixture(tmp_path, how):
+    repo = _repo_at_base(tmp_path, {OLD_FIXTURE: CLEAN_DOCUMENT})
+    (repo / NEW_FIXTURE).write_text(PLANTED_DOCUMENT, encoding="utf-8")
+    _tmp_git(repo, "add", NEW_FIXTURE)
+    if how == "committed":
+        _tmp_git(repo, "commit", "-q", "-m", "a lane's capture")
+    scoped = select_fixtures("changed", "base", repo)
+    assert (scoped.mode, scoped.files) == ("changed", (NEW_FIXTURE,)), scoped
+    full = select_fixtures("all", "base", repo)
+    assert (full.mode, sorted(full.files)) == ("all", sorted([NEW_FIXTURE, OLD_FIXTURE]))
+    for selection in (scoped, full):
+        found = _convicted(selection, repo)
+        assert len(found) == 1 and found[0].startswith(NEW_FIXTURE + ":"), found
+        _assert_no_plant_token(found)
+
+
+def test_THIS_CONTROL_CAN_FAIL_the_scoped_mode_reads_an_edited_tracked_fixture(tmp_path):
+    repo = _repo_at_base(tmp_path, {OLD_FIXTURE: CLEAN_DOCUMENT, NEW_FIXTURE: CLEAN_DOCUMENT})
+    (repo / OLD_FIXTURE).write_text(PLANTED_DOCUMENT, encoding="utf-8")   # edited, not staged
+    scoped = select_fixtures("changed", "base", repo)
+    assert scoped.files == (OLD_FIXTURE,), scoped
+    found = _convicted(scoped, repo)
+    assert len(found) == 1 and found[0].startswith(OLD_FIXTURE + ":"), found
+
+
+def test_THIS_CONTROL_CAN_PASS_a_clean_change_is_read_and_cleared(tmp_path):
+    repo = _repo_at_base(tmp_path, {OLD_FIXTURE: CLEAN_DOCUMENT})
+    declared = PLANTS[MEMBER_TEXT].format(name=sorted(SYNTHETIC_PEOPLE)[0])
+    (repo / NEW_FIXTURE).write_text(declared, encoding="utf-8")
+    _tmp_git(repo, "add", NEW_FIXTURE)
+    scoped = select_fixtures("changed", "base", repo)
+    assert scoped.files == (NEW_FIXTURE,) and _convicted(scoped, repo) == []
+
+
+def test_the_scoped_mode_does_not_read_an_unchanged_fixture_and_says_so(tmp_path):
+    """THE STATED LIMIT, MEASURED: a name planted BEFORE the base is not this
+    mode's to find. The full sweep finds it, and CI runs the full sweep."""
+    repo = _repo_at_base(tmp_path, {OLD_FIXTURE: PLANTED_DOCUMENT})
+    scoped = select_fixtures("changed", "base", repo)
+    assert scoped.files == () and _convicted(scoped, repo) == []
+    assert "NOT read here -- the full sweep runs on CI" in scoped.note
+    assert len(_convicted(select_fixtures("all", "base", repo), repo)) == 1
+
+
+@pytest.mark.parametrize("guard_file", GUARD_SOURCES)
+def test_the_scoped_mode_falls_back_to_the_full_sweep_when_the_rules_change(tmp_path, guard_file):
+    repo = _repo_at_base(tmp_path, {OLD_FIXTURE: PLANTED_DOCUMENT, guard_file: "RULES = 1\n"})
+    (repo / guard_file).write_text("RULES = 2\n", encoding="utf-8")
+    scoped = select_fixtures("changed", "base", repo)
+    assert scoped.mode == "all" and "FELL BACK" in scoped.note and guard_file in scoped.note
+    assert len(_convicted(scoped, repo)) == 1
+
+
+def test_the_scoped_mode_falls_back_to_the_full_sweep_without_a_merge_base(tmp_path):
+    repo = _repo_at_base(tmp_path, {OLD_FIXTURE: PLANTED_DOCUMENT})
+    scoped = select_fixtures("changed", "no-such-ref", repo)
+    assert scoped.mode == "all" and "FELL BACK" in scoped.note and "no merge base" in scoped.note
+    assert len(_convicted(scoped, repo)) == 1
+
+
+def test_a_scoped_run_over_nothing_is_a_loud_skip_never_a_pass():
+    empty = Selection("changed", (), "scoped mode: 0 of 176 tracked fixtures changed")
+    with pytest.raises(pytest.skip.Exception, match="NOTHING READ, NOTHING CLEARED"):
+        test_tracked_fixtures_render_only_declared_synthetic_people(empty)
+    with pytest.raises(pytest.skip.Exception, match="NOT RUN in the scoped mode"):
+        _full_sweep_only(empty)
+
+
+def test_the_option_is_declared_and_ci_passes_none(pytestconfig):
+    """THE FULL SWEEP IS THE DEFAULT, AND CI KEEPS IT: the option exists (an
+    undeclared one would raise here) and no workflow passes it."""
+    assert pytestconfig.getoption(SCOPE_OPTION) in ("all", "changed")
+    workflows = sorted((REPO / ".github" / "workflows").glob("*.yml"))
+    assert workflows, "no workflow found to check"
+    for path in workflows:
+        assert SCOPE_OPTION not in path.read_text(encoding="utf-8"), path.name
 
 
 def test_this_file_stays_ascii():
