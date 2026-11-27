@@ -40,6 +40,7 @@ browser.
 from __future__ import annotations
 
 import json
+import math
 import re
 import time
 from typing import Any, Optional
@@ -9290,7 +9291,14 @@ async def wait_for_tracker_list(page: Any) -> dict[str, Any]:
         "failure": None,
         "why": "the readiness check did not run",
     }
-    started = time.monotonic()
+    # READ ON perf_counter AND ROUNDED UP, so a wait that spent its bound never
+    # reads short of it (lane ci8, 2026-11-27). The driver ends a wait on its own
+    # whole-millisecond clock, up to a millisecond sooner in real time, and the
+    # reading used to TRUNCATE: lane CI read 999 on a 1000 ms bound while the
+    # note said "the full bound". ``time.monotonic()`` was also the wrong clock:
+    # GetTickCount64, 15.625 ms ticks, on Windows before Python 3.13 (measured).
+    # tests/test_tracker_readiness.py section 2b reproduces both.
+    started = time.perf_counter()
     try:
         await page.locator(tracker_list_selector()).first.wait_for(
             state="attached", timeout=TRACKER_LIST_TIMEOUT_MS
@@ -9316,7 +9324,7 @@ async def wait_for_tracker_list(page: Any) -> dict[str, Any]:
                 "about the page" % name
             )
             logger.debug("tracker readiness check failed: %s", name)
-    out["waited_ms"] = int((time.monotonic() - started) * 1000)
+    out["waited_ms"] = math.ceil((time.perf_counter() - started) * 1000)
     return out
 
 
