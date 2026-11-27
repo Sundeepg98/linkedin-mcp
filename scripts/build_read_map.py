@@ -158,7 +158,14 @@ def _rel(path: str, repo: Path) -> str | None:
     # ``show`` as read targets from a ``git show`` argv. A recorded edge to a
     # path that does not exist is noise that would widen every plan touching
     # a file with that name.
-    if not resolved.exists():
+    # ``exists()`` CAN RAISE, and on Linux it does: a name past NAME_MAX gives
+    # ENAMETOOLONG rather than False. Tests that run ``python -c <code>`` hand
+    # the code over as an argv item, and the first CI recording (run
+    # 46065815443) failed three tests on it. Not a path is not a read.
+    try:
+        if not resolved.exists():
+            return None
+    except OSError:
         return None
     if out in _IGNORED_NAMES or any(out.startswith(prefix) for prefix in _IGNORED_PREFIXES):
         return None
@@ -240,12 +247,16 @@ def _install(recorder: _Recorder) -> None:
     """
     real_open = builtins.open
 
+    # THE RECORDER NEVER BREAKS THE CALL IT OBSERVES (2026-11-28). An error in
+    # recording is a missed edge, which the map's additive law makes safe; an
+    # error escaping into the call is the observed test failing for the
+    # instrument's sake. So every record below is fenced, whatever it raises.
     def traced_open(file, mode="r", *args, **kwargs):  # noqa: ANN001
         if isinstance(file, (str, bytes, os.PathLike)) and "w" not in str(mode) \
                 and "a" not in str(mode) and "x" not in str(mode):
             try:
                 recorder.record(os.fspath(file))
-            except (TypeError, ValueError):
+            except Exception:  # noqa: BLE001 -- see the fence above
                 pass
         return real_open(file, mode, *args, **kwargs)
 
@@ -281,14 +292,20 @@ def _install(recorder: _Recorder) -> None:
                 if tail and not tail.startswith(("\\", "/")):
                     recorder.record(tail)
 
+    def _fenced_argv(argv) -> None:  # noqa: ANN001
+        try:
+            _record_argv(argv)
+        except Exception:  # noqa: BLE001 -- the fence above traced_open
+            pass
+
     def traced_run(*args, **kwargs):  # noqa: ANN002
         if args:
-            _record_argv(args[0])
+            _fenced_argv(args[0])
         return real_run(*args, **kwargs)
 
     def traced_popen(self, args=None, *rest, **kwargs):  # noqa: ANN001
         if args is not None:
-            _record_argv(args)
+            _fenced_argv(args)
         return real_popen(self, args, *rest, **kwargs)
 
     subprocess.run = traced_run

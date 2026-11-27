@@ -632,8 +632,8 @@ def cmd_read_map(sha: str, *, poll: int = POLL_SECONDS,
     merged map uploaded by its last job. This dispatches it on ``ci/<branch>``
     (refused unless the ref holds ``sha``), finds the run BY SHA, EVENT AND
     RUN NAME -- never a full-matrix dispatch of the same sha -- waits, and on
-    a merge job that succeeded installs the map through
-    ``build_read_map.fetch(run id, sha)``. As with ``--full``, a recording
+    a merge job that succeeded installs the map through the recipe's own
+    fetch, by run id and sha. As with ``--full``, a recording
     already running is waited on, and one finished is read, not repeated. The
     recording has a concurrency group of its own, so no push run is waited on.
     """

@@ -74,6 +74,55 @@ def test_prune_keeps_no_git_file_either(worktree):
     assert kept == {"tests/test_x.py": ["tests/data.txt"]}, kept
 
 
+def test_an_argv_item_too_long_to_be_a_name_is_not_a_read(worktree, monkeypatch):
+    """THE FIRST CI RECORDING (run 46065815443) FAILED THREE TESTS. Tests that
+    run ``python -c <code>`` hand the code to the recorder as a candidate
+    path, and on Linux ``exists()`` of a name past NAME_MAX raises
+    ENAMETOOLONG instead of answering False. Emulated here on any platform:
+    a name longer than 255 raises, as Linux's does. SHOWN FAILING before
+    ``_rel`` caught it: the OSError reached the test."""
+    import errno
+    import pathlib
+
+    real_exists = pathlib.Path.exists
+
+    def linux_exists(self, *args, **kwargs):
+        if any(len(part) > 255 for part in self.parts):
+            raise OSError(errno.ENAMETOOLONG, "File name too long", str(self))
+        return real_exists(self, *args, **kwargs)
+
+    monkeypatch.setattr(pathlib.Path, "exists", linux_exists)
+    code = "import sys; print(sys.argv)" * 12
+    assert len(code) > 255
+    assert recipe._rel(str(worktree / code), worktree) is None
+    assert recipe._rel(str(worktree / "tests" / "data.txt"), worktree) == "tests/data.txt"
+
+
+def test_the_recorder_never_breaks_the_call_it_observes(tmp_path):
+    """An instrument that raises inside the test it observes reports itself
+    as the test's failure. Run in a child, because installing the recorder
+    rebinds this process's ``open`` and ``subprocess``: a recorder whose
+    every record raises must still let ``open`` and ``subprocess.run`` work.
+    SHOWN FAILING before the tracers caught it."""
+    script = tmp_path / "child.py"
+    script.write_text(
+        "import subprocess, sys\n"
+        f"sys.path.insert(0, {str(REPO / 'scripts')!r})\n"
+        "import build_read_map as r\n"
+        "class Broken(r._Recorder):\n"
+        "    def record(self, target):\n"
+        "        raise RuntimeError('the recorder broke')\n"
+        f"r._install(Broken(__import__('pathlib').Path({str(tmp_path)!r})))\n"
+        f"open({str(script)!r}).close()\n"
+        "done = subprocess.run([sys.executable, '-c', 'print(7)'], capture_output=True, text=True)\n"
+        "print(done.stdout.strip())\n",
+        encoding="utf-8")
+    done = subprocess.run([__import__("sys").executable, str(script)], capture_output=True,
+                          text=True, timeout=60)
+    assert done.returncode == 0, done.stderr[-800:]
+    assert done.stdout.strip().splitlines()[-1] == "7", done.stdout
+
+
 # ---------------------------------------------------------------------------
 # The merge, as the CI job runs it
 # ---------------------------------------------------------------------------
