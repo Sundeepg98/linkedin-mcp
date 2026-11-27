@@ -88,6 +88,15 @@ SPEC: dict[str, tuple[str, str, tuple[str, ...]]] = {
         "premium_matches",
         ("Hiring for", "at"),
     ),
+    # Load 14: his connections page -- the toolbar's first pill's label
+    # (`Companies`, the second, is on the harness's list and survives in the
+    # copy) and the origin LinkedIn's people-search link carries. Added in
+    # the lane's round 2 for N 27 and N 24 (CONNECTIONS-CONTROLS-MEASURED-ABSENT).
+    "live12_connections_words": (
+        "connections",
+        "connections",
+        ("Locations", "MEMBER_PROFILE_CANNED_SEARCH"),
+    ),
     # Load 28: the received tab -- the three pills' labels, each a word and
     # its count as drawn, the tab strip's address words and the invitations'
     # fixed words (readers-net26's on session 11, measured again here).

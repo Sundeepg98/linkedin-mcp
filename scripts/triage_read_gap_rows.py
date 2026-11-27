@@ -228,8 +228,8 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
                               "filter vocabulary"),
     "N 92": ("BUILDABLE", "", "served by the shipped people-search tool's "
                               "filter vocabulary"),
-    "N 93": ("BUILDABLE", "", "served by the shipped people-search tool's "
-                              "filter vocabulary"),
+    # N 93 LEFT 2026-11-27 (lane net7's round 2): MEASURED-ABSENT on
+    # KEYWORD-FIELDS-MEASURED-ABSENT -- see LEFT THE READ-GAP SET below.
     # N 94 LEFT 2026-09-24: lane S composes several locations into one
     # search from the tool's arguments (COVERED-UNFIRED, a FILTER row).
     # N 95 LEFT 2026-11-26: lane build-net2 built its read on
@@ -305,7 +305,8 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
     # same day, ENTERED:
     # N 26b LEFT 2026-11-27 (lane net7): the school and industry facets
     # beside the degree filter, see LEFT THE READ-GAP SET below.
-    "N 27": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
+    # N 27 LEFT 2026-11-27 (lane net7's round 2): MEASURED-ABSENT on
+    # CONNECTIONS-CONTROLS-MEASURED-ABSENT -- see LEFT THE READ-GAP SET below.
     "N 28": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
     "N 32": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
     # N 38 LEFT 2026-11-26: lane readers-net26 built its reader over live
@@ -374,6 +375,14 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
 #:            by dom.read_search_appearances, the employer kept in the page
 #:     N 195  COVERED-UNFIRED  (was BUILDABLE) -- recruiter insights, the
 #:            viewers as people records (recruiter_views.read_recruiter_views)
+#:
+#: LEFT THE READ-GAP SET 2026-11-27, on lane net7's round 2 (the orchestrator's
+#: rulings of 13:25): two readings retired.
+#:
+#:     N 93   MEASURED-ABSENT  (was BUILDABLE) -- the open panel draws no
+#:            keyword field (KEYWORD-FIELDS-MEASURED-ABSENT)
+#:     N 27   MEASURED-ABSENT  (was RETURNED) -- no Talks-about filter on three
+#:            surfaces (CONNECTIONS-CONTROLS-MEASURED-ABSENT)
 #:
 #: LEFT THE READ-GAP SET 2026-11-27, on lane net7's build (wave 7): four
 #: people-search facets, each a section live session 12's open All-filters

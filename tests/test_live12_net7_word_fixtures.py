@@ -13,7 +13,10 @@ shape equals the skeleton's, a declared word that matches nowhere refused:
 * ``tests/fixtures/synthetic/live12_premium_matches_words.html`` -- his Premium
   networking matches (load 26; ``N 199``);
 * ``tests/fixtures/synthetic/live12_invitation_pills_words.html`` -- his
-  received invitations' three filter pills (load 28; ``N 14``).
+  received invitations' three filter pills (load 28; ``N 14``);
+* ``tests/fixtures/synthetic/live12_connections_words.html`` -- his
+  connections page's toolbar (load 14; ``N 27``, ``N 24``), added in the
+  lane's round 2.
 
 The keyed skeletons are not here, so this file holds each OUTPUT to the tracked
 copy it must equal everywhere else, TOKEN BY TOKEN: a token may differ ONLY
@@ -47,6 +50,8 @@ CONTROL_WORD = {
     "live12_first_degree_panel_words": "Industries",
     "live12_premium_matches_words": "Hiring for",
     "live12_invitation_pills_words": "Focused 3",
+    # Round 2 (2026-11-27): his connections page (load 14), for N 27 and N 24.
+    "live12_connections_words": "Locations",
 }
 
 

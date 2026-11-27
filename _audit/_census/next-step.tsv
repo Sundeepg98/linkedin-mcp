@@ -222,17 +222,16 @@ N 7	N	W	R3	TARGET:a Page and the connections he names to invite	INFERRED	RULING:
 N 8	N	W	R3	TARGET:a Page and the connections he names to invite	INFERRED	RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS ; N 7
 N 11	N	R	-	PRECONDITION:a Page-follow invitation he has sent, pending (the Sent tab draws only its CONNECTION category)	MEASURED	tests/fixtures/live11/invitations_sent.html ; RULING:MEASURED-ABSENT-OR-PRECONDITION
 N 12	N	W	R3	PRECONDITION:a Page-follow invitation he has sent, pending (the Sent tab draws only its CONNECTION category)	MEASURED	tests/fixtures/live11/invitations_sent.html ; RULING:MEASURED-ABSENT-OR-PRECONDITION
-N 14	N	R	-	CAPTURE:admit-mynetwork-invitation-manager	MEASURED	tests/fixtures/live11/invitations.html ; RULING:READ-PAST-AN-ACT-SUBSTRING
+N 14	N	R	-	CAPTURE:admit-mynetwork-invitation-manager	MEASURED	tests/fixtures/synthetic/live12_invitation_pills_words.html ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
 N 17	N	W	R3	SIBLING:N 16	INFERRED	tests/fixtures/live11/invitations.html ; N 16
 N 18	N	W	R2	SIBLING:N 19	INFERRED	tests/fixtures/live11/invitations.html ; N 19
 N 19	N	R	-	PRECONDITION:an invitation carrying a personal note, pending in his received list	INFERRED	tests/fixtures/live11/invitations.html ; RULING:MEASURED-ABSENT-OR-PRECONDITION
 N 21	N	W	R3	SIBLING:N 15	INFERRED	tests/fixtures/live11/invitations.html ; N 15
-N 22	N	R	-	CAPTURE:admit-mynetwork	INFERRED	_audit/_census/read-addresses.tsv::the general R1 badge-cost ruling ; RULING:READ-PAST-AN-ACT-SUBSTRING
-N 24	N	R	-	CAPTURE:connections-sort-and-filters	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/mynetwork/invite-connect/connections/?foo=1 ; RULING:READ-PAST-AN-ACT-SUBSTRING
-N 27	N	R	-	CAPTURE:connections-sort-and-filters	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/mynetwork/invite-connect/connections/?foo=1 ; RULING:READ-PAST-AN-ACT-SUBSTRING
-N 28	N	R	-	CAPTURE:connections-sort-and-filters	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/mynetwork/invite-connect/connections/?foo=1 ; RULING:READ-PAST-AN-ACT-SUBSTRING
+N 22	N	R	-	SIBLING:N 15	INFERRED	tests/fixtures/live12/mynetwork.html ; N 15
+N 24	N	R	-	CAPTURE:connections-sort-and-filters	MEASURED	tests/fixtures/synthetic/live12_connections_words.html ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
+N 28	N	R	-	SIBLING:N 91	INFERRED	tests/fixtures/synthetic/live12_people_panel_words.html ; N 91
 N 29	N	W	R3	TARGET:a 1st-degree connection he names for removal	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::`N 29`: the row menu of one connection he names ; RULING:RELATION-REMOVALS-BUILT-BEHIND-GRANTS
-N 32	N	R	-	CAPTURE:admit-mynetwork	INFERRED	_audit/_census/read-addresses.tsv::the general R1 badge-cost ruling ; RULING:READ-PAST-AN-ACT-SUBSTRING
+N 32	N	R	-	ADMIT:https://www.linkedin.com/mynetwork/settings/manage-syncing/	MEASURED	_audit/2026-09-28-lane-s-settings.md::A-SYNCING ; tests/fixtures/live12/mynetwork.html
 N 34	N	W	R1	TARGET:a member he names to follow or unfollow	INFERRED	RULING:NAMED-PROFILE-READ-BEHIND-A-GRANT ; _audit/_census/write-classes.tsv::queued:THIRD-PARTY-PROFILE-FORBIDDEN
 N 36	N	W	R1	TARGET:a member he names to follow or unfollow	INFERRED	RULING:NAMED-PROFILE-READ-BEHIND-A-GRANT ; _audit/_census/write-classes.tsv::queued:THIRD-PARTY-PROFILE-FORBIDDEN
 N 37	N	W	R1	CAPTURE:feed-item-permalink-menu	MEASURED	tests/fixtures/live11/permalink_member_post_menu_open.html ; RULING:HIS-OWN-CURATION-NOT-OUTWARD
@@ -264,10 +263,9 @@ N 75	N	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 N 76	N	R	-	CAPTURE:in-me-profile	NAMED	RULING:NO-INDEX-PINNED-JUDGEMENTS ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
 N 77	N	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 N 78	N	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
-N 90	N	R	-	CAPTURE:search-people-labels	NAMED	RULING:CAPTURE-PRESS-UNDER-PROBE-RULE ; _audit/_census/read-addresses.tsv::TERMINAL BY THIS ROUTE
-N 91	N	R	-	CAPTURE:search-people-labels	NAMED	RULING:CAPTURE-PRESS-UNDER-PROBE-RULE ; _audit/_census/read-addresses.tsv::TERMINAL BY THIS ROUTE
-N 92	N	R	-	CAPTURE:search-people-labels	NAMED	RULING:CAPTURE-PRESS-UNDER-PROBE-RULE ; _audit/_census/read-addresses.tsv::TERMINAL BY THIS ROUTE
-N 93	N	R	-	CAPTURE:search-people-labels	MEASURED	RULING:CAPTURE-PRESS-UNDER-PROBE-RULE ; _audit/2026-10-10-lane-b2-network-build.md::So the first render draws no control labelled exactly
+N 90	N	R	-	CAPTURE:search-people-labels	MEASURED	tests/fixtures/synthetic/live12_people_panel_words.html ; RULING:VIEW-SWITCH-PRESS-RESTORED
+N 91	N	R	-	CAPTURE:search-people-labels	MEASURED	tests/fixtures/synthetic/live12_people_panel_words.html ; RULING:VIEW-SWITCH-PRESS-RESTORED
+N 92	N	R	-	CAPTURE:search-people-labels	MEASURED	tests/fixtures/synthetic/live12_people_panel_words.html ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
 N 96	N	W	R3	CAPTURE:admit-mypreferences-d-categories-privacy	INFERRED	_audit/_census/network.md::awaiting admission by name ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
 N 97	N	R	-	CAPTURE:admit-mynetwork-discovery-see-all	NAMED	_audit/_census/completeness-annotations.tsv::My Network: full discovery lists ; tests/fixtures/live12/mynetwork.html
 N 98	N	W	R3	CAPTURE:admit-mynetwork-discovery-see-all	NAMED	_audit/_census/completeness-annotations.tsv::My Network: full discovery lists ; tests/fixtures/live12/mynetwork.html
@@ -275,7 +273,7 @@ N 99	N	R	-	TARGET:a school Page he names	NAMED	_audit/_census/read-addresses.tsv
 N 100	N	R	-	TARGET:a school Page he names	NAMED	_audit/_census/read-addresses.tsv::UNDER THE WHO/WHICH RULE, EXTENDED ; RULING:OPERATOR-NAMES-THE-TARGET
 N 103	N	R	-	SIBLING:lane-NP	MEASURED	_audit/2026-10-10-lane-b2-network-build.md::A third first render without the section
 N 104	N	R	-	RULING:Q-ORG-IDENTITY	MEASURED	_audit/2026-10-10-lane-b2-network-build.md::every segment carries letters
-N 110	N	W	R3	CAPTURE:admit-mynetwork	INFERRED	_audit/_census/write-classes.tsv::queued:CONTACTS-MANAGER-ADMISSION ; RULING:READ-PAST-AN-ACT-SUBSTRING
+N 110	N	W	R3	ADMIT:https://www.linkedin.com/mynetwork/settings/manage-syncing/	MEASURED	_audit/_census/completeness-annotations.tsv::Settings: sync calendar and contacts ; _audit/_census/write-classes.tsv::queued:CONTACTS-MANAGER-ADMISSION
 N 111	N	W	R3	TARGET:a 1st-degree connection he names, whose skill he endorses	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::| C3 | `endorse_skill` ; RULING:OPERATOR-NAMES-THE-TARGET
 N 112	N	W	R3	TARGET:a 1st-degree connection he names, whose skill he endorses	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::| C3 | `endorse_skill` ; RULING:OPERATOR-NAMES-THE-TARGET
 N 113	N	W	R3	TARGET:a 1st-degree connection he names, whose skill he endorses	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::| C3 | `endorse_skill` ; RULING:OPERATOR-NAMES-THE-TARGET

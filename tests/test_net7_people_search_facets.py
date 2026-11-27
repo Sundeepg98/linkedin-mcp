@@ -341,3 +341,68 @@ def test_the_moved_rows_left_every_gap_table() -> None:
     for row in rows:
         assert f"N {row}" not in triage.TRIAGE, row
         assert f"N {row}" in cc.PINNED_B1_ROWS[cc.NO_RULING], row
+
+
+# ---------------------------------------------------------------------------
+# 6. Round 2 (the orchestrator's rulings of 2026-11-27 13:25): two rows
+#    MEASURED-ABSENT, each state held to the committed reading it rests on
+# ---------------------------------------------------------------------------
+
+CONNECTIONS = SYNTHETIC / "live12_connections_words.html"
+
+
+def _toolbar() -> str:
+    """His connections page's toolbar: ``main`` up to its first member card."""
+    text = CONNECTIONS.read_text(encoding="ascii")
+    main = text[text.index("<main"):]
+    return main[:main.index('href="https://www.linkedin.com/in/x/"')]
+
+
+def test_his_connections_toolbar_draws_a_search_two_pills_and_one_link() -> None:
+    """``N 27``'s connections-page half and ``N 24``'s second condition, on
+    session 12's load 14: the toolbar's whole control set, and no sort or
+    Talks-about control among it."""
+    toolbar = _toolbar()
+    assert re.findall(r'<label [^>]*for="k[0-9a-f]+"[^>]*>\n([^<\n]+)\n', toolbar) == ["Locations", "Companies"]
+    inputs = re.findall(r"<input [^>]*>", toolbar)
+    assert len(inputs) == 3, inputs  # the name search and the two pills' checkboxes
+    assert sum('aria-autocomplete="' in tag for tag in inputs) == 1
+    assert len(re.findall(r'role="button" tabindex="0" [^>]*aria-expanded="false"', toolbar)) == 2
+    assert re.findall(r'<a [^>]*href="([^"]+)"', toolbar) == [
+        "https://www.linkedin.com/search/results/people/?network=x&amp;origin=MEMBER_PROFILE_CANNED_SEARCH"
+    ]
+    for word in ("Talks about", "Open to", "Sort"):
+        assert word not in toolbar, word
+
+
+#: row -> (its new state, the words its paragraph must carry).
+ABSENT = {
+    "93": ("MEASURED-ABSENT", ("KEYWORD-FIELDS-MEASURED-ABSENT", "ZERO text inputs", "`N 79`",
+                               "`N 84`", "`N 88`", "REOPENER: a capture that draws a keyword field")),
+    "27": ("MEASURED-ABSENT", ("CONNECTIONS-CONTROLS-MEASURED-ABSENT", "THREE SURFACES",
+                               "tests/fixtures/synthetic/live12_connections_words.html",
+                               "REOPENER: a capture that draws a Talks about filter")),
+}
+
+
+@pytest.mark.parametrize("row", sorted(ABSENT))
+def test_each_absent_row_is_measured_absent_on_its_own_reading(row) -> None:
+    """The state and the shipped reading cannot separate: the premise tests
+    above (no keyword field; the toolbar's whole control set; the panels'
+    headings) are what each paragraph cites."""
+    state, cell = _cell(row)
+    want, words = ABSENT[row]
+    assert state == want
+    paragraph = cell[cell.index("**LANE NET7, 2026-11-27"):]
+    for word in words:
+        assert word in paragraph, (row, word)
+    assert not any(line.startswith(f"N {row}\t") for line in NEXT_STEP.read_text(encoding="utf-8").splitlines())
+
+
+def test_n24_stays_gap_on_the_failed_condition() -> None:
+    state, cell = _cell("24")
+    assert state == "GAP"
+    paragraph = cell[cell.index("**LANE NET7, 2026-11-27"):]
+    for words in ("26 closed spellings", "HOLDS", "FAILS", "13 `aria-expanded`",
+                  "CAPTURE `connections-sort-and-filters`"):
+        assert words in paragraph, words
