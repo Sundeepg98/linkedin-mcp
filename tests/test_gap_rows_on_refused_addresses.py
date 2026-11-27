@@ -169,6 +169,28 @@ SCRIPT = ROOT / "scripts" / "check_gap_rows_on_refused_addresses.py"
 #: refused on that substring. The lane's other four moved rows (`J 76`,
 #: `P M7`, `P M8`, `J 163`) name no refused address in backticks, and its notes
 #: on `J 19` and `J 37` backtick none. No boundary entry changed.
+#: 79 ON LANE NET7 (2026-11-27), MEASURED by the shipped walk (77 on the
+#: base `68a4ff7`, 79 here), none removed, two added: `N 32` and `N 110`,
+#: each cell newly naming the settings nav's contact-sync page,
+#: `/mynetwork/settings/manage-syncing` (session 11's link, no trailing
+#: slash), refused on "/settings/". Each stays
+#: GAP on the step its own cell names -- a capture on lane settings7's line,
+#: once that lane's own commit admits the page by name, on
+#: CONTACTS-PAGE-FROM-THE-SETTINGS-NAV (that line takes both slash forms, so
+#: the merged tree reads both rows off this list, and `P N20` with them: 76
+#: before settings7's own moves, measured by simulating the admission on this
+#: walk) -- under
+#: INCIDENTAL-CAPTURE-IS-NOT-A-RULING. Two more cells name an address this
+#: lane admitted, so neither counts: `N 14`'s note names the received tab's
+#: own leaf (admitted with its "invitation" exemption) and `N 97`'s cell the
+#: full suggestion lists (refused until then by allowlist silence alone).
+#: 77 AT INTEGRATION 7, MERGE 5 (2026-11-27), MEASURED by
+#: scripts/check_gap_rows_on_refused_addresses.py on the merged tree, never
+#: summed: lane net7's `N 32` and `N 110` (79 on its branch) leave again on
+#: lane settings7's admission of `/mynetwork/settings/manage-syncing` in both
+#: slash forms, and settings7's own moves add `N 143` and `P O22` and remove
+#: `P K1` and `P N20` (net 0), so the merged walk reads 77, the cross-lane
+#: critic's measurement, not net7's predicted 76.
 EXPECTED_GAP_ROWS = 77
 
 

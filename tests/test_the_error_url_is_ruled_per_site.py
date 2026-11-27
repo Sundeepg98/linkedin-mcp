@@ -250,6 +250,9 @@ DECLARED: dict[tuple[str, str], tuple[str, int]] = {
     # Never the landing: each reader holds the page and never reads its url.
     ("verifications_page.py", "read_verifications"): (ASKED_FOR, 2),
     ("premium_account.py", "read_premium_account"): (ASKED_FOR, 2),
+    # 2026-11-27 (lane net7, census N 199): the matches page drew no card;
+    # raised with its module's admitted constant, `premium_matches.MATCHES_URL`.
+    ("premium_matches.py", "read_matches"): (ASKED_FOR, 1),
     # 2026-11-26 (lane build-net2, census N 95): the recent-searches group
     # read wrong -- none or two of its structure, no link, a link that is no
     # search address -- each raised with the feed, the address the module
@@ -666,10 +669,17 @@ def test_the_twenty_are_still_twenty():
     # 48 on lane settings7: its four ASKED_FOR raises beside the 44.
     # FIFTY-ONE AT INTEGRATION 7, MERGE 4 (2026-11-27): both lanes' DECLARED entries in one
     # table, MEASURED off it on the merged tree, not summed.
+    # FORTY-FIVE ON LANE NET7 (2026-11-27, census N 199):
+    # ``premium_matches.read_matches`` raises once on a page with no match
+    # card, with its module's admitted constant MATCHES_URL -- the address it
+    # asked for -- so ASKED_FOR is 19 -> 20. MEASURED off this table, not summed.
+    # 45 on lane net7, one ASKED_FOR raise more.
+    # FIFTY-TWO AT INTEGRATION 7, MERGE 5 (2026-11-27): every lane's DECLARED entries in one table,
+    # MEASURED off it on the merged tree, not summed.
     assert tally[WITHHELD] == 26, tally
-    assert tally[ASKED_FOR] == 24, tally
+    assert tally[ASKED_FOR] == 25, tally
     assert tally[PASSTHROUGH] == 1, tally
-    assert tally[WITHHELD] + tally[ASKED_FOR] + tally[PASSTHROUGH] == 51, tally
+    assert tally[WITHHELD] + tally[ASKED_FOR] + tally[PASSTHROUGH] == 52, tally
     assert tally[NO_ADDRESS_IN_SCOPE] == 10, tally
 
 

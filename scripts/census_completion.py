@@ -1149,7 +1149,9 @@ PINNED = {
     #: 723 AT INTEGRATION 7, MERGE 3 (lane msg7 onto prof7 and jobs7; 2026-11-27), MEASURED by --check on the merged tree, never summed: both lanes' moves above, in one tree (_audit/2026-11-27-integration-7.md).
     #: 720 ON LANE SETTINGS7 (2026-11-27), MEASURED by --check: `P N32` entered, split from `P N22`, GAP (was 719).
     #: 724 AT INTEGRATION 7, MERGE 4 (lane settings7 onto prof7, jobs7 and msg7; 2026-11-27), MEASURED by --check on the merged tree, never summed: the lanes' moves above, in one tree (_audit/2026-11-27-integration-7.md).
-    "capabilities_achievable": 724,
+    #: 717 ON LANE NET7 (2026-11-27), MEASURED by --check, never summed: `N 93` and `N 27` GAP -> MEASURED-ABSENT on the orchestrator's rulings of 13:25 (KEYWORD-FIELDS-MEASURED-ABSENT, CONNECTIONS-CONTROLS-MEASURED-ABSENT; `_audit/2026-11-27-net7.md`, section 10): out of scope, off bucket 3 (was 719).
+    #: 722 AT INTEGRATION 7, MERGE 5 (lane net7 onto the other four; 2026-11-27), MEASURED by --check on the merged tree, never summed: the lanes' moves above in one tree, with N 32's read-address line moved NEEDS-SESSION -> ADMITTED at settings7's admission (_audit/2026-11-27-integration-7.md).
+    "capabilities_achievable": 722,
     #: 43 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: 29 rows returned
     #: to GAP when OUTWARD-CLASSES-BUILT-BEHIND-GRANTS retired their key, and
     #: `P P2` at the merge (-30); `P N27` and `P P2` then EXCLUDED-RULED on
@@ -1174,7 +1176,9 @@ PINNED = {
     #: 69 ON LANE READERS-MSG26 (2026-11-26), MEASURED: `M M20` GAP -> MEASURED-ABSENT, under MEASURED-ABSENT-OR-PRECONDITION: the first opened conversation on disk draws no video-meeting control, every footer and header control accounted for (`_audit/2026-11-26-readers-msg26.md` section 3) (was 68).
     #: MEASURED AT INTEGRATION 4'S MERGE OF READERS-MSG26 (2026-11-26) on the merged tree, never summed (the figures above are each lane's own).
     #: 72 ON LANE MSG7 (2026-11-27), MEASURED by --check, never summed: `M C70` GAP -> MEASURED-ABSENT on the orchestrator's GROUP-SEARCH-MEASURED-ABSENT (registration owed at integration 7), under MEASURED-ABSENT-OR-PRECONDITION: no search inside a group on either surface its plan named (`_audit/2026-11-27-msg7.md` section 5) (was 71).
-    "out_of_scope": 72,
+    #: 73 ON LANE NET7 (2026-11-27), MEASURED by --check, never summed: `N 93` and `N 27` GAP -> MEASURED-ABSENT on the orchestrator's rulings of 13:25 (KEYWORD-FIELDS-MEASURED-ABSENT, CONNECTIONS-CONTROLS-MEASURED-ABSENT; `_audit/2026-11-27-net7.md`, section 10): out of scope, off bucket 3 (was 71).
+    #: 74 AT INTEGRATION 7, MERGE 5 (lane net7 onto the other four; 2026-11-27), MEASURED by --check on the merged tree, never summed: the lanes' moves above in one tree, with N 32's read-address line moved NEEDS-SESSION -> ADMITTED at settings7's admission (_audit/2026-11-27-integration-7.md).
+    "out_of_scope": 74,
     #: 727 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: stated rows 770
     #: less out_of_scope 43: the returns, `P A23b`, and the two re-exclusions.
     #: 728 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: stated rows 770 less out_of_scope 42 (`N 2`).
@@ -1211,7 +1215,9 @@ PINNED = {
     #: 710 AT INTEGRATION 7, MERGE 3 (lane msg7 onto prof7 and jobs7; 2026-11-27), MEASURED by --check on the merged tree, never summed: both lanes' moves above, in one tree (_audit/2026-11-27-integration-7.md).
     #: 707 ON LANE SETTINGS7 (2026-11-27), MEASURED by --check: `P N32` entered, split from `P N22`, GAP (was 706).
     #: 711 AT INTEGRATION 7, MERGE 4 (lane settings7 onto prof7, jobs7 and msg7; 2026-11-27), MEASURED by --check on the merged tree, never summed: the lanes' moves above, in one tree (_audit/2026-11-27-integration-7.md).
-    "achievable": 711,
+    #: 704 ON LANE NET7 (2026-11-27), MEASURED by --check, never summed: `N 93` and `N 27` GAP -> MEASURED-ABSENT on the orchestrator's rulings of 13:25 (KEYWORD-FIELDS-MEASURED-ABSENT, CONNECTIONS-CONTROLS-MEASURED-ABSENT; `_audit/2026-11-27-net7.md`, section 10): out of scope, off bucket 3 (was 706).
+    #: 709 AT INTEGRATION 7, MERGE 5 (lane net7 onto the other four; 2026-11-27), MEASURED by --check on the merged tree, never summed: the lanes' moves above in one tree, with N 32's read-address line moved NEEDS-SESSION -> ADMITTED at settings7's admission (_audit/2026-11-27-integration-7.md).
+    "achievable": 709,
     #: 205 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
     #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
     #: 179 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: the 30 returned
@@ -1373,7 +1379,11 @@ PINNED = {
     #: 267 AT INTEGRATION 7, MERGE 3 (lane msg7 onto prof7 and jobs7; 2026-11-27), MEASURED by --check on the merged tree, never summed: both lanes' moves above, in one tree (_audit/2026-11-27-integration-7.md).
     #: 261 ON LANE SETTINGS7 (2026-11-27), MEASURED by --check: `P K1` and `P N22` GAP -> COVERED-UNFIRED (`linkedin_my_verifications`, `linkedin_my_premium_account`) (was 259).
     #: 269 AT INTEGRATION 7, MERGE 4 (lane settings7 onto prof7, jobs7 and msg7; 2026-11-27), MEASURED by --check on the merged tree, never summed: the lanes' moves above, in one tree (_audit/2026-11-27-integration-7.md).
-    "adjudicated": 269,
+    #: 264 ON LANE NET7 (2026-11-27), MEASURED by --check, never summed: `N 82`, `N 86`, `N 88`, `N 89` and `N 26b` GAP -> COVERED-UNFIRED, four people-search facets on live session 12's open All-filters panel (`linkedin_people_search_shape`; `_audit/2026-11-27-net7.md`, section 3): five R rows entering bucket 1 held by no ruling (was 259).
+    #: 266 ON LANE NET7 (2026-11-27), MEASURED by --check, never summed: `N 93` and `N 27` GAP -> MEASURED-ABSENT on the orchestrator's rulings of 13:25 (KEYWORD-FIELDS-MEASURED-ABSENT, CONNECTIONS-CONTROLS-MEASURED-ABSENT; `_audit/2026-11-27-net7.md`, section 10): out of scope, off bucket 3 (was 264).
+    #: 267 ON LANE NET7 (2026-11-27), MEASURED by --check, never summed: `N 199` GAP -> COVERED-UNFIRED, his Premium networking matches as people records (`linkedin_premium_matches`; `_audit/2026-11-27-net7.md`, section 5): an R row entering bucket 1 held by no ruling (was 266).
+    #: 277 AT INTEGRATION 7, MERGE 5 (lane net7 onto the other four; 2026-11-27), MEASURED by --check on the merged tree, never summed: the lanes' moves above in one tree, with N 32's read-address line moved NEEDS-SESSION -> ADMITTED at settings7's admission (_audit/2026-11-27-integration-7.md).
+    "adjudicated": 277,
     #: THE LIVE LANE'S FOUR ROWS, RE-DERIVED AT EACH OF ITS MERGES OF MASTER
     #: (2026-09-24; last over lane S): four rows fired live and banked
     #: (`_audit/2026-09-23-live-lane-session-1.md`). `P G6` COVERED-UNFIRED ->
@@ -1523,7 +1533,10 @@ PINNED = {
     #: 178 AT INTEGRATION 7, MERGE 3 (lane msg7 onto prof7 and jobs7; 2026-11-27), MEASURED by --check on the merged tree, never summed: both lanes' moves above, in one tree (_audit/2026-11-27-integration-7.md).
     #: 173 ON LANE SETTINGS7 (2026-11-27), MEASURED by --check: `P K1` and `P N22` GAP -> COVERED-UNFIRED (was 171).
     #: 180 AT INTEGRATION 7, MERGE 4 (lane settings7 onto prof7, jobs7 and msg7; 2026-11-27), MEASURED by --check on the merged tree, never summed: the lanes' moves above, in one tree (_audit/2026-11-27-integration-7.md).
-    "delivered_broad": 180,
+    #: 176 ON LANE NET7 (2026-11-27), MEASURED by --check, never summed: `N 82`, `N 86`, `N 88`, `N 89` and `N 26b` GAP -> COVERED-UNFIRED, four people-search facets on live session 12's open All-filters panel (`linkedin_people_search_shape`; `_audit/2026-11-27-net7.md`, section 3): five R rows entering bucket 1 held by no ruling (was 171).
+    #: 177 ON LANE NET7 (2026-11-27), MEASURED by --check, never summed: `N 199` GAP -> COVERED-UNFIRED, his Premium networking matches as people records (`linkedin_premium_matches`; `_audit/2026-11-27-net7.md`, section 5): an R row entering bucket 1 held by no ruling (was 176).
+    #: 186 AT INTEGRATION 7, MERGE 5 (lane net7 onto the other four; 2026-11-27), MEASURED by --check on the merged tree, never summed: the lanes' moves above in one tree, with N 32's read-address line moved NEEDS-SESSION -> ADMITTED at settings7's admission (_audit/2026-11-27-integration-7.md).
+    "delivered_broad": 186,
     #: 79 since the live lane's merge (see `adjudicated`): P G6, N 134, P O3
     #: and M C72 COVERED-PROVEN.
     #: 75 and 21 since the bucket-1 merge: `M C41` fired live and moved from
@@ -1700,7 +1713,11 @@ PINNED = {
     #: 515 AT INTEGRATION 7, MERGE 3 (lane msg7 onto prof7 and jobs7; 2026-11-27), MEASURED by --check on the merged tree, never summed: both lanes' moves above, in one tree (_audit/2026-11-27-integration-7.md).
     #: 517 ON LANE SETTINGS7 (2026-11-27), MEASURED by --check: `P K1` and `P N22` GAP -> COVERED-UNFIRED (`linkedin_my_verifications`, `linkedin_my_premium_account`), and `P N32` entered GAP, split from `P N22` (was 518).
     #: 514 AT INTEGRATION 7, MERGE 4 (lane settings7 onto prof7, jobs7 and msg7; 2026-11-27), MEASURED by --check on the merged tree, never summed: the lanes' moves above, in one tree (_audit/2026-11-27-integration-7.md).
-    "gap": 514,
+    #: 513 ON LANE NET7 (2026-11-27), MEASURED by --check, never summed: `N 82`, `N 86`, `N 88`, `N 89` and `N 26b` GAP -> COVERED-UNFIRED, four people-search facets on live session 12's open All-filters panel (`linkedin_people_search_shape`; `_audit/2026-11-27-net7.md`, section 3): five R rows entering bucket 1 held by no ruling (was 518).
+    #: 511 ON LANE NET7 (2026-11-27), MEASURED by --check, never summed: `N 93` and `N 27` GAP -> MEASURED-ABSENT on the orchestrator's rulings of 13:25 (KEYWORD-FIELDS-MEASURED-ABSENT, CONNECTIONS-CONTROLS-MEASURED-ABSENT; `_audit/2026-11-27-net7.md`, section 10): out of scope, off bucket 3 (was 513).
+    #: 510 ON LANE NET7 (2026-11-27), MEASURED by --check, never summed: `N 199` GAP -> COVERED-UNFIRED, his Premium networking matches as people records (`linkedin_premium_matches`; `_audit/2026-11-27-net7.md`, section 5): an R row entering bucket 1 held by no ruling (was 511).
+    #: 506 AT INTEGRATION 7, MERGE 5 (lane net7 onto the other four; 2026-11-27), MEASURED by --check on the merged tree, never summed: the lanes' moves above in one tree, with N 32's read-address line moved NEEDS-SESSION -> ADMITTED at settings7's admission (_audit/2026-11-27-integration-7.md).
+    "gap": 506,
     #: 18 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: `M M1` built (`linkedin_message_from_profile`).
     #: 16 ON LANE L5'S ORDER OF 2026-09-27 23:36, MEASURED:
     #: `linkedin_send_message` RETIRED (aimed by a name): `M M2` to GAP and `N
@@ -1865,7 +1882,10 @@ PINNED = {
     #: 83 AT INTEGRATION 7, MERGE 3 (lane msg7 onto prof7 and jobs7; 2026-11-27), MEASURED by --check on the merged tree, never summed: both lanes' moves above, in one tree (_audit/2026-11-27-integration-7.md).
     #: 77 ON LANE SETTINGS7 (2026-11-27), MEASURED by --check: `P K1` and `P N22` entered COVERED-UNFIRED, never fired (was 75).
     #: 85 AT INTEGRATION 7, MERGE 4 (lane settings7 onto prof7, jobs7 and msg7; 2026-11-27), MEASURED by --check on the merged tree, never summed: the lanes' moves above, in one tree (_audit/2026-11-27-integration-7.md).
-    "unfired": 85,
+    #: 80 ON LANE NET7 (2026-11-27), MEASURED by --check, never summed: `N 82`, `N 86`, `N 88`, `N 89` and `N 26b` GAP -> COVERED-UNFIRED, four people-search facets on live session 12's open All-filters panel (`linkedin_people_search_shape`; `_audit/2026-11-27-net7.md`, section 3): five R rows entering bucket 1 held by no ruling (was 75).
+    #: 81 ON LANE NET7 (2026-11-27), MEASURED by --check, never summed: `N 199` GAP -> COVERED-UNFIRED, his Premium networking matches as people records (`linkedin_premium_matches`; `_audit/2026-11-27-net7.md`, section 5): an R row entering bucket 1 held by no ruling (was 80).
+    #: 91 AT INTEGRATION 7, MERGE 5 (lane net7 onto the other four; 2026-11-27), MEASURED by --check on the merged tree, never summed: the lanes' moves above in one tree, with N 32's read-address line moved NEEDS-SESSION -> ADMITTED at settings7's admission (_audit/2026-11-27-integration-7.md).
+    "unfired": 91,
     #: 104 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     #: 101 AT LANE S'S NAMES ADOPTION (2026-09-27), MEASURED: `N 79`, `N 172`
@@ -1930,7 +1950,11 @@ PINNED = {
     #: 65 ON LANE MSG7 (2026-11-27), MEASURED by --check, never summed: `M C70` GAP -> MEASURED-ABSENT on the orchestrator's GROUP-SEARCH-MEASURED-ABSENT (registration owed at integration 7), under MEASURED-ABSENT-OR-PRECONDITION: no search inside a group on either surface its plan named (`_audit/2026-11-27-msg7.md` section 5) (was 66).
     #: 65 ON LANE SETTINGS7 (2026-11-27), MEASURED by --check: `P K1` and `P N22`, two reads, left GAP; `P N32`, a read, entered it (was 66).
     #: 64 AT INTEGRATION 7, MERGE 4 (2026-11-27), MEASURED by --check on the merged tree: lanes msg7 and settings7 each moved this pin 66 -> 65 by a different row (msg7's M C70 left GAP; settings7's P K1 and P N22 left and P N32 entered), so the two equal lines merged clean as one; the merged tree holds both moves.
-    "gap_read": 64,
+    #: 61 ON LANE NET7 (2026-11-27), MEASURED by --check, never summed: `N 82`, `N 86`, `N 88`, `N 89` and `N 26b` GAP -> COVERED-UNFIRED, four people-search facets on live session 12's open All-filters panel (`linkedin_people_search_shape`; `_audit/2026-11-27-net7.md`, section 3): five R rows entering bucket 1 held by no ruling (was 66).
+    #: 59 ON LANE NET7 (2026-11-27), MEASURED by --check, never summed: `N 93` and `N 27` GAP -> MEASURED-ABSENT on the orchestrator's rulings of 13:25 (KEYWORD-FIELDS-MEASURED-ABSENT, CONNECTIONS-CONTROLS-MEASURED-ABSENT; `_audit/2026-11-27-net7.md`, section 10): out of scope, off bucket 3 (was 61).
+    #: 58 ON LANE NET7 (2026-11-27), MEASURED by --check, never summed: `N 199` GAP -> COVERED-UNFIRED, his Premium networking matches as people records (`linkedin_premium_matches`; `_audit/2026-11-27-net7.md`, section 5): an R row entering bucket 1 held by no ruling (was 59).
+    #: 56 AT INTEGRATION 7, MERGE 5 (lane net7 onto the other four; 2026-11-27), MEASURED by --check on the merged tree, never summed: the lanes' moves above in one tree, with N 32's read-address line moved NEEDS-SESSION -> ADMITTED at settings7's admission (_audit/2026-11-27-integration-7.md).
+    "gap_read": 56,
     #: 151, not the 152 published by `_audit/2026-09-21-the-write-ceiling.md`.
     #: That document scoped itself to `profile.md`, `network.md` and
     #: `messaging-and-content.md`; measured at HEAD those three carry W 151 and
@@ -2177,7 +2201,12 @@ PINNED = {
     #: 37 ON LANE MSG7 (2026-11-27), MEASURED by --check, never summed: `M C70` -- an ADMITTED bucket-3 read -- left GAP, MEASURED-ABSENT on the orchestrator's GROUP-SEARCH-MEASURED-ABSENT, and its line left `read-addresses.tsv` (`_audit/2026-11-27-msg7.md` section 5) (was 38).
     #: 37 ON LANE SETTINGS7 (2026-11-27), MEASURED by --check: `P K1`'s ADMITTED line left read-addresses.tsv with the row (was 38).
     #: 38 ON LANE SETTINGS7'S SECOND ADMISSION (2026-11-27), MEASURED by --check: `P P3`'s read-addresses line NEEDS-SESSION -> ADMITTED, its page measured on the privacy capture and admitted by name (was 37).
-    "b3_admitted": 37,
+    #: 33 ON LANE NET7 (2026-11-27), MEASURED by --check, never summed: `N 82`, `N 86`, `N 88`, `N 89` and `N 26b` GAP -> COVERED-UNFIRED, four people-search facets on live session 12's open All-filters panel (`linkedin_people_search_shape`; `_audit/2026-11-27-net7.md`, section 3): five R rows entering bucket 1 held by no ruling (was 38).
+    #: 34 ON LANE NET7 (2026-11-27), MEASURED by --check, never summed: `N 97`'s address line NEEDS-SESSION -> ADMITTED, its full People You May Know lists admitted at /mynetwork/discovery-see-all/ on GROW-SUGGESTIONS-BY-ADMISSION-NOT-SCROLL (`_audit/2026-11-27-net7.md`, section 10); no state moved (was 33).
+    #: 33 ON LANE NET7 (2026-11-27), MEASURED by --check, never summed: `N 93` and `N 27` GAP -> MEASURED-ABSENT on the orchestrator's rulings of 13:25 (KEYWORD-FIELDS-MEASURED-ABSENT, CONNECTIONS-CONTROLS-MEASURED-ABSENT; `_audit/2026-11-27-net7.md`, section 10): out of scope, off bucket 3 (was 34).
+    #: 32 ON LANE NET7 (2026-11-27), MEASURED by --check, never summed: `N 199` GAP -> COVERED-UNFIRED, his Premium networking matches as people records (`linkedin_premium_matches`; `_audit/2026-11-27-net7.md`, section 5): an R row entering bucket 1 held by no ruling (was 33).
+    #: 32 AT INTEGRATION 7, MERGE 5 (lane net7 onto the other four; 2026-11-27), MEASURED by --check on the merged tree, never summed: the lanes' moves above in one tree, with N 32's read-address line moved NEEDS-SESSION -> ADMITTED at settings7's admission (_audit/2026-11-27-integration-7.md).
+    "b3_admitted": 32,
     #: 38 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     #: 40 ON LANE L5'S ORDER OF 2026-09-28 12:32, MEASURED: `N 30`, `N 31`, `N 65`
@@ -2200,7 +2229,9 @@ PINNED = {
     #: C70` and `M C93` admitted, and `P M9` left the table.
     #: 16 ON LANE SETTINGS7 (2026-11-27), MEASURED by --check: `P N32` entered REFUSED, its static purchases address refused by allowlist silence (was 15).
     #: 18 ON LANE SETTINGS7'S RE-AIMS (2026-11-27), MEASURED by --check: the same two lines entered REFUSED at that address (was 16).
-    "b3_refused": 18,
+    #: 14 ON LANE NET7 (2026-11-27), MEASURED by --check, never summed: `N 93` and `N 27` GAP -> MEASURED-ABSENT on the orchestrator's rulings of 13:25 (KEYWORD-FIELDS-MEASURED-ABSENT, CONNECTIONS-CONTROLS-MEASURED-ABSENT; `_audit/2026-11-27-net7.md`, section 10): out of scope, off bucket 3 (was 15).
+    #: 17 AT INTEGRATION 7, MERGE 5 (lane net7 onto the other four; 2026-11-27), MEASURED by --check on the merged tree, never summed: the lanes' moves above in one tree, with N 32's read-address line moved NEEDS-SESSION -> ADMITTED at settings7's admission (_audit/2026-11-27-integration-7.md).
+    "b3_refused": 17,
     "b3_no_address": 1,
     #: 13 ON LANE BUILD-P26 (2026-11-25), MEASURED: `P D25`'s read address measured (the three anchors' target), so its line is ADMITTED, not NEEDS-SESSION (`_audit/2026-11-25-build-p26.md`, section 2).
     #: 12 ON LANE BUILD-NET2'S THIRD BUILD (2026-11-26), MEASURED: `N 95` GAP -> COVERED-UNFIRED, his recent searches read from his own search box on SEARCH-BOX-TYPEAHEAD-DISCLOSURE (`linkedin_recent_searches`; `_audit/2026-11-26-build-net2.md`, section 4): its bucket-3 line, NEEDS-SESSION, left with the row (was 13).
@@ -2209,7 +2240,9 @@ PINNED = {
     #: 10 ON LANE SETTINGS7 (2026-11-27), MEASURED by --check: `P N22`'s NEEDS-SESSION line left read-addresses.tsv with the row (was 11).
     #: 9 ON LANE SETTINGS7'S SECOND ADMISSION (2026-11-27), MEASURED by --check: the same line left NEEDS-SESSION (was 10).
     #: 7 ON LANE SETTINGS7'S RE-AIMS (2026-11-27), MEASURED by --check: `N 143` and `P O22` left NEEDS-SESSION: the privacy capture draws no blocked list, so each line records the Visibility category, refused (was 9).
-    "b3_needs_session": 7,
+    #: 10 ON LANE NET7 (2026-11-27), MEASURED by --check, never summed: `N 97`'s address line NEEDS-SESSION -> ADMITTED, its full People You May Know lists admitted at /mynetwork/discovery-see-all/ on GROW-SUGGESTIONS-BY-ADMISSION-NOT-SCROLL (`_audit/2026-11-27-net7.md`, section 10); no state moved (was 11).
+    #: 5 AT INTEGRATION 7, MERGE 5 (lane net7 onto the other four; 2026-11-27), MEASURED by --check on the merged tree, never summed: the lanes' moves above in one tree, with N 32's read-address line moved NEEDS-SESSION -> ADMITTED at settings7's admission (_audit/2026-11-27-integration-7.md).
+    "b3_needs_session": 5,
     #: 1 ON LANE BUILD-MSG2'S ROUND 2 (2026-11-26), MEASURED: `M M28` SPLIT on the orchestrator's ruling M-M28-SPLITS (round 2, to be registered at integration 6): the view half stayed `M M28`, COVERED-UNFIRED on `linkedin_archived_conversations`; the restore half entered as `M M54`, GAP, W (`_audit/2026-11-26-build-msg2.md` section 10) (was 2).
     #: 1 AT INTEGRATION 6'S MERGE OF LANE BUILD-MSG2 (2026-11-26), MEASURED on the merged tree by --check, never summed: the three lanes' moves above, together.
     "b3_undetermined": 1,
@@ -2521,7 +2554,10 @@ PINNED = {
     #: 55 AT INTEGRATION 7, MERGE 3 (lane msg7 onto prof7 and jobs7; 2026-11-27), MEASURED by --check on the merged tree, never summed: both lanes' moves above, in one tree (_audit/2026-11-27-integration-7.md).
     #: 50 ON LANE SETTINGS7 (2026-11-27), MEASURED by --check: `P K1` and `P N22` entered bucket 1, reads no ruling holds (was 48).
     #: 57 AT INTEGRATION 7, MERGE 4 (lane settings7 onto prof7, jobs7 and msg7; 2026-11-27), MEASURED by --check on the merged tree, never summed: the lanes' moves above, in one tree (_audit/2026-11-27-integration-7.md).
-    "b1_no_ruling": 57,
+    #: 53 ON LANE NET7 (2026-11-27), MEASURED by --check, never summed: `N 82`, `N 86`, `N 88`, `N 89` and `N 26b` GAP -> COVERED-UNFIRED, four people-search facets on live session 12's open All-filters panel (`linkedin_people_search_shape`; `_audit/2026-11-27-net7.md`, section 3): five R rows entering bucket 1 held by no ruling (was 48).
+    #: 54 ON LANE NET7 (2026-11-27), MEASURED by --check, never summed: `N 199` GAP -> COVERED-UNFIRED, his Premium networking matches as people records (`linkedin_premium_matches`; `_audit/2026-11-27-net7.md`, section 5): an R row entering bucket 1 held by no ruling (was 53).
+    #: 63 AT INTEGRATION 7, MERGE 5 (lane net7 onto the other four; 2026-11-27), MEASURED by --check on the merged tree, never summed: the lanes' moves above in one tree, with N 32's read-address line moved NEEDS-SESSION -> ADMITTED at settings7's admission (_audit/2026-11-27-integration-7.md).
+    "b1_no_ruling": 63,
     #: 7 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
     #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
     #: 4 AT THE LIVE LANE'S MERGE OF MASTER c2825a4 (2026-09-28), MEASURED on the
@@ -3100,6 +3136,20 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
         #: session 12's load 20; never fired. J169-BY-ITS-OWN-WORDS kept the two
         #: facets on this row; no ruling holds it.
         "J 169",
+        #: `N 82`, `N 86`, `N 88`, `N 89` and `N 26b` entered on lane net7
+        #: (2026-11-27): four people-search facets, each a section live
+        #: session 12's open All-filters panel draws, sent as the address
+        #: LinkedIn writes for it (`linkedin_people_search_shape`); never
+        #: fired. Reads: D1-SEARCH-AS-READS and OTHER-MEMBER-IDS-AS-READS
+        #: permit them and hold nothing, as for `N 30` and `N 85` before
+        #: their fires.
+        "N 82", "N 86", "N 88", "N 89", "N 26b",
+        #: `N 199` entered on lane net7 (2026-11-27): his Premium networking
+        #: matches, each member a people record beside the id of the job they
+        #: are hiring for (`linkedin_premium_matches`), read off one admitted
+        #: page over live session 12's capture; never fired. NAMES-AT-RUNTIME and
+        #: PEOPLE-DATA-MITIGATIONS permit and shape it; none holds it.
+        "N 199",
     ),
 }
 

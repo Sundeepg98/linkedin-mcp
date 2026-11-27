@@ -155,6 +155,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_sent_invitations": (),
     "linkedin_my_following_list": (),
     "linkedin_my_unfollowed_list": (),
+    "linkedin_premium_matches": (),
     "linkedin_my_advertising_data": (),
     # 2026-11-27, lane settings7: two READS, no parameter each, built on live
     # session 12's captures. Census P K1, P N22.
@@ -170,8 +171,9 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_page_plugin_snippet": ("page_id",),
     "linkedin_item_viewer_demographics": ("item",),
     "linkedin_people_search_shape": (
-        "connections_of", "current_company_ids", "include_names", "keywords",
-        "location_ids", "network", "past_company_ids",
+        "actively_hiring", "connections_of", "current_company_ids",
+        "followers_of", "include_names", "industry_ids", "keywords",
+        "location_ids", "network", "past_company_ids", "school_ids",
     ),
     "linkedin_premium_job_collection": ("collection",),
     "linkedin_premium_status": (),
@@ -881,8 +883,22 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: parameterless reads in one registry, counted off `mcp.list_tools()` on
 #: the merged tree, never summed. No census decision is made in the merge:
 #: each lane's rows moved on its own branch (above).
-PINNED_TOOL_COUNT = 110
-PINNED_PARAMETER_COUNT = 164
+#: **AT LANE NET7 (2026-11-27): 107 TOOLS AND 166 PARAMETERS** -- no tool
+#: added; `linkedin_people_search_shape` gains four, `followers_of`,
+#: `school_ids`, `industry_ids` and `actively_hiring`, beside the 162,
+#: counted off `mcp.list_tools()`, never summed. THE CENSUS DECISION, IN THE
+#: SAME COMMIT: `N 86`, `N 88`, `N 89`, `N 82` and `N 26b` GAP ->
+#: COVERED-UNFIRED on them, never fired. See `_audit/2026-11-27-net7.md`.
+#: **ON THE SAME LANE: 108 TOOLS AND 166 PARAMETERS** -- one READ,
+#: `linkedin_premium_matches()`, of no parameter, beside the 107 and 166,
+#: counted off `mcp.list_tools()`, never summed. THE CENSUS DECISION, IN THE
+#: SAME COMMIT: `N 199` GAP -> COVERED-UNFIRED on it, never fired.
+#: **111 TOOLS AND 168 PARAMETERS AT INTEGRATION 7, MERGE 5 (2026-11-27)** -- lane net7's
+#: `linkedin_premium_matches()` and its four people-search parameters beside
+#: the 110 tools and 164 parameters above, counted off `mcp.list_tools()` on
+#: the merged tree, never summed. No census decision is made in the merge.
+PINNED_TOOL_COUNT = 111
+PINNED_PARAMETER_COUNT = 168
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:

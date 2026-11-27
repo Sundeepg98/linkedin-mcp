@@ -534,6 +534,35 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "**WHAT WOULD MAKE THIS ENTRY WRONG:** a note of this lane saying an "
         "earlier paragraph of its row was untrue while leaving it unmarked."
     ),
+    # 2026-11-27, lane net7. READ, not inferred from the filenames: every
+    # network.md line citing the lane's record was listed with the guard's own
+    # vocabulary and window and every match placed; none is in a paragraph of
+    # this lane.
+    ("network.md", "2026-11-27-net7.md"): (
+        "EIGHT MOVES AND FIFTEEN NOTES, NOT A CORRECTION. Rows 82, 86, 88, "
+        "89 and 26b gained the paragraph that moves them GAP -> COVERED-UNFIRED "
+        "on four people-search facets, row 199 the paragraph that moves it GAP "
+        "-> COVERED-UNFIRED on its reader, and in the lane's round 2 rows 93 and "
+        "27 the paragraph that moves them GAP -> MEASURED-ABSENT on the "
+        "orchestrator's rulings; rows 14, 22, 24, 28, 32, 62, 90, 91, 92, 97, "
+        "98 and 110 each gained one note naming the step session 12's capture "
+        "or a ruling now gives them, and rows 13, 15 and 16 one note each on "
+        "the received leaf their landing check now accepts (no correction "
+        "word stands within the window of those three, nor of row 199); three "
+        "DELTA paragraphs name the record. Each "
+        "cites this record and none says an earlier paragraph of its row was "
+        "untrue (row 26b's names lane S's 2026-09-28 sentence as contradicted "
+        "by that lane's own table and leaves it as written). Every matched "
+        "word is older text in the rows' own cells or their neighbours: "
+        "'returns False' for `reachable_by_this_route` and 'BLOCKER CORRECTED "
+        "2026-09-21' in rows 84 to 92, row 83's 'CORRECTED 2026-09-21', "
+        "'False' in rows 80 and 81, row 33's 'CORRECTED', 'false', 'refutes' "
+        "and 'wrong' beside row 32, row 63's 'correction' and 'false' beside "
+        "row 62, and row 99's 'false' and 'overturn' and row 100's "
+        "'correction' beside rows 97 and 98. **WHAT WOULD MAKE THIS ENTRY "
+        "WRONG:** a paragraph of this lane saying an earlier paragraph of its "
+        "row was untrue while leaving it unmarked."
+    ),
     ("network.md", "2026-09-28-lane-k-ledger.md"): (
         "THIS LANE'S NOTES CITE LANE K'S RECORD AS WHERE THEIR QUESTIONS LIVE, "
         "NOT AS A DOCUMENT THEY CORRECT. Rows 6, 40 and 200 each name the "

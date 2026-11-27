@@ -1996,7 +1996,11 @@ BLOCKED = [
     # unrecorded leaf and an act-shaped sub-path
     # (tests/test_lane_a_admissions.py holds the rest).
     "https://www.linkedin.com/mynetwork/invitation-manager/?filterCriteria=x",
-    "https://www.linkedin.com/mynetwork/invitation-manager/received/",
+    # ``.../invitation-manager/received/`` WAS HERE UNTIL 2026-11-27 and is
+    # now READABLE (lane net7, on the orchestrator's ruling for N 13: live
+    # session 12 landed there, load 28). Recorded rather than silently
+    # dropped; a query on it stands in.
+    "https://www.linkedin.com/mynetwork/invitation-manager/received/?x=1",
     "https://www.linkedin.com/mynetwork/invitation-manager/sent/withdraw/",
     "https://www.linkedin.com/in/someone/edit/topcard/",
     "https://www.linkedin.com/psettings/open-to-work",
@@ -2848,7 +2852,12 @@ MUST_STAY_UNREADABLE = (
     # names). Recorded rather than silently dropped; the pages below it, which
     # did not travel with it, stand in.
     "https://www.linkedin.com/mynetwork/?x=1",
-    "https://www.linkedin.com/mynetwork/discovery-see-all/",
+    # ``https://www.linkedin.com/mynetwork/discovery-see-all/`` WAS HERE UNTIL
+    # 2026-11-27 and is now READABLE (lane net7, GROW-SUGGESTIONS-BY-
+    # ADMISSION-NOT-SCROLL: his full suggestion lists by their own anchored
+    # line, refused by allowlist silence alone). Recorded rather than silently
+    # dropped; a query on it stands in.
+    "https://www.linkedin.com/mynetwork/discovery-see-all/?x=1",
     "https://www.linkedin.com/mynetwork/import-contacts/",
     # ADDED 2026-09-03, in the commit admitting the CONNECTIONS list. These
     # are the addresses that must not travel with it. ``/mynetwork/`` itself

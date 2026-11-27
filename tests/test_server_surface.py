@@ -1,4 +1,13 @@
-"""The tool surface: one hundred and ten tools, seventy of which do not write.
+"""The tool surface: one hundred and eleven tools, seventy-one of which do not write.
+
+**IT READ "one hundred and ten tools, seventy of which do not write" UNTIL
+INTEGRATION 7 MERGED LANE NET7 (2026-11-27)**, its one READ beside the
+others; measured off the merged registry, not summed.
+
+**IT READ "one hundred and seven tools, sixty-eight of which do not write"
+UNTIL LANE NET7 (2026-11-27)**: one READ, ``linkedin_premium_matches``
+(census ``N 199``), so sixty-nine do not write. Measured off this branch's
+registry, not summed; the integrator re-derives it on the merged tree.
 
 **IT READ "one hundred and eight tools, sixty-eight of which do not write"
 UNTIL INTEGRATION 7 MERGED LANE SETTINGS7 (2026-11-27)**, its two READS beside
@@ -516,6 +525,10 @@ EXPECTED_TOOLS = {
     # write table.
     "linkedin_my_verifications",
     "linkedin_my_premium_account",
+    # 2026-11-27 (lane net7, built on live session 12's capture of its page):
+    # one READ of one admitted page with no press -- his Premium networking
+    # matches, each member a people record beside a job id (census N 199).
+    "linkedin_premium_matches",
     # THE THIRTY-EIGHTH, 2026-09-05: linkedin_events_home, a READ. No
     # write was added. It is the only tool here whose whole answer can be
     # ZERO, and its reader returns that integer only when four
@@ -958,8 +971,17 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_one_hundred_and_ten_tools(tools):
-    """RENAMED AT INTEGRATION 7 (2026-11-27), to
+async def test_the_surface_is_exactly_the_one_hundred_and_eleven_tools(tools):
+    """RENAMED AGAIN AT INTEGRATION 7 (2026-11-27), merge 5, to
+    ``..._one_hundred_and_eleven_tools``: lane net7's read (census N 199)
+    beside the one hundred and ten, measured off the merged registry.
+
+    RENAMED AGAIN ON LANE NET7 (2026-11-27), to
+    ``..._one_hundred_and_eight_tools``: one READ, ``linkedin_premium_matches``
+    (census N 199), beside the one hundred and seven. MEASURED off this
+    branch's registry; the name moved with the pin.
+
+    RENAMED AT INTEGRATION 7 (2026-11-27), to
     ``..._one_hundred_and_ten_tools``: lane settings7's two reads (census
     P K1, P N22) beside lane msg7's write, measured off the merged registry;
     each lane's branch had renamed it for its own count (below).
@@ -1616,7 +1638,11 @@ async def test_the_surface_is_exactly_the_one_hundred_and_ten_tools(tools):
     # split moves on its read side. MEASURED off mcp.list_tools(), not summed.
     # ONE HUNDRED AND TEN AT INTEGRATION 7, MERGE 4 (2026-11-27): both lanes' tools, MEASURED off
     # mcp.list_tools() on the merged tree, not summed.
-    assert len(tools) == 110
+    # ONE HUNDRED AND EIGHT ON LANE NET7 (2026-11-27): one READ,
+    # linkedin_premium_matches. MEASURED off mcp.list_tools(), not summed.
+    # ONE HUNDRED AND ELEVEN AT INTEGRATION 7, MERGE 5 (2026-11-27): every lane's tools, MEASURED off
+    # mcp.list_tools() on the merged tree, not summed.
+    assert len(tools) == 111
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -1929,8 +1955,12 @@ async def test_the_surface_is_exactly_the_one_hundred_and_ten_tools(tools):
     # moves with the first test's pin. MEASURED.
     # SEVENTY AND ONE HUNDRED AND TEN AT INTEGRATION 7, MERGE 4 (2026-11-27): settings7's two reads
     # and msg7's write in one registry, MEASURED.
-    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 70
-    assert len(tools) == 110
+    # ONE HUNDRED AND EIGHT AND SIXTY-NINE ON LANE NET7 (2026-11-27): one READ,
+    # linkedin_premium_matches. MEASURED.
+    # SEVENTY-ONE AND ONE HUNDRED AND ELEVEN AT INTEGRATION 7, MERGE 5 (2026-11-27): net7's read
+    # beside the others in one registry, MEASURED.
+    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 71
+    assert len(tools) == 111
 
 
 def test_the_read_that_was_nearly_named_a_write():

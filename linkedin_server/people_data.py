@@ -737,6 +737,9 @@ PEOPLE_TOOLS: frozenset[str] = frozenset(
         "linkedin_my_unfollowed_list",
         # 2026-11-26 (lane readers-msg26, census M C93): one content search page.
         "linkedin_search_content",
+        # 2026-11-27 (lane net7, census N 199): his Premium networking matches,
+        # one page, each member a person record beside a job id.
+        "linkedin_premium_matches",
     }
 )
 

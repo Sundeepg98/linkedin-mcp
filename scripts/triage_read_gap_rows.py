@@ -212,24 +212,24 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
     # N 194); _audit/2026-10-10-lane-b2-network-build.md section 3.
     # N 81 LEFT 2026-09-28 (lane S, the orchestrator's call of 17:02) -- see
     # LEFT THE READ-GAP SET below.
-    "N 82": ("BUILDABLE", "", "served by the shipped people-search tool's "
-                              "filter vocabulary"),
+    # N 82 LEFT 2026-11-27 (lane net7): the actively-hiring facet, see LEFT
+    # THE READ-GAP SET below.
     # N 84, N 85 and N 87 LEFT 2026-09-24: lane S built their facet readers
     # (COVERED-UNFIRED), and the WHO rule keeps them there -- each is a FILTER.
-    "N 86": ("BUILDABLE", "", "served by the shipped people-search tool's "
-                              "filter vocabulary"),
-    "N 88": ("BUILDABLE", "", "served by the shipped people-search tool's "
-                              "filter vocabulary"),
-    "N 89": ("BUILDABLE", "", "served by the shipped people-search tool's "
-                              "filter vocabulary"),
+    # N 86 LEFT 2026-11-27 (lane net7): the followers-of facet, see LEFT THE
+    # READ-GAP SET below.
+    # N 88 LEFT 2026-11-27 (lane net7): the school facet, see LEFT THE
+    # READ-GAP SET below.
+    # N 89 LEFT 2026-11-27 (lane net7): the industry facet, see LEFT THE
+    # READ-GAP SET below.
     "N 90": ("BUILDABLE", "", "served by the shipped people-search tool's "
                               "filter vocabulary"),
     "N 91": ("BUILDABLE", "", "served by the shipped people-search tool's "
                               "filter vocabulary"),
     "N 92": ("BUILDABLE", "", "served by the shipped people-search tool's "
                               "filter vocabulary"),
-    "N 93": ("BUILDABLE", "", "served by the shipped people-search tool's "
-                              "filter vocabulary"),
+    # N 93 LEFT 2026-11-27 (lane net7's round 2): MEASURED-ABSENT on
+    # KEYWORD-FIELDS-MEASURED-ABSENT -- see LEFT THE READ-GAP SET below.
     # N 94 LEFT 2026-09-24: lane S composes several locations into one
     # search from the tool's arguments (COVERED-UNFIRED, a FILTER row).
     # N 95 LEFT 2026-11-26: lane build-net2 built its read on
@@ -282,12 +282,8 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
     # READ-GAP SET below. It had stayed BUILDABLE under
     # WHO-WHICH-COUNTS-ARE-NOT-DELIVERY (2026-09-24): the page names no member.
     # N 197 LEFT 2026-10-10 (lane B5) -- see LEFT THE READ-GAP SET below.
-    "N 199": ("ADDRESS", "ABSENT", "the Premium suggestions page is drawn from "
-                                   "a notification and no pattern names it; "
-                                   "the list is of other people, so as "
-                                   "WHO-WHICH-COUNTS-ARE-NOT-DELIVERY rules an "
-                                   "admission and a count reader would still "
-                                   "not deliver it"),
+    # N 199 LEFT 2026-11-27 (lane net7): his Premium networking matches as
+    # people records -- see LEFT THE READ-GAP SET below.
     # ---- RETURNED by lane R, 2026-09-23 (its own class; see VERDICTS) ----
     # N 9 LEFT 2026-11-26: lane readers-net26 built its reader over live
     # session 11's capture of its page (COVERED-UNFIRED), so its line goes,
@@ -303,11 +299,10 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
     # N 25 AND N 26 LEFT 2026-09-28 (lane S, the orchestrator's call of
     # 17:46) -- see LEFT THE READ-GAP SET below. N 26b, split from N 26 the
     # same day, ENTERED:
-    "N 26b": ("BUILDABLE", "", "split from N 26 2026-09-28: the people "
-                               "search the shipped tool reads is admitted, and "
-                               "no school or industry facet is composed; a "
-                               "capture of LinkedIn's own spelling comes first"),
-    "N 27": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
+    # N 26b LEFT 2026-11-27 (lane net7): the school and industry facets
+    # beside the degree filter, see LEFT THE READ-GAP SET below.
+    # N 27 LEFT 2026-11-27 (lane net7's round 2): MEASURED-ABSENT on
+    # CONNECTIONS-CONTROLS-MEASURED-ABSENT -- see LEFT THE READ-GAP SET below.
     "N 28": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
     "N 32": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
     # N 38 LEFT 2026-11-26: lane readers-net26 built its reader over live
@@ -384,6 +379,32 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
 #:            by dom.read_search_appearances, the employer kept in the page
 #:     N 195  COVERED-UNFIRED  (was BUILDABLE) -- recruiter insights, the
 #:            viewers as people records (recruiter_views.read_recruiter_views)
+#:
+#: LEFT THE READ-GAP SET 2026-11-27, on lane net7's reader: built offline over
+#: live session 12's capture of the page and never fired.
+#:
+#:     N 199  COVERED-UNFIRED  (was ADDRESS) -- his Premium networking matches,
+#:            each a people record beside a job id (premium_matches.read_matches)
+#:
+#: LEFT THE READ-GAP SET 2026-11-27, on lane net7's round 2 (the orchestrator's
+#: rulings of 13:25): two readings retired.
+#:
+#:     N 93   MEASURED-ABSENT  (was BUILDABLE) -- the open panel draws no
+#:            keyword field (KEYWORD-FIELDS-MEASURED-ABSENT)
+#:     N 27   MEASURED-ABSENT  (was RETURNED) -- no Talks-about filter on three
+#:            surfaces (CONNECTIONS-CONTROLS-MEASURED-ABSENT)
+#:
+#: LEFT THE READ-GAP SET 2026-11-27, on lane net7's build (wave 7): four
+#: people-search facets, each a section live session 12's open All-filters
+#: panel draws, sent as the address LinkedIn writes for it; never fired.
+#:
+#:     N 82   COVERED-UNFIRED  (was BUILDABLE) -- activelyHiring, the JSON
+#:            string LinkedIn writes
+#:     N 86   COVERED-UNFIRED  (was BUILDABLE) -- followerOf, one member token
+#:     N 88   COVERED-UNFIRED  (was BUILDABLE) -- schoolFilter
+#:     N 89   COVERED-UNFIRED  (was BUILDABLE) -- industry
+#:     N 26b  COVERED-UNFIRED  (was BUILDABLE) -- the school and industry
+#:            facets beside network F
 #:
 #: LEFT THE READ-GAP SET 2026-09-28, on the orchestrator's order of 15:10
 #: (lane S): each the people search a first-degree profile's topcard links

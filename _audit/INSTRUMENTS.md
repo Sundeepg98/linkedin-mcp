@@ -13388,6 +13388,95 @@ measured by keyed shape. The summary and the module heading named the table; and
   box, the writer re-measures four navigating readers as timed out.
 * **The batch runners and the plant scripts.**
 
+## 115. A FILTER THE PANEL DRAWS IS SENT AS THE ADDRESS LINKEDIN WRITES, AND A MATCH CARD IS FOUND BY LINKEDIN'S OWN WORDS (net7, 2026-11-27)
+
+Lane net7's instruments, wave 7 (`_audit/2026-11-27-net7.md`, sections 2, 3,
+5, 7 and 10). Each entered only after it was SHOWN FAILING; the offline probes
+that read session 12's keyed skeletons are declared disposable (115.6).
+
+### 115.1 The live-12 word fixtures (`scripts/_build_live12_net7_word_skeletons.py`)
+
+Six fixtures from session 12's KEYED skeletons -- the two open people panels,
+the Premium matches page, the received tab's pills and his connections page --
+LinkedIn's words put back only where the keyed shape proves them, through the
+base builder's `build()` (imported): a declared word that matches nowhere
+refuses, and the base copy must equal the committed capture or the build
+refuses. SHOWN FAILING: `tests/test_live12_net7_word_fixtures.py`, each
+fixture with its control word off the list leaves a difference nothing
+explains (6 of 6).
+
+    A WORD IS WRITTEN ONLY WHERE ITS KEYED SHAPE MATCHED, AND THE INPUT IS
+    SHOWN TO BE THE CAPTURE THE REPOSITORY HOLDS.
+
+### 115.2 Four facets on the people search (`people_search.FACETS`, `ACTIVELY_HIRING_KEY`)
+
+`followerOf`, `schoolFilter`, `industry` and the `activelyHiring` switch, each
+after every older facet so no earlier address changes; `landing_verdict` reads
+a JSON string as its text. SHOWN FAILING: `tests/test_net7_people_search_facets.py`
+on the unchanged code, 17 failed and 5 passed (the premises); five facet
+mutations, each RED (115.5).
+
+    A FILTER BEHIND A PRESS NO TOOL MAY MAKE IS SENT AS THE ADDRESS LINKEDIN
+    WRITES FOR IT, AND ITS LANDING SAYS WHAT LINKEDIN KEPT.
+
+### 115.3 The Premium matches reader (`premium_matches.read_matches`)
+
+A card is a job link whose line opens `Hiring for` -- matched in the page --
+and its nearest block holding a member link; every card pinned to a handle
+before any text, its link read again after. SHOWN FAILING: the tracked copy,
+LinkedIn's words reduced to `x`, finds no card and raises
+(`tests/test_premium_matches.py`); six reader mutations, each RED (115.5).
+
+    A CARD IS FOUND BY LINKEDIN'S OWN WORDS, NEVER BY ITS PLACE AMONG CARDS.
+
+### 115.4 The near misses of two admissions (`tests/test_net7_admissions.py`)
+
+`/mynetwork/discovery-see-all/` and `/mynetwork/invitation-manager/received/`,
+each one anchored line; each held by its address admitted, every near miss --
+a query, a sub-path, a longer word, a sibling page, a traversal, plain http --
+refused, and its exemption exactly the substrings it trips. SHOWN FAILING:
+before each line, 3 failed and 9 passed, then 4 failed and 7 passed.
+
+    AN ADMISSION IS SHOWN ANCHORED BY WHAT IT STILL REFUSES.
+
+### 115.5 The mutation pass (disposable runner)
+
+Eleven mutations, each weakening one check of 115.2 or 115.3, each run against
+the test that should catch it: 11 of 11 RED as FAILED tests (none an error),
+both files restored byte for byte. The table is the record's section 7.
+
+### 115.6 Declared disposable
+
+The keyed-shape probes in the lane's gitignored scratch -- the word counter and
+outline printer, the three pill brute-forcers, the at-line tester, the
+href-form and href-word readers, the N 24 measurement -- and the census,
+queue, ledger, pin and tool-table edit scripts and the mutation runner. Each
+read the live lane's preserved keyed skeletons or this worktree and printed
+counts or closed words only. Added in the fix round: the merged-tree
+refused-address probe (the record's section 10.5), which wraps the shipped gate
+and never edits it, and the curation-receipt mutation runner (115.7).
+
+### 115.7 The curation receipt reads a change (`feed_curation.verification_verdict`)
+
+FEED-CURATION-RECEIPT-NEEDS-A-CHANGE, the shape of lane msg7's fix to the save
+receipt (its section 116). The receipt of `linkedin_mark_not_interested` (census `N 154`)
+takes the gate's reading, made just before the `Not interested` press, as its
+baseline. Hidden only when the page's main draws more undo controls than the
+gate counted there, a new undo beside the item; the menu still open with
+nothing changed is not landed; a refused gate is not pressed; anything else is
+unverified. Each sentence opens with its closed word (`feed_curation.OUTCOMES`).
+SHOWN FAILING: `tests/test_mark_not_interested.py`, its new tests on the
+lane's certified module, 7 failed and 10 passed. Six failed on the defect
+itself: an undo already on the page read hidden, beside the item or outside
+the main, and so did the menu left open beside one, a new undo outside the
+main, and a refused gate beside one, which read performed: true with only the
+trigger pressed. One failed on the new API, and both controls passed. Green:
+17 passed. Eight mutations, each killed by FAILED tests, none by an error (the
+record's section 13.3).
+
+    A RECEIPT READS A CHANGE THE PRESS MADE, NEVER A PRESENCE THE PAGE
+    ALREADY HAD.
+
 ## 116. A READ IS CHOSEN BY THE DESIGN THE PAGE DRAWS, AND A SECOND PRESS IS ONE THE OWNED MENU NAMES EXACTLY (msg7, 2026-11-27)
 
 Lane msg7's instruments, wave 7, built offline on live session 12's captures.

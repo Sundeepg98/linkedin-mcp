@@ -2337,8 +2337,20 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # is recorded and that spelling gets its own line then. KEPT 2026-10-10
     # by RECEIVED-INVITATIONS-READ-STAYS-ADMITTED: whatever a read changes in
     # an invitation's seen state is a passive cost, UNMEASURED on those rows,
-    # reopened when a capture shows the sender can see it.
+    # reopened when a capture shows the sender can see it. [AMENDED
+    # 2026-11-27, COMMENT ONLY: it does -- live session 12, load 28, landed on
+    # the `received` leaf -- and that spelling's own line is the next one.]
     re.compile(r"^https://www\.linkedin\.com/mynetwork/invitation-manager/?$"),
+    # LANE NET7 (2026-11-27), on the orchestrator's ruling of 13:25 ("one
+    # reader must not be split across two lanes"): the received tab's own
+    # leaf, where LinkedIn now lands the line above (live session 12, load
+    # 28: redirected one level deeper, the tab strip's `Received` link
+    # current at this spelling). The same page and the same read -- census
+    # N 13, N 14, N 19 -- under the same rulings: READ-PAST-AN-ACT-SUBSTRING
+    # (one anchored line, its one exemption below excusing exactly
+    # "invitation", the tuple unchanged), RECEIVED-INVITATIONS-READ-STAYS-
+    # ADMITTED and RECEIVED-BADGE-IS-THE-READS-COST. No query, no sub-path.
+    re.compile(r"^https://www\.linkedin\.com/mynetwork/invitation-manager/received/?$"),
     # The invitation manager, sent tab (census N 9, N 11). NAMED, as above.
     re.compile(r"^https://www\.linkedin\.com/mynetwork/invitation-manager/sent/?$"),
     # The people he follows (census N 38). NAMED: this module's own
@@ -2705,6 +2717,22 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # after, as `linkedin_connections` does. Every control stays refused by the
     # press gate.
     re.compile(r"^https://www\.linkedin\.com/mynetwork/?$"),
+    # LANE NET7 (2026-11-27), GROW-SUGGESTIONS-BY-ADMISSION-NOT-SCROLL (the
+    # orchestrator, 13:25; integration 7 registers it): his full People You
+    # May Know lists (census N 97, N 98, N 62), RECORDED in LinkedIn's app
+    # route table ("My Network: full discovery lists",
+    # `completeness-annotations.tsv`) and drawn as the 'Show all' lane Y2 read
+    # (2026-09-24). `/mynetwork/` now lands on its Grow tab, whose first render
+    # draws no suggestion module (live session 12, load 8), and
+    # SCROLL-NOT-SANCTIONED stands, so the lists are read at their own address.
+    # Refused by allowlist silence alone (no substring): READ-PAST-AN-ACT-
+    # SUBSTRING's second clause, one anchored line, NO QUERY and NO SUB-PATH.
+    # THE PAGE LISTS OTHER PEOPLE: a reader owes NAMES-AT-RUNTIME and
+    # PEOPLE-DATA-MITIGATIONS under MEMBER-ROSTERS-AS-BOUNDED-READS, and its
+    # capture is people-gated -- raws withheld, skeletons only -- with its
+    # landing check, in live session 14. No row moves on this line alone.
+    # Every control stays refused by the press gate.
+    re.compile(r"^https://www\.linkedin\.com/mynetwork/discovery-see-all/?$"),
     # ----------------------------------------------------------------------
     # LANE ADMIT26, NAMED SETTINGS PAGES -- each by its exact address, in its
     # own commit, as NAMED-SETTINGS-PAGES-RATIFIED reads ONE-NAMED-SETTINGS-
@@ -3401,6 +3429,12 @@ _FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS: tuple[
     ),
     (
         re.compile(r"^https://www\.linkedin\.com/mynetwork/invitation-manager/sent/?$"),
+        frozenset({"invitation"}),
+    ),
+    # LANE NET7 (2026-11-27): the second gate of the received leaf's pair,
+    # excusing exactly the one substring that address trips, measured.
+    (
+        re.compile(r"^https://www\.linkedin\.com/mynetwork/invitation-manager/received/?$"),
         frozenset({"invitation"}),
     ),
     (

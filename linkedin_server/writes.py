@@ -1449,8 +1449,12 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "WHAT PRESSING 'Not interested' DRAWS IS UNMEASURED: the undo's word "
             "is DERIVED ('Undo'), and whether LinkedIn hides an item on its own "
             "permalink at all is unseen. The verification reads the page IN "
-            "PLACE: an Undo drawn is the act's only proof; no Undo, with the menu "
-            "closed, is unknown -- never 'not done'. A dialog is counted and "
+            "PLACE, AND AS A CHANGE (FEED-CURATION-RECEIPT-NEEDS-A-CHANGE): a NEW "
+            "Undo in the page's main, beside the item, against the count the "
+            "gate took just before the press, is the act's only proof; an Undo "
+            "already there counts for nothing. The menu still open with its item "
+            "and nothing changed is not landed; anything else is unverified -- "
+            "never 'not done'. A dialog is counted and "
             "never answered. What the mark changes in his feed's ranking is "
             "LinkedIn's. HIS-OWN-CURATION-NOT-OUTWARD proves the act with its "
             "inverse; the inverse, pressing that undo, waits on the undo's "
@@ -8755,8 +8759,9 @@ PERFORMABLE: frozenset[str] = frozenset(
         #   an aimable target    the one trigger in the page's main, then the
         #                        one item inside the portal that trigger owns
         #                        by id -- each strict at its press
-        #   a real verification  IN PLACE: the undo LinkedIn draws once; no
-        #                        undo reads unknown, never "not done"
+        #   a real verification  IN PLACE, as a CHANGE: a NEW undo in the
+        #                        page's main, beside the item (DERIVED);
+        #                        else unverified, never "not done"
         #   no new permission    TWO presses through perform()'s one click
         #                        site, the second appended only by a gate
         #
@@ -10386,10 +10391,13 @@ _VERIFIED_FROM["mark_not_interested"] = (
     "IN PLACE, on the permalink the press was made on, before any "
     "navigation: the undo LinkedIn draws in a hidden item's place is drawn "
     "once, and HIS-OWN-CURATION-NOT-OUTWARD proves the act only through it. "
-    "Its word is DERIVED ('Undo'), never captured, so an undo read is its "
-    "first reading; no undo with the menu closed answers unknown -- never "
-    "'not done' -- and only the menu still open with its item unpressed "
-    "answers not done."
+    "Read as a CHANGE against the counts the gate took just before the press "
+    "(FEED-CURATION-RECEIPT-NEEDS-A-CHANGE): a NEW undo in the page's main, "
+    "beside the item, is the act's reading. Its word is DERIVED ('Undo'), "
+    "never captured, so a reading is its first. An undo already on the page "
+    "counts for nothing; the menu still open with its item and nothing "
+    "changed answers not landed; anything else answers unverified -- never "
+    "'not done'."
 )
 # 2026-11-27 (lane msg7, M C36).
 _VERIFIED_FROM["save_post"] = (
@@ -12010,6 +12018,8 @@ async def _verify_after(
     opened: Optional[dict[str, Any]] = None,
     typed: bool = False,
     badge_before: Optional[dict[str, Any]] = None,
+    curation_before: Optional[dict[str, Any]] = None,
+    curation_attempted: Optional[bool] = None,
     witness: Optional[dict[str, Any]] = None,
     first_contact_after: Optional[dict[str, Any]] = None,
     send_attempted: Optional[bool] = None,
@@ -12563,11 +12573,21 @@ async def _verify_after(
     if spec.action == "mark_not_interested":
         # IN PLACE (lane build-net2, N 154): the undo LinkedIn draws is drawn
         # once, so the page the press was made on is read again where it is,
-        # with no navigation. An Undo drawn is hidden (DERIVED word); the
-        # menu still open with its item is not done; else unknown.
+        # with no navigation -- and read as a CHANGE
+        # (FEED-CURATION-RECEIPT-NEEDS-A-CHANGE, the orchestrator, 2026-11-27,
+        # lane net7). ``curation_before`` is the reading the gate took just
+        # before the 'Not interested' press: hidden only when the page's main
+        # draws more undo controls than it counted there, a new undo beside
+        # the item. An item the gate never let through was never pressed, and
+        # that answer needs no reading at all.
         url = str(spec.url_template).format(target=url_target_of(spec, grant.target))
+        if not curation_attempted:
+            _facts, state, why = feed_curation.verification_verdict(
+                {}, before=curation_before, pressed=False
+            )
+            return (state, why, "")
         _facts, state, why = feed_curation.verification_verdict(
-            await feed_curation.read_item(page)
+            await feed_curation.read_item(page), before=curation_before, pressed=True
         )
         return (state, why, url)
 
@@ -14637,7 +14657,8 @@ async def perform(
                     # THE ITEM WAS PRESSED. What it left, read before anything
                     # else -- counts only; nothing more is pressed.
                     curation_after_press = feed_curation.after_press_note(
-                        await feed_curation.read_item(page)
+                        await feed_curation.read_item(page),
+                        before=(curation_gate or {}).get("observed"),
                     )
                 elif spec.action == "save_post" and clicks_made == 1:
                     # THE TRIGGER OPENED A MENU (lane msg7, M C36): "Save" is
@@ -14879,6 +14900,20 @@ async def perform(
             # HIS WORDS WERE IN THE BOX by a fill, or already, by the draft rule.
             typed=fills_made > 0 or drafts_used > 0,
             badge_before=badge_before,
+            # WHAT THE PAGE DREW JUST BEFORE THE 'Not interested' PRESS, and
+            # whether that press was ever let through (lane net7,
+            # FEED-CURATION-RECEIPT-NEEDS-A-CHANGE): a hidden reading must be a
+            # change this press made.
+            curation_before=(
+                curation_gate.get("observed")
+                if spec.action == "mark_not_interested" and curation_gate is not None
+                else None
+            ),
+            curation_attempted=(
+                spec.action == "mark_not_interested"
+                and curation_gate is not None
+                and curation_gate.get("proceed") is True
+            ),
             witness=switch_fresh,
             first_contact_after=first_contact_after,
             # WHETHER SEND WAS EVER LET THROUGH (the call of 2026-09-28 19:48):
