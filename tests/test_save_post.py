@@ -98,6 +98,7 @@ document.addEventListener('click', function (e) {
   window.__itemPresses += 1;
   var leave = '%(leave)s';
   if (leave === 'open') return;
+  if (leave === 'flip') { item.textContent = 'Unsave'; return; }
   if (pop) pop.hidePopover();
   document.querySelector('main button[aria-label^="Open control menu"]').removeAttribute('aria-expanded');
   if (leave === 'saved') {
@@ -110,15 +111,25 @@ document.addEventListener('click', function (e) {
 </script>"""
 
 
-def answering(leave: str, *, already_saved: bool = False) -> str:
+#: A LIVE REGION ALREADY CARRYING THE WORD BEFORE ANY PRESS -- a stale toast, or
+#: another part of the page. PLANTED, a fixture CHOICE: no capture holds one, and
+#: it is the shape a real save's confirmation is DERIVED to take, which makes it
+#: the hardest case for a reading in place (SAVE-RECEIPT-NEEDS-A-CHANGE).
+_STALE_REGION = '<div role="status"><p>Saved</p></div>'
+
+
+def answering(leave: str, *, already_saved: bool = False, stale: bool = False) -> str:
     """The OPEN capture made closed -- the trigger's aria-expanded removed --
     with the press-answering script. DERIVED: what the item's press leaves is
-    the test's choice (``saved``, ``nothing``, ``open``); an item already saved
-    is DERIVED to draw ``Unsave`` in ``Save``'s place."""
+    the test's choice (``saved``, ``nothing``, ``open``, or ``flip``: the menu
+    stays open and the item's word becomes ``Unsave``); an item already saved
+    is DERIVED to draw ``Unsave`` in ``Save``'s place; ``stale`` plants a
+    'saved' live region before any press."""
     closed = _plant(OPEN, f'aria-label="{LABEL}" aria-expanded="true"', f'aria-label="{LABEL}"')
     if already_saved:
         closed = _plant(closed, _SAVE_WORD, ">\nUnsave\n<")
-    return closed.replace("</body>", _SCRIPT % {"leave": leave} + "</body>", 1)
+    extra = (_STALE_REGION if stale else "") + _SCRIPT % {"leave": leave}
+    return closed.replace("</body>", extra + "</body>", 1)
 
 
 class Navigator:
@@ -197,11 +208,53 @@ def test_the_verdicts_say_what_they_saw_in_counts():
     assert fs.menu_verdict(dict(owned, items_in_owned_menu=0))["refused_condition"] == "item_outside_the_owned_menu"
     assert fs.menu_verdict(dict(owned, triggers_expanded=0))["refused_condition"] == "menu_not_open"
     assert fs.menu_verdict({"error": "TimeoutError"})["refused_condition"] == "unreadable"
-    # IN PLACE: a live region carrying "saved" is saved; the menu still open
-    # with its item is not done; anything else is unknown -- never "not saved".
-    assert fs.verification_verdict({"saved_regions": 1})[1] == fs.SAVED
+    # IN PLACE, AS A CHANGE: a live region carrying "saved" with no count taken
+    # before the press is no confirmation. It read saved until 2026-11-27, which
+    # is the defect the cold verification of 5beac57 found
+    # (SAVE-RECEIPT-NEEDS-A-CHANGE). The menu still open with its item is not
+    # done; anything else is unknown -- never "not saved".
+    assert fs.verification_verdict({"saved_regions": 1})[1] == fs.UNKNOWN
+    assert fs.verification_verdict({"saved_regions": 1}, before={"saved_regions": 0})[1] == fs.SAVED
     assert fs.verification_verdict(owned)[1] == fs.SHOWN
     assert fs.verification_verdict({"triggers": 1})[1] == fs.UNKNOWN
+
+
+def test_a_saved_reading_must_be_a_change_this_press_made():
+    """SAVE-RECEIPT-NEEDS-A-CHANGE (the orchestrator, 2026-11-27, on the cold
+    verification of 5beac57). The verdict counted every visible live region
+    carrying "saved", read nothing before the press, and checked that count
+    before the menu still being open -- so a region drawn BEFORE the press, or
+    by another part of the page, made an unlanded save read saved."""
+    gate = {"triggers_expanded": 1, "items_visible": 1, "items_in_owned_menu": 1}
+    stale = dict(gate, saved_regions=1)
+    closed = {"triggers": 1}
+    # A STALE REGION AND NO CHANGE: unverified, never saved.
+    _facts, state, why = fs.verification_verdict(dict(closed, saved_regions=1), before=stale)
+    assert state == fs.UNKNOWN, why
+    assert why.startswith(fs.UNVERIFIED + ":"), why
+    # ... and beside the menu still open with its Save: the press did not land.
+    _facts, state, why = fs.verification_verdict(dict(gate, saved_regions=1), before=stale)
+    assert state == fs.SHOWN, why
+    assert why.startswith(fs.NOT_LANDED + ":"), why
+    # A REAL CHANGE: one more region than the gate counted, or the menu's flip.
+    assert fs.verification_verdict(dict(closed, saved_regions=1), before=dict(gate, saved_regions=0))[1] == fs.SAVED
+    assert fs.verification_verdict(dict(closed, saved_regions=2), before=stale)[1] == fs.SAVED
+    flipped = {"triggers_expanded": 1, "items_in_owned_menu": 0, "unsave_in_owned_menu": 1}
+    _facts, state, why = fs.verification_verdict(flipped, before=gate)
+    assert state == fs.SAVED, why
+    assert why.startswith(fs.SAVED_BY_THE_PRESS + ":"), why
+    # An Unsave already drawn before the press is no flip.
+    assert fs.verification_verdict(flipped, before=dict(gate, unsave_in_owned_menu=1))[1] == fs.UNKNOWN
+    # NO READING BEFORE THE PRESS: nothing can be shown to be a change.
+    assert fs.verification_verdict(dict(closed, saved_regions=1))[1] == fs.UNKNOWN
+    # A NEW REGION WHILE THE MENU STILL DRAWS Save UNPRESSED: contradictory.
+    assert fs.verification_verdict(dict(gate, saved_regions=1), before=dict(gate, saved_regions=0))[1] == fs.UNKNOWN
+    # NOTHING PRESSED PAST THE TRIGGER: nothing saved by this call.
+    _facts, state, why = fs.verification_verdict({}, before=None, pressed=False)
+    assert state == fs.SHOWN, why
+    assert why.startswith(fs.NOT_PRESSED + ":"), why
+    assert fs.verification_verdict({"error": "TimeoutError"}, before=stale)[1] == fs.UNKNOWN
+    assert set(fs.OUTCOMES) == {fs.SAVED_BY_THE_PRESS, fs.NOT_LANDED, fs.NOT_PRESSED, fs.UNVERIFIED}
 
 
 # ---------------------------------------------------------------------------
@@ -347,6 +400,59 @@ async def test_an_item_already_saved_is_pressed_no_further(writes_on, page, fast
     assert await _witness(page) == {"trigger": 1, "item": 0, "other": 0}
     assert receipt["curation_gate"]["refused_condition"] == "item_not_unique"
     assert receipt["performed"] != True  # noqa: E712 -- never claimed done
+
+
+# ---------------------------------------------------------------------------
+# 3b. SAVE-RECEIPT-NEEDS-A-CHANGE: a saved reading is a change this press made
+# ---------------------------------------------------------------------------
+
+
+async def test_a_saved_region_drawn_before_the_press_is_no_confirmation(writes_on, page, fast_menu):
+    """THE RED THE ORDER NAMES: a page already carrying a 'saved' region, and a
+    press that changes nothing, read item_saved -- performed: true -- at
+    5beac57. The gate's reading, taken just before the Save press, is the
+    baseline the verdict now compares with."""
+    receipt, _act = await _run(page, answering("nothing", stale=True))
+    assert await _witness(page) == {"trigger": 1, "item": 1, "other": 0}
+    gate = receipt["curation_gate"]
+    assert gate["observed"]["saved_regions"] == 1, "the stale region, counted before the press"
+    assert gate["after_the_item_press"]["saved_regions"] == 1
+    assert receipt["verification"]["observed_state"] == fs.UNKNOWN
+    assert receipt["performed"] == writes.UNKNOWN
+    assert receipt["verification"]["why"].startswith(fs.UNVERIFIED + ":")
+
+
+async def test_the_menu_left_open_beside_a_stale_saved_region_is_not_landed(writes_on, page, fast_menu):
+    receipt, _act = await _run(page, answering("open", stale=True))
+    assert receipt["verification"]["observed_state"] == fs.SHOWN
+    assert receipt["performed"] is False
+    assert receipt["verification"]["why"].startswith(fs.NOT_LANDED + ":")
+
+
+async def test_control_a_new_saved_region_beside_a_stale_one_is_saved(writes_on, page, fast_menu):
+    receipt, _act = await _run(page, answering("saved", stale=True))
+    gate = receipt["curation_gate"]
+    assert (gate["observed"]["saved_regions"], gate["after_the_item_press"]["saved_regions"]) == (1, 2)
+    assert receipt["verification"]["observed_state"] == fs.SAVED
+    assert receipt["performed"] is True
+
+
+async def test_the_items_own_menu_flipping_to_unsave_is_saved(writes_on, page, fast_menu):
+    receipt, _act = await _run(page, answering("flip"))
+    assert await _witness(page) == {"trigger": 1, "item": 1, "other": 0}
+    assert receipt["verification"]["observed_state"] == fs.SAVED
+    assert receipt["performed"] is True
+    assert receipt["curation_gate"]["after_the_item_press"]["unsave_in_owned_menu"] == 1
+
+
+async def test_an_item_already_saved_beside_a_stale_saved_region_is_never_claimed_saved(
+    writes_on, page, fast_menu
+):
+    receipt, _act = await _run(page, answering("saved", already_saved=True, stale=True))
+    assert receipt["clicked"]["clicks_made"] == 1, "the trigger and nothing more"
+    assert await _witness(page) == {"trigger": 1, "item": 0, "other": 0}
+    assert receipt["performed"] is False
+    assert receipt["verification"]["why"].startswith(fs.NOT_PRESSED + ":")
 
 
 # ---------------------------------------------------------------------------

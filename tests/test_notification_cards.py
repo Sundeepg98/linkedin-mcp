@@ -158,6 +158,21 @@ def test_nothing_is_pressed_and_nothing_navigates_while_reading(sdui):
     assert sdui["expanded_after"] == 0
 
 
+def test_the_side_effect_says_what_each_design_reports(sdui, classic):
+    """The envelope's side_effect is read on every call. On the server-driven
+    design no row carries an 'unread' key, so its sentence "The per-row
+    'unread' flag is how it stood before this call" was false there (the cold
+    verification of 5beac57, finding 3). And "the only change any tool in this
+    package makes" was false everywhere: thirty-six tools write."""
+    sdui_text, classic_text = sdui["tool"]["side_effect"], classic["tool"]["side_effect"]
+    for text in (sdui_text, classic_text):
+        assert "badge" in text and "cleared" in text
+        assert "only change any tool" not in text
+    assert "per-row 'unread' flag is how it stood before this call" in classic_text
+    assert "per-row 'unread' flag" not in sdui_text
+    assert "unread_note" in sdui_text
+
+
 def test_control_the_classic_page_still_reads_nine_of_nine(classic):
     assert classic["design"] == notification_cards.CLASSIC
     assert len(classic["records"]) == 9, len(classic["records"])

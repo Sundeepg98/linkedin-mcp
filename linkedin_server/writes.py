@@ -1522,9 +1522,12 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
         residue=(
             "WHAT PRESSING 'Save' DRAWS IS UNMEASURED: the confirmation's word is "
             "DERIVED ('saved'), never captured. The verification reads the page "
-            "IN PLACE: a visible live region carrying the word is the act's "
-            "reading; the menu still open with 'Save' unpressed is not saved; "
-            "anything else is unknown -- never 'not saved'. A dialog is counted "
+            "IN PLACE, AND AS A CHANGE (SAVE-RECEIPT-NEEDS-A-CHANGE): saved only "
+            "when more visible live regions carry the word than the gate counted "
+            "just before the press, or when the item's own menu draws 'Unsave' "
+            "where it drew 'Save'; a region already there counts for nothing. "
+            "The menu still open with 'Save' and nothing changed is not landed; "
+            "anything else is unverified -- never 'not saved'. A dialog is counted "
             "and never answered. HIS-OWN-CURATION-NOT-OUTWARD proves the act with "
             "its inverse, and the inverse rides the first supervised fire "
             "(SAVE-POST-UNDER-OWN-CURATION: save, read the drawn Unsave, unsave)."
@@ -8760,8 +8763,9 @@ PERFORMABLE: frozenset[str] = frozenset(
         #                        menu's own "Save", verbatim on every capture
         #   an aimable target    the one trigger, then the one "Save" inside
         #                        the portal that trigger owns -- each strict
-        #   a real verification  IN PLACE: a live region carrying "saved"
-        #                        (DERIVED); none reads unknown, never "not saved"
+        #   a real verification  IN PLACE, as a CHANGE: a NEW live region
+        #                        carrying "saved", or the menu flipping to
+        #                        "Unsave" (both DERIVED); else unverified
         #   no new permission    TWO presses through perform()'s one click
         #                        site, the second appended only by a gate
         #
@@ -10374,10 +10378,13 @@ _VERIFIED_FROM["mark_not_interested"] = (
 # 2026-11-27 (lane msg7, M C36).
 _VERIFIED_FROM["save_post"] = (
     "IN PLACE, on the permalink the press was made on, before any "
-    "navigation: a visible live region carrying the DERIVED word 'saved' is "
-    "the save's reading, never captured, so a reading is its first; the "
-    "menu still open with its 'Save' unpressed answers not done; anything "
-    "else answers unknown -- never 'not saved'."
+    "navigation, and read as a CHANGE against the count the gate took just "
+    "before the press: more visible live regions carrying the DERIVED word "
+    "'saved', or the item's own menu drawing 'Unsave' where it drew 'Save', "
+    "is the save's reading, never captured, so a reading is its first. A "
+    "region already on the page counts for nothing; the menu still open "
+    "with its 'Save' and nothing changed answers not landed; anything else "
+    "answers unverified -- never 'not saved'."
 )
 _VERIFIED_FROM["follow_company_page"] = (
     "a DIFFERENT surface from the one clicked: Manage Pages, where a followed "
@@ -11989,6 +11996,8 @@ async def _verify_after(
     first_contact_after: Optional[dict[str, Any]] = None,
     send_attempted: Optional[bool] = None,
     menu_item_attempted: Optional[bool] = None,
+    save_before: Optional[dict[str, Any]] = None,
+    save_attempted: Optional[bool] = None,
 ) -> tuple[str, str, str]:
     """Read whether it landed, and read it somewhere the click did not reach.
 
@@ -12546,12 +12555,21 @@ async def _verify_after(
 
     if spec.action == "save_post":
         # IN PLACE (lane msg7, M C36): the page the press was made on is read
-        # again where it is, with no navigation. A live region carrying the
-        # DERIVED word 'saved' is saved; the menu still open with its 'Save'
-        # is not done; else unknown.
+        # again where it is, with no navigation -- and read as a CHANGE
+        # (SAVE-RECEIPT-NEEDS-A-CHANGE, the orchestrator, 2026-11-27, on the
+        # cold verification of 5beac57). ``save_before`` is the reading the
+        # gate took just before the Save press: saved only when more live
+        # regions carry 'saved' than it counted, or the item's own menu draws
+        # 'Unsave' where it drew 'Save'. A Save the gate never let through
+        # was never pressed, and that answer needs no reading at all.
         url = str(spec.url_template).format(target=url_target_of(spec, grant.target))
+        if not save_attempted:
+            _facts, state, why = feed_save.verification_verdict(
+                {}, before=save_before, pressed=False
+            )
+            return (state, why, "")
         _facts, state, why = feed_save.verification_verdict(
-            await feed_save.read_item(page)
+            await feed_save.read_item(page), before=save_before, pressed=True
         )
         return (state, why, url)
 
@@ -14613,9 +14631,11 @@ async def perform(
                         click_plan.append(curation_gate["selector"])
                 elif spec.action == "save_post" and clicks_made == 2:
                     # THE ITEM WAS PRESSED. What it left, read before anything
-                    # else -- counts only; nothing more is pressed.
+                    # else -- counts only; nothing more is pressed -- beside
+                    # the count the gate took just before the press.
                     curation_after_press = feed_save.after_press_note(
-                        await feed_save.read_item(page)
+                        await feed_save.read_item(page),
+                        before=(curation_gate or {}).get("observed"),
                     )
                 elif spec.action in invitation_acts.ACTIONS and clicks_made == 1:
                     # THE ONE PRESS WAS MADE (lane build-net2, 2026-11-26).
@@ -14851,6 +14871,19 @@ async def perform(
             # WHETHER A CONVERSATION MENU'S ITEM WAS EVER LET THROUGH (lane
             # build-msg2): an item its gate refused was never pressed.
             menu_item_attempted=menu_gate is not None and menu_gate.get("proceed") is True,
+            # WHAT THE PAGE DREW JUST BEFORE THE SAVE PRESS, and whether that
+            # press was ever let through (lane msg7, SAVE-RECEIPT-NEEDS-A-CHANGE):
+            # a saved reading must be a change this press made.
+            save_before=(
+                curation_gate.get("observed")
+                if spec.action == "save_post" and curation_gate is not None
+                else None
+            ),
+            save_attempted=(
+                spec.action == "save_post"
+                and curation_gate is not None
+                and curation_gate.get("proceed") is True
+            ),
         )
     except Exception as exc:  # noqa: BLE001 - the click already happened
         # WHERE TO GO AND LOOK, when the verification read itself failed.

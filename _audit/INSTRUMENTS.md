@@ -13315,20 +13315,28 @@ one line, the rollback and the blast radius). With the line, 8 passed.
 ### 116.2 `tests/test_notification_cards.py` -- the server-driven page read where its screen is drawn, the old design kept as the control
 
 `linkedin_server/notification_cards.py` is held over session 12's tracked
-`/notifications/`, and session 5's old-design page is the control (9 of 9,
-green throughout). Both run in a local engine with every request aborted.
+`/notifications/`, and session 5's old-design page is the control. The
+control's harvest reads 9 of 9 throughout; its envelope test was red at the
+unwired step, for want of `page_design`. Both run in a local engine with
+every request aborted.
 What it holds:
 * ten cards, each with its time from beside its one `aria-expanded` trigger;
 * `unread` None, never False;
 * ten rows through `linkedin_notifications` itself;
 * seven job-alert rows publishing ONE link (`M C97`'s key);
 * a link labelled from outside itself is no card;
-* the old selectors alone read nothing on the server-driven page.
+* the old selectors alone read nothing on the server-driven page;
+* the side_effect sentence says what each design reports: no per-row unread
+  flag on the server-driven design.
 
 SHOWN FAILING:
 * an ImportError without the module;
-* 5 of 10 red with the server unwired, on the tool's own "nothing readable
-  found" over session 12's page;
+* 4 of 10 red with the certified module and the server unwired, on the
+  tool's own "nothing readable found" over session 12's page and the
+  control's missing `page_design` (the first draft ran 5, its own time
+  defect the fifth);
+* the side_effect test red on 5beac57's server, which claimed a per-row
+  unread flag the server-driven rows do not carry;
 * two mutations of the module, each red on the test named for it: the label
   looked up page-wide, and unread reported False.
 
@@ -13346,7 +13354,10 @@ permalink menus. What it holds:
 * a press that leaves nothing reads unknown, never "not saved";
 * an unowned menu is never pressed;
 * an item already saved (`Unsave` in `Save`'s place) is pressed no further
-  than its trigger.
+  than its trigger;
+* a saved reading is a CHANGE this press made (SAVE-RECEIPT-NEEDS-A-CHANGE):
+  a new region, or the menu flipping to `Unsave`. A region already on the
+  page, a refused gate or the menu left open never reads saved.
 
 SHOWN FAILING:
 * an ImportError;
@@ -13361,9 +13372,14 @@ SHOWN FAILING:
   For the third, a quoted name in Playwright's `role=` engine never matches as
   a substring (measured), so the faithful mutant is the regex
   `name=/save/i`, which reaches `Unsave`.
+* THE FIX ROUND: 5 red on a clean copy of 5beac57, four on behaviour (a stale
+  region read saved, beside an unlanded press, beside the menu left open, and
+  beside a refused gate; the menu's flip unread) and the pure verdicts on
+  their signature; then four mutations of the new verdict (record s3.5).
 
     A PRESS AIMED BY A WORD IS AIMED BY THE WHOLE WORD: "SAVE" IS A
-    SUBSTRING OF "UNSAVE", AND A SAVED ITEM WOULD BE UNSAVED.
+    SUBSTRING OF "UNSAVE", AND A SAVED ITEM WOULD BE UNSAVED. AND A
+    RECEIPT READ IN PLACE READS A CHANGE, NEVER A PRESENCE.
 
 ### 116.4 Declared disposable
 
@@ -13372,6 +13388,6 @@ These were never shown failing as instruments, so none of them enters:
   `_state/lane-scratch/msg7/probes/`: the keyed-shape matcher `kdom.py` and
   probes 1 to 8;
 * the census editors and re-pin scripts;
-* the two mutation scripts;
+* the three mutation scripts;
 * the two page-string baseline measurers. Each imports the guard's own
   `drive()`.

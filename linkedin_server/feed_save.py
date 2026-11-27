@@ -20,6 +20,12 @@ navigates nowhere and returns no page text.
 * ``PEOPLE-DATA-MITIGATIONS``: the item's author is never read. The trigger's
   accessible name carries the author's name after LinkedIn's fixed prefix,
   and the selector names the PREFIX only.
+* ``SAVE-RECEIPT-NEEDS-A-CHANGE`` (the orchestrator, 2026-11-27 17:20 IST, on
+  the cold verification of 5beac57; registration owed at integration 7): "Read
+  the live-region state BEFORE the press. After the press, require a NEW or
+  CHANGED 'saved' region, or the item's own menu state flipping to Unsave,
+  before reporting performed: true. Otherwise report the outcome in closed
+  words (unverified or not_landed). Never claim performed."
 
 ## WHAT IS MEASURED, AND WHERE
 
@@ -43,10 +49,17 @@ lane msg7's record, section 4) -- a ``div`` whose whole text is LinkedIn's word
   beyond the trigger.
 * **What pressing ``Save`` draws.** No capture holds it. DERIVED: a
   confirmation in a live region whose words include ``saved``
-  (:data:`SAVED_WORD`), never seen. The verification is IN PLACE, on the page
-  the press was made on: a visible live region reading the word is saved; the
-  owned menu still open with its ``Save`` unpressed is not saved; anything
-  else is UNKNOWN -- never "not saved". The first supervised press records
+  (:data:`SAVED_WORD`), or the item's own menu drawing ``Unsave`` where it drew
+  ``Save``; neither has been seen. The verification is IN PLACE, on the page
+  the press was made on, and it reads a CHANGE, never a presence
+  (SAVE-RECEIPT-NEEDS-A-CHANGE): the gate's reading, taken just before the
+  ``Save`` press, is the baseline. Saved only when more visible live regions
+  carry the word than the gate counted, or when the owned menu now draws
+  ``Unsave`` where it drew ``Save``. A region already on the page before the
+  press counts for nothing: until 2026-11-27 it read saved, and an unlanded
+  save could report ``performed: true``. The owned menu still open with its
+  ``Save`` and nothing changed is ``not_landed``; anything else is
+  ``unverified`` -- never "not saved". The first supervised press records
   what was drawn, by counts.
 * **The inverse** (``M C37``, unsaving): ``Unsave`` is drawn only after a save,
   in no capture, so it is not built. SAVE-POST-UNDER-OWN-CURATION names the
@@ -56,7 +69,7 @@ lane msg7's record, section 4) -- a ``div`` whose whole text is LinkedIn's word
 from __future__ import annotations
 
 import re
-from typing import Any
+from typing import Any, Optional
 
 from linkedin_server import coerce, feed_curation
 
@@ -74,6 +87,21 @@ SAVE = "Save"
 #: DERIVED, NEVER CAPTURED: the word a save's confirmation is expected to
 #: carry. A reading, never an aim: nothing here presses it.
 SAVED_WORD = re.compile(r"\bsaved\b", re.IGNORECASE)
+
+#: DERIVED, NEVER CAPTURED: the word a saved item's own menu is expected to draw
+#: in ``Save``'s place. A reading, never an aim: nothing here presses it.
+UNSAVE = "Unsave"
+
+#: THE CLOSED WORDS the verification's sentence opens with
+#: (SAVE-RECEIPT-NEEDS-A-CHANGE). ``saved``: a change this press made.
+#: ``not_landed``: the press was made and the menu still draws its ``Save``,
+#: with nothing changed. ``not_pressed``: the gate refused, so nothing past the
+#: trigger was pressed. ``unverified``: anything else.
+SAVED_BY_THE_PRESS = "saved"
+NOT_LANDED = "not_landed"
+NOT_PRESSED = "not_pressed"
+UNVERIFIED = "unverified"
+OUTCOMES: tuple[str, ...] = (SAVED_BY_THE_PRESS, NOT_LANDED, NOT_PRESSED, UNVERIFIED)
 
 #: The states this module knows. ``UNKNOWN`` is ``writes.UNKNOWN``'s spelling,
 #: and ``SHOWN`` is ``feed_curation``'s: the closed item the act starts from.
@@ -93,6 +121,14 @@ ITEM_IN_OWNED_MENU = (
     f"[normalize-space(.)='{SAVE}']"
 )
 ITEM_IN_OWNED_MENU_VISIBLE = ITEM_IN_OWNED_MENU + " >> visible=true"
+#: ``Unsave`` IN THE SAME OWNED MENU: the flip a press could draw, read and
+#: never pressed. Whole word, so ``Save`` and ``Unsave`` never count as each
+#: other.
+UNSAVE_IN_OWNED_MENU = (
+    f"xpath={feed_curation._OWNED_PORTAL}//*[@role='menu']//*[@role='menuitem']"
+    f"[normalize-space(.)='{UNSAVE}']"
+)
+UNSAVE_IN_OWNED_MENU_VISIBLE = UNSAVE_IN_OWNED_MENU + " >> visible=true"
 #: The same item anywhere on the page, visible: the denominator.
 ITEMS_VISIBLE = f'role=menuitem[name="{SAVE}"s] >> visible=true'
 #: The live regions a confirmation could be drawn in.
@@ -108,7 +144,7 @@ MENU_POLL_MS: int = 250
 
 _KEYS = (
     "triggers", "triggers_visible", "triggers_expanded", "items_visible",
-    "items_in_owned_menu", "saved_regions", "dialogs",
+    "items_in_owned_menu", "unsave_in_owned_menu", "saved_regions", "dialogs",
 )
 
 
@@ -129,6 +165,7 @@ async def read_item(page: Any) -> dict[str, Any]:
         out["triggers_expanded"] = await _count(page, OPEN_TRIGGERS)
         out["items_visible"] = await _count(page, ITEMS_VISIBLE)
         out["items_in_owned_menu"] = await _count(page, ITEM_IN_OWNED_MENU_VISIBLE)
+        out["unsave_in_owned_menu"] = await _count(page, UNSAVE_IN_OWNED_MENU_VISIBLE)
         out["saved_regions"] = coerce.as_count(
             await page.locator(LIVE_REGIONS).filter(has_text=SAVED_WORD).count()
         )
@@ -226,9 +263,15 @@ async def menu_item_gate(page: Any) -> dict[str, Any]:
     return verdict
 
 
-def after_press_note(reading: dict[str, Any]) -> dict[str, Any]:
-    """What the ``Save`` press left, as the receipt prints it."""
+def after_press_note(
+    reading: dict[str, Any], *, before: Optional[dict[str, Any]] = None
+) -> dict[str, Any]:
+    """What the ``Save`` press left, as the receipt prints it, beside the count
+    the gate took just before the press (``before``), so a region that was
+    already there is never read as one the press drew."""
     facts = _facts(reading)
+    prior = (f"{_facts(before)['saved_regions']} just before the press"
+             if isinstance(before, dict) else "none counted before the press")
     error = (_error_kind(reading.get("error"))
              if isinstance(reading, dict) and reading.get("error") else None)
     if error:
@@ -241,31 +284,86 @@ def after_press_note(reading: dict[str, Any]) -> dict[str, Any]:
     else:
         sentence = (f"no dialog was visible after {SAVE!r} was pressed; "
                     f"{facts['saved_regions']} visible live region(s) carried the DERIVED "
-                    f"word 'saved', and the trigger is drawn {facts['triggers']} time(s).")
+                    f"word 'saved' ({prior}), {facts['unsave_in_owned_menu']} visible "
+                    f"{UNSAVE!r} item(s) are in the owned menu, and the trigger is drawn "
+                    f"{facts['triggers']} time(s).")
     return {**facts, "error": error, "what_this_means": sentence}
 
 
-def verification_verdict(reading: dict[str, Any]) -> tuple[dict[str, Any], str, str]:
-    """IN PLACE, on the page the press was made on. PURE.
+def verification_verdict(
+    reading: dict[str, Any],
+    *,
+    before: Optional[dict[str, Any]] = None,
+    pressed: bool = True,
+) -> tuple[dict[str, Any], str, str]:
+    """IN PLACE, on the page the press was made on, read as a CHANGE. PURE.
 
-    ``item_saved``: a visible live region carries the DERIVED word. ``item_shown``:
-    the owned menu is still open with its ``Save`` visible -- the item was never
-    pressed. Everything else is ``unknown``, never "not saved".
+    SAVE-RECEIPT-NEEDS-A-CHANGE. ``before`` is the reading the gate took just
+    before the ``Save`` press. ``pressed`` says whether the gate let that press
+    through at all. Every sentence opens with one of :data:`OUTCOMES`.
+
+    * ``item_saved`` ONLY on a change this press can explain: more visible
+      live regions carry the DERIVED word than ``before`` counted (a new region,
+      or one whose words changed to carry it), or the item's own menu draws
+      ``Unsave`` where, before the press, it drew ``Save``.
+    * ``item_shown``, ``not_pressed``: the gate refused, so nothing was pressed
+      past the trigger and this call saved nothing.
+    * ``item_shown``, ``not_landed``: the owned menu is still open with its
+      ``Save`` visible and nothing changed.
+    * ``unknown``, ``unverified``: everything else, never "not saved". That
+      includes a reading with no ``before``, which can show no change, and a
+      new region while the menu still draws ``Save`` unpressed.
     """
     facts = _facts(reading)
+    if not pressed:
+        return (facts, SHOWN,
+                f"{NOT_PRESSED}: the gate refused the {SAVE!r} item, so nothing past the "
+                "item's menu trigger was pressed and this call saved nothing. It says "
+                "nothing about whether the item was saved before this call.")
     if isinstance(reading, dict) and reading.get("error"):
         return (facts, UNKNOWN,
-                f"the page could not be read after the press ({_error_kind(reading.get('error'))}).")
-    if facts["saved_regions"] >= 1:
-        return (facts, SAVED,
-                f"{facts['saved_regions']} visible live region(s) carry the word 'saved' "
-                "where the press was made. That word is DERIVED, never captured: this is "
-                "its first reading.")
-    if facts["items_in_owned_menu"] == 1 and facts["triggers_expanded"] == 1:
+                f"{UNVERIFIED}: the page could not be read after the press "
+                f"({_error_kind(reading.get('error'))}).")
+    still_open = facts["items_in_owned_menu"] == 1 and facts["triggers_expanded"] == 1
+    if not isinstance(before, dict):
+        if still_open:
+            return (facts, SHOWN,
+                    f"{NOT_LANDED}: the item's menu is still open with its {SAVE!r} item "
+                    "visible, so the press did not land and this call saved nothing. No "
+                    "reading was taken just before the press.")
+        return (facts, UNKNOWN,
+                f"{UNVERIFIED}: no reading was taken just before the press, so nothing "
+                "on the page can be shown to be a change this press made. Open your "
+                "Saved items and look; do not retry.")
+    prior = _facts(before)
+    new_regions = facts["saved_regions"] - prior["saved_regions"]
+    flipped = (
+        prior["items_in_owned_menu"] == 1 and prior["unsave_in_owned_menu"] == 0
+        and facts["unsave_in_owned_menu"] == 1 and facts["items_in_owned_menu"] == 0
+    )
+    counts = (f"{prior['saved_regions']} visible live region(s) carried the word 'saved' "
+              f"just before the press and {facts['saved_regions']} after it")
+    if still_open and new_regions <= 0:
         return (facts, SHOWN,
-                f"the item's menu is still open with its {SAVE!r} item visible and "
-                "unpressed, so the item was not saved.")
+                f"{NOT_LANDED}: the item's menu is still open with its {SAVE!r} item "
+                f"visible and nothing changed ({counts}), so the press did not land and "
+                "this call saved nothing.")
+    if still_open:
+        return (facts, UNKNOWN,
+                f"{UNVERIFIED}: {counts}, but the item's menu still draws its {SAVE!r} "
+                "unpressed. The two readings disagree, so neither is taken. Open your "
+                "Saved items and look; do not retry.")
+    if new_regions > 0:
+        return (facts, SAVED,
+                f"{SAVED_BY_THE_PRESS}: {counts}. The word is DERIVED, never captured: "
+                "this is its first reading.")
+    if flipped:
+        return (facts, SAVED,
+                f"{SAVED_BY_THE_PRESS}: the item's own menu draws {UNSAVE!r} where, just "
+                f"before the press, it drew {SAVE!r}. That word is DERIVED, never "
+                "captured: this is its first reading.")
     return (facts, UNKNOWN,
-            "no confirmation carrying 'saved' was drawn and the menu is not open with its "
-            "item unpressed: the press may have landed with LinkedIn drawing something this "
-            "server has never seen. Open your Saved items and look; do not retry.")
+            f"{UNVERIFIED}: no live region carrying 'saved' was added ({counts}) and the "
+            f"item's menu draws no {UNSAVE!r} in its {SAVE!r}'s place. The press may have "
+            "landed with LinkedIn drawing something this server has never seen, or not "
+            "at all. Open your Saved items and look; do not retry.")

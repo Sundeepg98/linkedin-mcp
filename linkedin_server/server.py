@@ -7516,12 +7516,24 @@ async def linkedin_notifications(
             envelope = shape.envelope(
                 rows, limit=limit, source_url=final_url, dropped=dropped
             )
-            envelope["side_effect"] = (
+            # WHAT EACH DESIGN REPORTS, said per design (lane msg7, on the cold
+            # verification of 5beac57): the server-driven rows carry no
+            # 'unread' key, so the per-row sentence is the classic design's
+            # only. And "the only change any tool in this package makes" was
+            # false once the first write shipped: the badge is the one change a
+            # READ makes without being asked, as the docstring above says.
+            cleared = (
                 "loading this page cleared LinkedIn's unread notification "
                 "badge. Unavoidable -- LinkedIn marks the list seen when it "
-                "serves the page -- and it is the only change any tool in this "
-                "package makes. The per-row 'unread' flag is how it stood "
-                "before this call."
+                "serves the page -- and it is the one change a read in this "
+                "package makes without being asked for it. "
+            )
+            envelope["side_effect"] = cleared + (
+                "On this server-driven design no row carries an 'unread' key: "
+                "no unread marking on it has been measured, so how each row "
+                "stood before this call is not reported (see unread_note)."
+                if page_design == notification_cards.SDUI
+                else "The per-row 'unread' flag is how it stood before this call."
             )
             envelope["page_design"] = page_design
             if page_design == notification_cards.SDUI:
@@ -14796,10 +14808,14 @@ async def linkedin_save_post(
     saved item's, expected to draw "Unsave" instead -- is pressed no further
     than its trigger.
 
-    WHAT A SAVE DRAWS HAS NEVER BEEN CAPTURED, so the result is read IN PLACE:
-    a confirmation carrying the word "saved" means it is saved; the menu still
-    open with its "Save" means it was not pressed; anything else is
-    ``unknown`` -- look at your Saved items, do not retry. Unsaving is not built
+    WHAT A SAVE DRAWS HAS NEVER BEEN CAPTURED, so the result is read IN PLACE,
+    and as a CHANGE against the count taken just before the press
+    (SAVE-RECEIPT-NEEDS-A-CHANGE): a NEW confirmation carrying the word
+    "saved", or the item's own menu drawing "Unsave" where it drew "Save",
+    means it is saved. A confirmation already on the page counts for nothing.
+    The menu still open with its "Save" and nothing changed means the press
+    did not land; anything else is ``unknown`` (unverified) -- look at your
+    Saved items, do not retry. Unsaving is not built
     here (census ``M C37``): unsave by hand, from the item's menu or your Saved
     items.
 
