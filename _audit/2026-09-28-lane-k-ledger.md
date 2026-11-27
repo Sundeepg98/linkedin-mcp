@@ -1175,6 +1175,15 @@ and verified gone; his root read before and after, its structure unchanged.
 No row moves on the ruling; the rows' next steps are those queue lines'
 session-14 captures.
 
+**Amended 2026-11-27 17:20 by the orchestrator** (on disk to lane prof7,
+after the cold verification; registration owed at integration 7):
+EXACT-MATCH-REFUSES-ANY-WHITESPACE. The match never normalises the target:
+any whitespace, control, character outside printable ASCII or
+percent-escaped whitespace or control refuses, and the raw string is compared
+with the admitted address character for character, its only equivalences the
+admission's own query and `me` for the proven member. One matcher serves
+every line: `volunteering_route.exact_link_verdict`.
+
 ### Q-VOLUNTEERING-ID-FROM-HIS-ARGUMENTS -- a page every drawn route reaches with his own id
 
 Added 2026-11-27 by lane prof7 (`_audit/2026-11-27-prof7.md`, section 3).

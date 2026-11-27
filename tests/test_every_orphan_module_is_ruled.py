@@ -145,9 +145,10 @@ DELIBERATELY_UNWIRED: dict[str, str] = {
     "volunteering_route": (
         "A BOUNDARY FOR THE LIVE RUNNER, NOT A CAPABILITY: the ruling "
         "VOLUNTEERING-FALLBACK-BOUNDARY (the orchestrator, 2026-11-27) has it "
-        "form his volunteering page's one drawn spelling from HIS argument and "
-        "match a target his root draws against it exactly, for session 14's "
-        "attended capture (queue line 69). No shipped tool presses on his "
+        "form his volunteering page's one drawn spelling from HIS argument, "
+        "and EXACT-MATCH-REFUSES-ANY-WHITESPACE makes its exact_link_verdict "
+        "the ONE matcher every session-14 press on his root is judged by "
+        "(queue lines 30, 31, 64, 67, 68 and 69). No shipped tool presses on his "
         "root, and none is ruled to: wiring it into one would widen the tool "
         "surface with a press only the live lane may make, attended. Its "
         "readers are tests/test_volunteering_fallback_boundary.py and that "

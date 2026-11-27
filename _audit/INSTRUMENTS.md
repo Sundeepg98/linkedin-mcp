@@ -13313,20 +13313,26 @@ offline -- and the press gate pressing before the page arrived.
     A LANDING READ BEFORE THE PAGE HAS ARRIVED IS A READING OF THE WRONG
     PAGE. WAIT, BOUNDED, ON THE ADDRESS -- AND JUDGE WHERE IT LANDS.
 
-### 117.2 The exact-match verdict, and the seven mutants that prove its guards
+### 117.2 The ONE exact-match verdict, and the thirteen mutants that prove its guards
 
-`linkedin_server/volunteering_route.match_verdict` and
+`linkedin_server/volunteering_route.exact_link_verdict` (and `match_verdict`,
+which forms his volunteering address and hands it over) and
 `tests/test_volunteering_fallback_boundary.py`. A target the page drew -- an
-href, a menu item's declared address -- is a press target only when, the
-proven member read as `me`, it is EXACTLY the address this repository formed
-from the caller's own argument: one parameter, the member-id shape, no
-fragment, ASCII-only case folding inside the closed segment alphabet. Its
-answer is one of eight closed words; the formed address never reaches a log,
-an exception or a verdict. SHOWN FAILING: seven planted mutants (a disposable
-pytest plugin in the lane's scratch), each disabling ONE guard -- the shape
-check, the id comparison, the argument (the page's id used instead), the
-one-parameter rule, the no-log rule, the ASCII fold, the boundary line's id
-shape -- each caught by FAILED tests, none by an error.
+href, a menu item's declared address -- is a press target only when its RAW
+string, never normalised, is EXACTLY the address readonly.py admits for that
+line, its only equivalences the admission's own query and `me` for the proven
+member, no case folded (EXACT-MATCH-REFUSES-ANY-WHITESPACE, 2026-11-27 17:20):
+any whitespace, control, character outside printable ASCII, or percent escape
+of whitespace or a control refuses first. Its answer is one of eleven closed
+words; the formed address never reaches a log, an exception or a verdict.
+SHOWN FAILING: the cold verifier's lookalikes (a leading U+00A0, a trailing
+U+3000, U+00A0 or U+0085, a tab, a newline) read `match` on the first version,
+41 tests red; and thirteen planted mutants (a disposable pytest plugin in the
+lane's scratch), each disabling ONE guard -- the shape check, the id
+comparison, the argument, the one-parameter rule, the no-log rule, a Unicode
+fold, the boundary line's id shape, a strip, the character clause, the
+percent clause, a case fold, the admitted-address clause, the query's
+exactness -- each caught by FAILED tests, none by an error.
 
     THE PAGE MAY VETO A PRESS. IT NEVER SUPPLIES THE ADDRESS, AND A MATCH IS
     NEVER A FOLLOW.
