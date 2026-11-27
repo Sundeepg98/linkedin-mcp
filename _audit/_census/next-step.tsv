@@ -330,7 +330,6 @@ N 191	N	W	R2	TARGET:an event he names	NAMED	_audit/_census/read-addresses.tsv::A
 N 192	N	W	R2	TARGET:an event he names	NAMED	_audit/_census/read-addresses.tsv::ADMITTED 2026-09-23 BY A REVIEW: COMMIT (lane L1): one event by its NUMERIC id ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
 N 193	N	W	R3	TARGET:an event he names	NAMED	_audit/_census/read-addresses.tsv::ADMITTED 2026-09-23 BY A REVIEW: COMMIT (lane L1): one event by its NUMERIC id ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
 N 196	N	W	R3	TARGET:an organisation Page he names to report	NAMED	_audit/2026-09-28-rulings-build-classes.md::a report is never fired for a proof unless he names a real item to report
-N 199	N	R	-	CAPTURE:admit-premium-matches	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/premium/matches/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
 N 200	N	W	R3	RULING:Q-AD-HIDE-AIM	MEASURED	tests/fixtures/live11/feed_ad_control_open.html ; RULING:HIS-OWN-CURATION-NOT-OUTWARD ; RULING:AD-HIDE-AT-HIS-NAMED-AD
 N A1	N	W	R3	PRECONDITION:admin rights on a Company Page	NAMED	_audit/_census/blocker-map.tsv::ADMIN-RIGHTS-NOT-HELD
 N A2	N	W	R3	PRECONDITION:admin rights on a Company Page	NAMED	_audit/_census/blocker-map.tsv::ADMIN-RIGHTS-NOT-HELD

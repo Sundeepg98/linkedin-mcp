@@ -155,6 +155,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_sent_invitations": (),
     "linkedin_my_following_list": (),
     "linkedin_my_unfollowed_list": (),
+    "linkedin_premium_matches": (),
     "linkedin_my_advertising_data": (),
     "linkedin_my_profile": ("details", "include_skills"),
     "linkedin_new_messages": (),
@@ -865,7 +866,11 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: counted off `mcp.list_tools()`, never summed. THE CENSUS DECISION, IN THE
 #: SAME COMMIT: `N 86`, `N 88`, `N 89`, `N 82` and `N 26b` GAP ->
 #: COVERED-UNFIRED on them, never fired. See `_audit/2026-11-27-net7.md`.
-PINNED_TOOL_COUNT = 107
+#: **ON THE SAME LANE: 108 TOOLS AND 166 PARAMETERS** -- one READ,
+#: `linkedin_premium_matches()`, of no parameter, beside the 107 and 166,
+#: counted off `mcp.list_tools()`, never summed. THE CENSUS DECISION, IN THE
+#: SAME COMMIT: `N 199` GAP -> COVERED-UNFIRED on it, never fired.
+PINNED_TOOL_COUNT = 108
 PINNED_PARAMETER_COUNT = 166
 
 

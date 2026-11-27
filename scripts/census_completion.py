@@ -1348,7 +1348,8 @@ PINNED = {
     #: 259 AT INTEGRATION 6'S REGISTRATION (2026-11-26), MEASURED by --check, never summed: RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE returned the 22 rows of search26's section 4.5 to GAP (21 COVERED-PROVEN, J 31 COVERED-UNFIRED), and FAILED-REPROOF-DEMOTES moved M C41 COVERED-PROVEN -> COVERED-UNFIRED.
     #: 264 ON LANE NET7 (2026-11-27), MEASURED by --check, never summed: `N 82`, `N 86`, `N 88`, `N 89` and `N 26b` GAP -> COVERED-UNFIRED, four people-search facets on live session 12's open All-filters panel (`linkedin_people_search_shape`; `_audit/2026-11-27-net7.md`, section 3): five R rows entering bucket 1 held by no ruling (was 259).
     #: 266 ON LANE NET7 (2026-11-27), MEASURED by --check, never summed: `N 93` and `N 27` GAP -> MEASURED-ABSENT on the orchestrator's rulings of 13:25 (KEYWORD-FIELDS-MEASURED-ABSENT, CONNECTIONS-CONTROLS-MEASURED-ABSENT; `_audit/2026-11-27-net7.md`, section 10): out of scope, off bucket 3 (was 264).
-    "adjudicated": 266,
+    #: 267 ON LANE NET7 (2026-11-27), MEASURED by --check, never summed: `N 199` GAP -> COVERED-UNFIRED, his Premium networking matches as people records (`linkedin_premium_matches`; `_audit/2026-11-27-net7.md`, section 5): an R row entering bucket 1 held by no ruling (was 266).
+    "adjudicated": 267,
     #: THE LIVE LANE'S FOUR ROWS, RE-DERIVED AT EACH OF ITS MERGES OF MASTER
     #: (2026-09-24; last over lane S): four rows fired live and banked
     #: (`_audit/2026-09-23-live-lane-session-1.md`). `P G6` COVERED-UNFIRED ->
@@ -1491,7 +1492,8 @@ PINNED = {
     #: 193 AT INTEGRATION 6'S MERGE OF LANE BUILD-MSG2 (2026-11-26), MEASURED on the merged tree by --check, never summed: the three lanes' moves above, together.
     #: 171 AT INTEGRATION 6'S REGISTRATION (2026-11-26), MEASURED by --check, never summed: RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE returned the 22 rows of search26's section 4.5 to GAP (21 COVERED-PROVEN, J 31 COVERED-UNFIRED), and FAILED-REPROOF-DEMOTES moved M C41 COVERED-PROVEN -> COVERED-UNFIRED.
     #: 176 ON LANE NET7 (2026-11-27), MEASURED by --check, never summed: `N 82`, `N 86`, `N 88`, `N 89` and `N 26b` GAP -> COVERED-UNFIRED, four people-search facets on live session 12's open All-filters panel (`linkedin_people_search_shape`; `_audit/2026-11-27-net7.md`, section 3): five R rows entering bucket 1 held by no ruling (was 171).
-    "delivered_broad": 176,
+    #: 177 ON LANE NET7 (2026-11-27), MEASURED by --check, never summed: `N 199` GAP -> COVERED-UNFIRED, his Premium networking matches as people records (`linkedin_premium_matches`; `_audit/2026-11-27-net7.md`, section 5): an R row entering bucket 1 held by no ruling (was 176).
+    "delivered_broad": 177,
     #: 79 since the live lane's merge (see `adjudicated`): P G6, N 134, P O3
     #: and M C72 COVERED-PROVEN.
     #: 75 and 21 since the bucket-1 merge: `M C41` fired live and moved from
@@ -1658,7 +1660,8 @@ PINNED = {
     #: 518 AT INTEGRATION 6'S REGISTRATION (2026-11-26), MEASURED by --check, never summed: RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE returned the 22 rows of search26's section 4.5 to GAP (21 COVERED-PROVEN, J 31 COVERED-UNFIRED), and FAILED-REPROOF-DEMOTES moved M C41 COVERED-PROVEN -> COVERED-UNFIRED.
     #: 513 ON LANE NET7 (2026-11-27), MEASURED by --check, never summed: `N 82`, `N 86`, `N 88`, `N 89` and `N 26b` GAP -> COVERED-UNFIRED, four people-search facets on live session 12's open All-filters panel (`linkedin_people_search_shape`; `_audit/2026-11-27-net7.md`, section 3): five R rows entering bucket 1 held by no ruling (was 518).
     #: 511 ON LANE NET7 (2026-11-27), MEASURED by --check, never summed: `N 93` and `N 27` GAP -> MEASURED-ABSENT on the orchestrator's rulings of 13:25 (KEYWORD-FIELDS-MEASURED-ABSENT, CONNECTIONS-CONTROLS-MEASURED-ABSENT; `_audit/2026-11-27-net7.md`, section 10): out of scope, off bucket 3 (was 513).
-    "gap": 511,
+    #: 510 ON LANE NET7 (2026-11-27), MEASURED by --check, never summed: `N 199` GAP -> COVERED-UNFIRED, his Premium networking matches as people records (`linkedin_premium_matches`; `_audit/2026-11-27-net7.md`, section 5): an R row entering bucket 1 held by no ruling (was 511).
+    "gap": 510,
     #: 18 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: `M M1` built (`linkedin_message_from_profile`).
     #: 16 ON LANE L5'S ORDER OF 2026-09-27 23:36, MEASURED:
     #: `linkedin_send_message` RETIRED (aimed by a name): `M M2` to GAP and `N
@@ -1815,7 +1818,8 @@ PINNED = {
     #: 63 ON LANE BUILD-MSG2'S ROUND 2 (2026-11-26), MEASURED: `M M28` SPLIT on the orchestrator's ruling M-M28-SPLITS (round 2, to be registered at integration 6): the view half stayed `M M28`, COVERED-UNFIRED on `linkedin_archived_conversations`; the restore half entered as `M M54`, GAP, W (`_audit/2026-11-26-build-msg2.md` section 10) (was 62).
     #: 75 AT INTEGRATION 6'S MERGE OF LANE BUILD-MSG2 (2026-11-26), MEASURED on the merged tree by --check, never summed: the three lanes' moves above, together.
     #: 80 ON LANE NET7 (2026-11-27), MEASURED by --check, never summed: `N 82`, `N 86`, `N 88`, `N 89` and `N 26b` GAP -> COVERED-UNFIRED, four people-search facets on live session 12's open All-filters panel (`linkedin_people_search_shape`; `_audit/2026-11-27-net7.md`, section 3): five R rows entering bucket 1 held by no ruling (was 75).
-    "unfired": 80,
+    #: 81 ON LANE NET7 (2026-11-27), MEASURED by --check, never summed: `N 199` GAP -> COVERED-UNFIRED, his Premium networking matches as people records (`linkedin_premium_matches`; `_audit/2026-11-27-net7.md`, section 5): an R row entering bucket 1 held by no ruling (was 80).
+    "unfired": 81,
     #: 104 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     #: 101 AT LANE S'S NAMES ADOPTION (2026-09-27), MEASURED: `N 79`, `N 172`
@@ -1879,7 +1883,8 @@ PINNED = {
     #: 66 AT INTEGRATION 6'S MERGE OF LANE BUILD-MSG2 (2026-11-26), MEASURED on the merged tree by --check, never summed: the three lanes' moves above, together.
     #: 61 ON LANE NET7 (2026-11-27), MEASURED by --check, never summed: `N 82`, `N 86`, `N 88`, `N 89` and `N 26b` GAP -> COVERED-UNFIRED, four people-search facets on live session 12's open All-filters panel (`linkedin_people_search_shape`; `_audit/2026-11-27-net7.md`, section 3): five R rows entering bucket 1 held by no ruling (was 66).
     #: 59 ON LANE NET7 (2026-11-27), MEASURED by --check, never summed: `N 93` and `N 27` GAP -> MEASURED-ABSENT on the orchestrator's rulings of 13:25 (KEYWORD-FIELDS-MEASURED-ABSENT, CONNECTIONS-CONTROLS-MEASURED-ABSENT; `_audit/2026-11-27-net7.md`, section 10): out of scope, off bucket 3 (was 61).
-    "gap_read": 59,
+    #: 58 ON LANE NET7 (2026-11-27), MEASURED by --check, never summed: `N 199` GAP -> COVERED-UNFIRED, his Premium networking matches as people records (`linkedin_premium_matches`; `_audit/2026-11-27-net7.md`, section 5): an R row entering bucket 1 held by no ruling (was 59).
+    "gap_read": 58,
     #: 151, not the 152 published by `_audit/2026-09-21-the-write-ceiling.md`.
     #: That document scoped itself to `profile.md`, `network.md` and
     #: `messaging-and-content.md`; measured at HEAD those three carry W 151 and
@@ -2119,7 +2124,8 @@ PINNED = {
     #: 33 ON LANE NET7 (2026-11-27), MEASURED by --check, never summed: `N 82`, `N 86`, `N 88`, `N 89` and `N 26b` GAP -> COVERED-UNFIRED, four people-search facets on live session 12's open All-filters panel (`linkedin_people_search_shape`; `_audit/2026-11-27-net7.md`, section 3): five R rows entering bucket 1 held by no ruling (was 38).
     #: 34 ON LANE NET7 (2026-11-27), MEASURED by --check, never summed: `N 97`'s address line NEEDS-SESSION -> ADMITTED, its full People You May Know lists admitted at /mynetwork/discovery-see-all/ on GROW-SUGGESTIONS-BY-ADMISSION-NOT-SCROLL (`_audit/2026-11-27-net7.md`, section 10); no state moved (was 33).
     #: 33 ON LANE NET7 (2026-11-27), MEASURED by --check, never summed: `N 93` and `N 27` GAP -> MEASURED-ABSENT on the orchestrator's rulings of 13:25 (KEYWORD-FIELDS-MEASURED-ABSENT, CONNECTIONS-CONTROLS-MEASURED-ABSENT; `_audit/2026-11-27-net7.md`, section 10): out of scope, off bucket 3 (was 34).
-    "b3_admitted": 33,
+    #: 32 ON LANE NET7 (2026-11-27), MEASURED by --check, never summed: `N 199` GAP -> COVERED-UNFIRED, his Premium networking matches as people records (`linkedin_premium_matches`; `_audit/2026-11-27-net7.md`, section 5): an R row entering bucket 1 held by no ruling (was 33).
+    "b3_admitted": 32,
     #: 38 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     #: 40 ON LANE L5'S ORDER OF 2026-09-28 12:32, MEASURED: `N 30`, `N 31`, `N 65`
@@ -2452,7 +2458,8 @@ PINNED = {
     #: 41 ON LANE BUILD-MSG2'S ROUND 2 (2026-11-26), MEASURED: `M M28` SPLIT on the orchestrator's ruling M-M28-SPLITS (round 2, to be registered at integration 6): the view half stayed `M M28`, COVERED-UNFIRED on `linkedin_archived_conversations`; the restore half entered as `M M54`, GAP, W (`_audit/2026-11-26-build-msg2.md` section 10) (was 40).
     #: 48 AT INTEGRATION 6'S MERGE OF LANE BUILD-MSG2 (2026-11-26), MEASURED on the merged tree by --check, never summed: the three lanes' moves above, together.
     #: 53 ON LANE NET7 (2026-11-27), MEASURED by --check, never summed: `N 82`, `N 86`, `N 88`, `N 89` and `N 26b` GAP -> COVERED-UNFIRED, four people-search facets on live session 12's open All-filters panel (`linkedin_people_search_shape`; `_audit/2026-11-27-net7.md`, section 3): five R rows entering bucket 1 held by no ruling (was 48).
-    "b1_no_ruling": 53,
+    #: 54 ON LANE NET7 (2026-11-27), MEASURED by --check, never summed: `N 199` GAP -> COVERED-UNFIRED, his Premium networking matches as people records (`linkedin_premium_matches`; `_audit/2026-11-27-net7.md`, section 5): an R row entering bucket 1 held by no ruling (was 53).
+    "b1_no_ruling": 54,
     #: 7 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
     #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
     #: 4 AT THE LIVE LANE'S MERGE OF MASTER c2825a4 (2026-09-28), MEASURED on the
@@ -2977,6 +2984,12 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
         #: permit them and hold nothing, as for `N 30` and `N 85` before
         #: their fires.
         "N 82", "N 86", "N 88", "N 89", "N 26b",
+        #: `N 199` entered on lane net7 (2026-11-27): his Premium networking
+        #: matches, each member a people record beside the id of the job they
+        #: are hiring for (`linkedin_premium_matches`), read off one admitted
+        #: page over live session 12's capture; never fired. NAMES-AT-RUNTIME and
+        #: PEOPLE-DATA-MITIGATIONS permit and shape it; none holds it.
+        "N 199",
     ),
 }
 

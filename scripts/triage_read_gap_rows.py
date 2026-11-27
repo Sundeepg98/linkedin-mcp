@@ -282,12 +282,8 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
     # READ-GAP SET below. It had stayed BUILDABLE under
     # WHO-WHICH-COUNTS-ARE-NOT-DELIVERY (2026-09-24): the page names no member.
     # N 197 LEFT 2026-10-10 (lane B5) -- see LEFT THE READ-GAP SET below.
-    "N 199": ("ADDRESS", "ABSENT", "the Premium suggestions page is drawn from "
-                                   "a notification and no pattern names it; "
-                                   "the list is of other people, so as "
-                                   "WHO-WHICH-COUNTS-ARE-NOT-DELIVERY rules an "
-                                   "admission and a count reader would still "
-                                   "not deliver it"),
+    # N 199 LEFT 2026-11-27 (lane net7): his Premium networking matches as
+    # people records -- see LEFT THE READ-GAP SET below.
     # ---- RETURNED by lane R, 2026-09-23 (its own class; see VERDICTS) ----
     # N 9 LEFT 2026-11-26: lane readers-net26 built its reader over live
     # session 11's capture of its page (COVERED-UNFIRED), so its line goes,
@@ -375,6 +371,12 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
 #:            by dom.read_search_appearances, the employer kept in the page
 #:     N 195  COVERED-UNFIRED  (was BUILDABLE) -- recruiter insights, the
 #:            viewers as people records (recruiter_views.read_recruiter_views)
+#:
+#: LEFT THE READ-GAP SET 2026-11-27, on lane net7's reader: built offline over
+#: live session 12's capture of the page and never fired.
+#:
+#:     N 199  COVERED-UNFIRED  (was ADDRESS) -- his Premium networking matches,
+#:            each a people record beside a job id (premium_matches.read_matches)
 #:
 #: LEFT THE READ-GAP SET 2026-11-27, on lane net7's round 2 (the orchestrator's
 #: rulings of 13:25): two readings retired.

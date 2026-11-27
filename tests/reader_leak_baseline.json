@@ -176,6 +176,7 @@
     "post_summary_counts:read_post_summary_counts": "clean",
     "post_viewer_demographics:read_post_viewer_demographics": "clean",
     "premium:read_premium_surface": "clean",
+    "premium_matches:read_matches": "not_driven:reaches a people-record builder and built no record",
     "presence:read_suggested_presence": "returns_records",
     "press:_read_witness": "clean",
     "press:_take_reading": "not_driven:read the page and returned nothing the page made",

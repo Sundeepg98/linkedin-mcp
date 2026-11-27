@@ -1473,6 +1473,9 @@ WHAT_WOULD_DRIVE_IT: dict[str, str] = {
         "label, back only inside the person records. A shipped_drives double "
         "is not built."
     ),
+    "premium_matches:read_matches": (
+        "CAPTURE: the Premium matches page, each card a job link opening 'Hiring for' beside one member link -- on the planted page no job link carries LinkedIn's words, so no card is found and the read raises, building no record. tests/fixtures/synthetic/live12_premium_matches_words.html draws it, and tests/test_premium_matches.py drives this reader over it in a headless browser, two synthetic members planted, a name planted in every name slot and every label, back only inside the person records. A shipped_drives double is not built."
+    ),
     # Lane build-msg2, 2026-11-26: the conversation menu's closing wait.
     "conversation_menu:_wait_for_closed": (
         "NOT A PAGE READER: a bounded wait that returns how many polls it took "
