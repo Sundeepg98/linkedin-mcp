@@ -2438,6 +2438,13 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(r"^https://www\.linkedin\.com/learning/browse/certifications/?$"),
     re.compile(r"^https://www\.linkedin\.com/learning/me/my-library/?$"),
     re.compile(r"^https://www\.linkedin\.com/learning/me/my-library/in-progress/?$"),
+    # His library's saved list (census J 175, split from J 154 by the
+    # orchestrator's corrected LEARNING-ROWS-SPLIT, 2026-11-27): the tab
+    # beside in-progress, refused until now by this list's silence alone --
+    # it carries no forbidden substring. One exact anchored line, its control
+    # in tests/test_lane_a_admissions.py (learning-saved); its landing check
+    # and capture ride live session 14.
+    re.compile(r"^https://www\.linkedin\.com/learning/me/my-library/saved/?$"),
     re.compile(r"^https://www\.linkedin\.com/learning/career-journey/?$"),
     # A company Page's tabs (census J 106, J 109, J 111, J 113, J 114,
     # J 165), each drawn by Pages and postings. The organisation segment is

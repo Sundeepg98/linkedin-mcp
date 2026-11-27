@@ -43,6 +43,21 @@ import pytest
 from linkedin_server import readonly
 from linkedin_server.server import linkedin_search_jobs
 
+
+@pytest.fixture(autouse=True)
+def _classic_route_serving_again(monkeypatch):
+    """THE REOPENER'S WORLD (lane jobs7, 2026-11-27). Since the orchestrator's
+    REFUSE-BEFORE-LOAD-ON-A-RETIRED-ROUTE, the classic route is measured
+    retired and a search setting an argument the AI route refuses is refused
+    before any load. The tests in this file exercise the CLASSIC composition
+    and its reads, which run again only once a capture shows the classic route
+    serving -- the ruling's reopener -- so they run with it marked serving.
+    The shipped refusal is tested in
+    ``tests/test_the_ai_search_is_the_search_route.py``."""
+    from linkedin_server import job_search_route as _route
+
+    monkeypatch.setattr(_route, "CLASSIC_ROUTE_RETIRED", False)
+
 from tests.conftest import FakePage
 from tests.test_tools import SEARCH_CARD, drive  # noqa: F401 - drive by injection
 
@@ -147,6 +162,10 @@ async def test_a_none_keyword_from_a_python_caller_is_the_employer_search_too(dr
 @pytest.mark.parametrize("company", ["", EMPLOYER])
 async def test_a_keyworded_search_builds_keywords_first_as_it_always_did(drive, company):
     page = FakePage(evaluate_result=[dict(SEARCH_CARD)])
+    if not company:
+        # Since lane jobs7 a keyword search with no other argument asks for
+        # the AI address; this page is LinkedIn serving its classic one there.
+        page.redirect_to = "https://www.linkedin.com/jobs/search/?keywords=node.js+engineer"
     navigations = drive(page)
 
     result = await linkedin_search_jobs(keywords="node.js engineer", company_id=company)
@@ -155,6 +174,7 @@ async def test_a_keyworded_search_builds_keywords_first_as_it_always_did(drive, 
     pairs = _pairs(navigations[0])
     assert pairs[0] == ("keywords", "node.js engineer"), pairs
     assert (("f_C", EMPLOYER) in pairs) is bool(company), pairs
+    assert ("/jobs/search-results/" in navigations[0]) is not bool(company), navigations
 
 
 # ---------------------------------------------------------------------------

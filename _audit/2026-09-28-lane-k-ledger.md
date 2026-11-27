@@ -1208,6 +1208,62 @@ only when its target equals the address formed from his argument. Row
 `P D24` moves no state; its next step is the session-14 capture under that
 match, attended.
 
+### Q-J169-SENIORITY -- a facet whose one measured control offers another
+
+Added 2026-11-27 by lane jobs7 (`_audit/2026-11-27-jobs7.md`, sections 4 and 7). Row: `J 169`
+("Premium Page Insights: headcount over time, notable alumni, job openings by seniority", split
+from `J 114` by J-114-SPLITS). Its step was `CAPTURE:C-RJ26-1`: the job-openings card's
+`Functions` dropdown opened as a disclosure, "the seniority view, if one is offered, then read
+offline". Session 12's load 20 opened it: by keyed shape the dropdown's items are JOB FUNCTIONS
+(the open page draws 14 of the 26 function words), and 0 of 10 seniority words and 0 of 5
+experience-level words match anywhere on the page. So no seniority view is offered behind the one
+control the row's step named; "notable alumni" is not drawn on this view; and the open page draws a
+table summarised `Total employee count`, the candidate for "headcount over time", its cells reduced.
+The lane asks: IS "JOB OPENINGS BY SENIORITY" A FACET LINKEDIN STILL DRAWS ANYWHERE -- so the row's
+next step is a capture of another Insights view -- OR DOES THE ROW SPLIT, its seniority facet closed
+by this measurement? The cell names no absence as its bar, so this lane moves nothing.
+
+**Answered 2026-11-27, 13:45 IST, by the orchestrator** (integration 7 registers it): J169-SPLITS-SENIORITY-REAIMED-UNDER-D6 -- split, the FUNCTION half keeping `J 169` and building on load 20, the SENIORITY half a new GAP row whose next step is a capture of the AI job search's experience-level facet for that company (not MEASURED-ABSENT on one dropdown). HELD by the lane: `J 169`'s capability names no function facet on disk (distribution by function is `J 114`), so the split cannot be applied as written without re-scoping the row (the lane's record, section 11.4); its step stays here, and the counts the ruling asked for are in its cell.
+
+**Answered again 2026-11-27, 14:05 IST, by the orchestrator** (integration 7 registers them): J169-BY-ITS-OWN-WORDS, plus JOB-OPENINGS-BY-FUNCTION-ADDED, replacing the 13:45 answer. The split is applied to the row's own words: load 20 draws headcount over time and notable alumni, so `J 169` keeps those two (step BUILD on `tests/fixtures/live12/c_rj26_1_functions-open.html`), and the seniority facet is `J 173`, GAP, step CAPTURE `C-J173-1` under D6. "Job openings by function" is a new row, `J 174`, drawn on load 20 with no selection (step BUILD on the same fixture); `J 114` is a different capability and is not merged. The counts stay in the cells. The lane's record, section 11.5.
+
+### Q-J170-ROW-CONTROL -- an alert's own control that may open an editor
+
+Added 2026-11-27 by lane jobs7 (`_audit/2026-11-27-jobs7.md`, section 7). Row: `J 170` ("Manage
+all alerts", split from `J 37` by J-37-SPLITS). Its step was BUILD on session 11's alert-manager
+capture (`tests/fixtures/live11/jobs_alerts_manager.html`), but that capture never drew what an
+alert row's control opens: the control's label matched none of 23 candidates by keyed shape (an
+edit, a delete, a frequency, a menu word), and nothing was pressed. A build aimed at an unmeasured
+dialog would be built on synthetic markup and move nothing. Pressing the control to read it is not
+plainly a CAPTURE-PRESS-UNDER-PROBE-RULE disclosure: it may open an EDITOR, which that rule forbids
+pressing. The lane asks: MAY A CAPTURE PRESS ONE ALERT ROW'S CONTROL, read what it opens by keyed
+shape, and close it on Escape with nothing chosen -- as a disclosure if it opens a menu, and stop
+unpressed if it opens an editor? Until ruled, `J 170` stays GAP on this question.
+
+**Answered 2026-11-27, 13:45 IST, by the orchestrator** (on disk to the lane; integration 7 registers it): JOB-ALERT-ROW-CONTROL-ATTENDED -- accepted as a SESSION-14 capture, ATTENDED: one alert row's control pressed; a menu read and closed on Escape; an editor or dialog read for labels and states only, nothing typed or chosen, closed by Escape or its exact Dismiss and verified gone; the alert manager read before and after, no change; no Save, Delete or Remove press in the closed list. `J 170` stays GAP, its step now CAPTURE `C-J170-1` (the lane's record, section 11.3); wave 8 builds on that capture.
+
+### Q-LEARNING-SPLITS -- three Learning rows, each captured on one half
+
+Added 2026-11-27 by lane jobs7 (`_audit/2026-11-27-jobs7.md`, section 7). Rows: `J 152`, `J 154`,
+`J 156`, each captured by session 12 on ONE half of a compound capability. `J 152` ("Browse
+LinkedIn Learning: its home, the catalogue, certifications, topic pages and showcase collections"):
+the home is captured (load 23: 16 course cards, each a type label and a duration by keyed shape);
+the catalogue and certifications pages are admitted and uncaptured; topic and showcase pages are
+refused. `J 154` ("View your LinkedIn Learning library: saved courses and the ones in progress"):
+load 25 landed one level deeper, on the IN-PROGRESS tab (its link marked `aria-current="page"`),
+drawing one course with `Unsave` beside it; the saved list is uncaptured, and the read boundary
+refuses its address (NO-PATTERN). (This sentence first named the other tab; the lane's record,
+section 11.2, holds the reading that settled it.) `J 156` ("See and set career goals", R+W): load 24 draws a section
+labelled `Career goal`; the setting half is an editor, unmeasured. Each row's payload is WHICH items
+of other people's content (course titles; NAMES-AT-RUNTIME) or his own text (his goal;
+HIS-OWN-TEXT-AT-RUNTIME). The lane asks: DOES EACH SPLIT UNDER COMPOUND-ROW-SPLITS-ONLY-ON-STATE, as
+J-114-SPLITS and J-37-SPLITS split theirs -- the captured half building on its capture, the rest a
+new GAP row with its own next step? Until ruled, the three stay GAP on this question.
+
+**Answered 2026-11-27, 13:45 IST, by the orchestrator** (integration 7 registers it): LEARNING-ROWS-SPLIT -- all three split under COMPOUND-ROW-SPLITS-ONLY-ON-STATE, each captured half keeping its id. APPLIED to `J 152` (its other half `J 171`, step CAPTURE `C-LRN-1`) and `J 156` (its write half `J 172`, step CAPTURE `C-LRN-2`, session 14, attended). `J 154` is HELD: the ruling named in-progress as its other half, and disk says the captured tab is in-progress (the lane's record, section 11.2); its step stays here until the orchestrator rules again.
+
+**Answered again 2026-11-27, 14:05 IST, by the orchestrator** (integration 7 registers it): LEARNING-ROWS-SPLIT, re-ruled on the lane's measurement -- the IN-PROGRESS half keeps `J 154` and builds on load 25's capture (step BUILD on `tests/fixtures/live12/learning_library.html`); the SAVED half is `J 175`, GAP, its address ADMITTED by one anchored line, red first, its step CAPTURE `C-LRN-3` (session 14, the ADMIT-NOW-LANDING-IN-SESSION-14 shape). "Your corrected three sentences stand." The lane's record, section 11.5.
+
 ## 8. Preconditions and purposes
 
 PRECONDITION rows stay GAP; each waits on something he does not hold.

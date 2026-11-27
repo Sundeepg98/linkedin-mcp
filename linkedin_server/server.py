@@ -5820,7 +5820,10 @@ async def _read_job_search(
       is REFUSED unless the page drew LinkedIn's own empty state, and no
       capture has shown the classic one, so today every zero refuses. It used
       to come back as ``results: []`` with a note blaming the filters.
-    * **AI** -- the fallback (``Q-SEARCH-ROUTE-POLICY``). ``refused_on_ai``
+    * **AI** -- the search's own route for a call that refuses nothing there
+      (lane jobs7: ``url`` is then the AI address itself), and the fallback
+      for a classic request LinkedIn redirected here (``Q-SEARCH-ROUTE-
+      POLICY``). ``refused_on_ai``
       names the arguments the AI route has not been measured honouring. The
       page is read once by ``job_search_route.read_ai_search`` (the refusal
       reports the Easy Apply toggle it drew), and any one of those arguments
@@ -5860,6 +5863,14 @@ async def _read_job_search(
             return html if isinstance(html, str) else ""
 
         if route == job_search_route.CLASSIC:
+            if easy_apply and job_search_route.landing_route(url) == job_search_route.AI:
+                # AN AI-ROUTED easy_apply ANSWERED WITH THE CLASSIC PAGE (lane
+                # jobs7): the AI address carried no filter, because easy_apply
+                # is applied there to each card's own mark, so the classic rows
+                # were never Easy Apply-filtered. Refused, not returned.
+                raise ExtractionFailedError(
+                    job_search_route.classic_at_ai_refusal(), url=url, hint=hint
+                )
             records = await dom.harvest_linked_cards(
                 page, href_pattern=dom.JOB_HREF, max_items=limit * 3
             )
@@ -5999,20 +6010,30 @@ async def linkedin_search_jobs(
     exactly as it would if you typed the query on the site. That is the only
     trace a search leaves, and it is on your account, not anyone else's.
 
-    WHICH PAGE IT READ, AND WHEN IT REFUSES (lane search-fix26, 2026-11-26).
-    LinkedIn draws a banner over this page: it is "gradually retiring classic
-    job search starting in September". This tool asks for the classic page and
-    reads whatever the load LANDED on, reported as ``route``: ``classic_search``,
-    or ``ai_search`` when LinkedIn served its AI search instead. Classic is the
-    PRIMARY route while it serves (ruling Q-SEARCH-ROUTE-POLICY). The AI route
-    is the FALLBACK and honours ``keywords``. There ``easy_apply`` narrows the
-    one window loaded, locally, to the cards whose own ``easy_apply`` field is
-    true -- it is not LinkedIn's Easy Apply filter, and the result says so in
-    ``easy_apply_post_filter`` with the count before and after. Every other
-    argument is REFUSED there, by name, until a fire measures LinkedIn
-    honouring it, because a filter accepted and ignored puts an unfiltered
-    shortlist in front of you. A landing on any other page refuses, naming only
-    its shape. AND A
+    WHICH PAGE IT READ, AND WHEN IT REFUSES (lane search-fix26, 2026-11-26;
+    lane jobs7, 2026-11-27). LinkedIn's classic job search NO LONGER SERVES:
+    on 2026-11-26 its address redirected to the AI search, with no classic
+    list. So a KEYWORD SEARCH -- keywords, optionally easy_apply and limit, and
+    nothing else -- asks for the AI search's own address and reads it as the
+    search's own route, reported as ``route: ai_search``. Each AI row carries
+    the card's own ``easy_apply`` reading, its posted line, any proximity line,
+    and ``hiring``, the hiring chips the card draws (``actively_reviewing_
+    applicants``, ``be_an_early_applicant``), omitted when none is drawn.
+    There ``easy_apply`` narrows the one window loaded, locally, to the cards
+    whose own ``easy_apply`` field is true -- it is not LinkedIn's Easy Apply
+    filter, and the result says so in ``easy_apply_post_filter`` with the
+    count before and after. A call that sets any OTHER argument -- a place,
+    any filter, an offset, an employer -- is REFUSED BEFORE ANYTHING LOADS,
+    naming the arguments: the classic route is retired and the AI search has
+    not been measured honouring them (rulings Q-SEARCH-ROUTE-POLICY and
+    REFUSE-BEFORE-LOAD-ON-A-RETIRED-ROUTE), because a filter accepted and
+    ignored puts an unfiltered shortlist in front of you, and refusing first
+    spends no page load and none of your searches. The notes below on places,
+    filters, offsets and employers describe the classic route, which runs
+    again only once a capture shows it serving; should LinkedIn serve its
+    classic page at the AI address meanwhile, it is read by the classic reader
+    and reported as ``route: classic_search``. A landing on any other page
+    refuses, naming only its shape. AND A
     ZERO IS NEVER SILENT: a page with no readable card is refused unless it drew
     LinkedIn's own no-results state, which no capture has shown yet -- so an
     empty search, or an offset past the end, is reported as a failure, never as
@@ -6303,6 +6324,24 @@ async def linkedin_search_jobs(
             sort_by=sort_by,
             start=start,
         )
+        # REFUSED BEFORE ANY LOAD ON A RETIRED ROUTE (the orchestrator's
+        # REFUSE-BEFORE-LOAD-ON-A-RETIRED-ROUTE, 2026-11-27; lane jobs7). The
+        # classic route is measured retired, so a call setting an argument the
+        # AI route refuses could only land there and refuse after spending a
+        # load and one of D1's searches. It refuses here instead, naming the
+        # arguments and the retired route, at zero loads. The classic
+        # composition below runs only once a capture shows classic serving
+        # again (the reopener, ``job_search_route.CLASSIC_ROUTE_RETIRED``).
+        if refused_on_ai and job_search_route.CLASSIC_ROUTE_RETIRED:
+            return {
+                "error": "bad_argument",
+                "message": job_search_route.retired_route_refusal(refused_on_ai),
+            }
+        # THE AI ROUTE IS THE SEARCH'S OWN ROUTE FOR EVERY CALL IT HONOURS
+        # (lane jobs7, 2026-11-27; census J 1). The classic address redirected
+        # to it on live session 12's load 3, so a call refusing nothing there
+        # asks for its own address and is read there as the primary route.
+        on_ai = job_search_route.asks_the_ai_route(refused_on_ai, keywords=keywords)
 
         def _search_url(place: str) -> str:
             """The url for ONE place. The ONLY place a location reaches a url.
@@ -6312,7 +6351,13 @@ async def linkedin_search_jobs(
             and a repeated ``location`` key -- are unreachable from here because
             this takes ONE string and appends ONE pair. A fan-out that built its
             own url would be free to reinvent either of them.
+
+            A call on the AI route carries no place at all: ``location`` and
+            ``locations`` are refused there, so ``on_ai`` holds only when
+            ``place`` is empty, and the AI address is keywords alone.
             """
+            if on_ai:
+                return job_search_route.ai_search_url(keywords)
 
             # A KEYWORD-LESS CALL CARRIES NO keywords KEY AT ALL, not an empty
             # one: `/jobs/search/?f_C=<id>` is the address the boundary was
@@ -6377,17 +6422,33 @@ async def linkedin_search_jobs(
             # through the easy_apply post-filter, whose zero is an explained one
             # (cards were read, none drew the mark), never a believed no-results
             # page. The AI zero that is not explained refused upstream.
-            note = (
-                "LinkedIn served its AI job search in place of the classic one, "
-                "so this is the FALLBACK route (ruling Q-SEARCH-ROUTE-POLICY): "
-                "it honours keywords, applies easy_apply locally to each card's "
-                "own mark, and every other argument refuses there until a fire "
-                "measures LinkedIn honouring it. Its window was 25 cards on the "
-                "one load measured (2026-11-26). results_label is LinkedIn's own "
-                "capped label, not a count of matches, and its pager is buttons "
-                "with no address, so a next page cannot be asked for yet. Each "
-                "row's easy_apply is its card's own mark."
-            )
+            if on_ai:
+                # THE PRIMARY ROUTE, ASKED FOR AT ITS OWN ADDRESS (lane jobs7).
+                note = (
+                    "This is LinkedIn's AI job search, asked for at its own "
+                    "address: the classic job search no longer serves (its "
+                    "address redirected here on 2026-11-26). It honours "
+                    "keywords and applies easy_apply locally to each card's "
+                    "own mark; every other argument refuses here until a fire "
+                    "measures LinkedIn honouring it. Its window was 25 cards "
+                    "on the loads measured. results_label is LinkedIn's own "
+                    "label, capped at 99+, not a count of matches, and its "
+                    "pager is buttons with no address, so a next page cannot "
+                    "be asked for yet. Each row's easy_apply and hiring are "
+                    "its card's own marks."
+                )
+            else:
+                note = (
+                    "LinkedIn served its AI job search in place of the classic one, "
+                    "so this is the FALLBACK route (ruling Q-SEARCH-ROUTE-POLICY): "
+                    "it honours keywords, applies easy_apply locally to each card's "
+                    "own mark, and every other argument refuses there until a fire "
+                    "measures LinkedIn honouring it. Its window was 25 cards on the "
+                    "one load measured (2026-11-26). results_label is LinkedIn's own "
+                    "capped label, not a count of matches, and its pager is buttons "
+                    "with no address, so a next page cannot be asked for yet. Each "
+                    "row's easy_apply is its card's own mark."
+                )
             receipt = result.get("easy_apply_post_filter")
             if receipt:
                 note += (
@@ -13429,12 +13490,15 @@ from linkedin_server import company_tabs  # noqa: E402 -- lane readers-jobs26's 
 @mcp.tool()
 async def linkedin_company_page_tab(organisation_id: str, tab: str = "about") -> dict[str, Any]:
     """ONE tab of an organisation's Page: its About tab, its Events tab, its
-    Premium Insights tab, its Life tab or its posts. ONE page load, nothing
-    pressed.
+    Premium Insights tab, its Life tab, its posts or its Products tab. ONE
+    page load, nothing pressed.
 
-    ``tab`` is exactly one of ``about``, ``events``, ``insights``, ``life`` or
-    ``posts``; anything else is refused before any load. Census rows ``J 106``
-    (About), ``J 165`` (Events), ``J 113`` (Insights), ``J 109`` (Life) and
+    ``tab`` is exactly one of ``about``, ``events``, ``insights``, ``life``,
+    ``posts`` or ``products``; anything else is refused before any load.
+    Census rows ``J 106``
+    (About), ``J 165`` (Events), ``J 113`` (Insights, with its two function
+    tables ``J 114`` and ``J 174`` and ``J 169``'s headcount and notable
+    alumni), ``J 109`` (Life), ``J 111`` (its Products tab) and
     ``J 168`` (the posts), read under THIRD-PARTY-TEXT-AT-RUNTIME
     and NAMES-AT-RUNTIME: every string of the Page's own comes back inside a
     record whose ``untrusted_third_party_text`` marker says it is someone
@@ -13454,10 +13518,22 @@ async def linkedin_company_page_tab(organisation_id: str, tab: str = "about") ->
     own words. ``more_offered`` says the tab offers more than it drew; the
     button is never pressed.
 
-    ``insights`` (Premium): ``modules`` (the insight cards drawn, by key) and
-    ``functions`` -- each row of the tab's function table: a job function from
-    LinkedIn's fixed taxonomy, its employee count, its percentage of the
-    Page's headcount and its 3- and 6-month growth in percent.
+    ``insights`` (Premium): ``modules`` (the insight cards drawn, by key);
+    ``functions`` -- each row of the table LinkedIn summarises "Headcount
+    growth by function": a job function from LinkedIn's fixed taxonomy, its
+    employee count, its percentage of the Page's headcount and its growth in
+    percent; and ``openings_by_function`` -- each row of the table it
+    summarises "Total job openings": a function, its job openings, its
+    percentage of the Page's openings and their 3- and 6-month growth. EACH
+    TABLE IS CHOSEN BY ITS SUMMARY, never by its column words, which LinkedIn
+    writes alike on both; a field with no row says why in
+    ``functions_unread`` or ``openings_by_function_unread``. ``headcount`` --
+    the table LinkedIn summarises "Total employee count": the Page's total
+    employees and its growth over 6 months, 1 year and 2 years in percent,
+    or None with ``headcount_unread`` saying why; and ``notable_alumni`` --
+    each member card under the heading "Notable company alumni", a person
+    record (name, headline, profile link, degree), with ``alumni_withheld``
+    counting the cards not returned. Only the cards the page drew are read.
 
     ``life``: ``modules`` (how many of each module LinkedIn drew, by key);
     ``trending`` -- the "Trending employee content" carousel's items, each a
@@ -13480,6 +13556,13 @@ async def linkedin_company_page_tab(organisation_id: str, tab: str = "about") ->
     with no words, or with two text boxes (a reshare), is counted and not
     read; no item's link is drawn on that view, so none is returned.
 
+    ``products``: ``products`` -- each product the tab drew, its name and its
+    category as records of the Page's own words; ``products`` is None, with
+    ``products_tab_drawn`` False, when the Page's navigation draws no
+    Products tab. ``show_all_offered`` says the tab offers more than it drew;
+    its button is never pressed. A product's link and the members pictured
+    under it are never read.
+
     A TAB THAT YIELDS NOTHING IS A FAILURE, never "this organisation has
     none", unless the page itself says so. If the load lands anywhere but the
     tab asked for, the page is not read and the landing is withheld (an
@@ -13491,12 +13574,12 @@ async def linkedin_company_page_tab(organisation_id: str, tab: str = "about") ->
     rather than quoting it.
 
     THIS TOOL WRITES NOTHING. It does not follow the Page, press "I'm
-    interested", open an event, a photo or a spotlight's link, or open the
-    Insights tab's dropdown.
+    interested", open an event, a photo or a spotlight's link, open the
+    Insights tab's dropdown, or page the alumni carousel.
 
     Args:
         organisation_id: the numeric LinkedIn organisation id.
-        tab: about (the default), events, insights, life or posts.
+        tab: about (the default), events, insights, life, posts or products.
     """
     try:
         address = company_tabs.tab_url(organisation_id, tab)
@@ -13528,6 +13611,8 @@ async def linkedin_company_page_tab(organisation_id: str, tab: str = "about") ->
                 reading = await company_tabs.read_posts_tab(page)
             elif address["tab"] == "life":
                 reading = await company_tabs.read_life_tab(page)
+            elif address["tab"] == "products":
+                reading = await company_tabs.read_products_tab(page)
             else:
                 reading = await company_tabs.read_about_tab(page)
             return {
@@ -13739,8 +13824,8 @@ def _search_alert_refusal(why: str) -> dict[str, Any]:
     return {
         "error": "bad_argument",
         "message": (
-            "a job alert is set on one search, composed from its keywords and "
-            f"an optional location: {why} Nothing was loaded."
+            "a job alert is set on one search, composed from its keywords: "
+            f"{why} Nothing was loaded."
         ),
         "performed": False,
     }
@@ -13752,19 +13837,23 @@ async def linkedin_set_search_job_alert(
 ) -> dict[str, Any]:
     """Turn ON LinkedIn's job alert for one job search -- a WRITE.
 
-    Presses the "Set alert" switch at the head of that search's results, which
-    makes LinkedIn send you new jobs matching it. A job alert is your own saved
-    search; nobody else sees it. Same two-step shape and the same five gates as
-    ``linkedin_save_job``: no ``confirm_token``, no action -- you get a block to
-    read and a token that works ONCE, only for this search, only for this verb,
-    within two minutes. Census row ``J 31``.
+    Presses the "Get job alerts for this search" switch at the head of that
+    search's results, which makes LinkedIn send you new jobs matching it. A job
+    alert is your own saved search; nobody else sees it. Same two-step shape
+    and the same five gates as ``linkedin_save_job``: no ``confirm_token``, no
+    action -- you get a block to read and a token that works ONCE, only for
+    this search, only for this verb, within two minutes. Census row ``J 31``.
 
-    THE SEARCH IS YOURS TO NAME: ``keywords`` and, optionally, ``location``,
-    composed into the classic job search's address the way
-    ``linkedin_search_jobs`` composes them; filters are not carried. THE
-    PREVIEW READS that search: exactly one alert toggle with LinkedIn's own
-    class and its word "Set alert", exactly one switch in it, reading off. A
-    switch already on is refused -- turning it off is
+    THE SEARCH IS YOURS TO NAME: ``keywords``, composed into LinkedIn's AI
+    job search's address the way ``linkedin_search_jobs`` composes a keyword
+    search; filters are not carried. A ``location`` is REFUSED before anything
+    loads: the classic job search no longer serves, and what the AI search does
+    with a typed place has not been measured, so an alert asked for "these
+    keywords in that place" could be set on the keywords alone. THE PREVIEW
+    READS that search: exactly one switch on the page, inside LinkedIn's
+    alert toggle and captioned with its words, reading off (on a classic page,
+    should LinkedIn serve one: the toggle with LinkedIn's own class and its
+    word "Set alert"). A switch already on is refused -- turning it off is
     ``linkedin_unset_search_job_alert``. A landing on any other search is
     refused.
 
@@ -13775,7 +13864,8 @@ async def linkedin_set_search_job_alert(
 
     Args:
         keywords: the search's keywords, as you would type them.
-        location: the search's location, as you would type it; empty for none.
+        location: leave empty: a place is refused until the AI search's place
+            is measured.
         confirm_token: leave empty to preview. Pass the token from that
             preview to actually press the switch.
     """
@@ -13795,9 +13885,12 @@ async def linkedin_unset_search_job_alert(
     """Turn OFF LinkedIn's job alert for one job search -- a WRITE, the inverse of
     ``linkedin_set_search_job_alert``.
 
-    Presses the same "Set alert" switch at the head of that search's results,
-    from on. Same two steps, same gates, a token bound to this search and this
-    verb. A switch reading off is refused -- turning it on is
+    Presses the same switch at the head of that search's results, from on, so
+    the alert you set is switched off -- on LinkedIn's AI job search, the one
+    captioned "Get job alerts for this search". Same two steps, same gates, a
+    token bound to this search and this verb, and a ``location`` refused
+    before anything loads, as there. A switch reading off is refused --
+    turning it on is
     ``linkedin_set_search_job_alert``. After the press the search is
     re-rendered and the switch read again; off means the alert is gone. The on
     reading this starts from is derived (no capture holds the switch on), so
@@ -13805,7 +13898,7 @@ async def linkedin_unset_search_job_alert(
 
     Args:
         keywords: the same keywords the alert was set with.
-        location: the same location, or empty.
+        location: leave empty, as for the set.
         confirm_token: leave empty to preview. Pass the token from that
             preview to actually press the switch.
     """

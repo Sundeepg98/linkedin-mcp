@@ -40,10 +40,16 @@ UNSET = "unset_search_job_alert"
 SET_SPEC = spec_for_action(SET)
 UNSET_SPEC = spec_for_action(UNSET)
 
-#: A search with a location, and one without: declared shapes, not his data.
+#: A search, and a place: declared shapes, not his data. SINCE LANE JOBS7
+#: (2026-11-27) the address is the AI search's own and a place is REFUSED (its
+#: handling there is unmeasured, capture C-SRCH-2), so every target here is
+#: keywords alone; the AI arm's own tests are
+#: ``tests/test_the_search_alert_is_on_the_ai_route.py``. The classic captures
+#: below are still read: a classic page served at the AI address is read on
+#: its own arm.
 KEYWORDS = "Example role"
 LOCATION = "Example City"
-QUERY, _ = search_alert_switch.query_for(KEYWORDS, LOCATION)
+QUERY, _ = search_alert_switch.query_for(KEYWORDS)
 URL = SET_SPEC.url_template.format(target=QUERY)
 
 #: The tracked capture every derived world starts from (session 2, MEASURED).
@@ -95,12 +101,14 @@ async def _read(page, html: str):
 # ---------------------------------------------------------------------------
 
 
-def test_the_query_is_his_two_values_in_one_spelling():
-    assert QUERY == "keywords=Example+role&location=Example+City"
+def test_the_query_is_his_keywords_in_one_spelling():
+    assert QUERY == "keywords=Example+role"
     assert search_alert_switch.query_for(KEYWORDS, "") == ("keywords=Example+role", "")
-    assert search_alert_switch.query_for("  Example role  ", " Example City ")[0] == QUERY
+    assert search_alert_switch.query_for("  Example role  ", "")[0] == QUERY
     assert search_alert_switch.canonical(QUERY) == (QUERY, "")
-    assert URL == "https://www.linkedin.com/jobs/search/?keywords=Example+role&location=Example+City"
+    # A place is refused since lane jobs7 (the AI route's place is unmeasured).
+    assert search_alert_switch.query_for(KEYWORDS, LOCATION)[0] is None
+    assert URL == "https://www.linkedin.com/jobs/search-results/?keywords=Example+role"
     assert SET_SPEC.url_pattern.match(URL) and UNSET_SPEC.url_pattern.match(URL)
 
 
@@ -135,14 +143,14 @@ def test_a_target_not_in_the_one_spelling_is_refused(target):
     "landed, on_search",
     [(URL, True),
      (URL + "&geoId=100000000&refresh=true", True),
-     ("https://www.linkedin.com/jobs/search?keywords=Example+role&location=Example+City", True),
-     ("https://www.linkedin.com/jobs/search-results/?keywords=Example+role", False),
-     ("https://www.linkedin.com/jobs/search/?keywords=Another+role&location=Example+City", False),
-     ("https://www.linkedin.com/jobs/search/?keywords=Example+role", False),
-     ("https://www.linkedin.com/jobs/search/?keywords=Example+role&keywords=Another&location=Example+City", False),
-     ("https://example.com/jobs/search/?keywords=Example+role&location=Example+City", False)],
-    ids=["the-same", "linkedin-added-params", "no-trailing-slash", "the-ai-search",
-         "other-keywords", "the-location-dropped", "keywords-twice", "another-host"],
+     ("https://www.linkedin.com/jobs/search-results?keywords=Example+role", True),
+     ("https://www.linkedin.com/jobs/search/?keywords=Example+role", True),
+     ("https://www.linkedin.com/jobs/search-results/?keywords=Another+role", False),
+     ("https://www.linkedin.com/jobs/search-results/", False),
+     ("https://www.linkedin.com/jobs/search-results/?keywords=Example+role&keywords=Another", False),
+     ("https://example.com/jobs/search-results/?keywords=Example+role", False)],
+    ids=["the-same", "linkedin-added-params", "no-trailing-slash", "the-classic-page",
+         "other-keywords", "the-keywords-dropped", "keywords-twice", "another-host"],
 )
 def test_the_page_may_veto_the_search_and_never_supply_one(landed, on_search):
     assert search_alert_switch.landed_on_search(landed, QUERY) is on_search
@@ -210,7 +218,7 @@ async def test_set_previews_from_off_and_mints(writes_on, page):
     nav = FixtureNavigator({URL: BASE})
     block = await preview(SET_SPEC, target=QUERY, navigator=nav, page=page)
     assert nav.gotos == [URL]
-    assert block["where"]["search"] == {"keywords": KEYWORDS, "location": LOCATION}
+    assert block["where"]["search"] == {"keywords": KEYWORDS, "location": ""}
     assert block["where"]["target"] == QUERY
     assert block["read"]["same_page_as_the_action"] is True
     assert block["read"]["page_loads"] == 1
@@ -258,12 +266,15 @@ async def test_the_preview_refuses_a_landing_on_another_search(writes_on, page):
     class Elsewhere(FixtureNavigator):
         async def goto(self, page, url, **kwargs):
             await super().goto(page, url, **kwargs)
-            return "https://www.linkedin.com/jobs/search-results/?keywords=Example+role"
+            # Another search on the same route (since lane jobs7 the AI search
+            # with the SAME keywords is this search's own landing).
+            return "https://www.linkedin.com/jobs/search-results/?keywords=Another+role"
 
     nav = Elsewhere({URL: BASE})
     with pytest.raises(WriteAttemptError) as excinfo:
         await preview(SET_SPEC, target=QUERY, navigator=nav, page=page)
     assert "search-results" not in str(excinfo.value), "the landing was quoted"
+    assert "Another" not in str(excinfo.value), "the landing was quoted"
     assert not writes._GRANTS
 
 
@@ -279,7 +290,7 @@ async def test_control_1_it_refuses_with_writes_off(monkeypatch, page):
         await preview(SET_SPEC, target=QUERY, navigator=nav, page=page)
     off = await server._write_tool(SET, QUERY, "")
     assert off["error"] == "writes_disabled" and off["performed"] is False
-    tool_off = await server.linkedin_set_search_job_alert(KEYWORDS, LOCATION)
+    tool_off = await server.linkedin_set_search_job_alert(KEYWORDS)
     assert tool_off["error"] == "writes_disabled" and tool_off["performed"] is False
     assert nav.gotos == []
 
@@ -293,7 +304,7 @@ async def test_control_1b_a_search_the_tool_cannot_compose_loads_nothing():
 async def test_control_2_a_grant_binds_its_search_and_its_verb(writes_on, page):
     nav = FixtureNavigator({URL: BASE})
     block = await preview(SET_SPEC, target=QUERY, navigator=nav, page=page)
-    other, _ = search_alert_switch.query_for("Another role", LOCATION)
+    other, _ = search_alert_switch.query_for("Another role")
     with pytest.raises(WriteAttemptError, match="minted for target"):
         consume(block["to_confirm"], action=SET, target=other)
     nav = FixtureNavigator({URL: BASE})
@@ -366,7 +377,9 @@ def test_the_tables_name_both_actions():
         assert action in writes._TOGGLE_ACTIONS
         assert "switch" in writes._WHERE_TO_LOOK[action]
         assert "RE-RENDERED" in writes._VERIFIED_FROM[action]
-        assert writes.anchor_label_for(spec) == search_alert_switch.WORD
+        # The AI arm's caption since lane jobs7 (the classic word stays the
+        # classic toggle's, held by the reader).
+        assert writes.anchor_label_for(spec) == search_alert_switch.CAPTION
         assert writes.grant_is_possible(spec)
         assert spec.target_kind == "job_search"
         assert callable(getattr(server, "linkedin_" + action, None))
@@ -381,6 +394,8 @@ def test_the_block_names_the_search_and_no_label_text():
                "word": "Set alert", "aria_checked": "false", "checked": False}
     facts, state, _why = search_alert_switch.switch_verdict(reading)
     assert state == search_alert_switch.ALERT_OFF
-    assert set(facts) == {"toggles", "switches_in_toggle", "switches_on_page", "word",
+    # Since lane jobs7 a reading also carries the AI arm's counts and the arm.
+    assert set(facts) == {"arm", "toggles", "switches_in_toggle", "switches_on_page", "word",
+                          "ai_toggles", "ai_switches", "captions", "captions_near_switch",
                           "aria_checked", "checked"}
     assert json.dumps(facts)

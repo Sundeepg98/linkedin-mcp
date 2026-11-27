@@ -194,6 +194,8 @@ withheld, never flipped). EACH CELL IS READ UNDER THE HEADER ITS OWN
 `headers` ATTRIBUTE NAMES: a test swaps two header ids and the values follow
 the ids, not the positions.
 
+**CORRECTED BY:** `_audit/2026-11-27-jobs7.md` -- the table this section and section 4.4 read as the headcount distribution is summarised `Total job openings`, under that module heading. LinkedIn reuses the headcount header words there, so its rows are each function's job openings (row `J 174`). The reader now chooses each table by its summary, and `J 114` is re-based on session 12's load 20 (J114-READS-ITS-OWN-TABLE, 2026-11-27, sections 11.5 and 11.6).
+
 ### 4.4 `J 114` -- four Premium facets: STAYS GAP, one of four built
 
 On the HEADCOUNT view, "distribution and growth by function" is drawn as the

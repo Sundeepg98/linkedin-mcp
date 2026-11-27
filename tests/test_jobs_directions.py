@@ -486,7 +486,9 @@ def _admitted_unheld_jobs_row(row: dict[str, str]) -> bool:
     # NOT ALREADY READER, since integration 6 (2026-11-26): `J 1`, `J 20` and
     # `J 40` returned to GAP gated READER on the AI route, and the first of them
     # heads the table, so a plant of READER on it changed nothing and the
-    # control reported itself broken -- which is what it is for.
+    # control reported itself broken -- which is what it is for. The three
+    # left GAP on lane jobs7 (2026-11-27); the narrowing stays, so a READER
+    # row entering the table later cannot blind the control again.
     return (row["class"] == "ADMITTED" and _jobs_page(row).endswith("/")
             and row["gate"] != "READER"
             and rh.surface_hold(_jobs_page(row)) is None)

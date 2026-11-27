@@ -2044,7 +2044,20 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # on VOLUNTEERING-FALLBACK-BOUNDARY (the orchestrator, 2026-11-27 13:10),
     # allowlist silence alone, no exemption; every other key byte-identical
     # (17 of 18). Record: _audit/2026-11-27-prof7.md, section 2.
-    "_ALLOWED_URL_PATTERNS": "10c0a7637b7c3ca8",
+    #
+    # 5d3109ee0aa96e48 until 2026-11-27 (lane jobs7): one anchored line, his
+    # LinkedIn Learning library's saved list (census row J 175), on
+    # LEARNING-ROWS-SPLIT as re-ruled and READ-PAST-AN-ACT-SUBSTRING's second
+    # clause (allowlist silence alone, no exemption); every other key
+    # byte-identical (17 of 18). Record: _audit/2026-11-27-jobs7.md s11.5.
+    #
+    # MERGED at integration 7 (2026-11-27), each lane above moving this key
+    # from the same base: a3510436178fb711, measured with this file's
+    # ast_digest on the merged readonly.py; only this key moved from 68a4ff7.
+    # ATTRIBUTION: the merged list minus jobs7's one entry hashes to prof7's
+    # 10c0a7637b7c3ca8, and minus prof7's one entry to jobs7's
+    # efcaa36167e42ccf. Record: _audit/2026-11-27-integration-7.md.
+    "_ALLOWED_URL_PATTERNS": "a3510436178fb711",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     # 419e64a3cd92ec7e until the same REVIEW: commit: a third entry, excusing
     # exactly {"/follow"} for exactly the anchored follower-list address.

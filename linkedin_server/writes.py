@@ -3166,20 +3166,27 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
     # ``HIS-OWN-CURATION-NOT-OUTWARD``: an alert is his own saved search, sent
     # to nobody. The address, the switch, its readings and its verdicts live in
     # ``search_alert_switch``; these entries and the arms below delegate.
-    # MEASURED on live session 2's classic job search
+    # THE AI ARM SINCE LANE JOBS7 (2026-11-27): the classic search no longer
+    # serves (live session 12, load 3), so the address is the AI search's own
+    # and the switch pressed is the AI page's -- the page's one
+    # ``input[role=switch]`` inside the component keyed
+    # ``JobSearchAlertToggleRef_``, captioned "Get job alerts for this
+    # search", MEASURED off on session 11's raw page and on both of session
+    # 12's AI loads (tests/fixtures/live12/c_srch_1_words.html,
+    # c_srch_0b_words.html). The classic arm -- session 2's
     # (tests/fixtures/live2/j107_search_alert.html): one toggle wearing
     # LinkedIn's class ``jobs-search-create-alert__artdeco-toggle``, its word
-    # "Set alert", one ``input[role=switch]`` in it drawing aria-checked off.
-    # The target is a QUERY the caller's own keywords and location compose --
-    # the first write addressed by a search rather than an id. Named on
-    # LinkedIn's own verb here ("Set alert"), as the J 161 pair is.
+    # "Set alert" -- is still read wherever LinkedIn serves the classic page.
+    # The target is a QUERY the caller's own keywords compose -- the first
+    # write addressed by a search rather than an id; a place is refused until
+    # the AI route's place is measured (C-SRCH-2). Named on LinkedIn's own
+    # verb here ("Set alert"), as the J 161 pair is.
     "linkedin_set_search_job_alert": WriteSpec(
         action="set_search_job_alert",
         tool_name="linkedin_set_search_job_alert",
         url_template=search_alert_switch.URL_TEMPLATE,
         url_pattern=re.compile(
-            r"^https://www\.linkedin\.com/jobs/search/\?keywords=[A-Za-z0-9%+._~-]{1,600}"
-            r"(?:&location=[A-Za-z0-9%+._~-]{1,300})?$"
+            r"^https://www\.linkedin\.com/jobs/search-results/\?keywords=[A-Za-z0-9%+._~-]{1,600}$"
         ),
         exempt_substring=None,
         summary=(
@@ -3192,11 +3199,14 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
         state_from="search_alert_switch",
         direction_source=(
             "the search's own job-alert switch, read off the page this action "
-            "clicks on, at no extra page load: exactly one toggle wearing "
-            "LinkedIn's class for it, its word 'Set alert', exactly one input "
-            "switch in it and on the page, and its aria-checked agreeing with "
-            "its checked property. MEASURED on live session 2's classic job "
-            "search, 2026-09-28."
+            "clicks on, at no extra page load. On LinkedIn's AI job search: the "
+            "page's one input switch, inside the component keyed for the alert "
+            "toggle, captioned 'Get job alerts for this search', its checked "
+            "property its state and no aria-checked drawn -- MEASURED off on live "
+            "sessions 11 and 12, 2026-11-26. On the classic page, should LinkedIn "
+            "serve it: exactly one toggle wearing LinkedIn's class for it, its "
+            "word 'Set alert', its aria-checked agreeing with its checked property "
+            "-- MEASURED on live session 2, 2026-09-28."
         ),
         wrong_state_note=(
             "This acts only from the OFF reading. A switch already reading on is "
@@ -3218,12 +3228,12 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
         ),
         residue=(
             "WHETHER ONE PRESS COMPLETES THE ACT is unmeasured -- LinkedIn may "
-            "draw a further step, or change the toggle's word once the alert is "
-            "on -- and so is whether a click reaches the switch: no trial press "
+            "draw a further step, or change the switch's caption once the alert "
+            "is on -- and so is whether a click reaches the switch: no trial press "
             "is taken, so an unreachable switch throws inside the click and the "
             "receipt says so. The fresh render after the press says whether the "
-            "alert landed. The page is LinkedIn's CLASSIC job search, which the "
-            "same capture marks with a deprecation banner."
+            "alert landed. The page is LinkedIn's AI job search; a place is not "
+            "taken until that route's place is measured (capture C-SRCH-2)."
         ),
         reversibility_procedure=(
             "One supervised round trip on a search HE names: set (preview, press, "
@@ -3236,8 +3246,7 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
         tool_name="linkedin_unset_search_job_alert",
         url_template=search_alert_switch.URL_TEMPLATE,
         url_pattern=re.compile(
-            r"^https://www\.linkedin\.com/jobs/search/\?keywords=[A-Za-z0-9%+._~-]{1,600}"
-            r"(?:&location=[A-Za-z0-9%+._~-]{1,300})?$"
+            r"^https://www\.linkedin\.com/jobs/search-results/\?keywords=[A-Za-z0-9%+._~-]{1,600}$"
         ),
         exempt_substring=None,
         summary=(
@@ -3269,9 +3278,9 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "from off."
         ),
         residue=(
-            "the same as linkedin_set_search_job_alert's: one press, the toggle's "
-            "word once on, and whether the switch can be reached, are measured on "
-            "the first supervised round trip."
+            "the same as linkedin_set_search_job_alert's: one press, the switch's "
+            "caption once on, and whether the switch can be reached, are measured "
+            "on the first supervised round trip."
         ),
         reversibility_procedure=(
             "the same round trip as linkedin_set_search_job_alert, this half "
@@ -5313,17 +5322,18 @@ def _target_for(spec: WriteSpec, target: Any) -> str:
         # are compared against its segment, in the page.
         return _canonical_profile(raw)
     if spec.target_kind == "job_search":
-        # ONE JOB SEARCH, AS THE QUERY ITS OWN KEYWORDS AND LOCATION COMPOSE
-        # (2026-11-25, lane build-jmn26, J 31) -- ``search_alert_switch``'s one
-        # spelling, which the tool composes from its arguments and this
-        # re-derives, so a hand-written query never reaches a url. The refusal
-        # describes the shape and never repeats the value.
+        # ONE JOB SEARCH, AS THE QUERY ITS OWN KEYWORDS COMPOSE (2026-11-25,
+        # lane build-jmn26, J 31; keywords alone since lane jobs7's AI arm, a
+        # place refused until the AI route's place is measured) --
+        # ``search_alert_switch``'s one spelling, which the tool composes from
+        # its arguments and this re-derives, so a hand-written query never
+        # reaches a url. The refusal describes the shape and never repeats the
+        # value.
         query, why = search_alert_switch.canonical(raw)
         if query is None:
             raise WriteAttemptError(
-                f"{spec.action!r} is addressed by one job search -- keywords and "
-                f"an optional location, composed by its tool -- and the value "
-                f"given is not one: {why}"
+                f"{spec.action!r} is addressed by one job search -- its keywords, "
+                f"composed by its tool -- and the value given is not one: {why}"
             )
         return query
     if spec.target_kind == "recommendations_feedback":
@@ -8881,14 +8891,18 @@ PERFORMABLE: frozenset[str] = frozenset(
         "unset_similar_jobs_alert",
         # THE SEARCH'S JOB-ALERT PAIR, 2026-11-25 (lane build-jmn26, census
         # row J 31), under HIS-OWN-CURATION-NOT-OUTWARD, each the other's
-        # inverse:
+        # inverse; ITS AI ARM 2026-11-27 (lane jobs7), the classic search no
+        # longer serving:
         #
-        #   a measured surface   /jobs/search/ with the query the caller's own
-        #                        keywords and location compose -- the read
+        #   a measured surface   /jobs/search-results/ with the query the
+        #                        caller's own keywords compose -- the read
         #                        boundary admits it, as linkedin_search_jobs
-        #                        loads it
-        #   a measured anchor    one input[role=switch] in the one toggle
-        #                        wearing LinkedIn's class
+        #                        loads it (live session 12, loads 3 and 4)
+        #   a measured anchor    the page's one input[role=switch] inside the
+        #                        component keyed JobSearchAlertToggleRef_,
+        #                        captioned "Get job alerts for this search"
+        #                        (sessions 11 and 12); on a classic page, the
+        #                        one toggle wearing LinkedIn's class
         #                        jobs-search-create-alert__artdeco-toggle, its
         #                        word "Set alert" (live session 2)
         #   an aimable target    that one switch, strict at the press
@@ -9460,13 +9474,15 @@ def anchor_label_for(
         # its one block, in the page; the title never reaches this process.
         return dom.JOB_ALERT_HEADING_PREFIX
     if spec.action in search_alert_switch.ACTIONS:
-        # THE TOGGLE'S OWN WORD, exact, MEASURED by keyed shape on session 2's
-        # search (lane build-jmn26, J 31). The switch's accessible name is its
-        # hidden label, which no candidate matched and this server never reads,
-        # so the switch is found STRUCTURALLY -- the one input in the one toggle
-        # wearing LinkedIn's class -- and the reader requires this word on that
-        # toggle before it reads any state.
-        return search_alert_switch.WORD
+        # THE SWITCH'S OWN CAPTION, exact, MEASURED on session 11's raw page and
+        # by keyed shape on both of session 12's AI loads (lane jobs7, J 31's
+        # AI arm; the classic arm's word ``search_alert_switch.WORD`` was lane
+        # build-jmn26's). The switch's accessible name is its label, which no
+        # candidate matched and this server never reads, so the switch is found
+        # STRUCTURALLY -- the page's one input switch inside the keyed toggle --
+        # and the reader requires this caption beside it before it reads any
+        # state. The reader holds the classic arm's word to the classic toggle.
+        return search_alert_switch.CAPTION
     if spec.action == "send_recommendations_feedback":
         # THE BUTTON'S OWN WORDS, exact, MEASURED by keyed shape on session 8's
         # recommended jobs (lane build-jobs2, J 163), chosen by his answer from
@@ -10017,8 +10033,8 @@ _WHERE_TO_LOOK: dict[str, str] = {
     # 2026-11-25 (lane build-jmn26, J 31). The switch at the head of the search
     # he named, which the verification re-reads; his job alerts are listed on
     # LinkedIn's alerts page too, which he can open himself.
-    "set_search_job_alert": "the 'Set alert' switch at the head of that search's results, or your job alerts",
-    "unset_search_job_alert": "the 'Set alert' switch at the head of that search's results, or your job alerts",
+    "set_search_job_alert": "the 'Get job alerts for this search' switch at the head of that search's results, or your job alerts",
+    "unset_search_job_alert": "the 'Get job alerts for this search' switch at the head of that search's results, or your job alerts",
     # 2026-11-26 (lane build-jobs2, J 163). The block under the list on his
     # recommended jobs: the one place the answer could show.
     "send_recommendations_feedback": "the question under the list on your recommended jobs",
@@ -10908,11 +10924,13 @@ async def _live_control(
         # second source (lane build-jmn26, J 31). The landing was checked
         # against his search by ``_assert_landed_on_target`` before this ran;
         # the switch is re-read in its one toggle, and the selector is the
-        # module's CONSTANT, which strict mode holds to the one switch.
-        _switch, state, why = await search_alert_switch.read_state(page)
+        # module's CONSTANT for the arm the reading was taken on (lane jobs7:
+        # the AI search's switch, or the classic toggle's), which strict mode
+        # holds to the one switch.
+        switch, state, why = await search_alert_switch.read_state(page)
         if state not in (search_alert_switch.ALERT_OFF, search_alert_switch.ALERT_ON):
             return (state, why, "")
-        return (state, why, search_alert_switch.SWITCH)
+        return (state, why, search_alert_switch.switch_for(switch))
 
     if spec.action == "send_recommendations_feedback":
         # THE SAME READER THE PREVIEW USED, ON THE SAME PAGE: freshness, not a

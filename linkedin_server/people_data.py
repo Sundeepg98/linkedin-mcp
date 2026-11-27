@@ -540,6 +540,10 @@ PROSE_SOURCES = (
     # spotlights on its Life tab -- its title, and the words beside it.
     "life_spotlight_title",
     "life_spotlight_body",
+    # 2026-11-27 (lane jobs7, census ``J 111``): one product on the Page's
+    # Products tab -- its name, and the category LinkedIn files it under.
+    "product_name",
+    "product_category",
 )
 
 #: The cap on an organisation's prose, in characters after normalisation.

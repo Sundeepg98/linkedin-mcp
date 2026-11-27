@@ -13290,6 +13290,104 @@ contact. Not exercised live: the re-proof's block kept the editor unpressed.
 readers, and the history classifier behind E1's diagnosis. None was shown
 failing on a planted defect.
 
+## 114. A KEY THAT CARRIES DATA IS READ BY ITS GRAMMAR'S SHAPE, AND ONLY WHERE THE LIVE COUNT AGREES (jobs7, 2026-11-27)
+
+Lane jobs7 read live session 12's KEYED skeletons offline -- the session kept no raw page -- and
+built tracked word skeletons from them, then the AI job search's own route, `J 31`'s AI arm and the
+pre-load refusal on the retired classic route over those skeletons. Each instrument below was SHOWN
+FAILING on a planted defect before it was trusted. The record is `_audit/2026-11-27-jobs7.md`,
+sections 2, 3, 5 and 11.
+
+### 114.1 `scripts/_build_jobs7_word_skeletons.py`: words by keyed shape, keys by grammar, two channels
+
+The shipped word-skeleton method (`_build_live11_word_skeletons.build`, a closed word written only
+where `value_shape(word, key)` matched) plus one declared class: a `componentkey` whose value
+carries data -- a posting id, his query words -- is written by its GRAMMAR's shape class (a card
+key is 19 letters, D digits and length 23 + D; the alert key the switch's nearest keyed pair with 9
+digits), only as a nested pair, and only when the number of outer cards EQUALS the session's own
+live reading (`evidence.ai_cards`, taken on the raw page by the shipped regex). SHOWN FAILING, four
+plants, each refused with its own reason while the unplanted build passes: the live count off by
+one ("the two channels disagree"), a declared word the page never drew ("matched no keyed shape"),
+a third copy of a card key ("appears 3 time(s), where a nested pair is required"), a second switch
+("2 input switch(es) on the page").
+
+    A VALUE THAT CARRIES DATA CANNOT BE MATCHED, ONLY ITS SHAPE; SO THE SHAPE IS
+    WRITTEN BACK ONLY WHERE A SECOND CHANNEL COUNTS THE SAME THINGS.
+
+### 114.2 The words fixture differs from its capture only by what was declared
+
+`tests/test_the_ai_search_is_the_search_route.py::test_each_words_fixture_differs_from_its_capture_only_by_declared_words_and_keys`
+(every fixture the builder writes, by `test_every_built_fixture_is_on_disk_and_proved_here`):
+line for line against the committed tracked copy, every differing text a declared word, every
+differing attribute value a declared word or a synthetic key, every differing address segment a
+declared path word. SHOWN FAILING, three plants into a copy, each failing while the committed
+fixture passes: an undeclared name in a title slot, an undeclared component key, an undeclared slug
+in a product's address.
+
+    A FIXTURE BUILT FROM A CAPTURE CARRIES ITS PROVENANCE AS A TEST, OR IT IS
+    SYNTHETIC MARKUP WITH A CAPTURE'S NAME.
+
+### 114.3 Loads and searches counted where the real browser counts them
+
+The `_counted` harness in the same file: loads through `call_ceiling.count_load` inside an armed
+`call_ceiling.per_call` budget, as the real `BROWSER.goto` counts them, and searches by the live
+harness's own D1 counter, `_probe_live_lane_session_2.searches_spent`. SHOWN FAILING: on the code
+before REFUSE-BEFORE-LOAD-ON-A-RETIRED-ROUTE, 12 of 12 refused arguments counted 1 load and 1
+search before refusing (red); the keyword control counts 1 and 1 on both codes, so the zeros are
+readings, not a counter that cannot count.
+
+    A REFUSAL'S COST IS MEASURED BY THE COUNTERS THE BUDGET USES, AND A ZERO NEEDS
+    A CONTROL THAT COUNTS ONE.
+
+### 114.4 An admission's press condition, measured on the shipped gate
+
+`tests/test_the_learning_saved_list_presses_nothing.py`: READ-PAST-AN-ACT-SUBSTRING's condition
+"the press gate still refusing every control" for an admitted page, measured on the shipped gate
+rather than argued. The test checks four things: the write guard's forbidden substrings (none in
+the address); the press gate's composer markers (none); `press.sensitivity_basis` (None for every
+spelling and shape); and `press.evaluate` (each sanctioned shape refused `no_sensitivity_basis`).
+SHOWN FAILING: a planted `/learning/` basis, matched by containment the way `/feed/` reached
+`/feed/hashtag/` (lane msg7's finding), makes the probe answer and lifts the refusal.
+
+    A CONDITION AN ADMISSION RESTS ON IS A TEST OF THE SHIPPED GATE, WITH THE
+    CONTAINMENT THAT ONCE BROKE IT PLANTED AS ITS CONTROL.
+
+### 114.5 A data table is chosen by what it says it counts, never by its column words
+
+`tests/test_the_insights_tables_are_read_by_their_summary.py` runs over session 11's load 19 and
+session 12's load 20. LinkedIn heads its headcount table and its job-openings table with the same
+words, so the reader picks each table by its `summary` alone (`company_tabs.FUNCTION_TABLES`).
+
+SHOWN FAILING on the shipped reader, which picked by header words: **9 failed of 9**.
+
+* On session 11 it returned the openings as employee counts.
+* On load 20 it read no row.
+* On the control page, which draws neither summary, it still read rows by their header words.
+
+On the fix: 9 passed. The control returns both fields empty, each with its closed reason, and a
+summary drawn twice is read from neither copy. The finding that the test now holds was itself
+measured by keyed shape. The summary and the module heading named the table; and for each of the
+10 functions in both tables, the openings count had one or two fewer digits than the headcount.
+
+    TWO TABLES WITH ONE SET OF COLUMN WORDS ARE TOLD APART ONLY BY THEIR OWN
+    LABEL; A READER KEYED ON THE COLUMNS READS WHICHEVER IT MEETS.
+
+### 114.6 DECLARED DISPOSABLE
+
+* **The scratch probes** that measured session 12's keyed skeletons: `kprobe.py`, `kstruct.py`,
+  `khref.py`, `kchip.py`, `klearn.py`, `kprod.py`, `kdiff.py`, `kelem.py`, `kinsight.py`,
+  `kheads.py`, `krows.py`. Each ran with a provenance check (`tracked_copy` equal to the committed
+  copy) and a random-key negative control, which matched 0 of every candidate list it was given.
+  They live in gitignored scratch and answered one question each.
+* **The census, queue, side-table and pin editors**: `census_move.py`, `census_split.py`,
+  `tsv_rows.py`, `tsv_drop.py`, `queue_edit.py`, `queue_add.py`, `nextstep_edit.py`,
+  `set_pins.py`, `ledger5.py`, `allowcount5.py`. Each asserted its own edit and answered one
+  question.
+* **`keep_new_entries.py`**: it keeps the committed reader inventory byte-for-byte and adds only
+  readers the fresh measure found absent from it. It answered this lane's one question: on this
+  box, the writer re-measures four navigating readers as timed out.
+* **The batch runners and the plant scripts.**
+
 ## 117. A LANDING IS JUDGED WHERE THE PAGE ARRIVES, AND A DRAWN TARGET IS PRESSED ONLY WHEN IT IS EXACTLY AN ADDRESS THIS REPOSITORY FORMED (prof7, 2026-11-27)
 
 Lane prof7's two instruments, each SHOWN FAILING before it was trusted. The
