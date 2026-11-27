@@ -59,9 +59,14 @@ shape on the live lane's own skeletons (``tests/fixtures/live12/
 c_srch_1_words.html`` and ``c_srch_0b_words.html``): 25 and 18 cards, each
 with the head stack below, the hiring chip on 5 and on 13, proximity on 3 and
 on 3. A call that sets an argument this route has not been measured honouring
-is composed as before, and its landing here refuses by name
-(:func:`fallback_refusal`); a landing on the classic page, should LinkedIn
-serve it again, is still read by the classic reader.
+is REFUSED BEFORE ANY LOAD (:func:`retired_route_refusal`, ruling
+``REFUSE-BEFORE-LOAD-ON-A-RETIRED-ROUTE``): zero loads and zero of D1's
+searches, its refusal naming the arguments and the retired classic route.
+That is the shipped default, :data:`CLASSIC_ROUTE_RETIRED` True. Only the
+reopener -- a capture showing the classic route serving again, which sets the
+constant False -- keeps such a call on its classic composition, where its
+landing here refuses by name (:func:`fallback_refusal`) and a landing on the
+classic page is read by the classic reader.
 
 ## THE AI READER, AND WHAT EACH FIELD IS BOUND TO
 
@@ -307,9 +312,11 @@ def asks_the_ai_route(refused: Iterable[str], *, keywords: Any) -> bool:
     refuses (:func:`ai_route_refusals` named none): then every argument it
     sets is honoured there -- ``keywords`` on the address, ``easy_apply``
     locally, ``limit`` in this process -- and the classic address, which no
-    longer serves (live session 12, load 3), would only redirect here. Any
-    refused argument keeps the call on its classic composition, so it refuses
-    by name on the landing exactly as before.
+    longer serves (live session 12, load 3), would only redirect here. A call
+    with any refused argument is refused BEFORE ANY LOAD by the shipped
+    default (:data:`CLASSIC_ROUTE_RETIRED` True, :func:`retired_route_refusal`);
+    only under the reopener (the constant set False) does it keep its classic
+    composition and refuse by name on the landing.
     """
     return not list(refused or ()) and bool(" ".join(str(keywords or "").split()))
 
