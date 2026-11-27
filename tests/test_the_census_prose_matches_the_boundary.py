@@ -91,13 +91,18 @@ _CLAIMED_REACHABLE = {
     "post analytics": (
         "https://www.linkedin.com/analytics/post-summary/urn:li:activity:10001/"
     ),
+    # MOVED FROM THE REFUSED TABLE BELOW 2026-11-27, with the census row it
+    # checks: lane msg7 admitted his saved posts list on its own anchored
+    # line (ADMIT-NOW-LANDING-IN-SESSION-14). The guard went red at the edit,
+    # and the census moved with the boundary, not the assertion.
+    "saved posts": "https://www.linkedin.com/my-items/saved-posts/",
 }
 
-#: Surfaces the correction block says still REFUSE. Six of the eleven the
-#: original sentence named (seven until 2026-09-23; post analytics moved up).
+#: Surfaces the correction block says still REFUSE. Five of the eleven the
+#: original sentence named (seven until 2026-09-23, when post analytics moved
+#: up; six until 2026-11-27, when saved posts moved up).
 _CLAIMED_REFUSED = {
     "linkedin live": "https://www.linkedin.com/video/live/",
-    "saved posts": "https://www.linkedin.com/my-items/saved-posts/",
     "hashtags": "https://www.linkedin.com/feed/hashtag/",
     "article drafts": "https://www.linkedin.com/article/drafts/",
     "scheduled posts": "https://www.linkedin.com/scheduled-posts/",

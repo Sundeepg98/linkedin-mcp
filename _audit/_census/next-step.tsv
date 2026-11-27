@@ -135,8 +135,8 @@ M C31	M	W	R3	TARGET:a comment of his he names for deletion	NAMED	_audit/2026-09-
 M C33	M	W	R3	CAPTURE:own-post-reactions	INFERRED	linkedin_server/press.py::"/feed/update/", ; RULING:OUTWARD-CLASSES-BUILT-BEHIND-GRANTS
 M C34	M	W	R3	TARGET:a comment he names	INFERRED	RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS ; M C26
 M C35b	M	W	R3	CAPTURE:own-post-reactions	NAMED	_audit/_census/messaging-and-content.md::capture the reactions menu ; M C33
-M C36	M	W	R1	ADMIT:https://www.linkedin.com/my-items/saved-posts/	MEASURED	_audit/2026-11-27-msg7.md::THE LEFT RAIL DRAWS ; _audit/2026-09-19-content-tail.md::run the landed-address check IN THE SAME WAVE ; tests/fixtures/live12/feed_s12.html
-M C37	M	W	R1	ADMIT:https://www.linkedin.com/my-items/saved-posts/	MEASURED	_audit/2026-11-27-msg7.md::THE LANDING NEEDS A LIVE LOAD IN THE SAME WAVE ; M C36
+M C36	M	W	R1	CAPTURE:admit-my-items-saved-posts	MEASURED	_audit/2026-11-27-msg7.md::THE ADMISSION IS ONE ANCHORED LINE ; _audit/2026-09-19-content-tail.md::run the landed-address check IN THE SAME WAVE ; tests/fixtures/live12/feed_s12.html
+M C37	M	W	R1	CAPTURE:admit-my-items-saved-posts	MEASURED	_audit/2026-11-27-msg7.md::THE ADMISSION IS ONE ANCHORED LINE ; M C36
 M C39	M	R	-	CAPTURE:post-analytics-comments	MEASURED	_audit/2026-11-27-msg7.md::THE METRIC TYPE SELECTOR OFFERS TWO METRICS, AND NEITHER IS COMMENTS ; tests/fixtures/live12/creator_content_metric-open.html ; RULING:D6-CAPABILITY-OVER-AFFORDANCE
 M C42	M	R	-	TARGET:another member's post he names, by link	NAMED	_audit/_census/read-addresses.tsv::THE ROW HOLDS FOR OTHER PEOPLE'S POSTS ONLY
 M C44	M	W	R3	CAPTURE:C-MSG7-1	MEASURED	_audit/2026-11-27-msg7.md::NEXT DRAWS AN ERROR TOAST ON AN EMPTY ARTICLE ; tests/fixtures/live12/article_next-open.html ; RULING:ARTICLE-COMPOSER-CAPTURE

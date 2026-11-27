@@ -2037,7 +2037,13 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # `?isSelfProfile=true`, on SELF-PROFILE-QUERY-VARIANT-ADMITTED (the
     # orchestrator, 2026-11-26), no exemption; every other key byte-identical
     # (17 of 18).
-    "_ALLOWED_URL_PATTERNS": "5d3109ee0aa96e48",
+    #
+    # 5d3109ee0aa96e48 until lane msg7's admission commit (wave 7, 2026-11-27):
+    # one anchored line, his saved posts list /my-items/saved-posts/, on
+    # ADMIT-NOW-LANDING-IN-SESSION-14 (allowlist silence alone, no exemption);
+    # every other key byte-identical (17 of 18). Record:
+    # _audit/2026-11-27-msg7.md, section 3.
+    "_ALLOWED_URL_PATTERNS": "3f12a2c2143c6576",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     # 419e64a3cd92ec7e until the same REVIEW: commit: a third entry, excusing
     # exactly {"/follow"} for exactly the anchored follower-list address.
