@@ -2337,8 +2337,20 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # is recorded and that spelling gets its own line then. KEPT 2026-10-10
     # by RECEIVED-INVITATIONS-READ-STAYS-ADMITTED: whatever a read changes in
     # an invitation's seen state is a passive cost, UNMEASURED on those rows,
-    # reopened when a capture shows the sender can see it.
+    # reopened when a capture shows the sender can see it. [AMENDED
+    # 2026-11-27, COMMENT ONLY: it does -- live session 12, load 28, landed on
+    # the `received` leaf -- and that spelling's own line is the next one.]
     re.compile(r"^https://www\.linkedin\.com/mynetwork/invitation-manager/?$"),
+    # LANE NET7 (2026-11-27), on the orchestrator's ruling of 13:25 ("one
+    # reader must not be split across two lanes"): the received tab's own
+    # leaf, where LinkedIn now lands the line above (live session 12, load
+    # 28: redirected one level deeper, the tab strip's `Received` link
+    # current at this spelling). The same page and the same read -- census
+    # N 13, N 14, N 19 -- under the same rulings: READ-PAST-AN-ACT-SUBSTRING
+    # (one anchored line, its one exemption below excusing exactly
+    # "invitation", the tuple unchanged), RECEIVED-INVITATIONS-READ-STAYS-
+    # ADMITTED and RECEIVED-BADGE-IS-THE-READS-COST. No query, no sub-path.
+    re.compile(r"^https://www\.linkedin\.com/mynetwork/invitation-manager/received/?$"),
     # The invitation manager, sent tab (census N 9, N 11). NAMED, as above.
     re.compile(r"^https://www\.linkedin\.com/mynetwork/invitation-manager/sent/?$"),
     # The people he follows (census N 38). NAMED: this module's own
@@ -2438,6 +2450,13 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(r"^https://www\.linkedin\.com/learning/browse/certifications/?$"),
     re.compile(r"^https://www\.linkedin\.com/learning/me/my-library/?$"),
     re.compile(r"^https://www\.linkedin\.com/learning/me/my-library/in-progress/?$"),
+    # His library's saved list (census J 175, split from J 154 by the
+    # orchestrator's corrected LEARNING-ROWS-SPLIT, 2026-11-27): the tab
+    # beside in-progress, refused until now by this list's silence alone --
+    # it carries no forbidden substring. One exact anchored line, its control
+    # in tests/test_lane_a_admissions.py (learning-saved); its landing check
+    # and capture ride live session 14.
+    re.compile(r"^https://www\.linkedin\.com/learning/me/my-library/saved/?$"),
     re.compile(r"^https://www\.linkedin\.com/learning/career-journey/?$"),
     # A company Page's tabs (census J 106, J 109, J 111, J 113, J 114,
     # J 165), each drawn by Pages and postings. The organisation segment is
@@ -2698,6 +2717,22 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # after, as `linkedin_connections` does. Every control stays refused by the
     # press gate.
     re.compile(r"^https://www\.linkedin\.com/mynetwork/?$"),
+    # LANE NET7 (2026-11-27), GROW-SUGGESTIONS-BY-ADMISSION-NOT-SCROLL (the
+    # orchestrator, 13:25; integration 7 registers it): his full People You
+    # May Know lists (census N 97, N 98, N 62), RECORDED in LinkedIn's app
+    # route table ("My Network: full discovery lists",
+    # `completeness-annotations.tsv`) and drawn as the 'Show all' lane Y2 read
+    # (2026-09-24). `/mynetwork/` now lands on its Grow tab, whose first render
+    # draws no suggestion module (live session 12, load 8), and
+    # SCROLL-NOT-SANCTIONED stands, so the lists are read at their own address.
+    # Refused by allowlist silence alone (no substring): READ-PAST-AN-ACT-
+    # SUBSTRING's second clause, one anchored line, NO QUERY and NO SUB-PATH.
+    # THE PAGE LISTS OTHER PEOPLE: a reader owes NAMES-AT-RUNTIME and
+    # PEOPLE-DATA-MITIGATIONS under MEMBER-ROSTERS-AS-BOUNDED-READS, and its
+    # capture is people-gated -- raws withheld, skeletons only -- with its
+    # landing check, in live session 14. No row moves on this line alone.
+    # Every control stays refused by the press gate.
+    re.compile(r"^https://www\.linkedin\.com/mynetwork/discovery-see-all/?$"),
     # ----------------------------------------------------------------------
     # LANE ADMIT26, NAMED SETTINGS PAGES -- each by its exact address, in its
     # own commit, as NAMED-SETTINGS-PAGES-RATIFIED reads ONE-NAMED-SETTINGS-
@@ -2805,6 +2840,25 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # every control: the capture reads shapes and stops at the first one
     # (lane L7's capture C3).
     re.compile(r"^https://www\.linkedin\.com/in/me/opportunities/volunteering/education/?$"),
+    # ----------------------------------------------------------------------
+    # LANE PROF7 (2026-11-27) -- THE SAME PAGE ON THE SPELLING LINKEDIN DRAWS,
+    # its profile id from HIS ARGUMENTS. Ruling VOLUNTEERING-FALLBACK-BOUNDARY
+    # (the orchestrator, 2026-11-27 13:10), answering Q-VOLUNTEERING-ID-FROM-
+    # HIS-ARGUMENTS: the bare spelling above landed on his profile root (the
+    # live lane's session 12, load 22), so VOLUNTEERING-BARE-SPELLING-FIRST's
+    # fallback -- "profileId from tool arguments at runtime (his own id, never
+    # stored)" -- gets this line. ONE parameter, ``profileId``, its value of
+    # the package's member-id shape (``named_profile.MEMBER_ID``, pinned equal
+    # by tests/test_volunteering_fallback_boundary.py), the /in/me/ spelling
+    # only, no other parameter, no fragment, no sub-path. THE ID IS NEVER A
+    # PAGE'S: ``volunteering_route.volunteering_address`` forms this address
+    # from the caller's argument alone, and a link on his root is pressed only
+    # when its target equals that address exactly (SELF-ROOT-LINK-PRESS-BY-
+    # EXACT-MATCH). The id is never stored, logged or committed.
+    re.compile(
+        r"^https://www\.linkedin\.com/in/me/opportunities/volunteering/education/"
+        r"\?profileId=ACoAA[A-Za-z0-9_\-]{10,80}$"
+    ),
     # One newsletter's own page (census M C80, M C82, M C101, N 55, N 56), ON
     # THE SLUG SHAPE LINKEDIN DRAWS. Ruling NAME-BEARING-ADDRESS-REDACTION-
     # SCOPE (the orchestrator, 2026-11-25): the redaction "reaches every
@@ -2872,6 +2926,73 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # read by its own address, lane L1's `/in/me/overlay/contact-info/` line
     # above, under the same self-only anchors, labels only.
     re.compile(r"^https://www\.linkedin\.com/in/me/\?isSelfProfile=true$"),
+    # LANE MSG7 (wave 7, 2026-11-27): his saved posts list (census M C36,
+    # M C37), on ADMIT-NOW-LANDING-IN-SESSION-14 (the orchestrator, 2026-11-27
+    # 12:35 IST; registration owed at integration 7). DRAWN: session 12's feed
+    # (load 16) draws this spelling once, in its left rail -- measured on the
+    # keyed skeleton and by the live runner's in-page count; until then it was
+    # NAMED only. Refused by allowlist silence alone, no forbidden substring
+    # tripped (READ-PAST-AN-ACT-SUBSTRING's second clause), so no exemption.
+    # ONE exact anchored line: both slash forms, no query, no sub-path;
+    # /my-items/ and /my-items/saved-jobs/ (recorded above as redirecting to
+    # the job tracker) stay refused. The press gate refuses every control here:
+    # press.sensitivity_basis declares no basis for this path. THE LANDING IS
+    # UNMEASURED, which is content-tail 4.1's point: its one read-only
+    # landing-and-capture load is session 14's, the first live session on a
+    # master carrying this line, and a landing elsewhere reverts it at the next
+    # integration. Saving and unsaving a post are writes with their own rows
+    # (tests/test_msg7_admissions.py).
+    re.compile(r"^https://www\.linkedin\.com/my-items/saved-posts/?$"),
+    # ======================================================================
+    # LANE SETTINGS7 (2026-11-27) -- NAMED SETTINGS PAGES OF HIS OWN, each BY
+    # NAME, in its own commit, under ONE-NAMED-SETTINGS-PAGE-AT-A-TIME as
+    # NAMED-SETTINGS-PAGES-RATIFIED reads it ("one named settings page per
+    # commit is within the ruling"), with HIS-OWN-SETTINGS-NOT-OUTWARD; the
+    # orchestrator confirmed each on 2026-11-27. Record:
+    # `_audit/2026-11-27-settings7.md` section 5; each line pinned, every
+    # sibling shown refused, in `tests/test_settings7_admissions.py` (lane
+    # admit26's harness). THE SPELLINGS ARE MEASURED, never named: each is a
+    # link a live capture drew, its path words matched by keyed shape. Each
+    # page is READ-ONLY here: its controls are writes with their own rows and
+    # specs, and the press gate refuses every one.
+    #
+    # His search history page (census N 96, "Clear your search history"),
+    # drawn on his Data privacy category page as the setting link 'Clear
+    # search history' under 'How LinkedIn uses your data' (session 12, load
+    # 10; `tests/fixtures/live12/privacy_words.html`), in the
+    # `/mypreferences/m/` tree LinkedIn draws it in. It trips no forbidden
+    # substring: refused by allowlist silence alone until now
+    # (READ-PAST-AN-ACT-SUBSTRING's second clause), so no exemption. The
+    # `/d/` spelling nothing draws, the jobs search history (`J 18`'s priced
+    # address), a query, a sub-path and a longer leaf stay refused.
+    re.compile(r"^https://www\.linkedin\.com/mypreferences/m/search-history/?$"),
+    # His data-download page (census P P3, "Get a copy of his data"), drawn
+    # on the same category page as the setting link 'Download your data'
+    # under the same heading (the same capture and fixture). It trips no
+    # forbidden substring: allowlist silence alone, no exemption. Requesting
+    # an archive is a press the gate refuses, and a password prompt drawn on
+    # the load is a sign-in challenge that stops the read -- the one surface
+    # READ-PAST-AN-ACT-SUBSTRING never reaches. The `/d/` spelling, a query, a
+    # sub-path and a longer leaf stay refused, as does its sensitive
+    # neighbour on the same heading, `/mypreferences/m/demographic-info/`.
+    re.compile(r"^https://www\.linkedin\.com/mypreferences/m/download-my-data/?$"),
+    # His contact-syncing page (census N 32 and N 110, whose next steps lane
+    # net7 re-aims), on the orchestrator's order
+    # CONTACTS-PAGE-FROM-THE-SETTINGS-NAV (2026-11-27 13:25): drawn on
+    # session 11's capture of his Account preferences category page (load 8;
+    # `tests/fixtures/live11/sessions_surface_words.html`) as 'Sync
+    # contacts' under 'Syncing options', the settings nav's one contacts
+    # entry. THIS LINE IS HALF OF A TWO-GATE ADMISSION: the address trips
+    # "/settings/" and "settings", the 2026-09-03 second gate over the
+    # toggle-bearing settings family -- an act's ground, so
+    # READ-PAST-AN-ACT-SUBSTRING reads past it -- and the paired LANE
+    # SETTINGS7 entry in `_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS` excuses
+    # exactly those two for exactly this anchored address (the "Sharing
+    # profile edits" precedent); NEITHER HALF ALONE ADMITS ANYTHING. Every
+    # other page under /mynetwork/settings/, a query, a sub-path and the
+    # imported-contacts manager (`/mynetwork/import-contacts/...`, never
+    # drawn) stay refused. Its switches are writes the press gate refuses.
+    re.compile(r"^https://www\.linkedin\.com/mynetwork/settings/manage-syncing/?$"),
 )
 
 #: Substrings that must never appear in a navigation target, checked before
@@ -3310,6 +3431,12 @@ _FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS: tuple[
         re.compile(r"^https://www\.linkedin\.com/mynetwork/invitation-manager/sent/?$"),
         frozenset({"invitation"}),
     ),
+    # LANE NET7 (2026-11-27): the second gate of the received leaf's pair,
+    # excusing exactly the one substring that address trips, measured.
+    (
+        re.compile(r"^https://www\.linkedin\.com/mynetwork/invitation-manager/received/?$"),
+        frozenset({"invitation"}),
+    ),
     (
         re.compile(
             r"^https://www\.linkedin\.com/mynetwork/network-manager/"
@@ -3397,6 +3524,18 @@ _FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS: tuple[
     (
         re.compile(r"^https://www\.linkedin\.com/mypreferences/d/verifications/?$"),
         frozenset({"verification"}),
+    ),
+    # LANE SETTINGS7 (2026-11-27) -- the second gate of the pair whose first
+    # gate is the matching LANE SETTINGS7 line in `_ALLOWED_URL_PATTERNS`;
+    # the argument and the order are written there. It excuses exactly the
+    # substrings its address trips, measured with the shipped tuple; the
+    # tuple itself is unchanged.
+    #
+    # His contact-syncing page, tripping "/settings/" and "settings" and
+    # nothing else.
+    (
+        re.compile(r"^https://www\.linkedin\.com/mynetwork/settings/manage-syncing/?$"),
+        frozenset({"/settings/", "settings"}),
     ),
 )
 

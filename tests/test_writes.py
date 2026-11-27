@@ -807,6 +807,9 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         # LANE BUILD-NET2, 2026-11-26: one feed item he names marked Not
         # interested (census N 154), sanctioned and performable in one move.
         "mark_not_interested",
+        # LANE MSG7, 2026-11-27: one feed item he names saved (census M C36),
+        # sanctioned and performable in one move.
+        "save_post",
         # EIGHTEEN AND NINETEEN FROM LANE L5'S MERGE OF MASTER 52b55b6, the
         # same day (seventeen and eighteen on its follow-up branch): Connect
         # and Message on the profile of a person he names (census N 4 by D6,
@@ -1000,6 +1003,9 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         # LANE BUILD-NET2, 2026-11-26: one feed item he names marked Not
         # interested (census N 154), sanctioned and performable in one move.
         "mark_not_interested",
+        # LANE MSG7, 2026-11-27: one feed item he names saved (census M C36),
+        # sanctioned and performable in one move.
+        "save_post",
         # THE SEVENTEENTH AND EIGHTEENTH, 2026-09-27 (lane L5's follow-up; the
         # sixteenth and seventeenth on its branch until its merge of master
         # 52b55b6 brought withdraw_from_group in first): Connect and Message on
@@ -1599,6 +1605,9 @@ _UNMEASURED_REVERSIBILITY = {
     # 2026-11-26 (lane build-net2, N 154). The undo LinkedIn draws after Not
     # interested has never been captured.
     "mark_not_interested",
+    # 2026-11-27 (lane msg7, M C36). What a save draws, and the Unsave a saved
+    # item's menu is expected to draw, have never been captured.
+    "save_post",
     # 2026-09-27 (lane L5's follow-up). What a pressed Connect becomes on a
     # profile has never been captured, so neither has a withdraw control; and
     # whether a message sent from a profile can be recalled has never been
@@ -1684,6 +1693,7 @@ REVERSIBILITY_CLASS = {
     "ignore_invitation_to_connect": "STILL-UNKNOWN",
     "withdraw_invitation": "STILL-UNKNOWN",
     "mark_not_interested": "STILL-UNKNOWN",
+    "save_post": "STILL-UNKNOWN",
     # 2026-09-27 (lane L5's follow-up). STILL-UNKNOWN, both: see
     # _UNMEASURED_REVERSIBILITY.
     "connect_from_profile": "STILL-UNKNOWN",
@@ -1739,6 +1749,7 @@ REVERSIBILITY_MEASURED = {
     "ignore_invitation_to_connect": False,
     "withdraw_invitation": False,
     "mark_not_interested": False,
+    "save_post": False,
     "connect_from_profile": False,
     "message_from_profile": False,
     "set_admitted_setting": False,

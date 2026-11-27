@@ -352,14 +352,18 @@ async def test_the_preview_mints_on_the_tab_it_acts_on_and_refuses_every_other_w
             assert not writes._GRANTS, f"[{action} {label}] a refused preview minted a grant"
             _no_member(str(raised.value), f"{action} {label}")
 
-    # A LANDING OFF THE TAB -- LinkedIn's own strip spelling of the received
-    # tab, which the boundary does not admit -- vetoes, and is not quoted.
+    # A LANDING OFF THE TAB vetoes, and is not quoted. (LinkedIn's own strip
+    # spelling of the received tab, `.../invitation-manager/received/`, stood
+    # here until 2026-11-27: live session 12 LANDED there (load 28), and lane
+    # net7 admitted it and made `invitation_manager.landed_on_received` --
+    # which this act's landing check reads -- accept it, on the orchestrator's
+    # ruling for N 13. A sub-path of it is off the tab.)
     spec = SPECS[ACCEPT]
-    elsewhere = "https://www.linkedin.com/mynetwork/invitation-manager/received/"
+    elsewhere = "https://www.linkedin.com/mynetwork/invitation-manager/received/elsewhere/"
     with pytest.raises(WriteAttemptError) as raised:
         await preview(spec, target=_link(INVITERS[0]),
                       navigator=Navigator(spec.url_template, RECEIVED, landed=elsewhere), page=page)
-    assert "received/" not in str(raised.value)
+    assert "elsewhere/" not in str(raised.value)
     assert not writes._GRANTS
 
 

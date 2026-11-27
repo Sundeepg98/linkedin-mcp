@@ -171,6 +171,11 @@ def test_applied_counts_what_each_argument_contributed_and_carries_no_value() ->
         "location_ids": 1,
         "network": 0,
         "connections_of": 1,
+        # Lane net7's four (2026-11-27), each counted 0 when not given.
+        "followers_of": 0,
+        "school_ids": 0,
+        "industry_ids": 0,
+        "actively_hiring": 0,
     }
     assert all(isinstance(value, int) for value in verdict["applied"].values())
 
@@ -439,17 +444,20 @@ def test_the_composer_touches_no_page_and_no_browser() -> None:
         assert forbidden not in imported, f"people_search imports {forbidden}"
 
 
-def test_compose_takes_exactly_the_tools_six_arguments() -> None:
+def test_compose_takes_exactly_the_tools_ten_arguments() -> None:
     """Six since 2026-09-28: ``network`` (census ``N 31``), LinkedIn's degree
-    facet, sent only beside ``connections_of`` --
-    ``tests/test_shared_connections_search.py`` holds it."""
+    facet -- ``tests/test_shared_connections_search.py`` holds it. Ten since
+    2026-11-27 (lane net7): ``followers_of``, ``school_ids``, ``industry_ids``
+    and ``actively_hiring`` -- ``tests/test_net7_people_search_facets.py``
+    holds them."""
     tree = _tree(MODULE)
     compose = next(n for n in tree.body
                    if isinstance(n, ast.FunctionDef) and n.name == "compose")
     assert [a.arg for a in compose.args.args] == []
     assert [a.arg for a in compose.args.kwonlyargs] == [
         "keywords", "current_company_ids", "past_company_ids",
-        "location_ids", "connections_of", "network",
+        "location_ids", "connections_of", "network", "followers_of",
+        "school_ids", "industry_ids", "actively_hiring",
     ]
 
 
@@ -611,6 +619,7 @@ def test_the_driven_tool_reports_what_linkedin_kept_as_literals(monkeypatch) -> 
     assert payload["query_applied"] == {
         "keywords": 1, "current_company_ids": 1, "past_company_ids": 1,
         "location_ids": 2, "network": 0, "connections_of": 1,
+        "followers_of": 0, "school_ids": 0, "industry_ids": 0, "actively_hiring": 0,
     }
     kept = payload["query_kept"]
     assert set(kept.values()) <= set(people_search.KEPT_VERDICTS)
@@ -894,11 +903,14 @@ def test_the_chain_the_rows_rest_on_is_whole() -> None:
         for name in names:
             assert name in _defined(source), (module, name)
     keys = {key for _arg, key, _kind, _most in people_search.FACETS}
-    assert keys == {"currentCompany", "pastCompany", "geoUrn", "network", "connectionOf"}
+    assert keys == {"currentCompany", "pastCompany", "geoUrn", "network", "connectionOf",
+                    "followerOf", "schoolFilter", "industry"}
+    assert people_search.ACTIVELY_HIRING_KEY == "activelyHiring"
     tool = _tool_node()
     assert [a.arg for a in tool.args.args] == [
         "keywords", "current_company_ids", "past_company_ids",
-        "location_ids", "connections_of", "network", "include_names",
+        "location_ids", "connections_of", "network", "followers_of",
+        "school_ids", "industry_ids", "actively_hiring", "include_names",
     ]
 
 

@@ -239,8 +239,12 @@ ADMISSIONS = (
         siblings=(
             Sibling(f"{B}/mynetwork/?x=1", None,
                     "a QUERY -- where a filter naming a person would arrive"),
-            Sibling(f"{B}/mynetwork/discovery-see-all/", None,
-                    "the full suggestion lists: drawn, not admitted here"),
+            # The full suggestion lists, /mynetwork/discovery-see-all/, stood
+            # here until 2026-11-27, when lane net7 admitted them on
+            # GROW-SUGGESTIONS-BY-ADMISSION-NOT-SCROLL by their own anchored
+            # line (tests/test_net7_admissions.py, which holds their near
+            # misses refused). Not admitted by THIS line: /mynetwork/ takes no
+            # sub-path.
             Sibling(f"{B}/mynetwork/discover-hub/", None,
                     "the Discover-more hub: drawn, not admitted here"),
             Sibling(f"{B}/mynetwork/import-contacts/", None,
@@ -249,8 +253,13 @@ ADMISSIONS = (
                     "the network manager's root"),
             Sibling(f"{B}/mynetwork/invite-connect/invitations/", "/invite",
                     "the invitation surface the forbidden substrings exist for"),
-            Sibling(f"{B}/mynetwork/settings/manage-syncing/", "/settings/",
-                    "a syncing settings page"),
+            # The syncing settings page this control named,
+            # /mynetwork/settings/manage-syncing/, was admitted by name on its
+            # own line by lane settings7 (2026-11-27,
+            # CONTACTS-PAGE-FROM-THE-SETTINGS-NAV); the settings root beside
+            # it stays refused, on the same gate.
+            Sibling(f"{B}/mynetwork/settings/", "/settings/",
+                    "the settings root under /mynetwork/"),
             Sibling(f"{B}/mynetworkx/", None, "a longer word"),
             Sibling(f"{B}/mynetwork/x/../../in/someone-else/", None,
                     "a TRAVERSAL onto a third party"),

@@ -104,8 +104,13 @@ ADMISSIONS = (
         siblings=(
             Sibling(f"{B}/mynetwork/invitation-manager/?filterCriteria=x",
                     "invitation", "a QUERY -- the anchor is load-bearing"),
-            Sibling(f"{B}/mynetwork/invitation-manager/received/",
-                    "invitation", "an unrecorded leaf: its own line if served"),
+            # The received leaf, `.../invitation-manager/received/`, stood
+            # here until 2026-11-27 ("an unrecorded leaf: its own line if
+            # served"); live session 12 was served it (load 28), and lane net7
+            # gave it its own line (tests/test_net7_admissions.py). A sub-path
+            # of it stands in.
+            Sibling(f"{B}/mynetwork/invitation-manager/received/x/",
+                    "invitation", "a sub-path of the received leaf"),
             Sibling(f"{B}/mynetwork/invitation-manager/accept/",
                     "invitation", "a SUB-PATH naming an act"),
             Sibling(f"{B}/mynetwork/invitation-manager/../../in/someone-else/",
@@ -117,9 +122,12 @@ ADMISSIONS = (
             # The hub, /mynetwork/, stood here until 2026-11-25, "refused on
             # its badge cost (R1) and by nothing else"; lane admit26 admitted
             # it (tests/test_admit26_admissions.py). Its discovery lists did
-            # not travel with it.
-            Sibling(f"{B}/mynetwork/discovery-see-all/", None,
-                    "the hub's full suggestion lists -- the allowlist alone"),
+            # not travel with it; they stood here until 2026-11-27, when lane
+            # net7 admitted them by their own anchored line on
+            # GROW-SUGGESTIONS-BY-ADMISSION-NOT-SCROLL
+            # (tests/test_net7_admissions.py). A sub-path of them stands in.
+            Sibling(f"{B}/mynetwork/discovery-see-all/people/", None,
+                    "a sub-path of the hub's full suggestion lists"),
         ),
     ),
     Admission(
@@ -412,6 +420,26 @@ ADMISSIONS = (
         siblings=(
             Sibling(f"{B}/learning/me/my-library/in-progress/?x=1", None,
                     "a QUERY"),
+        ),
+    ),
+    # Lane jobs7, 2026-11-27: the library's SAVED list, split from J 154 as
+    # J 175 by the orchestrator's corrected LEARNING-ROWS-SPLIT. Refused by
+    # allowlist silence alone (it trips no forbidden substring); the
+    # READ-PAST-AN-ACT-SUBSTRING clause for such a page, one exact line. Its
+    # landing check and capture ride live session 14. Record:
+    # _audit/2026-11-27-jobs7.md section 11.5.
+    Admission(
+        key="learning-saved",
+        rows=("J 175",),
+        address=f"{B}/learning/me/my-library/saved/",
+        excused=frozenset(),
+        siblings=(
+            Sibling(f"{B}/learning/me/my-library/saved/x/", None, "a SUB-PATH"),
+            Sibling(f"{B}/learning/me/my-library/saved/?x=1", None, "a QUERY"),
+            Sibling(f"{B}/learning/me/my-library/savedx/", None,
+                    "a LONGER SEGMENT -- the anchor is load-bearing"),
+            Sibling(f"{B}/learning/me/my-library/saved/1234567/", None,
+                    "an ITEM under the list"),
         ),
     ),
     Admission(

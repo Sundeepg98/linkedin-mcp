@@ -415,7 +415,12 @@ def test_red_on_a_superseded_ruling(tmp_path):
 
 def test_red_on_a_build_naming_an_action_that_cannot_perform(tmp_path):
     lines = _lines()
-    i = _find(lines, lambda r: r["class"] == "R1")
+    # A QUEUED R1 line, so its row is still GAP: the second conviction needs a
+    # row no build moved. LANE MSG7 (2026-11-27): the first R1 line was
+    # ``M C36``'s until linkedin_save_post moved it to COVERED-UNFIRED, and a
+    # plant there then drew the first conviction only.
+    i = _find(lines, lambda r: r["class"] == "R1"
+              and r["disposition"].startswith("queued:"))
     row = _row(lines[i])
     row["disposition"] = "built:a_write_nobody_built"
     lines[i] = _line(row)

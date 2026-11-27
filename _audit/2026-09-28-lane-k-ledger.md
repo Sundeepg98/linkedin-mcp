@@ -1127,6 +1127,71 @@ can return an ad's urn to him WITHOUT pressing ads he did not name. Option
 (b) is declined: it presses the menus of ads he did not name, for a low-value
 row. Row `N 200`: next step this question, held, until the reopener is met.
 
+### Q-VERIFICATION-DELETE -- a Delete drawn by name whose confirmation nobody has seen
+
+Added 2026-11-27 by lane settings7 (`_audit/2026-11-27-settings7.md`,
+section 7). Row: `P K7`, "Remove a verification". Session 12's capture of his
+Verifications page (load 15, served exact;
+`tests/fixtures/live12/verifications_words.html`) draws one Workplace
+verification whose delete section holds one button reading `Delete`, by
+name. What the press opens -- a confirmation, or the removal itself -- has
+never been captured, and the act has no exact inverse: a verification is
+re-earned through LinkedIn's own flow, not put back by a control. Lane
+settings7 builds reads only. The question: does a write lane build `P K7` on
+`J-19-BUILT-BEHIND-THE-GRANT`'s shape -- behind the grant, REFUSING until its
+confirm dialog is captured, fired only on his order -- or does it hold at
+GAP? The lane's default, with no answer on disk: it holds. Row `P K7`: next
+step this question.
+
+**Answered 2026-11-27 by the orchestrator** (`_TEAM_LEAD_RULINGS1`, 12:55 IST;
+integration 7 registers it): option (b), HOLD at GAP. Ground: removing a
+verification has no inverse and changes what other people see on his
+profile, and nothing captured shows that the first press of `Delete` only
+opens a confirmation -- if that press IS the act, a capture press would do
+the very thing the row is about. The lane was ordered to measure offline
+whether the captured control declares a popup or a controlled dialog; it
+does not: the button carries `class`, `id` and `type` only, with 0
+`aria-haspopup`, 0 `aria-controls` and 0 `aria-expanded` on it or on any
+ancestor up to `main`, and the page draws no dialog (lane settings7's record,
+section 7). So, by the answer, the row stays at RULING and only he can open
+it. Row `P K7`: next step this question, held.
+
+### Q-P-N22-SPLITS -- a compound row whose page draws its subscription half and not its payments half
+
+Added 2026-11-27 by lane settings7 (`_audit/2026-11-27-settings7.md`,
+section 7). Row: `P N22`, "Subscriptions and payments". Session 12's capture
+of his Manage Premium account page (load 33, served exact;
+`tests/fixtures/live12/premium_manage_account_words.html`) draws one
+subscription card: its plan, `Premium Career`, and three controls,
+`Switch plans`, `Manage subscription` and `Cancel subscription`. It draws NO
+date, price or payment: the card's two description lines carry no digit,
+measured on their keyed shapes. The lane built the subscription read
+(`linkedin_my_premium_account`, closed words, nothing pressed). The
+payments half is on his purchase page, which `Manage subscription` opens
+(`/manage/purchases-payments/purchases/<his purchase id>`, refused), with
+`View purchase history` (`/manage/purchases-payments/purchases/`, drawn --
+`P N22`'s cell, captured 2026-09-23 -- and refused) beside it. The halves now need different STATES,
+COMPOUND-ROW-SPLITS-ONLY-ON-STATE's ground, the `J-114-SPLITS` and
+`J-37-SPLITS` shape. The question: split `P N22` -- the subscription half
+COVERED-UNFIRED on the new read, the payments half the next free id, GAP,
+next step ADMIT his purchase page by name -- or hold it whole at GAP? The
+lane's default, with no answer on disk: it holds whole, at GAP. Row `P N22`:
+next step this question.
+
+**Answered 2026-11-27 by the orchestrator** (`_TEAM_LEAD_RULINGS1`, 12:55 IST;
+integration 7 registers it): option (a), SPLIT, under
+COMPOUND-ROW-SPLITS-ONLY-ON-STATE (the `J-114-SPLITS` / `J-37-SPLITS`
+precedent). The subscription half keeps `P N22`, COVERED-UNFIRED on the new
+read, which uses closed words, presses nothing and cites the Manage Premium
+capture (session 12, load 33). The payments half -- renewal and billing
+dates, price, payment method -- takes the next free id at GAP, its next step
+ADMIT of a STATIC, named purchases address under NAMED-SETTINGS-PAGES-RATIFIED;
+NEVER the page-drawn `/manage/purchases-payments/purchases/<id>`: a page may
+veto, it never supplies an address or an id. Applied by lane settings7: the
+payments half is `P N32`, next step ADMIT
+`https://www.linkedin.com/manage/purchases-payments/purchases/` ('View
+purchase history', drawn), not admitted by the lane.
+
 ### Q-MEDIA-POST-AUDIENCE -- a photo or a video on the composer whose audience is unread
 
 Added 2026-11-26 at integration 6, from lane build-msg2's question 2
@@ -1145,6 +1210,252 @@ any click" order.
 after a press; `M C3`, `M C4`, `M C6` and `M C7` stay GAP and cite the
 ruling. Reopener: an audience the server can read. Rows `M C3` and `M C4`:
 next step this question, held, until the reopener is met.
+
+### Q-SELF-ROOT-FORM-LINKS -- a form his own profile root reaches only by a link
+
+Added 2026-11-27 by lane prof7 (`_audit/2026-11-27-prof7.md`, section 3).
+Rows: `P A26` to `P A29`, `P D2`, `P D5`, `P D6`, `P D8`, `P D9`, `P D27`,
+`P H1` (queue lines 30, 31, 64, 67, 68). Live session 12 found every
+`/in/me/edit/` and `/in/me/opportunities/` address landing on his profile root
+with no form (6 of 6). On the nine keyed skeletons of his root (sessions 11
+and 12, matched offline in LinkedIn's own words) every drawn entry to those
+forms is a LINK -- `Edit about`, `Edit profile language`, the services card,
+the top card's `Contact info` -- and LINKS-ARE-NOT-DISCLOSURES vetoes link
+presses on his profile. The question: may a capture press such a link when
+its target, his proven member read as `me`, is exactly the address the
+boundary already admits for that line?
+
+**Answered 2026-11-27 by the orchestrator** (13:00, amended 13:10; on disk
+to lane prof7; registration owed at integration 7):
+SELF-ROOT-LINK-PRESS-BY-EXACT-MATCH, attended only. A link drawn on his root
+is pressed only when its href is EXACTLY the admitted address for that line,
+the landed member, proven his by the self-profile loader, read as `me`: a
+match, never a follow, and any difference vetoes. The match includes any
+query the admission itself carries (rank 31's entry-point query), and nothing
+the page adds. The contact-info line takes the rule twice (the overlay link,
+then the form's own link inside it). A press that navigates is a load. In the
+editor, labels and states only, nothing typed or saved, no Save, Submit,
+Delete or Remove in the closed list; closed by Escape or its exact Dismiss
+and verified gone; his root read before and after, its structure unchanged.
+No row moves on the ruling; the rows' next steps are those queue lines'
+session-14 captures.
+
+**Amended 2026-11-27 17:20 by the orchestrator** (on disk to lane prof7,
+after the cold verification; registration owed at integration 7):
+EXACT-MATCH-REFUSES-ANY-WHITESPACE. The match never normalises the target:
+any whitespace, control, character outside printable ASCII or
+percent-escaped whitespace or control refuses, and the raw string is compared
+with the admitted address character for character, its only equivalences the
+admission's own query and `me` for the proven member. One matcher serves
+every line: `volunteering_route.exact_link_verdict`.
+
+### Q-VOLUNTEERING-ID-FROM-HIS-ARGUMENTS -- a page every drawn route reaches with his own id
+
+Added 2026-11-27 by lane prof7 (`_audit/2026-11-27-prof7.md`, section 3).
+Row: `P D24` (queue line 69). VOLUNTEERING-BARE-SPELLING-FIRST's reopener is
+met: the bare spelling landed on his profile root (live session 12, load
+22). Every drawn route to the page carries `?profileId=` -- his root's card
+link on all nine keyed skeletons, and the `Open to` menu's volunteering item
+(`_audit/_slice-otw-census.md`) -- an id the page supplies, which
+SELF-ROOT-LINK-PRESS-BY-EXACT-MATCH vetoes. The question: does the ruling's
+fallback, profileId from tool arguments at runtime (his own id, never
+stored), now get its boundary line -- or does `P D24` hold?
+
+**Answered 2026-11-27 by the orchestrator** (13:10; on disk to lane prof7;
+registration owed at integration 7): VOLUNTEERING-FALLBACK-BOUNDARY, yes. The
+boundary line is built in lane prof7, red first: the drawn spelling with one
+member-id-shaped `profileId`, the id ONLY from the caller's arguments at
+runtime (for the live runner, the gitignored identity key's operator class),
+validated by shape, never stored, logged, committed or kept in a raw; a
+missing or ill-shaped id refuses; the page never supplies it, so his root's
+card link -- or the `Open to` menu's item, by the same match -- is pressed
+only when its target equals the address formed from his argument. Row
+`P D24` moves no state; its next step is the session-14 capture under that
+match, attended.
+
+### Q-J169-SENIORITY -- a facet whose one measured control offers another
+
+Added 2026-11-27 by lane jobs7 (`_audit/2026-11-27-jobs7.md`, sections 4 and 7). Row: `J 169`
+("Premium Page Insights: headcount over time, notable alumni, job openings by seniority", split
+from `J 114` by J-114-SPLITS). Its step was `CAPTURE:C-RJ26-1`: the job-openings card's
+`Functions` dropdown opened as a disclosure, "the seniority view, if one is offered, then read
+offline". Session 12's load 20 opened it: by keyed shape the dropdown's items are JOB FUNCTIONS
+(the open page draws 14 of the 26 function words), and 0 of 10 seniority words and 0 of 5
+experience-level words match anywhere on the page. So no seniority view is offered behind the one
+control the row's step named; "notable alumni" is not drawn on this view; and the open page draws a
+table summarised `Total employee count`, the candidate for "headcount over time", its cells reduced.
+The lane asks: IS "JOB OPENINGS BY SENIORITY" A FACET LINKEDIN STILL DRAWS ANYWHERE -- so the row's
+next step is a capture of another Insights view -- OR DOES THE ROW SPLIT, its seniority facet closed
+by this measurement? The cell names no absence as its bar, so this lane moves nothing.
+
+**Answered 2026-11-27, 13:45 IST, by the orchestrator** (integration 7 registers it): J169-SPLITS-SENIORITY-REAIMED-UNDER-D6 -- split, the FUNCTION half keeping `J 169` and building on load 20, the SENIORITY half a new GAP row whose next step is a capture of the AI job search's experience-level facet for that company (not MEASURED-ABSENT on one dropdown). HELD by the lane: `J 169`'s capability names no function facet on disk (distribution by function is `J 114`), so the split cannot be applied as written without re-scoping the row (the lane's record, section 11.4); its step stays here, and the counts the ruling asked for are in its cell.
+
+**Answered again 2026-11-27, 14:05 IST, by the orchestrator** (integration 7 registers them): J169-BY-ITS-OWN-WORDS, plus JOB-OPENINGS-BY-FUNCTION-ADDED, replacing the 13:45 answer. The split is applied to the row's own words: load 20 draws headcount over time and notable alumni, so `J 169` keeps those two (step BUILD on `tests/fixtures/live12/c_rj26_1_functions-open.html`), and the seniority facet is `J 173`, GAP, step CAPTURE `C-J173-1` under D6. "Job openings by function" is a new row, `J 174`, drawn on load 20 with no selection (step BUILD on the same fixture); `J 114` is a different capability and is not merged. The counts stay in the cells. The lane's record, section 11.5.
+
+### Q-J170-ROW-CONTROL -- an alert's own control that may open an editor
+
+Added 2026-11-27 by lane jobs7 (`_audit/2026-11-27-jobs7.md`, section 7). Row: `J 170` ("Manage
+all alerts", split from `J 37` by J-37-SPLITS). Its step was BUILD on session 11's alert-manager
+capture (`tests/fixtures/live11/jobs_alerts_manager.html`), but that capture never drew what an
+alert row's control opens: the control's label matched none of 23 candidates by keyed shape (an
+edit, a delete, a frequency, a menu word), and nothing was pressed. A build aimed at an unmeasured
+dialog would be built on synthetic markup and move nothing. Pressing the control to read it is not
+plainly a CAPTURE-PRESS-UNDER-PROBE-RULE disclosure: it may open an EDITOR, which that rule forbids
+pressing. The lane asks: MAY A CAPTURE PRESS ONE ALERT ROW'S CONTROL, read what it opens by keyed
+shape, and close it on Escape with nothing chosen -- as a disclosure if it opens a menu, and stop
+unpressed if it opens an editor? Until ruled, `J 170` stays GAP on this question.
+
+**Answered 2026-11-27, 13:45 IST, by the orchestrator** (on disk to the lane; integration 7 registers it): JOB-ALERT-ROW-CONTROL-ATTENDED -- accepted as a SESSION-14 capture, ATTENDED: one alert row's control pressed; a menu read and closed on Escape; an editor or dialog read for labels and states only, nothing typed or chosen, closed by Escape or its exact Dismiss and verified gone; the alert manager read before and after, no change; no Save, Delete or Remove press in the closed list. `J 170` stays GAP, its step now CAPTURE `C-J170-1` (the lane's record, section 11.3); wave 8 builds on that capture.
+
+### Q-LEARNING-SPLITS -- three Learning rows, each captured on one half
+
+Added 2026-11-27 by lane jobs7 (`_audit/2026-11-27-jobs7.md`, section 7). Rows: `J 152`, `J 154`,
+`J 156`, each captured by session 12 on ONE half of a compound capability. `J 152` ("Browse
+LinkedIn Learning: its home, the catalogue, certifications, topic pages and showcase collections"):
+the home is captured (load 23: 16 course cards, each a type label and a duration by keyed shape);
+the catalogue and certifications pages are admitted and uncaptured; topic and showcase pages are
+refused. `J 154` ("View your LinkedIn Learning library: saved courses and the ones in progress"):
+load 25 landed one level deeper, on the IN-PROGRESS tab (its link marked `aria-current="page"`),
+drawing one course with `Unsave` beside it; the saved list is uncaptured, and the read boundary
+refuses its address (NO-PATTERN). (This sentence first named the other tab; the lane's record,
+section 11.2, holds the reading that settled it.) `J 156` ("See and set career goals", R+W): load 24 draws a section
+labelled `Career goal`; the setting half is an editor, unmeasured. Each row's payload is WHICH items
+of other people's content (course titles; NAMES-AT-RUNTIME) or his own text (his goal;
+HIS-OWN-TEXT-AT-RUNTIME). The lane asks: DOES EACH SPLIT UNDER COMPOUND-ROW-SPLITS-ONLY-ON-STATE, as
+J-114-SPLITS and J-37-SPLITS split theirs -- the captured half building on its capture, the rest a
+new GAP row with its own next step? Until ruled, the three stay GAP on this question.
+
+**Answered 2026-11-27, 13:45 IST, by the orchestrator** (integration 7 registers it): LEARNING-ROWS-SPLIT -- all three split under COMPOUND-ROW-SPLITS-ONLY-ON-STATE, each captured half keeping its id. APPLIED to `J 152` (its other half `J 171`, step CAPTURE `C-LRN-1`) and `J 156` (its write half `J 172`, step CAPTURE `C-LRN-2`, session 14, attended). `J 154` is HELD: the ruling named in-progress as its other half, and disk says the captured tab is in-progress (the lane's record, section 11.2); its step stays here until the orchestrator rules again.
+
+**Answered again 2026-11-27, 14:05 IST, by the orchestrator** (integration 7 registers it): LEARNING-ROWS-SPLIT, re-ruled on the lane's measurement -- the IN-PROGRESS half keeps `J 154` and builds on load 25's capture (step BUILD on `tests/fixtures/live12/learning_library.html`); the SAVED half is `J 175`, GAP, its address ADMITTED by one anchored line, red first, its step CAPTURE `C-LRN-3` (session 14, the ADMIT-NOW-LANDING-IN-SESSION-14 shape). "Your corrected three sentences stand." The lane's record, section 11.5.
+
+### Q-FEED-UNFOLLOW-AIM -- an Unfollow drawn only on /feed/, where an item's urn is drawn only inside its open menu
+
+Added 2026-11-27 by lane msg7 (`_audit/2026-11-27-msg7.md`, section 4). Row:
+`N 37`. Session 12 opened a followed author's item menu on `/feed/` (load 16)
+and that same post's own permalink menu (load 17). The feed menu draws
+`Unfollow <the author>` (the runner's in-page count, 1). The permalink, where
+the urn he names IS the address, draws no entry beginning `Unfollow ` (0), and
+neither does a Page post's permalink (load 39). On `/feed/` an item's urn is
+drawn only inside its open menu: one `/feed/update/` address across the seven
+menu-bearing items closed, and one `targetUrn` link once a menu opens. So the
+only drawn route presses the menus of items he did not name until the one
+whose urn he named appears -- the option AD-HIDE-AIM-HELD declined for ads
+(`N 200`). The question: is `N 37` held the same way, until a sanctioned
+disclosure shape returns item urns without pressing items he did not name? Or
+is it discharged under D6 by another route that unfollows a person he names --
+his following list (`linkedin_my_following_list`'s page, where each followed
+member's card draws one `Following` button)?
+
+**Answered 2026-11-27 by the orchestrator** (on disk at 12:35 IST as `_TEAM_LEAD_RULINGS1.md`, deleted by lane msg7 as its ack; registration owed at integration 7): FEED-UNFOLLOW-ROUTES-UNDER-D6. `N 37` is HELD on the feed, on
+AD-HIDE-AIM-HELD's ground: no press on the menu of an item he did not name.
+Under D6-CAPABILITY-OVER-AFFORDANCE its next step goes to a surface that draws
+the named target directly: a SIBLING to an existing route that unfollows a
+member he names, if the tool surface has one, else a CAPTURE on his following
+list, network's surface, for wave 8; the lane builds neither. Checked by the
+lane: no shipped tool unfollows a member (`linkedin_follow_company`,
+`linkedin_follow_company_page` and `linkedin_unfollow_company` act on a
+company). Row `N 37`: next step `CAPTURE:following-list-unfollow`.
+
+### Q-ARTICLE-MANAGE-DRAFTS -- a drafts list reached only by a button inside the article editor
+
+Added 2026-11-27 by lane msg7 (`_audit/2026-11-27-msg7.md`, section 2). Row:
+`M C47`. Session 12 opened `Manage` on the article composer (load 7): eight
+`role=button` items and no address -- `Settings` | `Drafts`, `Scheduled`,
+`Published` | `New draft`, `Create newsletter`, `Help`, `Give feedback`, each by
+keyed shape. The drafts list this row needs is reached by pressing `Drafts`; no
+spelling of its address is drawn, and the three NAMED ones are drawn nowhere.
+Q-ARTICLE-COMPOSER-DISCLOSURES' answer named the controls one capture may press
+inside the editor (the author toggle, `Manage`, the embed control, `Next`);
+`Drafts` is one press deeper, and it navigates. The question: may one capture
+load of the article composer press `Manage` and then `Drafts`, record where it
+lands (by path words) and what the list draws (by closed words, each draft's
+own controls drawn closed), and return, with nothing else pressed and nothing
+typed?
+
+**Answered 2026-11-27 by the orchestrator** (on disk at 12:35 IST as `_TEAM_LEAD_RULINGS1.md`, deleted by lane msg7 as its ack; registration owed at integration 7): ARTICLE-EDITOR-PRESSES, part (a): the `Drafts` press in `Manage` is
+a read of his own lists, ACCEPTED as a session-14 capture spec in the queue's
+own form. Row `M C47`: next step `CAPTURE:article-composer`.
+
+### Q-NEWSLETTER-CREATE-FORM -- a newsletter form behind Manage's Create newsletter
+
+Added 2026-11-27 by lane msg7 (`_audit/2026-11-27-msg7.md`, section 2). Rows:
+`M C50`, `M C81`, `P L3`. Session 12 opened the article composer's author
+toggle (load 7): a form whose `Publish as` lists only him and whose `Publish to`
+lists `Individual article` and an empty newsletter list. It draws no create
+control, so the DERIVED premise those three cells carried (the newsletter
+"chosen behind the author toggle") is wrong. `Create newsletter` is drawn in
+`Manage` instead, by keyed shape. What it opens -- expected to be the
+newsletter's creation form -- is not on disk, and it sits inside the editor.
+The question: may one capture load press `Manage` and then `Create newsletter`,
+read the form it opens by closed words (its fields; any choice of publisher
+between him and a Page, for `M C81`; its submit control drawn and never
+pressed), and close it with Cancel or Escape, with nothing typed and STOP-ALL if
+any control would create or publish?
+
+**Answered 2026-11-27 by the orchestrator** (on disk at 12:35 IST as `_TEAM_LEAD_RULINGS1.md`, deleted by lane msg7 as its ack; registration owed at integration 7): ARTICLE-EDITOR-PRESSES, part (b): press `Create newsletter`, read its
+form with NOTHING typed, and close it without submitting -- ACCEPTED as a
+session-14 capture spec. Rows `M C50`, `M C81`, `P L3`: next step
+`CAPTURE:C-MSG7-2`.
+
+### Q-ARTICLE-NEXT-NEEDS-A-TITLE -- the publish settings, reachable only after a title is typed
+
+Added 2026-11-27 by lane msg7 (`_audit/2026-11-27-msg7.md`, section 2). Rows:
+`M C44`, `M C78`. Session 12 pressed `Next` on the empty article (load 7): an
+error toast, and the title box focused; no dialog and no publish settings.
+ARTICLE-COMPOSER-CAPTURE admits one load "with nothing typed", and
+CAPTURE-PRESS-UNDER-PROBE-RULE excludes typing into a composer or an editor, so
+no capture today may reach the settings `M C44`'s publish and `M C78`'s
+visibility need. The question: may one capture load of the article composer
+type a placeholder title (nothing in the body), press `Next`, read the publish
+settings by closed words, and close them with Cancel or Escape -- never Publish
+and never Schedule -- then delete the draft that typing makes (his own, private,
+reversible), with STOP-ALL if any control would publish?
+
+**Answered 2026-11-27 by the orchestrator** (on disk at 12:35 IST as `_TEAM_LEAD_RULINGS1.md`, deleted by lane msg7 as its ack; registration owed at integration 7): ARTICLE-EDITOR-PRESSES, part (c): ACCEPTED, ATTENDED ONLY. A fixed
+placeholder title with no personal content is typed; `Next` is pressed and the
+publish settings read; they are closed without Publish; the draft is deleted
+and verified absent with part (a)'s `Drafts` read. No Publish press is ever in
+the runner's closed press list, and a deletion that cannot be verified is
+STOP-ALL and a report. `M C46` rides `M C44`. Rows `M C44`, `M C78`: next step
+`CAPTURE:C-MSG7-1`.
+
+### Q-COMMENT-ANALYTICS-METRIC -- a content analytics page whose metric type offers no comments
+
+Added 2026-11-27 by lane msg7 (`_audit/2026-11-27-msg7.md`, section 6). Row:
+`M C39`. Session 12 opened the metric selector on his content analytics (load
+36): a popover titled `Metric type` with two options, `Impressions` and
+`Engagements`, and `Show results` -- no comments metric. The only `metricType`
+link on the page spells `IMPRESSIONS`. The row's premise, in its address line
+("the comments metric needs ?metricType="), is not what the page draws. The
+question: under MEASURED-ABSENT-OR-PRECONDITION, is `M C39` MEASURED-ABSENT, or
+does it wait on another surface where a per-comment figure might be drawn?
+
+**Answered 2026-11-27 by the orchestrator** (on disk at 12:35 IST as `_TEAM_LEAD_RULINGS1.md`, deleted by lane msg7 as its ack; registration owed at integration 7): (question 6, no id given) `M C39` is NOT MEASURED-ABSENT: one
+dropdown on one surface does not measure a capability. Under
+D6-CAPABILITY-OVER-AFFORDANCE it is re-aimed to a post's own analytics, a
+CAPTURE, and kept at GAP. Row `M C39`: next step
+`CAPTURE:post-analytics-comments`.
+
+### Q-GROUP-CONTENT-SEARCH-ABSENT -- a search inside groups that neither surface draws
+
+Added 2026-11-27 by lane msg7 (`_audit/2026-11-27-msg7.md`, section 5). Row:
+`M C70`. Its plan named two places: a group facet in the content search's All
+filters panel, and failing that a group page's own search control (spec F.4 of
+`_audit/2026-09-24-lane-s-people-search.md`). Session 12 (load 13): All filters
+draws ten facets, none a group (`In group` and `Posted in group` counted 0).
+Session 11's member-group page (`tests/fixtures/live11/group_member.html`): one
+input, the global search combobox in the page header; no form; no
+`role=search`; and no group-scoped search label among its 63 buttons, by keyed
+shape. The question: under MEASURED-ABSENT-OR-PRECONDITION, is `M C70`
+MEASURED-ABSENT, with the reopener "a capture drawing a group facet or a
+group-scoped search control"?
+
+**Answered 2026-11-27 by the orchestrator** (on disk at 12:35 IST as `_TEAM_LEAD_RULINGS1.md`, deleted by lane msg7 as its ack; registration owed at integration 7): GROUP-SEARCH-MEASURED-ABSENT: `M C70` is MEASURED-ABSENT, on the two
+surfaces measured -- the content search's All filters (session 12, load 13), no
+group facet; session 11's member-group page, no group-scoped search control.
+Reopener: a capture that draws a group facet or a group-scoped search control.
+Row `M C70`: MEASURED-ABSENT, so it leaves the next-step table.
 
 ## 8. Preconditions and purposes
 

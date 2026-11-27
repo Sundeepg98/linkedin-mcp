@@ -540,6 +540,10 @@ PROSE_SOURCES = (
     # spotlights on its Life tab -- its title, and the words beside it.
     "life_spotlight_title",
     "life_spotlight_body",
+    # 2026-11-27 (lane jobs7, census ``J 111``): one product on the Page's
+    # Products tab -- its name, and the category LinkedIn files it under.
+    "product_name",
+    "product_category",
 )
 
 #: The cap on an organisation's prose, in characters after normalisation.
@@ -733,6 +737,9 @@ PEOPLE_TOOLS: frozenset[str] = frozenset(
         "linkedin_my_unfollowed_list",
         # 2026-11-26 (lane readers-msg26, census M C93): one content search page.
         "linkedin_search_content",
+        # 2026-11-27 (lane net7, census N 199): his Premium networking matches,
+        # one page, each member a person record beside a job id.
+        "linkedin_premium_matches",
     }
 )
 

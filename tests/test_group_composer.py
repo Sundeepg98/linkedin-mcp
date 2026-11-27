@@ -18,6 +18,7 @@ Chromium by the navigator below, every request refused.
 """
 from __future__ import annotations
 
+import asyncio
 from typing import Any, Optional
 
 import pytest
@@ -246,13 +247,73 @@ async def test_a_composer_or_a_post_that_arrives_late_is_waited_for(writes_on, p
 async def test_without_the_wait_the_same_world_is_refused(writes_on, page, monkeypatch, config, gate, condition):
     """SHOWN FAILING: the bound taken to zero polls, the same late worlds are
     refused -- so the waits above are what let a live fire through."""
+    await _refused_without_the_wait(page, monkeypatch, config, gate, condition)
+
+
+async def _refused_without_the_wait(page, monkeypatch, config, gate, condition) -> None:
+    """The bound taken to zero polls, on a page whose clock the TEST holds.
+
+    WHY THE CLOCK IS HELD (lane masterfix7, 2026-11-27). A zero-poll gate takes
+    one reading, then decides on a fresh one, while the late world runs its lag
+    on the page's own timers from the press or the fill. On the runner's clock
+    that is a race between the lag and the readings' round trips, and a slow
+    runner loses it: master run 46030101439 (ubuntu py3.10, shard 0) read Post
+    already on, and the gate proceeded. Installed and paused before the first
+    world loads, the page's clock cannot move while the gate reads; it moves
+    only when this helper runs it on, after the receipt.
+    """
     monkeypatch.setattr(gc, "POLLS", 0)
+    await page.clock.install(time=0)  # seconds, as the Python API takes them
+    await page.clock.pause_at(1)
     nav = _Navigator([w.world(), w.world(**config)])
     grant, _block = await _granted(page, nav)
     receipt = await perform(nav, page, grant)
     assert receipt[gate]["proceeded"] is False
     assert receipt[gate]["refused_condition"] == condition
     assert (await _witness(page))["post"] == 0
+    # THE SAME LATE WORLD, NOT A DEAD ONE: run on for its own lag (in the page's
+    # milliseconds), it draws what a wait would have read. So the refusal above
+    # is the missing wait's, and not a world that never arrives.
+    await page.clock.run_for(config.get("openAfterMs") or config.get("enableAfterMs"))
+    drawn = await gc.read_composer(page)
+    if gate == "publish_gate":
+        assert drawn["post_enabled"] is True, drawn
+    else:
+        assert drawn["modals"] == 1 and drawn["editors"] == 1, drawn
+
+
+#: Real seconds every composer reading is held back in the test below: more than
+#: twice the late worlds' 120 ms lag, so a reading taken on the runner's clock
+#: lands after the lag every time.
+SLOWER_THAN_THE_LAG_S = 0.3
+
+
+@pytest.mark.parametrize(
+    "config,gate,condition",
+    [
+        ({"openAfterMs": 120}, "group_composer_gate", "1_not_one_composer"),
+        ({"enableAfterMs": 120}, "publish_gate", "3_post_not_enabled"),
+    ],
+    ids=["no-wait-for-the-composer", "no-wait-for-post"],
+)
+async def test_the_refusal_without_the_wait_holds_on_a_runner_slower_than_the_lag(
+    writes_on, page, monkeypatch, config, gate, condition
+):
+    """THE SAME REFUSAL ON A SLOW RUNNER. Every composer reading is held back
+    ``SLOWER_THAN_THE_LAG_S`` of REAL time, the way a starved runner spends its
+    round trips, and the zero-poll gate must still refuse the late world: the
+    verdict above may not depend on the runner's speed.
+
+    Master run 46030101439 (ubuntu py3.10, shard 0) is the case: the
+    ``no-wait-for-post`` world read Post already on, and that gate proceeded."""
+    real = gc.read_composer
+
+    async def slow(*args, **kwargs):
+        await asyncio.sleep(SLOWER_THAN_THE_LAG_S)
+        return await real(*args, **kwargs)
+
+    monkeypatch.setattr(gc, "read_composer", slow)
+    await _refused_without_the_wait(page, monkeypatch, config, gate, condition)
 
 
 async def test_a_wrong_landing_at_the_act_presses_nothing(writes_on, page):

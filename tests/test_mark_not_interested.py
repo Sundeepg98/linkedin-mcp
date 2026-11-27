@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from typing import Optional
 
 import pytest
 
@@ -94,16 +95,36 @@ document.addEventListener('click', function (e) {
     d.innerHTML = '<p>x</p><button type="button">Undo</button>';
     document.querySelector('main').appendChild(d);
   }
+  if (leave === 'undo_elsewhere') {
+    var t = document.createElement('div');
+    t.innerHTML = '<p>x</p><button type="button">Undo</button>';
+    document.body.appendChild(t);
+  }
 }, true);
 </script>"""
 
+#: AN UNDO ALREADY DRAWN BEFORE ANY PRESS -- an earlier action's, or another
+#: item's. PLANTED, a fixture CHOICE: no capture holds one, and it is the shape
+#: the hidden item's own undo is DERIVED to take, which makes it the hardest
+#: case for a reading in place (FEED-CURATION-RECEIPT-NEEDS-A-CHANGE).
+_STALE_UNDO = '<div><p>x</p><button type="button">Undo</button></div>'
 
-def answering(leave: str) -> str:
+
+def answering(leave: str, *, stale: Optional[str] = None) -> str:
     """The OPEN capture made closed -- the trigger's aria-expanded removed,
     the popover left as the capture draws it, shut until shown -- with the
     press-answering script. DERIVED: what the item's press leaves is the
-    test's choice (``undo``, ``nothing``, ``open``)."""
+    test's choice (``undo``, in the page's main where the item is;
+    ``undo_elsewhere``, outside it, as a toast would be; ``nothing``;
+    ``open``). ``stale`` plants an undo before any press: ``"main"`` beside
+    the item, ``"page"`` outside the page's main."""
     closed = _plant(OPEN, f'aria-label="{LABEL}" aria-expanded="true"', f'aria-label="{LABEL}"')
+    if stale == "main":
+        closed = _plant(closed, "</main>", _STALE_UNDO + "</main>")
+    elif stale == "page":
+        closed = _plant(closed, "</body>", _STALE_UNDO + "</body>")
+    else:
+        assert stale is None, stale
     return closed.replace("</body>", _SCRIPT % {"leave": leave} + "</body>", 1)
 
 
@@ -174,11 +195,61 @@ def test_the_verdicts_say_what_they_saw_in_counts():
     assert fc.menu_verdict(dict(owned, items_in_owned_menu=0))["refused_condition"] == "item_outside_the_owned_menu"
     assert fc.menu_verdict(dict(owned, items_visible=2))["refused_condition"] == "item_not_unique"
     assert fc.menu_verdict(dict(owned, triggers_expanded=0))["refused_condition"] == "menu_not_open"
-    # IN PLACE: an Undo is hidden; the menu still open with its item is not
-    # done; anything else is unknown -- never "not done".
-    assert fc.verification_verdict({"undo_controls": 1})[1] == fc.HIDDEN
+    # IN PLACE, AS A CHANGE: an Undo with no count taken before the press is
+    # no proof. It read hidden until 2026-11-27 -- the defect lane msg7 found
+    # beside save_post's (FEED-CURATION-RECEIPT-NEEDS-A-CHANGE). The menu still
+    # open with its item is not done; anything else is unknown -- never
+    # "not done".
+    assert fc.verification_verdict({"undo_controls": 1, "undo_in_main": 1})[1] == fc.UNKNOWN
+    assert fc.verification_verdict(
+        {"undo_controls": 1, "undo_in_main": 1}, before={"undo_in_main": 0}
+    )[1] == fc.HIDDEN
     assert fc.verification_verdict(owned)[1] == fc.SHOWN
     assert fc.verification_verdict({"triggers": 1})[1] == fc.UNKNOWN
+
+
+def test_a_hidden_reading_must_be_a_change_this_press_made():
+    """FEED-CURATION-RECEIPT-NEEDS-A-CHANGE (the orchestrator, 2026-11-27, on
+    lane msg7's finding beside save_post's receipt). The verdict read ANY
+    visible Undo as hidden and read nothing before the press, so an Undo
+    already on the page -- an earlier action's, or another item's -- made an
+    unlanded mark read hidden, which is ``performed: true``."""
+    gate = {"triggers": 1, "triggers_visible": 1, "triggers_expanded": 1,
+            "items_visible": 1, "items_in_owned_menu": 1}
+    stale = dict(gate, undo_controls=1, undo_in_main=1)
+    closed = {"triggers": 1, "triggers_visible": 1}
+    # A STALE UNDO BESIDE THE ITEM AND NO CHANGE: unverified, never hidden.
+    _facts, state, why = fc.verification_verdict(dict(closed, undo_controls=1, undo_in_main=1), before=stale)
+    assert state == fc.UNKNOWN, why
+    assert why.startswith(fc.UNVERIFIED + ":"), why
+    # ... and beside the menu still open with its item: the press did not land.
+    _facts, state, why = fc.verification_verdict(dict(gate, undo_controls=1, undo_in_main=1), before=stale)
+    assert state == fc.SHOWN, why
+    assert why.startswith(fc.NOT_LANDED + ":"), why
+    # A REAL CHANGE: one more undo beside the item than the gate counted --
+    # with the item's trigger still drawn, or the item replaced by its card.
+    _facts, state, why = fc.verification_verdict(dict(closed, undo_controls=1, undo_in_main=1), before=gate)
+    assert state == fc.HIDDEN, why
+    assert why.startswith(fc.HIDDEN_BY_THE_PRESS + ":"), why
+    assert fc.verification_verdict(dict(closed, undo_controls=2, undo_in_main=2), before=stale)[1] == fc.HIDDEN
+    assert fc.verification_verdict({"undo_controls": 1, "undo_in_main": 1}, before=gate)[1] == fc.HIDDEN
+    # A NEW UNDO ELSEWHERE ON THE PAGE IS NOT BESIDE THE ITEM: unverified.
+    _facts, state, why = fc.verification_verdict(dict(closed, undo_controls=1, undo_in_main=0), before=gate)
+    assert state == fc.UNKNOWN, why
+    assert why.startswith(fc.UNVERIFIED + ":"), why
+    # THE ITEM'S TRIGGER GONE AND NO NEW UNDO: a navigation or an error page
+    # removes it too, so that alone is never hidden.
+    assert fc.verification_verdict({"triggers": 0}, before=gate)[1] == fc.UNKNOWN
+    # NO READING BEFORE THE PRESS: nothing can be shown to be a change.
+    assert fc.verification_verdict(dict(closed, undo_controls=1, undo_in_main=1))[1] == fc.UNKNOWN
+    # A NEW UNDO WHILE THE MENU STILL DRAWS ITS ITEM UNPRESSED: contradictory.
+    assert fc.verification_verdict(dict(gate, undo_controls=1, undo_in_main=1), before=gate)[1] == fc.UNKNOWN
+    # NOTHING PRESSED PAST THE TRIGGER: nothing marked by this call.
+    _facts, state, why = fc.verification_verdict({}, before=None, pressed=False)
+    assert state == fc.SHOWN, why
+    assert why.startswith(fc.NOT_PRESSED + ":"), why
+    assert fc.verification_verdict({"error": "TimeoutError"}, before=stale)[1] == fc.UNKNOWN
+    assert set(fc.OUTCOMES) == {fc.HIDDEN_BY_THE_PRESS, fc.NOT_LANDED, fc.NOT_PRESSED, fc.UNVERIFIED}
 
 
 # ---------------------------------------------------------------------------
@@ -314,6 +385,66 @@ async def test_an_unowned_menu_is_never_pressed(writes_on, page, fast_menu):
     assert await _witness(page) == {"trigger": 1, "item": 0, "other": 0}
     assert receipt["curation_gate"]["refused_condition"] == "item_outside_the_owned_menu"
     assert receipt["performed"] != True  # noqa: E712 -- never claimed done
+
+
+# ---------------------------------------------------------------------------
+# 3b. FEED-CURATION-RECEIPT-NEEDS-A-CHANGE: hidden is a change this press made
+# ---------------------------------------------------------------------------
+
+
+async def test_an_undo_drawn_before_the_press_is_no_confirmation(writes_on, page, fast_menu):
+    """THE RED THE ORDER NAMES: a page already drawing an undo beside the item,
+    and a press that changes nothing, read item_hidden -- performed: true --
+    at the lane's certified head. The gate's reading, taken just before the
+    'Not interested' press, is the baseline the verdict now compares with."""
+    receipt, _act = await _run(page, answering("nothing", stale="main"))
+    assert await _witness(page) == {"trigger": 1, "item": 1, "other": 0}
+    assert receipt["verification"]["observed_state"] == fc.UNKNOWN
+    assert receipt["performed"] == writes.UNKNOWN
+    assert receipt["verification"]["why"].startswith(fc.UNVERIFIED + ":")
+    gate = receipt["curation_gate"]
+    assert gate["observed"]["undo_in_main"] == 1, "the stale undo, counted before the press"
+    assert gate["after_the_item_press"]["undo_in_main"] == 1
+
+
+async def test_an_undo_outside_the_main_before_the_press_is_no_confirmation(writes_on, page, fast_menu):
+    receipt, _act = await _run(page, answering("nothing", stale="page"))
+    assert receipt["verification"]["observed_state"] == fc.UNKNOWN
+    assert receipt["performed"] == writes.UNKNOWN
+
+
+async def test_the_menu_left_open_beside_a_stale_undo_is_not_landed(writes_on, page, fast_menu):
+    receipt, _act = await _run(page, answering("open", stale="main"))
+    assert receipt["verification"]["observed_state"] == fc.SHOWN
+    assert receipt["performed"] is False
+    assert receipt["verification"]["why"].startswith(fc.NOT_LANDED + ":")
+
+
+async def test_a_new_undo_outside_the_main_is_not_beside_the_item(writes_on, page, fast_menu):
+    receipt, _act = await _run(page, answering("undo_elsewhere"))
+    assert await _witness(page) == {"trigger": 1, "item": 1, "other": 0}
+    assert receipt["verification"]["observed_state"] == fc.UNKNOWN
+    assert receipt["performed"] == writes.UNKNOWN
+    assert receipt["verification"]["why"].startswith(fc.UNVERIFIED + ":")
+
+
+async def test_control_a_refused_gate_beside_a_stale_undo_is_not_pressed(writes_on, page, fast_menu):
+    """CONTROL: a refused gate reads not_pressed. Beside a stale undo it read
+    item_hidden -- performed: true, with nothing pressed past the trigger."""
+    world = _plant(answering("undo", stale="main"), 'aria-owns="k2c1ddb96"', 'aria-owns="kffffffff"')
+    receipt, _act = await _run(page, world)
+    assert receipt["clicked"]["clicks_made"] == 1, "the trigger and nothing more"
+    assert await _witness(page) == {"trigger": 1, "item": 0, "other": 0}
+    assert receipt["performed"] is False
+    assert receipt["verification"]["why"].startswith(fc.NOT_PRESSED + ":")
+
+
+async def test_control_a_new_undo_beside_a_stale_one_is_hidden(writes_on, page, fast_menu):
+    """CONTROL: a real change reads hidden, beside a stale undo too."""
+    receipt, _act = await _run(page, answering("undo", stale="main"))
+    assert await _witness(page) == {"trigger": 1, "item": 1, "other": 0}
+    assert receipt["verification"]["observed_state"] == fc.HIDDEN
+    assert receipt["performed"] is True
 
 
 # ---------------------------------------------------------------------------

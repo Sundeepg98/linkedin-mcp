@@ -217,6 +217,7 @@ from linkedin_server import (
     dom,
     endorse_skill,
     feed_curation,
+    feed_save,
     field_restore,
     group_composer,
     group_leave,
@@ -1448,8 +1449,12 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "WHAT PRESSING 'Not interested' DRAWS IS UNMEASURED: the undo's word "
             "is DERIVED ('Undo'), and whether LinkedIn hides an item on its own "
             "permalink at all is unseen. The verification reads the page IN "
-            "PLACE: an Undo drawn is the act's only proof; no Undo, with the menu "
-            "closed, is unknown -- never 'not done'. A dialog is counted and "
+            "PLACE, AND AS A CHANGE (FEED-CURATION-RECEIPT-NEEDS-A-CHANGE): a NEW "
+            "Undo in the page's main, beside the item, against the count the "
+            "gate took just before the press, is the act's only proof; an Undo "
+            "already there counts for nothing. The menu still open with its item "
+            "and nothing changed is not landed; anything else is unverified -- "
+            "never 'not done'. A dialog is counted and "
             "never answered. What the mark changes in his feed's ranking is "
             "LinkedIn's. HIS-OWN-CURATION-NOT-OUTWARD proves the act with its "
             "inverse; the inverse, pressing that undo, waits on the undo's "
@@ -1460,6 +1465,83 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "reading records the undo LinkedIn draws, by closed words; the undo "
             "press is then built on that capture and the two proven together in "
             "one session, read back."
+        ),
+    ),
+    # LANE MSG7, 2026-11-27: ONE FEED ITEM HE NAMES SAVED to his Saved items
+    # (census ``M C36``; ``M C37`` rides it), from the item's own control menu
+    # on its PERMALINK -- mark_not_interested's route and gates, on
+    # SAVE-POST-UNDER-OWN-CURATION (the orchestrator, 2026-11-27; registration
+    # owed at integration 7), under HIS-OWN-CURATION-NOT-OUTWARD. The selectors
+    # and verdicts live in ``feed_save``; this entry and the arms below
+    # delegate. MEASURED: ``Save`` is the first item of every permalink menu
+    # captured (sessions 11 and 12). Two presses through the one click site --
+    # the trigger, then ``Save``, the second appended only by a gate that finds
+    # exactly one visible ``Save`` in the menu the pressed trigger owns -- and
+    # the verification is IN PLACE.
+    "linkedin_save_post": WriteSpec(
+        action="save_post",
+        tool_name="linkedin_save_post",
+        url_template=feed_save.URL_TEMPLATE,
+        url_pattern=re.compile(
+            r"^https://www\.linkedin\.com/feed/update/urn:li:[A-Za-z]+:[0-9]+/$"
+        ),
+        exempt_substring=None,
+        summary=(
+            "Save one feed item you name by its urn to your Saved items, from "
+            "that item's own control menu on its permalink."
+        ),
+        from_state=feed_save.SHOWN,
+        to_state=feed_save.SAVED,
+        target_kind="item_urn",
+        state_from="feed_item_save_menu",
+        direction_source=(
+            "the item's own permalink, /feed/update/<the urn you name>/ -- the "
+            "page this action presses on, at one page load. MEASURED on live "
+            "sessions 11 (load 29) and 12 (loads 17 and 39): one control-menu "
+            "trigger in the page's main, found by LinkedIn's fixed 'Open control "
+            "menu' prefix (the rest of its label names the author and is never "
+            "read); pressed, it owns, by id, a portal whose menu draws 'Save' as "
+            "the first of seven items. The gate requires exactly one such "
+            "trigger, closed."
+        ),
+        wrong_state_note=(
+            "Not readable closed: the permalink draws no save state, so an item "
+            "already saved is refused AFTER the trigger press -- its menu draws "
+            "no 'Save' (DERIVED: 'Unsave' in its place, never captured) -- and "
+            "nothing more is pressed."
+        ),
+        reversibility="STILL-UNKNOWN whether the item's menu draws Unsave once saved",
+        reversibility_measured=False,
+        reversibility_class="STILL-UNKNOWN",
+        reversibility_evidence=(
+            "NOT MEASURED. No capture holds a saved item's menu or the page "
+            "after 'Save'; the inverse LinkedIn is expected to draw, 'Unsave' in "
+            "the item's own menu, has never been seen."
+        ),
+        reversible_by=(
+            "LinkedIn's own 'Unsave', expected in the same item's menu once "
+            "saved, and on his Saved items list -- by him, by hand; this server "
+            "does not press it, because no capture holds it (census M C37)."
+        ),
+        residue=(
+            "WHAT PRESSING 'Save' DRAWS IS UNMEASURED: the confirmation's word is "
+            "DERIVED ('saved'), never captured. The verification reads the page "
+            "IN PLACE, AND AS A CHANGE (SAVE-RECEIPT-NEEDS-A-CHANGE): saved only "
+            "when more visible live regions carry the word than the gate counted "
+            "just before the press, or when the item's own menu draws 'Unsave' "
+            "where it drew 'Save'; a region already there counts for nothing. "
+            "The menu still open with 'Save' and nothing changed is not landed; "
+            "anything else is unverified -- never 'not saved'. A dialog is counted "
+            "and never answered. HIS-OWN-CURATION-NOT-OUTWARD proves the act with "
+            "its inverse, and the inverse rides the first supervised fire "
+            "(SAVE-POST-UNDER-OWN-CURATION: save, read the drawn Unsave, unsave)."
+        ),
+        reversibility_procedure=(
+            "One supervised press on an item HE NAMES by urn, attended, in "
+            "session 14: the after-press reading records what LinkedIn draws, "
+            "by counts; the item's menu re-opened shows whether 'Unsave' is "
+            "drawn; the unsave is then built on that capture and the two proven "
+            "together in one session, read back on his Saved items list."
         ),
     ),
     "linkedin_set_open_to_work": WriteSpec(
@@ -3166,20 +3248,27 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
     # ``HIS-OWN-CURATION-NOT-OUTWARD``: an alert is his own saved search, sent
     # to nobody. The address, the switch, its readings and its verdicts live in
     # ``search_alert_switch``; these entries and the arms below delegate.
-    # MEASURED on live session 2's classic job search
+    # THE AI ARM SINCE LANE JOBS7 (2026-11-27): the classic search no longer
+    # serves (live session 12, load 3), so the address is the AI search's own
+    # and the switch pressed is the AI page's -- the page's one
+    # ``input[role=switch]`` inside the component keyed
+    # ``JobSearchAlertToggleRef_``, captioned "Get job alerts for this
+    # search", MEASURED off on session 11's raw page and on both of session
+    # 12's AI loads (tests/fixtures/live12/c_srch_1_words.html,
+    # c_srch_0b_words.html). The classic arm -- session 2's
     # (tests/fixtures/live2/j107_search_alert.html): one toggle wearing
     # LinkedIn's class ``jobs-search-create-alert__artdeco-toggle``, its word
-    # "Set alert", one ``input[role=switch]`` in it drawing aria-checked off.
-    # The target is a QUERY the caller's own keywords and location compose --
-    # the first write addressed by a search rather than an id. Named on
-    # LinkedIn's own verb here ("Set alert"), as the J 161 pair is.
+    # "Set alert" -- is still read wherever LinkedIn serves the classic page.
+    # The target is a QUERY the caller's own keywords compose -- the first
+    # write addressed by a search rather than an id; a place is refused until
+    # the AI route's place is measured (C-SRCH-2). Named on LinkedIn's own
+    # verb here ("Set alert"), as the J 161 pair is.
     "linkedin_set_search_job_alert": WriteSpec(
         action="set_search_job_alert",
         tool_name="linkedin_set_search_job_alert",
         url_template=search_alert_switch.URL_TEMPLATE,
         url_pattern=re.compile(
-            r"^https://www\.linkedin\.com/jobs/search/\?keywords=[A-Za-z0-9%+._~-]{1,600}"
-            r"(?:&location=[A-Za-z0-9%+._~-]{1,300})?$"
+            r"^https://www\.linkedin\.com/jobs/search-results/\?keywords=[A-Za-z0-9%+._~-]{1,600}$"
         ),
         exempt_substring=None,
         summary=(
@@ -3192,11 +3281,14 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
         state_from="search_alert_switch",
         direction_source=(
             "the search's own job-alert switch, read off the page this action "
-            "clicks on, at no extra page load: exactly one toggle wearing "
-            "LinkedIn's class for it, its word 'Set alert', exactly one input "
-            "switch in it and on the page, and its aria-checked agreeing with "
-            "its checked property. MEASURED on live session 2's classic job "
-            "search, 2026-09-28."
+            "clicks on, at no extra page load. On LinkedIn's AI job search: the "
+            "page's one input switch, inside the component keyed for the alert "
+            "toggle, captioned 'Get job alerts for this search', its checked "
+            "property its state and no aria-checked drawn -- MEASURED off on live "
+            "sessions 11 and 12, 2026-11-26. On the classic page, should LinkedIn "
+            "serve it: exactly one toggle wearing LinkedIn's class for it, its "
+            "word 'Set alert', its aria-checked agreeing with its checked property "
+            "-- MEASURED on live session 2, 2026-09-28."
         ),
         wrong_state_note=(
             "This acts only from the OFF reading. A switch already reading on is "
@@ -3218,12 +3310,12 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
         ),
         residue=(
             "WHETHER ONE PRESS COMPLETES THE ACT is unmeasured -- LinkedIn may "
-            "draw a further step, or change the toggle's word once the alert is "
-            "on -- and so is whether a click reaches the switch: no trial press "
+            "draw a further step, or change the switch's caption once the alert "
+            "is on -- and so is whether a click reaches the switch: no trial press "
             "is taken, so an unreachable switch throws inside the click and the "
             "receipt says so. The fresh render after the press says whether the "
-            "alert landed. The page is LinkedIn's CLASSIC job search, which the "
-            "same capture marks with a deprecation banner."
+            "alert landed. The page is LinkedIn's AI job search; a place is not "
+            "taken until that route's place is measured (capture C-SRCH-2)."
         ),
         reversibility_procedure=(
             "One supervised round trip on a search HE names: set (preview, press, "
@@ -3236,8 +3328,7 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
         tool_name="linkedin_unset_search_job_alert",
         url_template=search_alert_switch.URL_TEMPLATE,
         url_pattern=re.compile(
-            r"^https://www\.linkedin\.com/jobs/search/\?keywords=[A-Za-z0-9%+._~-]{1,600}"
-            r"(?:&location=[A-Za-z0-9%+._~-]{1,300})?$"
+            r"^https://www\.linkedin\.com/jobs/search-results/\?keywords=[A-Za-z0-9%+._~-]{1,600}$"
         ),
         exempt_substring=None,
         summary=(
@@ -3269,9 +3360,9 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "from off."
         ),
         residue=(
-            "the same as linkedin_set_search_job_alert's: one press, the toggle's "
-            "word once on, and whether the switch can be reached, are measured on "
-            "the first supervised round trip."
+            "the same as linkedin_set_search_job_alert's: one press, the switch's "
+            "caption once on, and whether the switch can be reached, are measured "
+            "on the first supervised round trip."
         ),
         reversibility_procedure=(
             "the same round trip as linkedin_set_search_job_alert, this half "
@@ -5313,17 +5404,18 @@ def _target_for(spec: WriteSpec, target: Any) -> str:
         # are compared against its segment, in the page.
         return _canonical_profile(raw)
     if spec.target_kind == "job_search":
-        # ONE JOB SEARCH, AS THE QUERY ITS OWN KEYWORDS AND LOCATION COMPOSE
-        # (2026-11-25, lane build-jmn26, J 31) -- ``search_alert_switch``'s one
-        # spelling, which the tool composes from its arguments and this
-        # re-derives, so a hand-written query never reaches a url. The refusal
-        # describes the shape and never repeats the value.
+        # ONE JOB SEARCH, AS THE QUERY ITS OWN KEYWORDS COMPOSE (2026-11-25,
+        # lane build-jmn26, J 31; keywords alone since lane jobs7's AI arm, a
+        # place refused until the AI route's place is measured) --
+        # ``search_alert_switch``'s one spelling, which the tool composes from
+        # its arguments and this re-derives, so a hand-written query never
+        # reaches a url. The refusal describes the shape and never repeats the
+        # value.
         query, why = search_alert_switch.canonical(raw)
         if query is None:
             raise WriteAttemptError(
-                f"{spec.action!r} is addressed by one job search -- keywords and "
-                f"an optional location, composed by its tool -- and the value "
-                f"given is not one: {why}"
+                f"{spec.action!r} is addressed by one job search -- its keywords, "
+                f"composed by its tool -- and the value given is not one: {why}"
             )
         return query
     if spec.target_kind == "recommendations_feedback":
@@ -5532,6 +5624,9 @@ STRICT_PRESS_ACTIONS: frozenset[str] = NAMED_PROFILE_ACTIONS | frozenset(
         # counted as exactly one; a second match at press time throws.
         "mark_not_interested",
         "follow_company",
+        # 2026-11-27 (lane msg7, M C36): the same trigger, then the one "Save"
+        # in the menu it owns, each counted as exactly one.
+        "save_post",
         "send_invitation",
         # Lane S, 2026-10-10: the generic settings writer's press is aimed by
         # the control's exact name, which the gate required to be drawn once;
@@ -7281,6 +7376,28 @@ async def observe(
             same_page_as_action=True,
         )
 
+    if spec.state_from == "feed_item_save_menu":
+        # ONE load, of the permalink the urn he names composes (lane msg7,
+        # 2026-11-27, M C36): the item's own page, where the urn IS the
+        # address -- mark_not_interested's page, read by
+        # ``feed_save.read_state``. COUNTS ONLY; the author is never read. A
+        # landing off that permalink reads ``unknown``.
+        url = str(spec.url_template or "").format(target=target)
+        landed = await _load(navigator, page, url, surface="feed item")
+        facts, state, why = await feed_save.read_state(
+            page, landed_elsewhere=str(landed).rstrip("/") != url.rstrip("/")
+        )
+        return _record(
+            spec,
+            target=target,
+            facts=facts,
+            facts_url=url,
+            state=state,
+            state_why=why,
+            state_url=url,
+            same_page_as_action=True,
+        )
+
     if spec.state_from == settings_writer.STATE_FROM:
         # ONE load, of the admitted page the click lands on (lane S,
         # 2026-10-10). The address is the registry's CONSTANT for the page's
@@ -8642,14 +8759,35 @@ PERFORMABLE: frozenset[str] = frozenset(
         #   an aimable target    the one trigger in the page's main, then the
         #                        one item inside the portal that trigger owns
         #                        by id -- each strict at its press
-        #   a real verification  IN PLACE: the undo LinkedIn draws once; no
-        #                        undo reads unknown, never "not done"
+        #   a real verification  IN PLACE, as a CHANGE: a NEW undo in the
+        #                        page's main, beside the item (DERIVED);
+        #                        else unverified, never "not done"
         #   no new permission    TWO presses through perform()'s one click
         #                        site, the second appended only by a gate
         #
         # WHAT IT CANNOT SAY is the undo's word (DERIVED: "Undo"); its
         # first supervised press records it. ENABLING IS NOT FIRING.
         "mark_not_interested",
+        # ONE FEED ITEM HE NAMES SAVED, 2026-11-27 (lane msg7, census row
+        # M C36; M C37 rides it), on SAVE-POST-UNDER-OWN-CURATION, under
+        # HIS-OWN-CURATION-NOT-OUTWARD:
+        #
+        #   a measured surface   the item's own permalink, mark_not_interested's,
+        #                        loaded live in sessions 11 and 12
+        #   a measured anchor    the same "Open control menu" trigger; the
+        #                        menu's own "Save", verbatim on every capture
+        #   an aimable target    the one trigger, then the one "Save" inside
+        #                        the portal that trigger owns -- each strict
+        #   a real verification  IN PLACE, as a CHANGE: a NEW live region
+        #                        carrying "saved", or the menu flipping to
+        #                        "Unsave" (both DERIVED); else unverified
+        #   no new permission    TWO presses through perform()'s one click
+        #                        site, the second appended only by a gate
+        #
+        # WHAT IT CANNOT SAY is what a save draws, and whether the item was
+        # saved before the press; its first supervised fire records both.
+        # ENABLING IS NOT FIRING.
+        "save_post",
         # THE THIRTEENTH, 2026-09-23, census row ``N 47``, and the first write
         # added under the operator's reversible-first-round class since the
         # round's own three. Every clause the others needed is true of it:
@@ -8881,14 +9019,18 @@ PERFORMABLE: frozenset[str] = frozenset(
         "unset_similar_jobs_alert",
         # THE SEARCH'S JOB-ALERT PAIR, 2026-11-25 (lane build-jmn26, census
         # row J 31), under HIS-OWN-CURATION-NOT-OUTWARD, each the other's
-        # inverse:
+        # inverse; ITS AI ARM 2026-11-27 (lane jobs7), the classic search no
+        # longer serving:
         #
-        #   a measured surface   /jobs/search/ with the query the caller's own
-        #                        keywords and location compose -- the read
+        #   a measured surface   /jobs/search-results/ with the query the
+        #                        caller's own keywords compose -- the read
         #                        boundary admits it, as linkedin_search_jobs
-        #                        loads it
-        #   a measured anchor    one input[role=switch] in the one toggle
-        #                        wearing LinkedIn's class
+        #                        loads it (live session 12, loads 3 and 4)
+        #   a measured anchor    the page's one input[role=switch] inside the
+        #                        component keyed JobSearchAlertToggleRef_,
+        #                        captioned "Get job alerts for this search"
+        #                        (sessions 11 and 12); on a classic page, the
+        #                        one toggle wearing LinkedIn's class
         #                        jobs-search-create-alert__artdeco-toggle, its
         #                        word "Set alert" (live session 2)
         #   an aimable target    that one switch, strict at the press
@@ -9460,13 +9602,15 @@ def anchor_label_for(
         # its one block, in the page; the title never reaches this process.
         return dom.JOB_ALERT_HEADING_PREFIX
     if spec.action in search_alert_switch.ACTIONS:
-        # THE TOGGLE'S OWN WORD, exact, MEASURED by keyed shape on session 2's
-        # search (lane build-jmn26, J 31). The switch's accessible name is its
-        # hidden label, which no candidate matched and this server never reads,
-        # so the switch is found STRUCTURALLY -- the one input in the one toggle
-        # wearing LinkedIn's class -- and the reader requires this word on that
-        # toggle before it reads any state.
-        return search_alert_switch.WORD
+        # THE SWITCH'S OWN CAPTION, exact, MEASURED on session 11's raw page and
+        # by keyed shape on both of session 12's AI loads (lane jobs7, J 31's
+        # AI arm; the classic arm's word ``search_alert_switch.WORD`` was lane
+        # build-jmn26's). The switch's accessible name is its label, which no
+        # candidate matched and this server never reads, so the switch is found
+        # STRUCTURALLY -- the page's one input switch inside the keyed toggle --
+        # and the reader requires this caption beside it before it reads any
+        # state. The reader holds the classic arm's word to the classic toggle.
+        return search_alert_switch.CAPTION
     if spec.action == "send_recommendations_feedback":
         # THE BUTTON'S OWN WORDS, exact, MEASURED by keyed shape on session 8's
         # recommended jobs (lane build-jobs2, J 163), chosen by his answer from
@@ -9491,6 +9635,12 @@ def anchor_label_for(
         # FIRST press is the menu's trigger, aimed by LinkedIn's fixed
         # prefix; the rest of its label names the author and is never read.
         return feed_curation.NOT_INTERESTED
+    if spec.action == "save_post":
+        # THE ITEM THAT SAVES IT, exact, LinkedIn's whole word in the item's
+        # own menu, verbatim on every captured permalink menu (lane msg7,
+        # M C36). The FIRST press is the menu's trigger, aimed by LinkedIn's
+        # fixed prefix; the rest of its label names the author, never read.
+        return feed_save.SAVE
     if spec.action in conversation_menu.ACTIONS:
         # THE ITEM'S OWN WORD, exact (lane build-msg2): 'Mute', 'Mark as
         # unread', 'Archive' and 'Delete conversation' are MEASURED on live
@@ -9903,6 +10053,8 @@ _WRITE_SURFACE_FOR_ACTION: dict[str, str] = {
     "withdraw_invitation": "your invitation manager's Sent tab",
     # 2026-11-26 (lane build-net2, N 154): the item's own permalink.
     "mark_not_interested": "the feed item's own permalink",
+    # 2026-11-27 (lane msg7, M C36): the same permalink.
+    "save_post": "the feed item's own permalink",
     # 2026-09-27: addressed by a person's link, acting on HIS OWN profile's
     # suggestion rail -- the page the press lands on, not the linked one.
     "send_invitation": "your own profile's suggestion rail",
@@ -9987,6 +10139,8 @@ _WHERE_TO_LOOK: dict[str, str] = {
     "withdraw_invitation": "your invitation manager's Sent tab",
     # 2026-11-26 (lane build-net2, N 154): where a hidden item stops showing.
     "mark_not_interested": "your LinkedIn feed, where that item stops being shown",
+    # 2026-11-27 (lane msg7, M C36): where a saved post is listed.
+    "save_post": "your Saved items, where a saved post is listed",
     # Lane S, 2026-10-10: the one page that renders the value is the page that
     # sets it, under Settings and Privacy, named in the preview.
     "set_admitted_setting": "that page under Settings and Privacy, named in the preview",
@@ -10017,8 +10171,8 @@ _WHERE_TO_LOOK: dict[str, str] = {
     # 2026-11-25 (lane build-jmn26, J 31). The switch at the head of the search
     # he named, which the verification re-reads; his job alerts are listed on
     # LinkedIn's alerts page too, which he can open himself.
-    "set_search_job_alert": "the 'Set alert' switch at the head of that search's results, or your job alerts",
-    "unset_search_job_alert": "the 'Set alert' switch at the head of that search's results, or your job alerts",
+    "set_search_job_alert": "the 'Get job alerts for this search' switch at the head of that search's results, or your job alerts",
+    "unset_search_job_alert": "the 'Get job alerts for this search' switch at the head of that search's results, or your job alerts",
     # 2026-11-26 (lane build-jobs2, J 163). The block under the list on his
     # recommended jobs: the one place the answer could show.
     "send_recommendations_feedback": "the question under the list on your recommended jobs",
@@ -10237,10 +10391,24 @@ _VERIFIED_FROM["mark_not_interested"] = (
     "IN PLACE, on the permalink the press was made on, before any "
     "navigation: the undo LinkedIn draws in a hidden item's place is drawn "
     "once, and HIS-OWN-CURATION-NOT-OUTWARD proves the act only through it. "
-    "Its word is DERIVED ('Undo'), never captured, so an undo read is its "
-    "first reading; no undo with the menu closed answers unknown -- never "
-    "'not done' -- and only the menu still open with its item unpressed "
-    "answers not done."
+    "Read as a CHANGE against the counts the gate took just before the press "
+    "(FEED-CURATION-RECEIPT-NEEDS-A-CHANGE): a NEW undo in the page's main, "
+    "beside the item, is the act's reading. Its word is DERIVED ('Undo'), "
+    "never captured, so a reading is its first. An undo already on the page "
+    "counts for nothing; the menu still open with its item and nothing "
+    "changed answers not landed; anything else answers unverified -- never "
+    "'not done'."
+)
+# 2026-11-27 (lane msg7, M C36).
+_VERIFIED_FROM["save_post"] = (
+    "IN PLACE, on the permalink the press was made on, before any "
+    "navigation, and read as a CHANGE against the count the gate took just "
+    "before the press: more visible live regions carrying the DERIVED word "
+    "'saved', or the item's own menu drawing 'Unsave' where it drew 'Save', "
+    "is the save's reading, never captured, so a reading is its first. A "
+    "region already on the page counts for nothing; the menu still open "
+    "with its 'Save' and nothing changed answers not landed; anything else "
+    "answers unverified -- never 'not saved'."
 )
 _VERIFIED_FROM["follow_company_page"] = (
     "a DIFFERENT surface from the one clicked: Manage Pages, where a followed "
@@ -10908,11 +11076,13 @@ async def _live_control(
         # second source (lane build-jmn26, J 31). The landing was checked
         # against his search by ``_assert_landed_on_target`` before this ran;
         # the switch is re-read in its one toggle, and the selector is the
-        # module's CONSTANT, which strict mode holds to the one switch.
-        _switch, state, why = await search_alert_switch.read_state(page)
+        # module's CONSTANT for the arm the reading was taken on (lane jobs7:
+        # the AI search's switch, or the classic toggle's), which strict mode
+        # holds to the one switch.
+        switch, state, why = await search_alert_switch.read_state(page)
         if state not in (search_alert_switch.ALERT_OFF, search_alert_switch.ALERT_ON):
             return (state, why, "")
-        return (state, why, search_alert_switch.SWITCH)
+        return (state, why, search_alert_switch.switch_for(switch))
 
     if spec.action == "send_recommendations_feedback":
         # THE SAME READER THE PREVIEW USED, ON THE SAME PAGE: freshness, not a
@@ -10993,6 +11163,17 @@ async def _live_control(
         if state != feed_curation.SHOWN:
             return (state, why, "")
         return (state, why, feed_curation.TRIGGER)
+
+    if spec.action == "save_post":
+        # THE SAME READING AND VERDICT THE PREVIEW TOOK, on the permalink the
+        # press is about to land on (lane msg7, M C36). The selector is the
+        # FIRST press only -- the one trigger by LinkedIn's fixed prefix,
+        # pressed strictly; "Save" is appended later by
+        # ``feed_save.menu_item_gate``, or not at all.
+        _facts, state, why = await feed_save.read_state(page)
+        if state != feed_save.SHOWN:
+            return (state, why, "")
+        return (state, why, feed_save.TRIGGER)
 
     if spec.action == "update_profile_field":
         # THE ONE SWITCH IN THIS FAMILY, P B9 (2026-09-24): the Premium
@@ -11837,10 +12018,14 @@ async def _verify_after(
     opened: Optional[dict[str, Any]] = None,
     typed: bool = False,
     badge_before: Optional[dict[str, Any]] = None,
+    curation_before: Optional[dict[str, Any]] = None,
+    curation_attempted: Optional[bool] = None,
     witness: Optional[dict[str, Any]] = None,
     first_contact_after: Optional[dict[str, Any]] = None,
     send_attempted: Optional[bool] = None,
     menu_item_attempted: Optional[bool] = None,
+    save_before: Optional[dict[str, Any]] = None,
+    save_attempted: Optional[bool] = None,
 ) -> tuple[str, str, str]:
     """Read whether it landed, and read it somewhere the click did not reach.
 
@@ -12388,11 +12573,41 @@ async def _verify_after(
     if spec.action == "mark_not_interested":
         # IN PLACE (lane build-net2, N 154): the undo LinkedIn draws is drawn
         # once, so the page the press was made on is read again where it is,
-        # with no navigation. An Undo drawn is hidden (DERIVED word); the
-        # menu still open with its item is not done; else unknown.
+        # with no navigation -- and read as a CHANGE
+        # (FEED-CURATION-RECEIPT-NEEDS-A-CHANGE, the orchestrator, 2026-11-27,
+        # lane net7). ``curation_before`` is the reading the gate took just
+        # before the 'Not interested' press: hidden only when the page's main
+        # draws more undo controls than it counted there, a new undo beside
+        # the item. An item the gate never let through was never pressed, and
+        # that answer needs no reading at all.
         url = str(spec.url_template).format(target=url_target_of(spec, grant.target))
+        if not curation_attempted:
+            _facts, state, why = feed_curation.verification_verdict(
+                {}, before=curation_before, pressed=False
+            )
+            return (state, why, "")
         _facts, state, why = feed_curation.verification_verdict(
-            await feed_curation.read_item(page)
+            await feed_curation.read_item(page), before=curation_before, pressed=True
+        )
+        return (state, why, url)
+
+    if spec.action == "save_post":
+        # IN PLACE (lane msg7, M C36): the page the press was made on is read
+        # again where it is, with no navigation -- and read as a CHANGE
+        # (SAVE-RECEIPT-NEEDS-A-CHANGE, the orchestrator, 2026-11-27, on the
+        # cold verification of 5beac57). ``save_before`` is the reading the
+        # gate took just before the Save press: saved only when more live
+        # regions carry 'saved' than it counted, or the item's own menu draws
+        # 'Unsave' where it drew 'Save'. A Save the gate never let through
+        # was never pressed, and that answer needs no reading at all.
+        url = str(spec.url_template).format(target=url_target_of(spec, grant.target))
+        if not save_attempted:
+            _facts, state, why = feed_save.verification_verdict(
+                {}, before=save_before, pressed=False
+            )
+            return (state, why, "")
+        _facts, state, why = feed_save.verification_verdict(
+            await feed_save.read_item(page), before=save_before, pressed=True
         )
         return (state, why, url)
 
@@ -14442,7 +14657,24 @@ async def perform(
                     # THE ITEM WAS PRESSED. What it left, read before anything
                     # else -- counts only; nothing more is pressed.
                     curation_after_press = feed_curation.after_press_note(
-                        await feed_curation.read_item(page)
+                        await feed_curation.read_item(page),
+                        before=(curation_gate or {}).get("observed"),
+                    )
+                elif spec.action == "save_post" and clicks_made == 1:
+                    # THE TRIGGER OPENED A MENU (lane msg7, M C36): "Save" is
+                    # appended to this same queue only if a fresh read finds
+                    # exactly one visible "Save" inside the menu this trigger
+                    # owns, by id -- an item already saved draws none.
+                    curation_gate = await feed_save.menu_item_gate(page)
+                    if curation_gate["proceed"]:
+                        click_plan.append(curation_gate["selector"])
+                elif spec.action == "save_post" and clicks_made == 2:
+                    # THE ITEM WAS PRESSED. What it left, read before anything
+                    # else -- counts only; nothing more is pressed -- beside
+                    # the count the gate took just before the press.
+                    curation_after_press = feed_save.after_press_note(
+                        await feed_save.read_item(page),
+                        before=(curation_gate or {}).get("observed"),
                     )
                 elif spec.action in invitation_acts.ACTIONS and clicks_made == 1:
                     # THE ONE PRESS WAS MADE (lane build-net2, 2026-11-26).
@@ -14668,6 +14900,20 @@ async def perform(
             # HIS WORDS WERE IN THE BOX by a fill, or already, by the draft rule.
             typed=fills_made > 0 or drafts_used > 0,
             badge_before=badge_before,
+            # WHAT THE PAGE DREW JUST BEFORE THE 'Not interested' PRESS, and
+            # whether that press was ever let through (lane net7,
+            # FEED-CURATION-RECEIPT-NEEDS-A-CHANGE): a hidden reading must be a
+            # change this press made.
+            curation_before=(
+                curation_gate.get("observed")
+                if spec.action == "mark_not_interested" and curation_gate is not None
+                else None
+            ),
+            curation_attempted=(
+                spec.action == "mark_not_interested"
+                and curation_gate is not None
+                and curation_gate.get("proceed") is True
+            ),
             witness=switch_fresh,
             first_contact_after=first_contact_after,
             # WHETHER SEND WAS EVER LET THROUGH (the call of 2026-09-28 19:48):
@@ -14678,6 +14924,19 @@ async def perform(
             # WHETHER A CONVERSATION MENU'S ITEM WAS EVER LET THROUGH (lane
             # build-msg2): an item its gate refused was never pressed.
             menu_item_attempted=menu_gate is not None and menu_gate.get("proceed") is True,
+            # WHAT THE PAGE DREW JUST BEFORE THE SAVE PRESS, and whether that
+            # press was ever let through (lane msg7, SAVE-RECEIPT-NEEDS-A-CHANGE):
+            # a saved reading must be a change this press made.
+            save_before=(
+                curation_gate.get("observed")
+                if spec.action == "save_post" and curation_gate is not None
+                else None
+            ),
+            save_attempted=(
+                spec.action == "save_post"
+                and curation_gate is not None
+                and curation_gate.get("proceed") is True
+            ),
         )
     except Exception as exc:  # noqa: BLE001 - the click already happened
         # WHERE TO GO AND LOOK, when the verification read itself failed.
@@ -15336,7 +15595,8 @@ async def perform(
         # use makes this block the capture of LinkedIn's confirmation.
         "invitation_after_press": invitation_after_press,
         # WHAT THE CURATION GATE SAW (lane build-net2, N 154), for
-        # ``mark_not_interested`` only: counts and sentences, no author.
+        # ``mark_not_interested`` and ``save_post`` (lane msg7, M C36) only:
+        # counts and sentences, no author.
         "curation_gate": (
             None
             if curation_gate is None

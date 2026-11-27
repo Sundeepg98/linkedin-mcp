@@ -21,7 +21,11 @@ rows (``_audit/_census/network.md``): ``N 79`` and ``N 194`` (a keyword),
 location in one search), ``N 85``, ``N 172`` and ``N 30`` (the connections of
 a member), ``N 31`` (the connections he shares with a member: the member's
 connections narrowed by LinkedIn's ``network`` facet to his own first degree)
-and ``N 81`` (the same facet alone: a people search filtered by degree).
+and ``N 81`` (the same facet alone: a people search filtered by degree). Since
+2026-11-27 (lane net7): ``N 86`` (the followers of a member), ``N 88`` (a
+school), ``N 89`` (an industry), ``N 82`` (people actively hiring) and
+``N 26b`` (his own connections by school or industry: those two beside
+``network``).
 
 ## IT TOUCHES NO PAGE, AND THAT IS THE DERIVATION PROOF
 
@@ -56,6 +60,28 @@ two, off a first-degree profile's topcard (2026-09-28):
                     also ALONE on the connections page, whose value
                     shape is on record nowhere (its skeleton keeps a
                     placeholder), so sent there in the same grammar
+    followerOf      LinkedIn-authored as a JSON LIST, encoded,      MEASURED
+                    ONE member token (session 12's result cards,
+                    51 characters, connectionOf's length there)
+    schoolFilter    LinkedIn-authored BARE only (a job              list DERIVED
+                    collection's people link, 8 digits)
+    industry        LinkedIn-authored BARE only (profile views,     list DERIVED
+                    search appearances: 3 digits)
+    activelyHiring  LinkedIn-authored as a JSON STRING, "true"      MEASURED
+                    (the premium hub, a role-play page)
+
+THE FOUR LAST ARE LANE NET7'S (2026-11-27), AND EACH IS A SECTION TODAY'S
+PANEL DRAWS. Live session 12 opened the All-filters panel on two people
+searches (loads 6 and 32). Its keyed skeletons, LinkedIn's words put back where
+the keyed shape proves them, draw an ``h2`` reading ``Followers of``,
+``Schools``, ``Industries`` and ``Actively hiring``
+(``tests/fixtures/synthetic/live12_people_panel_words.html``,
+``live12_first_degree_panel_words.html``). The panel itself is opened by a press
+no shipped tool may make, so each filter is sent as the address LinkedIn writes
+for it instead. ``facetIndustry`` is on record once, on a notification's link
+beside ``q=``: an older grammar, not sent. The panel's language, volunteering
+and service-category sections are drawn too, and their spellings are on record
+nowhere, so no facet is composed for them.
 
 ``connectionOf`` read ``never LinkedIn-authored; named by a test`` -- DERIVED --
 from 2026-09-24 until the live lane's first-degree capture was read for its
@@ -142,6 +168,15 @@ ORGANISATION_ID = "organisation_id"
 GEO_ID = "geo_id"
 MEMBER_TOKEN = "member_token"
 NETWORK_DEGREE = "network_degree"
+#: LinkedIn's numeric industry code, the digits it writes under ``industry``.
+INDUSTRY_ID = "industry_id"
+
+#: THE ACTIVELY-HIRING SWITCH (census ``N 82``, lane net7): its query key, and
+#: the one value LinkedIn is on record writing for it -- the JSON string
+#: ``"true"`` (the premium hub's and a role-play page's people links). A switch,
+#: not a list, so it is not a row of :data:`FACETS`.
+ACTIVELY_HIRING_KEY = "activelyHiring"
+ACTIVELY_HIRING_VALUE = json.dumps("true")
 
 #: LINKEDIN'S ``network`` FACET, AS THE CAPTURES WRITE IT (census ``N 31``
 #: and ``N 81``, 2026-09-28). Its values are degrees of HIS OWN network, in LinkedIn's
@@ -162,17 +197,28 @@ NETWORK_DEGREES: tuple[str, ...] = ("F", "S")
 #: shared-connections links write them in that order (links 2 and 3 of a
 #: first-degree profile's topcard). It is sent alone too -- the connections
 #: page's link -- since 2026-09-28 17:02: see :func:`compose`.
+#:
+#: LANE NET7'S THREE (2026-11-27) COME AFTER EVERY OLDER FACET, so every
+#: address composed before them is composed byte for byte the same. The
+#: follower facet takes ONE member, for the member facet's reason above. A
+#: school is an organisation, so its id is held to the organisation-id rule.
 FACETS: tuple[tuple[str, str, str, int], ...] = (
     ("current_company_ids", "currentCompany", ORGANISATION_ID, 5),
     ("past_company_ids", "pastCompany", ORGANISATION_ID, 5),
     ("location_ids", "geoUrn", GEO_ID, 5),
     ("network", "network", NETWORK_DEGREE, len(NETWORK_DEGREES)),
     ("connections_of", "connectionOf", MEMBER_TOKEN, 1),
+    ("followers_of", "followerOf", MEMBER_TOKEN, 1),
+    ("school_ids", "schoolFilter", ORGANISATION_ID, 5),
+    ("industry_ids", "industry", INDUSTRY_ID, 5),
 )
 
-#: Every tool argument this module reads, in address order, with its key.
-ARGUMENT_KEYS: tuple[tuple[str, str], ...] = (("keywords", KEYWORDS_KEY),) + tuple(
-    (argument, key) for argument, key, _kind, _most in FACETS
+#: Every tool argument this module reads, in address order, with its key:
+#: the keywords, the facets, and the actively-hiring switch last.
+ARGUMENT_KEYS: tuple[tuple[str, str], ...] = (
+    (("keywords", KEYWORDS_KEY),)
+    + tuple((argument, key) for argument, key, _kind, _most in FACETS)
+    + (("actively_hiring", ACTIVELY_HIRING_KEY),)
 )
 
 #: THE KEYWORD'S LENGTH CEILING IS A BUDGET, NOT A MEASUREMENT. Nothing here
@@ -259,16 +305,49 @@ def _one_id(argument: str, kind: str, text: str) -> dict[str, Any]:
         verdict = company_page.company_identifier(text)
         if verdict.get("identified"):
             return {"ok": True, "value": str(verdict["identifier"])}
+        if argument == "school_ids":
+            source = (
+                "each school must be LinkedIn's NUMERIC organisation id -- a "
+                "school's Page is an organisation, and these are the digits "
+                "LinkedIn writes under schoolFilter -- never a school's name "
+                "or slug, because a slug is a name. "
+            )
+        else:
+            source = (
+                "each organisation must be LinkedIn's NUMERIC id -- the digits "
+                "linkedin_job_detail returns as company_id, or the ones "
+                "linkedin_followed_companies reads off Manage Pages -- never a "
+                "company name or slug, because a slug is a name. "
+            )
         return _refused(
             argument,
             str(verdict.get("refused") or "identifier_refused"),
             text,
-            "each organisation must be LinkedIn's NUMERIC id -- the digits "
-            "linkedin_job_detail returns as company_id, or the ones "
-            "linkedin_followed_companies reads off Manage Pages -- never a "
-            "company name or slug, because a slug is a name. "
-            + str(verdict.get("why") or ""),
+            source + str(verdict.get("why") or ""),
         )
+    if kind == INDUSTRY_ID:
+        # THE GEO ID'S RULE, restated for its own value: the ten ASCII digits
+        # and the same bound. LinkedIn is on record writing three.
+        if not text or not set(text) <= _ASCII_DIGITS:
+            return _refused(
+                argument,
+                "identifier_is_not_numeric",
+                text,
+                "each industry must be LinkedIn's NUMERIC industry code (the "
+                "digits LinkedIn writes under industry), never an industry's "
+                "name: a name is a search of its own. The ten ASCII digits "
+                "only; str.isdigit() is true of other scripts' digits as well.",
+            )
+        if len(text) > MAX_ID_DIGITS:
+            return _refused(
+                argument,
+                "identifier_too_long",
+                text,
+                f"a digit run longer than {MAX_ID_DIGITS} characters is not a "
+                "LinkedIn industry code, and an unbounded run on caller-shaped "
+                "input is a cost nobody chose.",
+            )
+        return {"ok": True, "value": text}
     if kind == GEO_ID:
         if not text or not set(text) <= _ASCII_DIGITS:
             return _refused(
@@ -298,7 +377,7 @@ def _one_id(argument: str, kind: str, text: str) -> dict[str, Any]:
             argument,
             "not_a_member_token",
             text,
-            "connections_of takes LinkedIn's opaque MEMBER TOKEN -- the value "
+            f"{argument} takes LinkedIn's opaque MEMBER TOKEN -- the value "
             "linkedin_connections returns as recipient_id, which opens ACoAA "
             "-- and never a profile address, a slug or a name: a slug is a "
             "name, and OTHER-MEMBER-IDS-AS-READS permits an id, not a name. "
@@ -405,6 +484,26 @@ def validated_keywords(keywords: Any) -> dict[str, Any]:
     return {"ok": True, "text": text}
 
 
+def _switch(argument: str, raw: Any) -> dict[str, Any]:
+    """A switch argument: ``{"ok": True, "on": bool}`` or a refusal.
+
+    A bool is the switch; nothing given (``None`` or ``""``) is off. Anything
+    else is refused rather than read as truthy -- ``"no"`` is a truthy string.
+    """
+    if isinstance(raw, bool):
+        return {"ok": True, "on": raw}
+    if raw is None or raw == "":
+        return {"ok": True, "on": False}
+    return _refused(
+        argument,
+        "not_a_switch",
+        str(raw),
+        f"{argument} is a switch: true or false. Nothing else is read as "
+        "either, because a string that says no is truthy. The value is "
+        "described rather than quoted.",
+    )
+
+
 def compose(
     *,
     keywords: Any = "",
@@ -413,6 +512,10 @@ def compose(
     location_ids: Any = "",
     connections_of: Any = "",
     network: Any = "",
+    followers_of: Any = "",
+    school_ids: Any = "",
+    industry_ids: Any = "",
+    actively_hiring: Any = False,
 ) -> dict[str, Any]:
     """The people-search address for these arguments, or a refusal.
 
@@ -438,6 +541,16 @@ def compose(
     needs no member; it was refused alone until the orchestrator's call of
     2026-09-28 17:02. ``origin`` is never sent, in either shape.
 
+    LANE NET7'S FOUR (2026-11-27), each a section of the All-filters panel
+    session 12 captured open: ``followers_of`` (ONE member's token, as
+    ``connections_of`` takes it: the people who follow that member, census
+    ``N 86``), ``school_ids`` and ``industry_ids`` (``N 88``, ``N 89``; beside
+    ``network="F"``, his own connections by school or industry, ``N 26b``), and
+    ``actively_hiring`` (``N 82``), a switch sent as LinkedIn's JSON string
+    ``"true"``. A list is sent where LinkedIn is on record writing a bare
+    value (``schoolFilter``, ``industry``): DERIVED, and ``landing_verdict``
+    reads a bare landing of the same values as ``same_values``.
+
     PURE: arguments in, a dict out. It reads no page, no file, no clock and
     no network, and it never raises.
     """
@@ -447,6 +560,9 @@ def compose(
         "location_ids": location_ids,
         "network": network,
         "connections_of": connections_of,
+        "followers_of": followers_of,
+        "school_ids": school_ids,
+        "industry_ids": industry_ids,
     }
     pairs: list[tuple[str, str]] = []
     applied: dict[str, int] = {}
@@ -472,6 +588,13 @@ def compose(
             # LinkedIn's faceted grammar: a JSON list of strings, no spaces.
             pairs.append((key, json.dumps(values, separators=(",", ":"))))
         applied[argument] = len(values)
+
+    switch = _switch("actively_hiring", actively_hiring)
+    if not switch.get("ok"):
+        return switch
+    if switch["on"]:
+        pairs.append((ACTIVELY_HIRING_KEY, ACTIVELY_HIRING_VALUE))
+    applied["actively_hiring"] = 1 if switch["on"] else 0
 
     url = BASE_URL + ("?" + urlencode(pairs) if pairs else "")
     return {"built": True, "url": url, "applied": applied}
@@ -585,15 +708,26 @@ def _segments(path: str) -> tuple[str, ...]:
 def _members(key: str, values: list[str]) -> Optional[frozenset[str]]:
     """The set of values one query key carries, whichever spelling it uses.
 
-    A JSON list is read as its members; a bare value as itself; a repeated key
-    as the union. ``None`` when a list cannot be parsed -- which is not the
-    same answer as an empty set, and is reported as ``different_values``.
+    A JSON list is read as its members; a JSON string as its text (the
+    actively-hiring switch's ``"true"``, lane net7); a bare value as itself; a
+    repeated key as the union. ``None`` when a list or a string cannot be
+    parsed -- which is not the same answer as an empty set, and is reported as
+    ``different_values``.
     """
     out: set[str] = set()
     for value in values:
         text = value.strip()
         if key == KEYWORDS_KEY:
             out.add(" ".join(text.split()).casefold())
+            continue
+        if text.startswith('"'):
+            try:
+                parsed_text = json.loads(text)
+            except ValueError:
+                return None
+            if not isinstance(parsed_text, str):
+                return None
+            out.add(parsed_text.strip())
             continue
         if text.startswith("["):
             try:

@@ -151,6 +151,48 @@ def _prose_lines(path):
 #: :func:`test_the_field_is_read_in_exactly_one_module`.
 READER_MODULE = "shape.py"
 
+#: A DIFFERENT FIELD BY THE SAME WORD, DECLARED (lane jobs7, 2026-11-27,
+#: census ``J 169``): the Premium Insights tab's "Notable company alumni"
+#: module, read in ``company_tabs.py`` as people records under
+#: NAMES-AT-RUNTIME -- LinkedIn's own class names
+#: (``org-notable-alumni-card``) and the reader's own fields. It is NOT the
+#: job-card proximity line this file concentrates in :data:`READER_MODULE`.
+#: So the declaration is bounded twice: the word may appear in CODE only
+#: between the two section markers named here, and never beside the
+#: proximity line's own words (:data:`_PROXIMITY_WORDS`) anywhere in the
+#: module. A spread past either bound is a red, as before.
+DECLARED_OTHER_FIELDS: dict[str, tuple[str, str]] = {
+    "company_tabs.py": (
+        "# The Insights tab (Premium), at insightType=HEADCOUNT",
+        "# The Page's posts (J 168), read off the Page ROOT",
+    ),
+}
+
+#: The job-card proximity line's own words and keys, as ``shape.py`` names
+#: them: "1 company alum works here", "4 company alums work here", "school
+#: alumni work here", and the fields ``company_alum`` / ``school_alum``. The
+#: Page module's heading "Notable company alumni" is none of these.
+_PROXIMITY_WORDS = re.compile(
+    r"alum(?:s|ni)?\s+works?\s+here|\b(?:company|school)_alum\b", re.I)
+
+
+def _declared_field_problems(lines, prose, start_marker, end_marker):
+    """Where a declared module names the word outside its section, or names
+    the proximity line's own words at all. Empty when the declaration holds."""
+    starts = [n for n, line in enumerate(lines, 1) if line.startswith(start_marker)]
+    ends = [n for n, line in enumerate(lines, 1) if line.startswith(end_marker)]
+    if len(starts) != 1 or len(ends) != 1 or not starts[0] < ends[0]:
+        return ["the declared section's markers are not found once each, in order"]
+    problems = []
+    for n, line in enumerate(lines, 1):
+        if _PROXIMITY_WORDS.search(line):
+            problems.append("line %d names the proximity line's words" % n)
+        if n in prose or not re.search(r"alum", line, re.I):
+            continue
+        if not starts[0] < n < ends[0]:
+            problems.append("line %d names the word outside its declared section" % n)
+    return problems
+
 
 def test_the_field_is_read_in_exactly_one_module():
     """THIS CHECK WAS INVERTED ON 2026-09-21, WHEN THE READER LANDED.
@@ -206,10 +248,37 @@ def test_the_field_is_read_in_exactly_one_module():
         "census row J 40 rests on has been removed or renamed -- which puts "
         "the row back to a GAP and is a finding, not a pass."
     )
-    stray = sorted({where.split(":")[0] for where in in_code} - {READER_MODULE})
+    stray = sorted({where.split(":")[0] for where in in_code}
+                   - {READER_MODULE} - set(DECLARED_OTHER_FIELDS))
     assert stray == [], (
         "the alumni field is now named in CODE outside %s, in %r. The reader "
         "is meant to be concentrated in one module so the guarantee that no "
         "employer name leaves it can be audited in one place."
         % (READER_MODULE, stray)
     )
+    for module, (start_marker, end_marker) in sorted(DECLARED_OTHER_FIELDS.items()):
+        path = os.path.join(pkg, module)
+        with open(path, encoding="utf-8") as fh:
+            lines = fh.read().splitlines()
+        problems = _declared_field_problems(lines, _prose_lines(path), start_marker, end_marker)
+        assert problems == [], (
+            "%s was declared to name a DIFFERENT alumni field inside one section "
+            "only: %r" % (module, problems)
+        )
+
+
+def test_control_the_declared_field_cannot_hide_a_spread():
+    """SHOWN FAILING on synthetic module text: a declared module that names the
+    word outside its section, or names the proximity line's words, is caught;
+    the same text with the word inside the section is not."""
+    start, end = "# START", "# END"
+    inside = ["x = 1", start, 'CARD = "org-notable-alumni-card"', end, "y = 2"]
+    assert _declared_field_problems(inside, set(), start, end) == []
+    outside = ["ALUMNI = 1", start, end]
+    assert _declared_field_problems(outside, set(), start, end) == [
+        "line 1 names the word outside its declared section"]
+    spread = [start, 'NEEDLE = "school alumni work here"', end]
+    assert _declared_field_problems(spread, set(), start, end) == [
+        "line 2 names the proximity line's words"]
+    assert _declared_field_problems(["ALUMNI = 1"], set(), start, end) == [
+        "the declared section's markers are not found once each, in order"]

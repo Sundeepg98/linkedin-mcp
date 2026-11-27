@@ -7415,6 +7415,8 @@ bytes arrive CRLF here and LF there -- a byte comparison would pass on one and
 fail on the other, which is the local-passes/clone-fails shape this repository
 has paid for once already.
 
+**CORRECTED BY:** `_audit/2026-11-27-masterfix7.md` -- "false on CI" holds for the two ubuntu cells only: the windows cell checks out with `core.autocrlf=true` and reads the same committed bytes as CRLF (master run 46030101439, windows shards 2 and 5). The normalisation above is right on all three cells.
+
 `scripts/_check_audit_index_guard_can_fail.py` is the red proof, and it makes
 the claim the in-test controls cannot: it copies the tree, plants seven defects
 and runs THE REAL PYTEST SELECTOR against each.
@@ -13290,6 +13292,400 @@ contact. Not exercised live: the re-proof's block kept the editor unpressed.
 readers, and the history classifier behind E1's diagnosis. None was shown
 failing on a planted defect.
 
+## 114. A KEY THAT CARRIES DATA IS READ BY ITS GRAMMAR'S SHAPE, AND ONLY WHERE THE LIVE COUNT AGREES (jobs7, 2026-11-27)
+
+Lane jobs7 read live session 12's KEYED skeletons offline -- the session kept no raw page -- and
+built tracked word skeletons from them, then the AI job search's own route, `J 31`'s AI arm and the
+pre-load refusal on the retired classic route over those skeletons. Each instrument below was SHOWN
+FAILING on a planted defect before it was trusted. The record is `_audit/2026-11-27-jobs7.md`,
+sections 2, 3, 5 and 11.
+
+### 114.1 `scripts/_build_jobs7_word_skeletons.py`: words by keyed shape, keys by grammar, two channels
+
+The shipped word-skeleton method (`_build_live11_word_skeletons.build`, a closed word written only
+where `value_shape(word, key)` matched) plus one declared class: a `componentkey` whose value
+carries data -- a posting id, his query words -- is written by its GRAMMAR's shape class (a card
+key is 19 letters, D digits and length 23 + D; the alert key the switch's nearest keyed pair with 9
+digits), only as a nested pair, and only when the number of outer cards EQUALS the session's own
+live reading (`evidence.ai_cards`, taken on the raw page by the shipped regex). SHOWN FAILING, four
+plants, each refused with its own reason while the unplanted build passes: the live count off by
+one ("the two channels disagree"), a declared word the page never drew ("matched no keyed shape"),
+a third copy of a card key ("appears 3 time(s), where a nested pair is required"), a second switch
+("2 input switch(es) on the page").
+
+    A VALUE THAT CARRIES DATA CANNOT BE MATCHED, ONLY ITS SHAPE; SO THE SHAPE IS
+    WRITTEN BACK ONLY WHERE A SECOND CHANNEL COUNTS THE SAME THINGS.
+
+### 114.2 The words fixture differs from its capture only by what was declared
+
+`tests/test_the_ai_search_is_the_search_route.py::test_each_words_fixture_differs_from_its_capture_only_by_declared_words_and_keys`
+(every fixture the builder writes, by `test_every_built_fixture_is_on_disk_and_proved_here`):
+line for line against the committed tracked copy, every differing text a declared word, every
+differing attribute value a declared word or a synthetic key, every differing address segment a
+declared path word. SHOWN FAILING, three plants into a copy, each failing while the committed
+fixture passes: an undeclared name in a title slot, an undeclared component key, an undeclared slug
+in a product's address.
+
+    A FIXTURE BUILT FROM A CAPTURE CARRIES ITS PROVENANCE AS A TEST, OR IT IS
+    SYNTHETIC MARKUP WITH A CAPTURE'S NAME.
+
+### 114.3 Loads and searches counted where the real browser counts them
+
+The `_counted` harness in the same file: loads through `call_ceiling.count_load` inside an armed
+`call_ceiling.per_call` budget, as the real `BROWSER.goto` counts them, and searches by the live
+harness's own D1 counter, `_probe_live_lane_session_2.searches_spent`. SHOWN FAILING: on the code
+before REFUSE-BEFORE-LOAD-ON-A-RETIRED-ROUTE, 12 of 12 refused arguments counted 1 load and 1
+search before refusing (red); the keyword control counts 1 and 1 on both codes, so the zeros are
+readings, not a counter that cannot count.
+
+    A REFUSAL'S COST IS MEASURED BY THE COUNTERS THE BUDGET USES, AND A ZERO NEEDS
+    A CONTROL THAT COUNTS ONE.
+
+### 114.4 An admission's press condition, measured on the shipped gate
+
+`tests/test_the_learning_saved_list_presses_nothing.py`: READ-PAST-AN-ACT-SUBSTRING's condition
+"the press gate still refusing every control" for an admitted page, measured on the shipped gate
+rather than argued. The test checks four things: the write guard's forbidden substrings (none in
+the address); the press gate's composer markers (none); `press.sensitivity_basis` (None for every
+spelling and shape); and `press.evaluate` (each sanctioned shape refused `no_sensitivity_basis`).
+SHOWN FAILING: a planted `/learning/` basis, matched by containment the way `/feed/` reached
+`/feed/hashtag/` (lane msg7's finding), makes the probe answer and lifts the refusal.
+
+    A CONDITION AN ADMISSION RESTS ON IS A TEST OF THE SHIPPED GATE, WITH THE
+    CONTAINMENT THAT ONCE BROKE IT PLANTED AS ITS CONTROL.
+
+### 114.5 A data table is chosen by what it says it counts, never by its column words
+
+`tests/test_the_insights_tables_are_read_by_their_summary.py` runs over session 11's load 19 and
+session 12's load 20. LinkedIn heads its headcount table and its job-openings table with the same
+words, so the reader picks each table by its `summary` alone (`company_tabs.FUNCTION_TABLES`).
+
+SHOWN FAILING on the shipped reader, which picked by header words: **9 failed of 9**.
+
+* On session 11 it returned the openings as employee counts.
+* On load 20 it read no row.
+* On the control page, which draws neither summary, it still read rows by their header words.
+
+On the fix: 9 passed. The control returns both fields empty, each with its closed reason, and a
+summary drawn twice is read from neither copy. The finding that the test now holds was itself
+measured by keyed shape. The summary and the module heading named the table; and for each of the
+10 functions in both tables, the openings count had one or two fewer digits than the headcount.
+
+    TWO TABLES WITH ONE SET OF COLUMN WORDS ARE TOLD APART ONLY BY THEIR OWN
+    LABEL; A READER KEYED ON THE COLUMNS READS WHICHEVER IT MEETS.
+
+### 114.6 DECLARED DISPOSABLE
+
+* **The scratch probes** that measured session 12's keyed skeletons: `kprobe.py`, `kstruct.py`,
+  `khref.py`, `kchip.py`, `klearn.py`, `kprod.py`, `kdiff.py`, `kelem.py`, `kinsight.py`,
+  `kheads.py`, `krows.py`. Each ran with a provenance check (`tracked_copy` equal to the committed
+  copy) and a random-key negative control, which matched 0 of every candidate list it was given.
+  They live in gitignored scratch and answered one question each.
+* **The census, queue, side-table and pin editors**: `census_move.py`, `census_split.py`,
+  `tsv_rows.py`, `tsv_drop.py`, `queue_edit.py`, `queue_add.py`, `nextstep_edit.py`,
+  `set_pins.py`, `ledger5.py`, `allowcount5.py`. Each asserted its own edit and answered one
+  question.
+* **`keep_new_entries.py`**: it keeps the committed reader inventory byte-for-byte and adds only
+  readers the fresh measure found absent from it. It answered this lane's one question: on this
+  box, the writer re-measures four navigating readers as timed out.
+* **The batch runners and the plant scripts.**
+
+## 115. A FILTER THE PANEL DRAWS IS SENT AS THE ADDRESS LINKEDIN WRITES, AND A MATCH CARD IS FOUND BY LINKEDIN'S OWN WORDS (net7, 2026-11-27)
+
+Lane net7's instruments, wave 7 (`_audit/2026-11-27-net7.md`, sections 2, 3,
+5, 7 and 10). Each entered only after it was SHOWN FAILING; the offline probes
+that read session 12's keyed skeletons are declared disposable (115.6).
+
+### 115.1 The live-12 word fixtures (`scripts/_build_live12_net7_word_skeletons.py`)
+
+Six fixtures from session 12's KEYED skeletons -- the two open people panels,
+the Premium matches page, the received tab's pills and his connections page --
+LinkedIn's words put back only where the keyed shape proves them, through the
+base builder's `build()` (imported): a declared word that matches nowhere
+refuses, and the base copy must equal the committed capture or the build
+refuses. SHOWN FAILING: `tests/test_live12_net7_word_fixtures.py`, each
+fixture with its control word off the list leaves a difference nothing
+explains (6 of 6).
+
+    A WORD IS WRITTEN ONLY WHERE ITS KEYED SHAPE MATCHED, AND THE INPUT IS
+    SHOWN TO BE THE CAPTURE THE REPOSITORY HOLDS.
+
+### 115.2 Four facets on the people search (`people_search.FACETS`, `ACTIVELY_HIRING_KEY`)
+
+`followerOf`, `schoolFilter`, `industry` and the `activelyHiring` switch, each
+after every older facet so no earlier address changes; `landing_verdict` reads
+a JSON string as its text. SHOWN FAILING: `tests/test_net7_people_search_facets.py`
+on the unchanged code, 17 failed and 5 passed (the premises); five facet
+mutations, each RED (115.5).
+
+    A FILTER BEHIND A PRESS NO TOOL MAY MAKE IS SENT AS THE ADDRESS LINKEDIN
+    WRITES FOR IT, AND ITS LANDING SAYS WHAT LINKEDIN KEPT.
+
+### 115.3 The Premium matches reader (`premium_matches.read_matches`)
+
+A card is a job link whose line opens `Hiring for` -- matched in the page --
+and its nearest block holding a member link; every card pinned to a handle
+before any text, its link read again after. SHOWN FAILING: the tracked copy,
+LinkedIn's words reduced to `x`, finds no card and raises
+(`tests/test_premium_matches.py`); six reader mutations, each RED (115.5).
+
+    A CARD IS FOUND BY LINKEDIN'S OWN WORDS, NEVER BY ITS PLACE AMONG CARDS.
+
+### 115.4 The near misses of two admissions (`tests/test_net7_admissions.py`)
+
+`/mynetwork/discovery-see-all/` and `/mynetwork/invitation-manager/received/`,
+each one anchored line; each held by its address admitted, every near miss --
+a query, a sub-path, a longer word, a sibling page, a traversal, plain http --
+refused, and its exemption exactly the substrings it trips. SHOWN FAILING:
+before each line, 3 failed and 9 passed, then 4 failed and 7 passed.
+
+    AN ADMISSION IS SHOWN ANCHORED BY WHAT IT STILL REFUSES.
+
+### 115.5 The mutation pass (disposable runner)
+
+Eleven mutations, each weakening one check of 115.2 or 115.3, each run against
+the test that should catch it: 11 of 11 RED as FAILED tests (none an error),
+both files restored byte for byte. The table is the record's section 7.
+
+### 115.6 Declared disposable
+
+The keyed-shape probes in the lane's gitignored scratch -- the word counter and
+outline printer, the three pill brute-forcers, the at-line tester, the
+href-form and href-word readers, the N 24 measurement -- and the census,
+queue, ledger, pin and tool-table edit scripts and the mutation runner. Each
+read the live lane's preserved keyed skeletons or this worktree and printed
+counts or closed words only. Added in the fix round: the merged-tree
+refused-address probe (the record's section 10.5), which wraps the shipped gate
+and never edits it, and the curation-receipt mutation runner (115.7).
+
+### 115.7 The curation receipt reads a change (`feed_curation.verification_verdict`)
+
+FEED-CURATION-RECEIPT-NEEDS-A-CHANGE, the shape of lane msg7's fix to the save
+receipt (its section 116). The receipt of `linkedin_mark_not_interested` (census `N 154`)
+takes the gate's reading, made just before the `Not interested` press, as its
+baseline. Hidden only when the page's main draws more undo controls than the
+gate counted there, a new undo beside the item; the menu still open with
+nothing changed is not landed; a refused gate is not pressed; anything else is
+unverified. Each sentence opens with its closed word (`feed_curation.OUTCOMES`).
+SHOWN FAILING: `tests/test_mark_not_interested.py`, its new tests on the
+lane's certified module, 7 failed and 10 passed. Six failed on the defect
+itself: an undo already on the page read hidden, beside the item or outside
+the main, and so did the menu left open beside one, a new undo outside the
+main, and a refused gate beside one, which read performed: true with only the
+trigger pressed. One failed on the new API, and both controls passed. Green:
+17 passed. Eight mutations, each killed by FAILED tests, none by an error (the
+record's section 13.3).
+
+    A RECEIPT READS A CHANGE THE PRESS MADE, NEVER A PRESENCE THE PAGE
+    ALREADY HAD.
+
+## 116. A READ IS CHOSEN BY THE DESIGN THE PAGE DRAWS, AND A SECOND PRESS IS ONE THE OWNED MENU NAMES EXACTLY (msg7, 2026-11-27)
+
+Lane msg7's instruments, wave 7, built offline on live session 12's captures.
+Each was SHOWN FAILING before it was trusted, in one of two ways: on this
+lane's tree with the change withheld, or by a mutation the lane then reverted.
+The record is `_audit/2026-11-27-msg7.md`, sections 3.3, 3.4 and 7.4. The
+number is the wave's assignment (sections 114 to 119, one per lane).
+
+### 116.1 `tests/test_msg7_admissions.py` -- one anchored line per address, every sibling still refused
+
+Lane admit26's harness, applied unchanged to `/my-items/saved-posts/`
+(ADMIT-NOW-LANDING-IN-SESSION-14). It checks:
+* the address is admitted through the shipped gate;
+* exactly one anchored line carries it, with no wildcard;
+* it trips no forbidden substring and needs no exemption;
+* twelve siblings are each refused on the gate that names them;
+* the proven rollback;
+* the blast radius, measured on concrete urls before and after.
+
+SHOWN FAILING: 4 of 8 red on the tree without the line (the admission, its
+one line, the rollback and the blast radius). With the line, 8 passed.
+
+### 116.2 `tests/test_notification_cards.py` -- the server-driven page read where its screen is drawn, the old design kept as the control
+
+`linkedin_server/notification_cards.py` is held over session 12's tracked
+`/notifications/`, and session 5's old-design page is the control. The
+control's harvest reads 9 of 9 throughout; its envelope test was red at the
+unwired step, for want of `page_design`. Both run in a local engine with
+every request aborted.
+What it holds:
+* ten cards, each with its time from beside its one `aria-expanded` trigger;
+* `unread` None, never False;
+* ten rows through `linkedin_notifications` itself;
+* seven job-alert rows publishing ONE link (`M C97`'s key);
+* a link labelled from outside itself is no card;
+* the old selectors alone read nothing on the server-driven page;
+* the side_effect sentence says what each design reports: no per-row unread
+  flag on the server-driven design.
+
+SHOWN FAILING:
+* an ImportError without the module;
+* 4 of 10 red with the certified module and the server unwired, on the
+  tool's own "nothing readable found" over session 12's page and the
+  control's missing `page_design` (the first draft ran 5, its own time
+  defect the fifth);
+* the side_effect test red on 5beac57's server, which claimed a per-row
+  unread flag the server-driven rows do not carry;
+* two mutations of the module, each red on the test named for it: the label
+  looked up page-wide, and unread reported False.
+
+    A READER CHOOSES ITS DESIGN BY WHAT THE PAGE DRAWS, NEVER BY ASSUMING
+    WHICH ONE IT IS, AND THE OLD DESIGN STAYS ITS CONTROL.
+
+### 116.3 `tests/test_save_post.py` -- the second press is one the owned menu names exactly
+
+`save_post` (census `M C36`) is held over session 11's permalink capture and
+its menu words, and its readers are shown on session 12's member and Page
+permalink menus. What it holds:
+* the preview mints only on the permalink of the urn named;
+* the controls: writes off, another item, and a second use;
+* two presses, and an in-place reading decides;
+* a press that leaves nothing reads unknown, never "not saved";
+* an unowned menu is never pressed;
+* an item already saved (`Unsave` in `Save`'s place) is pressed no further
+  than its trigger;
+* a saved reading is a CHANGE this press made (SAVE-RECEIPT-NEEDS-A-CHANGE):
+  a new region, or the menu flipping to `Unsave`. A region already on the
+  page, a refused gate or the menu left open never reads saved.
+
+SHOWN FAILING:
+* an ImportError;
+* "not a sanctioned write";
+* 2 of 11 red without the tool (4 before the harness's viewport was made tall
+  enough for the unstyled menu);
+* three mutations of `linkedin_server/feed_save.py`, each red on behaviour:
+  * the owned-menu check dropped;
+  * any reading counted saved;
+  * `Save` matched by substring.
+
+  For the third, a quoted name in Playwright's `role=` engine never matches as
+  a substring (measured), so the faithful mutant is the regex
+  `name=/save/i`, which reaches `Unsave`.
+* THE FIX ROUND: 5 red on a clean copy of 5beac57, four on behaviour (a stale
+  region read saved, beside an unlanded press, beside the menu left open, and
+  beside a refused gate; the menu's flip unread) and the pure verdicts on
+  their signature; then four mutations of the new verdict (record s3.5).
+
+    A PRESS AIMED BY A WORD IS AIMED BY THE WHOLE WORD: "SAVE" IS A
+    SUBSTRING OF "UNSAVE", AND A SAVED ITEM WOULD BE UNSAVED. AND A
+    RECEIPT READ IN PLACE READS A CHANGE, NEVER A PRESENCE.
+
+### 116.4 Declared disposable
+
+These were never shown failing as instruments, so none of them enters:
+* the scratch probes in the lane's gitignored
+  `_state/lane-scratch/msg7/probes/`: the keyed-shape matcher `kdom.py` and
+  probes 1 to 8;
+* the census editors and re-pin scripts;
+* the three mutation scripts;
+* the two page-string baseline measurers. Each imports the guard's own
+  `drive()`.
+
+## 117. A LANDING IS JUDGED WHERE THE PAGE ARRIVES, AND A DRAWN TARGET IS PRESSED ONLY WHEN IT IS EXACTLY AN ADDRESS THIS REPOSITORY FORMED (prof7, 2026-11-27)
+
+Lane prof7's two instruments, each SHOWN FAILING before it was trusted. The
+record is `_audit/2026-11-27-prof7.md`, sections 1 and 2.
+
+### 117.1 The rewriting page: a page that moves its own address after a delay
+
+`tests/test_self_profile_waits_for_the_rewrite.py`. A local page served AT the
+self alias `/in/me/`, its markup session 11's tracked landing, whose own
+script moves its address with `history.replaceState` after one second -- the
+same-document change the live lane's session 12 found in the browser's
+history (E1). It drives the SHIPPED self-profile loader through all three of
+its callers, the press gate and the live harness's press step; the controls
+(the alias never moving, moving after the bound, to the feed, beneath a root,
+to another member's path, another member's profile at his path, onto the
+signed-out wall) refuse on both trees. SHOWN FAILING: 28 red on the unfixed
+tree, the loader's callers refusing `self_assertion_unreadable` after two
+loads with `landed_on_member_path` false -- session 12's E1, reproduced
+offline -- and the press gate pressing before the page arrived.
+
+    A LANDING READ BEFORE THE PAGE HAS ARRIVED IS A READING OF THE WRONG
+    PAGE. WAIT, BOUNDED, ON THE ADDRESS -- AND JUDGE WHERE IT LANDS.
+
+### 117.2 The ONE exact-match verdict, and the thirteen mutants that prove its guards
+
+`linkedin_server/volunteering_route.exact_link_verdict` (and `match_verdict`,
+which forms his volunteering address and hands it over) and
+`tests/test_volunteering_fallback_boundary.py`. A target the page drew -- an
+href, a menu item's declared address -- is a press target only when its RAW
+string, never normalised, is EXACTLY the address readonly.py admits for that
+line, its only equivalences the admission's own query and `me` for the proven
+member, no case folded (EXACT-MATCH-REFUSES-ANY-WHITESPACE, 2026-11-27 17:20):
+any whitespace, control, character outside printable ASCII, or percent escape
+of whitespace or a control refuses first. Its answer is one of eleven closed
+words; the formed address never reaches a log, an exception or a verdict.
+SHOWN FAILING: the cold verifier's lookalikes (a leading U+00A0, a trailing
+U+3000, U+00A0 or U+0085, a tab, a newline) read `match` on the first version,
+41 tests red; and thirteen planted mutants (a disposable pytest plugin in the
+lane's scratch), each disabling ONE guard -- the shape check, the id
+comparison, the argument, the one-parameter rule, the no-log rule, a Unicode
+fold, the boundary line's id shape, a strip, the character clause, the
+percent clause, a case fold, the admitted-address clause, the query's
+exactness -- each caught by FAILED tests, none by an error.
+
+    THE PAGE MAY VETO A PRESS. IT NEVER SUPPLIES THE ADDRESS, AND A MATCH IS
+    NEVER A FOLLOW.
+
+**Disposable** (the lane's scratch folder): the keyed-shape scanner of his
+root's entries, the creator-hub path-word matcher, and the queue and
+next-step editors. None was shown failing on a planted defect.
+
+## 118. A SETTINGS PAGE IS READ BY THE WORDS ITS OWN CAPTURE DREW, MEASURED BY KEYED SHAPE, AND A PAGE IT LINKS IS ADMITTED ONLY ON THE SPELLING THE CAPTURE DREW (settings7, 2026-11-27)
+
+Lane settings7 read four of session 12's settings captures offline and built
+two readers, three admissions and the re-aims of eleven rows on them. Every
+word a reader or an admission rests on was MEASURED on a keyed skeleton by
+keyed shape -- a LinkedIn word is "drawn" only where its keyed shape equals
+the skeleton's -- and committed as a words fixture held to its tracked copy.
+The record is `_audit/2026-11-27-settings7.md`.
+
+    A PAGE'S OWN WORDS ARE MEASURED, NEVER ASSUMED: A CANDIDATE IS DRAWN ONLY
+    WHERE ITS KEYED SHAPE MATCHES, AND A SHAPE THAT FITS IS NOT A MATCH.
+
+The second half was measured twice: the Data privacy page's entry 5 has the
+25-letter, 28-character shape `synced-and-imported-contacts` has, in both its
+slug and its label, and its hash is something else; entry 12 has the shape of
+`blocked-members` and is `recruiter-calls`.
+
+### 118.1 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `scripts/_build_live12_settings_word_skeletons.py` (the provenance of `tests/fixtures/live12/{privacy,verifications,job_prefs,premium_manage_account}_words.html`) | a declared word planted that no capture drew -- the build refuses, writing nothing ("1 declared word(s) matched no keyed shape; refusing"); a fixed point (`--check`: all four match on a second run) |
+| `scripts/_build_live11_settings7_word_skeletons.py` (the provenance of `tests/fixtures/live11/sessions_surface_words.html`) | the builder pointed at a committed copy that is not the skeleton's tracked copy -- it refuses ("this skeleton's tracked copy is not the committed one"); a fixed point (`--check` matches) |
+| `tests/test_live12_settings_word_fixtures.py`; `tests/test_live11_settings7_word_fixture.py` | each holds its fixtures to the tracked copies token by token, and each carries its own control: another page's words leave the differences unexplained, and the comparison fails. Besides: the verification's detail lines, his purchase id, the premium card's two lines and the six job cards are asserted to stay as the tracked copy draws them; the contacts link is asserted drawn with its label |
+| `tests/test_verifications_page.py`; `linkedin_server/verifications_page.py` | against a stub reader returning the empty shape, 16 failed and 5 passed (the five landings that must be refused); green 21 passed. Inside: a planted marker in the detail lines and the switch's name never leaves; an unmeasured kind is counted and never named; `Off` reads off and any other word unknown; a second switch reads unknown; a container of two entries is withheld and the zero raises |
+| `tests/test_premium_account.py`; `linkedin_server/premium_account.py` | against a stub reader, 11 failed and 6 passed; green 17 passed. Inside: a planted dated line is counted as carrying a digit and its words, date and marker never leave; an unmeasured plan and an unmeasured control are counted and never named; no address the card draws is returned |
+| `tests/test_settings7_admissions.py` (lane admit26's harness, extended to an exempted admission) | each admission red first on the boundary before its line: search history 4 failed, data download 4 failed, contact syncing 6 failed (its first gate alone refusing with the pattern-would-admit sentence); green 24 passed. Its FIRST red run also failed a sibling check before any edit -- the settings-tree spelling is refused by `/settings/`, the first substring in order, not `settings` -- the test's own defect, caught because a red-first run may fail only the checks the edit is to turn green |
+| `tests/test_settings7_admissions.py::test_the_press_gate_refuses_every_control_on_the_page` (READ-PAST-AN-ACT-SUBSTRING's third condition, measured offline at the orchestrator's addendum) | a `/mynetwork/` containment basis planted in `press.SENSITIVITY_BASES` turns it red for the contact-syncing page; its control asserts the feed is priced and that the plant reaches the page; green on the shipped table |
+
+### 118.2 DECLARED DISPOSABLE
+
+The lane's scratch probes (`_state/lane-scratch/settings7/`): the keyed-word
+probes for sessions 12 and 11 (matched candidates and counts only), the two
+combination searches over a closed vocabulary and over 4921 words harvested
+from the census prose, the shape printers for the verifications and premium
+pages (interface texts only, the verification's detail lines skipped), the
+structural outliner over tracked copies, the census editors and the
+harness extender, and the script that showed both builders refusing. None was
+shown failing on a planted defect except the last, which is the demonstration
+itself.
+
+AFTER THE COLD VERIFICATION (2026-11-27): the dialog's keyed-shape probe
+(`probe_dialog.py`: the open `<dialog>` on session 12's job-preferences
+capture, matched candidates and letters/length counts only; its wrong-key
+control matched 0 where the real key matched 9) and the generated-candidate
+search over its unmatched slots (`brute_dialog.py`, which ran past its
+15-minute bound and printed nothing) are DECLARED DISPOSABLE.
+
+### 118.3 ADDED AFTER THE COLD VERIFICATION
+
+| path | shown failing by |
+|---|---|
+| `tests/test_verifications_page.py::test_two_consent_sections_read_as_several_never_as_none`, `::test_a_consent_count_that_cannot_be_read_says_unread_never_none`, `::test_each_consent_reading_is_a_closed_word_and_none_means_no_section`; `linkedin_server/verifications_page.py` (`CONSENT_READINGS`) | the cold verification's F3: before the fix, two planted consent sections and a section count that raises each read `None`, the word for "no consent section" (2 failed by assertion, `assert None == ...`; the third by the missing closed tuple): 3 failed, 21 passed; after, 24 passed |
+
 ## 119. ONCE A PRESS HAS CHANGED A VIEW, EVERY EXIT RESTORES IT OR STOPS EVERYTHING, AND EVERY DOCUMENT A PRESS LOADS IS A LOAD (live-s13, 2026-11-27)
 
 The live lane's session-13 runner (`runner_s13.py`, kept in the main
@@ -13362,3 +13758,30 @@ document); the suspect-ledger STOP-ALL (no count failed).
 **Disposable** (the lane's scratch folder and the reviewer's): the toolbar and
 ledger readers, the patch scripts, the verdict matrix, the reviewer's probes.
 None was shown failing on a planted defect.
+
+## 120. A FIXTURE'S LINE ENDS ARE READ AS COMMITTED, AND A TIMED WORLD RUNS ON A CLOCK THE TEST HOLDS (masterfix7, 2026-11-27)
+
+Lane masterfix7 made master CI green again after integration 7. Four cells of
+master run 46030101439 failed on three causes: two were repaired at their
+cause, and the third, a starved Windows runner, was measured and left. The
+record is `_audit/2026-11-27-masterfix7.md`.
+
+    A TEST THAT READS COMMITTED BYTES READS THE CHECKOUT, AND A ZERO-WAIT TEST
+    AGAINST A TIMED WORLD RACES THE RUNNER. RENDER THE CRLF CHECKOUT IN THE
+    TEST, AND HOLD THE PAGE'S CLOCK WHILE THE GATE READS.
+
+### 120.1 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `tests/test_live12_settings_word_fixtures.py::test_a_crlf_checkout_of_each_fixture_opens_the_same`; `tests/test_live11_settings7_word_fixture.py::test_a_crlf_checkout_of_the_fixture_opens_the_same` (the committed bytes written as `core.autocrlf` writes them, held to the provenance check) | before `_as_committed` read CRLF as LF: 5 failed on an LF checkout, and the same 5 on a CRLF one beside the 5 on-disk checks; after, 27 passed on each |
+| `tests/test_group_composer.py::test_the_refusal_without_the_wait_holds_on_a_runner_slower_than_the_lag` (every composer reading held back 0.3 s of real time) | before the page's clock was held: 2 of 2 failed, `assert True is False` on `proceeded`, on py3.13 and on py3.10; after, 18 passed in the file |
+| the lateness check in `tests/test_group_composer.py::_refused_without_the_wait` (after the receipt, the clock run on by the world's lag draws the composer, or turns Post on) | the clock run on 1 ms short: 4 of 4 failed at that check |
+
+### 120.2 DECLARED DISPOSABLE
+
+The lane's scratch tools (`_state/lane-scratch/masterfix7/tools/`): the per-test
+and per-file duration readers over the shard reports' junit XML, and the
+page-clock probe. None was shown failing on a planted defect. The method is
+kept in the record's section 4.2: both attempts' shard reports, the same
+commit and plan, compared file by file.

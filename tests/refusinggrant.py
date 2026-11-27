@@ -153,7 +153,9 @@ SYNTHETIC_RAW_TARGETS: dict[str, Any] = {
     # ``_target_for`` re-derives and refuses in any other spelling. Missing,
     # the KeyError stopped every writes reader being driven for ANY spec --
     # measured on that lane's first local run, as the rows above record.
-    "job_search": "keywords=example+harness+search&location=example+harness+place",
+    # Keywords alone since lane jobs7's AI arm (2026-11-27): a place is refused
+    # until the AI route's place is measured (capture C-SRCH-2).
+    "job_search": "keywords=example+harness+search",
     # HIS ANSWER (the recommendations feedback, lane build-jobs2, 2026-11-26):
     # one of the two closed words ``job_feedback.canonical_answer`` admits.
     "recommendations_feedback": "no",

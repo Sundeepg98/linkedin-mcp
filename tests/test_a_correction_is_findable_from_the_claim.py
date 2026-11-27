@@ -342,6 +342,32 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "MAKE THIS ENTRY WRONG:** a jobs row saying that ruling's text is stale "
         "while leaving its document unmarked."
     ),
+
+    # 2026-11-27, lane jobs7. READ, not inferred from the filenames: the
+    # notes are this lane's own, one per row it moved (`J 1`, `J 20`, `J 31`,
+    # `J 40`) or re-aimed (`J 56`, `J 71`, `J 72`, `J 152`, `J 154`, `J 156`,
+    # `J 169`, `J 170`).
+    ("jobs.md", "2026-11-27-jobs7.md"): (
+        "CENSUS MOVES AND RE-AIMED STEPS CITING THE LANE'S RECORD, NOT A "
+        "CORRECTION OF IT. Each row's one dated note cites the record as its "
+        "evidence; none says anything in that record does not hold. The matched "
+        "words are OLDER TEXT: TABLE-ROW PROXIMITY to `J 18`'s 2026-09-23 note "
+        "two lines above `J 20` ('THE ROW WAS PRICED ON THE WRONG ADDRESS'), "
+        "and `J 40`'s own 2026-09-21 history in the same cell ('THIS PROBE'S "
+        "OWN CORRECTED DEFECT', 'wrong by one'). **WHAT WOULD MAKE THIS ENTRY "
+        "WRONG:** a jobs row saying something in the lane's record does not "
+        "hold while leaving the record unmarked."
+    ),
+    ("profile.md", "2026-11-27-jobs7.md"): (
+        "THREE RE-AIMED STEPS CITING THE LANE'S RECORD, NOT A CORRECTION OF IT. "
+        "`P M1`, `P M3` and `P M4` each gained one dated note citing the record "
+        "for the resume menu session 12 drew; none says anything in that record "
+        "does not hold. The matched words are `P M1`'s OWN 2026-09-20 HISTORY in "
+        "the same cell ('which has been false since 2026-09-04', 'a stale clause "
+        "beside a live one'), about that row's earlier upload clause. **WHAT "
+        "WOULD MAKE THIS ENTRY WRONG:** a profile row saying something in the "
+        "lane's record does not hold while leaving the record unmarked."
+    ),
     ("messaging-and-content.md", "2026-11-26-live-session-12.md"): (
         "A CENSUS MOVE UNDER A REGISTERED RULING, NOT A CORRECTION OF THE RECORD. "
         "Row `C41` gained one dated note citing the session record's E1, loads 1 "
@@ -508,6 +534,35 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "**WHAT WOULD MAKE THIS ENTRY WRONG:** a note of this lane saying an "
         "earlier paragraph of its row was untrue while leaving it unmarked."
     ),
+    # 2026-11-27, lane net7. READ, not inferred from the filenames: every
+    # network.md line citing the lane's record was listed with the guard's own
+    # vocabulary and window and every match placed; none is in a paragraph of
+    # this lane.
+    ("network.md", "2026-11-27-net7.md"): (
+        "EIGHT MOVES AND FIFTEEN NOTES, NOT A CORRECTION. Rows 82, 86, 88, "
+        "89 and 26b gained the paragraph that moves them GAP -> COVERED-UNFIRED "
+        "on four people-search facets, row 199 the paragraph that moves it GAP "
+        "-> COVERED-UNFIRED on its reader, and in the lane's round 2 rows 93 and "
+        "27 the paragraph that moves them GAP -> MEASURED-ABSENT on the "
+        "orchestrator's rulings; rows 14, 22, 24, 28, 32, 62, 90, 91, 92, 97, "
+        "98 and 110 each gained one note naming the step session 12's capture "
+        "or a ruling now gives them, and rows 13, 15 and 16 one note each on "
+        "the received leaf their landing check now accepts (no correction "
+        "word stands within the window of those three, nor of row 199); three "
+        "DELTA paragraphs name the record. Each "
+        "cites this record and none says an earlier paragraph of its row was "
+        "untrue (row 26b's names lane S's 2026-09-28 sentence as contradicted "
+        "by that lane's own table and leaves it as written). Every matched "
+        "word is older text in the rows' own cells or their neighbours: "
+        "'returns False' for `reachable_by_this_route` and 'BLOCKER CORRECTED "
+        "2026-09-21' in rows 84 to 92, row 83's 'CORRECTED 2026-09-21', "
+        "'False' in rows 80 and 81, row 33's 'CORRECTED', 'false', 'refutes' "
+        "and 'wrong' beside row 32, row 63's 'correction' and 'false' beside "
+        "row 62, and row 99's 'false' and 'overturn' and row 100's "
+        "'correction' beside rows 97 and 98. **WHAT WOULD MAKE THIS ENTRY "
+        "WRONG:** a paragraph of this lane saying an earlier paragraph of its "
+        "row was untrue while leaving it unmarked."
+    ),
     ("network.md", "2026-09-28-lane-k-ledger.md"): (
         "THIS LANE'S NOTES CITE LANE K'S RECORD AS WHERE THEIR QUESTIONS LIVE, "
         "NOT AS A DOCUMENT THEY CORRECT. Rows 6, 40 and 200 each name the "
@@ -537,6 +592,27 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "with its 'mistake', 'stale' and 'false', and row C54's 'corrected' "
         "beside it. **WHAT WOULD MAKE THIS ENTRY WRONG:** this lane's note "
         "saying the row's earlier text was untrue."
+    ),
+    # 2026-11-27, lane settings7: its notes on profile rows K1, K7, N22, N32,
+    # O22, P3, I12 and I13 cite its record. Read, not inferred, three hits:
+    # K7's note, within the window of words two neighbours wrote ('false',
+    # not K7's own), and I12's and I13's, whose own 'refuted' reports an
+    # in-place replacement after the cold verification.
+    ("profile.md", "2026-11-27-settings7.md"): (
+        "TABLE-ROW PROXIMITY, NOT A CORRECTION. Row K7 gained one note -- the "
+        "Delete drawn by name on session 12's capture, measured offline to "
+        "declare no popup, and held by the orchestrator's answer to "
+        "Q-VERIFICATION-DELETE -- citing this record. The matched word is "
+        "'false', in its neighbours K8 ('\"NO REASON\" IS FALSE', a 2026-09-21 "
+        "note on that row's own reading) and K10 ('return False' and 'false "
+        "on 6', about that row's badge reader), two rows this lane did not "
+        "write. Rows I12 and I13 gained, later the same day, a note saying "
+        "this lane's own first reading of the job-preferences load ('no "
+        "dialog') was refuted by the cold verification and is replaced IN "
+        "PLACE, in those rows and in the record's sections 1 and 2.3 alike: a "
+        "report about documents that already carry their correction in place. "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** a profile row saying "
+        "this lane's record does not hold, while leaving the record unmarked."
     ),
     ("profile.md", "2026-11-25-build-p26.md"): (
         "A LEDGER NOTE AND ONE MOVE, NOT A CORRECTION. Rows A11, A13, A14, "
@@ -3670,6 +3746,90 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "`176` withdraws nothing from the lane record. **WHAT WOULD MAKE THIS "
         "ENTRY WRONG:** row `176` or `114` asserting that something the lane "
         "record says is mistaken while leaving the record untouched."
+    ),
+
+    # 2026-11-27, lane msg7. READ, not inferred from the filenames: each line
+    # citing the lane's record was read with the matched words in its window.
+    ("messaging-and-content.md", "2026-11-27-msg7.md"): (
+        "A ROW'S MOVE OR NEXT STEP RECORDED, NOT A CORRECTION OF THE CITED "
+        "RECORD. Rows `C47`, `C44`, `C46`, `C50`, `C78`, `C81`, `C36`, `C37`, "
+        "`C70`, `C39` and `C97` each gained one dated note citing lane msg7's "
+        "record -- session 12's readings of the article composer, the feed's "
+        "saved-items link, the content search's filter panel, the metric "
+        "selector and the notifications page, `C70`'s move to MEASURED-ABSENT, "
+        "and each row's answered next step -- and none says anything in that "
+        "record does not hold. The matched words are older text in the same "
+        "rows: `C36`'s own 2026-09-19 'COST CORRECTED', and in `C50`, `C81` the "
+        "lane's note calling the cell's OWN earlier DERIVED premise wrong. That "
+        "premise is lane readers-msg26's, and the correction of it is DECLARED "
+        "between the two records (`CORRECTS:` in lane msg7's, `CORRECTED BY:` "
+        "in readers-msg26's section 6). **WHAT WOULD MAKE THIS ENTRY WRONG:** a "
+        "messaging-and-content row asserting that something lane msg7's record "
+        "says is mistaken while leaving the record unmarked."
+    ),
+    ("network.md", "2026-11-27-msg7.md"): (
+        "A ROW'S NEXT STEP RECORDED, NOT A CORRECTION. Rows `37`, `43`, `51` and "
+        "`59` each gained one dated note citing lane msg7's record -- session "
+        "12's item menus and the hashtag search, and each row's answered next "
+        "step -- and none withdraws anything in it. The matched words are the "
+        "rows' own older text (row `37`'s 2026-09-27 'RESTATED' paragraph, "
+        "which corrects lane L8's key, not this record). **WHAT WOULD MAKE "
+        "THIS ENTRY WRONG:** a network row asserting that something lane msg7's "
+        "record says is mistaken while leaving the record unmarked."
+    ),
+    ("profile.md", "2026-11-27-msg7.md"): (
+        "A ROW'S NEXT STEP RECORDED, NOT A CORRECTION OF THE CITED RECORD. Row "
+        "`L3` gained one dated note citing lane msg7's record -- the author "
+        "toggle's open form and `Manage`'s `Create newsletter` -- and corrects "
+        "nothing in that record. The matched word is the row's own 2026-09-21 "
+        "sentence ('no published cell is false of any of them'). The note's "
+        "reading does refute readers-msg26's DERIVED toggle premise quoted in "
+        "the same cell, and that correction is declared between the two "
+        "records. **WHAT WOULD MAKE THIS ENTRY WRONG:** a profile row asserting "
+        "that something lane msg7's record says is mistaken while leaving the "
+        "record unmarked."
+    ),
+
+    # 2026-11-27, integration 7. READ, not inferred from the filenames: each
+    # citing line was read with the matched words in its window.
+    ("2026-11-27-integration-7.md", "2026-11-27-prof7.md"): (
+        "A HEAD READ BY SHA, NOT A CORRECTION. The citing line measures that "
+        "prof7's branch head changes only its record over the certified sha. "
+        "The matched word is 'supersedes', which says that sha replaced the one "
+        "the cold verifier read, on the lane's own fix round. Nothing in "
+        "prof7's record is withdrawn. **WHAT WOULD MAKE THIS ENTRY WRONG:** the "
+        "integration record asserting that something prof7's record says is "
+        "mistaken while leaving the record unmarked."
+    ),
+    ("2026-11-27-integration-7.md", "2026-11-27-settings7.md"): (
+        "A HEAD READ BY SHA, NOT A CORRECTION. The citing line measures that "
+        "settings7's branch head changes only its record over the certified "
+        "sha. The matched words ('REFUTED', 'supersedes') report the cold "
+        "verifier's finding and the lane's OWN fix of it, which the lane's "
+        "record carries itself (its fix-round commits). The integration record "
+        "corrects nothing in it. **WHAT WOULD MAKE THIS ENTRY WRONG:** the "
+        "integration record asserting that something settings7's record, as "
+        "merged, says is mistaken while leaving the record unmarked."
+    ),
+    ("2026-11-27-rulings-integration-7.md", "2026-11-27-jobs7.md"): (
+        "RULINGS QUOTED FROM THE LANE'S RECORD, NOT A CORRECTION OF IT. The "
+        "citing line names the record that quotes the orchestrator's 13:45, "
+        "14:05 and 14:30 notes. The matched word is 'corrected', in 'the 14:05 "
+        "note corrected both', meaning the orchestrator's corrected rulings, "
+        "which the lane's record applies and quotes itself (its section "
+        "11.5). **WHAT WOULD MAKE THIS ENTRY WRONG:** the rulings record "
+        "asserting that something jobs7's record says is mistaken while "
+        "leaving the record unmarked."
+    ),
+    ("jobs.md", "2026-11-27-integration-7.md"): (
+        "A ROW'S MOVE RECORDED, NOT A CORRECTION OF THE CITED RECORD. Rows "
+        "`111` and `176` each cite the integration record for "
+        "J111-SPLITS-PRODUCTS-FROM-SERVICES, the split and the move it "
+        "applied. The matched words are older text in row `111`'s own cell. "
+        "Neither row says anything in the record does not hold. **WHAT WOULD "
+        "MAKE THIS ENTRY WRONG:** a jobs row asserting that something the "
+        "integration record says is mistaken while leaving the record "
+        "unmarked."
     ),
 
 }

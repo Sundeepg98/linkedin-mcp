@@ -186,6 +186,12 @@ DECLARED: dict[tuple[str, str], tuple[str, int]] = {
     # an uncorroborated zero -- no Life module drawn. Handed a page and never
     # a url; the landing described in the hint, as its sibling tabs do.
     ("company_tabs.py", "read_life_tab"): (WITHHELD, 1),
+    # 2026-11-27 (lane jobs7, census J 111): the Products tab's two refusals of
+    # an uncorroborated zero -- the tab not marked current on a navigation too
+    # thin to say the Page has none, and a current tab that yields no product.
+    # Handed a page and never a url; the landing described in the hint, as
+    # its sibling tabs do.
+    ("company_tabs.py", "read_products_tab"): (WITHHELD, 2),
     # --- ASKED_FOR: the seven tool-side raises ----------------------------
     # (``_read_cards``'s one raise left this table on 2026-11-26, when the
     # helper was deleted with no caller left: READ-CARDS-DELETION, lane
@@ -198,8 +204,10 @@ DECLARED: dict[tuple[str, str], tuple[str, int]] = {
     # one passing the ASKED-FOR `url` and never the landing: the classic zero,
     # the AI fallback's refused arguments, the AI landing for other keywords,
     # the AI zero, and a landing on any other route (whose message carries
-    # only `landing.withheld`).
-    ("server.py", "_read_job_search"): (ASKED_FOR, 5),
+    # only `landing.withheld`). SIX FROM 2026-11-27 (lane jobs7): an AI-routed
+    # easy_apply answered with the classic page refuses with the same ASKED-FOR
+    # `url` -- the AI address `job_search_route.ai_search_url` composed.
+    ("server.py", "_read_job_search"): (ASKED_FOR, 6),
     # f"{BASE_URL}/jobs-tracker/?stage={stage}" -- this package's template.
     ("server.py", "_read_tracker"): (ASKED_FOR, 1),
     # The last of two module constants. THE ONE SURFACE WHOSE OWN DOCSTRING
@@ -233,6 +241,18 @@ DECLARED: dict[tuple[str, str], tuple[str, int]] = {
     ("following_list.py", "read_following_list"): (ASKED_FOR, 1),
     ("unfollowed_list.py", "read_unfollowed_list"): (ASKED_FOR, 1),
     ("advertising_data.py", "read_advertising_data"): (ASKED_FOR, 1),
+    # --- ASKED_FOR: lane settings7's two readers (2026-11-27) --------------
+    # Each raises twice -- its heading not drawn, or nothing read on a page
+    # whose empty state was never captured -- and passes as `url` its own
+    # module's admitted constant, the one address its tool requested
+    # (`verifications_page.VERIFICATIONS_URL`,
+    # `premium_account.PREMIUM_ACCOUNT_URL`), BASE_URL plus a fixed path.
+    # Never the landing: each reader holds the page and never reads its url.
+    ("verifications_page.py", "read_verifications"): (ASKED_FOR, 2),
+    ("premium_account.py", "read_premium_account"): (ASKED_FOR, 2),
+    # 2026-11-27 (lane net7, census N 199): the matches page drew no card;
+    # raised with its module's admitted constant, `premium_matches.MATCHES_URL`.
+    ("premium_matches.py", "read_matches"): (ASKED_FOR, 1),
     # 2026-11-26 (lane build-net2, census N 95): the recent-searches group
     # read wrong -- none or two of its structure, no link, a link that is no
     # search address -- each raised with the feed, the address the module
@@ -635,12 +655,31 @@ def test_the_twenty_are_still_twenty():
     # build-jobs2's three WITHHELD raises and build-net2's three ASKED_FOR
     # raises, every site of each kept; the tally MEASURED off the merged
     # table, not summed: {WITHHELD 24, ASKED_FOR 19, PASSTHROUGH 1}.
-    assert tally[WITHHELD] == 24, tally
-    assert tally[ASKED_FOR] == 19, tally
-    assert tally[PASSTHROUGH] == 1, tally
+    # FORTY-FIVE ON LANE JOBS7 (2026-11-27): ``_read_job_search``'s sixth raise,
+    # ASKED_FOR (above), so ASKED_FOR is 20. MEASURED off this table, not summed.
+    # FORTY-SEVEN ON THE SAME LANE: ``read_products_tab``'s two WITHHELD raises
+    # (census J 111), so WITHHELD is 26. MEASURED off this table, not summed.
     # 44, not 41: both lanes' branches read 41 (24 + 16 + 1 and 21 + 19 + 1), so
     # the two equal lines merged clean as one; the merged table measures 44.
-    assert tally[WITHHELD] + tally[ASKED_FOR] + tally[PASSTHROUGH] == 44, tally
+    # 45 on lane jobs7, then 47, measured off this table.
+    # FORTY-EIGHT ON LANE SETTINGS7 (2026-11-27): two readers outside
+    # server.py, each raising twice with its own module's admitted constant as
+    # `url` -- the address its tool requested -- so ASKED_FOR is 19 -> 23.
+    # MEASURED off this table, not summed.
+    # 48 on lane settings7: its four ASKED_FOR raises beside the 44.
+    # FIFTY-ONE AT INTEGRATION 7, MERGE 4 (2026-11-27): both lanes' DECLARED entries in one
+    # table, MEASURED off it on the merged tree, not summed.
+    # FORTY-FIVE ON LANE NET7 (2026-11-27, census N 199):
+    # ``premium_matches.read_matches`` raises once on a page with no match
+    # card, with its module's admitted constant MATCHES_URL -- the address it
+    # asked for -- so ASKED_FOR is 19 -> 20. MEASURED off this table, not summed.
+    # 45 on lane net7, one ASKED_FOR raise more.
+    # FIFTY-TWO AT INTEGRATION 7, MERGE 5 (2026-11-27): every lane's DECLARED entries in one table,
+    # MEASURED off it on the merged tree, not summed.
+    assert tally[WITHHELD] == 26, tally
+    assert tally[ASKED_FOR] == 25, tally
+    assert tally[PASSTHROUGH] == 1, tally
+    assert tally[WITHHELD] + tally[ASKED_FOR] + tally[PASSTHROUGH] == 52, tally
     assert tally[NO_ADDRESS_IN_SCOPE] == 10, tally
 
 

@@ -2037,7 +2037,90 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # `?isSelfProfile=true`, on SELF-PROFILE-QUERY-VARIANT-ADMITTED (the
     # orchestrator, 2026-11-26), no exemption; every other key byte-identical
     # (17 of 18).
-    "_ALLOWED_URL_PATTERNS": "5d3109ee0aa96e48",
+    #
+    # 5d3109ee0aa96e48 until 2026-11-27 (lane prof7): one anchored line, his
+    # "Open to" volunteering page on the spelling LinkedIn draws, its ONE
+    # `profileId` of the member-id shape and taken from his arguments only,
+    # on VOLUNTEERING-FALLBACK-BOUNDARY (the orchestrator, 2026-11-27 13:10),
+    # allowlist silence alone, no exemption; every other key byte-identical
+    # (17 of 18). Record: _audit/2026-11-27-prof7.md, section 2.
+    #
+    # 5d3109ee0aa96e48 until 2026-11-27 (lane jobs7): one anchored line, his
+    # LinkedIn Learning library's saved list (census row J 175), on
+    # LEARNING-ROWS-SPLIT as re-ruled and READ-PAST-AN-ACT-SUBSTRING's second
+    # clause (allowlist silence alone, no exemption); every other key
+    # byte-identical (17 of 18). Record: _audit/2026-11-27-jobs7.md s11.5.
+    #
+    # MERGED at integration 7 (2026-11-27), each lane above moving this key
+    # from the same base: a3510436178fb711, measured with this file's
+    # ast_digest on the merged readonly.py; only this key moved from 68a4ff7.
+    # ATTRIBUTION: the merged list minus jobs7's one entry hashes to prof7's
+    # 10c0a7637b7c3ca8, and minus prof7's one entry to jobs7's
+    # efcaa36167e42ccf. Record: _audit/2026-11-27-integration-7.md.
+    #
+    # 5d3109ee0aa96e48 until lane msg7's admission commit (wave 7, 2026-11-27):
+    # one anchored line, his saved posts list /my-items/saved-posts/, on
+    # ADMIT-NOW-LANDING-IN-SESSION-14 (allowlist silence alone, no exemption);
+    # every other key byte-identical (17 of 18). Record:
+    # _audit/2026-11-27-msg7.md, section 3.
+    #
+    # MERGED again at integration 7 (2026-11-27), merge 3, lane msg7:
+    # 947dcb23d73c0491, measured with this file's ast_digest on the merged
+    # readonly.py; only this key moved from 68a4ff7. ATTRIBUTION: the merged
+    # list minus msg7's one entry hashes to a3510436178fb711 (merge 2's value
+    # above), and minus prof7's and jobs7's two entries to msg7's
+    # 3f12a2c2143c6576. Record: _audit/2026-11-27-integration-7.md.
+    #
+    # 5d3109ee0aa96e48 until 2026-11-27 (lane settings7, its first admission):
+    # one anchored line, his search history page in the /mypreferences/m/
+    # tree, drawn on his Data privacy category page (session 12, load 10), a
+    # named settings page in its own commit (NAMED-SETTINGS-PAGES-RATIFIED;
+    # allowlist silence alone, no exemption). ATTRIBUTION, with this file's
+    # ast_digest: readonly.py at the lane's base 68a4ff7 hashes to the prior
+    # pin on every key, and only this key moved (17 of 18 byte-identical).
+    # Record: _audit/2026-11-27-settings7.md.
+    #
+    # 30ed6faba55a8e9a until lane settings7's second admission: one anchored
+    # line, his data-download page in the same tree, drawn on the same
+    # category page, a named settings page in its own commit (allowlist
+    # silence alone, no exemption); every other key byte-identical (17 of 18).
+    #
+    # 228d24c9fa344a2f until lane settings7's third admission: one anchored
+    # line, his contact-syncing page, /mynetwork/settings/manage-syncing, on
+    # CONTACTS-PAGE-FROM-THE-SETTINGS-NAV (the orchestrator, 2026-11-27 13:25),
+    # paired with one exemption below; only this key and the
+    # pattern-exemption key moved (16 of 18 byte-identical).
+    #
+    # MERGED again at integration 7 (2026-11-27), merge 4, lane settings7:
+    # 18413e5f8838d54c (107 entries), measured with this file's ast_digest on
+    # the merged readonly.py; this key and the pattern-exemption key are the
+    # two moved from 68a4ff7, the second by settings7 alone. ATTRIBUTION: the
+    # merged list minus settings7's three entries hashes to 947dcb23d73c0491
+    # (merge 3's value above), and minus prof7's, jobs7's and msg7's three to
+    # settings7's 0c47f74920c44695. Record: _audit/2026-11-27-integration-7.md.
+    #
+    # 5d3109ee0aa96e48 until 2026-11-27 (lane net7): one anchored line, his
+    # full People You May Know lists at /mynetwork/discovery-see-all/, on
+    # GROW-SUGGESTIONS-BY-ADMISSION-NOT-SCROLL (allowlist silence alone, no
+    # exemption). ATTRIBUTION, with this file's ast_digest: readonly.py at
+    # the lane's base 68a4ff7 hashes to the prior pin on every key, and only
+    # this key moved (17 of 18 byte-identical). Record:
+    # _audit/2026-11-27-net7.md.
+    #
+    # d2742a5df5370866 until lane net7's second admission (2026-11-27): one
+    # anchored line, the received tab's own leaf
+    # /mynetwork/invitation-manager/received/, where live session 12 landed
+    # the tab (load 28), on the orchestrator's ruling for N 13, paired with
+    # one exemption below; the tree at the lane's previous commit hashes to
+    # the prior pins on every key, and only this key and the pattern-exemption
+    # key moved (16 of 18 byte-identical).
+    #
+    # MERGED again at integration 7 (2026-11-27), merge 5, lane net7:
+    # 311b43fe823f84e5 (109 entries), measured with this file's ast_digest
+    # on the merged readonly.py. ATTRIBUTION: the merged list minus net7's
+    # two entries hashes to 18413e5f8838d54c (merge 4's value above), and
+    # minus the other lanes' six to net7's edacedfed37feca9.
+    "_ALLOWED_URL_PATTERNS": "311b43fe823f84e5",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     # 419e64a3cd92ec7e until the same REVIEW: commit: a third entry, excusing
     # exactly {"/follow"} for exactly the anchored follower-list address.
@@ -2066,7 +2149,21 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # address trips, measured -- for exactly his Verifications settings page,
     # the per-address exemption VERIFICATIONS-PAGE-ADMITTED names; the
     # forbidden tuple is unchanged at 33.
-    "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "8a0202843de29ce2",
+    # 8a0202843de29ce2 until lane settings7's third admission (2026-11-27):
+    # one more, excusing exactly {"/settings/", "settings"} -- the two
+    # substrings the address trips, measured -- for exactly his
+    # contact-syncing page, /mynetwork/settings/manage-syncing; the forbidden
+    # tuple is unchanged at 33.
+    # 8a0202843de29ce2 until lane net7's second admission (2026-11-27): one
+    # more, excusing exactly {"invitation"} -- the one substring the address
+    # trips, measured -- for exactly the received tab's own leaf; the
+    # forbidden tuple is unchanged at 33.
+    # MERGED at integration 7 (2026-11-27), merge 5: 3fdfb5719f05d4b5 (19
+    # entries), settings7's {"/settings/", "settings"} and net7's
+    # {"invitation"} beside the base's 17. ATTRIBUTION: minus net7's entry it
+    # hashes to settings7's 59a59624d142d203, minus settings7's to net7's
+    # 5cd3168ae01326f1; the forbidden tuple is unchanged at 33.
+    "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "3fdfb5719f05d4b5",
     "_FORBIDDEN_URL_SUBSTRINGS": "b0291a66ec9bd51e",
     # 23aece1483afdee9 until 2026-09-19. See the re-freeze note above: eleven
     # detector classes added, zero removed, and the direction is pinned by

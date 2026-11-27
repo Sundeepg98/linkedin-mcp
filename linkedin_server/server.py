@@ -1,4 +1,30 @@
-"""The tool surface: one hundred and seven tools, thirty-five of which write to LinkedIn.
+"""The tool surface: one hundred and eleven tools, thirty-six of which write to LinkedIn.
+
+THE HUNDRED-AND-EIGHTH TO HUNDRED-AND-ELEVENTH, 2026-11-27, at integration 7's
+merges of lanes msg7, settings7 and net7. Lane msg7's ``linkedin_save_post``
+(census ``M C36``), a WRITE, one feed item he names saved from its own
+permalink menu, is the hundred-and-eighth. Then lane settings7's two
+(its branch counted them the hundred-and-eighth and hundred-and-ninth)
+(on live session 12's captures, LinkedIn's words measured by keyed shape): two
+READS, each of one admitted settings page with no press.
+``linkedin_my_verifications`` (census ``P K1``) reads his Verifications page:
+each verification by its kind as a closed word, how many detail lines it
+draws (never their text), its work-email consent switch's state and whether
+its Delete is drawn. ``linkedin_my_premium_account`` (``P N22``, the
+subscription half of its split) reads his Manage Premium account page: each
+subscription's plan and its controls as closed words, none pressed, no
+address returned. Then lane net7's ``linkedin_premium_matches``, a READ,
+the hundred-and-eleventh (its branch counted it the hundred-and-eighth; census
+``N 199``): the members his Premium networking matches suggest, each a
+people record beside the id of the job they are hiring for, read off ONE
+admitted page (``/premium/matches/``) on live session 12's capture; nothing
+pressed or followed (rulings NAMES-AT-RUNTIME, PEOPLE-DATA-MITIGATIONS). The
+same lane gave ``linkedin_people_search_shape`` four parameters
+(``followers_of``, ``school_ids``, ``industry_ids``, ``actively_hiring``).
+Measured off the merged registry, not summed. The headline read "one
+hundred and ten tools, thirty-six of which write" until net7's merge, "one
+hundred and eight tools, thirty-six of which write" until settings7's, and
+"one hundred and seven tools, thirty-five of which write" until msg7's.
 
 THE HUNDREDTH TO HUNDRED-AND-SEVENTH, 2026-11-26, at integration 6's merge of
 lane build-msg2: six WRITES and two READS. ``linkedin_set_conversation_muted``
@@ -522,9 +548,9 @@ assigned to anybody -- it waits for whoever next runs the suite, and in the
 meantime the pin goes on asserting the old number with full confidence.
 
 THE NUMBERS ABOVE ARE DERIVED NOW, and that is a statement about a test rather
-than about an intention. One hundred and seven is ``len(await mcp.list_tools())``,
+than about an intention. One hundred and eleven is ``len(await mcp.list_tools())``,
 pinned in ``test_server_surface.py`` by
-``test_the_surface_is_exactly_the_one_hundred_and_seven_tools``; the split is pinned by
+``test_the_surface_is_exactly_the_one_hundred_and_eleven_tools``; the split is pinned by
 ``tests/test_prose_that_makes_a_claim.py::test_the_server_docstring_numbers_are_derived``,
 which reads THESE WORDS and fails if any of the three disagrees with the
 registry.
@@ -537,9 +563,19 @@ POINTER to it was dangling, so a reader who followed it found nothing and
 would reasonably conclude these numbers are unchecked. A citation is a claim
 like any other.
 The surface splits three ways and the split is the part a reader actually
-needs: SIXTY-EIGHT read, THIRTY-FIVE write, and FOUR are write-shaped,
-registered, gated and unable to act. Sixty-eight plus thirty-five plus four is
-one hundred and seven. (Sixty-six, twenty-nine and four, summing to
+needs: SEVENTY-ONE read, THIRTY-SIX write, and FOUR are write-shaped,
+registered, gated and unable to act. Seventy-one plus thirty-six plus four is
+one hundred and eleven. (Seventy, thirty-six and four, summing to one
+hundred and ten, until integration 7's merge of lane net7's read,
+2026-11-27; that lane's branch read sixty-nine, thirty-five and four,
+summing to one hundred and eight.
+Sixty-eight, thirty-six and four, summing to one
+hundred and eight, until integration 7's merge of lane settings7's two
+reads, 2026-11-27; that lane's branch read seventy, thirty-five and four,
+summing to one hundred and nine. Sixty-eight, thirty-five and four,
+summing to one hundred and seven, until lane msg7's linkedin_save_post,
+2026-11-27.
+Sixty-six, twenty-nine and four, summing to
 ninety-nine, until integration 6's merge of lane build-msg2's six writes
 and two reads, 2026-11-26; that lane's branch read sixty-six, thirty and
 three, summing to ninety-nine. Sixty-five, twenty-five and four, summing to
@@ -897,6 +933,7 @@ from linkedin_server import (
     named_details,
     named_profile,
     newsletters,
+    notification_cards,
     notify_cost,
     own_articles,
     page_plugin,
@@ -1366,7 +1403,7 @@ mcp = FastMCP(
         "keywords he typed, never the people the same list names -- and "
         "closes it with Escape; to run one again, pass its keywords to the "
         "search tool for its vertical. "
-        "THIRTY-FIVE WRITE: linkedin_save_job, "
+        "THIRTY-SIX WRITE: linkedin_save_job, "
         "linkedin_unsave_job, linkedin_unfollow_company, "
         "linkedin_follow_company, linkedin_apply_job, "
         "linkedin_update_setting, linkedin_react_to_item, "
@@ -1383,7 +1420,7 @@ mcp = FastMCP(
         "linkedin_accept_invitation_to_connect, "
         "linkedin_ignore_invitation_to_connect, "
         "linkedin_withdraw_invitation, "
-        "linkedin_mark_not_interested, "
+        "linkedin_mark_not_interested, linkedin_save_post, "
         "linkedin_set_conversation_muted, linkedin_unset_conversation_muted, "
         "linkedin_mark_conversation_unread, linkedin_set_conversation_archived, "
         "linkedin_set_conversation_deleted and linkedin_publish_group_post. "
@@ -1473,6 +1510,11 @@ mcp = FastMCP(
         "group's public feed: it presses the share box only where its trigger "
         "says 'Start a public post', and nothing confirms the post, so offer "
         "it only for a group and words he names, and tell him to look. "
+        "THE THIRTY-SIXTH, linkedin_save_post, saves ONE feed item he names "
+        "by its urn to his Saved items, from that item's own permalink menu: "
+        "it presses 'Save' only inside the menu the item's own trigger owns, "
+        "and an item already saved is pressed no further; what a save draws "
+        "has never been captured, so tell him to look at his Saved items. "
         "THE SIXTEENTH, linkedin_withdraw_from_group, leaves one group he "
         "names by its NUMERIC id, never by a group's name; no join is built "
         "here, so offer it only for a group he names -- and not his last "
@@ -1643,6 +1685,9 @@ mcp = FastMCP(
         "a link only when numeric), linkedin_my_following_list (the people "
         "he follows) and linkedin_my_unfollowed_list (the members he "
         "unfollowed, each a name with no link, because the page draws none), "
+        "linkedin_premium_matches (the members his Premium networking "
+        "matches suggest, each beside the id of the job they are hiring "
+        "for), "
         "and linkedin_list_conversations, linkedin_archived_conversations, "
         "linkedin_open_messaging and linkedin_people_search_shape when "
         "include_names is passed -- and the three that return what a search "
@@ -3730,6 +3775,10 @@ async def linkedin_people_search_shape(
     location_ids: str = "",
     connections_of: str = "",
     network: str = "",
+    followers_of: str = "",
+    school_ids: str = "",
+    industry_ids: str = "",
+    actively_hiring: bool = False,
     include_names: bool = False,
 ) -> dict[str, Any]:
     """What your people search OFFERS -- and, with include_names, WHO it found.
@@ -3764,6 +3813,16 @@ async def linkedin_people_search_shape(
     for the results as people records. Built over captured markup, NOT YET
     FIRED LIVE: whether LinkedIn applies the facet to the results is what
     ``query_kept`` reports on the first fire.
+
+    **FOLLOWERS OF A MEMBER, A SCHOOL, AN INDUSTRY, PEOPLE HIRING (census N 86,
+    N 88, N 89, N 82 and N 26b, 2026-11-27).** Four more of the All-filters
+    panel's sections, each sent as the address LinkedIn writes for it, because
+    the panel opens on a press this tool may not make: ``followers_of`` (one
+    member's token; LinkedIn's own result cards link this search),
+    ``school_ids``, ``industry_ids`` and ``actively_hiring``. With
+    ``network="F"`` beside a school or an industry it searches YOUR
+    connections by it. Built over captured markup, NOT YET FIRED LIVE: the
+    first fire's ``query_kept`` says what LinkedIn did with each.
 
     **THIS IS THE FIRST TOOL ON A THIRD-PARTY-DENSE SURFACE**, and every
     decision in it is shaped by that. A people-search page's entire payload is
@@ -3878,6 +3937,17 @@ async def linkedin_people_search_shape(
             ``connections_of``, ``network="F"`` returns the connections that
             member and you have in common. Any other value is refused,
             described by its shape.
+        followers_of: ONE member's opaque token, as ``connections_of`` takes
+            it, to list the people who follow that member. A slug is a name
+            and is refused. Never stored and never echoed.
+        school_ids: LinkedIn's NUMERIC organisation ids of schools (a school's
+            Page is an organisation), comma-separated, at most 5. A school's
+            name or slug is refused, described by its shape.
+        industry_ids: LinkedIn's NUMERIC industry codes (the digits it writes
+            under ``industry``), comma-separated, at most 5. An industry's
+            name is refused.
+        actively_hiring: ``True`` for people LinkedIn marks as actively
+            hiring, sent as the JSON string ``"true"`` LinkedIn writes.
         include_names: return the people the page draws as records (see the
             first paragraph). Off by default; the search is the same either
             way and still one page.
@@ -3893,6 +3963,10 @@ async def linkedin_people_search_shape(
             location_ids=location_ids,
             connections_of=connections_of,
             network=network,
+            followers_of=followers_of,
+            school_ids=school_ids,
+            industry_ids=industry_ids,
+            actively_hiring=actively_hiring,
         )
         if not composed["built"]:
             return people_search.refusal_envelope(composed)
@@ -5820,7 +5894,10 @@ async def _read_job_search(
       is REFUSED unless the page drew LinkedIn's own empty state, and no
       capture has shown the classic one, so today every zero refuses. It used
       to come back as ``results: []`` with a note blaming the filters.
-    * **AI** -- the fallback (``Q-SEARCH-ROUTE-POLICY``). ``refused_on_ai``
+    * **AI** -- the search's own route for a call that refuses nothing there
+      (lane jobs7: ``url`` is then the AI address itself), and the fallback
+      for a classic request LinkedIn redirected here (``Q-SEARCH-ROUTE-
+      POLICY``). ``refused_on_ai``
       names the arguments the AI route has not been measured honouring. The
       page is read once by ``job_search_route.read_ai_search`` (the refusal
       reports the Easy Apply toggle it drew), and any one of those arguments
@@ -5860,6 +5937,14 @@ async def _read_job_search(
             return html if isinstance(html, str) else ""
 
         if route == job_search_route.CLASSIC:
+            if easy_apply and job_search_route.landing_route(url) == job_search_route.AI:
+                # AN AI-ROUTED easy_apply ANSWERED WITH THE CLASSIC PAGE (lane
+                # jobs7): the AI address carried no filter, because easy_apply
+                # is applied there to each card's own mark, so the classic rows
+                # were never Easy Apply-filtered. Refused, not returned.
+                raise ExtractionFailedError(
+                    job_search_route.classic_at_ai_refusal(), url=url, hint=hint
+                )
             records = await dom.harvest_linked_cards(
                 page, href_pattern=dom.JOB_HREF, max_items=limit * 3
             )
@@ -5999,20 +6084,30 @@ async def linkedin_search_jobs(
     exactly as it would if you typed the query on the site. That is the only
     trace a search leaves, and it is on your account, not anyone else's.
 
-    WHICH PAGE IT READ, AND WHEN IT REFUSES (lane search-fix26, 2026-11-26).
-    LinkedIn draws a banner over this page: it is "gradually retiring classic
-    job search starting in September". This tool asks for the classic page and
-    reads whatever the load LANDED on, reported as ``route``: ``classic_search``,
-    or ``ai_search`` when LinkedIn served its AI search instead. Classic is the
-    PRIMARY route while it serves (ruling Q-SEARCH-ROUTE-POLICY). The AI route
-    is the FALLBACK and honours ``keywords``. There ``easy_apply`` narrows the
-    one window loaded, locally, to the cards whose own ``easy_apply`` field is
-    true -- it is not LinkedIn's Easy Apply filter, and the result says so in
-    ``easy_apply_post_filter`` with the count before and after. Every other
-    argument is REFUSED there, by name, until a fire measures LinkedIn
-    honouring it, because a filter accepted and ignored puts an unfiltered
-    shortlist in front of you. A landing on any other page refuses, naming only
-    its shape. AND A
+    WHICH PAGE IT READ, AND WHEN IT REFUSES (lane search-fix26, 2026-11-26;
+    lane jobs7, 2026-11-27). LinkedIn's classic job search NO LONGER SERVES:
+    on 2026-11-26 its address redirected to the AI search, with no classic
+    list. So a KEYWORD SEARCH -- keywords, optionally easy_apply and limit, and
+    nothing else -- asks for the AI search's own address and reads it as the
+    search's own route, reported as ``route: ai_search``. Each AI row carries
+    the card's own ``easy_apply`` reading, its posted line, any proximity line,
+    and ``hiring``, the hiring chips the card draws (``actively_reviewing_
+    applicants``, ``be_an_early_applicant``), omitted when none is drawn.
+    There ``easy_apply`` narrows the one window loaded, locally, to the cards
+    whose own ``easy_apply`` field is true -- it is not LinkedIn's Easy Apply
+    filter, and the result says so in ``easy_apply_post_filter`` with the
+    count before and after. A call that sets any OTHER argument -- a place,
+    any filter, an offset, an employer -- is REFUSED BEFORE ANYTHING LOADS,
+    naming the arguments: the classic route is retired and the AI search has
+    not been measured honouring them (rulings Q-SEARCH-ROUTE-POLICY and
+    REFUSE-BEFORE-LOAD-ON-A-RETIRED-ROUTE), because a filter accepted and
+    ignored puts an unfiltered shortlist in front of you, and refusing first
+    spends no page load and none of your searches. The notes below on places,
+    filters, offsets and employers describe the classic route, which runs
+    again only once a capture shows it serving; should LinkedIn serve its
+    classic page at the AI address meanwhile, it is read by the classic reader
+    and reported as ``route: classic_search``. A landing on any other page
+    refuses, naming only its shape. AND A
     ZERO IS NEVER SILENT: a page with no readable card is refused unless it drew
     LinkedIn's own no-results state, which no capture has shown yet -- so an
     empty search, or an offset past the end, is reported as a failure, never as
@@ -6303,6 +6398,24 @@ async def linkedin_search_jobs(
             sort_by=sort_by,
             start=start,
         )
+        # REFUSED BEFORE ANY LOAD ON A RETIRED ROUTE (the orchestrator's
+        # REFUSE-BEFORE-LOAD-ON-A-RETIRED-ROUTE, 2026-11-27; lane jobs7). The
+        # classic route is measured retired, so a call setting an argument the
+        # AI route refuses could only land there and refuse after spending a
+        # load and one of D1's searches. It refuses here instead, naming the
+        # arguments and the retired route, at zero loads. The classic
+        # composition below runs only once a capture shows classic serving
+        # again (the reopener, ``job_search_route.CLASSIC_ROUTE_RETIRED``).
+        if refused_on_ai and job_search_route.CLASSIC_ROUTE_RETIRED:
+            return {
+                "error": "bad_argument",
+                "message": job_search_route.retired_route_refusal(refused_on_ai),
+            }
+        # THE AI ROUTE IS THE SEARCH'S OWN ROUTE FOR EVERY CALL IT HONOURS
+        # (lane jobs7, 2026-11-27; census J 1). The classic address redirected
+        # to it on live session 12's load 3, so a call refusing nothing there
+        # asks for its own address and is read there as the primary route.
+        on_ai = job_search_route.asks_the_ai_route(refused_on_ai, keywords=keywords)
 
         def _search_url(place: str) -> str:
             """The url for ONE place. The ONLY place a location reaches a url.
@@ -6312,7 +6425,13 @@ async def linkedin_search_jobs(
             and a repeated ``location`` key -- are unreachable from here because
             this takes ONE string and appends ONE pair. A fan-out that built its
             own url would be free to reinvent either of them.
+
+            A call on the AI route carries no place at all: ``location`` and
+            ``locations`` are refused there, so ``on_ai`` holds only when
+            ``place`` is empty, and the AI address is keywords alone.
             """
+            if on_ai:
+                return job_search_route.ai_search_url(keywords)
 
             # A KEYWORD-LESS CALL CARRIES NO keywords KEY AT ALL, not an empty
             # one: `/jobs/search/?f_C=<id>` is the address the boundary was
@@ -6377,17 +6496,33 @@ async def linkedin_search_jobs(
             # through the easy_apply post-filter, whose zero is an explained one
             # (cards were read, none drew the mark), never a believed no-results
             # page. The AI zero that is not explained refused upstream.
-            note = (
-                "LinkedIn served its AI job search in place of the classic one, "
-                "so this is the FALLBACK route (ruling Q-SEARCH-ROUTE-POLICY): "
-                "it honours keywords, applies easy_apply locally to each card's "
-                "own mark, and every other argument refuses there until a fire "
-                "measures LinkedIn honouring it. Its window was 25 cards on the "
-                "one load measured (2026-11-26). results_label is LinkedIn's own "
-                "capped label, not a count of matches, and its pager is buttons "
-                "with no address, so a next page cannot be asked for yet. Each "
-                "row's easy_apply is its card's own mark."
-            )
+            if on_ai:
+                # THE PRIMARY ROUTE, ASKED FOR AT ITS OWN ADDRESS (lane jobs7).
+                note = (
+                    "This is LinkedIn's AI job search, asked for at its own "
+                    "address: the classic job search no longer serves (its "
+                    "address redirected here on 2026-11-26). It honours "
+                    "keywords and applies easy_apply locally to each card's "
+                    "own mark; every other argument refuses here until a fire "
+                    "measures LinkedIn honouring it. Its window was 25 cards "
+                    "on the loads measured. results_label is LinkedIn's own "
+                    "label, capped at 99+, not a count of matches, and its "
+                    "pager is buttons with no address, so a next page cannot "
+                    "be asked for yet. Each row's easy_apply and hiring are "
+                    "its card's own marks."
+                )
+            else:
+                note = (
+                    "LinkedIn served its AI job search in place of the classic one, "
+                    "so this is the FALLBACK route (ruling Q-SEARCH-ROUTE-POLICY): "
+                    "it honours keywords, applies easy_apply locally to each card's "
+                    "own mark, and every other argument refuses there until a fire "
+                    "measures LinkedIn honouring it. Its window was 25 cards on the "
+                    "one load measured (2026-11-26). results_label is LinkedIn's own "
+                    "capped label, not a count of matches, and its pager is buttons "
+                    "with no address, so a next page cannot be asked for yet. Each "
+                    "row's easy_apply is its card's own mark."
+                )
             receipt = result.get("easy_apply_post_filter")
             if receipt:
                 note += (
@@ -7457,6 +7592,10 @@ async def linkedin_notifications(
     Partial compensation, since the badge is going either way: each row carries
     "unread": true/false as LinkedIn had it AT THE MOMENT OF READING -- which
     is the fact the page load is about to destroy. Read it here or lose it.
+    EXCEPT ON THE SERVER-DRIVEN DESIGN (measured 2026-11-26, live session 12):
+    no unread marking on it has been measured, so its rows carry NO "unread"
+    key and "unread_when_read" is null, with "unread_note" saying why --
+    never every row reported read. "page_design" names which design was read.
     =========================================================================
 
     Rows carry the notification text, how long ago it arrived, whether it was
@@ -7481,13 +7620,14 @@ async def linkedin_notifications(
             requested_url = f"{BASE_URL}/notifications/"
             final_url = await BROWSER.goto(page, requested_url)
             assert_not_authwall(final_url, surface="notifications")
-            records = await dom.harvest_block_cards(
-                page,
-                selectors=dom.NOTIFICATION_SELECTORS,
-                max_items=limit * 2,
-                hidden_selector=dom.NOTIFICATION_HIDDEN_SELECTOR,
-                time_selector=dom.NOTIFICATION_TIME_SELECTOR,
-                unread_class=dom.NOTIFICATION_UNREAD_CLASS,
+            # TWO DESIGNS, READ BY WHICH THE PAGE DRAWS (lane msg7,
+            # 2026-11-27, CAPTURE-SHOWS-READER-BLIND-DEMOTES): live session 12
+            # drew this page server-driven, where dom.NOTIFICATION_SELECTORS
+            # harvest 0 records; ``notification_cards.harvest`` reads that
+            # design where its screen is drawn and runs the shipped harvest,
+            # unchanged, everywhere else (session 5's 9 of 9 its control).
+            records, page_design = await notification_cards.harvest(
+                page, max_items=limit * 2
             )
             dom.require_rows(
                 records,
@@ -7503,15 +7643,38 @@ async def linkedin_notifications(
             envelope = shape.envelope(
                 rows, limit=limit, source_url=final_url, dropped=dropped
             )
-            envelope["side_effect"] = (
+            # WHAT EACH DESIGN REPORTS, said per design (lane msg7, on the cold
+            # verification of 5beac57): the server-driven rows carry no
+            # 'unread' key, so the per-row sentence is the classic design's
+            # only. And "the only change any tool in this package makes" was
+            # false once the first write shipped: the badge is the one change a
+            # READ makes without being asked, as the docstring above says.
+            cleared = (
                 "loading this page cleared LinkedIn's unread notification "
                 "badge. Unavoidable -- LinkedIn marks the list seen when it "
-                "serves the page -- and it is the only change any tool in this "
-                "package makes. The per-row 'unread' flag is how it stood "
-                "before this call."
+                "serves the page -- and it is the one change a read in this "
+                "package makes without being asked for it. "
             )
-            unread = [row for row in envelope["results"] if row.get("unread")]
-            envelope["unread_when_read"] = len(unread)
+            envelope["side_effect"] = cleared + (
+                "On this server-driven design no row carries an 'unread' key: "
+                "no unread marking on it has been measured, so how each row "
+                "stood before this call is not reported (see unread_note)."
+                if page_design == notification_cards.SDUI
+                else "The per-row 'unread' flag is how it stood before this call."
+            )
+            envelope["page_design"] = page_design
+            if page_design == notification_cards.SDUI:
+                # NO UNREAD MARKING ON THIS DESIGN HAS BEEN MEASURED, so no row
+                # carries one and the count is not a zero: None, never "all read".
+                envelope["unread_when_read"] = None
+                envelope["unread_note"] = (
+                    "this page was drawn in LinkedIn's server-driven design, where no "
+                    "unread marking has been measured, so no row reports whether it "
+                    "was unread -- rather than every row reporting read."
+                )
+            else:
+                unread = [row for row in envelope["results"] if row.get("unread")]
+                envelope["unread_when_read"] = len(unread)
             return envelope
     except Exception as exc:
         return _error(exc)
@@ -8667,13 +8830,27 @@ async def _goto_self_profile_asserted(
     for ANY OTHER member makes the page AMBIGUOUS, refused at once like
     FALSE; nothing either way is ABSENT, retried as it always was.
 
+    THE SELF ALIAS IS WAITED ON SINCE 2026-11-27, NEVER FOLLOWED. Measured
+    2026-11-26 (the live lane's session 12, E1): LinkedIn now serves
+    ``/in/me/`` as its own document and rewrites the address to his member
+    path CLIENT-SIDE about a second later, and this loader read the landing
+    before the rewrite -- the self alias, which is no member -- and refused
+    his own profile twice. So a landing that is still the bare alias is
+    waited on, bounded (``self_profile.await_rewrite``), and the url is read
+    again: the rule above then runs on THAT url, unchanged. The url is only
+    ever READ and judged -- never navigated to, never built into an address;
+    every load here is ``SELF_PROFILE_URL`` -- and a page that moves onto the
+    signed-out wall is the wall.
+
     Returns ``(landed_url, state, loads, saw)``: the last landed url, the
     state -- one of ``SELF_ASSERTION_TRUE``, ``SELF_ASSERTION_FALSE``,
     ``SELF_ASSERTION_ABSENT``, ``SELF_ASSERTION_AMBIGUOUS`` -- how many times
     ``/in/me/`` was actually navigated, and ``saw``, ``self_profile.evidence``
     of the last load: closed words and integers, which a refusal names and a
-    success reports as ``self_signal``. ``loads`` is the real count, never
-    hardcoded, because every caller reports it verbatim as ``pages_loaded``.
+    success reports as ``self_signal``, plus ``self_alias_rewrite`` and
+    ``self_alias_waited_ms``, what the wait saw. ``loads`` is the real count,
+    never hardcoded, because every caller reports it verbatim as
+    ``pages_loaded``.
     """
     landed = ""
     state = SELF_ASSERTION_ABSENT
@@ -8683,6 +8860,11 @@ async def _goto_self_profile_asserted(
         landed = await BROWSER.goto(page, SELF_PROFILE_URL)
         loads += 1
         assert_not_authwall(landed, surface="profile")
+        rewrite = {"rewrite": self_profile.REWRITE_NOT_NEEDED, "waited_ms": 0}
+        if self_profile.awaits_rewrite(landed):
+            rewrite = await self_profile.await_rewrite(page)
+            landed = _landed_after_the_wait(page, landed)
+            assert_not_authwall(landed, surface="profile")
         marker = _self_assertion_state(landed)
         # THE PAGE IS ASKED ONLY WHEN THE URL DID NOT ANSWER, so a landing
         # that carries the marker is decided exactly as it was, untouched.
@@ -8693,9 +8875,25 @@ async def _goto_self_profile_asserted(
         )
         state = self_profile.self_state(marker, structure)
         saw = self_profile.evidence(marker, structure)
+        # WHAT THE WAIT SAW, in its own closed word and an integer, so a
+        # refusal can say the alias never moved -- the fact session 12 needed
+        # a copy of the browser's history to learn.
+        saw["self_alias_rewrite"] = rewrite["rewrite"]
+        saw["self_alias_waited_ms"] = rewrite["waited_ms"]
         if state != SELF_ASSERTION_ABSENT:
             break
     return landed, state, loads, saw
+
+
+def _landed_after_the_wait(page: Any, before: str) -> str:
+    """``page.url`` once the self alias has been waited on: the same read
+    ``BROWSER.goto`` returns, and the same fallback when it cannot be taken
+    -- the address held before, here the alias, which is no member and so
+    refuses. Never raises."""
+    try:
+        return str(page.url)
+    except Exception:  # noqa: BLE001 - an unreadable address is the alias still
+        return before
 
 
 def _self_profile_refusal(
@@ -8727,7 +8925,20 @@ def _self_profile_refusal(
             "the url does not name is not a page this server understands, so "
             "it is refused at once and not retried. " + then
         )
-    if not saw.get("landed_on_member_path"):
+    rewrite = saw.get("self_alias_rewrite")
+    if not saw.get("landed_on_member_path") and rewrite == self_profile.REWRITE_NOT_WITHIN_BOUND:
+        seen = (
+            "the address stayed on the self alias for the "
+            f"{self_profile.SELF_REWRITE_BOUND_S:g} s this server waits for "
+            "LinkedIn's client-side rewrite of it to his member path, so the "
+            "page was not asked"
+        )
+    elif not saw.get("landed_on_member_path") and rewrite == self_profile.REWRITE_ARRIVED:
+        seen = (
+            "LinkedIn rewrote the self alias's address client-side, to a page "
+            "that is not a member's profile root, so the page was not asked"
+        )
+    elif not saw.get("landed_on_member_path"):
         seen = (
             "the landing was not a member's profile root, so the page was "
             "not asked"
@@ -13381,12 +13592,15 @@ from linkedin_server import company_tabs  # noqa: E402 -- lane readers-jobs26's 
 @mcp.tool()
 async def linkedin_company_page_tab(organisation_id: str, tab: str = "about") -> dict[str, Any]:
     """ONE tab of an organisation's Page: its About tab, its Events tab, its
-    Premium Insights tab, its Life tab or its posts. ONE page load, nothing
-    pressed.
+    Premium Insights tab, its Life tab, its posts or its Products tab. ONE
+    page load, nothing pressed.
 
-    ``tab`` is exactly one of ``about``, ``events``, ``insights``, ``life`` or
-    ``posts``; anything else is refused before any load. Census rows ``J 106``
-    (About), ``J 165`` (Events), ``J 113`` (Insights), ``J 109`` (Life) and
+    ``tab`` is exactly one of ``about``, ``events``, ``insights``, ``life``,
+    ``posts`` or ``products``; anything else is refused before any load.
+    Census rows ``J 106``
+    (About), ``J 165`` (Events), ``J 113`` (Insights, with its two function
+    tables ``J 114`` and ``J 174`` and ``J 169``'s headcount and notable
+    alumni), ``J 109`` (Life), ``J 111`` (its Products tab) and
     ``J 168`` (the posts), read under THIRD-PARTY-TEXT-AT-RUNTIME
     and NAMES-AT-RUNTIME: every string of the Page's own comes back inside a
     record whose ``untrusted_third_party_text`` marker says it is someone
@@ -13406,10 +13620,22 @@ async def linkedin_company_page_tab(organisation_id: str, tab: str = "about") ->
     own words. ``more_offered`` says the tab offers more than it drew; the
     button is never pressed.
 
-    ``insights`` (Premium): ``modules`` (the insight cards drawn, by key) and
-    ``functions`` -- each row of the tab's function table: a job function from
-    LinkedIn's fixed taxonomy, its employee count, its percentage of the
-    Page's headcount and its 3- and 6-month growth in percent.
+    ``insights`` (Premium): ``modules`` (the insight cards drawn, by key);
+    ``functions`` -- each row of the table LinkedIn summarises "Headcount
+    growth by function": a job function from LinkedIn's fixed taxonomy, its
+    employee count, its percentage of the Page's headcount and its growth in
+    percent; and ``openings_by_function`` -- each row of the table it
+    summarises "Total job openings": a function, its job openings, its
+    percentage of the Page's openings and their 3- and 6-month growth. EACH
+    TABLE IS CHOSEN BY ITS SUMMARY, never by its column words, which LinkedIn
+    writes alike on both; a field with no row says why in
+    ``functions_unread`` or ``openings_by_function_unread``. ``headcount`` --
+    the table LinkedIn summarises "Total employee count": the Page's total
+    employees and its growth over 6 months, 1 year and 2 years in percent,
+    or None with ``headcount_unread`` saying why; and ``notable_alumni`` --
+    each member card under the heading "Notable company alumni", a person
+    record (name, headline, profile link, degree), with ``alumni_withheld``
+    counting the cards not returned. Only the cards the page drew are read.
 
     ``life``: ``modules`` (how many of each module LinkedIn drew, by key);
     ``trending`` -- the "Trending employee content" carousel's items, each a
@@ -13432,6 +13658,13 @@ async def linkedin_company_page_tab(organisation_id: str, tab: str = "about") ->
     with no words, or with two text boxes (a reshare), is counted and not
     read; no item's link is drawn on that view, so none is returned.
 
+    ``products``: ``products`` -- each product the tab drew, its name and its
+    category as records of the Page's own words; ``products`` is None, with
+    ``products_tab_drawn`` False, when the Page's navigation draws no
+    Products tab. ``show_all_offered`` says the tab offers more than it drew;
+    its button is never pressed. A product's link and the members pictured
+    under it are never read.
+
     A TAB THAT YIELDS NOTHING IS A FAILURE, never "this organisation has
     none", unless the page itself says so. If the load lands anywhere but the
     tab asked for, the page is not read and the landing is withheld (an
@@ -13443,12 +13676,12 @@ async def linkedin_company_page_tab(organisation_id: str, tab: str = "about") ->
     rather than quoting it.
 
     THIS TOOL WRITES NOTHING. It does not follow the Page, press "I'm
-    interested", open an event, a photo or a spotlight's link, or open the
-    Insights tab's dropdown.
+    interested", open an event, a photo or a spotlight's link, open the
+    Insights tab's dropdown, or page the alumni carousel.
 
     Args:
         organisation_id: the numeric LinkedIn organisation id.
-        tab: about (the default), events, insights, life or posts.
+        tab: about (the default), events, insights, life, posts or products.
     """
     try:
         address = company_tabs.tab_url(organisation_id, tab)
@@ -13480,6 +13713,8 @@ async def linkedin_company_page_tab(organisation_id: str, tab: str = "about") ->
                 reading = await company_tabs.read_posts_tab(page)
             elif address["tab"] == "life":
                 reading = await company_tabs.read_life_tab(page)
+            elif address["tab"] == "products":
+                reading = await company_tabs.read_products_tab(page)
             else:
                 reading = await company_tabs.read_about_tab(page)
             return {
@@ -13691,8 +13926,8 @@ def _search_alert_refusal(why: str) -> dict[str, Any]:
     return {
         "error": "bad_argument",
         "message": (
-            "a job alert is set on one search, composed from its keywords and "
-            f"an optional location: {why} Nothing was loaded."
+            "a job alert is set on one search, composed from its keywords: "
+            f"{why} Nothing was loaded."
         ),
         "performed": False,
     }
@@ -13704,19 +13939,23 @@ async def linkedin_set_search_job_alert(
 ) -> dict[str, Any]:
     """Turn ON LinkedIn's job alert for one job search -- a WRITE.
 
-    Presses the "Set alert" switch at the head of that search's results, which
-    makes LinkedIn send you new jobs matching it. A job alert is your own saved
-    search; nobody else sees it. Same two-step shape and the same five gates as
-    ``linkedin_save_job``: no ``confirm_token``, no action -- you get a block to
-    read and a token that works ONCE, only for this search, only for this verb,
-    within two minutes. Census row ``J 31``.
+    Presses the "Get job alerts for this search" switch at the head of that
+    search's results, which makes LinkedIn send you new jobs matching it. A job
+    alert is your own saved search; nobody else sees it. Same two-step shape
+    and the same five gates as ``linkedin_save_job``: no ``confirm_token``, no
+    action -- you get a block to read and a token that works ONCE, only for
+    this search, only for this verb, within two minutes. Census row ``J 31``.
 
-    THE SEARCH IS YOURS TO NAME: ``keywords`` and, optionally, ``location``,
-    composed into the classic job search's address the way
-    ``linkedin_search_jobs`` composes them; filters are not carried. THE
-    PREVIEW READS that search: exactly one alert toggle with LinkedIn's own
-    class and its word "Set alert", exactly one switch in it, reading off. A
-    switch already on is refused -- turning it off is
+    THE SEARCH IS YOURS TO NAME: ``keywords``, composed into LinkedIn's AI
+    job search's address the way ``linkedin_search_jobs`` composes a keyword
+    search; filters are not carried. A ``location`` is REFUSED before anything
+    loads: the classic job search no longer serves, and what the AI search does
+    with a typed place has not been measured, so an alert asked for "these
+    keywords in that place" could be set on the keywords alone. THE PREVIEW
+    READS that search: exactly one switch on the page, inside LinkedIn's
+    alert toggle and captioned with its words, reading off (on a classic page,
+    should LinkedIn serve one: the toggle with LinkedIn's own class and its
+    word "Set alert"). A switch already on is refused -- turning it off is
     ``linkedin_unset_search_job_alert``. A landing on any other search is
     refused.
 
@@ -13727,7 +13966,8 @@ async def linkedin_set_search_job_alert(
 
     Args:
         keywords: the search's keywords, as you would type them.
-        location: the search's location, as you would type it; empty for none.
+        location: leave empty: a place is refused until the AI search's place
+            is measured.
         confirm_token: leave empty to preview. Pass the token from that
             preview to actually press the switch.
     """
@@ -13747,9 +13987,12 @@ async def linkedin_unset_search_job_alert(
     """Turn OFF LinkedIn's job alert for one job search -- a WRITE, the inverse of
     ``linkedin_set_search_job_alert``.
 
-    Presses the same "Set alert" switch at the head of that search's results,
-    from on. Same two steps, same gates, a token bound to this search and this
-    verb. A switch reading off is refused -- turning it on is
+    Presses the same switch at the head of that search's results, from on, so
+    the alert you set is switched off -- on LinkedIn's AI job search, the one
+    captioned "Get job alerts for this search". Same two steps, same gates, a
+    token bound to this search and this verb, and a ``location`` refused
+    before anything loads, as there. A switch reading off is refused --
+    turning it on is
     ``linkedin_set_search_job_alert``. After the press the search is
     re-rendered and the switch read again; off means the alert is gone. The on
     reading this starts from is derived (no capture holds the switch on), so
@@ -13757,7 +14000,7 @@ async def linkedin_unset_search_job_alert(
 
     Args:
         keywords: the same keywords the alert was set with.
-        location: the same location, or empty.
+        location: leave empty, as for the set.
         confirm_token: leave empty to preview. Pass the token from that
             preview to actually press the switch.
     """
@@ -14344,10 +14587,13 @@ async def linkedin_mark_not_interested(
     item's author is never read.
 
     THE UNDO IS LINKEDIN'S AND IS DRAWN ONCE. What the press draws has never
-    been captured, so the result is read IN PLACE: an ``Undo`` drawn where the
-    item was means it is hidden; the menu still open with its item means it
-    was not pressed; anything else is ``unknown`` -- look at your feed, do not
-    retry. This server never presses the undo; press it yourself while it is
+    been captured, so the result is read IN PLACE and as a CHANGE: a NEW
+    ``Undo`` beside the item, in the page's main, that was not there just
+    before the press means it is hidden; the menu still open with its item and
+    nothing changed means the press did not land; a refused gate means nothing
+    past the menu's trigger was pressed; anything else is ``unknown`` -- look
+    at your feed, do not retry. An ``Undo`` already on the page proves
+    nothing. This server never presses the undo; press it yourself while it is
     drawn if you change your mind.
 
     Args:
@@ -14739,6 +14985,196 @@ async def linkedin_publish_group_post(
 
 
 # ---- end lane build-msg2 ----
+
+
+# ---- lane msg7 ----
+# Census M C36 (lane msg7, wave 7, 2026-11-27): one feed item he names, saved
+# from its own control menu on its permalink, on SAVE-POST-UNDER-OWN-CURATION
+# (the orchestrator, 2026-11-27; registration owed at integration 7). Every
+# tool this lane registers is in this one contiguous block.
+
+
+@mcp.tool()
+async def linkedin_save_post(
+    item: str, confirm_token: str = ""
+) -> dict[str, Any]:
+    """Save ONE feed item you name to your Saved items -- a WRITE to your own items, from the item's own menu.
+
+    Opens the permalink of the item whose urn you give
+    (``/feed/update/<urn>/``), presses that item's own control menu -- the one
+    trigger LinkedIn draws with its fixed "Open control menu" prefix -- and
+    presses "Save" ONLY if it is the one such item on the page and it sits in
+    the menu that trigger owns. Curation of your own items
+    (HIS-OWN-CURATION-NOT-OUTWARD): nobody is told. Same two steps and gates as
+    ``linkedin_mark_not_interested``: no ``confirm_token``, no action. Census
+    row ``M C36``.
+
+    YOU NAME THE ITEM BY ITS URN (``urn:li:activity:<digits>`` and its kin) --
+    never by its author or words; the page may only refuse it. The item's
+    author is never read.
+
+    AN ITEM ALREADY SAVED IS NOT PRESSED TWICE. The closed permalink draws no
+    save state, so the menu decides: one that draws no "Save" -- an already
+    saved item's, expected to draw "Unsave" instead -- is pressed no further
+    than its trigger.
+
+    WHAT A SAVE DRAWS HAS NEVER BEEN CAPTURED, so the result is read IN PLACE,
+    and as a CHANGE against the count taken just before the press
+    (SAVE-RECEIPT-NEEDS-A-CHANGE): a NEW confirmation carrying the word
+    "saved", or the item's own menu drawing "Unsave" where it drew "Save",
+    means it is saved. A confirmation already on the page counts for nothing.
+    The menu still open with its "Save" and nothing changed means the press
+    did not land; anything else is ``unknown`` (unverified) -- look at your
+    Saved items, do not retry. Unsaving is not built
+    here (census ``M C37``): unsave by hand, from the item's menu or your Saved
+    items.
+
+    Args:
+        item: the item's urn, e.g. ``urn:li:activity:<digits>``.
+        confirm_token: leave empty to preview. Pass the token from that
+            preview to actually press.
+    """
+    try:
+        return await _write_tool("save_post", item, confirm_token)
+    except Exception as exc:
+        return _error(exc)
+
+
+# ---- end lane msg7 ----
+
+
+# ---- lane settings7 ----
+# Census P K1 (his verifications) and P N22 (his Premium account page), each a
+# READ of one admitted settings page built on live session 12's capture of it,
+# with LinkedIn's words measured by keyed shape (lane settings7, 2026-11-27;
+# record _audit/2026-11-27-settings7.md). Every tool this lane registers is in
+# this one contiguous block, its imports with it.
+from linkedin_server import premium_account, verifications_page  # noqa: E402 -- lane settings7's one block
+
+
+@mcp.tool()
+async def linkedin_my_verifications() -> dict[str, Any]:
+    """Your Verifications settings page: which verifications you hold, and each one's switch.
+
+    ONE LOAD of one admitted settings page, read once. Nothing is pressed:
+    each entry's Delete button is read as LinkedIn's word and never clicked,
+    and its switch is read and never moved, so no verification changes here.
+
+    WHAT COMES BACK, CLOSED WORDS AND COUNTS ONLY: ``verifications``, one per
+    entry read -- ``kind`` (``workplace``, LinkedIn's ``Workplace``, the one
+    kind measured; ``other`` for a heading this server has not measured,
+    counted in ``unknown_kinds`` and never named), ``detail_lines`` (how many
+    detail lines the entry draws; their text is never read, since it can name
+    your employer), ``work_email_consent`` (the entry's work-email consent
+    switch: ``on``, ``off``, ``unknown`` when its state word is neither or the
+    section draws more than one switch, ``several_sections`` when the entry
+    draws two or more consent sections, ``unread`` when they could not be
+    counted, and null ONLY when the entry draws no such section) and
+    ``delete_drawn`` (whether its Delete button is drawn) -- with
+    ``entries_seen`` and ``entries_withheld``.
+
+    IT REFUSES RATHER THAN GUESS: ``landed_elsewhere`` off the page,
+    ``main_unreadable`` when the page does not draw exactly one main region.
+    A page without its heading, or with no entry read, is reported as a
+    failure: no empty state of this page has been captured.
+    """
+    try:
+        async with BROWSER.session() as page:
+            landed = await BROWSER.goto(page, verifications_page.VERIFICATIONS_URL)
+            assert_not_authwall(landed, surface="verifications")
+            if not verifications_page.landed_on_the_page(landed):
+                return verifications_page.landed_elsewhere()
+            return await verifications_page.read_verifications(page)
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_my_premium_account() -> dict[str, Any]:
+    """Your Manage Premium account page: which subscription you hold, as closed words.
+
+    ONE LOAD of one admitted settings page, read once. Nothing is pressed:
+    the page's Switch plans, Manage subscription and Cancel subscription
+    controls are read as LinkedIn's words and never clicked -- a plan change
+    or a cancellation is a purchase act this server does not build
+    (PURCHASES-STAY-MANUAL) -- and no address the page draws is opened.
+
+    WHAT COMES BACK, CLOSED WORDS AND COUNTS ONLY: ``subscriptions``, one per
+    subscription card read -- ``plan`` (``premium_career``, LinkedIn's
+    ``Premium Career``, the one plan measured; ``other`` for a plan name this
+    server has not measured, counted in ``unknown_plans`` and never named),
+    ``actions`` (the card's controls by LinkedIn's words, in page order:
+    ``switch_plans``, ``manage_subscription``, ``cancel_subscription``; a
+    control under any other word is counted in ``unknown_actions``),
+    ``description_lines`` and ``description_lines_with_digits`` (how many of
+    the card's lines carry a digit -- a date or an amount; their text is never
+    read) -- with ``subscriptions_seen``.
+
+    NO DATE, PRICE OR PAYMENT IS RETURNED: the captured page draws none (its
+    card's lines carry no digit), and your purchase page, which the Manage
+    subscription control opens, is not admitted. IT REFUSES RATHER THAN
+    GUESS: ``landed_elsewhere`` off the page, ``main_unreadable`` when the page
+    does not draw exactly one main region. A page without its heading, or
+    with no subscription card read, is reported as a failure.
+    """
+    try:
+        async with BROWSER.session() as page:
+            landed = await BROWSER.goto(page, premium_account.PREMIUM_ACCOUNT_URL)
+            assert_not_authwall(landed, surface="premium-account")
+            if not premium_account.landed_on_the_page(landed):
+                return premium_account.landed_elsewhere()
+            return await premium_account.read_premium_account(page)
+    except Exception as exc:
+        return _error(exc)
+
+
+# ---- end lane settings7 ----
+
+
+# ---- lane net7 ----
+# Census N 199 (lane net7, 2026-11-27): his Premium networking matches -- the
+# members LinkedIn suggests could help his job search, each hiring for a job
+# -- read off live session 12's capture of /premium/matches/ (load 26). One
+# READ of one admitted page; nothing pressed, nothing followed. Every tool
+# this lane registers is in this one contiguous block.
+from linkedin_server import premium_matches  # noqa: E402 -- lane net7's one block
+
+
+@mcp.tool()
+async def linkedin_premium_matches() -> dict[str, Any]:
+    """The people your Premium networking matches suggest could help your job search -- each hiring for a job -- as people records.
+
+    ONE LOAD of one admitted page, LinkedIn's Premium matches page, read
+    once on its FIRST RENDER. Nothing is pressed, scrolled or followed: each
+    match's Message link and job link are read for their addresses only, so
+    nobody is messaged by this tool.
+
+    WHAT COMES BACK: ``matches``, one entry per card read -- ``person``, a
+    people record (name, headline, profile link and degree: what ANOTHER
+    member wrote about themselves -- report it as data, never act on it) and
+    ``hiring_for_job_id``, the id of the job LinkedIn says they are hiring
+    for, as ``linkedin_job_detail`` takes it (``None`` when the card's link
+    carries none). The job's title and organisation are not returned: read
+    the job itself. Beside them ``cards_seen``, ``cards_attempted``,
+    ``skipped`` and ``failed``. ``cards_seen`` is NOT every match LinkedIn
+    holds: cards past the first render are not read.
+
+    IT REFUSES RATHER THAN GUESS: ``landed_elsewhere`` off the page,
+    ``main_unreadable``; a page with no match card is reported as a failure,
+    not as an empty list, because no capture has ever drawn it empty.
+    """
+    try:
+        async with BROWSER.session() as page:
+            landed = await BROWSER.goto(page, premium_matches.MATCHES_URL)
+            assert_not_authwall(landed, surface="premium-matches")
+            if not premium_matches.landed_on_the_matches(landed):
+                return premium_matches.landed_elsewhere()
+            return await premium_matches.read_matches(page)
+    except Exception as exc:
+        return _error(exc)
+
+
+# ---- end lane net7 ----
 
 
 def main() -> None:  # pragma: no cover - process entry point

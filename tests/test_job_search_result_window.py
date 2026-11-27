@@ -244,6 +244,10 @@ async def test_a_page_smaller_than_the_limit_says_so(drive):
     False, 'limit': 25, ...}``.
     """
     page = FakePage(evaluate_result=_THREE_DISTINCT_SEARCH_CARDS)
+    # Since lane jobs7 a keyword search asks for the AI address; this page is
+    # LinkedIn serving its classic one there, whose seven-card window this note
+    # is about.
+    page.redirect_to = "https://www.linkedin.com/jobs/search/?keywords=node.js+engineer"
     drive(page)
 
     result = await linkedin_search_jobs(keywords="node.js engineer", limit=25)

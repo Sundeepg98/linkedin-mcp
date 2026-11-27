@@ -1088,6 +1088,18 @@ WHAT_WOULD_DRIVE_IT: dict[str, str] = {
         "constants on every path. Its behaviour is held over fake contexts by "
         "tests/test_the_last_tab_is_never_closed.py."
     ),
+    #: ADDED 2026-11-27 (lane prof7, SELF-LOADER-WAITS-FOR-THE-REWRITE): the
+    #: bounded wait on LinkedIn's client-side rewrite of /in/me/, shared by
+    #: the self-profile loader, the press gate and the live harness.
+    #: Discovered here because it takes a ``page``; it reads nothing ON it.
+    "self_profile:await_rewrite": (
+        "NOT A PAGE READER: it reads only page.url -- no locator, no script, "
+        "no page content -- polling it, bounded, while it names the bare self "
+        "alias, and returns closed words and integers on every path (one of "
+        "self_profile.REWRITE_WORDS, the milliseconds waited, the polls), never "
+        "the address. Its behaviour, an address that raises a page string "
+        "included, is held by tests/test_self_profile_waits_for_the_rewrite.py."
+    ),
     #: ADDED 2026-09-28 (lane L5, the first-contact path of
     #: message_from_profile): the one overlay bubble holding a composer, read
     #: through the piercing engine. Its success path is a bubble a Message
@@ -1473,6 +1485,9 @@ WHAT_WOULD_DRIVE_IT: dict[str, str] = {
         "label, back only inside the person records. A shipped_drives double "
         "is not built."
     ),
+    "premium_matches:read_matches": (
+        "CAPTURE: the Premium matches page, each card a job link opening 'Hiring for' beside one member link -- on the planted page no job link carries LinkedIn's words, so no card is found and the read raises, building no record. tests/fixtures/synthetic/live12_premium_matches_words.html draws it, and tests/test_premium_matches.py drives this reader over it in a headless browser, two synthetic members planted, a name planted in every name slot and every label, back only inside the person records. A shipped_drives double is not built."
+    ),
     # Lane build-msg2, 2026-11-26: the conversation menu's closing wait.
     "conversation_menu:_wait_for_closed": (
         "NOT A PAGE READER: a bounded wait that returns how many polls it took "
@@ -1497,6 +1512,18 @@ WHAT_WOULD_DRIVE_IT: dict[str, str] = {
         "pill reads open, which the planted page never draws. "
         "tests/test_messaging_folders.py drives it over a dropdown a choice "
         "left open."
+    ),
+    # Lane msg7, 2026-11-27 (CAPTURE-SHOWS-READER-BLIND-DEMOTES): the
+    # server-driven notifications page's cards, one step of
+    # notification_cards.harvest.
+    "notification_cards:_read_cards": (
+        "CAPTURE: /notifications/ as live session 12 drew it, server-driven "
+        "(tests/fixtures/live12/notifications.html): its success path needs a "
+        "full-card link labelled from inside itself, which the planted page "
+        "never draws -- its counts answer in strings, read as 0 -- so it finds "
+        "no card. notification_cards.harvest, its only caller, is driven clean, "
+        "and tests/test_notification_cards.py drives this step over that "
+        "capture in a real engine: 10 records, session 5's page the control."
     ),
 }
 

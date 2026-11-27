@@ -1,4 +1,28 @@
-"""The tool surface: one hundred and seven tools, sixty-eight of which do not write.
+"""The tool surface: one hundred and eleven tools, seventy-one of which do not write.
+
+**IT READ "one hundred and ten tools, seventy of which do not write" UNTIL
+INTEGRATION 7 MERGED LANE NET7 (2026-11-27)**, its one READ beside the
+others; measured off the merged registry, not summed.
+
+**IT READ "one hundred and seven tools, sixty-eight of which do not write"
+UNTIL LANE NET7 (2026-11-27)**: one READ, ``linkedin_premium_matches``
+(census ``N 199``), so sixty-nine do not write. Measured off this branch's
+registry, not summed; the integrator re-derives it on the merged tree.
+
+**IT READ "one hundred and eight tools, sixty-eight of which do not write"
+UNTIL INTEGRATION 7 MERGED LANE SETTINGS7 (2026-11-27)**, its two READS beside
+lane msg7's write; measured off the merged registry, not summed.
+
+**IT READ "one hundred and seven tools, sixty-eight of which do not write"
+UNTIL LANE SETTINGS7 (2026-11-27)**: that lane's two READS
+(``linkedin_my_verifications``, ``linkedin_my_premium_account``) beside the
+one hundred and seven, so seventy do not write. Measured off this branch's
+registry, not summed.
+
+**IT READ "one hundred and seven tools, sixty-eight of which do not write" UNTIL
+LANE MSG7 (2026-11-27)**: ``linkedin_save_post`` (census M C36), one feed
+item he names saved from its own permalink menu, a WRITE, so the non-write
+count holds at sixty-eight. Measured off the registry, not summed.
 
 **IT READ "ninety-nine tools, sixty-six of which do not write" UNTIL
 INTEGRATION 6'S MERGE OF LANE BUILD-MSG2 (2026-11-26)**: that lane's six
@@ -356,6 +380,9 @@ SANCTIONED_WRITE_TOOLS = frozenset(SANCTIONED_WRITES) & {
     # 2026-11-26 (lane build-net2, census N 154): Not interested on one feed
     # item he names. Its NAME announces the write ("mark").
     "linkedin_mark_not_interested",
+    # 2026-11-27 (lane msg7, census M C36): Save on one feed item he names.
+    # Its NAME announces the write ("save").
+    "linkedin_save_post",
 }
 
 #: THE DOCSTRING EXEMPTION IS THE SAME SET AS THE NAME EXEMPTION, and it took
@@ -488,6 +515,20 @@ EXPECTED_TOOLS = {
     "linkedin_my_following_list",
     "linkedin_my_unfollowed_list",
     "linkedin_my_advertising_data",
+    # THE ONE HUNDRED AND EIGHTH AND NINTH, 2026-11-27 (lane settings7, each
+    # built on live session 12's capture of its page, LinkedIn's words
+    # measured by keyed shape): two READS, each of one admitted settings page
+    # with no press -- his Verifications page (census P K1), each verification
+    # by its kind, its work-email consent switch and whether its Delete is
+    # drawn; and his Manage Premium account page (P N22), each subscription's
+    # plan and controls as closed words. They write nothing and are on no
+    # write table.
+    "linkedin_my_verifications",
+    "linkedin_my_premium_account",
+    # 2026-11-27 (lane net7, built on live session 12's capture of its page):
+    # one READ of one admitted page with no press -- his Premium networking
+    # matches, each member a people record beside a job id (census N 199).
+    "linkedin_premium_matches",
     # THE THIRTY-EIGHTH, 2026-09-05: linkedin_events_home, a READ. No
     # write was added. It is the only tool here whose whole answer can be
     # ZERO, and its reader returns that integer only when four
@@ -806,6 +847,9 @@ EXPECTED_TOOLS = {
     "linkedin_ignore_invitation_to_connect",
     "linkedin_withdraw_invitation",
     "linkedin_mark_not_interested",
+    # 2026-11-27 (lane msg7, census M C36): Save on one feed item he names.
+    # Its NAME announces the write ("save").
+    "linkedin_save_post",
     "linkedin_recent_searches",
     # THE FIFTY-EIGHTH AND FIFTY-NINTH, 2026-09-27 (lane L5's follow-up, at
     # its merge of master 52b55b6), two WRITES: see SANCTIONED_WRITE_TOOLS.
@@ -927,8 +971,32 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_one_hundred_and_seven_tools(tools):
-    """RENAMED AGAIN AT INTEGRATION 6'S MERGE OF LANE BUILD-MSG2 (2026-11-26), to
+async def test_the_surface_is_exactly_the_one_hundred_and_eleven_tools(tools):
+    """RENAMED AGAIN AT INTEGRATION 7 (2026-11-27), merge 5, to
+    ``..._one_hundred_and_eleven_tools``: lane net7's read (census N 199)
+    beside the one hundred and ten, measured off the merged registry.
+
+    RENAMED AGAIN ON LANE NET7 (2026-11-27), to
+    ``..._one_hundred_and_eight_tools``: one READ, ``linkedin_premium_matches``
+    (census N 199), beside the one hundred and seven. MEASURED off this
+    branch's registry; the name moved with the pin.
+
+    RENAMED AT INTEGRATION 7 (2026-11-27), to
+    ``..._one_hundred_and_ten_tools``: lane settings7's two reads (census
+    P K1, P N22) beside lane msg7's write, measured off the merged registry;
+    each lane's branch had renamed it for its own count (below).
+
+    RENAMED AGAIN ON LANE SETTINGS7 (2026-11-27), to
+    ``..._one_hundred_and_nine_tools``: its two reads (census P K1, P N22)
+    beside the one hundred and seven. MEASURED off this branch's registry, not
+    summed; the name moved with the pin.
+
+    RENAMED AGAIN ON LANE MSG7 (2026-11-27), to
+    ``..._one_hundred_and_eight_tools``: ``linkedin_save_post`` (census M C36)
+    beside the one hundred and seven. MEASURED off the registry; the name moved
+    with the pin.
+
+    RENAMED AGAIN AT INTEGRATION 6'S MERGE OF LANE BUILD-MSG2 (2026-11-26), to
     ``..._one_hundred_and_seven_tools``: lane build-msg2's eight tools beside
     the ninety-nine. MEASURED off the merged registry, not summed; the name
     moved with the pin. (Lane build-msg2's branch named it
@@ -1565,7 +1633,16 @@ async def test_the_surface_is_exactly_the_one_hundred_and_seven_tools(tools):
     # build-msg2's eight beside the ninety-nine (its branch read ninety-nine
     # too, so the two equal asserts below merged as one). MEASURED off
     # mcp.list_tools(), not summed.
-    assert len(tools) == 107
+    # ONE HUNDRED AND EIGHT ON LANE MSG7 (2026-11-27): linkedin_save_post, a WRITE.
+    # ONE HUNDRED AND NINE ON LANE SETTINGS7 (2026-11-27): two READS, so the
+    # split moves on its read side. MEASURED off mcp.list_tools(), not summed.
+    # ONE HUNDRED AND TEN AT INTEGRATION 7, MERGE 4 (2026-11-27): both lanes' tools, MEASURED off
+    # mcp.list_tools() on the merged tree, not summed.
+    # ONE HUNDRED AND EIGHT ON LANE NET7 (2026-11-27): one READ,
+    # linkedin_premium_matches. MEASURED off mcp.list_tools(), not summed.
+    # ONE HUNDRED AND ELEVEN AT INTEGRATION 7, MERGE 5 (2026-11-27): every lane's tools, MEASURED off
+    # mcp.list_tools() on the merged tree, not summed.
+    assert len(tools) == 111
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -1633,6 +1710,7 @@ async def test_the_surface_is_exactly_the_one_hundred_and_seven_tools(tools):
         "linkedin_ignore_invitation_to_connect",
         "linkedin_withdraw_invitation",
         "linkedin_mark_not_interested",
+        "linkedin_save_post",
     }
     # THE NON-WRITE COUNT MOVES TO SIXTEEN, and the reason is NOT the reason
     # it moved last time. The comment here said: "THE READ COUNT MOVES OFF
@@ -1871,8 +1949,18 @@ async def test_the_surface_is_exactly_the_one_hundred_and_seven_tools(tools):
     # second copy of the total moves to the measured ninety-nine.
     # ONE HUNDRED AND SEVEN AND SIXTY-EIGHT AT INTEGRATION 6'S MERGE OF LANE BUILD-MSG2 (2026-11-26):
     # build-msg2's two reads and six writes beside the ninety-nine. MEASURED.
-    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 68
-    assert len(tools) == 107
+    # ONE HUNDRED AND EIGHT ON LANE MSG7 (2026-11-27): linkedin_save_post, a WRITE.
+    # SEVENTY AND ONE HUNDRED AND NINE ON LANE SETTINGS7 (2026-11-27): its two
+    # READS move the non-write count by two, and this second copy of the total
+    # moves with the first test's pin. MEASURED.
+    # SEVENTY AND ONE HUNDRED AND TEN AT INTEGRATION 7, MERGE 4 (2026-11-27): settings7's two reads
+    # and msg7's write in one registry, MEASURED.
+    # ONE HUNDRED AND EIGHT AND SIXTY-NINE ON LANE NET7 (2026-11-27): one READ,
+    # linkedin_premium_matches. MEASURED.
+    # SEVENTY-ONE AND ONE HUNDRED AND ELEVEN AT INTEGRATION 7, MERGE 5 (2026-11-27): net7's read
+    # beside the others in one registry, MEASURED.
+    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 71
+    assert len(tools) == 111
 
 
 def test_the_read_that_was_nearly_named_a_write():
@@ -2016,6 +2104,7 @@ async def test_the_exemption_covers_only_the_names_on_it(tools):
         "linkedin_ignore_invitation_to_connect",
         "linkedin_withdraw_invitation",
         "linkedin_mark_not_interested",
+        "linkedin_save_post",
     }
     # The probe has to be genuinely sanctioned for this to test the thing it
     # claims to. A name nobody ever specced would only show that made-up names
@@ -2480,6 +2569,9 @@ async def test_server_info_stops_claiming_read_only_once_writes_are_on(monkeypat
         # siblings, because a derived list would admit the eighth silently.
         "react_to_item",
         "save_job",
+        # 2026-11-27 (lane msg7, census M C36), typed here by hand, in its
+        # sorted place.
+        "save_post",
         # THE NINETEENTH, 2026-10-10 (census M M14 / M15 / M18, lane U), typed
         # here by hand: one file into one conversation he names, its bytes
         # handed over as read and compared, SENT only off a fresh load.
@@ -2605,6 +2697,9 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
         # typed here by somebody who meant it.
         "react_to_item",
         "save_job",
+        # 2026-11-27 (lane msg7, census M C36), typed here by hand, in its
+        # sorted place.
+        "save_post",
         # THE NINETEENTH, 2026-10-10 (census M M14 / M15 / M18). Typed by
         # hand, as this list requires, by the lane that built it (lane U).
         "send_attachment",
@@ -3068,6 +3163,8 @@ async def test_the_server_instructions_name_every_write_that_ships():
         # six beside the twenty-nine; only thirty-five is reached.
         31: "thirty-one", 32: "thirty-two", 33: "thirty-three",
         34: "thirty-four", 35: "thirty-five",
+        # THIRTY-SIX ON LANE MSG7 (2026-11-27): save_post, the KeyError named it.
+        36: "thirty-six",
     }
     assert f"{words[len(writes.PERFORMABLE)]} write" in text
     for action in writes.PERFORMABLE:
