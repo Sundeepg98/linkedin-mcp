@@ -13289,3 +13289,48 @@ contact. Not exercised live: the re-proof's block kept the editor unpressed.
 `aim_probe_keyed.py`, `e5_preread.py`, the newsletter and organisation-heading
 readers, and the history classifier behind E1's diagnosis. None was shown
 failing on a planted defect.
+
+## 117. A LANDING IS JUDGED WHERE THE PAGE ARRIVES, AND A DRAWN TARGET IS PRESSED ONLY WHEN IT IS EXACTLY AN ADDRESS THIS REPOSITORY FORMED (prof7, 2026-11-27)
+
+Lane prof7's two instruments, each SHOWN FAILING before it was trusted. The
+record is `_audit/2026-11-27-prof7.md`, sections 1 and 2.
+
+### 117.1 The rewriting page: a page that moves its own address after a delay
+
+`tests/test_self_profile_waits_for_the_rewrite.py`. A local page served AT the
+self alias `/in/me/`, its markup session 11's tracked landing, whose own
+script moves its address with `history.replaceState` after one second -- the
+same-document change the live lane's session 12 found in the browser's
+history (E1). It drives the SHIPPED self-profile loader through all three of
+its callers, the press gate and the live harness's press step; the controls
+(the alias never moving, moving after the bound, to the feed, beneath a root,
+to another member's path, another member's profile at his path, onto the
+signed-out wall) refuse on both trees. SHOWN FAILING: 28 red on the unfixed
+tree, the loader's callers refusing `self_assertion_unreadable` after two
+loads with `landed_on_member_path` false -- session 12's E1, reproduced
+offline -- and the press gate pressing before the page arrived.
+
+    A LANDING READ BEFORE THE PAGE HAS ARRIVED IS A READING OF THE WRONG
+    PAGE. WAIT, BOUNDED, ON THE ADDRESS -- AND JUDGE WHERE IT LANDS.
+
+### 117.2 The exact-match verdict, and the seven mutants that prove its guards
+
+`linkedin_server/volunteering_route.match_verdict` and
+`tests/test_volunteering_fallback_boundary.py`. A target the page drew -- an
+href, a menu item's declared address -- is a press target only when, the
+proven member read as `me`, it is EXACTLY the address this repository formed
+from the caller's own argument: one parameter, the member-id shape, no
+fragment, ASCII-only case folding inside the closed segment alphabet. Its
+answer is one of eight closed words; the formed address never reaches a log,
+an exception or a verdict. SHOWN FAILING: seven planted mutants (a disposable
+pytest plugin in the lane's scratch), each disabling ONE guard -- the shape
+check, the id comparison, the argument (the page's id used instead), the
+one-parameter rule, the no-log rule, the ASCII fold, the boundary line's id
+shape -- each caught by FAILED tests, none by an error.
+
+    THE PAGE MAY VETO A PRESS. IT NEVER SUPPLIES THE ADDRESS, AND A MATCH IS
+    NEVER A FOLLOW.
+
+**Disposable** (the lane's scratch folder): the keyed-shape scanner of his
+root's entries, the creator-hub path-word matcher, and the queue and
+next-step editors. None was shown failing on a planted defect.

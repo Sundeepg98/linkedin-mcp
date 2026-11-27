@@ -1146,6 +1146,59 @@ after a press; `M C3`, `M C4`, `M C6` and `M C7` stay GAP and cite the
 ruling. Reopener: an audience the server can read. Rows `M C3` and `M C4`:
 next step this question, held, until the reopener is met.
 
+### Q-SELF-ROOT-FORM-LINKS -- a form his own profile root reaches only by a link
+
+Added 2026-11-27 by lane prof7 (`_audit/2026-11-27-prof7.md`, section 3).
+Rows: `P A26` to `P A29`, `P D2`, `P D5`, `P D6`, `P D8`, `P D9`, `P D27`,
+`P H1` (queue lines 30, 31, 64, 67, 68). Live session 12 found every
+`/in/me/edit/` and `/in/me/opportunities/` address landing on his profile root
+with no form (6 of 6). On the nine keyed skeletons of his root (sessions 11
+and 12, matched offline in LinkedIn's own words) every drawn entry to those
+forms is a LINK -- `Edit about`, `Edit profile language`, the services card,
+the top card's `Contact info` -- and LINKS-ARE-NOT-DISCLOSURES vetoes link
+presses on his profile. The question: may a capture press such a link when
+its target, his proven member read as `me`, is exactly the address the
+boundary already admits for that line?
+
+**Answered 2026-11-27 by the orchestrator** (13:00, amended 13:10; on disk
+to lane prof7; registration owed at integration 7):
+SELF-ROOT-LINK-PRESS-BY-EXACT-MATCH, attended only. A link drawn on his root
+is pressed only when its href is EXACTLY the admitted address for that line,
+the landed member, proven his by the self-profile loader, read as `me`: a
+match, never a follow, and any difference vetoes. The match includes any
+query the admission itself carries (rank 31's entry-point query), and nothing
+the page adds. The contact-info line takes the rule twice (the overlay link,
+then the form's own link inside it). A press that navigates is a load. In the
+editor, labels and states only, nothing typed or saved, no Save, Submit,
+Delete or Remove in the closed list; closed by Escape or its exact Dismiss
+and verified gone; his root read before and after, its structure unchanged.
+No row moves on the ruling; the rows' next steps are those queue lines'
+session-14 captures.
+
+### Q-VOLUNTEERING-ID-FROM-HIS-ARGUMENTS -- a page every drawn route reaches with his own id
+
+Added 2026-11-27 by lane prof7 (`_audit/2026-11-27-prof7.md`, section 3).
+Row: `P D24` (queue line 69). VOLUNTEERING-BARE-SPELLING-FIRST's reopener is
+met: the bare spelling landed on his profile root (live session 12, load
+22). Every drawn route to the page carries `?profileId=` -- his root's card
+link on all nine keyed skeletons, and the `Open to` menu's volunteering item
+(`_audit/_slice-otw-census.md`) -- an id the page supplies, which
+SELF-ROOT-LINK-PRESS-BY-EXACT-MATCH vetoes. The question: does the ruling's
+fallback, profileId from tool arguments at runtime (his own id, never
+stored), now get its boundary line -- or does `P D24` hold?
+
+**Answered 2026-11-27 by the orchestrator** (13:10; on disk to lane prof7;
+registration owed at integration 7): VOLUNTEERING-FALLBACK-BOUNDARY, yes. The
+boundary line is built in lane prof7, red first: the drawn spelling with one
+member-id-shaped `profileId`, the id ONLY from the caller's arguments at
+runtime (for the live runner, the gitignored identity key's operator class),
+validated by shape, never stored, logged, committed or kept in a raw; a
+missing or ill-shaped id refuses; the page never supplies it, so his root's
+card link -- or the `Open to` menu's item, by the same match -- is pressed
+only when its target equals the address formed from his argument. Row
+`P D24` moves no state; its next step is the session-14 capture under that
+match, attended.
+
 ## 8. Preconditions and purposes
 
 PRECONDITION rows stay GAP; each waits on something he does not hold.

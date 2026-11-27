@@ -290,14 +290,14 @@ N 116	N	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 N 117	N	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 N 119	N	W	R3	TARGET:a 1st-degree connection he names, to ask for a recommendation	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::| C4 | `request_recommendation` ; RULING:OPERATOR-NAMES-THE-TARGET
 N 120	N	W	R3	TARGET:a 1st-degree connection he names, to recommend	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::| C5 | `give_recommendation` ; RULING:OPERATOR-NAMES-THE-TARGET
-N 121	N	W	R3	CAPTURE:admit-in-me-details-recommendations	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::(his recommendations section, refused by allowlist silence until admitted) ; RULING:READ-PAST-AN-ACT-SUBSTRING
-N 122	N	W	R3	CAPTURE:admit-in-me-details-recommendations	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::(his recommendations section, refused by allowlist silence until admitted) ; RULING:READ-PAST-AN-ACT-SUBSTRING
-N 123	N	W	R3	CAPTURE:admit-in-me-details-recommendations	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::(his recommendations section, refused by allowlist silence until admitted) ; RULING:READ-PAST-AN-ACT-SUBSTRING
+N 121	N	W	R3	CAPTURE:admit-in-me-details-recommendations	MEASURED	tests/fixtures/live12/recommendations.html ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
+N 122	N	W	R3	CAPTURE:admit-in-me-details-recommendations	MEASURED	tests/fixtures/live12/recommendations.html ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
+N 123	N	W	R3	CAPTURE:admit-in-me-details-recommendations	MEASURED	tests/fixtures/live12/recommendations.html ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
 N 124	N	W	R3	TARGET:a 1st-degree connection he names, to recommend	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::| C5 | `give_recommendation` ; RULING:OPERATOR-NAMES-THE-TARGET
-N 125	N	W	R3	CAPTURE:admit-in-me-details-recommendations	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::(his recommendations section, refused by allowlist silence until admitted) ; RULING:READ-PAST-AN-ACT-SUBSTRING
-N 126	N	W	R3	CAPTURE:admit-in-me-details-recommendations	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::(his recommendations section, refused by allowlist silence until admitted) ; RULING:READ-PAST-AN-ACT-SUBSTRING
-N 127	N	W	R3	CAPTURE:admit-in-me-details-recommendations	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::(his recommendations section, refused by allowlist silence until admitted) ; RULING:READ-PAST-AN-ACT-SUBSTRING
-N 128	N	W	R3	CAPTURE:admit-in-me-details-recommendations	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::(his recommendations section, refused by allowlist silence until admitted) ; RULING:READ-PAST-AN-ACT-SUBSTRING
+N 125	N	W	R3	CAPTURE:admit-in-me-details-recommendations	MEASURED	tests/fixtures/live12/recommendations.html ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
+N 126	N	W	R3	CAPTURE:admit-in-me-details-recommendations	MEASURED	tests/fixtures/live12/recommendations.html ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
+N 127	N	W	R3	CAPTURE:admit-in-me-details-recommendations	MEASURED	tests/fixtures/live12/recommendations.html ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
+N 128	N	W	R3	CAPTURE:admit-in-me-details-recommendations	MEASURED	tests/fixtures/live12/recommendations.html ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
 N 137	N	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 N 138	N	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 N 139	N	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
@@ -359,10 +359,10 @@ P A17	P	W	R3	CAPTURE:C-B1a	NAMED	_audit/_census/write-classes.tsv::queued:AUTOCO
 P A23b	P	W	R3	PRECONDITION:a name-pronunciation recording (only the mobile app records one)	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::`P A23b` (a name-pronunciation recording must first exist
 P A24	P	W	R3	PRECONDITION:a completed identity verification (a verified name to show)	NAMED	_audit/_census/profile.md::no build is appropriate before he has a verified name to show
 P A25	P	R	-	CAPTURE:admit-in-me-isselfprofile-true	INFERRED	_audit/2026-10-10-lane-b1-profile-build.md::THE PANEL IS NOT DRAWN ; _audit/_census/read-addresses.tsv::https://www.linkedin.com/in/me/overlay/contact-info/ ; RULING:SELF-PROFILE-QUERY-VARIANT-ADMITTED
-P A26	P	W	R3	CAPTURE:admit-in-me-edit-contact-info	NAMED	_audit/_census/profile.md::/in/<me>/edit/forms/contact-info/new/ ; _audit/_census/write-classes.tsv::queued:CONTACT-INFO-EDITOR ; RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
-P A27	P	W	R3	CAPTURE:admit-in-me-edit-contact-info	NAMED	_audit/_census/profile.md::/in/<me>/edit/forms/contact-info/new/ ; _audit/_census/write-classes.tsv::queued:CONTACT-INFO-EDITOR ; RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
-P A28	P	W	R3	CAPTURE:admit-in-me-edit-contact-info	NAMED	_audit/_census/profile.md::/in/<me>/edit/forms/contact-info/new/ ; _audit/_census/write-classes.tsv::queued:CONTACT-INFO-EDITOR ; RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
-P A29	P	W	R3	CAPTURE:admit-in-me-edit-contact-info	NAMED	_audit/_census/profile.md::/in/<me>/edit/forms/contact-info/new/ ; _audit/_census/write-classes.tsv::queued:CONTACT-INFO-EDITOR ; RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
+P A26	P	W	R3	CAPTURE:admit-in-me-edit-contact-info	MEASURED	tests/fixtures/live11/in_me_profile.html ; _audit/2026-11-27-prof7.md::SELF-ROOT-LINK-PRESS-BY-EXACT-MATCH ; RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
+P A27	P	W	R3	CAPTURE:admit-in-me-edit-contact-info	MEASURED	tests/fixtures/live11/in_me_profile.html ; _audit/2026-11-27-prof7.md::SELF-ROOT-LINK-PRESS-BY-EXACT-MATCH ; RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
+P A28	P	W	R3	CAPTURE:admit-in-me-edit-contact-info	MEASURED	tests/fixtures/live11/in_me_profile.html ; _audit/2026-11-27-prof7.md::SELF-ROOT-LINK-PRESS-BY-EXACT-MATCH ; RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
+P A29	P	W	R3	CAPTURE:admit-in-me-edit-contact-info	MEASURED	tests/fixtures/live11/in_me_profile.html ; _audit/2026-11-27-prof7.md::SELF-ROOT-LINK-PRESS-BY-EXACT-MATCH ; RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
 P B2	P	W	R3	SIBLING:lane-U	INFERRED	linkedin_server/uploads.py ; _audit/2026-09-28-rulings-build-classes.md::`FILE-UPLOAD-UNSANCTIONED` is therefore a stale label.
 P B3	P	W	R3	CAPTURE:in-me-profile	NAMED	RULING:NO-INDEX-PINNED-JUDGEMENTS ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
 P B4	P	W	R3	SIBLING:lane-S	NAMED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD ; RULING:CREDENTIAL-SETTINGS-NEED-THE-OPERATOR
@@ -377,12 +377,12 @@ P C5	P	W	R3	SIBLING:lane-S	NAMED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD ; RULING:CR
 P C6	P	W	R3	SIBLING:lane-S	NAMED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD ; RULING:CREDENTIAL-SETTINGS-NEED-THE-OPERATOR
 P C7	P	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 P C8	P	R	-	CAPTURE:in-me-profile	NAMED	RULING:NO-INDEX-PINNED-JUDGEMENTS ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
-P D2	P	W	R3	CAPTURE:admit-in-me-edit-forms-summary-new	NAMED	_audit/_census/profile.md::/edit/forms/summary/new/ ; RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
-P D5	P	W	R3	CAPTURE:admit-in-me-edit-forms-position-new	NAMED	_audit/_census/completeness-annotations.tsv::/in/<entity>/edit/forms/position/new ; RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
-P D6	P	W	R3	CAPTURE:admit-in-me-edit-forms-position-new	INFERRED	RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
+P D2	P	W	R3	CAPTURE:admit-in-me-edit-forms-summary-new	MEASURED	tests/fixtures/live11/in_me_profile.html ; _audit/2026-11-27-prof7.md::SELF-ROOT-LINK-PRESS-BY-EXACT-MATCH ; RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
+P D5	P	W	R3	CAPTURE:admit-in-me-edit-forms-position-new	MEASURED	tests/fixtures/live11/in_me_profile.html ; _audit/2026-11-27-prof7.md::SELF-ROOT-LINK-PRESS-BY-EXACT-MATCH ; RULING:OWN-PROFILE-SCROLL-SANCTIONED
+P D6	P	W	R3	CAPTURE:admit-in-me-edit-forms-position-new	INFERRED	tests/fixtures/live11/in_me_profile.html ; _audit/2026-11-27-prof7.md::SELF-ROOT-LINK-PRESS-BY-EXACT-MATCH ; RULING:OWN-PROFILE-SCROLL-SANCTIONED
 P D7	P	W	R3	SIBLING:lane-S	NAMED	_audit/_census/profile.md::/psettings/activity-broadcast ; RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
-P D8	P	W	R3	CAPTURE:admit-in-me-edit-forms-position-new	INFERRED	RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
-P D9	P	W	R3	CAPTURE:admit-in-me-edit-forms-position-new	INFERRED	RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
+P D8	P	W	R3	CAPTURE:admit-in-me-edit-forms-position-new	INFERRED	tests/fixtures/live11/in_me_profile.html ; _audit/2026-11-27-prof7.md::SELF-ROOT-LINK-PRESS-BY-EXACT-MATCH ; RULING:OWN-PROFILE-SCROLL-SANCTIONED
+P D9	P	W	R3	CAPTURE:admit-in-me-edit-forms-position-new	INFERRED	tests/fixtures/live11/in_me_profile.html ; _audit/2026-11-27-prof7.md::SELF-ROOT-LINK-PRESS-BY-EXACT-MATCH ; RULING:OWN-PROFILE-SCROLL-SANCTIONED
 P D11	P	W	R3	CAPTURE:in-me-profile	INFERRED	RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
 P D12	P	W	R3	CAPTURE:in-me-profile	INFERRED	RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
 P D13	P	W	R3	CAPTURE:in-me-profile	INFERRED	RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
@@ -396,10 +396,10 @@ P D20	P	W	R3	CAPTURE:in-me-profile	INFERRED	RULING:PROFILE-EDITOR-ADDRESSES-ALLO
 P D21	P	W	R3	CAPTURE:in-me-profile	INFERRED	RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
 P D22	P	W	R3	CAPTURE:in-me-profile	INFERRED	RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
 P D23	P	W	R3	CAPTURE:in-me-profile	INFERRED	RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
-P D24	P	W	R3	CAPTURE:admit-in-me-opportunities-volunteering-education	NAMED	_audit/_census/profile.md::Lifted by capture C3 (after that exact address is admitted ; RULING:READ-PAST-AN-ACT-SUBSTRING
+P D24	P	W	R3	CAPTURE:admit-in-me-opportunities-volunteering-education	MEASURED	tests/fixtures/live11/in_me_profile.html ; _audit/2026-11-27-prof7.md::VOLUNTEERING-FALLBACK-BOUNDARY ; RULING:VOLUNTEERING-BARE-SPELLING-FIRST
 P D25	P	R	-	CAPTURE:admit-in-me-isselfprofile-true	INFERRED	_audit/2026-10-10-lane-b1-profile-build.md::(the three links) ; _audit/2026-11-25-build-p26.md::?isSelfProfile=true ; RULING:SELF-PROFILE-QUERY-VARIANT-ADMITTED
 P D26	P	R	-	CAPTURE:in-me-profile	INFERRED	tests/fixtures/live8/in_me.html ; _audit/2026-09-05-the-scroll-ruling.md::A surface exists that has no ; RULING:SCROLL-NOT-SANCTIONED
-P D27	P	W	R3	CAPTURE:admit-in-me-edit-secondary-language	NAMED	_audit/_census/profile.md::/edit/secondary-language/ ; RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
+P D27	P	W	R3	CAPTURE:admit-in-me-edit-secondary-language	MEASURED	tests/fixtures/live11/in_me_profile.html ; _audit/2026-11-27-prof7.md::SELF-ROOT-LINK-PRESS-BY-EXACT-MATCH ; RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
 P D28	P	R	-	PRECONDITION:a secondary-language profile (his own has one language)	NAMED	_audit/_census/read-addresses.tsv::the reading found distinct_langs 1
 P D29	P	W	R3	CAPTURE:in-me-profile	NAMED	RULING:P-D29-BUILT-BEHIND-THE-GRANT ; _audit/_census/profile.md::Its form is the `/edit/` certifications editor
 P E2	P	W	R3	CAPTURE:admit-in-me-details-skills-edit-forms-1	NAMED	_audit/_census/profile.md::/details/skills/edit/forms/ ; RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
@@ -408,20 +408,20 @@ P E4	P	W	R3	TARGET:a 1st-degree connection he names, whose skill he endorses	NAM
 P E5	P	W	R3	TARGET:a 1st-degree connection he names, whose skill he endorses	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::| C3 | `endorse_skill` ; RULING:OPERATOR-NAMES-THE-TARGET
 P E6	P	W	R3	PRECONDITION:an endorsement he has received	NAMED	_audit/_census/write-classes.tsv::queued:NO-ENDORSEMENT-DRAWN
 P E8	P	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
-P F1	P	R	-	CAPTURE:admit-in-me-details-recommendations	MEASURED	_audit/2026-10-10-lane-b1-profile-build.md::/in/me/details/recommendations/ ; _audit/_census/read-addresses.tsv::https://www.linkedin.com/in/me/details/recommendations/=>True
+P F1	P	R	-	CAPTURE:admit-in-me-details-recommendations	MEASURED	tests/fixtures/live12/recommendations.html ; _audit/_census/read-addresses.tsv::https://www.linkedin.com/in/me/details/recommendations/=>True
 P F2	P	W	R3	TARGET:a 1st-degree connection he names, to ask for a recommendation	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::| C4 | `request_recommendation` ; RULING:OPERATOR-NAMES-THE-TARGET
 P F3	P	W	R3	TARGET:a 1st-degree connection he names, to recommend	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::| C5 | `give_recommendation` ; RULING:OPERATOR-NAMES-THE-TARGET
 P F4	P	W	R3	TARGET:a 1st-degree connection he names, to recommend	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::| C5 | `give_recommendation` ; RULING:OPERATOR-NAMES-THE-TARGET
-P F5	P	W	R3	CAPTURE:admit-in-me-details-recommendations	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::(his recommendations section, refused by allowlist silence until admitted) ; RULING:READ-PAST-AN-ACT-SUBSTRING
-P F6	P	W	R3	CAPTURE:admit-in-me-details-recommendations	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::(his recommendations section, refused by allowlist silence until admitted) ; RULING:READ-PAST-AN-ACT-SUBSTRING
-P F7	P	W	R3	CAPTURE:admit-in-me-details-recommendations	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::(his recommendations section, refused by allowlist silence until admitted) ; RULING:READ-PAST-AN-ACT-SUBSTRING
-P F8	P	W	R3	CAPTURE:admit-in-me-details-recommendations	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::(his recommendations section, refused by allowlist silence until admitted) ; RULING:READ-PAST-AN-ACT-SUBSTRING
-P F9	P	W	R3	CAPTURE:admit-in-me-details-recommendations	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::(his recommendations section, refused by allowlist silence until admitted) ; RULING:READ-PAST-AN-ACT-SUBSTRING
+P F5	P	W	R3	CAPTURE:admit-in-me-details-recommendations	MEASURED	tests/fixtures/live12/recommendations.html ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
+P F6	P	W	R3	CAPTURE:admit-in-me-details-recommendations	MEASURED	tests/fixtures/live12/recommendations.html ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
+P F7	P	W	R3	CAPTURE:admit-in-me-details-recommendations	MEASURED	tests/fixtures/live12/recommendations.html ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
+P F8	P	W	R3	CAPTURE:admit-in-me-details-recommendations	MEASURED	tests/fixtures/live12/recommendations.html ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
+P F9	P	W	R3	CAPTURE:admit-in-me-details-recommendations	MEASURED	tests/fixtures/live12/recommendations.html ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
 P G2	P	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 P G3	P	W	R3	SIBLING:lane-U	INFERRED	linkedin_server/uploads.py ; _audit/2026-09-28-rulings-build-classes.md::`FILE-UPLOAD-UNSANCTIONED` is therefore a stale label.
 P G4	P	W	R3	CAPTURE:admit-in-me-details-featured	INFERRED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/in/me/details/featured/ ; RULING:SELF-PROFILE-EDITS-NOT-OUTWARD
 P G5	P	W	R3	CAPTURE:admit-in-me-details-featured	INFERRED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/in/me/details/featured/ ; RULING:SELF-PROFILE-EDITS-NOT-OUTWARD
-P H1	P	W	R3	CAPTURE:admit-in-me-opportunities-services-education	NAMED	_audit/_census/profile.md::/opportunities/services/education/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
+P H1	P	W	R3	CAPTURE:admit-in-me-opportunities-services-education	MEASURED	tests/fixtures/live11/in_me_profile.html ; _audit/2026-11-27-prof7.md::SELF-ROOT-LINK-PRESS-BY-EXACT-MATCH ; RULING:READ-PAST-AN-ACT-SUBSTRING
 P H2	P	W	R3	PRECONDITION:a Service Page	NAMED	_audit/_census/write-classes.tsv::queued:NO-SERVICE-PAGE
 P H3	P	W	R3	PRECONDITION:a Service Page	NAMED	_audit/_census/write-classes.tsv::queued:NO-SERVICE-PAGE
 P H4	P	W	R3	PRECONDITION:a Service Page	NAMED	_audit/_census/write-classes.tsv::queued:NO-SERVICE-PAGE
@@ -457,7 +457,7 @@ P K8	P	R	-	PRECONDITION:a Top Voice badge awarded to his account	NAMED	tests/fix
 P K9	P	W	R3	PRECONDITION:a Top Voice badge	NAMED	_audit/_census/write-classes.tsv::queued:NO-TOP-VOICE-BADGE
 P L3	P	W	R3	CAPTURE:C-MSG26-4	NAMED	_audit/2026-09-28-lane-k-ledger.md::YES, as ONE CAPTURE, nothing typed: ; RULING:ARTICLE-COMPOSER-CAPTURE
 P L4	P	R	-	PRECONDITION:a newsletter he authors	INFERRED	_audit/_census/read-addresses.tsv::the page listing his newsletters links no analytics address
-P L7	P	R	-	CAPTURE:creator-hub-on-the-dashboard	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/creator-hub/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
+P L7	P	R	-	CAPTURE:creator-hub-on-the-dashboard	MEASURED	tests/fixtures/live12/dashboard.html ; _audit/2026-11-27-prof7.md::CREATOR-IDEAS-NOT-ABSENT-ON-ONE-SURFACE
 P M1	P	W	R3	CAPTURE:C-RJ26-3	MEASURED	_audit/2026-11-26-readers-jobs26.md::THE OPTIONS MENU IS WHERE FIVE ROWS WAIT. ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
 P M3	P	W	R3	CAPTURE:C-RJ26-3	MEASURED	_audit/2026-11-26-readers-jobs26.md::THE OPTIONS MENU IS WHERE FIVE ROWS WAIT. ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
 P M4	P	R	-	CAPTURE:C-RJ26-3	MEASURED	_audit/2026-11-26-readers-jobs26.md::THE OPTIONS MENU IS WHERE FIVE ROWS WAIT. ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
@@ -516,4 +516,4 @@ P S3	P	R	-	CAPTURE:admit-in-me-skill-insights-skill	MEASURED	_audit/_census/read
 P S4	P	W	R3	CAPTURE:in-me-profile	NAMED	RULING:NO-INDEX-PINNED-JUDGEMENTS ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
 P S6	P	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 P S7	P	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
-P S8	P	W	R3	CAPTURE:C-P26-1	MEASURED	tests/fixtures/live8/keyskills.html ; _audit/2026-10-10-lane-b1-profile-build.md::THE CHOOSER IS DRAWN ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
+P S8	P	W	R3	CAPTURE:C-P26-1	MEASURED	tests/fixtures/live12/premium_key_skills.html ; tests/fixtures/live8/keyskills.html ; _audit/2026-11-27-prof7.md::KEY-SKILLS-ADD-HELD

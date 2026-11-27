@@ -141,6 +141,19 @@ DELIBERATELY_UNWIRED: dict[str, str] = {
         "entry in the commit that wires it into writes.perform's apply arm, "
         "after C-J68-1 has measured its shapes."
     ),
+    # ADDED 2026-11-27 (lane prof7); the reason is its author's.
+    "volunteering_route": (
+        "A BOUNDARY FOR THE LIVE RUNNER, NOT A CAPABILITY: the ruling "
+        "VOLUNTEERING-FALLBACK-BOUNDARY (the orchestrator, 2026-11-27) has it "
+        "form his volunteering page's one drawn spelling from HIS argument and "
+        "match a target his root draws against it exactly, for session 14's "
+        "attended capture (queue line 69). No shipped tool presses on his "
+        "root, and none is ruled to: wiring it into one would widen the tool "
+        "surface with a press only the live lane may make, attended. Its "
+        "readers are tests/test_volunteering_fallback_boundary.py and that "
+        "runner (_audit/2026-11-27-prof7.md, section 2). NOT PERMANENT: delete "
+        "this entry in the commit that gives a shipped tool its read of P D24."
+    ),
 }
 
 # TWO FORMER ENTRIES ARE GONE IN THE MERGED TREE, because the two modules they
