@@ -62,10 +62,33 @@ nothing new is disclosed to the page, and no href, label or segment returns.
 **NO SCRIPT.** These are locator counts, which inject nothing, so this module
 spends no ``page.evaluate`` waiver (``tests/test_readonly.py`` holds the
 package to 25 and a 26th needs its own ruling).
+
+## THE SELF ALIAS IS NOW REWRITTEN CLIENT-SIDE, SO ITS LANDING IS WAITED ON
+
+**MEASURED 2026-11-26, the live lane's session 12, E1 (loads 1 and 2):** the
+loader refused his own profile ``self_assertion_unreadable`` twice, its
+evidence "url marker absent, ``landed_on_member_path`` false, structure not
+read". The dedicated profile's history showed ``/in/me/`` visited, then his
+member path about a second later as a SEPARATE link-type visit with no
+redirect qualifier: LinkedIn now serves the self alias as its own document and
+rewrites the address CLIENT-SIDE. The loader read the landing before the
+rewrite. The rule above held; its moment of reading did not.
+
+So :func:`await_rewrite` waits -- bounded by :data:`SELF_REWRITE_BOUND_S`,
+looking every :data:`SELF_REWRITE_POLL_S` -- while the page still names the
+bare self alias (:func:`awaits_rewrite`), and its callers (the loader, the
+press gate, the live harness's press step) read the url again after it and run
+the rule above on THAT url, unchanged. **THE PAGE MAY VETO; IT NEVER SUPPLIES
+THE ADDRESS.** The url the page moves to is waited for and asserted -- a
+member's profile root, whose edit controls name that member and no other --
+and never navigated to, built into an address, or returned by the wait itself,
+which answers in closed words and integers.
 """
 from __future__ import annotations
 
+import asyncio
 import re
+import time
 from typing import Any, Optional
 from urllib.parse import parse_qs, urlsplit
 
@@ -276,3 +299,103 @@ def wants_structure(url: Any) -> bool:
     """Is ``url`` a member profile root carrying NO marker -- the one case the
     structure decides? Lets a gate leave every other page untouched. PURE."""
     return landed_member_segment(url) is not None and url_marker(url) == SELF_ABSENT
+
+
+# ---------------------------------------------------------------------------
+# The self alias, rewritten client-side since 2026-11-26: waited on, bounded
+# ---------------------------------------------------------------------------
+
+#: HOW LONG THE SELF ALIAS IS WAITED ON, at most. MEASURED 2026-11-26 (session
+#: 12, E1): his member path was visited about ONE SECOND after the alias, and
+#: ``BROWSER.goto`` had already returned. Five seconds is five times that gap,
+#: and a BOUND: a LinkedIn change cannot turn this into an open wait against
+#: his account. Read at call time, so a test may shorten it.
+SELF_REWRITE_BOUND_S = 5.0
+
+#: How often the address is looked at while it is waited on. Reading ``url``
+#: costs nothing -- no script, no request, nothing the page can see.
+SELF_REWRITE_POLL_S = 0.25
+
+#: The four closed words :func:`await_rewrite` answers in.
+REWRITE_NOT_NEEDED = "not_needed"
+REWRITE_ARRIVED = "arrived"
+REWRITE_NOT_WITHIN_BOUND = "not_within_bound"
+REWRITE_UNREADABLE = "unreadable"
+REWRITE_WORDS = (REWRITE_NOT_NEEDED, REWRITE_ARRIVED, REWRITE_NOT_WITHIN_BOUND, REWRITE_UNREADABLE)
+
+
+def on_self_alias(url: Any) -> bool:
+    """Is ``url`` the SELF ALIAS's own profile root -- ``/in/me/`` on LinkedIn's
+    host, either slash form, the alias's case folded, any query? PURE.
+
+    Not a member's landing (:func:`landed_member_segment` refuses it) and not
+    a page beneath a profile root: the one address LinkedIn has been measured
+    to serve as its own document and then rewrite client-side.
+    """
+    try:
+        parts = urlsplit(str(url or "").strip())
+    except ValueError:
+        return False
+    if parts.scheme != "https" or parts.netloc != _HOST:
+        return False
+    root = _PROFILE_ROOT.match(parts.path)
+    return bool(root) and root.group(1).translate(_ASCII_LOWER) == SELF_ALIAS
+
+
+def awaits_rewrite(url: Any) -> bool:
+    """Is ``url`` the one landing the loader and the press gate WAIT ON: the
+    self alias's profile root carrying NO marker? PURE.
+
+    A landing whose marker answered is decided by the marker, untouched, as
+    it always was; a member's path has already arrived; every other page is
+    not his profile root at all.
+    """
+    return on_self_alias(url) and url_marker(url) == SELF_ABSENT
+
+
+def _rewrite_outcome(word: str, started: float, polls: int) -> dict[str, Any]:
+    waited = max(0, int(round((time.monotonic() - started) * 1000)))
+    return {"rewrite": word, "waited_ms": waited, "polls": polls}
+
+
+async def await_rewrite(page: Any) -> dict[str, Any]:
+    """WAIT, BOUNDED, WHILE THE PAGE STILL NAMES THE SELF ALIAS. NEVER RAISES.
+
+    Looks at ``page.url`` every :data:`SELF_REWRITE_POLL_S` until it is no
+    longer :func:`on_self_alias`, or :data:`SELF_REWRITE_BOUND_S` has passed.
+    Returns closed words and integers and NOTHING OF THE PAGE:
+    ``{"rewrite": <one of REWRITE_WORDS>, "waited_ms": int, "polls": int}``.
+
+    * ``not_needed`` -- the address was not the self alias: no wait at all,
+      and the address read exactly once.
+    * ``arrived`` -- the address left the alias. For somewhere; WHERE is the
+      caller's question, answered by reading ``page.url`` itself and judging
+      it by the rule above, unchanged.
+    * ``not_within_bound`` -- still the alias when the bound ran out. A late
+      rewrite is not waited for.
+    * ``unreadable`` -- the address could not be read. Fail closed: the caller
+      reads it again and judges whatever it gets.
+
+    **IT ONLY WATCHES.** It reads one attribute, ``url`` (asserted on its own
+    syntax tree by ``tests/test_self_profile_waits_for_the_rewrite.py``): it
+    never navigates, reloads, runs a script or presses, and the address it
+    watches is never built into another one. The page may VETO what its caller
+    does next; it never supplies an address.
+    """
+    started = time.monotonic()
+    polls = 0
+    try:
+        bound = max(0.0, float(SELF_REWRITE_BOUND_S))
+        poll = max(0.01, float(SELF_REWRITE_POLL_S))
+        if not on_self_alias(page.url):
+            return _rewrite_outcome(REWRITE_NOT_NEEDED, started, polls)
+        while True:
+            left = bound - (time.monotonic() - started)
+            if left <= 0:
+                return _rewrite_outcome(REWRITE_NOT_WITHIN_BOUND, started, polls)
+            await asyncio.sleep(min(poll, left))
+            polls += 1
+            if not on_self_alias(page.url):
+                return _rewrite_outcome(REWRITE_ARRIVED, started, polls)
+    except Exception:  # noqa: BLE001 - a wait never breaks a gate, and never quotes the page
+        return _rewrite_outcome(REWRITE_UNREADABLE, started, polls)

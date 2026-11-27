@@ -1088,6 +1088,18 @@ WHAT_WOULD_DRIVE_IT: dict[str, str] = {
         "constants on every path. Its behaviour is held over fake contexts by "
         "tests/test_the_last_tab_is_never_closed.py."
     ),
+    #: ADDED 2026-11-27 (lane prof7, SELF-LOADER-WAITS-FOR-THE-REWRITE): the
+    #: bounded wait on LinkedIn's client-side rewrite of /in/me/, shared by
+    #: the self-profile loader, the press gate and the live harness.
+    #: Discovered here because it takes a ``page``; it reads nothing ON it.
+    "self_profile:await_rewrite": (
+        "NOT A PAGE READER: it reads only page.url -- no locator, no script, "
+        "no page content -- polling it, bounded, while it names the bare self "
+        "alias, and returns closed words and integers on every path (one of "
+        "self_profile.REWRITE_WORDS, the milliseconds waited, the polls), never "
+        "the address. Its behaviour, an address that raises a page string "
+        "included, is held by tests/test_self_profile_waits_for_the_rewrite.py."
+    ),
     #: ADDED 2026-09-28 (lane L5, the first-contact path of
     #: message_from_profile): the one overlay bubble holding a composer, read
     #: through the piercing engine. Its success path is a bubble a Message

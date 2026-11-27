@@ -2805,6 +2805,25 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # every control: the capture reads shapes and stops at the first one
     # (lane L7's capture C3).
     re.compile(r"^https://www\.linkedin\.com/in/me/opportunities/volunteering/education/?$"),
+    # ----------------------------------------------------------------------
+    # LANE PROF7 (2026-11-27) -- THE SAME PAGE ON THE SPELLING LINKEDIN DRAWS,
+    # its profile id from HIS ARGUMENTS. Ruling VOLUNTEERING-FALLBACK-BOUNDARY
+    # (the orchestrator, 2026-11-27 13:10), answering Q-VOLUNTEERING-ID-FROM-
+    # HIS-ARGUMENTS: the bare spelling above landed on his profile root (the
+    # live lane's session 12, load 22), so VOLUNTEERING-BARE-SPELLING-FIRST's
+    # fallback -- "profileId from tool arguments at runtime (his own id, never
+    # stored)" -- gets this line. ONE parameter, ``profileId``, its value of
+    # the package's member-id shape (``named_profile.MEMBER_ID``, pinned equal
+    # by tests/test_volunteering_fallback_boundary.py), the /in/me/ spelling
+    # only, no other parameter, no fragment, no sub-path. THE ID IS NEVER A
+    # PAGE'S: ``volunteering_route.volunteering_address`` forms this address
+    # from the caller's argument alone, and a link on his root is pressed only
+    # when its target equals that address exactly (SELF-ROOT-LINK-PRESS-BY-
+    # EXACT-MATCH). The id is never stored, logged or committed.
+    re.compile(
+        r"^https://www\.linkedin\.com/in/me/opportunities/volunteering/education/"
+        r"\?profileId=ACoAA[A-Za-z0-9_\-]{10,80}$"
+    ),
     # One newsletter's own page (census M C80, M C82, M C101, N 55, N 56), ON
     # THE SLUG SHAPE LINKEDIN DRAWS. Ruling NAME-BEARING-ADDRESS-REDACTION-
     # SCOPE (the orchestrator, 2026-11-25): the redaction "reaches every

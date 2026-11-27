@@ -27,9 +27,9 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 308 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 268 |
-| distinct dates | 22 |
+| audit documents git tracks under `_audit` | 309 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 269 |
+| distinct dates | 23 |
 | documents with no level-1 heading | 2 |
 | `CORRECTS:` marker lines | 130 |
 | `CORRECTED BY:` marker lines | 130 |
@@ -39,7 +39,7 @@ are listed as `(undated)`; no date is taken from git history, because
 | documents at either end of a cross-document edge | 109 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
-| documents no correction marker touches at all | 197 |
+| documents no correction marker touches at all | 198 |
 | blockquoted markers naming ANOTHER document | 0 |
 | edges missing one of their two markers | 0 |
 | edges declared a different number of times in each direction | 2 |
@@ -1940,6 +1940,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-11-26 | [2026-11-26-search-fix26.md](2026-11-26-search-fix26.md) | Lane search-fix26: an empty job search is never silent, and the AI search is a refusing fallback |  |
 | 2026-11-26 | [2026-11-26-selfprofile26.md](2026-11-26-selfprofile26.md) | 2026-11-26 -- lane selfprofile26: his own profile, asserted without the url marker |  |
 | 2026-11-26 | [2026-11-26-session-12-plan.md](2026-11-26-session-12-plan.md) | Live session 12 -- the plan, written offline: 37 loads, 5 searches, 113 rows |  |
+| 2026-11-27 | [2026-11-27-prof7.md](2026-11-27-prof7.md) | Lane prof7 -- the self-profile loader waits for the rewrite, then session 12's profile cells |  |
 
 ## 6. What the scan rejected, could not join, or had to repair
 

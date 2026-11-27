@@ -8667,13 +8667,27 @@ async def _goto_self_profile_asserted(
     for ANY OTHER member makes the page AMBIGUOUS, refused at once like
     FALSE; nothing either way is ABSENT, retried as it always was.
 
+    THE SELF ALIAS IS WAITED ON SINCE 2026-11-27, NEVER FOLLOWED. Measured
+    2026-11-26 (the live lane's session 12, E1): LinkedIn now serves
+    ``/in/me/`` as its own document and rewrites the address to his member
+    path CLIENT-SIDE about a second later, and this loader read the landing
+    before the rewrite -- the self alias, which is no member -- and refused
+    his own profile twice. So a landing that is still the bare alias is
+    waited on, bounded (``self_profile.await_rewrite``), and the url is read
+    again: the rule above then runs on THAT url, unchanged. The url is only
+    ever READ and judged -- never navigated to, never built into an address;
+    every load here is ``SELF_PROFILE_URL`` -- and a page that moves onto the
+    signed-out wall is the wall.
+
     Returns ``(landed_url, state, loads, saw)``: the last landed url, the
     state -- one of ``SELF_ASSERTION_TRUE``, ``SELF_ASSERTION_FALSE``,
     ``SELF_ASSERTION_ABSENT``, ``SELF_ASSERTION_AMBIGUOUS`` -- how many times
     ``/in/me/`` was actually navigated, and ``saw``, ``self_profile.evidence``
     of the last load: closed words and integers, which a refusal names and a
-    success reports as ``self_signal``. ``loads`` is the real count, never
-    hardcoded, because every caller reports it verbatim as ``pages_loaded``.
+    success reports as ``self_signal``, plus ``self_alias_rewrite`` and
+    ``self_alias_waited_ms``, what the wait saw. ``loads`` is the real count,
+    never hardcoded, because every caller reports it verbatim as
+    ``pages_loaded``.
     """
     landed = ""
     state = SELF_ASSERTION_ABSENT
@@ -8683,6 +8697,11 @@ async def _goto_self_profile_asserted(
         landed = await BROWSER.goto(page, SELF_PROFILE_URL)
         loads += 1
         assert_not_authwall(landed, surface="profile")
+        rewrite = {"rewrite": self_profile.REWRITE_NOT_NEEDED, "waited_ms": 0}
+        if self_profile.awaits_rewrite(landed):
+            rewrite = await self_profile.await_rewrite(page)
+            landed = _landed_after_the_wait(page, landed)
+            assert_not_authwall(landed, surface="profile")
         marker = _self_assertion_state(landed)
         # THE PAGE IS ASKED ONLY WHEN THE URL DID NOT ANSWER, so a landing
         # that carries the marker is decided exactly as it was, untouched.
@@ -8693,9 +8712,25 @@ async def _goto_self_profile_asserted(
         )
         state = self_profile.self_state(marker, structure)
         saw = self_profile.evidence(marker, structure)
+        # WHAT THE WAIT SAW, in its own closed word and an integer, so a
+        # refusal can say the alias never moved -- the fact session 12 needed
+        # a copy of the browser's history to learn.
+        saw["self_alias_rewrite"] = rewrite["rewrite"]
+        saw["self_alias_waited_ms"] = rewrite["waited_ms"]
         if state != SELF_ASSERTION_ABSENT:
             break
     return landed, state, loads, saw
+
+
+def _landed_after_the_wait(page: Any, before: str) -> str:
+    """``page.url`` once the self alias has been waited on: the same read
+    ``BROWSER.goto`` returns, and the same fallback when it cannot be taken
+    -- the address held before, here the alias, which is no member and so
+    refuses. Never raises."""
+    try:
+        return str(page.url)
+    except Exception:  # noqa: BLE001 - an unreadable address is the alias still
+        return before
 
 
 def _self_profile_refusal(
@@ -8727,7 +8762,20 @@ def _self_profile_refusal(
             "the url does not name is not a page this server understands, so "
             "it is refused at once and not retried. " + then
         )
-    if not saw.get("landed_on_member_path"):
+    rewrite = saw.get("self_alias_rewrite")
+    if not saw.get("landed_on_member_path") and rewrite == self_profile.REWRITE_NOT_WITHIN_BOUND:
+        seen = (
+            "the address stayed on the self alias for the "
+            f"{self_profile.SELF_REWRITE_BOUND_S:g} s this server waits for "
+            "LinkedIn's client-side rewrite of it to his member path, so the "
+            "page was not asked"
+        )
+    elif not saw.get("landed_on_member_path") and rewrite == self_profile.REWRITE_ARRIVED:
+        seen = (
+            "LinkedIn rewrote the self alias's address client-side, to a page "
+            "that is not a member's profile root, so the page was not asked"
+        )
+    elif not saw.get("landed_on_member_path"):
         seen = (
             "the landing was not a member's profile root, so the page was "
             "not asked"

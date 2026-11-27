@@ -2037,7 +2037,14 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # `?isSelfProfile=true`, on SELF-PROFILE-QUERY-VARIANT-ADMITTED (the
     # orchestrator, 2026-11-26), no exemption; every other key byte-identical
     # (17 of 18).
-    "_ALLOWED_URL_PATTERNS": "5d3109ee0aa96e48",
+    #
+    # 5d3109ee0aa96e48 until 2026-11-27 (lane prof7): one anchored line, his
+    # "Open to" volunteering page on the spelling LinkedIn draws, its ONE
+    # `profileId` of the member-id shape and taken from his arguments only,
+    # on VOLUNTEERING-FALLBACK-BOUNDARY (the orchestrator, 2026-11-27 13:10),
+    # allowlist silence alone, no exemption; every other key byte-identical
+    # (17 of 18). Record: _audit/2026-11-27-prof7.md, section 2.
+    "_ALLOWED_URL_PATTERNS": "10c0a7637b7c3ca8",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     # 419e64a3cd92ec7e until the same REVIEW: commit: a third entry, excusing
     # exactly {"/follow"} for exactly the anchored follower-list address.

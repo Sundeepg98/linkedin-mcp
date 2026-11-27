@@ -212,6 +212,7 @@
     "search_typeahead:disclose_recent_searches": "not_driven:navigates (locator.click)",
     "search_vertical_results:read_event_results": "returns_records",
     "search_vertical_results:read_group_results": "returns_records",
+    "self_profile:await_rewrite": "not_driven:returned without reading the page",
     "self_profile:read_edit_routes": "clean",
     "server:_attach_recipient_ids": "clean",
     "server:_establish_self_owned_editor": "not_driven:navigates (page.goto)",
