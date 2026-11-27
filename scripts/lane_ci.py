@@ -55,6 +55,38 @@ detail and are not subject to its cap; past ``ID_LIMIT`` the count of the
 rest is printed. When the log names no test it says so rather than let the
 exit banner pass for one.
 
+WHAT ``wait <sha> --full`` DOES, ADDED 2026-11-27 (lane ci8; ruled 22:55:
+before master is fast-forwarded, a branch's ci/ ref gets the FULL matrix --
+three cells x six shards, which ``ci.yml`` gives a workflow_dispatch on any
+ref). In order:
+
+1. refuses unless ``origin``'s ``ci/<branch>`` holds exactly ``<sha>``
+   (``git ls-remote``): a dispatch runs the REF's head, and a full matrix of
+   another commit is no certificate for this one.
+2. waits for the PUSH run of ``<sha>`` on ``ci/<branch>`` to FINISH. The
+   dispatch shares its concurrency group (``ci.yml``: one group per branch
+   ref, cancel-in-progress), so whichever started first would be cancelled.
+   A red push run ends it there: nothing is dispatched, because the full
+   matrix cannot certify a sha whose lane run failed.
+3. reads the workflow_dispatch runs of ``<sha>`` on ``ci/<branch>`` BEFORE
+   dispatching. One still running is RESUMED, never sent again (a second
+   dispatch would cancel it); one already finished is READ, not repeated --
+   it is the full matrix's verdict on this sha (re-run its failed jobs with
+   ``gh run rerun <id> --failed`` and ``--full`` waits on that attempt). Only
+   when there is none, or the last was cancelled, does it dispatch:
+   ``gh workflow run ci.yml --ref ci/<branch>``.
+4. finds the new run BY HEAD SHA AND EVENT and ref, excluding every run id
+   that existed before the dispatch -- never "the latest run", which right
+   after a dispatch is somebody else's -- and waits on it, bounded at
+   ``FULL_BOUND_SECONDS``.
+5. reports the run's verdict and EVERY CELL: each cell's shards and their
+   conclusions, the plan and totals jobs, and on a red run the failing tests
+   as ``wait`` prints them. A green run of one cell is the fast lane's shape,
+   and is reported as NOT THE FULL MATRIX rather than as its certificate.
+
+Re-running ``--full`` after a shell cut it short is therefore safe: it finds
+the dispatch it already sent and waits on that.
+
 EXIT CODES: 0 success; 1 a refusal or a red run; 2 nothing could be
 established (no run appeared, the bound ran out, gh kept failing). 2 never
 means green.
@@ -78,8 +110,19 @@ import pre_push_ref_gate as gate  # noqa: E402
 
 POLL_SECONDS = 20
 BOUND_SECONDS = 25 * 60
+#: The full matrix's bound, from the dispatch to its verdict. Measured: master
+#: run 46042146411 (three cells x six shards, 2026-11-27) took 10m44s; the
+#: windows shards set it, and a degraded windows runner has run 2x slower.
+FULL_BOUND_SECONDS = 45 * 60
+#: The workflow ``--full`` dispatches, by its file name.
+WORKFLOW_FILE = "ci.yml"
 FAILED_JOB_STATES = frozenset(
     {"failure", "cancelled", "timed_out", "action_required", "startup_failure"})
+#: A shard job's name as ``ci.yml`` renders it: ``pytest (<os>, py<version>,
+#: shard <n>)``. Held to the workflow's own template by
+#: ``tests/test_lane_ci.py::test_the_cell_reader_parses_the_job_name_ci_yml_writes``.
+_SHARD_JOB = re.compile(
+    r"^pytest \((?P<os>[^,()]+), py(?P<py>[^,()]+), shard (?P<shard>\d+)\)$")
 # The pre-fix pattern was ``(FAILED|ERROR) \S|##\[error\]|REFUS``. Those
 # classes carry a failing id when the suite runs under ``-rf`` (a
 # ``FAILED tests/...::test`` line) or always carry the exit banner. But CI
@@ -312,6 +355,88 @@ def elapsed(view: dict) -> str:
     return f"{seconds // 60}m{seconds % 60:02d}s"
 
 
+def _newest(runs: list[dict]) -> dict | None:
+    if not runs:
+        return None
+    return max(runs, key=lambda r: (r.get("createdAt") or "", r.get("databaseId") or 0))
+
+
+def dispatch_runs(runs: list[dict], sha: str, branch: str) -> list[dict]:
+    """The workflow_dispatch runs of exactly this sha on exactly ``ci/<branch>``."""
+    return [r for r in runs
+            if r.get("headSha") == sha and r.get("event") == "workflow_dispatch"
+            and r.get("headBranch") == f"ci/{branch}"]
+
+
+def choose_push_run(runs: list[dict], sha: str, branch: str) -> dict | None:
+    """The push run of this sha on ``ci/<branch>`` itself, the one the dispatch
+    would share a concurrency group with. A push of the same sha to another
+    ci/ ref is in another group, so it is never this run."""
+    return _newest([r for r in runs
+                    if r.get("headSha") == sha and r.get("event") == "push"
+                    and r.get("headBranch") == f"ci/{branch}"])
+
+
+def choose_dispatch_run(runs: list[dict], sha: str, branch: str,
+                        before: set) -> dict | None:
+    """The dispatch run this ``--full`` sent: of this sha, event and ref, and
+    not one of ``before``, the run ids that existed before the dispatch."""
+    return _newest([r for r in dispatch_runs(runs, sha, branch)
+                    if r.get("databaseId") not in before])
+
+
+def cells_of(view: dict) -> dict[str, dict[int, str]]:
+    """``{cell: {shard index: conclusion}}`` from a run's shard jobs.
+
+    The cell is spelled as ``ci_shard_totals.cell_label`` spells it
+    ("ubuntu-latest py3.13"). Jobs that are not shards (the plan, the totals)
+    are not cells and are reported apart.
+    """
+    cells: dict[str, dict[int, str]] = {}
+    for job in view.get("jobs") or []:
+        match = _SHARD_JOB.match(job.get("name") or "")
+        if match:
+            label = f"{match['os'].strip()} py{match['py'].strip()}"
+            cells.setdefault(label, {})[int(match["shard"])] = (
+                job.get("conclusion") or job.get("status") or "unknown")
+    return cells
+
+
+def matrix_problems(cells: dict[str, dict[int, str]]) -> list[str]:
+    """Why these cells are not a full-matrix run, or ``[]`` when they are.
+
+    The shape is read from what RAN, never from a second copy of the plan:
+    more than one cell (one cell is the fast lane's shape), and every cell
+    holding the same shards, 0 to n-1. The totals job, which reads the plan's
+    own outputs, already refuses a run whose shards do not add up.
+    """
+    problems: list[str] = []
+    if len(cells) < 2:
+        problems.append(f"{len(cells)} cell(s) ran; the full matrix runs more "
+                        "than one, and one cell is the fast lane's shape")
+    counts = {label: len(shards) for label, shards in cells.items()}
+    for label, shards in sorted(cells.items()):
+        if sorted(shards) != list(range(len(shards))):
+            problems.append(f"{label}: shards {sorted(shards)} are not "
+                            f"0..{len(shards) - 1}")
+    if len(set(counts.values())) > 1:
+        problems.append(f"the cells ran different numbers of shards: {counts}")
+    return problems
+
+
+def cell_lines(cells: dict[str, dict[int, str]]) -> list[str]:
+    """One line per cell: how many shards succeeded, and every one that did not."""
+    lines = []
+    for label, shards in sorted(cells.items()):
+        good = sum(1 for c in shards.values() if c == "success")
+        line = f"  {label}: {good} of {len(shards)} shards success"
+        bad = [f"shard {i} {shards[i]}" for i in sorted(shards) if shards[i] != "success"]
+        if bad:
+            line += "; " + ", ".join(bad)
+        lines.append(line)
+    return lines
+
+
 # ---------------------------------------------------------------------------
 # The repository and the network
 # ---------------------------------------------------------------------------
@@ -398,6 +523,59 @@ def cmd_push(pusher=git_push) -> int:
     return 0
 
 
+_RUN_FIELDS = "databaseId,headSha,headBranch,event,status,conclusion,createdAt"
+_VIEW_FIELDS = "status,conclusion,jobs,createdAt,startedAt,updatedAt"
+
+
+def _list_runs(slug: str, sha: str, event: str, what: str) -> list[dict] | None:
+    """The runs of ``sha`` for ``event``, asked BY SHA; None when gh failed."""
+    rc, out, err = _gh("run", "list", "-R", slug, "--commit", sha, "--event", event,
+                       "--limit", "50", "--json", _RUN_FIELDS)
+    if rc != 0:
+        print(f"lane_ci {what}: gh run list failed ({err[:200]})", file=sys.stderr)
+        return None
+    return json.loads(out or "[]")
+
+
+def _await_run(slug: str, sha: str, event: str, choose, *, what: str, poll: int,
+               bound: int, sleep, clock) -> tuple[str | None, dict | None, str | None]:
+    """Poll until ``choose`` names a run of ``sha`` and that run completes.
+
+    Returns ``(run_id, view, state)``. ``view`` is None when the bound ran out
+    first, which is NO VERDICT, and is said so.
+    """
+    deadline = clock() + bound
+    run_id = None
+    while True:
+        if run_id is None:
+            runs = _list_runs(slug, sha, event, what)
+            run = choose(runs) if runs is not None else None
+            if run is not None:
+                run_id = str(run["databaseId"])
+                print(f"lane_ci {what}: run {run_id} on {run['headBranch']} "
+                      f"for {sha[:12]}", file=sys.stderr)
+        if run_id is not None:
+            rc, out, err = _gh("run", "view", run_id, "-R", slug, "--json", _VIEW_FIELDS)
+            if rc == 0:
+                view = json.loads(out)
+                state = verdict(view)
+                if state != "pending":
+                    return run_id, view, state
+                jobs = view.get("jobs") or []
+                done = sum(1 for j in jobs if j.get("status") == "completed")
+                print(f"lane_ci {what}: run {run_id} {view.get('status')}, "
+                      f"{done}/{len(jobs)} jobs done", file=sys.stderr)
+            else:
+                print(f"lane_ci {what}: gh run view failed ({err[:200]})",
+                      file=sys.stderr)
+        if clock() >= deadline:
+            print(f"lane_ci {what}: NO VERDICT within {bound // 60} minutes "
+                  f"(run {run_id or 'never appeared'}). This is not a pass.",
+                  file=sys.stderr)
+            return run_id, None, None
+        sleep(poll)
+
+
 def cmd_wait(sha: str, *, poll: int = POLL_SECONDS, bound: int = BOUND_SECONDS,
              sleep=time.sleep, clock=time.monotonic) -> int:
     rc, url, err = _git("remote", "get-url", gate.CI_REMOTE)
@@ -406,45 +584,102 @@ def cmd_wait(sha: str, *, poll: int = POLL_SECONDS, bound: int = BOUND_SECONDS,
         return 2
     slug = slug_from_url(url)
     rc_branch, branch, _err = _git("symbolic-ref", "--quiet", "--short", "HEAD")
-    deadline = clock() + bound
-    run_id = None
-    while True:
-        if run_id is None:
-            rc, out, err = _gh("run", "list", "-R", slug, "--commit", sha,
-                               "--event", "push", "--limit", "50", "--json",
-                               "databaseId,headSha,headBranch,event,status,"
-                               "conclusion,createdAt")
-            if rc == 0:
-                run = choose_run(json.loads(out or "[]"), sha,
-                                 branch if rc_branch == 0 else None)
-                if run is not None:
-                    run_id = str(run["databaseId"])
-                    print(f"lane_ci wait: run {run_id} on {run['headBranch']} "
-                          f"for {sha[:12]}", file=sys.stderr)
-            else:
-                print(f"lane_ci wait: gh run list failed ({err[:200]})",
-                      file=sys.stderr)
-        if run_id is not None:
-            rc, out, err = _gh("run", "view", run_id, "-R", slug, "--json",
-                               "status,conclusion,jobs,createdAt,startedAt,updatedAt")
-            if rc == 0:
-                view = json.loads(out)
-                state = verdict(view)
-                jobs = view.get("jobs") or []
-                done = sum(1 for j in jobs if j.get("status") == "completed")
-                if state != "pending":
-                    return _report(slug, run_id, view, state)
-                print(f"lane_ci wait: run {run_id} {view.get('status')}, "
-                      f"{done}/{len(jobs)} jobs done", file=sys.stderr)
-            else:
-                print(f"lane_ci wait: gh run view failed ({err[:200]})",
-                      file=sys.stderr)
-        if clock() >= deadline:
-            print(f"lane_ci wait: NO VERDICT within {bound // 60} minutes "
-                  f"(run {run_id or 'never appeared'}). This is not a pass.",
-                  file=sys.stderr)
+    mine = branch if rc_branch == 0 else None
+    run_id, view, state = _await_run(
+        slug, sha, "push", lambda runs: choose_run(runs, sha, mine), what="wait",
+        poll=poll, bound=bound, sleep=sleep, clock=clock)
+    if view is None:
+        return 2
+    return _report(slug, run_id, view, state)
+
+
+def cmd_full(sha: str, *, poll: int = POLL_SECONDS, bound: int = BOUND_SECONDS,
+             full_bound: int = FULL_BOUND_SECONDS, sleep=time.sleep,
+             clock=time.monotonic) -> int:
+    """``wait <sha> --full``: the module docstring's five steps, in order."""
+    rc, url, err = _git("remote", "get-url", gate.CI_REMOTE)
+    if rc != 0:
+        print(f"lane_ci full: no {gate.CI_REMOTE} remote ({err})", file=sys.stderr)
+        return 2
+    slug = slug_from_url(url)
+    rc, branch, _err = _git("symbolic-ref", "--quiet", "--short", "HEAD")
+    try:
+        ref = ci_ref_for(branch if rc == 0 else "")
+    except ValueError as exc:
+        print(f"lane_ci full: REFUSED -- {exc}", file=sys.stderr)
+        return 1
+    short_ref = ref[len("refs/heads/"):]
+
+    # 1. The ref holds this sha, or the dispatch would test another commit.
+    rc, out, err = _git("ls-remote", gate.CI_REMOTE, ref)
+    held = out.split()[0] if rc == 0 and out.split() else ""
+    if held != sha:
+        print(f"lane_ci full: REFUSED -- {gate.CI_REMOTE} {short_ref} holds "
+              f"{held[:12] or 'nothing'}, not {sha[:12]}. A dispatch runs the "
+              "ref's head, so the full matrix would test that commit under this "
+              "sha's name; push this sha first (lane_ci.py push).",
+              file=sys.stderr)
+        return 1
+
+    # 2. The push run finishes first: it shares the dispatch's concurrency
+    # group, and cancel-in-progress cancels whichever started first.
+    push_id, push_view, push_state = _await_run(
+        slug, sha, "push", lambda runs: choose_push_run(runs, sha, branch),
+        what="full", poll=poll, bound=bound, sleep=sleep, clock=clock)
+    if push_view is None:
+        return 2
+    print(f"lane_ci full: the push run {push_id} on {short_ref} finished: "
+          f"{push_state}", file=sys.stderr)
+    if push_state.startswith("failure"):
+        _report(slug, push_id, push_view, push_state)
+        print("lane_ci full: the full matrix is not dispatched on a sha whose "
+              f"lane run is red. Re-run its failed jobs (gh run rerun {push_id} "
+              "--failed) or fix and push; then --full again.", file=sys.stderr)
+        return 1
+
+    # 3. A dispatch of this sha already running is resumed, one finished is
+    # read; only none, or a cancelled one, sends another.
+    listed = _list_runs(slug, sha, "workflow_dispatch", "full")
+    if listed is None:
+        return 2
+    existing = dispatch_runs(listed, sha, branch)
+    last = _newest(existing)
+    if last is not None and (last.get("status") != "completed"
+                             or last.get("conclusion") != "cancelled"):
+        known = last.get("databaseId")
+        if last.get("status") != "completed":
+            print(f"lane_ci full: run {known} was already dispatched for "
+                  f"{sha[:12]} and is still running; waiting on it, not "
+                  "dispatching again", file=sys.stderr)
+        else:
+            print(f"lane_ci full: the full matrix already ran on this sha (run "
+                  f"{known}, {last.get('conclusion')}); reading it, not repeating "
+                  "it", file=sys.stderr)
+
+        def choose(runs):
+            return next((r for r in dispatch_runs(runs, sha, branch)
+                         if r.get("databaseId") == known), None)
+    else:
+        before = {r.get("databaseId") for r in existing}
+        rc, _out, err = _gh("workflow", "run", WORKFLOW_FILE, "-R", slug,
+                            "--ref", short_ref)
+        if rc != 0:
+            print(f"lane_ci full: the dispatch failed ({err[:200]}); nothing was "
+                  "started", file=sys.stderr)
             return 2
-        sleep(poll)
+        print(f"lane_ci full: dispatched {WORKFLOW_FILE} on {short_ref} for "
+              f"{sha[:12]}", file=sys.stderr)
+
+        def choose(runs):
+            return choose_dispatch_run(runs, sha, branch, before)
+
+    # 4. The dispatch run, BY SHA AND EVENT, then 5. its verdict and cells.
+    run_id, view, state = _await_run(
+        slug, sha, "workflow_dispatch", choose, what="full", poll=poll,
+        bound=full_bound, sleep=sleep, clock=clock)
+    if view is None:
+        return 2
+    return _report_full(slug, run_id, view, state)
 
 
 def _report(slug: str, run_id: str, view: dict, state: str) -> int:
@@ -487,6 +722,25 @@ def _report(slug: str, run_id: str, view: dict, state: str) -> int:
     return 1
 
 
+def _report_full(slug: str, run_id: str, view: dict, state: str) -> int:
+    """``_report``'s verdict, then every cell, then the shape check."""
+    rc = _report(slug, run_id, view, state)
+    cells = cells_of(view)
+    for line in cell_lines(cells):
+        print(line)
+    for job in view.get("jobs") or []:
+        if not _SHARD_JOB.match(job.get("name") or ""):
+            print(f"  {job.get('name')}: {job.get('conclusion') or job.get('status')}")
+    problems = matrix_problems(cells)
+    if problems:
+        print("  NOT THE FULL MATRIX: " + "; ".join(problems))
+        return 1 if rc == 0 else rc
+    shards = len(next(iter(cells.values())))
+    print(f"  full matrix: {len(cells)} cells x {shards} shards = "
+          f"{len(cells) * shards} shard jobs")
+    return rc
+
+
 def cmd_clean(branch: str, pusher=None) -> int:
     try:
         ref = ci_ref_for(branch)
@@ -505,13 +759,16 @@ def main(argv: list[str]) -> int:
     sub.add_parser("push", help="push HEAD to ci/<branch> after the gate's checks")
     w = sub.add_parser("wait", help="wait on the CI run for a sha")
     w.add_argument("sha")
+    w.add_argument("--full", action="store_true",
+                   help="then dispatch the FULL matrix on ci/<branch> and wait on "
+                        "that run, read by sha (resumes one already dispatched)")
     c = sub.add_parser("clean", help="delete ci/<branch>")
     c.add_argument("branch")
     args = parser.parse_args(argv[1:])
     if args.command == "push":
         return cmd_push()
     if args.command == "wait":
-        return cmd_wait(args.sha)
+        return cmd_full(args.sha) if args.full else cmd_wait(args.sha)
     return cmd_clean(args.branch)
 
 

@@ -731,3 +731,298 @@ def test_the_hook_probe_reads_the_gate_this_lane_ships():
     """The probe is a literal; if the gate renames it, this goes red here."""
     assert lane.hook_gate_knows_ci(SCRIPTS / "pre_push_ref_gate.py")
     assert not lane.hook_gate_knows_ci(SCRIPTS / "lane_ci_no_such_file.py")
+
+
+# ---------------------------------------------------------------------------
+# wait --full: the full matrix on a lane's own ci/ ref (lane ci8, 2026-11-27)
+# ---------------------------------------------------------------------------
+#
+# RULED 22:55: before master is fast-forwarded, a branch's ci/ ref gets the
+# FULL matrix -- three cells x six shards, which ci.yml gives a
+# workflow_dispatch on any ref. ``wait <sha> --full`` waits for the push run
+# on ci/<branch> to FINISH first, because the dispatch shares its
+# concurrency group and cancel-in-progress would cancel it; then dispatches,
+# finds the dispatch run BY HEAD SHA AND EVENT, waits, and reports the
+# conclusion and every cell.
+
+import re  # noqa: E402 -- the section's own
+
+
+def _shard_job(os_name: str, py: str, shard: int, conclusion: str = "success") -> dict:
+    return {"name": f"pytest ({os_name}, py{py}, shard {shard})",
+            "status": "completed", "conclusion": conclusion}
+
+
+def _full_jobs(fail: tuple[str, str, int] | None = None, cells=None, shards=6) -> list[dict]:
+    cells = cells or [("ubuntu-latest", "3.10"), ("ubuntu-latest", "3.13"),
+                      ("windows-latest", "3.13")]
+    jobs = [{"name": "shard plan", "status": "completed", "conclusion": "success"}]
+    for os_name, py in cells:
+        for index in range(shards):
+            bad = fail == (os_name, py, index)
+            jobs.append(_shard_job(os_name, py, index, "failure" if bad else "success"))
+    jobs.append({"name": "every shard reported", "status": "completed",
+                 "conclusion": "success"})
+    return jobs
+
+
+def _view(conclusion: str, jobs: list[dict]) -> dict:
+    return {"status": "completed", "conclusion": conclusion, "jobs": jobs,
+            "startedAt": "2026-11-27T18:00:00Z", "updatedAt": "2026-11-27T18:11:00Z"}
+
+
+RUNNING = {"status": "in_progress", "jobs": []}
+
+
+def _run_of(i, event, status="completed", conclusion="success", sha=SHA,
+            branch="ci/lane", created="2026-11-27T18:00:00Z"):
+    return {"databaseId": i, "headSha": sha, "headBranch": branch, "event": event,
+            "status": status, "conclusion": conclusion, "createdAt": created}
+
+
+class FullGh:
+    """Canned gh answers for --full, keyed by what is asked, with every call
+    kept so a test can read their ORDER."""
+
+    def __init__(self, push_lists, dispatch_lists, views, log="", dispatch_rc=0):
+        self.push_lists = list(push_lists)
+        self.dispatch_lists = list(dispatch_lists)
+        self.views = {k: list(v) for k, v in views.items()}
+        self.log, self.dispatch_rc, self.calls = log, dispatch_rc, []
+
+    @staticmethod
+    def _next(queue):
+        return queue.pop(0) if len(queue) > 1 else queue[0]
+
+    def __call__(self, *args):
+        self.calls.append(args)
+        if args[:2] == ("workflow", "run"):
+            return self.dispatch_rc, "", "" if self.dispatch_rc == 0 else "HTTP 403"
+        if args[:2] == ("run", "list"):
+            assert "--commit" in args and SHA in args, args  # BY SHA, always
+            event = args[args.index("--event") + 1]
+            queue = self.push_lists if event == "push" else self.dispatch_lists
+            return 0, json.dumps(self._next(queue)), ""
+        if "--log-failed" in args:
+            return 0, self.log, ""
+        run_id = args[2]
+        return 0, json.dumps(self._next(self.views[run_id])), ""
+
+    def index(self, *prefix) -> list[int]:
+        return [i for i, call in enumerate(self.calls) if call[:len(prefix)] == prefix]
+
+
+def _git_for_full(ref_sha=SHA):
+    def git(*args):
+        if args[:2] == ("remote", "get-url"):
+            return 0, "https://github.com/owner-x/repo-y.git", ""
+        if args[:1] == ("symbolic-ref",):
+            return 0, "lane", ""
+        if args[:1] == ("ls-remote",):
+            assert args[-1] == "refs/heads/ci/lane", args
+            return 0, f"{ref_sha}\trefs/heads/ci/lane", ""
+        raise AssertionError(args)
+    return git
+
+
+def _full(monkeypatch, gh, ref_sha=SHA, bound=600):
+    ticks = iter(range(0, 100_000, 20))
+    monkeypatch.setattr(lane, "_git", _git_for_full(ref_sha))
+    monkeypatch.setattr(lane, "_gh", gh)
+    return lane.cmd_full(SHA, poll=20, bound=bound, full_bound=bound,
+                         sleep=lambda s: None, clock=lambda: next(ticks))
+
+
+def test_full_waits_for_the_push_run_to_finish_before_it_dispatches(monkeypatch, capsys):
+    """The dispatch shares the push run's concurrency group, and
+    cancel-in-progress would cancel whichever came first. So the dispatch is
+    sent only after the push run's view has read COMPLETED."""
+    gh = FullGh(push_lists=[[_run_of(7, "push", status="in_progress")]],
+                dispatch_lists=[[], [], [_run_of(9, "workflow_dispatch",
+                                                 status="in_progress")]],
+                views={"7": [RUNNING, RUNNING, _view("success", [])],
+                       "9": [RUNNING, _view("success", _full_jobs())]})
+    assert _full(monkeypatch, gh) == 0, capsys.readouterr()
+    push_views = gh.index("run", "view", "7")
+    assert len(push_views) == 3, ("the push run was not read to completion", gh.calls)
+    dispatched = gh.index("workflow", "run")
+    assert len(dispatched) == 1 and dispatched[0] > max(push_views), gh.calls
+    assert gh.calls[dispatched[0]] == ("workflow", "run", "ci.yml", "-R", "owner-x/repo-y",
+                                       "--ref", "ci/lane"), gh.calls[dispatched[0]]
+
+
+def test_full_reports_the_conclusion_and_every_cell(monkeypatch, capsys):
+    gh = FullGh(push_lists=[[_run_of(7, "push")]],
+                dispatch_lists=[[], [_run_of(9, "workflow_dispatch", status="in_progress")]],
+                views={"7": [_view("success", [])],
+                       "9": [_view("success", _full_jobs())]})
+    assert _full(monkeypatch, gh) == 0
+    out = capsys.readouterr().out
+    assert "run 9: success  jobs=20  wall=11m00s" in out, out
+    for cell in ("ubuntu-latest py3.10", "ubuntu-latest py3.13", "windows-latest py3.13"):
+        assert re.search(rf"{re.escape(cell)}: 6 of 6 shards success", out), out
+    assert "3 cells x 6 shards = 18 shard jobs" in out, out
+    assert "every shard reported: success" in out, out
+
+
+def test_full_finds_the_dispatch_run_by_sha_and_event_never_the_latest(monkeypatch, capsys):
+    """Right after a dispatch the newest run in the repository is somebody
+    else's. The run is the one whose head sha, event and ref are ours and
+    which did not exist before the dispatch."""
+    other = _run_of(99, "workflow_dispatch", status="in_progress", sha=OTHER,
+                    created="2026-11-27T19:00:00Z")
+    push = _run_of(7, "push", created="2026-11-27T18:30:00Z")
+    stranger_ref = _run_of(98, "workflow_dispatch", status="in_progress",
+                           branch="ci/someone-else", created="2026-11-27T18:59:00Z")
+    ours = _run_of(9, "workflow_dispatch", status="in_progress",
+                   created="2026-11-27T18:40:00Z")
+    gh = FullGh(push_lists=[[push]],
+                dispatch_lists=[[other, stranger_ref], [other, stranger_ref, push, ours]],
+                views={"7": [_view("success", [])],
+                       "9": [_view("success", _full_jobs())]})
+    assert _full(monkeypatch, gh) == 0
+    assert "run 9: success" in capsys.readouterr().out
+    listed = [call for call in gh.calls if call[:2] == ("run", "list")]
+    assert listed and all("--limit" in c and c[c.index("--limit") + 1] != "1"
+                          for c in listed), listed
+
+
+def test_a_dispatch_already_running_is_waited_on_never_sent_again(monkeypatch, capsys):
+    """A wait the shell cut short is RESUMED: a second dispatch would cancel
+    the first through the same concurrency group."""
+    gh = FullGh(push_lists=[[_run_of(7, "push")]],
+                dispatch_lists=[[_run_of(9, "workflow_dispatch", status="in_progress")]],
+                views={"7": [_view("success", [])],
+                       "9": [RUNNING, _view("success", _full_jobs())]})
+    assert _full(monkeypatch, gh) == 0
+    assert gh.index("workflow", "run") == [], gh.calls
+    assert "already dispatched" in capsys.readouterr().err
+
+
+def test_a_completed_dispatch_of_this_sha_is_read_not_repeated(monkeypatch, capsys):
+    gh = FullGh(push_lists=[[_run_of(7, "push")]],
+                dispatch_lists=[[_run_of(9, "workflow_dispatch")]],
+                views={"7": [_view("success", [])],
+                       "9": [_view("success", _full_jobs())]})
+    assert _full(monkeypatch, gh) == 0
+    assert gh.index("workflow", "run") == [], gh.calls
+    captured = capsys.readouterr()
+    assert "already ran on this sha" in captured.err and "run 9: success" in captured.out
+
+
+def test_a_cancelled_dispatch_is_dispatched_again(monkeypatch, capsys):
+    """And the OLD run is never taken for the new one: right after the
+    dispatch the list still shows only the cancelled run, whose verdict is
+    no verdict on anything."""
+    cancelled = _run_of(9, "workflow_dispatch", conclusion="cancelled")
+    gh = FullGh(push_lists=[[_run_of(7, "push")]],
+                dispatch_lists=[[cancelled], [cancelled],
+                                [cancelled,
+                                 _run_of(10, "workflow_dispatch", status="in_progress",
+                                         created="2026-11-27T18:50:00Z")]],
+                views={"7": [_view("success", [])],
+                       "9": [_view("cancelled", [])],
+                       "10": [_view("success", _full_jobs())]})
+    assert _full(monkeypatch, gh) == 0
+    assert len(gh.index("workflow", "run")) == 1, gh.calls
+    assert "run 10: success" in capsys.readouterr().out
+
+
+def test_full_refuses_when_the_ci_ref_does_not_hold_the_sha(monkeypatch, capsys):
+    """A dispatch runs the REF's head. If ci/<branch> holds another commit,
+    the full matrix would certify that one under this sha's name."""
+    gh = FullGh(push_lists=[[]], dispatch_lists=[[]], views={})
+    assert _full(monkeypatch, gh, ref_sha=OTHER) == 1
+    assert gh.calls == [], gh.calls
+    assert "holds " + OTHER[:12] in capsys.readouterr().err
+
+
+def test_full_sends_nothing_after_a_red_push_run(monkeypatch, capsys):
+    """The full matrix cannot certify a sha whose lane run is red, and it
+    would spend eighteen jobs of the shared pool learning so."""
+    gh = FullGh(push_lists=[[_run_of(7, "push", conclusion="failure")]],
+                dispatch_lists=[[]],
+                views={"7": [_view("failure", [_shard_job("ubuntu-latest", "3.13", 1,
+                                                          "failure")])]})
+    assert _full(monkeypatch, gh) == 1
+    assert gh.index("workflow", "run") == [], gh.calls
+    assert "not dispatched" in capsys.readouterr().err
+
+
+def test_a_red_cell_is_named_with_its_shard(monkeypatch, capsys):
+    gh = FullGh(push_lists=[[_run_of(7, "push")]],
+                dispatch_lists=[[], [_run_of(9, "workflow_dispatch", status="in_progress")]],
+                views={"7": [_view("success", [])],
+                       "9": [_view("failure", _full_jobs(fail=("windows-latest", "3.13", 1)))]})
+    assert _full(monkeypatch, gh) == 1
+    out = capsys.readouterr().out
+    assert "windows-latest py3.13: 5 of 6 shards success; shard 1 failure" in out, out
+    assert "ubuntu-latest py3.10: 6 of 6 shards success" in out, out
+
+
+def test_a_one_cell_run_is_not_the_full_matrix(monkeypatch, capsys):
+    """Green, and the wrong shape: one cell is the fast lane's. Reported as
+    not the full matrix, never as its certificate."""
+    jobs = _full_jobs(cells=[("ubuntu-latest", "3.13")], shards=4)
+    gh = FullGh(push_lists=[[_run_of(7, "push")]],
+                dispatch_lists=[[], [_run_of(9, "workflow_dispatch", status="in_progress")]],
+                views={"7": [_view("success", [])], "9": [_view("success", jobs)]})
+    assert _full(monkeypatch, gh) == 1
+    assert "NOT THE FULL MATRIX" in capsys.readouterr().out
+
+
+def test_a_dispatch_that_never_appears_is_no_verdict(monkeypatch, capsys):
+    gh = FullGh(push_lists=[[_run_of(7, "push")]], dispatch_lists=[[]],
+                views={"7": [_view("success", [])]})
+    assert _full(monkeypatch, gh, bound=100) == 2
+    assert "NO VERDICT" in capsys.readouterr().err
+
+
+def test_a_refused_dispatch_is_no_verdict(monkeypatch, capsys):
+    gh = FullGh(push_lists=[[_run_of(7, "push")]], dispatch_lists=[[]],
+                views={"7": [_view("success", [])]}, dispatch_rc=1)
+    assert _full(monkeypatch, gh) == 2
+    assert "dispatch failed" in capsys.readouterr().err
+
+
+def test_the_cell_reader_parses_the_job_name_ci_yml_writes():
+    """The shard job's name is a template in the workflow; the reader is
+    held to what that template renders, so a rename goes red here."""
+    import yaml
+
+    template = yaml.safe_load((REPO / ".github" / "workflows" / "ci.yml").read_text(
+        encoding="utf-8"))["jobs"]["test"]["name"]
+    name = (template.replace("${{ matrix.cell.os }}", "windows-latest")
+            .replace("${{ matrix.cell['python-version'] }}", "3.13")
+            .replace("${{ matrix.shard }}", "5"))
+    assert "${{" not in name, name
+    cells = lane.cells_of({"jobs": [{"name": name, "conclusion": "success"}]})
+    assert cells == {"windows-latest py3.13": {5: "success"}}, cells
+
+
+def test_the_full_plan_passes_the_shape_check_and_the_fast_plan_does_not(tmp_path):
+    """The shape check, held to the plan step itself: the outputs ci.yml
+    gives a workflow_dispatch on a ci/ ref pass it, and the fast lane's fail
+    it, so neither can drift away from the check unnoticed."""
+    from tests.test_ci_fast_lane import _run_plan
+
+    def jobs_for(plan):
+        return {"jobs": [_shard_job(c["os"], c["python-version"], s)
+                         for c in plan["cells"] for s in plan["shards"]]}
+
+    full = _run_plan(tmp_path, "workflow_dispatch", "refs/heads/ci/lane")
+    fast = _run_plan(tmp_path, "push", "refs/heads/ci/lane")
+    assert lane.matrix_problems(lane.cells_of(jobs_for(full))) == []
+    assert lane.matrix_problems(lane.cells_of(jobs_for(fast))) != []
+
+
+def test_wait_full_is_one_command():
+    """``lane_ci.py wait <sha> --full`` parses to the full-matrix path."""
+    calls = []
+    original = lane.cmd_full
+    try:
+        lane.cmd_full = lambda sha, **kw: calls.append(sha) or 0
+        assert lane.main(["lane_ci.py", "wait", SHA, "--full"]) == 0
+    finally:
+        lane.cmd_full = original
+    assert calls == [SHA]
