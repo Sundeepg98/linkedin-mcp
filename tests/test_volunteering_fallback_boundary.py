@@ -49,8 +49,9 @@ BARE = f"{B}/in/me/opportunities/volunteering/education/"
 HIS_ID = "ACoAASYNTHETICSYNTHETICSYNTHETIC0000002"
 #: Another id a page could draw (a declared synthetic token).
 OTHER_ID = "ACoAASYNTHETICSYNTHETICSYNTHETIC0000003"
-#: The landed member segment of his proven root (a placeholder).
-MEMBER = "placeholder-member"
+#: The landed member segment of his proven root: a synthetic slug already
+#: declared in tests/test_a_person_name_is_never_a_literal.py's INVENTED_NAMES.
+MEMBER = "alex-r-12ab34"
 FORMED = f"{BARE}?profileId={HIS_ID}"
 
 ALLOWLIST_SENTENCE = "not on the read-only allowlist"
@@ -259,7 +260,15 @@ def test_the_landed_member_must_be_a_member_segment():
 
 def test_the_id_and_the_formed_address_reach_no_log_and_no_verdict(caplog):
     route = _route()
+    # THE PACKAGE LOGGER TOO, not only the root: the package logger keeps its
+    # own INFO, so an absence asserted over a root-only capture would pass on
+    # a build that logs the value at DEBUG. The control record proves a DEBUG
+    # line on the package logger comes back.
     caplog.set_level(logging.DEBUG)
+    caplog.set_level(logging.DEBUG, logger="linkedin")
+    logging.getLogger("linkedin").debug("control record")
+    assert any(r.getMessage() == "control record" for r in caplog.records), caplog.records
+    caplog.clear()
     outputs = [
         route.match_verdict(_card(), HIS_ID, MEMBER),
         route.match_verdict(_card(query=f"profileId={OTHER_ID}"), HIS_ID, MEMBER),
