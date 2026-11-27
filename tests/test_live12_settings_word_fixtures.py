@@ -126,12 +126,40 @@ def test_a_word_from_another_page_does_not_explain_a_difference():
     assert _differences("verifications_words", builder.SPEC["premium_manage_account_words"][2]) != []
 
 
+def _as_committed(raw: bytes) -> str:
+    """A fixture's bytes as STRICT ASCII text (any other byte raises), with its
+    line ends read as committed.
+
+    THE CHECKOUT WRITES THE LINE ENDS, NOT THE BUILDER (lane masterfix7,
+    2026-11-27). The committed blobs are LF, with no CR at all. A Windows
+    checkout with ``core.autocrlf`` writes each LF as CRLF, and this repository
+    has no ``.gitattributes``: that is the difference the windows CI cell keeps
+    its place in the matrix for (``.github/workflows/ci.yml``). Read raw, these
+    files opened ``<!doctype html>\\r\\n`` there, and the provenance check
+    failed in windows shards 2 and 5 of master run 46030101439."""
+    return raw.decode("ascii").replace("\r\n", "\n")
+
+
+def _assert_opens_with_its_provenance(text: str, builder: str) -> None:
+    assert text.startswith("<!doctype html>\n<!--\n  LANE SETTINGS7, 2026-11-27: built by\n")
+    assert builder in text.split("-->", 1)[0]
+
+
 @pytest.mark.parametrize("stem", STEMS)
 def test_each_fixture_opens_with_its_provenance_and_is_strict_ascii(stem):
     raw = (LIVE12 / (stem + ".html")).read_bytes()
-    text = raw.decode("ascii")
-    assert text.startswith("<!doctype html>\n<!--\n  LANE SETTINGS7, 2026-11-27: built by\n")
-    assert "scripts/_build_live12_settings_word_skeletons.py" in text.split("-->", 1)[0]
+    _assert_opens_with_its_provenance(_as_committed(raw), "scripts/_build_live12_settings_word_skeletons.py")
+
+
+@pytest.mark.parametrize("stem", STEMS)
+def test_a_crlf_checkout_of_each_fixture_opens_the_same(stem):
+    """THE WINDOWS CELL'S CHECKOUT, ON ANY BOX. The committed bytes are LF with
+    no CR at all; ``core.autocrlf`` writes each LF as CRLF. Written that way,
+    each fixture must open with the same provenance."""
+    committed = (LIVE12 / (stem + ".html")).read_bytes().replace(b"\r\n", b"\n")
+    assert b"\r" not in committed
+    crlf = committed.replace(b"\n", b"\r\n")
+    _assert_opens_with_its_provenance(_as_committed(crlf), "scripts/_build_live12_settings_word_skeletons.py")
 
 
 def _body(stem: str) -> str:

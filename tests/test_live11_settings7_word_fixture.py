@@ -24,7 +24,12 @@ sys.path.insert(0, str(REPO / "scripts"))
 
 import _build_live11_settings7_word_skeletons as builder  # noqa: E402
 import _build_live12_settings_word_skeletons as other_page  # noqa: E402
-from tests.test_live12_settings_word_fixtures import _segments, _tokens  # noqa: E402
+from tests.test_live12_settings_word_fixtures import (  # noqa: E402
+    _as_committed,
+    _assert_opens_with_its_provenance,
+    _segments,
+    _tokens,
+)
 
 LIVE11 = REPO / "tests" / "fixtures" / "live11"
 STEM = "sessions_surface_words"
@@ -85,6 +90,14 @@ def test_the_contacts_entry_is_drawn_as_the_admitted_address_with_its_label():
 
 
 def test_the_fixture_opens_with_its_provenance_and_is_strict_ascii():
-    raw = (LIVE11 / (STEM + ".html")).read_bytes().decode("ascii")
-    assert raw.startswith("<!doctype html>\n<!--\n  LANE SETTINGS7, 2026-11-27: built by\n")
-    assert "scripts/_build_live11_settings7_word_skeletons.py" in raw.split("-->", 1)[0]
+    raw = (LIVE11 / (STEM + ".html")).read_bytes()
+    _assert_opens_with_its_provenance(_as_committed(raw), "scripts/_build_live11_settings7_word_skeletons.py")
+
+
+def test_a_crlf_checkout_of_the_fixture_opens_the_same():
+    """THE WINDOWS CELL'S CHECKOUT, ON ANY BOX: the committed LF bytes written as
+    ``core.autocrlf`` writes them open with the same provenance."""
+    committed = (LIVE11 / (STEM + ".html")).read_bytes().replace(b"\r\n", b"\n")
+    assert b"\r" not in committed
+    crlf = committed.replace(b"\n", b"\r\n")
+    _assert_opens_with_its_provenance(_as_committed(crlf), "scripts/_build_live11_settings7_word_skeletons.py")
