@@ -53,7 +53,7 @@ J 83	J	W	-	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 J 84	J	W	-	TARGET:a job in a search of his he names to hide	MEASURED	_audit/2026-11-25-build-jmn26.md::on 7 of 7 cards its aria-label is that card's own title ; RULING:HIS-OWN-CURATION-NOT-OUTWARD
 J 85	J	W	-	SIBLING:J 84	NAMED	_audit/2026-09-28-rulings-build-classes.md::the act is proven only through that undo
 J 86	J	W	-	SIBLING:P I14	INFERRED	RULING:D6-CAPABILITY-OVER-AFFORDANCE ; P I14
-J 87	J	W	-	CAPTURE:admit-mypreferences-d-categories-privacy	INFERRED	_audit/_census/jobs.md::awaiting admission by name: the settings page that holds the record ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
+J 87	J	W	-	ADMIT:https://www.linkedin.com/mypreferences/m/manage-data-and-activity/	INFERRED	tests/fixtures/live12/privacy_words.html ; _audit/_census/jobs.md::THE CATEGORY PAGE NAMES NO EXPRESSED-INTEREST RECORD ; RULING:NAMED-SETTINGS-PAGES-RATIFIED
 J 89	J	W	-	SIBLING:P I2	INFERRED	P I2
 J 90	J	W	-	SIBLING:P I3	INFERRED	P I3
 J 91	J	W	-	SIBLING:P I11	INFERRED	P I11
@@ -304,7 +304,7 @@ N 139	N	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 N 140	N	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 N 141	N	W	R3	TARGET:a member he names to block	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::`N 141`: the block control on the named member's profile ; RULING:RELATION-REMOVALS-BUILT-BEHIND-GRANTS
 N 142	N	W	R3	TARGET:a member he has blocked and names to unblock	NAMED	_audit/_census/network.md::the member can reach him again ; RULING:RELATION-REMOVALS-BUILT-BEHIND-GRANTS
-N 143	N	R	-	CAPTURE:admit-mypreferences-d-categories-privacy	INFERRED	_audit/_census/read-addresses.tsv::which settings address lists who he has blocked ; RULING:READ-PAST-AN-ACT-SUBSTRING
+N 143	N	R	-	ADMIT:https://www.linkedin.com/mypreferences/d/categories/profile-visibility/	INFERRED	tests/fixtures/live12/privacy_words.html ; _audit/_census/network.md::THE DATA PRIVACY CATEGORY DRAWS NO BLOCKED LIST ; RULING:READ-PAST-AN-ACT-SUBSTRING
 N 148	N	W	R3	TARGET:a real post or comment he names to report	NAMED	_audit/2026-09-28-rulings-build-classes.md::a report is never fired for a proof unless he names a real item to report
 N 149	N	W	R3	SIBLING:M M38	NAMED	N 149 ; M M38
 N 150	N	W	R3	TARGET:a conversation thread he names to report	NAMED	_audit/_census/network.md::THE QUEUED RE-FILE MUST NOT BE EXECUTED ON THIS ROW
@@ -486,7 +486,7 @@ P N32	P	R	-	ADMIT:https://www.linkedin.com/manage/purchases-payments/purchases/	
 P O4	P	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 P O5	P	W	R3	SIBLING:lane-S	NAMED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD ; RULING:CREDENTIAL-SETTINGS-NEED-THE-OPERATOR
 P O21	P	W	R3	TARGET:a member he names to block	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::`N 141`: the block control on the named member's profile ; RULING:RELATION-REMOVALS-BUILT-BEHIND-GRANTS
-P O22	P	R	-	CAPTURE:admit-mypreferences-d-categories-privacy	INFERRED	_audit/_census/read-addresses.tsv::which settings address lists who he has blocked ; RULING:READ-PAST-AN-ACT-SUBSTRING
+P O22	P	R	-	ADMIT:https://www.linkedin.com/mypreferences/d/categories/profile-visibility/	INFERRED	tests/fixtures/live12/privacy_words.html ; _audit/_census/profile.md::THE DATA PRIVACY CATEGORY DRAWS NO BLOCKED LIST ; RULING:READ-PAST-AN-ACT-SUBSTRING
 P O23	P	R	-	PRECONDITION:a second account to watch the network from	NAMED	_audit/_census/read-addresses.tsv::Measurable only by firing a profile write and watching another account
 P O6-O20	P	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 P P3	P	R	-	CAPTURE:admit-mypreferences-m-download-my-data	MEASURED	tests/fixtures/live12/privacy_words.html ; _audit/_census/profile.md::ADDRESS ADMITTED 2026-11-27 BY LANE SETTINGS7 ; RULING:NAMED-SETTINGS-PAGES-RATIFIED

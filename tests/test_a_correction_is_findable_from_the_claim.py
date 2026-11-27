@@ -538,6 +538,21 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "beside it. **WHAT WOULD MAKE THIS ENTRY WRONG:** this lane's note "
         "saying the row's earlier text was untrue."
     ),
+    # 2026-11-27, lane settings7: its notes on profile rows K1, K7, N22, N32,
+    # O22, P3, I12 and I13 cite its record, and one of them lands within the
+    # window of words two neighbours wrote. Read, not inferred: the only hit
+    # is K7's note, and its words are not K7's own.
+    ("profile.md", "2026-11-27-settings7.md"): (
+        "TABLE-ROW PROXIMITY, NOT A CORRECTION. Row K7 gained one note -- the "
+        "Delete drawn by name on session 12's capture, measured offline to "
+        "declare no popup, and held by the orchestrator's answer to "
+        "Q-VERIFICATION-DELETE -- citing this record. The matched word is "
+        "'false', in its neighbours K8 ('\"NO REASON\" IS FALSE', a 2026-09-21 "
+        "note on that row's own reading) and K10 ('return False' and 'false "
+        "on 6', about that row's badge reader), two rows this lane did not "
+        "write. **WHAT WOULD MAKE THIS ENTRY WRONG:** a profile row saying "
+        "this lane's record does not hold, while leaving the record unmarked."
+    ),
     ("profile.md", "2026-11-25-build-p26.md"): (
         "A LEDGER NOTE AND ONE MOVE, NOT A CORRECTION. Rows A11, A13, A14, "
         "A15, A17, A25, D25, D26, F1, K8 and S8 each gained one note -- the "
