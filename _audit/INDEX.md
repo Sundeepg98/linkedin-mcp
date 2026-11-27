@@ -27,8 +27,8 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 317 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 277 |
+| audit documents git tracks under `_audit` | 318 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 278 |
 | distinct dates | 23 |
 | documents with no level-1 heading | 2 |
 | `CORRECTS:` marker lines | 133 |
@@ -39,7 +39,7 @@ are listed as `(undated)`; no date is taken from git history, because
 | documents at either end of a cross-document edge | 114 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
-| documents no correction marker touches at all | 201 |
+| documents no correction marker touches at all | 202 |
 | blockquoted markers naming ANOTHER document | 0 |
 | edges missing one of their two markers | 0 |
 | edges declared a different number of times in each direction | 2 |
@@ -1987,6 +1987,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-11-27 | [2026-11-27-integration-7.md](2026-11-27-integration-7.md) | Integration 7, 2026-11-27: the five wave-7 lanes onto master 68a4ff7, and the wave's rulings |  |
 | 2026-11-27 | [2026-11-27-jobs7.md](2026-11-27-jobs7.md) | Lane jobs7, 2026-11-27: the AI job search as the keyword search's own route, and session 12's captures read by keyed shape | corrects x1 |
 | 2026-11-27 | [2026-11-27-live-session-13.md](2026-11-27-live-session-13.md) | Live session 13 -- the live lane's record, written as it runs |  |
+| 2026-11-27 | [2026-11-27-live-session-14.md](2026-11-27-live-session-14.md) | Live session 14 -- the live lane's record, written as it runs |  |
 | 2026-11-27 | [2026-11-27-masterfix7.md](2026-11-27-masterfix7.md) | Lane masterfix7: master CI red after integration 7, four failing cells | corrects x1 |
 | 2026-11-27 | [2026-11-27-msg7.md](2026-11-27-msg7.md) | msg7, 2026-11-27: the messaging and content rows session 12 captured, read offline | corrects x1 |
 | 2026-11-27 | [2026-11-27-net7.md](2026-11-27-net7.md) | Lane net7, 2026-11-27: the network rows session 12 captured -- the panel read offline, four facets and one reader built, the rest re-aimed |  |
