@@ -79,7 +79,10 @@ not, and no map is written from one. The map is uploaded as the run's
 
 installs it only if the run is that sha's recording and the map's stamp is
 that run's (``scripts/lane_ci.py read-map <sha>`` dispatches, waits and
-fetches in one step).
+fetches in one step). The installed map CARRIES the previous map's edges for
+test files and data files still on disk (``carry``), because a module-level
+read lands on whichever importer a process collects first, so a re-record
+attributes it differently; ``--replace`` installs the recording alone.
 """
 
 from __future__ import annotations
@@ -539,8 +542,42 @@ def _gh_cli(*args: str) -> tuple[int, str, str]:
     return proc.returncode, proc.stdout.strip(), proc.stderr.strip()
 
 
+#: Why a fetched recording carries the previous map's edges, said in the map.
+CARRY_WHY = (
+    "A re-record may add edges and never remove one, the map's own law. A "
+    "module-level read is attributed to whichever test file a process imports "
+    "first, so two recordings of one suite attribute it differently; these "
+    "edges are the previous map's, for test files and data files still on disk, "
+    "that this recording did not see.")
+
+
+def carry(payload: dict, previous: dict | None, repo: Path) -> dict:
+    """``payload``, plus every edge ``previous`` holds that it lacks, for a
+    test file still on disk and a data file ``prune`` still keeps. The
+    recording's own stamp is kept; ``carried`` says how many edges came over,
+    and from which map."""
+    if not previous or not isinstance(previous.get("edges"), dict):
+        return payload
+    edges = {test: set(paths) for test, paths in payload["edges"].items()}
+    added = 0
+    for test, paths in previous["edges"].items():
+        if not (repo / test).is_file():
+            continue
+        for path in prune({test: list(paths)}, repo).get(test, []):
+            if path not in edges.setdefault(test, set()):
+                edges[test].add(path)
+                added += 1
+    out = dict(payload)
+    out["edges"] = {test: sorted(paths) for test, paths in sorted(edges.items()) if paths}
+    out["test_files"] = len(out["edges"])
+    out["carried"] = {"edges": added, "from_head": previous.get("head"),
+                      "from_taken_at": previous.get("taken_at"), "why": CARRY_WHY}
+    return out
+
+
 def fetch(run_id: str, sha: str, *, slug: str | None = None, gh=None,
-          map_path: Path = MAP_PATH) -> int:
+          map_path: Path = MAP_PATH, repo: Path | None = None,
+          replace: bool = False) -> int:
     """Install the map recorded by run ``run_id``, which must be ``sha``'s.
 
     BY RUN ID AND HEAD SHA, never "the latest run": the run is read by its id,
@@ -608,9 +645,17 @@ def fetch(run_id: str, sha: str, *, slug: str | None = None, gh=None,
         print("build_read_map: REFUSED, nothing installed: " + "; ".join(stamp_problems),
               file=sys.stderr)
         return 1
+    if not replace:
+        try:
+            previous = json.loads(map_path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            previous = None
+        payload = carry(payload, previous, repo or _REPO_FALLBACK)
     map_path.write_text(json.dumps(payload, indent=1) + "\n", encoding="utf-8")
+    carried = (payload.get("carried") or {}).get("edges", 0)
     print(f"build_read_map: installed run {run_id}'s map at {head} -- "
-          f"{len(payload['edges'])} test files.")
+          f"{len(payload['edges'])} test files, {carried} edge(s) carried from the "
+          "previous map.")
     return 0
 
 
@@ -632,6 +677,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--fetch", default=None, metavar="RUN_ID",
                         help="install the map recorded by this CI run")
     parser.add_argument("--sha", default=None, help="the head sha --fetch must find")
+    parser.add_argument("--replace", action="store_true",
+                        help="with --fetch: install the recording alone, carrying nothing")
     args = parser.parse_args(argv)
 
     repo = Path(args.repo_root or _git(Path.cwd(), "rev-parse", "--show-toplevel")
@@ -641,7 +688,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.fetch is not None:
         if not args.sha:
             parser.error("--fetch needs --sha, the head the run must have recorded")
-        return fetch(args.fetch, args.sha)
+        return fetch(args.fetch, args.sha, repo=repo, replace=args.replace)
     if args.merge is not None:
         if not (args.out and args.run_id and args.head):
             parser.error("--merge needs --out, --run-id and --head")

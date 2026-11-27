@@ -46,9 +46,20 @@ SPLIT_READERS = [
 ]
 
 
-@pytest.mark.parametrize(("fixture", "reader", "why"), SPLIT_READERS,
+#: AND READERS THE 2026-09-22 RECORDING NEVER SAW (lane ci8, 2026-11-28),
+#: found once the full recording ran on CI (run 46067022556). Each reads the
+#: fixture through a name no static rule can match, and the stale map left it
+#: out of the plan for an edit to that fixture: measured through the shipped
+#: ``impact_set``, red against the old map and green against the new one.
+STALE_MAP_MISSED = [
+    ("tests/fixtures/synthetic/messaging_compose_list.html", "tests/test_people_seam.py",
+     "it imports COMPOSE_LIST, the fixture's text, from tests/test_messaging_threads.py"),
+]
+
+
+@pytest.mark.parametrize(("fixture", "reader", "why"), SPLIT_READERS + STALE_MAP_MISSED,
                          ids=[f"{r.split('/')[-1]}<-{f.split('/')[-1]}"
-                              for f, r, _w in SPLIT_READERS])
+                              for f, r, _w in SPLIT_READERS + STALE_MAP_MISSED])
 def test_the_map_names_the_split_file_that_reads_the_fixture(fixture, reader, why):
     assert (_ROOT / fixture).is_file() and (_ROOT / reader).is_file(), (fixture, reader)
     seen, stamp = G.observed_readers([fixture])

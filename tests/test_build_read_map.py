@@ -226,10 +226,46 @@ class FakeGh:
         raise AssertionError(args)
 
 
-def _fetch(tmp_path, gh):
-    target = tmp_path / "installed.json"
-    code = recipe.fetch("4242", SHA, slug="owner-x/repo-y", gh=gh, map_path=target)
+def _fetch(tmp_path, gh, **kwargs):
+    target = kwargs.pop("target", tmp_path / "installed.json")
+    code = recipe.fetch("4242", SHA, slug="owner-x/repo-y", gh=gh, map_path=target, **kwargs)
     return code, target
+
+
+def test_fetch_carries_what_the_previous_map_saw_and_this_run_did_not(tmp_path, worktree):
+    """A RE-RECORD MAY ADD EDGES AND NEVER REMOVE ONE. A module-level read is
+    attributed to whichever test file a process imports first, so two
+    recordings of one suite attribute it differently: run 46067022556's
+    xdist workers gave jobs_tracker_row.html to other importers, and dropped
+    it from three split test_writes files the previous map named. SHOWN
+    FAILING before the fetch carried them: the previous edge was gone."""
+    (worktree / "tests" / "test_old.py").write_text("", encoding="utf-8")
+    target = tmp_path / "installed.json"
+    target.write_text(json.dumps({
+        "taken_at": "2026-09-22", "head": "5c910e4", "edges": {
+            "tests/test_old.py": ["tests/data.txt", "tests/gone.txt"],
+            "tests/test_deleted.py": ["tests/data.txt"]}}), encoding="utf-8")
+    code, _target = _fetch(tmp_path, FakeGh(_view(), _map()), target=target, repo=worktree)
+    assert code == 0
+    payload = json.loads(target.read_text(encoding="utf-8"))
+    assert payload["edges"]["tests/test_a.py"] == ["tests/data.txt"], payload["edges"]
+    assert payload["edges"]["tests/test_old.py"] == ["tests/data.txt"], payload["edges"]
+    assert "tests/test_deleted.py" not in payload["edges"], "a deleted test was carried"
+    assert payload["carried"]["edges"] == 1, payload["carried"]
+    assert payload["carried"]["from_head"] == "5c910e4", payload["carried"]
+    assert payload["run_id"] == "4242" and payload["head"] == SHA[:7], payload
+
+
+def test_fetch_replace_installs_the_recording_alone(tmp_path, worktree):
+    target = tmp_path / "installed.json"
+    target.write_text(json.dumps({"head": "5c910e4", "edges": {
+        "tests/test_writes_gate.py": ["tests/data.txt"]}}), encoding="utf-8")
+    code, _target = _fetch(tmp_path, FakeGh(_view(), _map()), target=target, repo=worktree,
+                           replace=True)
+    assert code == 0
+    payload = json.loads(target.read_text(encoding="utf-8"))
+    assert payload["edges"] == {"tests/test_a.py": ["tests/data.txt"]}, payload["edges"]
+    assert "carried" not in payload
 
 
 def test_fetch_installs_the_recording_of_that_run_and_sha(tmp_path):
