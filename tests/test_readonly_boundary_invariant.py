@@ -2045,7 +2045,15 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # the lane's base 68a4ff7 hashes to the prior pin on every key, and only
     # this key moved (17 of 18 byte-identical). Record:
     # _audit/2026-11-27-net7.md.
-    "_ALLOWED_URL_PATTERNS": "d2742a5df5370866",
+    #
+    # d2742a5df5370866 until lane net7's second admission (2026-11-27): one
+    # anchored line, the received tab's own leaf
+    # /mynetwork/invitation-manager/received/, where live session 12 landed
+    # the tab (load 28), on the orchestrator's ruling for N 13, paired with
+    # one exemption below; the tree at the lane's previous commit hashes to
+    # the prior pins on every key, and only this key and the pattern-exemption
+    # key moved (16 of 18 byte-identical).
+    "_ALLOWED_URL_PATTERNS": "edacedfed37feca9",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     # 419e64a3cd92ec7e until the same REVIEW: commit: a third entry, excusing
     # exactly {"/follow"} for exactly the anchored follower-list address.
@@ -2074,7 +2082,11 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # address trips, measured -- for exactly his Verifications settings page,
     # the per-address exemption VERIFICATIONS-PAGE-ADMITTED names; the
     # forbidden tuple is unchanged at 33.
-    "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "8a0202843de29ce2",
+    # 8a0202843de29ce2 until lane net7's second admission (2026-11-27): one
+    # more, excusing exactly {"invitation"} -- the one substring the address
+    # trips, measured -- for exactly the received tab's own leaf; the
+    # forbidden tuple is unchanged at 33.
+    "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "5cd3168ae01326f1",
     "_FORBIDDEN_URL_SUBSTRINGS": "b0291a66ec9bd51e",
     # 23aece1483afdee9 until 2026-09-19. See the re-freeze note above: eleven
     # detector classes added, zero removed, and the direction is pinned by

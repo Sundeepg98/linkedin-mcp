@@ -513,13 +513,16 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
     # vocabulary and window and every match placed; none is in a paragraph of
     # this lane.
     ("network.md", "2026-11-27-net7.md"): (
-        "SEVEN MOVES AND FOURTEEN NOTES, NOT A CORRECTION. Rows 82, 86, 88, "
+        "SEVEN MOVES AND FIFTEEN NOTES, NOT A CORRECTION. Rows 82, 86, 88, "
         "89 and 26b gained the paragraph that moves them GAP -> COVERED-UNFIRED "
         "on four people-search facets, and in the lane's round 2 rows 93 and "
         "27 the paragraph that moves them GAP -> MEASURED-ABSENT on the "
         "orchestrator's rulings; rows 14, 22, 24, 28, 32, 62, 90, 91, 92, 97, "
         "98 and 110 each gained one note naming the step session 12's capture "
-        "or a ruling now gives them; two DELTA paragraphs name the record. Each "
+        "or a ruling now gives them, and rows 13, 15 and 16 one note each on "
+        "the received leaf their landing check now accepts (no correction "
+        "word stands within the window of those three); two DELTA paragraphs "
+        "name the record. Each "
         "cites this record and none says an earlier paragraph of its row was "
         "untrue (row 26b's names lane S's 2026-09-28 sentence as contradicted "
         "by that lane's own table and leaves it as written). Every matched "

@@ -230,9 +230,11 @@ def test_the_sent_age_is_linkedins_template_or_nothing(line, age):
     ("landed", "received", "sent"),
     [
         ("https://www.linkedin.com/mynetwork/invitation-manager/", True, False),
-        # LinkedIn's own tab-strip spelling, which the boundary does not admit:
-        # a landing there is recorded, never read (readonly.py's admission).
-        ("https://www.linkedin.com/mynetwork/invitation-manager/received/", False, False),
+        # LinkedIn's own tab-strip spelling. Refused here (False) until
+        # 2026-11-27: live session 12 LANDED on it (load 28), and lane net7
+        # admitted it by its own line and made the reader accept it, on the
+        # orchestrator's ruling (tests/test_net7_admissions.py).
+        ("https://www.linkedin.com/mynetwork/invitation-manager/received/", True, False),
         ("https://www.linkedin.com/mynetwork/invitation-manager/sent/", False, True),
         ("https://www.linkedin.com/mynetwork/invitation-manager/sent/CONNECTION/", False, False),
         ("https://www.linkedin.com/mynetwork/", False, False),

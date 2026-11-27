@@ -71,12 +71,15 @@ RECEIVED_URL = f"{BASE_URL}/mynetwork/invitation-manager/"
 SENT_URL = f"{BASE_URL}/mynetwork/invitation-manager/sent/"
 
 _HOST = "www.linkedin.com"
-#: The received tab's path: the admitted address, and only it. LinkedIn's own
-#: tab strip links the tab as ``/mynetwork/invitation-manager/received``
-#: (measured), a spelling the boundary does not admit; ``readonly.py``'s
-#: admission says a redirect there is RECORDED and gets its own line, so a
-#: landing on it refuses as ``landed_elsewhere`` rather than being read.
-_RECEIVED_PATHS = ("/mynetwork/invitation-manager",)
+#: The received tab's paths: the admitted address, and the leaf LinkedIn lands
+#: it on. LinkedIn's own tab strip links the tab as
+#: ``/mynetwork/invitation-manager/received`` (measured on session 11), and
+#: live session 12 LANDED there (load 28: redirected one level deeper). Until
+#: 2026-11-27 the boundary did not admit that spelling and a landing on it
+#: refused as ``landed_elsewhere``; lane net7 admitted it by its own anchored
+#: line, on the orchestrator's ruling, so the same page reads the same way at
+#: either address. Any other landing still refuses.
+_RECEIVED_PATHS = ("/mynetwork/invitation-manager", "/mynetwork/invitation-manager/received")
 _SENT_PATH = "/mynetwork/invitation-manager/sent"
 
 #: LinkedIn's own words, compared exactly and never returned.

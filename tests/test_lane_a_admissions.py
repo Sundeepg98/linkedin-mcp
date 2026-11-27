@@ -104,8 +104,13 @@ ADMISSIONS = (
         siblings=(
             Sibling(f"{B}/mynetwork/invitation-manager/?filterCriteria=x",
                     "invitation", "a QUERY -- the anchor is load-bearing"),
-            Sibling(f"{B}/mynetwork/invitation-manager/received/",
-                    "invitation", "an unrecorded leaf: its own line if served"),
+            # The received leaf, `.../invitation-manager/received/`, stood
+            # here until 2026-11-27 ("an unrecorded leaf: its own line if
+            # served"); live session 12 was served it (load 28), and lane net7
+            # gave it its own line (tests/test_net7_admissions.py). A sub-path
+            # of it stands in.
+            Sibling(f"{B}/mynetwork/invitation-manager/received/x/",
+                    "invitation", "a sub-path of the received leaf"),
             Sibling(f"{B}/mynetwork/invitation-manager/accept/",
                     "invitation", "a SUB-PATH naming an act"),
             Sibling(f"{B}/mynetwork/invitation-manager/../../in/someone-else/",

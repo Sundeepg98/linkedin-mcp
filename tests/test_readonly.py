@@ -1996,7 +1996,11 @@ BLOCKED = [
     # unrecorded leaf and an act-shaped sub-path
     # (tests/test_lane_a_admissions.py holds the rest).
     "https://www.linkedin.com/mynetwork/invitation-manager/?filterCriteria=x",
-    "https://www.linkedin.com/mynetwork/invitation-manager/received/",
+    # ``.../invitation-manager/received/`` WAS HERE UNTIL 2026-11-27 and is
+    # now READABLE (lane net7, on the orchestrator's ruling for N 13: live
+    # session 12 landed there, load 28). Recorded rather than silently
+    # dropped; a query on it stands in.
+    "https://www.linkedin.com/mynetwork/invitation-manager/received/?x=1",
     "https://www.linkedin.com/mynetwork/invitation-manager/sent/withdraw/",
     "https://www.linkedin.com/in/someone/edit/topcard/",
     "https://www.linkedin.com/psettings/open-to-work",

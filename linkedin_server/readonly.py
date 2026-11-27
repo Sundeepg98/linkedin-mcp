@@ -2337,8 +2337,20 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # is recorded and that spelling gets its own line then. KEPT 2026-10-10
     # by RECEIVED-INVITATIONS-READ-STAYS-ADMITTED: whatever a read changes in
     # an invitation's seen state is a passive cost, UNMEASURED on those rows,
-    # reopened when a capture shows the sender can see it.
+    # reopened when a capture shows the sender can see it. [AMENDED
+    # 2026-11-27, COMMENT ONLY: it does -- live session 12, load 28, landed on
+    # the `received` leaf -- and that spelling's own line is the next one.]
     re.compile(r"^https://www\.linkedin\.com/mynetwork/invitation-manager/?$"),
+    # LANE NET7 (2026-11-27), on the orchestrator's ruling of 13:25 ("one
+    # reader must not be split across two lanes"): the received tab's own
+    # leaf, where LinkedIn now lands the line above (live session 12, load
+    # 28: redirected one level deeper, the tab strip's `Received` link
+    # current at this spelling). The same page and the same read -- census
+    # N 13, N 14, N 19 -- under the same rulings: READ-PAST-AN-ACT-SUBSTRING
+    # (one anchored line, its one exemption below excusing exactly
+    # "invitation", the tuple unchanged), RECEIVED-INVITATIONS-READ-STAYS-
+    # ADMITTED and RECEIVED-BADGE-IS-THE-READS-COST. No query, no sub-path.
+    re.compile(r"^https://www\.linkedin\.com/mynetwork/invitation-manager/received/?$"),
     # The invitation manager, sent tab (census N 9, N 11). NAMED, as above.
     re.compile(r"^https://www\.linkedin\.com/mynetwork/invitation-manager/sent/?$"),
     # The people he follows (census N 38). NAMED: this module's own
@@ -3324,6 +3336,12 @@ _FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS: tuple[
     ),
     (
         re.compile(r"^https://www\.linkedin\.com/mynetwork/invitation-manager/sent/?$"),
+        frozenset({"invitation"}),
+    ),
+    # LANE NET7 (2026-11-27): the second gate of the received leaf's pair,
+    # excusing exactly the one substring that address trips, measured.
+    (
+        re.compile(r"^https://www\.linkedin\.com/mynetwork/invitation-manager/received/?$"),
         frozenset({"invitation"}),
     ),
     (
