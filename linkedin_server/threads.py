@@ -61,6 +61,7 @@ compared against a landing -- never read off a page and never returned.
 from __future__ import annotations
 
 import logging
+import math
 import re
 import time
 from typing import Any, Optional
@@ -1033,7 +1034,9 @@ async def wait_for_reply_send_enabled(
     is an exception's TYPE only (the order of 2026-09-28 21:08)."""
     bound = REPLY_SEND_ENABLED_WAIT_MS if timeout_ms is None else int(timeout_ms)
     out: dict[str, Any] = {"enabled": False, "waited_ms": 0, "failure": None}
-    started = time.monotonic()
+    # On perf_counter, rounded up (dom.wait_for_tracker_list says why): a Send
+    # that never turned on is read as having spent its bound.
+    started = time.perf_counter()
     try:
         await page.locator(_REPLY_SEND_ENABLED_SELECTOR).first.wait_for(
             state="attached", timeout=bound
@@ -1041,7 +1044,7 @@ async def wait_for_reply_send_enabled(
         out["enabled"] = True
     except Exception as exc:  # noqa: BLE001 - a timeout is a reading, not a fault
         out["failure"] = type(exc).__name__
-    out["waited_ms"] = int((time.monotonic() - started) * 1000)
+    out["waited_ms"] = math.ceil((time.perf_counter() - started) * 1000)
     return out
 
 

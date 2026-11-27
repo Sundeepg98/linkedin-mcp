@@ -61,6 +61,7 @@ from __future__ import annotations
 
 import hashlib
 import io
+import math
 import os
 import pathlib
 import time
@@ -468,20 +469,23 @@ async def wait_for_attachment_drawn(
     """
     bound = ATTACHMENT_DRAWN_WAIT_MS if timeout_ms is None else int(timeout_ms)
     out: dict[str, Any] = {"drawn": False, "waited_ms": 0, "failure": None}
-    started = time.monotonic()
+    # On perf_counter, rounded up (dom.wait_for_tracker_list says why): the
+    # time spent is taken off the ONE bound, so Send's wait gets only what is
+    # left of it, and a truncated reading would hand it a millisecond extra.
+    started = time.perf_counter()
     try:
         form = page.locator(threads.REPLY_FORM_SELECTOR)
         await form.get_by_text(file_name, exact=True).first.wait_for(
             state="attached", timeout=bound
         )
-        remaining = max(1, bound - int((time.monotonic() - started) * 1000))
+        remaining = max(1, bound - math.ceil((time.perf_counter() - started) * 1000))
         await page.locator(
             threads.REPLY_SEND_SELECTOR + ":not([disabled])"
         ).first.wait_for(state="attached", timeout=remaining)
         out["drawn"] = True
     except Exception as exc:  # noqa: BLE001 - a timeout is a reading, not a fault
         out["failure"] = type(exc).__name__
-    out["waited_ms"] = int((time.monotonic() - started) * 1000)
+    out["waited_ms"] = math.ceil((time.perf_counter() - started) * 1000)
     return out
 
 

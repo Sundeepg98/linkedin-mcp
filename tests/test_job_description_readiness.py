@@ -235,7 +235,13 @@ async def test_the_default_verdict_is_unknown_rather_than_a_finding():
     import inspect
 
     source = inspect.getsource(dom.wait_for_job_description)
-    initialiser = source.split("started = time.monotonic()")[0]
+    # THE ANCHOR MUST BE FOUND, or the split returns the whole function and
+    # the check reads more than the initialiser. It moved from
+    # ``time.monotonic()`` on 2026-11-27 (lane ci8: the reading is taken on
+    # perf_counter, rounded up).
+    anchor = "started = time.perf_counter()"
+    assert source.count(anchor) == 1, "the clock start this check splits on moved"
+    initialiser = source.split(anchor)[0]
     assert '"attached": None,' in initialiser
     assert '"attached": False,' not in initialiser
 

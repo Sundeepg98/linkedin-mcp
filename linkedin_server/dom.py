@@ -1803,7 +1803,9 @@ async def wait_for_save_control(page: Any, timeout_ms: int) -> dict[str, Any]:
         "timeout_ms": int(timeout_ms),
         "failure": None,
     }
-    started = time.monotonic()
+    # On perf_counter, rounded up, as wait_for_tracker_list explains: the
+    # refusal sets this reading beside its bound ("Nms of a Mms wait").
+    started = time.perf_counter()
     try:
         await page.locator(SAVE_CONTROL).first.wait_for(
             state="attached", timeout=timeout_ms
@@ -1816,7 +1818,7 @@ async def wait_for_save_control(page: Any, timeout_ms: int) -> dict[str, Any]:
             timeout_ms,
             type(exc).__name__,
         )
-    out["waited_ms"] = int((time.monotonic() - started) * 1000)
+    out["waited_ms"] = math.ceil((time.perf_counter() - started) * 1000)
     return out
 
 
@@ -2765,7 +2767,9 @@ async def wait_for_job_description(page: Any) -> dict[str, Any]:
         "failure": None,
         "why": "the readiness check did not run",
     }
-    started = time.monotonic()
+    # On perf_counter, rounded up, as wait_for_tracker_list explains: the
+    # note sets this reading beside its bound ("Nms, the full bound").
+    started = time.perf_counter()
     try:
         await page.locator(JOB_DESCRIPTION_SLOT).first.wait_for(
             state="attached", timeout=JOB_DESCRIPTION_TIMEOUT_MS
@@ -2796,7 +2800,7 @@ async def wait_for_job_description(page: Any) -> dict[str, Any]:
                 "nothing about the page"
             )
             logger.debug("description readiness check failed: %s", name)
-    out["waited_ms"] = int((time.monotonic() - started) * 1000)
+    out["waited_ms"] = math.ceil((time.perf_counter() - started) * 1000)
     return out
 
 
