@@ -121,6 +121,43 @@ def test_an_entry_with_no_consent_section_reads_none():
     assert result["verifications"][0]["work_email_consent"] is None
 
 
+# 2026-11-27, the cold verification of lane settings7 (its F3): two or more
+# consent sections, and a section count that could not be read, both came back
+# None -- the word for "no consent section". Each is its own closed word now.
+_DELETE_SECTION = (
+    '<div class="verifications-evidences__delete-evidence" '
+    'data-test-verifications-delete-evidence="">'
+)
+
+
+def test_two_consent_sections_read_as_several_never_as_none():
+    second = '<div data-test-verifications-evidences-work-email-consent-toggle="">\n</div>\n'
+    result, page = run(plant(markup(), _DELETE_SECTION, second + _DELETE_SECTION))
+    assert page.unmodelled == []
+    assert result["verifications"][0]["work_email_consent"] == "several_sections"
+
+
+class _UnreadableSections:
+    """A container whose consent-section count raises, as a detached page would."""
+
+    def locator(self, selector: str) -> "_UnreadableSections":
+        return self
+
+    async def count(self) -> int:
+        raise RuntimeError("placeholder failure")
+
+
+def test_a_consent_count_that_cannot_be_read_says_unread_never_none():
+    failed = [0]
+    assert asyncio.run(vp._consent(_UnreadableSections(), failed)) == "unread"
+    assert failed == [1]
+
+
+def test_each_consent_reading_is_a_closed_word_and_none_means_no_section():
+    assert vp.CONSENT_READINGS == ("on", "off", "unknown", "several_sections", "unread")
+    assert None not in vp.CONSENT_READINGS
+
+
 def test_delete_is_drawn_only_when_its_own_word_is():
     result, _ = run(plant(markup(), _DELETE_WORD, _DELETE_WORD.replace("Delete", "Remove")))
     assert result["verifications"][0]["delete_drawn"] is False

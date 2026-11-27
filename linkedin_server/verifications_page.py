@@ -40,8 +40,11 @@ compared exactly against :data:`KINDS` and returned as that literal; any other
 heading is ``other``, COUNTED (``unknown_kinds``) and never named. The switch
 state is LinkedIn's own word, ``On`` or ``Off``, compared exactly (``Off`` is
 the switch's other word, DERIVED: the capture drew ``On``); ``unknown`` when
-the word is neither or the section draws more than one switch, ``None`` when
-the entry draws no consent section. ``delete_drawn`` is whether the delete
+the word is neither or the section draws more than one switch;
+``several_sections`` when the entry draws two or more consent sections (which
+one is the switch's would be a guess, so none is read); ``unread`` when the
+sections could not be counted; and ``None`` ONLY when the entry draws no
+consent section (:data:`CONSENT_READINGS`). ``delete_drawn`` is whether the delete
 section draws a button reading exactly ``Delete`` -- read, never pressed:
 removing a verification is census ``P K7``, a write this module does not
 build.
@@ -78,6 +81,12 @@ KINDS: dict[str, str] = {"Workplace": "workplace"}
 
 #: The switch's state words, compared exactly.
 _STATE_WORDS: dict[str, str] = {"On": "on", "Off": "off"}
+
+#: Every word ``work_email_consent`` can carry. Closed. ``None`` is not among
+#: them: it means only that the entry draws no consent section. Until
+#: 2026-11-27 two or more sections, and a count that could not be read, also
+#: came back ``None`` (the cold verification of lane settings7, its F3).
+CONSENT_READINGS: tuple[str, ...] = ("on", "off", "unknown", "several_sections", "unread")
 
 #: The delete section's button word, compared exactly.
 DELETE_WORD = "Delete"
@@ -155,10 +164,21 @@ async def _text(locator: Any, failed: list[int]) -> str:
 
 
 async def _consent(container: Any, failed: list[int]) -> Optional[str]:
-    """The entry's work-email consent switch, by LinkedIn's own state word."""
+    """The entry's work-email consent switch, by LinkedIn's own state word.
+
+    ``None`` means the entry draws no consent section, and nothing else: a
+    count that could not be read is ``unread``, two or more sections are
+    ``several_sections``.
+    """
     sections = container.locator("[data-test-verifications-evidences-work-email-consent-toggle]")
-    if await _count(sections, failed) != 1:
+    before = failed[0]
+    drawn = await _count(sections, failed)
+    if failed[0] != before:
+        return "unread"
+    if drawn == 0:
         return None
+    if drawn > 1:
+        return "several_sections"
     section = sections.nth(0)
     if await _count(section.locator('input[role="switch"]'), failed) != 1:
         return "unknown"

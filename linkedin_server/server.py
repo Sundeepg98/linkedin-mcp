@@ -14780,8 +14780,10 @@ async def linkedin_my_verifications() -> dict[str, Any]:
     detail lines the entry draws; their text is never read, since it can name
     your employer), ``work_email_consent`` (the entry's work-email consent
     switch: ``on``, ``off``, ``unknown`` when its state word is neither or the
-    section draws more than one switch, null when the entry draws no such
-    switch) and ``delete_drawn`` (whether its Delete button is drawn) -- with
+    section draws more than one switch, ``several_sections`` when the entry
+    draws two or more consent sections, ``unread`` when they could not be
+    counted, and null ONLY when the entry draws no such section) and
+    ``delete_drawn`` (whether its Delete button is drawn) -- with
     ``entries_seen`` and ``entries_withheld``.
 
     IT REFUSES RATHER THAN GUESS: ``landed_elsewhere`` off the page,
