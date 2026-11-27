@@ -224,7 +224,7 @@ LIFTED = {
     # action was RETIRED on lane L5's order of 23:36 -- it was aimed by a name
     # -- so it is in no sanctioned set at all, and a ledger entry for it would
     # make the reconciliation below count an action the registry no longer
-    # holds. ``tests/test_writes.py::test_send_message_is_retired_and_its_
+    # holds. ``tests/test_writes_conservation.py::test_send_message_is_retired_and_its_
     # name_is_forbidden_again`` holds the retirement instead.
 }
 
