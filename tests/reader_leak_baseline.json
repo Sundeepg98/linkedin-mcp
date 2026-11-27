@@ -28,6 +28,7 @@
     "company_interest:read_state": "clean",
     "company_people_insights:read_people_insights": "returns_records",
     "company_root:read_company_root": "not_driven:read the page and returned nothing the page made",
+    "company_tabs:_read_function_table": "clean",
     "company_tabs:current_tab": "clean",
     "company_tabs:read_about_tab": "not_driven:raises ExtractionFailedError",
     "company_tabs:read_events_tab": "not_driven:raises ExtractionFailedError",

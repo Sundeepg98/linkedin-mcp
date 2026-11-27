@@ -13447,7 +13447,8 @@ async def linkedin_company_page_tab(organisation_id: str, tab: str = "about") ->
 
     ``tab`` is exactly one of ``about``, ``events``, ``insights``, ``life`` or
     ``posts``; anything else is refused before any load. Census rows ``J 106``
-    (About), ``J 165`` (Events), ``J 113`` (Insights), ``J 109`` (Life) and
+    (About), ``J 165`` (Events), ``J 113`` (Insights, with its two function
+    tables ``J 114`` and ``J 174``), ``J 109`` (Life) and
     ``J 168`` (the posts), read under THIRD-PARTY-TEXT-AT-RUNTIME
     and NAMES-AT-RUNTIME: every string of the Page's own comes back inside a
     record whose ``untrusted_third_party_text`` marker says it is someone
@@ -13467,10 +13468,16 @@ async def linkedin_company_page_tab(organisation_id: str, tab: str = "about") ->
     own words. ``more_offered`` says the tab offers more than it drew; the
     button is never pressed.
 
-    ``insights`` (Premium): ``modules`` (the insight cards drawn, by key) and
-    ``functions`` -- each row of the tab's function table: a job function from
-    LinkedIn's fixed taxonomy, its employee count, its percentage of the
-    Page's headcount and its 3- and 6-month growth in percent.
+    ``insights`` (Premium): ``modules`` (the insight cards drawn, by key);
+    ``functions`` -- each row of the table LinkedIn summarises "Headcount
+    growth by function": a job function from LinkedIn's fixed taxonomy, its
+    employee count, its percentage of the Page's headcount and its growth in
+    percent; and ``openings_by_function`` -- each row of the table it
+    summarises "Total job openings": a function, its job openings, its
+    percentage of the Page's openings and their 3- and 6-month growth. EACH
+    TABLE IS CHOSEN BY ITS SUMMARY, never by its column words, which LinkedIn
+    writes alike on both; a field with no row says why in
+    ``functions_unread`` or ``openings_by_function_unread``.
 
     ``life``: ``modules`` (how many of each module LinkedIn drew, by key);
     ``trending`` -- the "Trending employee content" carousel's items, each a

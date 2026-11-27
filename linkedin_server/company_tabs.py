@@ -589,18 +589,64 @@ INSIGHT_MODULES: dict[str, str] = {
     "Total job openings": "total_job_openings",
 }
 
-#: The screen-reader data table LinkedIn draws beside the function chart:
-#: its header cells, MEASURED, each with the field its column is returned as.
-#: A table is read only when it carries the first two; a header not here
-#: leaves its column unread.
-FUNCTION_TABLE_HEADERS: dict[str, str] = {
-    "Function": "function",
-    "Number of employees": "employees",
-    "Percentage of total headcount": "share_of_headcount_percent",
-    "3 month growth": "growth_3_months_percent",
-    "6 month growth": "growth_6_months_percent",
+#: THE SCREEN-READER DATA TABLES LinkedIn draws beside the Insights charts,
+#: CHOSEN BY THE SUMMARY EACH CARRIES -- NEVER BY ITS HEADER WORDS. Each
+#: summary names the field its rows are returned under, and the field each
+#: header word is read as THERE. A table is read only when it carries the
+#: two required headers; a header not in its map leaves its column unread.
+#:
+#: WHY THE SUMMARY AND NOT THE HEADERS (J114-READS-ITS-OWN-TABLE, the
+#: orchestrator, 2026-11-27, on lane jobs7's finding). LinkedIn heads BOTH
+#: function tables ``Function``, ``Number of employees`` and ``Percentage of
+#: total headcount``. MEASURED by keyed shape:
+#:
+#: * session 11's load 19 (``tests/fixtures/live11/company_insights_headcount.html``)
+#:   draws ONE such table, summarised ``Total job openings`` under that
+#:   module heading;
+#: * session 12's load 20 (``tests/fixtures/live12/c_rj26_1_functions-open.html``)
+#:   draws it AND one summarised ``Headcount growth by function``, under the
+#:   heading ``Employee distribution and headcount growth by function``.
+#:   For each of the 10 functions in both, the openings count has one or two
+#:   fewer digits than the headcount.
+#:
+#: A table chosen by its headers returned job openings as employee counts on
+#: the first page, and read neither table on the second. Under the openings
+#: summary, the same header words mean the function's openings and its
+#: share of them.
+FUNCTION_TABLES: dict[str, tuple[str, dict[str, str]]] = {
+    # Census row J 114: distribution and headcount growth by function.
+    "Headcount growth by function": ("functions", {
+        "Function": "function",
+        "Number of employees": "employees",
+        "Percentage of total headcount": "share_of_headcount_percent",
+        "3 month growth": "growth_3_months_percent",
+        "6 month growth": "growth_6_months_percent",
+        "1 year growth": "growth_1_year_percent",
+    }),
+    # Census row J 174: job openings by function.
+    "Total job openings": ("openings_by_function", {
+        "Function": "function",
+        "Number of employees": "openings",
+        "Percentage of total headcount": "share_of_openings_percent",
+        "3 month growth": "growth_3_months_percent",
+        "6 month growth": "growth_6_months_percent",
+        "1 year growth": "growth_1_year_percent",
+    }),
 }
 _REQUIRED_HEADERS = ("Function", "Number of employees")
+
+#: Why a function field came back empty, in closed words:
+#:
+#: * no table carries its summary;
+#: * more than one does, so neither copy is read;
+#: * its table draws no ``Function`` or no ``Number of employees`` header;
+#: * every row was withheld.
+FUNCTION_TABLE_UNREAD: tuple[str, ...] = (
+    "no_table_with_this_summary",
+    "more_than_one_table_with_this_summary",
+    "required_headers_not_drawn",
+    "every_row_withheld",
+)
 
 #: LinkedIn's job-function taxonomy -- a fixed list of LinkedIn's own words,
 #: not a Page's. Eleven were drawn on the capture; the rest are the same
@@ -637,23 +683,74 @@ def _cell_value(key: str, text: Optional[str]) -> Any:
     line = collapsed(text)
     if key == "function":
         return line if line in JOB_FUNCTIONS else None
-    if key in ("growth_3_months_percent", "growth_6_months_percent"):
+    if key.startswith("growth_"):
         return _growth(text)
     if _PLAIN_INT.fullmatch(line):
         value = _grouped_int(line)
-        if key == "share_of_headcount_percent" and value > 100:
+        if key.startswith("share_") and value > 100:
             return None
         return value
     return None
 
 
+async def _read_function_table(
+    page: Any, summary: str, headers_map: dict[str, str], out: dict[str, Any], failed: list,
+) -> tuple[list[dict[str, Any]], Optional[str]]:
+    """The rows of the ONE table carrying ``summary``, and why there are
+    none (a word of :data:`FUNCTION_TABLE_UNREAD`) when there are none."""
+    tables = page.locator(f'main table[summary="{summary}"]')
+    drawn = await _count(tables, failed)
+    if drawn == 0:
+        return [], "no_table_with_this_summary"
+    if drawn > 1:
+        return [], "more_than_one_table_with_this_summary"
+    table = tables.nth(0)
+    heads = table.locator("th")
+    headers = [collapsed(t) for t in await _texts(heads, failed, 12)]
+    if not all(h in headers for h in _REQUIRED_HEADERS):
+        return [], "required_headers_not_drawn"
+    count_key = headers_map["Number of employees"]
+    # A CELL BELONGS TO THE HEADER ITS OWN ``headers`` ATTRIBUTE NAMES -- the
+    # table's own accessibility wiring, measured on every cell of both
+    # captures -- never to the header at the same position.
+    column: dict[str, str] = {}
+    for index, word in enumerate(headers):
+        key = headers_map.get(word)
+        ident = await _attribute(heads.nth(index), "id", failed)
+        if key is None or not ident:
+            out["headers_unread"] += 1
+            continue
+        column[ident] = key
+    found: list[dict[str, Any]] = []
+    rows = table.locator("tbody tr")
+    for index in range(min(await _count(rows, failed), FUNCTION_ROWS)):
+        cells = rows.nth(index).locator("td")
+        row: dict[str, Any] = {}
+        for cell_index in range(min(await _count(cells, failed), 12)):
+            cell = cells.nth(cell_index)
+            key = column.get(await _attribute(cell, "headers", failed) or "")
+            if key is not None and key not in row:
+                row[key] = _cell_value(key, await _text(cell, failed))
+        if row.get("function") is None or row.get(count_key) is None:
+            out["rows_withheld"] += 1
+            continue
+        found.append(row)
+    return found, (None if found else "every_row_withheld")
+
+
 async def read_insights_tab(page: Any) -> dict[str, Any]:
     """The Insights tab ``page`` already shows: the modules it drew, and the
-    function table's rows -- each a function from LinkedIn's taxonomy with
+    rows of its two function tables, EACH CHOSEN BY ITS SUMMARY
+    (:data:`FUNCTION_TABLES`). ``functions`` comes from the table summarised
+    ``Headcount growth by function``: each function of LinkedIn's taxonomy,
     its employee count, its share of headcount and its growth.
+    ``openings_by_function`` comes from the table summarised ``Total job
+    openings``: each function, its job openings, its share of them and their
+    growth. A field with no row says why in ``<field>_unread``
+    (:data:`FUNCTION_TABLE_UNREAD`); both are None when rows were read.
 
-    Raises ``ExtractionFailedError`` when neither a known module nor a
-    function row was read.
+    Raises ``ExtractionFailedError`` when neither a known module nor a row of
+    either table was read.
     """
     failed = [0]
     out: dict[str, Any] = {
@@ -662,7 +759,9 @@ async def read_insights_tab(page: Any) -> dict[str, Any]:
         "modules": [],
         "modules_unrecognised": 0,
         "functions": [],
-        "function_tables": 0,
+        "functions_unread": None,
+        "openings_by_function": [],
+        "openings_by_function_unread": None,
         "rows_withheld": 0,
         "headers_unread": 0,
     }
@@ -670,46 +769,18 @@ async def read_insights_tab(page: Any) -> dict[str, Any]:
         key = INSIGHT_MODULES.get(collapsed(text))
         if key is not None and key not in out["modules"]:
             out["modules"].append(key)
-    tables = page.locator("main table")
-    chosen = []
-    for index in range(min(await _count(tables, failed), 20)):
-        heads = tables.nth(index).locator("th")
-        headers = [collapsed(t) for t in await _texts(heads, failed, 12)]
-        if all(h in headers for h in _REQUIRED_HEADERS):
-            chosen.append((tables.nth(index), heads, headers))
-    out["function_tables"] = len(chosen)
-    if len(chosen) == 1:
-        table, heads, headers = chosen[0]
-        # A CELL BELONGS TO THE HEADER ITS OWN ``headers`` ATTRIBUTE NAMES --
-        # the table's own accessibility wiring, measured on every cell of the
-        # capture -- never to the header at the same position.
-        column: dict[str, str] = {}
-        for index, word in enumerate(headers):
-            key = FUNCTION_TABLE_HEADERS.get(word)
-            ident = await _attribute(heads.nth(index), "id", failed)
-            if key is None or not ident:
-                out["headers_unread"] += 1
-                continue
-            column[ident] = key
-        rows = table.locator("tbody tr")
-        for index in range(min(await _count(rows, failed), FUNCTION_ROWS)):
-            cells = rows.nth(index).locator("td")
-            row: dict[str, Any] = {}
-            for cell_index in range(min(await _count(cells, failed), 12)):
-                cell = cells.nth(cell_index)
-                key = column.get(await _attribute(cell, "headers", failed) or "")
-                if key is not None and key not in row:
-                    row[key] = _cell_value(key, await _text(cell, failed))
-            if row.get("function") is None or row.get("employees") is None:
-                out["rows_withheld"] += 1
-                continue
-            out["functions"].append(row)
+    for summary, (field, headers_map) in FUNCTION_TABLES.items():
+        rows, unread = await _read_function_table(page, summary, headers_map, out, failed)
+        out[field] = rows
+        out[field + "_unread"] = unread
     out["reads_failed"] = failed[0]
-    if not out["functions"] and not out["modules"]:
+    if not out["functions"] and not out["openings_by_function"] and not out["modules"]:
         raise ExtractionFailedError(
-            "the Insights tab yielded no known module and no function row; an "
-            "empty answer here would be indistinguishable from a broken read "
-            f"({out['function_tables']} function table(s) found).",
+            "the Insights tab yielded no known module and no row of either "
+            "function table; an empty answer here would be indistinguishable "
+            "from a broken read (the headcount table: "
+            f"{out['functions_unread']}; the openings table: "
+            f"{out['openings_by_function_unread']}).",
             hint=dom._landing_note(page),
         )
     return out

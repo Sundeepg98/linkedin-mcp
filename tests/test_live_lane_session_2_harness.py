@@ -725,8 +725,12 @@ def test_a_non_ascii_word_survives_the_copy_as_a_reference() -> None:
 #: `live12` 51 ON THE SAME LANE, counted on disk: the open resume menu (load 9)
 #: and an organisation's Products tab (load 21), their LinkedIn words written
 #: by keyed shape, beside the 49.
+#: `live12` 52 ON THE SAME LANE, counted on disk: the Insights tab with its
+#: Functions dropdown open (load 20), its LinkedIn words -- the three tables'
+#: summaries and header words among them -- written by keyed shape, beside
+#: the 51 (J114-READS-ITS-OWN-TABLE).
 LIVE_FIXTURE_COUNTS = {"live1": 5, "live2": 31, "live3": 14, "live4": 4, "live5": 1, "live7": 1, "live8": 8, "live9": 1,
-                       "live11": 61, "live12": 51}
+                       "live11": 61, "live12": 52}
 
 
 @pytest.mark.parametrize("session_dir", sorted(LIVE_FIXTURE_COUNTS))

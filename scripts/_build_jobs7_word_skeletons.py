@@ -194,6 +194,29 @@ SPEC: dict[str, tuple[str, tuple[str, ...], Optional[int], bool]] = {
         None,
         False,
     ),
+    # J 114, J 169, J 174: load 20, an organisation's Premium Insights tab
+    # with the job-openings card's Functions dropdown OPEN (C-RJ26-1). The
+    # module headings, the three screen-reader tables' summaries and header
+    # words, the tab word, and the words of LinkedIn's own function list the
+    # page drew (the headcount table's `Education` the capture kept plain).
+    # Every figure, every growth cell and every member card's words stay x.
+    "c_rj26_1_functions-open_words": (
+        "c_rj26_1_functions-open",
+        (
+            "Hiring trends", "Total job openings", "Total employee count",
+            "Employee distribution and headcount growth by function",
+            "Headcount growth by function", "Notable company alumni", "Headcount growth",
+            "Functions", "Insights",
+            "Function", "Number of employees", "Percentage of total headcount",
+            "3 month growth", "6 month growth", "1 year growth",
+            "6m growth", "1y growth", "2y growth",
+            "Engineering", "Information Technology", "Sales", "Program and Project Management",
+            "Operations", "Product Management", "Business Development", "Arts and Design",
+            "Marketing", "Finance", "Support", "Research", "Administrative", "Human Resources",
+        ),
+        None,
+        False,
+    ),
 }
 
 

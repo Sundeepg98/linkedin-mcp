@@ -31,15 +31,15 @@ are listed as `(undated)`; no date is taken from git history, because
 | of those, carrying a `YYYY-MM-DD-` date prefix | 269 |
 | distinct dates | 23 |
 | documents with no level-1 heading | 2 |
-| `CORRECTS:` marker lines | 130 |
-| `CORRECTED BY:` marker lines | 130 |
-| distinct declared correction edges | 115 |
-| documents something later corrects | 55 |
-| documents that correct something | 78 |
-| documents at either end of a cross-document edge | 109 |
+| `CORRECTS:` marker lines | 131 |
+| `CORRECTED BY:` marker lines | 131 |
+| distinct declared correction edges | 116 |
+| documents something later corrects | 56 |
+| documents that correct something | 79 |
+| documents at either end of a cross-document edge | 111 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
-| documents no correction marker touches at all | 198 |
+| documents no correction marker touches at all | 196 |
 | blockquoted markers naming ANOTHER document | 0 |
 | edges missing one of their two markers | 0 |
 | edges declared a different number of times in each direction | 2 |
@@ -574,6 +574,14 @@ document is dead; it says one thing in it was overtaken and names what.
 - CORRECTED BY [2026-11-25-rulings-end-of-wave.md](2026-11-25-rulings-end-of-wave.md)
 
   > the orchestrator's later ruling N-102-MOVES-WITH-J-108 (lane build-jmn26's question 1) moves `N 102` with `J 108` as its sibling: lane build-jmn26 measured both readers on the same capture, so there is no distinct capability to rebuild, and the "stays GAP" outcome above no longer holds; integration 3 moved the row.
+
+### [2026-11-26-readers-jobs26.md](2026-11-26-readers-jobs26.md)
+
+2026-11-26 &middot; readers-jobs26, 2026-11-26: the jobs-side readers on session 11's skeletons
+
+- CORRECTED BY [2026-11-27-jobs7.md](2026-11-27-jobs7.md)
+
+  > the table this section and section 4.4 read as the headcount distribution is summarised `Total job openings`, under that module heading. LinkedIn reuses the headcount header words there, so its rows are each function's job openings (row `J 174`). The reader now chooses each table by its summary, and `J 114` is re-based on session 12's load 20 (J114-READS-ITS-OWN-TABLE, 2026-11-27, sections 11.5 and 11.6).
 
 ### [INSTRUMENTS.md](INSTRUMENTS.md)
 
@@ -1621,6 +1629,14 @@ reach is visible. The quoted reason here is the CORRECTOR's own
 
   > its section 6 recorded the orchestrator's earlier 2026-11-25 call that `N 102` "stays GAP", to be rebuilt under its own tool name if its distinct capability were wanted; the ruling below supersedes that outcome, because build-jmn26 measured that the two readers read the same carousel on the same capture, so there is no distinct capability, and `N 102` moves with `J 108`.
 
+### [2026-11-27-jobs7.md](2026-11-27-jobs7.md)
+
+2026-11-27 &middot; Lane jobs7, 2026-11-27: the AI job search as the keyword search's own route, and session 12's captures read by keyed shape
+
+- CORRECTS [2026-11-26-readers-jobs26.md](2026-11-26-readers-jobs26.md)
+
+  > its sections 4.3 and 4.4 read session 11's one function table as the headcount distribution (each function's employee count and its share of headcount). Its summary and module heading are `Total job openings`, so its rows are job openings by function (`J 174`). `J 114` is re-based on session 12's load 20, which draws the table summarised `Headcount growth by function` (J114-READS-ITS-OWN-TABLE).
+
 ## 5. Every document, by date
 
 `CORRECTED` means at least one later document declares a correction of
@@ -1930,7 +1946,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-11-26 | [2026-11-26-integration-6.md](2026-11-26-integration-6.md) | Integration 6, 2026-11-26: three build lanes and session 12 onto master f4fa447, and the rulings from 19:25 to 23:05 |  |
 | 2026-11-26 | [2026-11-26-live-session-12.md](2026-11-26-live-session-12.md) | Live session 12 -- the live lane's record, written as it runs |  |
 | 2026-11-26 | [2026-11-26-pace20.md](2026-11-26-pace20.md) | Lane pace20: the server's default spacing between page loads is the ruled 20 s |  |
-| 2026-11-26 | [2026-11-26-readers-jobs26.md](2026-11-26-readers-jobs26.md) | readers-jobs26, 2026-11-26: the jobs-side readers on session 11's skeletons |  |
+| 2026-11-26 | [2026-11-26-readers-jobs26.md](2026-11-26-readers-jobs26.md) | readers-jobs26, 2026-11-26: the jobs-side readers on session 11's skeletons | **CORRECTED x1** |
 | 2026-11-26 | [2026-11-26-readers-msg26.md](2026-11-26-readers-msg26.md) | readers-msg26, 2026-11-26: the messaging and content rows live session 11 captured, read offline |  |
 | 2026-11-26 | [2026-11-26-readers-net26.md](2026-11-26-readers-net26.md) | Lane readers-net26, 2026-11-26: the network rows live session 11 captured -- five readers built, one composition, one fire banked, twenty-five next steps re-pointed |  |
 | 2026-11-26 | [2026-11-26-rulings-integration-4.md](2026-11-26-rulings-integration-4.md) | Orchestrator rulings of 2026-11-26 (10:10 to 14:27 IST), registered at integration 4 |  |
@@ -1940,7 +1956,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-11-26 | [2026-11-26-search-fix26.md](2026-11-26-search-fix26.md) | Lane search-fix26: an empty job search is never silent, and the AI search is a refusing fallback |  |
 | 2026-11-26 | [2026-11-26-selfprofile26.md](2026-11-26-selfprofile26.md) | 2026-11-26 -- lane selfprofile26: his own profile, asserted without the url marker |  |
 | 2026-11-26 | [2026-11-26-session-12-plan.md](2026-11-26-session-12-plan.md) | Live session 12 -- the plan, written offline: 37 loads, 5 searches, 113 rows |  |
-| 2026-11-27 | [2026-11-27-jobs7.md](2026-11-27-jobs7.md) | Lane jobs7, 2026-11-27: the AI job search as the keyword search's own route, and session 12's captures read by keyed shape |  |
+| 2026-11-27 | [2026-11-27-jobs7.md](2026-11-27-jobs7.md) | Lane jobs7, 2026-11-27: the AI job search as the keyword search's own route, and session 12's captures read by keyed shape | corrects x1 |
 
 ## 6. What the scan rejected, could not join, or had to repair
 

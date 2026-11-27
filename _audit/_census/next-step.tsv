@@ -71,7 +71,6 @@ J 170	J	W	-	CAPTURE:C-J170-1	MEASURED	_audit/2026-11-27-jobs7.md::one alert row'
 J 171	J	R	-	CAPTURE:C-LRN-1	MEASURED	_audit/2026-11-27-jobs7.md::LinkedIn's browsable index, the same for every member ; RULING:COMPOUND-ROW-SPLITS-ONLY-ON-STATE
 J 172	J	W	-	CAPTURE:C-LRN-2	MEASURED	_audit/2026-11-27-jobs7.md::seeing his goal is a read of his own page ; RULING:COMPOUND-ROW-SPLITS-ONLY-ON-STATE
 J 173	J	R	-	CAPTURE:C-J173-1	MEASURED	_audit/2026-11-27-jobs7.md::the AI job search's Experience level facet for that company ; RULING:COMPOUND-ROW-SPLITS-ONLY-ON-STATE
-J 174	J	R	-	BUILD:tests/fixtures/live12/c_rj26_1_functions-open.html	MEASURED	_audit/2026-11-27-jobs7.md::and the table already holds every function's count
 J 175	J	R	-	CAPTURE:C-LRN-3	MEASURED	_audit/2026-11-27-jobs7.md::saved list is the tab beside it ; RULING:COMPOUND-ROW-SPLITS-ONLY-ON-STATE
 J 115	J	R+W	-	CAPTURE:C-JMN-3	MEASURED	_audit/2026-11-25-build-jmn26.md::NEITHER CAPTURED POSTING DRAWS ONE ; RULING:OPERATOR-NAMES-THE-TARGET
 J 116	J	R	-	RULING:Q-AI-GENERATING-LOADS	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/preload/guideOverlay/?interop=guideOverlay&query=Show+match+details ; RULING:READ-PAST-AN-ACT-SUBSTRING

@@ -375,16 +375,29 @@ def insights_markup(values=None, *, function_override=None) -> str:
     return markup[:start] + "<tr>".join(out) + markup[end:]
 
 
-def test_the_insights_tab_returns_its_modules_and_each_function_row():
+#: J114-READS-ITS-OWN-TABLE (the orchestrator, 2026-11-27; lane jobs7's
+#: record, sections 11.5 and 11.6). Session 11's one function table is
+#: summarised ``Total job openings``, so its rows are row ``J 174``'s
+#: ``openings_by_function``: each function's job openings. Until that ruling
+#: the tests below pinned the same rows as ``functions``, with employee
+#: counts. ``J 114``'s ``functions`` come from the table summarised
+#: ``Headcount growth by function``, which this capture does not draw
+#: (``tests/test_the_insights_tables_are_read_by_their_summary.py`` reads it
+#: on session 12's load 20).
+
+
+def test_the_insights_tab_returns_its_modules_and_each_openings_row():
     result, page = run(ct.read_insights_tab, insights_markup(), INSIGHTS_URL)
     assert page.unmodelled == [] and page.planted_answers == []
     assert result["view"] == "insights"
     assert result["modules"] == ["hiring_trends", "total_job_openings"]
-    assert result["function_tables"] == 1 and result["headers_unread"] == 0
-    assert [row["function"] for row in result["functions"]] == FUNCTIONS
-    first = result["functions"][0]
+    assert result["functions"] == []
+    assert result["functions_unread"] == "no_table_with_this_summary"
+    assert result["openings_by_function_unread"] is None and result["headers_unread"] == 0
+    assert [row["function"] for row in result["openings_by_function"]] == FUNCTIONS
+    first = result["openings_by_function"][0]
     assert first == {
-        "function": "Engineering", "employees": 1000, "share_of_headcount_percent": 20,
+        "function": "Engineering", "openings": 1000, "share_of_openings_percent": 20,
         "growth_3_months_percent": 75, "growth_6_months_percent": -35,
     }
     assert result["rows_withheld"] == 0 and result["reads_failed"] == 0
@@ -398,7 +411,7 @@ def test_with_its_words_reduced_the_insights_capture_is_a_failed_read():
 def test_a_function_outside_linkedins_taxonomy_is_withheld():
     result, _ = run(ct.read_insights_tab, insights_markup(function_override={3: MARKER}), INSIGHTS_URL)
     assert result["rows_withheld"] == 1
-    assert len(result["functions"]) == len(FUNCTIONS) - 1
+    assert len(result["openings_by_function"]) == len(FUNCTIONS) - 1
     assert all(MARKER not in text for _path, text in strings_in(result))
 
 
@@ -407,7 +420,7 @@ def test_a_growth_whose_sign_disagrees_with_its_word_is_withheld_not_flipped():
     start = markup.index('<table summary="Total job openings"')
     planted = markup[:start] + markup[start:].replace("\n75% increase\n", "\n-75% increase\n", 1)
     result, _ = run(ct.read_insights_tab, planted, INSIGHTS_URL)
-    assert result["functions"][0]["growth_3_months_percent"] is None
+    assert result["openings_by_function"][0]["growth_3_months_percent"] is None
 
 
 def test_a_cell_is_read_under_the_header_it_names_not_its_position():
@@ -421,11 +434,11 @@ def test_a_cell_is_read_under_the_header_it_names_not_its_position():
     assert len(ids) == 5
     swapped = head.replace(ids[1], "SWAP").replace(ids[2], ids[1]).replace("SWAP", ids[2])
     result, _ = run(ct.read_insights_tab, markup[:start] + swapped + markup[head_end:], INSIGHTS_URL)
-    first = result["functions"][0]
-    # The share cell now names the employees header, and the employees cell
-    # the share header -- whose bound (at most 100) withholds 1000.
-    assert first["employees"] == 20
-    assert first["share_of_headcount_percent"] is None
+    first = result["openings_by_function"][0]
+    # The share cell now names the count's header, and the count's cell the
+    # share header -- whose bound (at most 100) withholds 1000.
+    assert first["openings"] == 20
+    assert first["share_of_openings_percent"] is None
 
 
 def test_the_insights_tab_is_composed_with_its_one_admitted_query():
