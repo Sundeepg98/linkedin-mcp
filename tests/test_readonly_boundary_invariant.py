@@ -2057,7 +2057,20 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # ATTRIBUTION: the merged list minus jobs7's one entry hashes to prof7's
     # 10c0a7637b7c3ca8, and minus prof7's one entry to jobs7's
     # efcaa36167e42ccf. Record: _audit/2026-11-27-integration-7.md.
-    "_ALLOWED_URL_PATTERNS": "a3510436178fb711",
+    #
+    # 5d3109ee0aa96e48 until lane msg7's admission commit (wave 7, 2026-11-27):
+    # one anchored line, his saved posts list /my-items/saved-posts/, on
+    # ADMIT-NOW-LANDING-IN-SESSION-14 (allowlist silence alone, no exemption);
+    # every other key byte-identical (17 of 18). Record:
+    # _audit/2026-11-27-msg7.md, section 3.
+    #
+    # MERGED again at integration 7 (2026-11-27), merge 3, lane msg7:
+    # 947dcb23d73c0491, measured with this file's ast_digest on the merged
+    # readonly.py; only this key moved from 68a4ff7. ATTRIBUTION: the merged
+    # list minus msg7's one entry hashes to a3510436178fb711 (merge 2's value
+    # above), and minus prof7's and jobs7's two entries to msg7's
+    # 3f12a2c2143c6576. Record: _audit/2026-11-27-integration-7.md.
+    "_ALLOWED_URL_PATTERNS": "947dcb23d73c0491",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     # 419e64a3cd92ec7e until the same REVIEW: commit: a third entry, excusing
     # exactly {"/follow"} for exactly the anchored follower-list address.

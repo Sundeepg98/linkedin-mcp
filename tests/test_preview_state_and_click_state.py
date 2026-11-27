@@ -117,6 +117,8 @@ from tests.test_invitation_acts import MEMBER as INVITATION_MEMBER  # noqa: E402
 from tests.test_invitation_acts import WORLD as INVITATION_WORLD  # noqa: E402
 from tests.test_mark_not_interested import CLOSED as NOT_INTERESTED_CLOSED  # noqa: E402
 from tests.test_mark_not_interested import URN as NOT_INTERESTED_URN  # noqa: E402
+from tests.test_save_post import CLOSED as SAVE_POST_CLOSED  # noqa: E402
+from tests.test_save_post import URN as SAVE_POST_URN  # noqa: E402
 from tests.test_named_profile_route import LINK as NAMED_PROFILE_LINK
 from tests.test_named_profile_route import PROFILE as NAMED_PROFILE
 from tests.test_result_verification_block import SHAREBOX_MARKUP
@@ -373,6 +375,15 @@ REACHED: dict[str, tuple[str, str, str]] = {
         NOT_INTERESTED_CLOSED,
         NOT_INTERESTED_URN,
     ),
+    # 2026-11-27 (census row ``M C36``; lane msg7). The same TRACKED capture as
+    # mark_not_interested's, its one trigger labelled with LinkedIn's measured
+    # prefix and a synthetic name: the preview and the click read it through
+    # ONE verdict, ``feed_save.read_state``.
+    "save_post": (
+        "tests/test_save_post.py",
+        SAVE_POST_CLOSED,
+        SAVE_POST_URN,
+    ),
     # THE EIGHTEENTH, 2026-10-10 (census ``P O17``, lane S, settings). THE
     # REAL PAGE: the live lane's capture of "Share profile updates" as a
     # tracked skeleton. The preview and the click read its one switch
@@ -582,6 +593,7 @@ _WORLDS_THAT_REACH_OUT = frozenset({"set_similar_jobs_alert", "unset_similar_job
                                     "ignore_invitation_to_connect",
                                     "withdraw_invitation",
                                     "mark_not_interested",
+                                    "save_post",
                                     # 2026-11-26, lane build-msg2: session 11's thread
                                     # page is a tracked copy too.
                                     "set_conversation_muted", "unset_conversation_muted",
@@ -787,8 +799,10 @@ def test_every_performable_action_is_either_reached_or_declared_unreachable():
     # 35 AT INTEGRATION 6'S MERGE OF LANE BUILD-MSG2 (2026-11-26): build-msg2's
     # six beside the twenty-nine, each reached over its own tracked copy.
     # MEASURED.
-    assert len(PERFORMABLE) == 35, sorted(PERFORMABLE)
-    assert len(REACHED) == 35, sorted(REACHED)
+    # 35 -> 36 ON LANE MSG7 (2026-11-27): ``save_post``, reached over session
+    # 11's tracked permalink. MEASURED.
+    assert len(PERFORMABLE) == 36, sorted(PERFORMABLE)
+    assert len(REACHED) == 36, sorted(REACHED)
     assert len(CANNOT_REACH) == 0, sorted(CANNOT_REACH)
 
 

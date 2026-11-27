@@ -684,7 +684,10 @@ def test_the_urn_probe_is_load_bearing():
     # GREW BY ONE MORE, 2026-11-26 (lane build-net2, census N 154):
     # mark_not_interested, one feed item he names, on the same urn permalink.
     assert reached_by_urn == {
+        # AND ONE MORE, 2026-11-27 (lane msg7, census M C36): save_post, one
+        # feed item he names, on the same urn permalink.
         "comment_on_item", "react_to_item", "withdraw_reaction", "mark_not_interested",
+        "save_post",
     }, (
         "the set of specs reachable ONLY through the urn probe changed: %s. "
         "If it is now empty the literal is no longer needed and should become "

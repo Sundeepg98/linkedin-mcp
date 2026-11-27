@@ -27,25 +27,25 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 310 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 270 |
+| audit documents git tracks under `_audit` | 311 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 271 |
 | distinct dates | 23 |
 | documents with no level-1 heading | 2 |
-| `CORRECTS:` marker lines | 131 |
-| `CORRECTED BY:` marker lines | 131 |
-| distinct declared correction edges | 116 |
-| documents something later corrects | 56 |
-| documents that correct something | 79 |
-| documents at either end of a cross-document edge | 111 |
+| `CORRECTS:` marker lines | 132 |
+| `CORRECTED BY:` marker lines | 132 |
+| distinct declared correction edges | 117 |
+| documents something later corrects | 57 |
+| documents that correct something | 80 |
+| documents at either end of a cross-document edge | 113 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
-| documents no correction marker touches at all | 197 |
+| documents no correction marker touches at all | 196 |
 | blockquoted markers naming ANOTHER document | 0 |
 | edges missing one of their two markers | 0 |
 | edges declared a different number of times in each direction | 2 |
 | marker lines rejected as malformed | 0 |
 | marker-shaped lines inside a fenced code block | 0 |
-| reasons that continue past their own line (printed whole below) | 17 |
+| reasons that continue past their own line (printed whole below) | 19 |
 | tightest margin over the 20-character admission floor, in characters | 0 |
 | titles carrying a non-ASCII character | 5 |
 | quoted strings whose backticked citation had to be defused | 6 |
@@ -582,6 +582,14 @@ document is dead; it says one thing in it was overtaken and names what.
 - CORRECTED BY [2026-11-27-jobs7.md](2026-11-27-jobs7.md)
 
   > the table this section and section 4.4 read as the headcount distribution is summarised `Total job openings`, under that module heading. LinkedIn reuses the headcount header words there, so its rows are each function's job openings (row `J 174`). The reader now chooses each table by its summary, and `J 114` is re-based on session 12's load 20 (J114-READS-ITS-OWN-TABLE, 2026-11-27, sections 11.5 and 11.6).
+
+### [2026-11-26-readers-msg26.md](2026-11-26-readers-msg26.md)
+
+2026-11-26 &middot; readers-msg26, 2026-11-26: the messaging and content rows live session 11 captured, read offline
+
+- CORRECTED BY [2026-11-27-msg7.md](2026-11-27-msg7.md)
+
+  > section 2. Session 12 opened the author toggle (load 7). It draws `Publish as` (him only) and `Publish to` (`Individual article`, then an empty newsletter list), and no create control. So the newsletter EDITION choice is behind the toggle as 6.1 derived, but CREATING a newsletter (`M C50`, `M C81`, `P L3`) is not: `Create newsletter` is drawn in `Manage`.
 
 ### [INSTRUMENTS.md](INSTRUMENTS.md)
 
@@ -1637,6 +1645,14 @@ reach is visible. The quoted reason here is the CORRECTOR's own
 
   > its sections 4.3 and 4.4 read session 11's one function table as the headcount distribution (each function's employee count and its share of headcount). Its summary and module heading are `Total job openings`, so its rows are job openings by function (`J 174`). `J 114` is re-based on session 12's load 20, which draws the table summarised `Headcount growth by function` (J114-READS-ITS-OWN-TABLE).
 
+### [2026-11-27-msg7.md](2026-11-27-msg7.md)
+
+2026-11-27 &middot; msg7, 2026-11-27: the messaging and content rows session 12 captured, read offline
+
+- CORRECTS [2026-11-26-readers-msg26.md](2026-11-26-readers-msg26.md)
+
+  > section 6.2 placed the newsletter's CREATION (`M C50`, `M C81`, `P L3`) behind the article composer's author toggle, DERIVED from the toggle drawn closed. Opened in session 12, the toggle draws no create control, and `Create newsletter` is in `Manage` (section 2 here).
+
 ## 5. Every document, by date
 
 `CORRECTED` means at least one later document declares a correction of
@@ -1947,7 +1963,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-11-26 | [2026-11-26-live-session-12.md](2026-11-26-live-session-12.md) | Live session 12 -- the live lane's record, written as it runs |  |
 | 2026-11-26 | [2026-11-26-pace20.md](2026-11-26-pace20.md) | Lane pace20: the server's default spacing between page loads is the ruled 20 s |  |
 | 2026-11-26 | [2026-11-26-readers-jobs26.md](2026-11-26-readers-jobs26.md) | readers-jobs26, 2026-11-26: the jobs-side readers on session 11's skeletons | **CORRECTED x1** |
-| 2026-11-26 | [2026-11-26-readers-msg26.md](2026-11-26-readers-msg26.md) | readers-msg26, 2026-11-26: the messaging and content rows live session 11 captured, read offline |  |
+| 2026-11-26 | [2026-11-26-readers-msg26.md](2026-11-26-readers-msg26.md) | readers-msg26, 2026-11-26: the messaging and content rows live session 11 captured, read offline | **CORRECTED x1** |
 | 2026-11-26 | [2026-11-26-readers-net26.md](2026-11-26-readers-net26.md) | Lane readers-net26, 2026-11-26: the network rows live session 11 captured -- five readers built, one composition, one fire banked, twenty-five next steps re-pointed |  |
 | 2026-11-26 | [2026-11-26-rulings-integration-4.md](2026-11-26-rulings-integration-4.md) | Orchestrator rulings of 2026-11-26 (10:10 to 14:27 IST), registered at integration 4 |  |
 | 2026-11-26 | [2026-11-26-rulings-integration-5.md](2026-11-26-rulings-integration-5.md) | Orchestrator rulings of 2026-11-26 (16:45 to 18:40 IST), registered at integration 5 |  |
@@ -1957,6 +1973,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-11-26 | [2026-11-26-selfprofile26.md](2026-11-26-selfprofile26.md) | 2026-11-26 -- lane selfprofile26: his own profile, asserted without the url marker |  |
 | 2026-11-26 | [2026-11-26-session-12-plan.md](2026-11-26-session-12-plan.md) | Live session 12 -- the plan, written offline: 37 loads, 5 searches, 113 rows |  |
 | 2026-11-27 | [2026-11-27-jobs7.md](2026-11-27-jobs7.md) | Lane jobs7, 2026-11-27: the AI job search as the keyword search's own route, and session 12's captures read by keyed shape | corrects x1 |
+| 2026-11-27 | [2026-11-27-msg7.md](2026-11-27-msg7.md) | msg7, 2026-11-27: the messaging and content rows session 12 captured, read offline | corrects x1 |
 | 2026-11-27 | [2026-11-27-prof7.md](2026-11-27-prof7.md) | Lane prof7 -- the self-profile loader waits for the rewrite, then session 12's profile cells |  |
 
 ## 6. What the scan rejected, could not join, or had to repair
@@ -1992,6 +2009,8 @@ against the same line, so a missing continuation satisfies it.
 - REASON PAST ITS LINE [2026-09-20-the-five-under-banked.md](2026-09-20-the-five-under-banked.md) line 457 -- a line-scoped reader sees 94 of 717 characters.
 - REASON PAST ITS LINE [2026-09-28-lane-k-ledger.md](2026-09-28-lane-k-ledger.md) line 255 -- a line-scoped reader sees 25 of 386 characters.
 - REASON PAST ITS LINE [2026-11-25-admit26.md](2026-11-25-admit26.md) line 15 -- a line-scoped reader sees 26 of 482 characters.
+- REASON PAST ITS LINE [2026-11-26-readers-msg26.md](2026-11-26-readers-msg26.md) line 458 -- a line-scoped reader sees 32 of 357 characters.
+- REASON PAST ITS LINE [2026-11-27-msg7.md](2026-11-27-msg7.md) line 14 -- a line-scoped reader sees 22 of 269 characters.
 - REASON PAST ITS LINE [_census/jobs.md](_census/jobs.md) line 484 -- a line-scoped reader sees 825 of 1189 characters.
 
 - TIGHTEST ADMISSION MARGIN [2026-09-03-linkedin-gap-blockers.md](2026-09-03-linkedin-gap-blockers.md) line 272 clears the 20-character floor by 0. The floor is applied to the marker's OWN LINE, so a reason of 723 characters is admitted on the strength of 20. Reflow that paragraph by one word and a guard rejects it saying it *carries no reason after the citation*, which would not be true. Reported every regeneration rather than counted, because a count of rejections reads zero until the day it does not.

@@ -1264,6 +1264,134 @@ new GAP row with its own next step? Until ruled, the three stay GAP on this ques
 
 **Answered again 2026-11-27, 14:05 IST, by the orchestrator** (integration 7 registers it): LEARNING-ROWS-SPLIT, re-ruled on the lane's measurement -- the IN-PROGRESS half keeps `J 154` and builds on load 25's capture (step BUILD on `tests/fixtures/live12/learning_library.html`); the SAVED half is `J 175`, GAP, its address ADMITTED by one anchored line, red first, its step CAPTURE `C-LRN-3` (session 14, the ADMIT-NOW-LANDING-IN-SESSION-14 shape). "Your corrected three sentences stand." The lane's record, section 11.5.
 
+### Q-FEED-UNFOLLOW-AIM -- an Unfollow drawn only on /feed/, where an item's urn is drawn only inside its open menu
+
+Added 2026-11-27 by lane msg7 (`_audit/2026-11-27-msg7.md`, section 4). Row:
+`N 37`. Session 12 opened a followed author's item menu on `/feed/` (load 16)
+and that same post's own permalink menu (load 17). The feed menu draws
+`Unfollow <the author>` (the runner's in-page count, 1). The permalink, where
+the urn he names IS the address, draws no entry beginning `Unfollow ` (0), and
+neither does a Page post's permalink (load 39). On `/feed/` an item's urn is
+drawn only inside its open menu: one `/feed/update/` address across the seven
+menu-bearing items closed, and one `targetUrn` link once a menu opens. So the
+only drawn route presses the menus of items he did not name until the one
+whose urn he named appears -- the option AD-HIDE-AIM-HELD declined for ads
+(`N 200`). The question: is `N 37` held the same way, until a sanctioned
+disclosure shape returns item urns without pressing items he did not name? Or
+is it discharged under D6 by another route that unfollows a person he names --
+his following list (`linkedin_my_following_list`'s page, where each followed
+member's card draws one `Following` button)?
+
+**Answered 2026-11-27 by the orchestrator** (on disk at 12:35 IST as `_TEAM_LEAD_RULINGS1.md`, deleted by lane msg7 as its ack; registration owed at integration 7): FEED-UNFOLLOW-ROUTES-UNDER-D6. `N 37` is HELD on the feed, on
+AD-HIDE-AIM-HELD's ground: no press on the menu of an item he did not name.
+Under D6-CAPABILITY-OVER-AFFORDANCE its next step goes to a surface that draws
+the named target directly: a SIBLING to an existing route that unfollows a
+member he names, if the tool surface has one, else a CAPTURE on his following
+list, network's surface, for wave 8; the lane builds neither. Checked by the
+lane: no shipped tool unfollows a member (`linkedin_follow_company`,
+`linkedin_follow_company_page` and `linkedin_unfollow_company` act on a
+company). Row `N 37`: next step `CAPTURE:following-list-unfollow`.
+
+### Q-ARTICLE-MANAGE-DRAFTS -- a drafts list reached only by a button inside the article editor
+
+Added 2026-11-27 by lane msg7 (`_audit/2026-11-27-msg7.md`, section 2). Row:
+`M C47`. Session 12 opened `Manage` on the article composer (load 7): eight
+`role=button` items and no address -- `Settings` | `Drafts`, `Scheduled`,
+`Published` | `New draft`, `Create newsletter`, `Help`, `Give feedback`, each by
+keyed shape. The drafts list this row needs is reached by pressing `Drafts`; no
+spelling of its address is drawn, and the three NAMED ones are drawn nowhere.
+Q-ARTICLE-COMPOSER-DISCLOSURES' answer named the controls one capture may press
+inside the editor (the author toggle, `Manage`, the embed control, `Next`);
+`Drafts` is one press deeper, and it navigates. The question: may one capture
+load of the article composer press `Manage` and then `Drafts`, record where it
+lands (by path words) and what the list draws (by closed words, each draft's
+own controls drawn closed), and return, with nothing else pressed and nothing
+typed?
+
+**Answered 2026-11-27 by the orchestrator** (on disk at 12:35 IST as `_TEAM_LEAD_RULINGS1.md`, deleted by lane msg7 as its ack; registration owed at integration 7): ARTICLE-EDITOR-PRESSES, part (a): the `Drafts` press in `Manage` is
+a read of his own lists, ACCEPTED as a session-14 capture spec in the queue's
+own form. Row `M C47`: next step `CAPTURE:article-composer`.
+
+### Q-NEWSLETTER-CREATE-FORM -- a newsletter form behind Manage's Create newsletter
+
+Added 2026-11-27 by lane msg7 (`_audit/2026-11-27-msg7.md`, section 2). Rows:
+`M C50`, `M C81`, `P L3`. Session 12 opened the article composer's author
+toggle (load 7): a form whose `Publish as` lists only him and whose `Publish to`
+lists `Individual article` and an empty newsletter list. It draws no create
+control, so the DERIVED premise those three cells carried (the newsletter
+"chosen behind the author toggle") is wrong. `Create newsletter` is drawn in
+`Manage` instead, by keyed shape. What it opens -- expected to be the
+newsletter's creation form -- is not on disk, and it sits inside the editor.
+The question: may one capture load press `Manage` and then `Create newsletter`,
+read the form it opens by closed words (its fields; any choice of publisher
+between him and a Page, for `M C81`; its submit control drawn and never
+pressed), and close it with Cancel or Escape, with nothing typed and STOP-ALL if
+any control would create or publish?
+
+**Answered 2026-11-27 by the orchestrator** (on disk at 12:35 IST as `_TEAM_LEAD_RULINGS1.md`, deleted by lane msg7 as its ack; registration owed at integration 7): ARTICLE-EDITOR-PRESSES, part (b): press `Create newsletter`, read its
+form with NOTHING typed, and close it without submitting -- ACCEPTED as a
+session-14 capture spec. Rows `M C50`, `M C81`, `P L3`: next step
+`CAPTURE:C-MSG7-2`.
+
+### Q-ARTICLE-NEXT-NEEDS-A-TITLE -- the publish settings, reachable only after a title is typed
+
+Added 2026-11-27 by lane msg7 (`_audit/2026-11-27-msg7.md`, section 2). Rows:
+`M C44`, `M C78`. Session 12 pressed `Next` on the empty article (load 7): an
+error toast, and the title box focused; no dialog and no publish settings.
+ARTICLE-COMPOSER-CAPTURE admits one load "with nothing typed", and
+CAPTURE-PRESS-UNDER-PROBE-RULE excludes typing into a composer or an editor, so
+no capture today may reach the settings `M C44`'s publish and `M C78`'s
+visibility need. The question: may one capture load of the article composer
+type a placeholder title (nothing in the body), press `Next`, read the publish
+settings by closed words, and close them with Cancel or Escape -- never Publish
+and never Schedule -- then delete the draft that typing makes (his own, private,
+reversible), with STOP-ALL if any control would publish?
+
+**Answered 2026-11-27 by the orchestrator** (on disk at 12:35 IST as `_TEAM_LEAD_RULINGS1.md`, deleted by lane msg7 as its ack; registration owed at integration 7): ARTICLE-EDITOR-PRESSES, part (c): ACCEPTED, ATTENDED ONLY. A fixed
+placeholder title with no personal content is typed; `Next` is pressed and the
+publish settings read; they are closed without Publish; the draft is deleted
+and verified absent with part (a)'s `Drafts` read. No Publish press is ever in
+the runner's closed press list, and a deletion that cannot be verified is
+STOP-ALL and a report. `M C46` rides `M C44`. Rows `M C44`, `M C78`: next step
+`CAPTURE:C-MSG7-1`.
+
+### Q-COMMENT-ANALYTICS-METRIC -- a content analytics page whose metric type offers no comments
+
+Added 2026-11-27 by lane msg7 (`_audit/2026-11-27-msg7.md`, section 6). Row:
+`M C39`. Session 12 opened the metric selector on his content analytics (load
+36): a popover titled `Metric type` with two options, `Impressions` and
+`Engagements`, and `Show results` -- no comments metric. The only `metricType`
+link on the page spells `IMPRESSIONS`. The row's premise, in its address line
+("the comments metric needs ?metricType="), is not what the page draws. The
+question: under MEASURED-ABSENT-OR-PRECONDITION, is `M C39` MEASURED-ABSENT, or
+does it wait on another surface where a per-comment figure might be drawn?
+
+**Answered 2026-11-27 by the orchestrator** (on disk at 12:35 IST as `_TEAM_LEAD_RULINGS1.md`, deleted by lane msg7 as its ack; registration owed at integration 7): (question 6, no id given) `M C39` is NOT MEASURED-ABSENT: one
+dropdown on one surface does not measure a capability. Under
+D6-CAPABILITY-OVER-AFFORDANCE it is re-aimed to a post's own analytics, a
+CAPTURE, and kept at GAP. Row `M C39`: next step
+`CAPTURE:post-analytics-comments`.
+
+### Q-GROUP-CONTENT-SEARCH-ABSENT -- a search inside groups that neither surface draws
+
+Added 2026-11-27 by lane msg7 (`_audit/2026-11-27-msg7.md`, section 5). Row:
+`M C70`. Its plan named two places: a group facet in the content search's All
+filters panel, and failing that a group page's own search control (spec F.4 of
+`_audit/2026-09-24-lane-s-people-search.md`). Session 12 (load 13): All filters
+draws ten facets, none a group (`In group` and `Posted in group` counted 0).
+Session 11's member-group page (`tests/fixtures/live11/group_member.html`): one
+input, the global search combobox in the page header; no form; no
+`role=search`; and no group-scoped search label among its 63 buttons, by keyed
+shape. The question: under MEASURED-ABSENT-OR-PRECONDITION, is `M C70`
+MEASURED-ABSENT, with the reopener "a capture drawing a group facet or a
+group-scoped search control"?
+
+**Answered 2026-11-27 by the orchestrator** (on disk at 12:35 IST as `_TEAM_LEAD_RULINGS1.md`, deleted by lane msg7 as its ack; registration owed at integration 7): GROUP-SEARCH-MEASURED-ABSENT: `M C70` is MEASURED-ABSENT, on the two
+surfaces measured -- the content search's All filters (session 12, load 13), no
+group facet; session 11's member-group page, no group-scoped search control.
+Reopener: a capture that draws a group facet or a group-scoped search control.
+Row `M C70`: MEASURED-ABSENT, so it leaves the next-step table.
+
 ## 8. Preconditions and purposes
 
 PRECONDITION rows stay GAP; each waits on something he does not hold.

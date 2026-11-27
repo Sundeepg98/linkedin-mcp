@@ -57,8 +57,11 @@ chosen by hand and did not include it. The instrument worked; the selection
 of instruments did not. The count is twelve now: the same lane added three
 for the copy link of the operator's own post.
 
-WHAT IS TRUE, measured rather than remembered: thirty-nine write tools ship,
-twenty-two sanctioned mutating calls exist (thirty-three write tools and
+WHAT IS TRUE, measured rather than remembered: forty write tools ship,
+twenty-two sanctioned mutating calls exist (thirty-nine write tools until
+lane msg7's ``linkedin_save_post``, 2026-11-27 -- its two presses are
+perform()'s own click, so the mutating-call count did not move; thirty-three
+write tools and
 eighteen mutating calls until integration 6's merge of lane build-msg2,
 2026-11-26, whose branch read thirty-three and twenty -- its conversation
 menu's preview press, its folder switch and its scheduled list declared

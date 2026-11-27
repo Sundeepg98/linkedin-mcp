@@ -13388,6 +13388,108 @@ measured by keyed shape. The summary and the module heading named the table; and
   box, the writer re-measures four navigating readers as timed out.
 * **The batch runners and the plant scripts.**
 
+## 116. A READ IS CHOSEN BY THE DESIGN THE PAGE DRAWS, AND A SECOND PRESS IS ONE THE OWNED MENU NAMES EXACTLY (msg7, 2026-11-27)
+
+Lane msg7's instruments, wave 7, built offline on live session 12's captures.
+Each was SHOWN FAILING before it was trusted, in one of two ways: on this
+lane's tree with the change withheld, or by a mutation the lane then reverted.
+The record is `_audit/2026-11-27-msg7.md`, sections 3.3, 3.4 and 7.4. The
+number is the wave's assignment (sections 114 to 119, one per lane).
+
+### 116.1 `tests/test_msg7_admissions.py` -- one anchored line per address, every sibling still refused
+
+Lane admit26's harness, applied unchanged to `/my-items/saved-posts/`
+(ADMIT-NOW-LANDING-IN-SESSION-14). It checks:
+* the address is admitted through the shipped gate;
+* exactly one anchored line carries it, with no wildcard;
+* it trips no forbidden substring and needs no exemption;
+* twelve siblings are each refused on the gate that names them;
+* the proven rollback;
+* the blast radius, measured on concrete urls before and after.
+
+SHOWN FAILING: 4 of 8 red on the tree without the line (the admission, its
+one line, the rollback and the blast radius). With the line, 8 passed.
+
+### 116.2 `tests/test_notification_cards.py` -- the server-driven page read where its screen is drawn, the old design kept as the control
+
+`linkedin_server/notification_cards.py` is held over session 12's tracked
+`/notifications/`, and session 5's old-design page is the control. The
+control's harvest reads 9 of 9 throughout; its envelope test was red at the
+unwired step, for want of `page_design`. Both run in a local engine with
+every request aborted.
+What it holds:
+* ten cards, each with its time from beside its one `aria-expanded` trigger;
+* `unread` None, never False;
+* ten rows through `linkedin_notifications` itself;
+* seven job-alert rows publishing ONE link (`M C97`'s key);
+* a link labelled from outside itself is no card;
+* the old selectors alone read nothing on the server-driven page;
+* the side_effect sentence says what each design reports: no per-row unread
+  flag on the server-driven design.
+
+SHOWN FAILING:
+* an ImportError without the module;
+* 4 of 10 red with the certified module and the server unwired, on the
+  tool's own "nothing readable found" over session 12's page and the
+  control's missing `page_design` (the first draft ran 5, its own time
+  defect the fifth);
+* the side_effect test red on 5beac57's server, which claimed a per-row
+  unread flag the server-driven rows do not carry;
+* two mutations of the module, each red on the test named for it: the label
+  looked up page-wide, and unread reported False.
+
+    A READER CHOOSES ITS DESIGN BY WHAT THE PAGE DRAWS, NEVER BY ASSUMING
+    WHICH ONE IT IS, AND THE OLD DESIGN STAYS ITS CONTROL.
+
+### 116.3 `tests/test_save_post.py` -- the second press is one the owned menu names exactly
+
+`save_post` (census `M C36`) is held over session 11's permalink capture and
+its menu words, and its readers are shown on session 12's member and Page
+permalink menus. What it holds:
+* the preview mints only on the permalink of the urn named;
+* the controls: writes off, another item, and a second use;
+* two presses, and an in-place reading decides;
+* a press that leaves nothing reads unknown, never "not saved";
+* an unowned menu is never pressed;
+* an item already saved (`Unsave` in `Save`'s place) is pressed no further
+  than its trigger;
+* a saved reading is a CHANGE this press made (SAVE-RECEIPT-NEEDS-A-CHANGE):
+  a new region, or the menu flipping to `Unsave`. A region already on the
+  page, a refused gate or the menu left open never reads saved.
+
+SHOWN FAILING:
+* an ImportError;
+* "not a sanctioned write";
+* 2 of 11 red without the tool (4 before the harness's viewport was made tall
+  enough for the unstyled menu);
+* three mutations of `linkedin_server/feed_save.py`, each red on behaviour:
+  * the owned-menu check dropped;
+  * any reading counted saved;
+  * `Save` matched by substring.
+
+  For the third, a quoted name in Playwright's `role=` engine never matches as
+  a substring (measured), so the faithful mutant is the regex
+  `name=/save/i`, which reaches `Unsave`.
+* THE FIX ROUND: 5 red on a clean copy of 5beac57, four on behaviour (a stale
+  region read saved, beside an unlanded press, beside the menu left open, and
+  beside a refused gate; the menu's flip unread) and the pure verdicts on
+  their signature; then four mutations of the new verdict (record s3.5).
+
+    A PRESS AIMED BY A WORD IS AIMED BY THE WHOLE WORD: "SAVE" IS A
+    SUBSTRING OF "UNSAVE", AND A SAVED ITEM WOULD BE UNSAVED. AND A
+    RECEIPT READ IN PLACE READS A CHANGE, NEVER A PRESENCE.
+
+### 116.4 Declared disposable
+
+These were never shown failing as instruments, so none of them enters:
+* the scratch probes in the lane's gitignored
+  `_state/lane-scratch/msg7/probes/`: the keyed-shape matcher `kdom.py` and
+  probes 1 to 8;
+* the census editors and re-pin scripts;
+* the three mutation scripts;
+* the two page-string baseline measurers. Each imports the guard's own
+  `drive()`.
+
 ## 117. A LANDING IS JUDGED WHERE THE PAGE ARRIVES, AND A DRAWN TARGET IS PRESSED ONLY WHEN IT IS EXACTLY AN ADDRESS THIS REPOSITORY FORMED (prof7, 2026-11-27)
 
 Lane prof7's two instruments, each SHOWN FAILING before it was trusted. The

@@ -781,8 +781,13 @@ def test_the_action_set_is_the_one_this_file_was_measured_against():
     # a phrase build-jobs2's or build-net2's rows hold (recommended jobs, the
     # invitation tabs, his connections list, his feed). The phrase-owner
     # checks in this file re-derive that on the merged tree.
-    assert len(writes.PERFORMABLE) == 35, (
-        "writes.PERFORMABLE holds %d actions, not the 35 this file was "
+    # THIRTY-SIX ON LANE MSG7 (2026-11-27): ``save_post``. Its two rows were
+    # read: its ``_WHERE_TO_LOOK`` value is his Saved items and its
+    # ``_VERIFIED_FROM`` row reads the permalink IN PLACE; the phrase-owner
+    # checks in this file re-derive that neither holds a phrase another
+    # action owns.
+    assert len(writes.PERFORMABLE) == 36, (
+        "writes.PERFORMABLE holds %d actions, not the 36 this file was "
         "measured against: %s. Re-derive the phrase owners in this file for "
         "the new action, then update this count."
         % (len(writes.PERFORMABLE), sorted(writes.PERFORMABLE))

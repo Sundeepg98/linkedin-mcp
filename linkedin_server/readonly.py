@@ -2898,6 +2898,23 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # read by its own address, lane L1's `/in/me/overlay/contact-info/` line
     # above, under the same self-only anchors, labels only.
     re.compile(r"^https://www\.linkedin\.com/in/me/\?isSelfProfile=true$"),
+    # LANE MSG7 (wave 7, 2026-11-27): his saved posts list (census M C36,
+    # M C37), on ADMIT-NOW-LANDING-IN-SESSION-14 (the orchestrator, 2026-11-27
+    # 12:35 IST; registration owed at integration 7). DRAWN: session 12's feed
+    # (load 16) draws this spelling once, in its left rail -- measured on the
+    # keyed skeleton and by the live runner's in-page count; until then it was
+    # NAMED only. Refused by allowlist silence alone, no forbidden substring
+    # tripped (READ-PAST-AN-ACT-SUBSTRING's second clause), so no exemption.
+    # ONE exact anchored line: both slash forms, no query, no sub-path;
+    # /my-items/ and /my-items/saved-jobs/ (recorded above as redirecting to
+    # the job tracker) stay refused. The press gate refuses every control here:
+    # press.sensitivity_basis declares no basis for this path. THE LANDING IS
+    # UNMEASURED, which is content-tail 4.1's point: its one read-only
+    # landing-and-capture load is session 14's, the first live session on a
+    # master carrying this line, and a landing elsewhere reverts it at the next
+    # integration. Saving and unsaving a post are writes with their own rows
+    # (tests/test_msg7_admissions.py).
+    re.compile(r"^https://www\.linkedin\.com/my-items/saved-posts/?$"),
 )
 
 #: Substrings that must never appear in a navigation target, checked before

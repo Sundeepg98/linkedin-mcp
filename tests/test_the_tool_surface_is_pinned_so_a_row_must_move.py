@@ -246,6 +246,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_ignore_invitation_to_connect": ("confirm_token", "profile"),
     "linkedin_withdraw_invitation": ("confirm_token", "profile"),
     "linkedin_mark_not_interested": ("confirm_token", "item"),
+    "linkedin_save_post": ("confirm_token", "item"),
     "linkedin_recent_searches": (),
 }
 
@@ -858,8 +859,13 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: build-msg2's eight tools beside the ninety-nine and 148, counted off the
 #: merged registry, never summed; that lane's census decisions are its own,
 #: above.
-PINNED_TOOL_COUNT = 107
-PINNED_PARAMETER_COUNT = 162
+#: **108 TOOLS AND 164 PARAMETERS ON LANE MSG7 (2026-11-27)** --
+#: `linkedin_save_post(item, confirm_token)`, one WRITE of two parameters,
+#: counted off this branch's registry. THE CENSUS DECISION, IN THE SAME
+#: COMMIT: `M C36` GAP -> COVERED-UNFIRED on it, never fired. See
+#: `_audit/2026-11-27-msg7.md`, section 3.4.
+PINNED_TOOL_COUNT = 108
+PINNED_PARAMETER_COUNT = 164
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:
