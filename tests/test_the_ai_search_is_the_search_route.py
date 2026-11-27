@@ -100,9 +100,42 @@ def read(stem: str) -> dict:
 BUILT_CAPTURES = sorted(spec[0] for spec in _builder().SPEC.values())
 
 
+#: THE OTHER BUILDERS THAT WRITE INTO ``live12/``, since integration 7 merged lane
+#: settings7 (2026-11-27). Lane settings7's builder writes four words fixtures of
+#: session 12's settings captures into the same directory, and that lane's own
+#: tests prove them. This test's claim was "every words fixture here is this
+#: builder's". That held on lane jobs7's branch and stopped holding at the merge,
+#: where it failed lane CI 46026137615. The claim is now "every words fixture
+#: here is SOME declared builder's". An undeclared words fixture still fails.
+#: Each builder's SPEC is read off its syntax tree, never imported: fixture stem
+#: -> its capture stem, the first element of each entry.
+OTHER_LIVE12_BUILDERS = (REPO / "scripts" / "_build_live12_settings_word_skeletons.py",)
+
+
+def _spec_capture_stems(builder: Path) -> list[str]:
+    import ast
+
+    tree = ast.parse(builder.read_text(encoding="utf-8"))
+    for node in tree.body:
+        target = (node.target if isinstance(node, ast.AnnAssign)
+                  else node.targets[0] if isinstance(node, ast.Assign) else None)
+        if isinstance(target, ast.Name) and target.id == "SPEC":
+            assert isinstance(node.value, ast.Dict), builder.name
+            stems = []
+            for key, value in zip(node.value.keys, node.value.values):
+                assert isinstance(key, ast.Constant) and key.value.endswith("_words"), builder.name
+                first = value.elts[0]
+                assert isinstance(first, ast.Constant) and key.value == first.value + "_words"
+                stems.append(first.value)
+            return stems
+    raise AssertionError(f"{builder.name} declares no SPEC")
+
+
 def test_every_built_fixture_is_on_disk_and_proved_here():
     on_disk = sorted(p.name[: -len("_words.html")] for p in LIVE12.glob("*_words.html"))
-    assert on_disk == BUILT_CAPTURES
+    others = [stem for builder in OTHER_LIVE12_BUILDERS for stem in _spec_capture_stems(builder)]
+    assert not set(others) & set(BUILT_CAPTURES), "two builders claim one fixture"
+    assert on_disk == sorted(BUILT_CAPTURES + others)
 
 
 @pytest.mark.parametrize("stem", BUILT_CAPTURES)
