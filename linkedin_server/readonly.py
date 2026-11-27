@@ -2698,6 +2698,22 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # after, as `linkedin_connections` does. Every control stays refused by the
     # press gate.
     re.compile(r"^https://www\.linkedin\.com/mynetwork/?$"),
+    # LANE NET7 (2026-11-27), GROW-SUGGESTIONS-BY-ADMISSION-NOT-SCROLL (the
+    # orchestrator, 13:25; integration 7 registers it): his full People You
+    # May Know lists (census N 97, N 98, N 62), RECORDED in LinkedIn's app
+    # route table ("My Network: full discovery lists",
+    # `completeness-annotations.tsv`) and drawn as the 'Show all' lane Y2 read
+    # (2026-09-24). `/mynetwork/` now lands on its Grow tab, whose first render
+    # draws no suggestion module (live session 12, load 8), and
+    # SCROLL-NOT-SANCTIONED stands, so the lists are read at their own address.
+    # Refused by allowlist silence alone (no substring): READ-PAST-AN-ACT-
+    # SUBSTRING's second clause, one anchored line, NO QUERY and NO SUB-PATH.
+    # THE PAGE LISTS OTHER PEOPLE: a reader owes NAMES-AT-RUNTIME and
+    # PEOPLE-DATA-MITIGATIONS under MEMBER-ROSTERS-AS-BOUNDED-READS, and its
+    # capture is people-gated -- raws withheld, skeletons only -- with its
+    # landing check, in live session 14. No row moves on this line alone.
+    # Every control stays refused by the press gate.
+    re.compile(r"^https://www\.linkedin\.com/mynetwork/discovery-see-all/?$"),
     # ----------------------------------------------------------------------
     # LANE ADMIT26, NAMED SETTINGS PAGES -- each by its exact address, in its
     # own commit, as NAMED-SETTINGS-PAGES-RATIFIED reads ONE-NAMED-SETTINGS-

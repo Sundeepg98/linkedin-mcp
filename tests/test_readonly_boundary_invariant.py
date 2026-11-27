@@ -2037,7 +2037,15 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # `?isSelfProfile=true`, on SELF-PROFILE-QUERY-VARIANT-ADMITTED (the
     # orchestrator, 2026-11-26), no exemption; every other key byte-identical
     # (17 of 18).
-    "_ALLOWED_URL_PATTERNS": "5d3109ee0aa96e48",
+    #
+    # 5d3109ee0aa96e48 until 2026-11-27 (lane net7): one anchored line, his
+    # full People You May Know lists at /mynetwork/discovery-see-all/, on
+    # GROW-SUGGESTIONS-BY-ADMISSION-NOT-SCROLL (allowlist silence alone, no
+    # exemption). ATTRIBUTION, with this file's ast_digest: readonly.py at
+    # the lane's base 68a4ff7 hashes to the prior pin on every key, and only
+    # this key moved (17 of 18 byte-identical). Record:
+    # _audit/2026-11-27-net7.md.
+    "_ALLOWED_URL_PATTERNS": "d2742a5df5370866",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     # 419e64a3cd92ec7e until the same REVIEW: commit: a third entry, excusing
     # exactly {"/follow"} for exactly the anchored follower-list address.

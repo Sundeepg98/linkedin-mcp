@@ -239,8 +239,12 @@ ADMISSIONS = (
         siblings=(
             Sibling(f"{B}/mynetwork/?x=1", None,
                     "a QUERY -- where a filter naming a person would arrive"),
-            Sibling(f"{B}/mynetwork/discovery-see-all/", None,
-                    "the full suggestion lists: drawn, not admitted here"),
+            # The full suggestion lists, /mynetwork/discovery-see-all/, stood
+            # here until 2026-11-27, when lane net7 admitted them on
+            # GROW-SUGGESTIONS-BY-ADMISSION-NOT-SCROLL by their own anchored
+            # line (tests/test_net7_admissions.py, which holds their near
+            # misses refused). Not admitted by THIS line: /mynetwork/ takes no
+            # sub-path.
             Sibling(f"{B}/mynetwork/discover-hub/", None,
                     "the Discover-more hub: drawn, not admitted here"),
             Sibling(f"{B}/mynetwork/import-contacts/", None,

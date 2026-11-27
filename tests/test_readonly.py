@@ -2848,7 +2848,12 @@ MUST_STAY_UNREADABLE = (
     # names). Recorded rather than silently dropped; the pages below it, which
     # did not travel with it, stand in.
     "https://www.linkedin.com/mynetwork/?x=1",
-    "https://www.linkedin.com/mynetwork/discovery-see-all/",
+    # ``https://www.linkedin.com/mynetwork/discovery-see-all/`` WAS HERE UNTIL
+    # 2026-11-27 and is now READABLE (lane net7, GROW-SUGGESTIONS-BY-
+    # ADMISSION-NOT-SCROLL: his full suggestion lists by their own anchored
+    # line, refused by allowlist silence alone). Recorded rather than silently
+    # dropped; a query on it stands in.
+    "https://www.linkedin.com/mynetwork/discovery-see-all/?x=1",
     "https://www.linkedin.com/mynetwork/import-contacts/",
     # ADDED 2026-09-03, in the commit admitting the CONNECTIONS list. These
     # are the addresses that must not travel with it. ``/mynetwork/`` itself

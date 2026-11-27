@@ -117,9 +117,12 @@ ADMISSIONS = (
             # The hub, /mynetwork/, stood here until 2026-11-25, "refused on
             # its badge cost (R1) and by nothing else"; lane admit26 admitted
             # it (tests/test_admit26_admissions.py). Its discovery lists did
-            # not travel with it.
-            Sibling(f"{B}/mynetwork/discovery-see-all/", None,
-                    "the hub's full suggestion lists -- the allowlist alone"),
+            # not travel with it; they stood here until 2026-11-27, when lane
+            # net7 admitted them by their own anchored line on
+            # GROW-SUGGESTIONS-BY-ADMISSION-NOT-SCROLL
+            # (tests/test_net7_admissions.py). A sub-path of them stands in.
+            Sibling(f"{B}/mynetwork/discovery-see-all/people/", None,
+                    "a sub-path of the hub's full suggestion lists"),
         ),
     ),
     Admission(
