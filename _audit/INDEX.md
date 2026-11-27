@@ -31,15 +31,15 @@ are listed as `(undated)`; no date is taken from git history, because
 | of those, carrying a `YYYY-MM-DD-` date prefix | 278 |
 | distinct dates | 23 |
 | documents with no level-1 heading | 2 |
-| `CORRECTS:` marker lines | 133 |
-| `CORRECTED BY:` marker lines | 133 |
-| distinct declared correction edges | 118 |
-| documents something later corrects | 57 |
-| documents that correct something | 81 |
-| documents at either end of a cross-document edge | 114 |
+| `CORRECTS:` marker lines | 134 |
+| `CORRECTED BY:` marker lines | 134 |
+| distinct declared correction edges | 119 |
+| documents something later corrects | 58 |
+| documents that correct something | 82 |
+| documents at either end of a cross-document edge | 116 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
-| documents no correction marker touches at all | 202 |
+| documents no correction marker touches at all | 200 |
 | blockquoted markers naming ANOTHER document | 0 |
 | edges missing one of their two markers | 0 |
 | edges declared a different number of times in each direction | 2 |
@@ -590,6 +590,14 @@ document is dead; it says one thing in it was overtaken and names what.
 - CORRECTED BY [2026-11-27-msg7.md](2026-11-27-msg7.md)
 
   > section 2. Session 12 opened the author toggle (load 7). It draws `Publish as` (him only) and `Publish to` (`Individual article`, then an empty newsletter list), and no create control. So the newsletter EDITION choice is behind the toggle as 6.1 derived, but CREATING a newsletter (`M C50`, `M C81`, `P L3`) is not: `Create newsletter` is drawn in `Manage`.
+
+### [2026-11-27-net7.md](2026-11-27-net7.md)
+
+2026-11-27 &middot; Lane net7, 2026-11-27: the network rows session 12 captured -- the panel read offline, four facets and one reader built, the rest re-aimed
+
+- CORRECTED BY [2026-11-27-ci8.md](2026-11-27-ci8.md)
+
+  > "search appearances (5 links)" measured 4: the 2026-09-20 search-appearances capture writes `industry` on 4 people-search URLs, all one address, and 2 of the 4 are `href` links, the wave-7 verifier's 4. The key, its bare 3-digit shape and the `schoolFilter` and `activelyHiring` rows were measured again and stand; the other rows were not re-measured.
 
 ### [INSTRUMENTS.md](INSTRUMENTS.md)
 
@@ -1641,6 +1649,14 @@ reach is visible. The quoted reason here is the CORRECTOR's own
 
   > its section 6 recorded the orchestrator's earlier 2026-11-25 call that `N 102` "stays GAP", to be rebuilt under its own tool name if its distinct capability were wanted; the ruling below supersedes that outcome, because build-jmn26 measured that the two readers read the same carousel on the same capture, so there is no distinct capability, and `N 102` moves with `J 108`.
 
+### [2026-11-27-ci8.md](2026-11-27-ci8.md)
+
+2026-11-27 &middot; Lane ci8: the full matrix on a lane's ref, the runner each shard ran on, and three test-hygiene repairs
+
+- CORRECTS [2026-11-27-net7.md](2026-11-27-net7.md)
+
+  > section 2.5 records `industry` on "search appearances (5 links)". The 2026-09-20 search-appearances capture writes it on 4 people-search URLs, all one address, and 2 of the 4 are `href` links, the wave-7 verifier's 4 (section 13.1). The key and its bare 3-digit shape stand.
+
 ### [2026-11-27-jobs7.md](2026-11-27-jobs7.md)
 
 2026-11-27 &middot; Lane jobs7, 2026-11-27: the AI job search as the keyword search's own route, and session 12's captures read by keyed shape
@@ -1984,13 +2000,13 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-11-26 | [2026-11-26-search-fix26.md](2026-11-26-search-fix26.md) | Lane search-fix26: an empty job search is never silent, and the AI search is a refusing fallback |  |
 | 2026-11-26 | [2026-11-26-selfprofile26.md](2026-11-26-selfprofile26.md) | 2026-11-26 -- lane selfprofile26: his own profile, asserted without the url marker |  |
 | 2026-11-26 | [2026-11-26-session-12-plan.md](2026-11-26-session-12-plan.md) | Live session 12 -- the plan, written offline: 37 loads, 5 searches, 113 rows |  |
-| 2026-11-27 | [2026-11-27-ci8.md](2026-11-27-ci8.md) | Lane ci8: the full matrix on a lane's ref, the runner each shard ran on, and three test-hygiene repairs |  |
+| 2026-11-27 | [2026-11-27-ci8.md](2026-11-27-ci8.md) | Lane ci8: the full matrix on a lane's ref, the runner each shard ran on, and three test-hygiene repairs | corrects x1 |
 | 2026-11-27 | [2026-11-27-integration-7.md](2026-11-27-integration-7.md) | Integration 7, 2026-11-27: the five wave-7 lanes onto master 68a4ff7, and the wave's rulings |  |
 | 2026-11-27 | [2026-11-27-jobs7.md](2026-11-27-jobs7.md) | Lane jobs7, 2026-11-27: the AI job search as the keyword search's own route, and session 12's captures read by keyed shape | corrects x1 |
 | 2026-11-27 | [2026-11-27-live-session-13.md](2026-11-27-live-session-13.md) | Live session 13 -- the live lane's record, written as it runs |  |
 | 2026-11-27 | [2026-11-27-masterfix7.md](2026-11-27-masterfix7.md) | Lane masterfix7: master CI red after integration 7, four failing cells | corrects x1 |
 | 2026-11-27 | [2026-11-27-msg7.md](2026-11-27-msg7.md) | msg7, 2026-11-27: the messaging and content rows session 12 captured, read offline | corrects x1 |
-| 2026-11-27 | [2026-11-27-net7.md](2026-11-27-net7.md) | Lane net7, 2026-11-27: the network rows session 12 captured -- the panel read offline, four facets and one reader built, the rest re-aimed |  |
+| 2026-11-27 | [2026-11-27-net7.md](2026-11-27-net7.md) | Lane net7, 2026-11-27: the network rows session 12 captured -- the panel read offline, four facets and one reader built, the rest re-aimed | **CORRECTED x1** |
 | 2026-11-27 | [2026-11-27-prof7.md](2026-11-27-prof7.md) | Lane prof7 -- the self-profile loader waits for the rewrite, then session 12's profile cells |  |
 | 2026-11-27 | [2026-11-27-rulings-integration-7.md](2026-11-27-rulings-integration-7.md) | Orchestrator rulings of 2026-11-27 (12:35 to 17:50 IST), registered at integration 7 |  |
 | 2026-11-27 | [2026-11-27-settings7.md](2026-11-27-settings7.md) | Lane settings7, 2026-11-27: his four settings pages session 12 captured -- what each drew, measured by keyed shape, and what each row's bar lets move |  |
