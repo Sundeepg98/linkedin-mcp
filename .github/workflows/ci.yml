@@ -546,7 +546,14 @@ jobs:
         # job's interpreter, asked just before the run. A fact it cannot read is
         # recorded as unknown, never as a failure. tests/test_ci_runner_facts.py
         # pins this step's place and runs the script on both platforms.
-        run: python scripts/ci_runner_facts.py --out runner-facts.json
+        #
+        # THE FILE GOES IN $RUNNER_TEMP, OUTSIDE THE CHECKOUT. Lane run
+        # 46052436870 wrote it into the checkout, after this shard's count and
+        # before its run, and the two tracked-file guards sweep the checkout's
+        # untracked files too: each collected one more case than the shard had
+        # counted, and two shards and the totals job went red on "collection
+        # found 4227 but only 4228 reached the report".
+        run: python scripts/ci_runner_facts.py --out "$RUNNER_TEMP/runner-facts.json"
 
       - name: Run this shard
         # No -m filter, no --ignore, no --deselect anywhere in this line, and
@@ -590,7 +597,7 @@ jobs:
           python scripts/ci_shard_totals.py record \
             --plan shard-plan.json --junit junit.xml \
             --cell '${{ toJSON(matrix.cell) }}' \
-            --runner runner-facts.json \
+            --runner "$RUNNER_TEMP/runner-facts.json" \
             --out "reports/${{ matrix.cell.os }}-${{ matrix.cell['python-version'] }}-${{ matrix.shard }}.json"
 
       - name: Keep this shard's junit for the timings table

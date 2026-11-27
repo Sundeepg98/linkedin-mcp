@@ -28,6 +28,7 @@ from __future__ import annotations
 import importlib.util
 import json
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -113,6 +114,16 @@ def _index(steps: list[dict], needle: str) -> int:
     return found[0]
 
 
+#: Where the facts file goes: the runner's own temp directory, OUTSIDE the
+#: checkout. Lane run 46052436870 wrote it into the checkout, after the
+#: shard's collection and before its run, and the two tracked-file guards
+#: (test_no_committed_identity, test_no_committed_credential) sweep the
+#: worktree's untracked files too: each collected one more case at run time
+#: than the shard had counted, and shards 0 and 1 and the totals job went red
+#: with "collection found 4227 but only 4228 reached the report".
+FACTS_PATH = '"$RUNNER_TEMP/runner-facts.json"'
+
+
 def test_the_workflow_records_the_runner_before_the_run_and_reports_it():
     steps = _steps()
     facts = _index(steps, "scripts/ci_runner_facts.py")
@@ -120,9 +131,25 @@ def test_the_workflow_records_the_runner_before_the_run_and_reports_it():
     run = _index(steps, "--junitxml=junit.xml")
     report = _index(steps, "scripts/ci_shard_totals.py record")
     assert install < facts < run < report, (install, facts, run, report)
-    assert "--out runner-facts.json" in steps[facts]["run"], steps[facts]["run"]
-    assert "--runner runner-facts.json" in steps[report]["run"], steps[report]["run"]
+    assert f"--out {FACTS_PATH}" in steps[facts]["run"], steps[facts]["run"]
+    assert f"--runner {FACTS_PATH}" in steps[report]["run"], steps[report]["run"]
     assert "if" not in steps[facts], "the facts step is skipped on some runs"
+
+
+def test_no_step_between_the_shard_count_and_the_run_writes_into_the_checkout():
+    """The shard's denominator is collected BEFORE the facts step, and any file
+    a step then leaves in the checkout is swept by the tracked-file guards at
+    run time, so the shard runs more than it counted. Every path the facts
+    step writes is under ``$RUNNER_TEMP``."""
+    steps = _steps()
+    counted = _index(steps, "--collect-only -q $(cat shard-files.txt)")
+    run = _index(steps, "--junitxml=junit.xml")
+    between = [s.get("run") or "" for s in steps[counted + 1:run]]
+    assert between, "no step sits between the shard's count and its run"
+    for text in between:
+        for target in re.findall(r"--out\s+(\S+)|>\s*(\S+)", text):
+            path = next(t for t in target if t)
+            assert path.startswith('"$RUNNER_TEMP/'), (path, text)
 
 
 # ---------------------------------------------------------------------------
