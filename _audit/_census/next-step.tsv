@@ -63,7 +63,6 @@ J 98	J	W	-	SIBLING:P I13	INFERRED	P I13
 J 99	J	W	-	SIBLING:P I12	NAMED	_audit/_census/jobs.md::Container: `P I12`
 J 100	J	W	-	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 J 107	J	R	-	CAPTURE:C-SRCH-5	MEASURED	_audit/2026-11-26-live-session-12.md::REDIRECTED to the AI route ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
-J 111	J	R	-	CAPTURE:C-J111-1	MEASURED	_audit/2026-11-27-jobs7.md::row does not move on the products half alone ; RULING:COMPOUND-ROW-SPLITS-ONLY-ON-STATE
 J 112	J	R	-	TARGET:a school Page he names	NAMED	_audit/_census/read-addresses.tsv::UNDER THE WHO/WHICH RULE, EXTENDED ; RULING:OPERATOR-NAMES-THE-TARGET
 J 151	J	R	-	CAPTURE:C-SRCH-2	MEASURED	_audit/2026-11-26-live-session-12.md::REDIRECTED to the AI route ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
 J 170	J	W	-	CAPTURE:C-J170-1	MEASURED	_audit/2026-11-27-jobs7.md::one alert row's control, attended ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
@@ -71,6 +70,7 @@ J 171	J	R	-	CAPTURE:C-LRN-1	MEASURED	_audit/2026-11-27-jobs7.md::LinkedIn's brow
 J 172	J	W	-	CAPTURE:C-LRN-2	MEASURED	_audit/2026-11-27-jobs7.md::seeing his goal is a read of his own page ; RULING:COMPOUND-ROW-SPLITS-ONLY-ON-STATE
 J 173	J	R	-	CAPTURE:C-J173-1	MEASURED	_audit/2026-11-27-jobs7.md::the AI job search's Experience level facet for that company ; RULING:COMPOUND-ROW-SPLITS-ONLY-ON-STATE
 J 175	J	R	-	CAPTURE:C-LRN-3	MEASURED	_audit/2026-11-27-jobs7.md::saved list is the tab beside it ; RULING:COMPOUND-ROW-SPLITS-ONLY-ON-STATE
+J 176	J	R	-	CAPTURE:C-J111-1	MEASURED	_audit/2026-11-27-integration-7.md::J111-SPLITS-PRODUCTS-FROM-SERVICES ; RULING:COMPOUND-ROW-SPLITS-ONLY-ON-STATE
 J 115	J	R+W	-	CAPTURE:C-JMN-3	MEASURED	_audit/2026-11-25-build-jmn26.md::NEITHER CAPTURED POSTING DRAWS ONE ; RULING:OPERATOR-NAMES-THE-TARGET
 J 116	J	R	-	RULING:Q-AI-GENERATING-LOADS	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/preload/guideOverlay/?interop=guideOverlay&query=Show+match+details ; RULING:READ-PAST-AN-ACT-SUBSTRING
 J 117	J	R	-	RULING:Q-AI-GENERATING-LOADS	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/preload/guideOverlay/?interop=guideOverlay&query=Show+match+details ; RULING:READ-PAST-AN-ACT-SUBSTRING

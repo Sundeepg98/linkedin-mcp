@@ -3790,6 +3790,48 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "record unmarked."
     ),
 
+    # 2026-11-27, integration 7. READ, not inferred from the filenames: each
+    # citing line was read with the matched words in its window.
+    ("2026-11-27-integration-7.md", "2026-11-27-prof7.md"): (
+        "A HEAD READ BY SHA, NOT A CORRECTION. The citing line measures that "
+        "prof7's branch head changes only its record over the certified sha. "
+        "The matched word is 'supersedes', which says that sha replaced the one "
+        "the cold verifier read, on the lane's own fix round. Nothing in "
+        "prof7's record is withdrawn. **WHAT WOULD MAKE THIS ENTRY WRONG:** the "
+        "integration record asserting that something prof7's record says is "
+        "mistaken while leaving the record unmarked."
+    ),
+    ("2026-11-27-integration-7.md", "2026-11-27-settings7.md"): (
+        "A HEAD READ BY SHA, NOT A CORRECTION. The citing line measures that "
+        "settings7's branch head changes only its record over the certified "
+        "sha. The matched words ('REFUTED', 'supersedes') report the cold "
+        "verifier's finding and the lane's OWN fix of it, which the lane's "
+        "record carries itself (its fix-round commits). The integration record "
+        "corrects nothing in it. **WHAT WOULD MAKE THIS ENTRY WRONG:** the "
+        "integration record asserting that something settings7's record, as "
+        "merged, says is mistaken while leaving the record unmarked."
+    ),
+    ("2026-11-27-rulings-integration-7.md", "2026-11-27-jobs7.md"): (
+        "RULINGS QUOTED FROM THE LANE'S RECORD, NOT A CORRECTION OF IT. The "
+        "citing line names the record that quotes the orchestrator's 13:45, "
+        "14:05 and 14:30 notes. The matched word is 'corrected', in 'the 14:05 "
+        "note corrected both', meaning the orchestrator's corrected rulings, "
+        "which the lane's record applies and quotes itself (its section "
+        "11.5). **WHAT WOULD MAKE THIS ENTRY WRONG:** the rulings record "
+        "asserting that something jobs7's record says is mistaken while "
+        "leaving the record unmarked."
+    ),
+    ("jobs.md", "2026-11-27-integration-7.md"): (
+        "A ROW'S MOVE RECORDED, NOT A CORRECTION OF THE CITED RECORD. Rows "
+        "`111` and `176` each cite the integration record for "
+        "J111-SPLITS-PRODUCTS-FROM-SERVICES, the split and the move it "
+        "applied. The matched words are older text in row `111`'s own cell. "
+        "Neither row says anything in the record does not hold. **WHAT WOULD "
+        "MAKE THIS ENTRY WRONG:** a jobs row asserting that something the "
+        "integration record says is mistaken while leaving the record "
+        "unmarked."
+    ),
+
 }
 
 
