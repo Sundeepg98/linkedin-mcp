@@ -2895,6 +2895,16 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # `/d/` spelling nothing draws, the jobs search history (`J 18`'s priced
     # address), a query, a sub-path and a longer leaf stay refused.
     re.compile(r"^https://www\.linkedin\.com/mypreferences/m/search-history/?$"),
+    # His data-download page (census P P3, "Get a copy of his data"), drawn
+    # on the same category page as the setting link 'Download your data'
+    # under the same heading (the same capture and fixture). It trips no
+    # forbidden substring: allowlist silence alone, no exemption. Requesting
+    # an archive is a press the gate refuses, and a password prompt drawn on
+    # the load is a sign-in challenge that stops the read -- the one surface
+    # READ-PAST-AN-ACT-SUBSTRING never reaches. The `/d/` spelling, a query, a
+    # sub-path and a longer leaf stay refused, as does its sensitive
+    # neighbour on the same heading, `/mypreferences/m/demographic-info/`.
+    re.compile(r"^https://www\.linkedin\.com/mypreferences/m/download-my-data/?$"),
 )
 
 #: Substrings that must never appear in a navigation target, checked before

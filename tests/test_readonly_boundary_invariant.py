@@ -2046,7 +2046,12 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # ast_digest: readonly.py at the lane's base 68a4ff7 hashes to the prior
     # pin on every key, and only this key moved (17 of 18 byte-identical).
     # Record: _audit/2026-11-27-settings7.md.
-    "_ALLOWED_URL_PATTERNS": "30ed6faba55a8e9a",
+    #
+    # 30ed6faba55a8e9a until lane settings7's second admission: one anchored
+    # line, his data-download page in the same tree, drawn on the same
+    # category page, a named settings page in its own commit (allowlist
+    # silence alone, no exemption); every other key byte-identical (17 of 18).
+    "_ALLOWED_URL_PATTERNS": "228d24c9fa344a2f",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     # 419e64a3cd92ec7e until the same REVIEW: commit: a third entry, excusing
     # exactly {"/follow"} for exactly the anchored follower-list address.

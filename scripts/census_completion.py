@@ -2115,7 +2115,8 @@ PINNED = {
     #: 45 ON LANE READERS-MSG26 (2026-11-26), MEASURED: `M C93` GAP -> COVERED-UNFIRED, the content search vertical read over live session 11's capture (`linkedin_search_content`; `_audit/2026-11-26-readers-msg26.md`) (was 46).
     #: MEASURED AT INTEGRATION 4'S MERGE OF READERS-MSG26 (2026-11-26) on the merged tree, never summed (the figures above are each lane's own).
     #: 37 ON LANE SETTINGS7 (2026-11-27), MEASURED by --check: `P K1`'s ADMITTED line left read-addresses.tsv with the row (was 38).
-    "b3_admitted": 37,
+    #: 38 ON LANE SETTINGS7'S SECOND ADMISSION (2026-11-27), MEASURED by --check: `P P3`'s read-addresses line NEEDS-SESSION -> ADMITTED, its page measured on the privacy capture and admitted by name (was 37).
+    "b3_admitted": 38,
     #: 38 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     #: 40 ON LANE L5'S ORDER OF 2026-09-28 12:32, MEASURED: `N 30`, `N 31`, `N 65`
@@ -2144,7 +2145,8 @@ PINNED = {
     #: 12 ON LANE BUILD-MSG2'S TWO READS (2026-11-26), MEASURED: `M C14` left bucket 3 -- COVERED-UNFIRED on `linkedin_scheduled_posts` -- so its NEEDS-SESSION line left `_audit/_census/read-addresses.tsv` (`_audit/2026-11-26-build-msg2.md`, section 3) (was 13).
     #: 11 AT INTEGRATION 6'S MERGE OF LANE BUILD-MSG2 (2026-11-26), MEASURED on the merged tree by --check, never summed: the three lanes' moves above, together.
     #: 10 ON LANE SETTINGS7 (2026-11-27), MEASURED by --check: `P N22`'s NEEDS-SESSION line left read-addresses.tsv with the row (was 11).
-    "b3_needs_session": 10,
+    #: 9 ON LANE SETTINGS7'S SECOND ADMISSION (2026-11-27), MEASURED by --check: the same line left NEEDS-SESSION (was 10).
+    "b3_needs_session": 9,
     #: 1 ON LANE BUILD-MSG2'S ROUND 2 (2026-11-26), MEASURED: `M M28` SPLIT on the orchestrator's ruling M-M28-SPLITS (round 2, to be registered at integration 6): the view half stayed `M M28`, COVERED-UNFIRED on `linkedin_archived_conversations`; the restore half entered as `M M54`, GAP, W (`_audit/2026-11-26-build-msg2.md` section 10) (was 2).
     #: 1 AT INTEGRATION 6'S MERGE OF LANE BUILD-MSG2 (2026-11-26), MEASURED on the merged tree by --check, never summed: the three lanes' moves above, together.
     "b3_undetermined": 1,

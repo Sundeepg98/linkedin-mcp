@@ -15,7 +15,8 @@ draws each as a setting link whose path words matched by keyed shape:
 * ``/mypreferences/m/search-history/``, labelled ``Clear search history``
   (census ``N 96``, "Clear your search history"), under the page's ``How
   LinkedIn uses your data`` heading;
-* (commit D adds ``/mypreferences/m/download-my-data/``, census ``P P3``.)
+* ``/mypreferences/m/download-my-data/``, labelled ``Download your data``
+  (census ``P P3``, "Get a copy of his data"), under the same heading.
 
 READ-ONLY, ZERO PRESSES: clearing his search history and requesting his
 archive are each a write with its own row and spec; the press gate refuses
@@ -108,6 +109,23 @@ ADMISSIONS = (
             Sibling(f"{B}/psettings/search-history", "/psettings/", "the legacy namespace"),
             Sibling(f"{B}/mypreferences/m/manage-data-and-activity/", None,
                     "its neighbour on the same heading, not admitted here"),
+        ),
+    ),
+    Admission(
+        key="download-my-data",
+        rows=("P P3",),
+        address=f"{B}/mypreferences/m/download-my-data/",
+        label="Download your data",
+        siblings=(
+            Sibling(f"{B}/mypreferences/d/download-my-data", None,
+                    "the desktop-tree spelling, which nothing draws"),
+            Sibling(f"{B}/mypreferences/m/download-my-data/request/", None, "a sub-path"),
+            Sibling(f"{B}/mypreferences/m/download-my-data/?tier=fast", None, "a query"),
+            Sibling(f"{B}/mypreferences/m/Download-My-Data/", None, "another case"),
+            Sibling(f"{B}/mypreferences/m/download-my-data-now/", None, "a longer leaf"),
+            Sibling(f"{B}/mypreferences/m/demographic-info/", None,
+                    "its neighbour on the same heading, sensitive self-identification, refused"),
+            Sibling(f"{B}/psettings/member-data", "/psettings/", "the legacy namespace"),
         ),
     ),
 )

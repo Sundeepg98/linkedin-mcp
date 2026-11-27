@@ -489,7 +489,7 @@ P O21	P	W	R3	TARGET:a member he names to block	NAMED	_audit/2026-09-24-lane-l8-o
 P O22	P	R	-	CAPTURE:admit-mypreferences-d-categories-privacy	INFERRED	_audit/_census/read-addresses.tsv::which settings address lists who he has blocked ; RULING:READ-PAST-AN-ACT-SUBSTRING
 P O23	P	R	-	PRECONDITION:a second account to watch the network from	NAMED	_audit/_census/read-addresses.tsv::Measurable only by firing a profile write and watching another account
 P O6-O20	P	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
-P P3	P	R	-	CAPTURE:admit-mypreferences-d-categories-privacy	INFERRED	_audit/_census/read-addresses.tsv::which settings address lists who he has blocked ; RULING:READ-PAST-AN-ACT-SUBSTRING
+P P3	P	R	-	CAPTURE:admit-mypreferences-m-download-my-data	MEASURED	tests/fixtures/live12/privacy_words.html ; _audit/_census/profile.md::ADDRESS ADMITTED 2026-11-27 BY LANE SETTINGS7 ; RULING:NAMED-SETTINGS-PAGES-RATIFIED
 P P4	P	W	R3	SIBLING:lane-S	NAMED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 P P5	P	W	R3	SIBLING:lane-S	NAMED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 P P6	P	W	R3	SIBLING:lane-S	NAMED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
