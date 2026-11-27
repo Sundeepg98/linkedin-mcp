@@ -1498,6 +1498,18 @@ WHAT_WOULD_DRIVE_IT: dict[str, str] = {
         "tests/test_messaging_folders.py drives it over a dropdown a choice "
         "left open."
     ),
+    # Lane msg7, 2026-11-27 (CAPTURE-SHOWS-READER-BLIND-DEMOTES): the
+    # server-driven notifications page's cards, one step of
+    # notification_cards.harvest.
+    "notification_cards:_read_cards": (
+        "CAPTURE: /notifications/ as live session 12 drew it, server-driven "
+        "(tests/fixtures/live12/notifications.html): its success path needs a "
+        "full-card link labelled from inside itself, which the planted page "
+        "never draws -- its counts answer in strings, read as 0 -- so it finds "
+        "no card. notification_cards.harvest, its only caller, is driven clean, "
+        "and tests/test_notification_cards.py drives this step over that "
+        "capture in a real engine: 10 records, session 5's page the control."
+    ),
 }
 
 #: The verdicts that mean a drive never reached its success path.

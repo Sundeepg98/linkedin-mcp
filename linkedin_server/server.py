@@ -897,6 +897,7 @@ from linkedin_server import (
     named_details,
     named_profile,
     newsletters,
+    notification_cards,
     notify_cost,
     own_articles,
     page_plugin,
@@ -7457,6 +7458,10 @@ async def linkedin_notifications(
     Partial compensation, since the badge is going either way: each row carries
     "unread": true/false as LinkedIn had it AT THE MOMENT OF READING -- which
     is the fact the page load is about to destroy. Read it here or lose it.
+    EXCEPT ON THE SERVER-DRIVEN DESIGN (measured 2026-11-26, live session 12):
+    no unread marking on it has been measured, so its rows carry NO "unread"
+    key and "unread_when_read" is null, with "unread_note" saying why --
+    never every row reported read. "page_design" names which design was read.
     =========================================================================
 
     Rows carry the notification text, how long ago it arrived, whether it was
@@ -7481,13 +7486,14 @@ async def linkedin_notifications(
             requested_url = f"{BASE_URL}/notifications/"
             final_url = await BROWSER.goto(page, requested_url)
             assert_not_authwall(final_url, surface="notifications")
-            records = await dom.harvest_block_cards(
-                page,
-                selectors=dom.NOTIFICATION_SELECTORS,
-                max_items=limit * 2,
-                hidden_selector=dom.NOTIFICATION_HIDDEN_SELECTOR,
-                time_selector=dom.NOTIFICATION_TIME_SELECTOR,
-                unread_class=dom.NOTIFICATION_UNREAD_CLASS,
+            # TWO DESIGNS, READ BY WHICH THE PAGE DRAWS (lane msg7,
+            # 2026-11-27, CAPTURE-SHOWS-READER-BLIND-DEMOTES): live session 12
+            # drew this page server-driven, where dom.NOTIFICATION_SELECTORS
+            # harvest 0 records; ``notification_cards.harvest`` reads that
+            # design where its screen is drawn and runs the shipped harvest,
+            # unchanged, everywhere else (session 5's 9 of 9 its control).
+            records, page_design = await notification_cards.harvest(
+                page, max_items=limit * 2
             )
             dom.require_rows(
                 records,
@@ -7510,8 +7516,19 @@ async def linkedin_notifications(
                 "package makes. The per-row 'unread' flag is how it stood "
                 "before this call."
             )
-            unread = [row for row in envelope["results"] if row.get("unread")]
-            envelope["unread_when_read"] = len(unread)
+            envelope["page_design"] = page_design
+            if page_design == notification_cards.SDUI:
+                # NO UNREAD MARKING ON THIS DESIGN HAS BEEN MEASURED, so no row
+                # carries one and the count is not a zero: None, never "all read".
+                envelope["unread_when_read"] = None
+                envelope["unread_note"] = (
+                    "this page was drawn in LinkedIn's server-driven design, where no "
+                    "unread marking has been measured, so no row reports whether it "
+                    "was unread -- rather than every row reporting read."
+                )
+            else:
+                unread = [row for row in envelope["results"] if row.get("unread")]
+                envelope["unread_when_read"] = len(unread)
             return envelope
     except Exception as exc:
         return _error(exc)
