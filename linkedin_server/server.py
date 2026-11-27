@@ -13442,14 +13442,15 @@ from linkedin_server import company_tabs  # noqa: E402 -- lane readers-jobs26's 
 @mcp.tool()
 async def linkedin_company_page_tab(organisation_id: str, tab: str = "about") -> dict[str, Any]:
     """ONE tab of an organisation's Page: its About tab, its Events tab, its
-    Premium Insights tab, its Life tab or its posts. ONE page load, nothing
-    pressed.
+    Premium Insights tab, its Life tab, its posts or its Products tab. ONE
+    page load, nothing pressed.
 
-    ``tab`` is exactly one of ``about``, ``events``, ``insights``, ``life`` or
-    ``posts``; anything else is refused before any load. Census rows ``J 106``
+    ``tab`` is exactly one of ``about``, ``events``, ``insights``, ``life``,
+    ``posts`` or ``products``; anything else is refused before any load.
+    Census rows ``J 106``
     (About), ``J 165`` (Events), ``J 113`` (Insights, with its two function
     tables ``J 114`` and ``J 174`` and ``J 169``'s headcount and notable
-    alumni), ``J 109`` (Life) and
+    alumni), ``J 109`` (Life), ``J 111`` (its Products tab) and
     ``J 168`` (the posts), read under THIRD-PARTY-TEXT-AT-RUNTIME
     and NAMES-AT-RUNTIME: every string of the Page's own comes back inside a
     record whose ``untrusted_third_party_text`` marker says it is someone
@@ -13507,6 +13508,13 @@ async def linkedin_company_page_tab(organisation_id: str, tab: str = "about") ->
     with no words, or with two text boxes (a reshare), is counted and not
     read; no item's link is drawn on that view, so none is returned.
 
+    ``products``: ``products`` -- each product the tab drew, its name and its
+    category as records of the Page's own words; ``products`` is None, with
+    ``products_tab_drawn`` False, when the Page's navigation draws no
+    Products tab. ``show_all_offered`` says the tab offers more than it drew;
+    its button is never pressed. A product's link and the members pictured
+    under it are never read.
+
     A TAB THAT YIELDS NOTHING IS A FAILURE, never "this organisation has
     none", unless the page itself says so. If the load lands anywhere but the
     tab asked for, the page is not read and the landing is withheld (an
@@ -13523,7 +13531,7 @@ async def linkedin_company_page_tab(organisation_id: str, tab: str = "about") ->
 
     Args:
         organisation_id: the numeric LinkedIn organisation id.
-        tab: about (the default), events, insights, life or posts.
+        tab: about (the default), events, insights, life, posts or products.
     """
     try:
         address = company_tabs.tab_url(organisation_id, tab)
@@ -13555,6 +13563,8 @@ async def linkedin_company_page_tab(organisation_id: str, tab: str = "about") ->
                 reading = await company_tabs.read_posts_tab(page)
             elif address["tab"] == "life":
                 reading = await company_tabs.read_life_tab(page)
+            elif address["tab"] == "products":
+                reading = await company_tabs.read_products_tab(page)
             else:
                 reading = await company_tabs.read_about_tab(page)
             return {

@@ -186,6 +186,12 @@ DECLARED: dict[tuple[str, str], tuple[str, int]] = {
     # an uncorroborated zero -- no Life module drawn. Handed a page and never
     # a url; the landing described in the hint, as its sibling tabs do.
     ("company_tabs.py", "read_life_tab"): (WITHHELD, 1),
+    # 2026-11-27 (lane jobs7, census J 111): the Products tab's two refusals of
+    # an uncorroborated zero -- the tab not marked current on a navigation too
+    # thin to say the Page has none, and a current tab that yields no product.
+    # Handed a page and never a url; the landing described in the hint, as
+    # its sibling tabs do.
+    ("company_tabs.py", "read_products_tab"): (WITHHELD, 2),
     # --- ASKED_FOR: the seven tool-side raises ----------------------------
     # (``_read_cards``'s one raise left this table on 2026-11-26, when the
     # helper was deleted with no caller left: READ-CARDS-DELETION, lane
@@ -639,13 +645,15 @@ def test_the_twenty_are_still_twenty():
     # table, not summed: {WITHHELD 24, ASKED_FOR 19, PASSTHROUGH 1}.
     # FORTY-FIVE ON LANE JOBS7 (2026-11-27): ``_read_job_search``'s sixth raise,
     # ASKED_FOR (above), so ASKED_FOR is 20. MEASURED off this table, not summed.
-    assert tally[WITHHELD] == 24, tally
+    # FORTY-SEVEN ON THE SAME LANE: ``read_products_tab``'s two WITHHELD raises
+    # (census J 111), so WITHHELD is 26. MEASURED off this table, not summed.
+    assert tally[WITHHELD] == 26, tally
     assert tally[ASKED_FOR] == 20, tally
     assert tally[PASSTHROUGH] == 1, tally
     # 44, not 41: both lanes' branches read 41 (24 + 16 + 1 and 21 + 19 + 1), so
     # the two equal lines merged clean as one; the merged table measures 44.
-    # 45 on lane jobs7, measured off this table.
-    assert tally[WITHHELD] + tally[ASKED_FOR] + tally[PASSTHROUGH] == 45, tally
+    # 45 on lane jobs7, then 47, measured off this table.
+    assert tally[WITHHELD] + tally[ASKED_FOR] + tally[PASSTHROUGH] == 47, tally
     assert tally[NO_ADDRESS_IN_SCOPE] == 10, tally
 
 

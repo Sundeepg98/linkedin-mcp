@@ -37,6 +37,7 @@
     "company_tabs:read_insights_tab": "not_driven:raises ExtractionFailedError",
     "company_tabs:read_life_tab": "returns_records",
     "company_tabs:read_posts_tab": "not_driven:raises ExtractionFailedError",
+    "company_tabs:read_products_tab": "not_driven:raises ExtractionFailedError",
     "content_search:read_content_results": "returns_records",
     "conversation_menu:_close": "not_driven:navigates (keyboard.press)",
     "conversation_menu:_count": "clean",

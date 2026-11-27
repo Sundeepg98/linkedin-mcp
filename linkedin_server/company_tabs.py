@@ -116,6 +116,9 @@ TAB_SEGMENTS: dict[str, str] = {
     "insights": "insights",
     "life": "life",
     "posts": "",
+    # Census J 111 (lane jobs7, 2026-11-27): the Products tab, admitted by
+    # lane A on 2026-10-10 and captured by session 12's load 21.
+    "products": "products",
 }
 TAB_QUERIES: dict[str, str] = {"insights": "?insightType=HEADCOUNT"}
 TAB_PATHS: dict[str, str] = {
@@ -1295,6 +1298,114 @@ async def read_life_tab(page: Any) -> dict[str, Any]:
     return out
 
 
+# ---------------------------------------------------------------------------
+# The Products tab (census J 111, lane jobs7, 2026-11-27)
+# ---------------------------------------------------------------------------
+
+#: The Products tab's own words, MEASURED by keyed shape on session 12's
+#: capture of an organisation's Products tab (load 21;
+#: ``tests/fixtures/live12/c_rj26_2_products_words.html``): the Page
+#: navigation's tab word, and the label of the button LinkedIn draws to show
+#: the rest of the list (never pressed).
+PRODUCTS_TAB_WORD = "Products"
+SHOW_ALL_PRODUCTS = "Show all products"
+
+#: The most products one read returns. The capture drew two; the rest sit
+#: behind LinkedIn's own button, which is never pressed.
+PRODUCTS_BOUND = 25
+
+#: A product's own page, ``/products/<slug>/``, relative or absolute. The slug
+#: is the product's name in another spelling, so it is matched and never
+#: returned.
+_PRODUCT_HREF = re.compile(r"^(?:https://www\.linkedin\.com)?/products/[^/?#]{1,200}/?$")
+
+#: The fewest navigation links a Page must draw for "no Products tab among
+#: them" to be a reading rather than a navigation that failed to render.
+#: MEASURED: the capture's navigation draws eight.
+_NAV_LINKS_MIN = 3
+
+#: Where a product's NAME sits: the ``h2`` inside the ``aria-label``-carrying
+#: link to its own page. Its CATEGORY is the one paragraph inside the link to
+#: LinkedIn's product-category search, in the same lockup -- two levels above
+#: the name link. Both MEASURED on the capture's two cards.
+PRODUCT_NAMES = 'main a[aria-label][href*="/products/"] h2'
+PRODUCT_CATEGORY = 'a[href*="/search/results/products/"] p'
+
+
+async def read_products_tab(page: Any) -> dict[str, Any]:
+    """The Products tab ``page`` already shows: each product's name and
+    category, as records.
+
+    A product's NAME and its CATEGORY each leave as a
+    ``people_data.OrganisationProse`` record (``read_from`` ``product_name``
+    / ``product_category``): the Page's own words under
+    THIRD-PARTY-TEXT-AT-RUNTIME, untrusted, sanitised, bounded, never
+    stored. NEVER READ: the product's link (its slug is its name), the face
+    pile under each card (the members who use it), the card's own button,
+    any ``aria-label``. ``show_all_offered`` says LinkedIn draws its button
+    for the rest of the list; it is never pressed.
+
+    THE ZERO RULE. A Page whose navigation is drawn and draws NO Products
+    tab answers ``products: None`` with ``products_tab_drawn: False``: the
+    organisation has no Products tab, and the navigation itself says so
+    (session 11's load 23 was such a Page). A Products tab marked current
+    that yields no product raises ``ExtractionFailedError``, as does a page
+    that marks no Products tab and draws too little navigation to say why:
+    an empty answer would be indistinguishable from a broken read.
+    """
+    failed = [0]
+    tab = await current_tab(page, failed)
+    nav = [collapsed(t) for t in await _texts(page.locator("main nav a"), failed, 20)]
+    out: dict[str, Any] = {
+        "tab": "products",
+        "view": tab,
+        "products_tab_drawn": PRODUCTS_TAB_WORD in nav,
+        "products": [],
+        "products_withheld": 0,
+        "products_beyond_bound": 0,
+        "show_all_offered": (
+            await _count(page.locator(f'button[aria-label="{SHOW_ALL_PRODUCTS}"]'), failed)
+        ) > 0,
+    }
+    if tab != "products":
+        out["reads_failed"] = failed[0]
+        if len(nav) >= _NAV_LINKS_MIN and not out["products_tab_drawn"]:
+            out["products"] = None
+            return out
+        raise ExtractionFailedError(
+            "the Products tab is not the tab this Page marks current, and its "
+            "navigation does not show that it has none "
+            f"({len(nav)} navigation link(s) read, the current tab {tab}).",
+            hint=dom._landing_note(page),
+        )
+    names = page.locator(PRODUCT_NAMES)
+    total = await _count(names, failed)
+    for index in range(min(total, PRODUCTS_BOUND)):
+        heading = names.nth(index)
+        link = heading.locator("xpath=..")
+        href = await _attribute(link, "href", failed)
+        name = _prose_record(await _text(heading, failed), "product_name")
+        if not _PRODUCT_HREF.match(href or "") or name is None:
+            out["products_withheld"] += 1
+            continue
+        lockup = link.locator("xpath=..").locator("xpath=..")
+        categories = lockup.locator(PRODUCT_CATEGORY)
+        category = None
+        if await _count(categories, failed) == 1:
+            category = _prose_record(await _text(categories.nth(0), failed), "product_category")
+        out["products"].append({"name": name, "category": category})
+    out["products_beyond_bound"] = max(0, total - PRODUCTS_BOUND)
+    out["reads_failed"] = failed[0]
+    if not out["products"]:
+        raise ExtractionFailedError(
+            "the Products tab yielded no product; an empty answer here would be "
+            f"indistinguishable from a broken read ({total} product heading(s) "
+            f"drawn, {out['products_withheld']} withheld).",
+            hint=dom._landing_note(page),
+        )
+    return out
+
+
 #: The reader for each tab, by its token. The tool calls each one BY NAME
 #: (``server.linkedin_company_page_tab``), so the guards that follow calls by
 #: name -- the reachability inventory and the people-reader derivation -- find
@@ -1305,4 +1416,5 @@ READERS = {
     "insights": read_insights_tab,
     "life": read_life_tab,
     "posts": read_posts_tab,
+    "products": read_products_tab,
 }
