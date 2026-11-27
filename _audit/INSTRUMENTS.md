@@ -13686,6 +13686,79 @@ search over its unmatched slots (`brute_dialog.py`, which ran past its
 |---|---|
 | `tests/test_verifications_page.py::test_two_consent_sections_read_as_several_never_as_none`, `::test_a_consent_count_that_cannot_be_read_says_unread_never_none`, `::test_each_consent_reading_is_a_closed_word_and_none_means_no_section`; `linkedin_server/verifications_page.py` (`CONSENT_READINGS`) | the cold verification's F3: before the fix, two planted consent sections and a section count that raises each read `None`, the word for "no consent section" (2 failed by assertion, `assert None == ...`; the third by the missing closed tuple): 3 failed, 21 passed; after, 24 passed |
 
+## 119. ONCE A PRESS HAS CHANGED A VIEW, EVERY EXIT RESTORES IT OR STOPS EVERYTHING, AND EVERY DOCUMENT A PRESS LOADS IS A LOAD (live-s13, 2026-11-27)
+
+The live lane's session-13 runner (`runner_s13.py`, kept in the main
+checkout's gitignored `_state/live-runner/s13/`, beside its offline checks and
+the runner as each review round read it). Each instrument below was SHOWN
+FAILING offline before it was trusted -- against session 12's runner, or
+against the session-13 runner a reviewer's finding was made on -- and the
+record says where the session held it live. The record is
+`_audit/2026-11-27-live-session-13.md`, sections 2 and "Live session 13, the
+run". Only those that also HELD LIVE enter here; the rest are named at the end.
+
+### 119.1 A control found under several names is ONE match
+
+`one_named` collects DISTINCT ELEMENTS, each counted once however many names
+or roles find it (an accessible name is trimmed, so a set holding a name twice,
+once with a trailing space, found session 12's one document control twice and
+refused it). SHOWN FAILING: three checks red on session 12's runner. HELD LIVE:
+`Add a document` found as one distinct control and pressed (load 4).
+
+    MATCHES ARE ELEMENTS, NOT NAMES: COUNT WHAT THE PAGE HOLDS, ONCE.
+
+### 119.2 A panel drawn outside any dialog is closed only when what it added is gone
+
+A press that draws no popup and flips no `aria-expanded` but ADDS visible
+form controls has opened a panel. The addition is a multiset of control
+signatures counted in the page, so a toolbar re-rendering its own pills adds
+none and a page hydrating headings and links adds none. Closed only when the
+addition is gone: Escape, then one re-press of a declared toggle; else
+`did_not_close`, never "nothing opened". SHOWN FAILING: four checks red on
+session 12's runner (it read such a panel as `nothing_opened` and left it
+open). HELD LIVE: the AI route's All filters panel (26 checkboxes, 3 radios, 4
+switches) was SEEN as opened and, when neither Escape nor its trigger closed
+it, reported `did_not_close` and stopped the phase -- not reported closed.
+
+### 119.3 Every press needs room for a load; three loads a call
+
+One runner invocation is one call: the 4th load refuses before it is made, a
+phase needing 4 refuses before any browser contact, and a press is made only
+while one more load fits the call, the session's 28 and the account's 28 (a
+press that loads a document is a load, ruling Q2); every press paced 20 s
+after the last load and the last press, the press's time kept in the
+session's state for the next call. SHOWN FAILING: four checks red on session
+12's runner, R8 and R9 red on the cold review's runner. HELD LIVE: seven loads,
+never more than two in a call; every press paced, the closest two loads 22.7 s
+apart.
+
+### 119.4 The account's reserve, under the store's lock
+
+The account meter refuses a load that would make the pinned store's trailing
+12 hours hold more than 40 less the reserve (12 for the next session), on the
+same events it appends to. SHOWN FAILING: three checks red on session 12's
+runner. HELD LIVE: 7 records for 7 loads, the two ledgers agreeing; 33 free
+at the end.
+
+### 119.5 A dropdown pill is pressed on its own aria-expanded wrapper
+
+The AI route draws `aria-expanded` on each dropdown pill's `[role=button]`
+wrapper, not on its label; pressed there, the opening flips its own state and
+closes by session 11's proven rule. SHOWN FAILING: R6 red on the cold review's
+runner (a label press read as `nothing_opened` with the dropdown open). HELD
+LIVE: four pills, four flips, four closes on the first Escape, the view
+unchanged each time.
+
+**Shown failing, NOT exercised live** (candidates, not entered): the re-query
+ledger (no filter press was made); the Easy Apply restore against a fresh
+view, its bookkeeping keys recorded and not judged (the toggle was not
+reached); the document watch's late and exit counts (no press loaded a
+document); the suspect-ledger STOP-ALL (no count failed).
+
+**Disposable** (the lane's scratch folder and the reviewer's): the toolbar and
+ledger readers, the patch scripts, the verdict matrix, the reviewer's probes.
+None was shown failing on a planted defect.
+
 ## 120. A FIXTURE'S LINE ENDS ARE READ AS COMMITTED, AND A TIMED WORLD RUNS ON A CLOCK THE TEST HOLDS (masterfix7, 2026-11-27)
 
 Lane masterfix7 made master CI green again after integration 7. Four cells of
