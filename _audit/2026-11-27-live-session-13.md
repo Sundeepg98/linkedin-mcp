@@ -771,3 +771,60 @@ queue cells, below).
 * **INSTRUMENTS section 119** registers 119.1-119.5, the instruments shown
   failing offline that also held live; the four that were not exercised live
   are named there as candidates.
+
+### Gates (local, each under the 2-minute cap, serially, the flag down)
+
+| gate | result |
+|---|---|
+| the harness's fixture guards (`tests/test_live_lane_session_2_harness.py -k "fixture or counted"`) | 17 passed (`live13`: 13 counted) |
+| `tests/test_fixtures_hold_only_synthetic_people.py --people-guard-scope=changed` | 66 passed, 17 skipped: the 13 changed fixtures of 247 read; the corpus-wide tests are CI's |
+| `scripts/check_next_step.py` | GREEN: every GAP row once (518, census_completion's gap), every source and payload resolving, the queue agreeing |
+| `scripts/census_completion.py --check` | every headline figure matches its pin (no row moved, no pin moved) |
+| the three derived views | `--write`, then `--check` clean |
+| `tests/test_the_audit_index_is_derived.py`; `tests/test_the_register_numbers_are_unique.py` | 33 passed; 6 passed |
+| `tests/test_a_correction_is_findable_from_the_claim.py`; `tests/test_an_asserted_name_resolves.py` | 15 passed; 12 passed |
+| the pre-commit identity gate, at the close-out's commit `76ab0c4` | "examined 20 staged file(s) against 226 spellings; 0 hits" |
+| `tests/test_no_committed_identity.py`, AFTER that commit (it reads the committed blobs) | 1400 passed, 69 s |
+| the pre-push gate, on `scripts/lane_ci.py push` of `76ab0c4` to `ci/live-s13` | its sweep 0 hits across 1354 blobs and 226 needles; the ref admitted |
+
+NOT RUN locally, by the standing rules: the full suite (lane CI runs it on
+`ci/live-s13`).
+
+**Lane CI** (46020118577, the close-out's commit `76ab0c4`, found by its head
+sha): **success**, 6 jobs, 7 min 27 s. The certified sha is `76ab0c4`. Until
+integration 8 merges this branch, `76ab0c4` is nowhere on `master`: it resolves
+only on `live-s13`, and its subject is "live session 13: 7 loads, the record,
+13 tracked skeletons, the queue's captured cells". The
+commit that adds this paragraph and the FINAL below is record-only (this record,
+and the blocker map's derived reason-document score, 5 to 6, on the six rows
+that already named this record as their reason document): before it, the three
+derived views were re-written and checked and this record's own readers re-run
+(13 test files sharded 8 ways, 258 passed, after ONE red:
+`tests/test_a_cited_sha_resolves.py::test_no_new_unresolvable_citation_appears`
+found this section citing the close-out's sha where `master` cannot reach it,
+fixed by the disclosure sentence above, the guard untouched); after it, the
+committed-blob identity test, and lane CI on that head, whose run the FINAL
+message names.
+
+### FINAL (sent to the orchestrator; the branch head is the commit adding this section)
+
+* **Session 13**: 7 loads under the hard stop at 10, 3 searches of 5, the two
+  ledgers agreeing at 7; no STOP-ALL, no suspect mark, no wall or challenge; no
+  outward act. The flag down, 9224 down, the dedicated Chrome closed by its PID,
+  no process of this lane alive.
+* **Rows moved: none.** Every line was a capture.
+* **Captured, VERIFIED:** rank 133 `C-SRCH-2` (J 3, J 17, J 151), rank 83 (N
+  61), rank 129 `U-POST-DOCUMENT` (M C5), rank 132 `C-SRCH-3a` in part (J 4, J
+  5, J 6, J 11, J 15).
+* **Left, by named reason:** J 9, because All filters did not close (the
+  phase stopped) before the toggle, and a second try needs three more searches
+  where two were left;
+  M M28 and M M54, because the receipt guard refused (1 unread rendered row); M
+  M34, moved to session 14 by INBOX-SEARCH-IS-NOT-A-D1-SEARCH.
+* **Pins re-derived: none.**
+* **Gates:** the table above, and lane CI 46020118577 success on `76ab0c4`.
+* **Questions:** (1) session 14's `C-SRCH-3a`: the toggle FIRST, before All
+  filters, on one search and its two re-queries (finding 2: "until then, the
+  toggle must come BEFORE All filters"; finding 7: "J 9 needs a session of its
+  own budget"); (2) the messaging standby waits for him (finding 6: "His inbox
+  had 1 unread rendered row at 20:10").
