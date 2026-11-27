@@ -564,6 +564,27 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "beside it. **WHAT WOULD MAKE THIS ENTRY WRONG:** this lane's note "
         "saying the row's earlier text was untrue."
     ),
+    # 2026-11-27, lane settings7: its notes on profile rows K1, K7, N22, N32,
+    # O22, P3, I12 and I13 cite its record. Read, not inferred, three hits:
+    # K7's note, within the window of words two neighbours wrote ('false',
+    # not K7's own), and I12's and I13's, whose own 'refuted' reports an
+    # in-place replacement after the cold verification.
+    ("profile.md", "2026-11-27-settings7.md"): (
+        "TABLE-ROW PROXIMITY, NOT A CORRECTION. Row K7 gained one note -- the "
+        "Delete drawn by name on session 12's capture, measured offline to "
+        "declare no popup, and held by the orchestrator's answer to "
+        "Q-VERIFICATION-DELETE -- citing this record. The matched word is "
+        "'false', in its neighbours K8 ('\"NO REASON\" IS FALSE', a 2026-09-21 "
+        "note on that row's own reading) and K10 ('return False' and 'false "
+        "on 6', about that row's badge reader), two rows this lane did not "
+        "write. Rows I12 and I13 gained, later the same day, a note saying "
+        "this lane's own first reading of the job-preferences load ('no "
+        "dialog') was refuted by the cold verification and is replaced IN "
+        "PLACE, in those rows and in the record's sections 1 and 2.3 alike: a "
+        "report about documents that already carry their correction in place. "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** a profile row saying "
+        "this lane's record does not hold, while leaving the record unmarked."
+    ),
     ("profile.md", "2026-11-25-build-p26.md"): (
         "A LEDGER NOTE AND ONE MOVE, NOT A CORRECTION. Rows A11, A13, A14, "
         "A15, A17, A25, D25, D26, F1, K8 and S8 each gained one note -- the "

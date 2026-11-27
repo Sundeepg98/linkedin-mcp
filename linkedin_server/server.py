@@ -1,4 +1,22 @@
-"""The tool surface: one hundred and eight tools, thirty-six of which write to LinkedIn.
+"""The tool surface: one hundred and ten tools, thirty-six of which write to LinkedIn.
+
+THE HUNDRED-AND-EIGHTH TO HUNDRED-AND-TENTH, 2026-11-27, at integration 7's
+merges of lanes msg7 and settings7. Lane msg7's ``linkedin_save_post``
+(census ``M C36``), a WRITE, one feed item he names saved from its own
+permalink menu, is the hundred-and-eighth. Then lane settings7's two
+(its branch counted them the hundred-and-eighth and hundred-and-ninth)
+(on live session 12's captures, LinkedIn's words measured by keyed shape): two
+READS, each of one admitted settings page with no press.
+``linkedin_my_verifications`` (census ``P K1``) reads his Verifications page:
+each verification by its kind as a closed word, how many detail lines it
+draws (never their text), its work-email consent switch's state and whether
+its Delete is drawn. ``linkedin_my_premium_account`` (``P N22``, the
+subscription half of its split) reads his Manage Premium account page: each
+subscription's plan and its controls as closed words, none pressed, no
+address returned. Measured off the merged registry, not summed. The
+headline read "one hundred and eight tools, thirty-six of which write"
+until settings7's merge, and "one hundred and seven tools, thirty-five of
+which write" until msg7's.
 
 THE HUNDREDTH TO HUNDRED-AND-SEVENTH, 2026-11-26, at integration 6's merge of
 lane build-msg2: six WRITES and two READS. ``linkedin_set_conversation_muted``
@@ -522,9 +540,9 @@ assigned to anybody -- it waits for whoever next runs the suite, and in the
 meantime the pin goes on asserting the old number with full confidence.
 
 THE NUMBERS ABOVE ARE DERIVED NOW, and that is a statement about a test rather
-than about an intention. One hundred and eight is ``len(await mcp.list_tools())``,
+than about an intention. One hundred and ten is ``len(await mcp.list_tools())``,
 pinned in ``test_server_surface.py`` by
-``test_the_surface_is_exactly_the_one_hundred_and_eight_tools``; the split is pinned by
+``test_the_surface_is_exactly_the_one_hundred_and_ten_tools``; the split is pinned by
 ``tests/test_prose_that_makes_a_claim.py::test_the_server_docstring_numbers_are_derived``,
 which reads THESE WORDS and fails if any of the three disagrees with the
 registry.
@@ -537,10 +555,14 @@ POINTER to it was dangling, so a reader who followed it found nothing and
 would reasonably conclude these numbers are unchecked. A citation is a claim
 like any other.
 The surface splits three ways and the split is the part a reader actually
-needs: SIXTY-EIGHT read, THIRTY-SIX write, and FOUR are write-shaped,
-registered, gated and unable to act. Sixty-eight plus thirty-six plus four is
-one hundred and eight. (Sixty-eight, thirty-five and four, summing to one
-hundred and seven, until lane msg7's linkedin_save_post, 2026-11-27.
+needs: SEVENTY read, THIRTY-SIX write, and FOUR are write-shaped,
+registered, gated and unable to act. Seventy plus thirty-six plus four is
+one hundred and ten. (Sixty-eight, thirty-six and four, summing to one
+hundred and eight, until integration 7's merge of lane settings7's two
+reads, 2026-11-27; that lane's branch read seventy, thirty-five and four,
+summing to one hundred and nine. Sixty-eight, thirty-five and four,
+summing to one hundred and seven, until lane msg7's linkedin_save_post,
+2026-11-27.
 Sixty-six, twenty-nine and four, summing to
 ninety-nine, until integration 6's merge of lane build-msg2's six writes
 and two reads, 2026-11-26; that lane's branch read sixty-six, thirty and
@@ -14972,6 +14994,94 @@ async def linkedin_save_post(
 
 
 # ---- end lane msg7 ----
+
+
+# ---- lane settings7 ----
+# Census P K1 (his verifications) and P N22 (his Premium account page), each a
+# READ of one admitted settings page built on live session 12's capture of it,
+# with LinkedIn's words measured by keyed shape (lane settings7, 2026-11-27;
+# record _audit/2026-11-27-settings7.md). Every tool this lane registers is in
+# this one contiguous block, its imports with it.
+from linkedin_server import premium_account, verifications_page  # noqa: E402 -- lane settings7's one block
+
+
+@mcp.tool()
+async def linkedin_my_verifications() -> dict[str, Any]:
+    """Your Verifications settings page: which verifications you hold, and each one's switch.
+
+    ONE LOAD of one admitted settings page, read once. Nothing is pressed:
+    each entry's Delete button is read as LinkedIn's word and never clicked,
+    and its switch is read and never moved, so no verification changes here.
+
+    WHAT COMES BACK, CLOSED WORDS AND COUNTS ONLY: ``verifications``, one per
+    entry read -- ``kind`` (``workplace``, LinkedIn's ``Workplace``, the one
+    kind measured; ``other`` for a heading this server has not measured,
+    counted in ``unknown_kinds`` and never named), ``detail_lines`` (how many
+    detail lines the entry draws; their text is never read, since it can name
+    your employer), ``work_email_consent`` (the entry's work-email consent
+    switch: ``on``, ``off``, ``unknown`` when its state word is neither or the
+    section draws more than one switch, ``several_sections`` when the entry
+    draws two or more consent sections, ``unread`` when they could not be
+    counted, and null ONLY when the entry draws no such section) and
+    ``delete_drawn`` (whether its Delete button is drawn) -- with
+    ``entries_seen`` and ``entries_withheld``.
+
+    IT REFUSES RATHER THAN GUESS: ``landed_elsewhere`` off the page,
+    ``main_unreadable`` when the page does not draw exactly one main region.
+    A page without its heading, or with no entry read, is reported as a
+    failure: no empty state of this page has been captured.
+    """
+    try:
+        async with BROWSER.session() as page:
+            landed = await BROWSER.goto(page, verifications_page.VERIFICATIONS_URL)
+            assert_not_authwall(landed, surface="verifications")
+            if not verifications_page.landed_on_the_page(landed):
+                return verifications_page.landed_elsewhere()
+            return await verifications_page.read_verifications(page)
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_my_premium_account() -> dict[str, Any]:
+    """Your Manage Premium account page: which subscription you hold, as closed words.
+
+    ONE LOAD of one admitted settings page, read once. Nothing is pressed:
+    the page's Switch plans, Manage subscription and Cancel subscription
+    controls are read as LinkedIn's words and never clicked -- a plan change
+    or a cancellation is a purchase act this server does not build
+    (PURCHASES-STAY-MANUAL) -- and no address the page draws is opened.
+
+    WHAT COMES BACK, CLOSED WORDS AND COUNTS ONLY: ``subscriptions``, one per
+    subscription card read -- ``plan`` (``premium_career``, LinkedIn's
+    ``Premium Career``, the one plan measured; ``other`` for a plan name this
+    server has not measured, counted in ``unknown_plans`` and never named),
+    ``actions`` (the card's controls by LinkedIn's words, in page order:
+    ``switch_plans``, ``manage_subscription``, ``cancel_subscription``; a
+    control under any other word is counted in ``unknown_actions``),
+    ``description_lines`` and ``description_lines_with_digits`` (how many of
+    the card's lines carry a digit -- a date or an amount; their text is never
+    read) -- with ``subscriptions_seen``.
+
+    NO DATE, PRICE OR PAYMENT IS RETURNED: the captured page draws none (its
+    card's lines carry no digit), and your purchase page, which the Manage
+    subscription control opens, is not admitted. IT REFUSES RATHER THAN
+    GUESS: ``landed_elsewhere`` off the page, ``main_unreadable`` when the page
+    does not draw exactly one main region. A page without its heading, or
+    with no subscription card read, is reported as a failure.
+    """
+    try:
+        async with BROWSER.session() as page:
+            landed = await BROWSER.goto(page, premium_account.PREMIUM_ACCOUNT_URL)
+            assert_not_authwall(landed, surface="premium-account")
+            if not premium_account.landed_on_the_page(landed):
+                return premium_account.landed_elsewhere()
+            return await premium_account.read_premium_account(page)
+    except Exception as exc:
+        return _error(exc)
+
+
+# ---- end lane settings7 ----
 
 
 def main() -> None:  # pragma: no cover - process entry point

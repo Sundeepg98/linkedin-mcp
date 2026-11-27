@@ -1071,7 +1071,9 @@ PINNED = {
     #: 777 AT INTEGRATION 6'S MERGE OF LANE BUILD-MSG2 (2026-11-26), MEASURED on the merged tree by --check, never summed: the three lanes' moves above, together.
     #: 779 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 171` and `J 172` entered, split from `J 152` and `J 156` by the orchestrator's LEARNING-ROWS-SPLIT (`_audit/2026-11-27-jobs7.md` section 11.2): two GAP rows, `J 171` an admitted read, `J 172` a write, and `J 156` now a read alone.
     #: 782 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 173`, `J 174` and `J 175` entered by the orchestrator's corrected rulings of 14:05 IST (`_audit/2026-11-27-jobs7.md` section 11.5): `J 173` split from `J 169` (J169-BY-ITS-OWN-WORDS), `J 174` added (JOB-OPENINGS-BY-FUNCTION-ADDED), `J 175` split from `J 154` (LEARNING-ROWS-SPLIT as corrected); three GAP rows, each an admitted read.
-    "stated_rows": 782,
+    #: 778 ON LANE SETTINGS7 (2026-11-27), MEASURED by --check: `P N22` split under COMPOUND-ROW-SPLITS-ONLY-ON-STATE (the orchestrator's answer to Q-P-N22-SPLITS, 12:55): the subscription half stayed `P N22`, COVERED-UNFIRED on `linkedin_my_premium_account`; the payments half entered as `P N32`, GAP, R (`_audit/2026-11-27-settings7.md`) (was 777).
+    #: 783 AT INTEGRATION 7, MERGE 4 (lane settings7 onto prof7, jobs7 and msg7; 2026-11-27), MEASURED by --check on the merged tree, never summed: the lanes' moves above, in one tree (_audit/2026-11-27-integration-7.md).
+    "stated_rows": 783,
     #: 762 = 704 stated rows + 58 declared collapses, computed at HEAD. NOT the
     #: published 761 and NOT the counter docstring's 760: those two differ only
     #: by a `- 2 stateless` term whose two rows are already outside the 704.
@@ -1112,7 +1114,9 @@ PINNED = {
     #: 790 AT INTEGRATION 6'S MERGE OF LANE BUILD-MSG2 (2026-11-26), MEASURED on the merged tree by --check, never summed: the three lanes' moves above, together.
     #: 792 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 171` and `J 172` entered, split from `J 152` and `J 156` by the orchestrator's LEARNING-ROWS-SPLIT (`_audit/2026-11-27-jobs7.md` section 11.2): two GAP rows, `J 171` an admitted read, `J 172` a write, and `J 156` now a read alone.
     #: 795 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 173`, `J 174` and `J 175` entered by the orchestrator's corrected rulings of 14:05 IST (`_audit/2026-11-27-jobs7.md` section 11.5): `J 173` split from `J 169` (J169-BY-ITS-OWN-WORDS), `J 174` added (JOB-OPENINGS-BY-FUNCTION-ADDED), `J 175` split from `J 154` (LEARNING-ROWS-SPLIT as corrected); three GAP rows, each an admitted read.
-    "capabilities": 795,
+    #: 791 ON LANE SETTINGS7 (2026-11-27), MEASURED by --check: `P N32` entered, split from `P N22` (the orchestrator's answer to Q-P-N22-SPLITS) (was 790).
+    #: 796 AT INTEGRATION 7, MERGE 4 (lane settings7 onto prof7, jobs7 and msg7; 2026-11-27), MEASURED by --check on the merged tree, never summed: the lanes' moves above, in one tree (_audit/2026-11-27-integration-7.md).
+    "capabilities": 796,
     #: 741 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: the achievable
     #: move, with `O6-O20`'s 14 unchanged.
     #: 742 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: `N 2` left the exclusions.
@@ -1143,7 +1147,9 @@ PINNED = {
     #: 724 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 173`, `J 174` and `J 175` entered by the orchestrator's corrected rulings of 14:05 IST (`_audit/2026-11-27-jobs7.md` section 11.5): `J 173` split from `J 169` (J169-BY-ITS-OWN-WORDS), `J 174` added (JOB-OPENINGS-BY-FUNCTION-ADDED), `J 175` split from `J 154` (LEARNING-ROWS-SPLIT as corrected); three GAP rows, each an admitted read.
     #: 718 ON LANE MSG7 (2026-11-27), MEASURED by --check, never summed: `M C70` GAP -> MEASURED-ABSENT on the orchestrator's GROUP-SEARCH-MEASURED-ABSENT (registration owed at integration 7), under MEASURED-ABSENT-OR-PRECONDITION: no search inside a group on either surface its plan named (`_audit/2026-11-27-msg7.md` section 5) (was 719).
     #: 723 AT INTEGRATION 7, MERGE 3 (lane msg7 onto prof7 and jobs7; 2026-11-27), MEASURED by --check on the merged tree, never summed: both lanes' moves above, in one tree (_audit/2026-11-27-integration-7.md).
-    "capabilities_achievable": 723,
+    #: 720 ON LANE SETTINGS7 (2026-11-27), MEASURED by --check: `P N32` entered, split from `P N22`, GAP (was 719).
+    #: 724 AT INTEGRATION 7, MERGE 4 (lane settings7 onto prof7, jobs7 and msg7; 2026-11-27), MEASURED by --check on the merged tree, never summed: the lanes' moves above, in one tree (_audit/2026-11-27-integration-7.md).
+    "capabilities_achievable": 724,
     #: 43 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: 29 rows returned
     #: to GAP when OUTWARD-CLASSES-BUILT-BEHIND-GRANTS retired their key, and
     #: `P P2` at the merge (-30); `P N27` and `P P2` then EXCLUDED-RULED on
@@ -1203,7 +1209,9 @@ PINNED = {
     #: 711 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 173`, `J 174` and `J 175` entered by the orchestrator's corrected rulings of 14:05 IST (`_audit/2026-11-27-jobs7.md` section 11.5): `J 173` split from `J 169` (J169-BY-ITS-OWN-WORDS), `J 174` added (JOB-OPENINGS-BY-FUNCTION-ADDED), `J 175` split from `J 154` (LEARNING-ROWS-SPLIT as corrected); three GAP rows, each an admitted read.
     #: 705 ON LANE MSG7 (2026-11-27), MEASURED by --check, never summed: `M C70` GAP -> MEASURED-ABSENT on the orchestrator's GROUP-SEARCH-MEASURED-ABSENT (registration owed at integration 7), under MEASURED-ABSENT-OR-PRECONDITION: no search inside a group on either surface its plan named (`_audit/2026-11-27-msg7.md` section 5) (was 706).
     #: 710 AT INTEGRATION 7, MERGE 3 (lane msg7 onto prof7 and jobs7; 2026-11-27), MEASURED by --check on the merged tree, never summed: both lanes' moves above, in one tree (_audit/2026-11-27-integration-7.md).
-    "achievable": 710,
+    #: 707 ON LANE SETTINGS7 (2026-11-27), MEASURED by --check: `P N32` entered, split from `P N22`, GAP (was 706).
+    #: 711 AT INTEGRATION 7, MERGE 4 (lane settings7 onto prof7, jobs7 and msg7; 2026-11-27), MEASURED by --check on the merged tree, never summed: the lanes' moves above, in one tree (_audit/2026-11-27-integration-7.md).
+    "achievable": 711,
     #: 205 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
     #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
     #: 179 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: the 30 returned
@@ -1363,7 +1371,9 @@ PINNED = {
     #: 260 ON LANE MSG7 (2026-11-27), MEASURED by --check, never summed: `M C70` GAP -> MEASURED-ABSENT on the orchestrator's GROUP-SEARCH-MEASURED-ABSENT (registration owed at integration 7), under MEASURED-ABSENT-OR-PRECONDITION: no search inside a group on either surface its plan named (`_audit/2026-11-27-msg7.md` section 5) (was 259).
     #: 261 ON LANE MSG7 (2026-11-27), MEASURED by --check, never summed: `M C36` GAP -> COVERED-UNFIRED on `linkedin_save_post` (SAVE-POST-UNDER-OWN-CURATION, the orchestrator's, registration owed at integration 7): one feed item he names, saved from its own permalink menu, built over live sessions 11 and 12's captures and never fired (`_audit/2026-11-27-msg7.md` section 3.4) (was 260).
     #: 267 AT INTEGRATION 7, MERGE 3 (lane msg7 onto prof7 and jobs7; 2026-11-27), MEASURED by --check on the merged tree, never summed: both lanes' moves above, in one tree (_audit/2026-11-27-integration-7.md).
-    "adjudicated": 267,
+    #: 261 ON LANE SETTINGS7 (2026-11-27), MEASURED by --check: `P K1` and `P N22` GAP -> COVERED-UNFIRED (`linkedin_my_verifications`, `linkedin_my_premium_account`) (was 259).
+    #: 269 AT INTEGRATION 7, MERGE 4 (lane settings7 onto prof7, jobs7 and msg7; 2026-11-27), MEASURED by --check on the merged tree, never summed: the lanes' moves above, in one tree (_audit/2026-11-27-integration-7.md).
+    "adjudicated": 269,
     #: THE LIVE LANE'S FOUR ROWS, RE-DERIVED AT EACH OF ITS MERGES OF MASTER
     #: (2026-09-24; last over lane S): four rows fired live and banked
     #: (`_audit/2026-09-23-live-lane-session-1.md`). `P G6` COVERED-UNFIRED ->
@@ -1511,7 +1521,9 @@ PINNED = {
     #: 177 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 169` GAP -> COVERED-UNFIRED, headcount over time and notable alumni, read by `company_tabs.read_insights_tab` from the table summarised `Total employee count` and the member cards under `Notable company alumni` on session 12's load 20 (`_audit/2026-11-27-jobs7.md` section 11.7); a read entering bucket 1 held by no ruling.
     #: 172 ON LANE MSG7 (2026-11-27), MEASURED by --check, never summed: `M C36` GAP -> COVERED-UNFIRED on `linkedin_save_post` (SAVE-POST-UNDER-OWN-CURATION, the orchestrator's, registration owed at integration 7): one feed item he names, saved from its own permalink menu, built over live sessions 11 and 12's captures and never fired (`_audit/2026-11-27-msg7.md` section 3.4) (was 171).
     #: 178 AT INTEGRATION 7, MERGE 3 (lane msg7 onto prof7 and jobs7; 2026-11-27), MEASURED by --check on the merged tree, never summed: both lanes' moves above, in one tree (_audit/2026-11-27-integration-7.md).
-    "delivered_broad": 178,
+    #: 173 ON LANE SETTINGS7 (2026-11-27), MEASURED by --check: `P K1` and `P N22` GAP -> COVERED-UNFIRED (was 171).
+    #: 180 AT INTEGRATION 7, MERGE 4 (lane settings7 onto prof7, jobs7 and msg7; 2026-11-27), MEASURED by --check on the merged tree, never summed: the lanes' moves above, in one tree (_audit/2026-11-27-integration-7.md).
+    "delivered_broad": 180,
     #: 79 since the live lane's merge (see `adjudicated`): P G6, N 134, P O3
     #: and M C72 COVERED-PROVEN.
     #: 75 and 21 since the bucket-1 merge: `M C41` fired live and moved from
@@ -1686,7 +1698,9 @@ PINNED = {
     #: 517 ON LANE MSG7 (2026-11-27), MEASURED by --check, never summed: `M C70` GAP -> MEASURED-ABSENT on the orchestrator's GROUP-SEARCH-MEASURED-ABSENT (registration owed at integration 7), under MEASURED-ABSENT-OR-PRECONDITION: no search inside a group on either surface its plan named (`_audit/2026-11-27-msg7.md` section 5) (was 518).
     #: 516 ON LANE MSG7 (2026-11-27), MEASURED by --check, never summed: `M C36` GAP -> COVERED-UNFIRED on `linkedin_save_post` (SAVE-POST-UNDER-OWN-CURATION, the orchestrator's, registration owed at integration 7): one feed item he names, saved from its own permalink menu, built over live sessions 11 and 12's captures and never fired (`_audit/2026-11-27-msg7.md` section 3.4) (was 517).
     #: 515 AT INTEGRATION 7, MERGE 3 (lane msg7 onto prof7 and jobs7; 2026-11-27), MEASURED by --check on the merged tree, never summed: both lanes' moves above, in one tree (_audit/2026-11-27-integration-7.md).
-    "gap": 515,
+    #: 517 ON LANE SETTINGS7 (2026-11-27), MEASURED by --check: `P K1` and `P N22` GAP -> COVERED-UNFIRED (`linkedin_my_verifications`, `linkedin_my_premium_account`), and `P N32` entered GAP, split from `P N22` (was 518).
+    #: 514 AT INTEGRATION 7, MERGE 4 (lane settings7 onto prof7, jobs7 and msg7; 2026-11-27), MEASURED by --check on the merged tree, never summed: the lanes' moves above, in one tree (_audit/2026-11-27-integration-7.md).
+    "gap": 514,
     #: 18 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: `M M1` built (`linkedin_message_from_profile`).
     #: 16 ON LANE L5'S ORDER OF 2026-09-27 23:36, MEASURED:
     #: `linkedin_send_message` RETIRED (aimed by a name): `M M2` to GAP and `N
@@ -1849,7 +1863,9 @@ PINNED = {
     #: 76 ON LANE MSG7 (2026-11-27), MEASURED by --check, never summed: `M C75` COVERED-PROVEN -> COVERED-UNFIRED on the orchestrator's CAPTURE-SHOWS-READER-BLIND-DEMOTES (registration owed at integration 7): the shipped notifications harvest reads 0 records on live session 12's server-driven capture, and the server-driven read built over it is unfired (`_audit/2026-11-27-msg7.md` section 7.4) (was 75).
     #: 77 ON LANE MSG7 (2026-11-27), MEASURED by --check, never summed: `M C36` GAP -> COVERED-UNFIRED on `linkedin_save_post` (SAVE-POST-UNDER-OWN-CURATION, the orchestrator's, registration owed at integration 7): one feed item he names, saved from its own permalink menu, built over live sessions 11 and 12's captures and never fired (`_audit/2026-11-27-msg7.md` section 3.4) (was 76).
     #: 83 AT INTEGRATION 7, MERGE 3 (lane msg7 onto prof7 and jobs7; 2026-11-27), MEASURED by --check on the merged tree, never summed: both lanes' moves above, in one tree (_audit/2026-11-27-integration-7.md).
-    "unfired": 83,
+    #: 77 ON LANE SETTINGS7 (2026-11-27), MEASURED by --check: `P K1` and `P N22` entered COVERED-UNFIRED, never fired (was 75).
+    #: 85 AT INTEGRATION 7, MERGE 4 (lane settings7 onto prof7, jobs7 and msg7; 2026-11-27), MEASURED by --check on the merged tree, never summed: the lanes' moves above, in one tree (_audit/2026-11-27-integration-7.md).
+    "unfired": 85,
     #: 104 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     #: 101 AT LANE S'S NAMES ADOPTION (2026-09-27), MEASURED: `N 79`, `N 172`
@@ -1912,7 +1928,9 @@ PINNED = {
     #: 67 ON LANE BUILD-MSG2'S ROUND 2 (2026-11-26), MEASURED: `M M28` SPLIT on the orchestrator's ruling M-M28-SPLITS (round 2, to be registered at integration 6): the view half stayed `M M28`, COVERED-UNFIRED on `linkedin_archived_conversations`; the restore half entered as `M M54`, GAP, W (`_audit/2026-11-26-build-msg2.md` section 10) (was 68).
     #: 66 AT INTEGRATION 6'S MERGE OF LANE BUILD-MSG2 (2026-11-26), MEASURED on the merged tree by --check, never summed: the three lanes' moves above, together.
     #: 65 ON LANE MSG7 (2026-11-27), MEASURED by --check, never summed: `M C70` GAP -> MEASURED-ABSENT on the orchestrator's GROUP-SEARCH-MEASURED-ABSENT (registration owed at integration 7), under MEASURED-ABSENT-OR-PRECONDITION: no search inside a group on either surface its plan named (`_audit/2026-11-27-msg7.md` section 5) (was 66).
-    "gap_read": 65,
+    #: 65 ON LANE SETTINGS7 (2026-11-27), MEASURED by --check: `P K1` and `P N22`, two reads, left GAP; `P N32`, a read, entered it (was 66).
+    #: 64 AT INTEGRATION 7, MERGE 4 (2026-11-27), MEASURED by --check on the merged tree: lanes msg7 and settings7 each moved this pin 66 -> 65 by a different row (msg7's M C70 left GAP; settings7's P K1 and P N22 left and P N32 entered), so the two equal lines merged clean as one; the merged tree holds both moves.
+    "gap_read": 64,
     #: 151, not the 152 published by `_audit/2026-09-21-the-write-ceiling.md`.
     #: That document scoped itself to `profile.md`, `network.md` and
     #: `messaging-and-content.md`; measured at HEAD those three carry W 151 and
@@ -2157,6 +2175,8 @@ PINNED = {
     #: 45 ON LANE READERS-MSG26 (2026-11-26), MEASURED: `M C93` GAP -> COVERED-UNFIRED, the content search vertical read over live session 11's capture (`linkedin_search_content`; `_audit/2026-11-26-readers-msg26.md`) (was 46).
     #: MEASURED AT INTEGRATION 4'S MERGE OF READERS-MSG26 (2026-11-26) on the merged tree, never summed (the figures above are each lane's own).
     #: 37 ON LANE MSG7 (2026-11-27), MEASURED by --check, never summed: `M C70` -- an ADMITTED bucket-3 read -- left GAP, MEASURED-ABSENT on the orchestrator's GROUP-SEARCH-MEASURED-ABSENT, and its line left `read-addresses.tsv` (`_audit/2026-11-27-msg7.md` section 5) (was 38).
+    #: 37 ON LANE SETTINGS7 (2026-11-27), MEASURED by --check: `P K1`'s ADMITTED line left read-addresses.tsv with the row (was 38).
+    #: 38 ON LANE SETTINGS7'S SECOND ADMISSION (2026-11-27), MEASURED by --check: `P P3`'s read-addresses line NEEDS-SESSION -> ADMITTED, its page measured on the privacy capture and admitted by name (was 37).
     "b3_admitted": 37,
     #: 38 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
@@ -2178,13 +2198,18 @@ PINNED = {
     #: merged tree: lane K's rulings and this branch's moves, each above.
     #: 15 ON LANE A'S APPLICATION OF THE RULINGS OF 2026-10-10, MEASURED: `M
     #: C70` and `M C93` admitted, and `P M9` left the table.
-    "b3_refused": 15,
+    #: 16 ON LANE SETTINGS7 (2026-11-27), MEASURED by --check: `P N32` entered REFUSED, its static purchases address refused by allowlist silence (was 15).
+    #: 18 ON LANE SETTINGS7'S RE-AIMS (2026-11-27), MEASURED by --check: the same two lines entered REFUSED at that address (was 16).
+    "b3_refused": 18,
     "b3_no_address": 1,
     #: 13 ON LANE BUILD-P26 (2026-11-25), MEASURED: `P D25`'s read address measured (the three anchors' target), so its line is ADMITTED, not NEEDS-SESSION (`_audit/2026-11-25-build-p26.md`, section 2).
     #: 12 ON LANE BUILD-NET2'S THIRD BUILD (2026-11-26), MEASURED: `N 95` GAP -> COVERED-UNFIRED, his recent searches read from his own search box on SEARCH-BOX-TYPEAHEAD-DISCLOSURE (`linkedin_recent_searches`; `_audit/2026-11-26-build-net2.md`, section 4): its bucket-3 line, NEEDS-SESSION, left with the row (was 13).
     #: 12 ON LANE BUILD-MSG2'S TWO READS (2026-11-26), MEASURED: `M C14` left bucket 3 -- COVERED-UNFIRED on `linkedin_scheduled_posts` -- so its NEEDS-SESSION line left `_audit/_census/read-addresses.tsv` (`_audit/2026-11-26-build-msg2.md`, section 3) (was 13).
     #: 11 AT INTEGRATION 6'S MERGE OF LANE BUILD-MSG2 (2026-11-26), MEASURED on the merged tree by --check, never summed: the three lanes' moves above, together.
-    "b3_needs_session": 11,
+    #: 10 ON LANE SETTINGS7 (2026-11-27), MEASURED by --check: `P N22`'s NEEDS-SESSION line left read-addresses.tsv with the row (was 11).
+    #: 9 ON LANE SETTINGS7'S SECOND ADMISSION (2026-11-27), MEASURED by --check: the same line left NEEDS-SESSION (was 10).
+    #: 7 ON LANE SETTINGS7'S RE-AIMS (2026-11-27), MEASURED by --check: `N 143` and `P O22` left NEEDS-SESSION: the privacy capture draws no blocked list, so each line records the Visibility category, refused (was 9).
+    "b3_needs_session": 7,
     #: 1 ON LANE BUILD-MSG2'S ROUND 2 (2026-11-26), MEASURED: `M M28` SPLIT on the orchestrator's ruling M-M28-SPLITS (round 2, to be registered at integration 6): the view half stayed `M M28`, COVERED-UNFIRED on `linkedin_archived_conversations`; the restore half entered as `M M54`, GAP, W (`_audit/2026-11-26-build-msg2.md` section 10) (was 2).
     #: 1 AT INTEGRATION 6'S MERGE OF LANE BUILD-MSG2 (2026-11-26), MEASURED on the merged tree by --check, never summed: the three lanes' moves above, together.
     "b3_undetermined": 1,
@@ -2494,7 +2519,9 @@ PINNED = {
     #: 54 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 169` GAP -> COVERED-UNFIRED, headcount over time and notable alumni, read by `company_tabs.read_insights_tab` from the table summarised `Total employee count` and the member cards under `Notable company alumni` on session 12's load 20 (`_audit/2026-11-27-jobs7.md` section 11.7); a read entering bucket 1 held by no ruling.
     #: 49 ON LANE MSG7 (2026-11-27), MEASURED by --check, never summed: `M C75` COVERED-PROVEN -> COVERED-UNFIRED on the orchestrator's CAPTURE-SHOWS-READER-BLIND-DEMOTES (registration owed at integration 7): the shipped notifications harvest reads 0 records on live session 12's server-driven capture, and the server-driven read built over it is unfired (`_audit/2026-11-27-msg7.md` section 7.4) (was 48).
     #: 55 AT INTEGRATION 7, MERGE 3 (lane msg7 onto prof7 and jobs7; 2026-11-27), MEASURED by --check on the merged tree, never summed: both lanes' moves above, in one tree (_audit/2026-11-27-integration-7.md).
-    "b1_no_ruling": 55,
+    #: 50 ON LANE SETTINGS7 (2026-11-27), MEASURED by --check: `P K1` and `P N22` entered bucket 1, reads no ruling holds (was 48).
+    #: 57 AT INTEGRATION 7, MERGE 4 (lane settings7 onto prof7, jobs7 and msg7; 2026-11-27), MEASURED by --check on the merged tree, never summed: the lanes' moves above, in one tree (_audit/2026-11-27-integration-7.md).
+    "b1_no_ruling": 57,
     #: 7 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
     #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
     #: 4 AT THE LIVE LANE'S MERGE OF MASTER c2825a4 (2026-09-28), MEASURED on the
@@ -2963,6 +2990,16 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
         #: by `linkedin_application_settings` over session 11's capture; never
         #: fired. A read of his own settings no ruling holds.
         "P M2",
+        #: `P K1` and `P N22` entered on lane settings7 (2026-11-27): his
+        #: Verifications page, each verification by its kind, its work-email
+        #: consent switch and whether its Delete is drawn
+        #: (`linkedin_my_verifications`), and his Manage Premium account page,
+        #: each subscription's plan and controls (`linkedin_my_premium_account`),
+        #: each read as closed words off one admitted page over live session
+        #: 12's capture of it; never fired. Reads of his own settings no
+        #: ruling holds. `P N22` is the subscription half of its split
+        #: (Q-P-N22-SPLITS); its payments half, `P N32`, is GAP.
+        "P K1", "P N22",
         #: `J 107` and `M M53` entered with lane S's offline frontier,
         #: 2026-09-28, fired at session 2 without banking, and LEFT at
         #: session 3 (2026-09-28), fired again and banked -- with `N 194`.

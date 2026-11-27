@@ -13540,3 +13540,57 @@ exactness -- each caught by FAILED tests, none by an error.
 **Disposable** (the lane's scratch folder): the keyed-shape scanner of his
 root's entries, the creator-hub path-word matcher, and the queue and
 next-step editors. None was shown failing on a planted defect.
+
+## 118. A SETTINGS PAGE IS READ BY THE WORDS ITS OWN CAPTURE DREW, MEASURED BY KEYED SHAPE, AND A PAGE IT LINKS IS ADMITTED ONLY ON THE SPELLING THE CAPTURE DREW (settings7, 2026-11-27)
+
+Lane settings7 read four of session 12's settings captures offline and built
+two readers, three admissions and the re-aims of eleven rows on them. Every
+word a reader or an admission rests on was MEASURED on a keyed skeleton by
+keyed shape -- a LinkedIn word is "drawn" only where its keyed shape equals
+the skeleton's -- and committed as a words fixture held to its tracked copy.
+The record is `_audit/2026-11-27-settings7.md`.
+
+    A PAGE'S OWN WORDS ARE MEASURED, NEVER ASSUMED: A CANDIDATE IS DRAWN ONLY
+    WHERE ITS KEYED SHAPE MATCHES, AND A SHAPE THAT FITS IS NOT A MATCH.
+
+The second half was measured twice: the Data privacy page's entry 5 has the
+25-letter, 28-character shape `synced-and-imported-contacts` has, in both its
+slug and its label, and its hash is something else; entry 12 has the shape of
+`blocked-members` and is `recruiter-calls`.
+
+### 118.1 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `scripts/_build_live12_settings_word_skeletons.py` (the provenance of `tests/fixtures/live12/{privacy,verifications,job_prefs,premium_manage_account}_words.html`) | a declared word planted that no capture drew -- the build refuses, writing nothing ("1 declared word(s) matched no keyed shape; refusing"); a fixed point (`--check`: all four match on a second run) |
+| `scripts/_build_live11_settings7_word_skeletons.py` (the provenance of `tests/fixtures/live11/sessions_surface_words.html`) | the builder pointed at a committed copy that is not the skeleton's tracked copy -- it refuses ("this skeleton's tracked copy is not the committed one"); a fixed point (`--check` matches) |
+| `tests/test_live12_settings_word_fixtures.py`; `tests/test_live11_settings7_word_fixture.py` | each holds its fixtures to the tracked copies token by token, and each carries its own control: another page's words leave the differences unexplained, and the comparison fails. Besides: the verification's detail lines, his purchase id, the premium card's two lines and the six job cards are asserted to stay as the tracked copy draws them; the contacts link is asserted drawn with its label |
+| `tests/test_verifications_page.py`; `linkedin_server/verifications_page.py` | against a stub reader returning the empty shape, 16 failed and 5 passed (the five landings that must be refused); green 21 passed. Inside: a planted marker in the detail lines and the switch's name never leaves; an unmeasured kind is counted and never named; `Off` reads off and any other word unknown; a second switch reads unknown; a container of two entries is withheld and the zero raises |
+| `tests/test_premium_account.py`; `linkedin_server/premium_account.py` | against a stub reader, 11 failed and 6 passed; green 17 passed. Inside: a planted dated line is counted as carrying a digit and its words, date and marker never leave; an unmeasured plan and an unmeasured control are counted and never named; no address the card draws is returned |
+| `tests/test_settings7_admissions.py` (lane admit26's harness, extended to an exempted admission) | each admission red first on the boundary before its line: search history 4 failed, data download 4 failed, contact syncing 6 failed (its first gate alone refusing with the pattern-would-admit sentence); green 24 passed. Its FIRST red run also failed a sibling check before any edit -- the settings-tree spelling is refused by `/settings/`, the first substring in order, not `settings` -- the test's own defect, caught because a red-first run may fail only the checks the edit is to turn green |
+| `tests/test_settings7_admissions.py::test_the_press_gate_refuses_every_control_on_the_page` (READ-PAST-AN-ACT-SUBSTRING's third condition, measured offline at the orchestrator's addendum) | a `/mynetwork/` containment basis planted in `press.SENSITIVITY_BASES` turns it red for the contact-syncing page; its control asserts the feed is priced and that the plant reaches the page; green on the shipped table |
+
+### 118.2 DECLARED DISPOSABLE
+
+The lane's scratch probes (`_state/lane-scratch/settings7/`): the keyed-word
+probes for sessions 12 and 11 (matched candidates and counts only), the two
+combination searches over a closed vocabulary and over 4921 words harvested
+from the census prose, the shape printers for the verifications and premium
+pages (interface texts only, the verification's detail lines skipped), the
+structural outliner over tracked copies, the census editors and the
+harness extender, and the script that showed both builders refusing. None was
+shown failing on a planted defect except the last, which is the demonstration
+itself.
+
+AFTER THE COLD VERIFICATION (2026-11-27): the dialog's keyed-shape probe
+(`probe_dialog.py`: the open `<dialog>` on session 12's job-preferences
+capture, matched candidates and letters/length counts only; its wrong-key
+control matched 0 where the real key matched 9) and the generated-candidate
+search over its unmatched slots (`brute_dialog.py`, which ran past its
+15-minute bound and printed nothing) are DECLARED DISPOSABLE.
+
+### 118.3 ADDED AFTER THE COLD VERIFICATION
+
+| path | shown failing by |
+|---|---|
+| `tests/test_verifications_page.py::test_two_consent_sections_read_as_several_never_as_none`, `::test_a_consent_count_that_cannot_be_read_says_unread_never_none`, `::test_each_consent_reading_is_a_closed_word_and_none_means_no_section`; `linkedin_server/verifications_page.py` (`CONSENT_READINGS`) | the cold verification's F3: before the fix, two planted consent sections and a section count that raises each read `None`, the word for "no consent section" (2 failed by assertion, `assert None == ...`; the third by the missing closed tuple): 3 failed, 21 passed; after, 24 passed |

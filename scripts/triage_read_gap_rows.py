@@ -321,7 +321,9 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
     # N 165 LEFT 2026-10-10 (lane B5) -- see LEFT THE READ-GAP SET below.
     "N 188": ("RETURNED", "", "returned by lane R 2026-09-23; a member roster, admitted as a bounded read by MEMBER-ROSTERS-AS-BOUNDED-READS -- needs an admission and a reader; blocker named in its cell"),
     "N 189": ("RETURNED", "", "returned by lane R 2026-09-23; a member roster, admitted as a bounded read by MEMBER-ROSTERS-AS-BOUNDED-READS -- needs an admission and a reader; blocker named in its cell"),
-    "P K1": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
+    # `P K1` LEFT THE READ-GAP SET 2026-11-27 (lane settings7): COVERED-UNFIRED
+    # on linkedin_my_verifications over live session 12's capture of his
+    # Verifications page, so its line goes, as a line whose row left GAP must.
     # `P M2` LEFT THE READ-GAP SET 2026-11-26 (lane readers-jobs26):
     # COVERED-UNFIRED on linkedin_application_settings over session 11's
     # capture of his application settings page.
@@ -330,7 +332,13 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
     "P N9": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
     # `P N13` LEFT GAP 2026-10-10: EXCLUDED-RULED on SIGN-IN-CHALLENGES-ARE-HIS
     # (lane K, `_audit/2026-09-28-lane-k-ledger.md` s12).
-    "P N22": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
+    # `P N22` LEFT THE READ-GAP SET 2026-11-27 (lane settings7): split under
+    # COMPOUND-ROW-SPLITS-ONLY-ON-STATE (the orchestrator's answer to
+    # Q-P-N22-SPLITS), its subscription half COVERED-UNFIRED on
+    # linkedin_my_premium_account. Its payments half ENTERED as `P N32`:
+    "P N32": ("ADDRESS", "ABSENT", "split from P N22 2026-11-27: its page is the static "
+                                  "/manage/purchases-payments/purchases/, drawn, refused by "
+                                  "allowlist silence; next step its admission by name"),
     "P O22": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
     "P D26": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
 }

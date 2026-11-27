@@ -68,6 +68,18 @@ RETURNED_TO_GAP = {("jobs.md", "107")}
 NOT_BUILT = ("profile.md", "K1")
 NOT_BUILT_OPENED = "**NOT BLOCKED ON NOTHING, 2026-09-28 (lane S, the offline frontier):"
 
+#: BUILT LATER, 2026-11-27 (lane settings7): the capture the frontier lacked
+#: arrived -- live session 12's load of his Verifications page (load 15) -- and
+#: `P K1` moved GAP -> COVERED-UNFIRED on `linkedin_my_verifications`
+#: (`verifications_page.read_verifications`). Its cell still opens on the
+#: frontier's paragraph, carries the move after it, and the row has left the
+#: address table, as every moved read row here has.
+BUILT_LATER_OPENED = "**COVERED-UNFIRED 2026-11-27 (lane settings7):"
+BUILT_LATER_NAMES = ("linkedin_my_verifications", "verifications_page.read_verifications")
+
+#: A row the address table still holds, for the reader's control.
+STILL_IN_THE_TABLE = ("P", "A25")
+
 #: The address-table key each read row had.
 ADDRESS_KEYS = {("messaging-and-content.md", "M53"): ("M", "M53"),
                 ("network.md", "195"): ("N", "195"),
@@ -123,18 +135,26 @@ def test_the_jobs_row_is_back_in_the_directions_table_on_the_ai_route():
 
 
 def test_THIS_CONTROL_CAN_FAIL_the_table_reader_finds_a_row_that_is_there():
+    """It named ``P K1`` until that row left the table (lane settings7,
+    2026-11-27); a row the table still holds now stands in."""
     keys = {(r["slice"], r["row"]) for r in _table("read-addresses.tsv")}
-    assert ("P", "K1") in keys
+    assert STILL_IN_THE_TABLE in keys
 
 
-def test_the_row_not_built_says_why_and_is_gated_on_a_capture():
+def test_the_row_not_built_says_why_and_was_built_on_the_capture_it_waited_for():
+    """RENAMED 2026-11-27 (lane settings7) from
+    ``..._says_why_and_is_gated_on_a_capture``: the capture came (session 12,
+    load 15), and the row moved on it. The frontier's paragraph still opens the
+    cell, the move follows it, and the row has left the address table."""
     state, notes = _row(*NOT_BUILT)
-    assert state == "GAP"
+    assert state == "COVERED-UNFIRED", state
     assert notes.startswith(NOT_BUILT_OPENED)
     assert "The offline frontier" in notes
-    line = next(r for r in _table("read-addresses.tsv") if (r["slice"], r["row"]) == ("P", "K1"))
-    assert line["gate"] == "MEASURE", line["gate"]
-    assert line["note"].startswith("RE-GATED READER -> MEASURE 2026-09-28")
+    assert notes.find(BUILT_LATER_OPENED) > 0, "the move no longer follows the frontier's paragraph"
+    for name in BUILT_LATER_NAMES:
+        assert name in notes, name
+    keys = {(r["slice"], r["row"]) for r in _table("read-addresses.tsv")}
+    assert ("P", "K1") not in keys
 
 
 def test_the_record_carries_the_capture_spec_the_row_points_at():

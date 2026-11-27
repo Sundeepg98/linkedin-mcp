@@ -146,14 +146,23 @@ import pin_census_rows as P  # noqa: E402
 #: JOB-OPENINGS-BY-FUNCTION-ADDED) and `J 175` (split from `J 154`,
 #: LEARNING-ROWS-SPLIT as corrected) entered, by the orchestrator's corrected
 #: rulings of 14:05 IST (`_audit/2026-11-27-jobs7.md` section 11.5).
-PINNED_ROW_TOTAL = 782
+#: 777 -> 778 ON LANE SETTINGS7 (2026-11-27), MEASURED by
+#: scripts/pin_census_rows.py --write: `P N32` entered, split from `P N22`
+#: under COMPOUND-ROW-SPLITS-ONLY-ON-STATE by the orchestrator's answer to
+#: Q-P-N22-SPLITS: the subscription half stayed `P N22` (COVERED-UNFIRED),
+#: the payments half entered GAP.
+#: 782 -> 783 AT INTEGRATION 7, MERGE 4 (2026-11-27), MEASURED by
+#: scripts/pin_census_rows.py --write on the merged tree: lane jobs7's
+#: five rows and lane settings7's `P N32` in one census; each lane's
+#: branch counted its own from 777.
+PINNED_ROW_TOTAL = 783
 
 #: Per slice, because a delta of zero across four slices is reachable by two
 #: errors cancelling -- one row added to `jobs.md` and one dropped from
 #: `network.md` sum to the same total and are not the same census.
 PINNED_SLICE_ROWS = {
     "J": 174,   # jobs.md                    (150 + 16 + 1 + 1 + 1 + 1 + 1 + 3, J 168, J 169, J 170, J 171, J 172, J 173-175)
-    "P": 237,   # profile.md                 (203 + 10 + 22 + 1 + 1, P A23b, P O17)
+    "P": 238,   # profile.md                 (203 + 10 + 22 + 1 + 1 + 1, P A23b, P O17, P N32)
     "M": 155,   # messaging-and-content.md   (142 + 11 + 1 + 1, M C35b, M M54)
     "N": 216,   # network.md                 (209 + 6 + 1, N 26b)
 }

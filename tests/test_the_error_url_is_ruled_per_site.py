@@ -241,6 +241,15 @@ DECLARED: dict[tuple[str, str], tuple[str, int]] = {
     ("following_list.py", "read_following_list"): (ASKED_FOR, 1),
     ("unfollowed_list.py", "read_unfollowed_list"): (ASKED_FOR, 1),
     ("advertising_data.py", "read_advertising_data"): (ASKED_FOR, 1),
+    # --- ASKED_FOR: lane settings7's two readers (2026-11-27) --------------
+    # Each raises twice -- its heading not drawn, or nothing read on a page
+    # whose empty state was never captured -- and passes as `url` its own
+    # module's admitted constant, the one address its tool requested
+    # (`verifications_page.VERIFICATIONS_URL`,
+    # `premium_account.PREMIUM_ACCOUNT_URL`), BASE_URL plus a fixed path.
+    # Never the landing: each reader holds the page and never reads its url.
+    ("verifications_page.py", "read_verifications"): (ASKED_FOR, 2),
+    ("premium_account.py", "read_premium_account"): (ASKED_FOR, 2),
     # 2026-11-26 (lane build-net2, census N 95): the recent-searches group
     # read wrong -- none or two of its structure, no link, a link that is no
     # search address -- each raised with the feed, the address the module
@@ -647,13 +656,20 @@ def test_the_twenty_are_still_twenty():
     # ASKED_FOR (above), so ASKED_FOR is 20. MEASURED off this table, not summed.
     # FORTY-SEVEN ON THE SAME LANE: ``read_products_tab``'s two WITHHELD raises
     # (census J 111), so WITHHELD is 26. MEASURED off this table, not summed.
-    assert tally[WITHHELD] == 26, tally
-    assert tally[ASKED_FOR] == 20, tally
-    assert tally[PASSTHROUGH] == 1, tally
     # 44, not 41: both lanes' branches read 41 (24 + 16 + 1 and 21 + 19 + 1), so
     # the two equal lines merged clean as one; the merged table measures 44.
     # 45 on lane jobs7, then 47, measured off this table.
-    assert tally[WITHHELD] + tally[ASKED_FOR] + tally[PASSTHROUGH] == 47, tally
+    # FORTY-EIGHT ON LANE SETTINGS7 (2026-11-27): two readers outside
+    # server.py, each raising twice with its own module's admitted constant as
+    # `url` -- the address its tool requested -- so ASKED_FOR is 19 -> 23.
+    # MEASURED off this table, not summed.
+    # 48 on lane settings7: its four ASKED_FOR raises beside the 44.
+    # FIFTY-ONE AT INTEGRATION 7, MERGE 4 (2026-11-27): both lanes' DECLARED entries in one
+    # table, MEASURED off it on the merged tree, not summed.
+    assert tally[WITHHELD] == 26, tally
+    assert tally[ASKED_FOR] == 24, tally
+    assert tally[PASSTHROUGH] == 1, tally
+    assert tally[WITHHELD] + tally[ASKED_FOR] + tally[PASSTHROUGH] == 51, tally
     assert tally[NO_ADDRESS_IN_SCOPE] == 10, tally
 
 

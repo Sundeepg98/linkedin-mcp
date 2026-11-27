@@ -2915,6 +2915,56 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # integration. Saving and unsaving a post are writes with their own rows
     # (tests/test_msg7_admissions.py).
     re.compile(r"^https://www\.linkedin\.com/my-items/saved-posts/?$"),
+    # ======================================================================
+    # LANE SETTINGS7 (2026-11-27) -- NAMED SETTINGS PAGES OF HIS OWN, each BY
+    # NAME, in its own commit, under ONE-NAMED-SETTINGS-PAGE-AT-A-TIME as
+    # NAMED-SETTINGS-PAGES-RATIFIED reads it ("one named settings page per
+    # commit is within the ruling"), with HIS-OWN-SETTINGS-NOT-OUTWARD; the
+    # orchestrator confirmed each on 2026-11-27. Record:
+    # `_audit/2026-11-27-settings7.md` section 5; each line pinned, every
+    # sibling shown refused, in `tests/test_settings7_admissions.py` (lane
+    # admit26's harness). THE SPELLINGS ARE MEASURED, never named: each is a
+    # link a live capture drew, its path words matched by keyed shape. Each
+    # page is READ-ONLY here: its controls are writes with their own rows and
+    # specs, and the press gate refuses every one.
+    #
+    # His search history page (census N 96, "Clear your search history"),
+    # drawn on his Data privacy category page as the setting link 'Clear
+    # search history' under 'How LinkedIn uses your data' (session 12, load
+    # 10; `tests/fixtures/live12/privacy_words.html`), in the
+    # `/mypreferences/m/` tree LinkedIn draws it in. It trips no forbidden
+    # substring: refused by allowlist silence alone until now
+    # (READ-PAST-AN-ACT-SUBSTRING's second clause), so no exemption. The
+    # `/d/` spelling nothing draws, the jobs search history (`J 18`'s priced
+    # address), a query, a sub-path and a longer leaf stay refused.
+    re.compile(r"^https://www\.linkedin\.com/mypreferences/m/search-history/?$"),
+    # His data-download page (census P P3, "Get a copy of his data"), drawn
+    # on the same category page as the setting link 'Download your data'
+    # under the same heading (the same capture and fixture). It trips no
+    # forbidden substring: allowlist silence alone, no exemption. Requesting
+    # an archive is a press the gate refuses, and a password prompt drawn on
+    # the load is a sign-in challenge that stops the read -- the one surface
+    # READ-PAST-AN-ACT-SUBSTRING never reaches. The `/d/` spelling, a query, a
+    # sub-path and a longer leaf stay refused, as does its sensitive
+    # neighbour on the same heading, `/mypreferences/m/demographic-info/`.
+    re.compile(r"^https://www\.linkedin\.com/mypreferences/m/download-my-data/?$"),
+    # His contact-syncing page (census N 32 and N 110, whose next steps lane
+    # net7 re-aims), on the orchestrator's order
+    # CONTACTS-PAGE-FROM-THE-SETTINGS-NAV (2026-11-27 13:25): drawn on
+    # session 11's capture of his Account preferences category page (load 8;
+    # `tests/fixtures/live11/sessions_surface_words.html`) as 'Sync
+    # contacts' under 'Syncing options', the settings nav's one contacts
+    # entry. THIS LINE IS HALF OF A TWO-GATE ADMISSION: the address trips
+    # "/settings/" and "settings", the 2026-09-03 second gate over the
+    # toggle-bearing settings family -- an act's ground, so
+    # READ-PAST-AN-ACT-SUBSTRING reads past it -- and the paired LANE
+    # SETTINGS7 entry in `_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS` excuses
+    # exactly those two for exactly this anchored address (the "Sharing
+    # profile edits" precedent); NEITHER HALF ALONE ADMITS ANYTHING. Every
+    # other page under /mynetwork/settings/, a query, a sub-path and the
+    # imported-contacts manager (`/mynetwork/import-contacts/...`, never
+    # drawn) stay refused. Its switches are writes the press gate refuses.
+    re.compile(r"^https://www\.linkedin\.com/mynetwork/settings/manage-syncing/?$"),
 )
 
 #: Substrings that must never appear in a navigation target, checked before
@@ -3440,6 +3490,18 @@ _FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS: tuple[
     (
         re.compile(r"^https://www\.linkedin\.com/mypreferences/d/verifications/?$"),
         frozenset({"verification"}),
+    ),
+    # LANE SETTINGS7 (2026-11-27) -- the second gate of the pair whose first
+    # gate is the matching LANE SETTINGS7 line in `_ALLOWED_URL_PATTERNS`;
+    # the argument and the order are written there. It excuses exactly the
+    # substrings its address trips, measured with the shipped tuple; the
+    # tuple itself is unchanged.
+    #
+    # His contact-syncing page, tripping "/settings/" and "settings" and
+    # nothing else.
+    (
+        re.compile(r"^https://www\.linkedin\.com/mynetwork/settings/manage-syncing/?$"),
+        frozenset({"/settings/", "settings"}),
     ),
 )
 

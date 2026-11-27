@@ -729,8 +729,21 @@ def test_a_non_ascii_word_survives_the_copy_as_a_reference() -> None:
 #: Functions dropdown open (load 20), its LinkedIn words -- the three tables'
 #: summaries and header words among them -- written by keyed shape, beside
 #: the 51 (J114-READS-ITS-OWN-TABLE).
+#: `live12` 51 ON LANE SETTINGS7 (2026-11-27), counted on disk: four word
+#: skeletons of session 12's settings captures (his Data privacy category, his
+#: Verifications page, the page his job-seeker preferences address served and
+#: his Manage Premium account page), LinkedIn's own words written by keyed
+#: shape (`scripts/_build_live12_settings_word_skeletons.py`), beside the 47.
+#: `live11` 62 ON THE SAME LANE, counted on disk: session 11's Account
+#: preferences category capture with its measured words, the evidence for the
+#: contact-syncing admission (`scripts/_build_live11_settings7_word_skeletons.py`),
+#: beside the 61.
+#: `live12` 56 and `live11` 62 AT INTEGRATION 7, MERGE 4 (2026-11-27),
+#: counted on disk on the merged tree: jobs7's five and settings7's four
+#: word skeletons beside session 12's 47, and settings7's one beside
+#: session 11's 61. Each lane's branch counted its own.
 LIVE_FIXTURE_COUNTS = {"live1": 5, "live2": 31, "live3": 14, "live4": 4, "live5": 1, "live7": 1, "live8": 8, "live9": 1,
-                       "live11": 61, "live12": 52}
+                       "live11": 62, "live12": 56}
 
 
 @pytest.mark.parametrize("session_dir", sorted(LIVE_FIXTURE_COUNTS))

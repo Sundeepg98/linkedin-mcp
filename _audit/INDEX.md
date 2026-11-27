@@ -27,8 +27,8 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 311 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 271 |
+| audit documents git tracks under `_audit` | 312 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 272 |
 | distinct dates | 23 |
 | documents with no level-1 heading | 2 |
 | `CORRECTS:` marker lines | 132 |
@@ -39,7 +39,7 @@ are listed as `(undated)`; no date is taken from git history, because
 | documents at either end of a cross-document edge | 113 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
-| documents no correction marker touches at all | 196 |
+| documents no correction marker touches at all | 197 |
 | blockquoted markers naming ANOTHER document | 0 |
 | edges missing one of their two markers | 0 |
 | edges declared a different number of times in each direction | 2 |
@@ -1975,6 +1975,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-11-27 | [2026-11-27-jobs7.md](2026-11-27-jobs7.md) | Lane jobs7, 2026-11-27: the AI job search as the keyword search's own route, and session 12's captures read by keyed shape | corrects x1 |
 | 2026-11-27 | [2026-11-27-msg7.md](2026-11-27-msg7.md) | msg7, 2026-11-27: the messaging and content rows session 12 captured, read offline | corrects x1 |
 | 2026-11-27 | [2026-11-27-prof7.md](2026-11-27-prof7.md) | Lane prof7 -- the self-profile loader waits for the rewrite, then session 12's profile cells |  |
+| 2026-11-27 | [2026-11-27-settings7.md](2026-11-27-settings7.md) | Lane settings7, 2026-11-27: his four settings pages session 12 captured -- what each drew, measured by keyed shape, and what each row's bar lets move |  |
 
 ## 6. What the scan rejected, could not join, or had to repair
 

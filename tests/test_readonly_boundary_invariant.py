@@ -2070,7 +2070,35 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # list minus msg7's one entry hashes to a3510436178fb711 (merge 2's value
     # above), and minus prof7's and jobs7's two entries to msg7's
     # 3f12a2c2143c6576. Record: _audit/2026-11-27-integration-7.md.
-    "_ALLOWED_URL_PATTERNS": "947dcb23d73c0491",
+    #
+    # 5d3109ee0aa96e48 until 2026-11-27 (lane settings7, its first admission):
+    # one anchored line, his search history page in the /mypreferences/m/
+    # tree, drawn on his Data privacy category page (session 12, load 10), a
+    # named settings page in its own commit (NAMED-SETTINGS-PAGES-RATIFIED;
+    # allowlist silence alone, no exemption). ATTRIBUTION, with this file's
+    # ast_digest: readonly.py at the lane's base 68a4ff7 hashes to the prior
+    # pin on every key, and only this key moved (17 of 18 byte-identical).
+    # Record: _audit/2026-11-27-settings7.md.
+    #
+    # 30ed6faba55a8e9a until lane settings7's second admission: one anchored
+    # line, his data-download page in the same tree, drawn on the same
+    # category page, a named settings page in its own commit (allowlist
+    # silence alone, no exemption); every other key byte-identical (17 of 18).
+    #
+    # 228d24c9fa344a2f until lane settings7's third admission: one anchored
+    # line, his contact-syncing page, /mynetwork/settings/manage-syncing, on
+    # CONTACTS-PAGE-FROM-THE-SETTINGS-NAV (the orchestrator, 2026-11-27 13:25),
+    # paired with one exemption below; only this key and the
+    # pattern-exemption key moved (16 of 18 byte-identical).
+    #
+    # MERGED again at integration 7 (2026-11-27), merge 4, lane settings7:
+    # 18413e5f8838d54c (107 entries), measured with this file's ast_digest on
+    # the merged readonly.py; this key and the pattern-exemption key are the
+    # two moved from 68a4ff7, the second by settings7 alone. ATTRIBUTION: the
+    # merged list minus settings7's three entries hashes to 947dcb23d73c0491
+    # (merge 3's value above), and minus prof7's, jobs7's and msg7's three to
+    # settings7's 0c47f74920c44695. Record: _audit/2026-11-27-integration-7.md.
+    "_ALLOWED_URL_PATTERNS": "18413e5f8838d54c",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     # 419e64a3cd92ec7e until the same REVIEW: commit: a third entry, excusing
     # exactly {"/follow"} for exactly the anchored follower-list address.
@@ -2099,7 +2127,12 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # address trips, measured -- for exactly his Verifications settings page,
     # the per-address exemption VERIFICATIONS-PAGE-ADMITTED names; the
     # forbidden tuple is unchanged at 33.
-    "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "8a0202843de29ce2",
+    # 8a0202843de29ce2 until lane settings7's third admission (2026-11-27):
+    # one more, excusing exactly {"/settings/", "settings"} -- the two
+    # substrings the address trips, measured -- for exactly his
+    # contact-syncing page, /mynetwork/settings/manage-syncing; the forbidden
+    # tuple is unchanged at 33.
+    "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "59a59624d142d203",
     "_FORBIDDEN_URL_SUBSTRINGS": "b0291a66ec9bd51e",
     # 23aece1483afdee9 until 2026-09-19. See the re-freeze note above: eleven
     # detector classes added, zero removed, and the direction is pinned by
