@@ -107,6 +107,10 @@ if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
 
 import pre_push_ref_gate as gate  # noqa: E402
+# The read-map recording's run name, merge job and fetch are the recipe's own.
+import build_read_map as recipe  # noqa: E402
+
+RECORDING_RUN_NAME = recipe.RECORDING_RUN_NAME
 
 POLL_SECONDS = 20
 BOUND_SECONDS = 25 * 60
@@ -114,6 +118,9 @@ BOUND_SECONDS = 25 * 60
 #: run 46042146411 (three cells x six shards, 2026-11-27) took 10m44s; the
 #: windows shards set it, and a degraded windows runner has run 2x slower.
 FULL_BOUND_SECONDS = 45 * 60
+#: The read-map recording's bound: one cell in six shards, every read
+#: recorded, so slower than a shard of the full matrix.
+RECORDING_BOUND_SECONDS = 60 * 60
 #: The workflow ``--full`` dispatches, by its file name.
 WORKFLOW_FILE = "ci.yml"
 FAILED_JOB_STATES = frozenset(
@@ -361,11 +368,27 @@ def _newest(runs: list[dict]) -> dict | None:
     return max(runs, key=lambda r: (r.get("createdAt") or "", r.get("databaseId") or 0))
 
 
-def dispatch_runs(runs: list[dict], sha: str, branch: str) -> list[dict]:
-    """The workflow_dispatch runs of exactly this sha on exactly ``ci/<branch>``."""
+def _dispatched(runs: list[dict], sha: str, branch: str) -> list[dict]:
     return [r for r in runs
             if r.get("headSha") == sha and r.get("event") == "workflow_dispatch"
             and r.get("headBranch") == f"ci/{branch}"]
+
+
+def dispatch_runs(runs: list[dict], sha: str, branch: str) -> list[dict]:
+    """The FULL-MATRIX dispatch runs of exactly this sha on ``ci/<branch>``.
+
+    A read-map recording is a workflow_dispatch run of the same workflow on the
+    same sha, and it certifies nothing: it is told apart by its run name and
+    is never one of these (2026-11-28).
+    """
+    return [r for r in _dispatched(runs, sha, branch)
+            if r.get("displayTitle") != RECORDING_RUN_NAME]
+
+
+def recording_runs(runs: list[dict], sha: str, branch: str) -> list[dict]:
+    """The read-map recordings of exactly this sha on ``ci/<branch>``."""
+    return [r for r in _dispatched(runs, sha, branch)
+            if r.get("displayTitle") == RECORDING_RUN_NAME]
 
 
 def choose_push_run(runs: list[dict], sha: str, branch: str) -> dict | None:
@@ -523,7 +546,7 @@ def cmd_push(pusher=git_push) -> int:
     return 0
 
 
-_RUN_FIELDS = "databaseId,headSha,headBranch,event,status,conclusion,createdAt"
+_RUN_FIELDS = "databaseId,headSha,headBranch,event,status,conclusion,createdAt,displayTitle"
 _VIEW_FIELDS = "status,conclusion,jobs,createdAt,startedAt,updatedAt"
 
 
@@ -593,6 +616,96 @@ def cmd_wait(sha: str, *, poll: int = POLL_SECONDS, bound: int = BOUND_SECONDS,
     return _report(slug, run_id, view, state)
 
 
+def _ref_head(ref: str) -> str:
+    """The sha ``origin``'s ``ref`` holds, or ``""``."""
+    rc, out, _err = _git("ls-remote", gate.CI_REMOTE, ref)
+    return out.split()[0] if rc == 0 and out.split() else ""
+
+
+def cmd_read_map(sha: str, *, poll: int = POLL_SECONDS,
+                 bound: int = RECORDING_BOUND_SECONDS, sleep=time.sleep,
+                 clock=time.monotonic, fetcher=None) -> int:
+    """``read-map <sha>``: record the impact gate's read map on CI, install it.
+
+    The read-map recording is a dispatch of ci.yml with ``record_read_map``:
+    one cell, sharded, every shard under ``build_read_map.py``'s recorder, the
+    merged map uploaded by its last job. This dispatches it on ``ci/<branch>``
+    (refused unless the ref holds ``sha``), finds the run BY SHA, EVENT AND
+    RUN NAME -- never a full-matrix dispatch of the same sha -- waits, and on
+    a merge job that succeeded installs the map through
+    ``build_read_map.fetch(run id, sha)``. As with ``--full``, a recording
+    already running is waited on, and one finished is read, not repeated. The
+    recording has a concurrency group of its own, so no push run is waited on.
+    """
+    fetcher = fetcher or recipe.fetch
+    rc, url, err = _git("remote", "get-url", gate.CI_REMOTE)
+    if rc != 0:
+        print(f"lane_ci read-map: no {gate.CI_REMOTE} remote ({err})", file=sys.stderr)
+        return 2
+    slug = slug_from_url(url)
+    rc, branch, _err = _git("symbolic-ref", "--quiet", "--short", "HEAD")
+    try:
+        ref = ci_ref_for(branch if rc == 0 else "")
+    except ValueError as exc:
+        print(f"lane_ci read-map: REFUSED -- {exc}", file=sys.stderr)
+        return 1
+    short_ref = ref[len("refs/heads/"):]
+    held = _ref_head(ref)
+    if held != sha:
+        print(f"lane_ci read-map: REFUSED -- {gate.CI_REMOTE} {short_ref} holds "
+              f"{held[:12] or 'nothing'}, not {sha[:12]}. A dispatch runs the "
+              "ref's head; push this sha first (lane_ci.py push).", file=sys.stderr)
+        return 1
+
+    listed = _list_runs(slug, sha, "workflow_dispatch", "read-map")
+    if listed is None:
+        return 2
+    existing = recording_runs(listed, sha, branch)
+    last = _newest(existing)
+    if last is not None and (last.get("status") != "completed"
+                             or last.get("conclusion") != "cancelled"):
+        known = last.get("databaseId")
+        print(f"lane_ci read-map: recording run {known} of {sha[:12]} is "
+              f"{last.get('status')}; reading it, not dispatching again",
+              file=sys.stderr)
+
+        def choose(runs):
+            return next((r for r in recording_runs(runs, sha, branch)
+                         if r.get("databaseId") == known), None)
+    else:
+        before = {r.get("databaseId") for r in existing}
+        rc, _out, err = _gh("workflow", "run", WORKFLOW_FILE, "-R", slug, "--ref",
+                            short_ref, "-f", "record_read_map=true")
+        if rc != 0:
+            print(f"lane_ci read-map: the dispatch failed ({err[:200]}); nothing "
+                  "was started", file=sys.stderr)
+            return 2
+        print(f"lane_ci read-map: dispatched the read-map recording on {short_ref} "
+              f"for {sha[:12]}", file=sys.stderr)
+
+        def choose(runs):
+            return _newest([r for r in recording_runs(runs, sha, branch)
+                            if r.get("databaseId") not in before])
+
+    run_id, view, state = _await_run(
+        slug, sha, "workflow_dispatch", choose, what="read-map", poll=poll,
+        bound=bound, sleep=sleep, clock=clock)
+    if view is None:
+        return 2
+    jobs = view.get("jobs") or []
+    merged = [j.get("conclusion") for j in jobs if j.get("name") == recipe.MERGE_JOB_NAME]
+    print(f"run {run_id}: {state}  jobs={len(jobs)}  wall={elapsed(view)}  "
+          f"(read-map recording)")
+    for line in cell_lines(cells_of(view)):
+        print(line)
+    print(f"  {recipe.MERGE_JOB_NAME}: {merged[0] if merged else 'absent'}")
+    if merged != ["success"]:
+        print("  NO MAP: the merge job did not succeed, so nothing was recorded "
+              "whole; nothing is installed.")
+        return 1
+    return fetcher(run_id, sha, slug=slug)
+
+
 def cmd_full(sha: str, *, poll: int = POLL_SECONDS, bound: int = BOUND_SECONDS,
              full_bound: int = FULL_BOUND_SECONDS, sleep=time.sleep,
              clock=time.monotonic) -> int:
@@ -611,8 +724,7 @@ def cmd_full(sha: str, *, poll: int = POLL_SECONDS, bound: int = BOUND_SECONDS,
     short_ref = ref[len("refs/heads/"):]
 
     # 1. The ref holds this sha, or the dispatch would test another commit.
-    rc, out, err = _git("ls-remote", gate.CI_REMOTE, ref)
-    held = out.split()[0] if rc == 0 and out.split() else ""
+    held = _ref_head(ref)
     if held != sha:
         print(f"lane_ci full: REFUSED -- {gate.CI_REMOTE} {short_ref} holds "
               f"{held[:12] or 'nothing'}, not {sha[:12]}. A dispatch runs the "
@@ -762,6 +874,9 @@ def main(argv: list[str]) -> int:
     w.add_argument("--full", action="store_true",
                    help="then dispatch the FULL matrix on ci/<branch> and wait on "
                         "that run, read by sha (resumes one already dispatched)")
+    r = sub.add_parser("read-map", help="record the impact gate's read map on CI "
+                                        "for a sha, and install it")
+    r.add_argument("sha")
     c = sub.add_parser("clean", help="delete ci/<branch>")
     c.add_argument("branch")
     args = parser.parse_args(argv[1:])
@@ -769,6 +884,8 @@ def main(argv: list[str]) -> int:
         return cmd_push()
     if args.command == "wait":
         return cmd_full(args.sha) if args.full else cmd_wait(args.sha)
+    if args.command == "read-map":
+        return cmd_read_map(args.sha)
     return cmd_clean(args.branch)
 
 

@@ -775,9 +775,10 @@ RUNNING = {"status": "in_progress", "jobs": []}
 
 
 def _run_of(i, event, status="completed", conclusion="success", sha=SHA,
-            branch="ci/lane", created="2026-11-27T18:00:00Z"):
+            branch="ci/lane", created="2026-11-27T18:00:00Z", title=None):
     return {"databaseId": i, "headSha": sha, "headBranch": branch, "event": event,
-            "status": status, "conclusion": conclusion, "createdAt": created}
+            "status": status, "conclusion": conclusion, "createdAt": created,
+            "displayTitle": title or ("CI" if event == "workflow_dispatch" else "a commit")}
 
 
 class FullGh:
@@ -1026,3 +1027,113 @@ def test_wait_full_is_one_command():
     finally:
         lane.cmd_full = original
     assert calls == [SHA]
+
+
+# ---------------------------------------------------------------------------
+# read-map <sha>: the impact gate's read map, recorded on CI (lane ci8, 2026-11-28)
+# ---------------------------------------------------------------------------
+#
+# A dispatch of ci.yml with record_read_map runs the whole suite under the
+# recorder on one cell, sharded, and uploads the merged map. It is a
+# workflow_dispatch run of ci.yml on the sha, exactly like the full matrix's,
+# so the two are told apart by the recording's run name, and neither command
+# may ever take the other's run for its own.
+
+RECORDING = "read-map recording"
+
+
+def _recording_view(conclusion="success", merge="success"):
+    jobs = _full_jobs(cells=[("ubuntu-latest", "3.13")], shards=6)
+    jobs.append({"name": "the read map, merged and pruned", "status": "completed",
+                 "conclusion": merge})
+    return _view(conclusion, jobs)
+
+
+def _read_map(monkeypatch, gh, fetched, ref_sha=SHA, bound=600):
+    ticks = iter(range(0, 100_000, 20))
+    monkeypatch.setattr(lane, "_git", _git_for_full(ref_sha))
+    monkeypatch.setattr(lane, "_gh", gh)
+
+    def fetcher(run_id, sha, **kwargs):
+        fetched.append((run_id, sha, kwargs.get("slug")))
+        return 0
+
+    return lane.cmd_read_map(SHA, poll=20, bound=bound, sleep=lambda s: None,
+                             clock=lambda: next(ticks), fetcher=fetcher)
+
+
+def test_the_recordings_name_is_the_recipes(tmp_path):
+    """lane_ci tells a recording by the recipe's own constant, which ci.yml's
+    run-name writes (tests/test_ci_fast_lane.py holds that half)."""
+    assert lane.RECORDING_RUN_NAME == RECORDING
+
+
+def test_a_recording_of_the_same_sha_is_never_taken_for_the_full_matrix(monkeypatch, capsys):
+    """SHOWN FAILING before --full read the run name: it took the running
+    recording for a full-matrix dispatch already sent, and waited on it."""
+    recording = _run_of(8, "workflow_dispatch", status="in_progress", title=RECORDING)
+    gh = FullGh(push_lists=[[_run_of(7, "push")]],
+                dispatch_lists=[[recording],
+                                [recording, _run_of(9, "workflow_dispatch", status="in_progress",
+                                                    created="2026-11-27T18:40:00Z")]],
+                views={"7": [_view("success", [])],
+                       "8": [_recording_view()],
+                       "9": [_view("success", _full_jobs())]})
+    assert _full(monkeypatch, gh) == 0, capsys.readouterr()
+    assert len(gh.index("workflow", "run")) == 1, gh.calls
+    assert "run 9: success" in capsys.readouterr().out
+
+
+def test_read_map_dispatches_a_recording_and_installs_its_map(monkeypatch, capsys):
+    fetched = []
+    gh = FullGh(push_lists=[[]],
+                dispatch_lists=[[], [_run_of(11, "workflow_dispatch", status="in_progress",
+                                             title=RECORDING)]],
+                views={"11": [RUNNING, _recording_view()]})
+    assert _read_map(monkeypatch, gh, fetched) == 0, capsys.readouterr()
+    dispatched = [gh.calls[i] for i in gh.index("workflow", "run")]
+    assert dispatched == [("workflow", "run", "ci.yml", "-R", "owner-x/repo-y", "--ref",
+                           "ci/lane", "-f", "record_read_map=true")], gh.calls
+    assert fetched == [("11", SHA, "owner-x/repo-y")], fetched
+
+
+def test_read_map_never_takes_a_full_matrix_run_for_a_recording(monkeypatch, capsys):
+    fetched = []
+    full = _run_of(9, "workflow_dispatch")          # the full matrix's, finished
+    gh = FullGh(push_lists=[[]],
+                dispatch_lists=[[full], [full, _run_of(12, "workflow_dispatch",
+                                                       status="in_progress", title=RECORDING,
+                                                       created="2026-11-27T19:00:00Z")]],
+                views={"9": [_view("success", _full_jobs())], "12": [_recording_view()]})
+    assert _read_map(monkeypatch, gh, fetched) == 0, capsys.readouterr()
+    assert len(gh.index("workflow", "run")) == 1, gh.calls
+    assert fetched == [("12", SHA, "owner-x/repo-y")], fetched
+
+
+def test_read_map_resumes_a_recording_already_running(monkeypatch, capsys):
+    fetched = []
+    running = _run_of(13, "workflow_dispatch", status="in_progress", title=RECORDING)
+    gh = FullGh(push_lists=[[]], dispatch_lists=[[running]],
+                views={"13": [RUNNING, _recording_view()]})
+    assert _read_map(monkeypatch, gh, fetched) == 0
+    assert gh.index("workflow", "run") == [], gh.calls
+    assert fetched == [("13", SHA, "owner-x/repo-y")], fetched
+
+
+def test_read_map_installs_nothing_when_the_merge_did_not_run(monkeypatch, capsys):
+    fetched = []
+    gh = FullGh(push_lists=[[]],
+                dispatch_lists=[[], [_run_of(14, "workflow_dispatch", status="in_progress",
+                                             title=RECORDING)]],
+                views={"14": [_recording_view(conclusion="failure", merge="skipped")]},
+                log="")
+    assert _read_map(monkeypatch, gh, fetched) == 1
+    assert fetched == [], fetched
+    assert "merged and pruned" in capsys.readouterr().out
+
+
+def test_read_map_refuses_when_the_ci_ref_does_not_hold_the_sha(monkeypatch, capsys):
+    fetched = []
+    gh = FullGh(push_lists=[[]], dispatch_lists=[[]], views={})
+    assert _read_map(monkeypatch, gh, fetched, ref_sha=OTHER) == 1
+    assert gh.calls == [] and fetched == []

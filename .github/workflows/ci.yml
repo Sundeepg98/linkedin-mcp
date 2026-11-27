@@ -174,6 +174,28 @@ on:
   push:
   pull_request:
   workflow_dispatch:
+    # THE READ-MAP RECORDING, ADDED 2026-11-28 (lane ci8). The impact gate's
+    # observed read map (scripts/impact_gate_read_map.json) is a full-suite run
+    # under scripts/build_read_map.py's recorder, and the full suite does not
+    # run on the shared box, so the map went two months stale. A dispatch with
+    # this input set runs that recording here instead: ONE cell, sharded, every
+    # shard under the recorder, merged and pruned by the recipe's own code in
+    # the read-map job at the end, the map uploaded as an artifact.
+    # `scripts/lane_ci.py read-map <sha>` dispatches it, waits, and installs
+    # the map by run id and sha. Unset, a dispatch is the full matrix, exactly
+    # as before.
+    inputs:
+      record_read_map:
+        description: "Record the impact gate's read map (one cell, sharded) instead of the full matrix"
+        type: boolean
+        default: false
+
+# A recording is told apart from the full matrix by this name: both are
+# workflow_dispatch runs of this file on a sha, and `lane_ci.py wait --full`
+# must never take one for the other. It must equal build_read_map.py's
+# RECORDING_RUN_NAME (tests/test_lane_ci.py holds the two together). Every
+# other run keeps its default name: an empty run-name is the default.
+run-name: ${{ inputs.record_read_map && 'read-map recording' || '' }}
 
 # WHY THIS EXISTS, and why master is deliberately EXEMPT.
 #
@@ -213,8 +235,12 @@ on:
 # group and nothing can supersede it -- that is what keeps "20 of 20 at <sha>"
 # citable as a receipt. On a branch the group is shared, so a newer push
 # supersedes an older run that nobody is waiting on any more.
+#
+# A READ-MAP RECORDING HAS A GROUP OF ITS OWN (2026-11-28): it records the
+# suite, it certifies nothing, and neither it nor a lane's push or full-matrix
+# run on the same ref may cancel the other.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.ref == 'refs/heads/master' && github.sha || 'shared' }}
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.ref == 'refs/heads/master' && github.sha || 'shared' }}${{ inputs.record_read_map && '-read-map' || '' }}
   cancel-in-progress: true
 
 jobs:
@@ -237,6 +263,7 @@ jobs:
         env:
           EVENT: ${{ github.event_name }}
           REF: ${{ github.ref }}
+          RECORD: ${{ inputs.record_read_map }}
         run: |
           SHARDS=6
           CELLS='[{"os":"ubuntu-latest","python-version":"3.10"},
@@ -327,6 +354,20 @@ jobs:
                 echo "lane fast path: $REF gets one cell in $SHARDS shards"
                 ;;
             esac
+          fi
+          # -----------------------------------------------------------------
+          # THE READ-MAP RECORDING, ADDED 2026-11-28 (lane ci8): a
+          # workflow_dispatch with record_read_map gets ONE cell (ubuntu,
+          # 3.13) in SIX shards, every shard run under the recorder. One cell
+          # because the map is a recording of which test reads which file,
+          # and that does not vary by cell; six shards because the recorder
+          # slows every read and the totals job still proves the whole suite
+          # ran. Only a dispatch can set it, and a push never reads it.
+          # -----------------------------------------------------------------
+          if [ "$EVENT" = "workflow_dispatch" ] && [ "$RECORD" = "true" ]; then
+            SHARDS=6
+            CELLS='[{"os":"ubuntu-latest","python-version":"3.13"}]'
+            echo "read-map recording: one cell in $SHARDS shards"
           fi
           echo "count=$SHARDS" >> "$GITHUB_OUTPUT"
           echo "shards=$(python3 -c 'import json,sys; print(json.dumps(list(range(int(sys.argv[1])))))' "$SHARDS")" >> "$GITHUB_OUTPUT"
@@ -575,7 +616,31 @@ jobs:
         # startup and LOSES on small sets: one 29-test file is 26.10s serial against
         # 31.74s parallel, while the whole suite is 913s against 601s. A shard is ~600
         # tests, well past the crossover.
-        run: python -m pytest -q -rs -n auto --dist loadfile --junitxml=junit.xml $(cat shard-files.txt)
+        #
+        # THE READ-MAP RECORDING (2026-11-28, lane ci8). On a dispatch with
+        # record_read_map, the SAME line runs with the recorder plugin
+        # (-p build_read_map), which writes this shard's recordings, with the
+        # shard's own exit code and seconds beside them, under $RUNNER_TEMP:
+        # outside the checkout, so the tracked-file guards never sweep them
+        # (lane run 46052436870). The exit code is the run's own, so a red
+        # test is still red here.
+        env:
+          RECORD: ${{ inputs.record_read_map }}
+        run: |
+          if [ "$RECORD" = "true" ]; then
+            export IMPACT_GATE_READ_MAP_DIR="$RUNNER_TEMP/read-map/shard-${{ matrix.shard }}"
+            export IMPACT_GATE_READ_MAP_REPO="$GITHUB_WORKSPACE"
+            export PYTHONPATH="$GITHUB_WORKSPACE/scripts${PYTHONPATH:+:$PYTHONPATH}"
+            mkdir -p "$IMPACT_GATE_READ_MAP_DIR"
+            started=$SECONDS
+            code=0
+            python -m pytest -q -rs -n auto --dist loadfile -p build_read_map --junitxml=junit.xml $(cat shard-files.txt) || code=$?
+            printf '{"shard": %s, "exit": %s, "seconds": %s}\n' \
+              "${{ matrix.shard }}" "$code" "$((SECONDS - started))" \
+              > "$IMPACT_GATE_READ_MAP_DIR/pytest-run.json"
+            exit "$code"
+          fi
+          python -m pytest -q -rs -n auto --dist loadfile --junitxml=junit.xml $(cat shard-files.txt)
 
       - name: Every test in this shard actually ran
         # if: always() -- this must report the counts on a RED run too. A run
@@ -619,6 +684,16 @@ jobs:
         with:
           name: shard-report-${{ matrix.cell.os }}-${{ matrix.cell['python-version'] }}-${{ matrix.shard }}
           path: reports/
+          retention-days: 7
+
+      # The recording's own artifact, one per shard, holding a directory named
+      # by the shard, so the read-map job's merged download keeps every
+      # worker's file apart (two machines can share a pid). Only a recording.
+      - uses: actions/upload-artifact@v4
+        if: always() && inputs.record_read_map
+        with:
+          name: read-map-recording-${{ matrix.shard }}
+          path: ${{ runner.temp }}/read-map/
           retention-days: 7
 
   totals:
@@ -667,3 +742,42 @@ jobs:
           python3 scripts/ci_shard_totals.py verify \
             --reports reports --of ${{ needs.plan.outputs.count }} \
             --cells '${{ needs.plan.outputs.cells }}'
+
+  read-map:
+    # THE READ-MAP RECORDING'S MERGE (2026-11-28, lane ci8). Only a dispatch
+    # with record_read_map runs it, and only once the totals job has proved
+    # every shard ran what the cell collected: a recording of part of the
+    # suite would be a map with holes no reader could see. A red TEST does
+    # not stop it, as a failing test does not stop the local recipe; a shard
+    # whose pytest could not run does, inside the merge.
+    #
+    # The merge is the recipe's own: build_read_map.py's merge_shards and
+    # prune, against this job's checkout of the same commit, so a path a
+    # shard's run left in its own checkout is pruned. The map is stamped with
+    # this run's id and the head it recorded, and uploaded for
+    # `build_read_map.py --fetch <run id> --sha <sha>`.
+    name: the read map, merged and pruned
+    needs: [plan, test, totals]
+    if: always() && inputs.record_read_map && needs.totals.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: read-map-recording-*
+          path: ${{ runner.temp }}/read-map
+          merge-multiple: true
+
+      - name: Merge and prune the recordings by the recipe
+        run: |
+          ls -R "$RUNNER_TEMP/read-map" | head -40
+          python3 scripts/build_read_map.py --merge "$RUNNER_TEMP/read-map" \
+            --out "$RUNNER_TEMP/map/impact_gate_read_map.json" \
+            --run-id "$GITHUB_RUN_ID" --head "$(git rev-parse --short HEAD)"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: impact-gate-read-map
+          path: ${{ runner.temp }}/map/impact_gate_read_map.json
+          retention-days: 7
