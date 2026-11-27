@@ -53,7 +53,7 @@ J 83	J	W	-	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 J 84	J	W	-	TARGET:a job in a search of his he names to hide	MEASURED	_audit/2026-11-25-build-jmn26.md::on 7 of 7 cards its aria-label is that card's own title ; RULING:HIS-OWN-CURATION-NOT-OUTWARD
 J 85	J	W	-	SIBLING:J 84	NAMED	_audit/2026-09-28-rulings-build-classes.md::the act is proven only through that undo
 J 86	J	W	-	SIBLING:P I14	INFERRED	RULING:D6-CAPABILITY-OVER-AFFORDANCE ; P I14
-J 87	J	W	-	ADMIT:https://www.linkedin.com/mypreferences/m/manage-data-and-activity/	INFERRED	tests/fixtures/live12/privacy_words.html ; _audit/_census/jobs.md::THE CATEGORY PAGE NAMES NO EXPRESSED-INTEREST RECORD ; RULING:NAMED-SETTINGS-PAGES-RATIFIED
+J 87	J	W	-	ADMIT:https://www.linkedin.com/mypreferences/m/manage-data-and-activity/	INFERRED	tests/fixtures/live12/privacy_words.html ; _audit/_census/jobs.md::NO MEASURED LABEL ON THE CATEGORY PAGE NAMES AN EXPRESSED-INTEREST RECORD ; RULING:NAMED-SETTINGS-PAGES-RATIFIED
 J 89	J	W	-	SIBLING:P I2	INFERRED	P I2
 J 90	J	W	-	SIBLING:P I3	INFERRED	P I3
 J 91	J	W	-	SIBLING:P I11	INFERRED	P I11
@@ -442,8 +442,8 @@ P I8	P	W	R3	CAPTURE:admit-in-me-opportunities-job-opportunities-edit	INFERRED	_a
 P I9	P	W	R3	CAPTURE:admit-in-me-opportunities-job-opportunities-edit	INFERRED	_audit/_slice-otw-census.md::### C3 -- the "Edit" button ; RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
 P I10	P	W	R3	CAPTURE:admit-in-me-opportunities-job-opportunities-edit	INFERRED	_audit/_slice-otw-census.md::### C3 -- the "Edit" button ; RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
 P I11	P	W	R3	CAPTURE:admit-in-me-opportunities-job-opportunities-edit	INFERRED	_audit/_slice-otw-census.md::### C3 -- the "Edit" button ; RULING:PROFILE-EDITOR-ADDRESSES-ALLOWED
-P I12	P	W	R3	CAPTURE:admit-jobs-preferences-viewtype-seeking-preferences	NAMED	_audit/_census/profile.md::/jobs/preferences/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
-P I13	P	W	R3	CAPTURE:admit-jobs-preferences-viewtype-seeking-preferences	NAMED	_audit/_census/profile.md::/jobs/preferences?viewType=SEEKING_PREFERENCES ; RULING:READ-PAST-AN-ACT-SUBSTRING
+P I12	P	W	R3	CAPTURE:admit-in-me-opportunities-job-opportunities-edit	INFERRED	tests/fixtures/live12/job_prefs.html ; _audit/_census/profile.md::THE LOAD DREW LINKEDIN'S PREFERENCES DIALOG, OPEN WITH NO PRESS ; RULING:OPEN-TO-WORK-EDITOR-ATTENDED-ONLY
+P I13	P	W	R3	CAPTURE:admit-in-me-opportunities-job-opportunities-edit	INFERRED	tests/fixtures/live12/job_prefs.html ; _audit/_census/profile.md::THE LOAD DREW LINKEDIN'S PREFERENCES DIALOG, AND NO PAY PREFERENCE ; RULING:OPEN-TO-WORK-EDITOR-ATTENDED-ONLY
 P I15	P	W	R3	TARGET:a company he has signalled interest in	NAMED	_audit/_census/write-classes.tsv::queued:INTEREST-ON-LABEL ; RULING:OPERATOR-NAMES-THE-TARGET
 P I16	P	W	R3	PRECONDITION:a job change to share	NAMED	_audit/_census/write-classes.tsv::queued:NO-JOB-CHANGE
 P K2	P	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD

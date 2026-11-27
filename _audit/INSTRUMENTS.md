@@ -13330,3 +13330,16 @@ structural outliner over tracked copies, the census editors and the
 harness extender, and the script that showed both builders refusing. None was
 shown failing on a planted defect except the last, which is the demonstration
 itself.
+
+AFTER THE COLD VERIFICATION (2026-11-27): the dialog's keyed-shape probe
+(`probe_dialog.py`: the open `<dialog>` on session 12's job-preferences
+capture, matched candidates and letters/length counts only; its wrong-key
+control matched 0 where the real key matched 9) and the generated-candidate
+search over its unmatched slots (`brute_dialog.py`, which ran past its
+15-minute bound and printed nothing) are DECLARED DISPOSABLE.
+
+### 118.3 ADDED AFTER THE COLD VERIFICATION
+
+| path | shown failing by |
+|---|---|
+| `tests/test_verifications_page.py::test_two_consent_sections_read_as_several_never_as_none`, `::test_a_consent_count_that_cannot_be_read_says_unread_never_none`, `::test_each_consent_reading_is_a_closed_word_and_none_means_no_section`; `linkedin_server/verifications_page.py` (`CONSENT_READINGS`) | the cold verification's F3: before the fix, two planted consent sections and a section count that raises each read `None`, the word for "no consent section" (2 failed by assertion, `assert None == ...`; the third by the missing closed tuple): 3 failed, 21 passed; after, 24 passed |
