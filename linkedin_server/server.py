@@ -1,4 +1,4 @@
-"""The tool surface: one hundred and seven tools, thirty-five of which write to LinkedIn.
+"""The tool surface: one hundred and eight tools, thirty-six of which write to LinkedIn.
 
 THE HUNDREDTH TO HUNDRED-AND-SEVENTH, 2026-11-26, at integration 6's merge of
 lane build-msg2: six WRITES and two READS. ``linkedin_set_conversation_muted``
@@ -537,9 +537,11 @@ POINTER to it was dangling, so a reader who followed it found nothing and
 would reasonably conclude these numbers are unchecked. A citation is a claim
 like any other.
 The surface splits three ways and the split is the part a reader actually
-needs: SIXTY-EIGHT read, THIRTY-FIVE write, and FOUR are write-shaped,
-registered, gated and unable to act. Sixty-eight plus thirty-five plus four is
-one hundred and seven. (Sixty-six, twenty-nine and four, summing to
+needs: SIXTY-EIGHT read, THIRTY-SIX write, and FOUR are write-shaped,
+registered, gated and unable to act. Sixty-eight plus thirty-six plus four is
+one hundred and eight. (Sixty-eight, thirty-five and four, summing to one
+hundred and seven, until lane msg7's linkedin_save_post, 2026-11-27.
+Sixty-six, twenty-nine and four, summing to
 ninety-nine, until integration 6's merge of lane build-msg2's six writes
 and two reads, 2026-11-26; that lane's branch read sixty-six, thirty and
 three, summing to ninety-nine. Sixty-five, twenty-five and four, summing to
@@ -1367,7 +1369,7 @@ mcp = FastMCP(
         "keywords he typed, never the people the same list names -- and "
         "closes it with Escape; to run one again, pass its keywords to the "
         "search tool for its vertical. "
-        "THIRTY-FIVE WRITE: linkedin_save_job, "
+        "THIRTY-SIX WRITE: linkedin_save_job, "
         "linkedin_unsave_job, linkedin_unfollow_company, "
         "linkedin_follow_company, linkedin_apply_job, "
         "linkedin_update_setting, linkedin_react_to_item, "
@@ -1384,7 +1386,7 @@ mcp = FastMCP(
         "linkedin_accept_invitation_to_connect, "
         "linkedin_ignore_invitation_to_connect, "
         "linkedin_withdraw_invitation, "
-        "linkedin_mark_not_interested, "
+        "linkedin_mark_not_interested, linkedin_save_post, "
         "linkedin_set_conversation_muted, linkedin_unset_conversation_muted, "
         "linkedin_mark_conversation_unread, linkedin_set_conversation_archived, "
         "linkedin_set_conversation_deleted and linkedin_publish_group_post. "
@@ -1474,6 +1476,11 @@ mcp = FastMCP(
         "group's public feed: it presses the share box only where its trigger "
         "says 'Start a public post', and nothing confirms the post, so offer "
         "it only for a group and words he names, and tell him to look. "
+        "THE THIRTY-SIXTH, linkedin_save_post, saves ONE feed item he names "
+        "by its urn to his Saved items, from that item's own permalink menu: "
+        "it presses 'Save' only inside the menu the item's own trigger owns, "
+        "and an item already saved is pressed no further; what a save draws "
+        "has never been captured, so tell him to look at his Saved items. "
         "THE SIXTEENTH, linkedin_withdraw_from_group, leaves one group he "
         "names by its NUMERIC id, never by a group's name; no join is built "
         "here, so offer it only for a group he names -- and not his last "
@@ -14756,6 +14763,58 @@ async def linkedin_publish_group_post(
 
 
 # ---- end lane build-msg2 ----
+
+
+# ---- lane msg7 ----
+# Census M C36 (lane msg7, wave 7, 2026-11-27): one feed item he names, saved
+# from its own control menu on its permalink, on SAVE-POST-UNDER-OWN-CURATION
+# (the orchestrator, 2026-11-27; registration owed at integration 7). Every
+# tool this lane registers is in this one contiguous block.
+
+
+@mcp.tool()
+async def linkedin_save_post(
+    item: str, confirm_token: str = ""
+) -> dict[str, Any]:
+    """Save ONE feed item you name to your Saved items -- a WRITE to your own items, from the item's own menu.
+
+    Opens the permalink of the item whose urn you give
+    (``/feed/update/<urn>/``), presses that item's own control menu -- the one
+    trigger LinkedIn draws with its fixed "Open control menu" prefix -- and
+    presses "Save" ONLY if it is the one such item on the page and it sits in
+    the menu that trigger owns. Curation of your own items
+    (HIS-OWN-CURATION-NOT-OUTWARD): nobody is told. Same two steps and gates as
+    ``linkedin_mark_not_interested``: no ``confirm_token``, no action. Census
+    row ``M C36``.
+
+    YOU NAME THE ITEM BY ITS URN (``urn:li:activity:<digits>`` and its kin) --
+    never by its author or words; the page may only refuse it. The item's
+    author is never read.
+
+    AN ITEM ALREADY SAVED IS NOT PRESSED TWICE. The closed permalink draws no
+    save state, so the menu decides: one that draws no "Save" -- an already
+    saved item's, expected to draw "Unsave" instead -- is pressed no further
+    than its trigger.
+
+    WHAT A SAVE DRAWS HAS NEVER BEEN CAPTURED, so the result is read IN PLACE:
+    a confirmation carrying the word "saved" means it is saved; the menu still
+    open with its "Save" means it was not pressed; anything else is
+    ``unknown`` -- look at your Saved items, do not retry. Unsaving is not built
+    here (census ``M C37``): unsave by hand, from the item's menu or your Saved
+    items.
+
+    Args:
+        item: the item's urn, e.g. ``urn:li:activity:<digits>``.
+        confirm_token: leave empty to preview. Pass the token from that
+            preview to actually press.
+    """
+    try:
+        return await _write_tool("save_post", item, confirm_token)
+    except Exception as exc:
+        return _error(exc)
+
+
+# ---- end lane msg7 ----
 
 
 def main() -> None:  # pragma: no cover - process entry point

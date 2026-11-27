@@ -72,6 +72,7 @@
     "linkedin_recent_searches": "clean",
     "linkedin_recruiter_insights": "not_driven:never read the page",
     "linkedin_save_job": "not_driven:never read the page",
+    "linkedin_save_post": "not_driven:never read the page",
     "linkedin_saved_jobs": "clean",
     "linkedin_scheduled_posts": "clean",
     "linkedin_search_appearances": "returns_text:the plant reached a published payload",

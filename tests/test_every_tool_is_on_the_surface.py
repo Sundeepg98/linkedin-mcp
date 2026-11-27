@@ -510,4 +510,6 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # build-msg2's eight beside the ninety-nine; that lane's branch read
     # ninety-nine too, by its own eight, so the two equal asserts merged as one.
     # Measured off the merged registry, not summed.
-    assert len(_tool_names()) == 107
+    # ONE HUNDRED AND EIGHT ON LANE MSG7 (2026-11-27): linkedin_save_post, a
+    # WRITE, measured off this branch's registry.
+    assert len(_tool_names()) == 108

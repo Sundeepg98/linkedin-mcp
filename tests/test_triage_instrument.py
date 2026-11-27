@@ -492,7 +492,13 @@ AFTER_LANE_BUILD_MSG2_M28_SPLIT = (112, {"R": 8, "W": 102, "R+W": 2})
 #: reads 8 - 1.
 AFTER_LANE_MSG7_C70 = (111, {"R": 7, "W": 102, "R+W": 2})
 
-EXPECTED_NOW = AFTER_LANE_MSG7_C70
+#: ON THE SAME LANE, MEASURED with this tree's guard: `C36` -- a WRITE -- left
+#: GAP, COVERED-UNFIRED on `linkedin_save_post` (SAVE-POST-UNDER-OWN-CURATION):
+#: one feed item he names, saved from its own permalink menu
+#: (`_audit/2026-11-27-msg7.md` section 3.4). 111 - 1 = 110, writes 102 - 1.
+AFTER_LANE_MSG7_C36 = (110, {"R": 7, "W": 101, "R+W": 2})
+
+EXPECTED_NOW = AFTER_LANE_MSG7_C36
 
 
 def test_the_headline_split_is_the_one_the_report_quotes():

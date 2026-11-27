@@ -93,6 +93,10 @@ PINNED_STRICT_PRESS_ACTIONS = frozenset(
         # permalink's one control-menu trigger, then the one item in the
         # menu it owns, shown in tests/test_mark_not_interested.py.
         "mark_not_interested",
+        # AND save_post since lane msg7 (2026-11-27, census M C36): the same
+        # trigger, then the one Save in the menu it owns, shown in
+        # tests/test_save_post.py.
+        "save_post",
         "follow_company",
         # 2026-10-10, lane S: the generic settings writer's press is aimed by
         # the control's exact name, which its gate required drawn once.
