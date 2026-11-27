@@ -13354,4 +13354,27 @@ outline printer, the three pill brute-forcers, the at-line tester, the
 href-form and href-word readers, the N 24 measurement -- and the census,
 queue, ledger, pin and tool-table edit scripts and the mutation runner. Each
 read the live lane's preserved keyed skeletons or this worktree and printed
-counts or closed words only.
+counts or closed words only. Added in the fix round: the merged-tree
+refused-address probe (the record's section 10.5), which wraps the shipped gate
+and never edits it, and the curation-receipt mutation runner (115.7).
+
+### 115.7 The curation receipt reads a change (`feed_curation.verification_verdict`)
+
+FEED-CURATION-RECEIPT-NEEDS-A-CHANGE, the shape of lane msg7's fix to the save
+receipt (its section 116). The receipt of `linkedin_mark_not_interested` (census `N 154`)
+takes the gate's reading, made just before the `Not interested` press, as its
+baseline. Hidden only when the page's main draws more undo controls than the
+gate counted there, a new undo beside the item; the menu still open with
+nothing changed is not landed; a refused gate is not pressed; anything else is
+unverified. Each sentence opens with its closed word (`feed_curation.OUTCOMES`).
+SHOWN FAILING: `tests/test_mark_not_interested.py`, its new tests on the
+lane's certified module, 7 failed and 10 passed. Six failed on the defect
+itself: an undo already on the page read hidden, beside the item or outside
+the main, and so did the menu left open beside one, a new undo outside the
+main, and a refused gate beside one, which read performed: true with only the
+trigger pressed. One failed on the new API, and both controls passed. Green:
+17 passed. Eight mutations, each killed by FAILED tests, none by an error (the
+record's section 13.3).
+
+    A RECEIPT READS A CHANGE THE PRESS MADE, NEVER A PRESENCE THE PAGE
+    ALREADY HAD.

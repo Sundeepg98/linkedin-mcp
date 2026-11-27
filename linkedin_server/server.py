@@ -14388,10 +14388,13 @@ async def linkedin_mark_not_interested(
     item's author is never read.
 
     THE UNDO IS LINKEDIN'S AND IS DRAWN ONCE. What the press draws has never
-    been captured, so the result is read IN PLACE: an ``Undo`` drawn where the
-    item was means it is hidden; the menu still open with its item means it
-    was not pressed; anything else is ``unknown`` -- look at your feed, do not
-    retry. This server never presses the undo; press it yourself while it is
+    been captured, so the result is read IN PLACE and as a CHANGE: a NEW
+    ``Undo`` beside the item, in the page's main, that was not there just
+    before the press means it is hidden; the menu still open with its item and
+    nothing changed means the press did not land; a refused gate means nothing
+    past the menu's trigger was pressed; anything else is ``unknown`` -- look
+    at your feed, do not retry. An ``Undo`` already on the page proves
+    nothing. This server never presses the undo; press it yourself while it is
     drawn if you change your mind.
 
     Args:
