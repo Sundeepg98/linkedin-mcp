@@ -298,7 +298,11 @@ def test_this_widening_bought_no_forbidden_substring_exemption():
     # 16 UNTIL 2026-11-26, when lane admit5-26 added ONE more, excusing
     # "verification" for his Verifications settings page alone
     # (VERIFICATIONS-PAGE-ADMITTED). Not an alert address.
-    assert len(readonly._FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS) == 17
+    # 17 UNTIL 2026-11-27, when lane net7 added ONE more, excusing
+    # "invitation" for the received tab's own leaf alone
+    # (/mynetwork/invitation-manager/received/, on the orchestrator's ruling
+    # for N 13). Not an alert address.
+    assert len(readonly._FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS) == 18
     for url in (CREATE_URL, DELETE_URL, FREQUENCY_URL):
         assert url not in readonly._FORBIDDEN_SUBSTRING_EXEMPTIONS
 

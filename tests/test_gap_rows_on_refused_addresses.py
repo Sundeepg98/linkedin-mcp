@@ -169,7 +169,17 @@ SCRIPT = ROOT / "scripts" / "check_gap_rows_on_refused_addresses.py"
 #: refused on that substring. The lane's other four moved rows (`J 76`,
 #: `P M7`, `P M8`, `J 163`) name no refused address in backticks, and its notes
 #: on `J 19` and `J 37` backtick none. No boundary entry changed.
-EXPECTED_GAP_ROWS = 77
+#: 79 ON LANE NET7 (2026-11-27), MEASURED by the shipped walk (77 on the
+#: base `68a4ff7`, 79 here), none removed, two added: `N 32` and `N 110`,
+#: each cell newly naming the settings nav's contact-sync page,
+#: `/mynetwork/settings/manage-syncing/`, refused on "/settings/". Each stays
+#: GAP on the step its own cell names -- an admission by name in the settings
+#: lane's own commit, on CONTACTS-PAGE-FROM-THE-SETTINGS-NAV -- under
+#: INCIDENTAL-CAPTURE-IS-NOT-A-RULING. Two more cells name an address this
+#: lane admitted, so neither counts: `N 14`'s note names the received tab's
+#: own leaf (admitted with its "invitation" exemption) and `N 97`'s cell the
+#: full suggestion lists (refused until then by allowlist silence alone).
+EXPECTED_GAP_ROWS = 79
 
 
 def _run(*args: str) -> subprocess.CompletedProcess:

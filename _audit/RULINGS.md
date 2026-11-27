@@ -949,7 +949,7 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | a heading naming a ruling | 154 | 326 |
 | a bold line opening on RULING/RULED | 66 | 155 |
 | the phrase THE RULING | 43 | 72 |
-| a named -RULING id | 44 | 114 |
+| a named -RULING id | 45 | 115 |
 | the phrase standing ruling | 18 | 41 |
 | a lead or operator ruling in prose | 44 | 111 |
 
