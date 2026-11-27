@@ -58,7 +58,7 @@ from typing import NamedTuple, Optional
 
 import pytest
 
-from linkedin_server import readonly
+from linkedin_server import press, readonly, writes
 from linkedin_server.errors import WriteAttemptError
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -308,6 +308,40 @@ def test_each_admission_newly_admits_exactly_its_own_spellings(adm):
     lost = sorted(u for u in corpus if before[u] and not after[u])
     assert gained == sorted(own), (adm.key, gained)
     assert lost == [], (adm.key, lost)
+
+
+@pytest.mark.parametrize("adm", ADMISSIONS, ids=KEYS)
+def test_the_press_gate_refuses_every_control_on_the_page(adm):
+    """READ-PAST-AN-ACT-SUBSTRING'S THIRD CONDITION, "the press gate still
+    refusing every control", MEASURED OFFLINE the way lane msg7 measured
+    ``/feed/hashtag/`` (the orchestrator's addendum to
+    CONTACTS-PAGE-FROM-THE-SETTINGS-NAV, 2026-11-27). No entry of
+    ``press.SENSITIVITY_BASES`` reaches the page, so ``sensitivity_basis`` is
+    None and ``_basis_refusal`` refuses every press there before the click;
+    and no sanctioned write spec's pattern or template names it."""
+    for url in sorted(_own(adm)):
+        assert press.sensitivity_basis(url) is None, (adm.key, url)
+        # The gate's own refusal path, for every shape it sanctions: refused
+        # before any page contact, never priced (the order of 14:12).
+        for shape in press.SANCTIONED_SHAPES:
+            verdict = press.check_basis(url, shape)
+            assert verdict.get("refused") == "no_sensitivity_basis", (adm.key, url, shape, verdict)
+        path = url.split("linkedin.com", 1)[1].rstrip("/")
+        for name, spec in writes.SANCTIONED_WRITES.items():
+            pattern = getattr(spec, "url_pattern", None)
+            assert not (pattern is not None and pattern.match(url)), (adm.key, name, url)
+            assert path not in (getattr(spec, "url_template", None) or ""), (adm.key, name, url)
+
+
+def test_the_press_gate_check_can_fail(monkeypatch):
+    """THE CHECK CAN FAIL: the feed is a priced surface, and a basis planted
+    for a prefix the contact-syncing page carries reaches it by containment --
+    the inheritance that held the hashtag page back."""
+    assert press.sensitivity_basis(f"{B}/feed/") is not None
+    planted = (("/mynetwork/", {"kind": "sensitive", "counters": ("off_state",),
+                                "why": "planted by this test"}),) + tuple(press.SENSITIVITY_BASES)
+    monkeypatch.setattr(press, "SENSITIVITY_BASES", planted)
+    assert press.sensitivity_basis(f"{B}/mynetwork/settings/manage-syncing") is not None
 
 
 def test_the_forbidden_tuple_is_unchanged_and_every_crossed_substring_is_in_it():

@@ -151,7 +151,7 @@ async def _text(locator: Any, failed: list[int]) -> str:
     return _collapsed(value)
 
 
-async def _card(card: Any, out: dict[str, Any], failed: list[int]) -> dict[str, Any]:
+async def _subscription_card(card: Any, out: dict[str, Any], failed: list[int]) -> dict[str, Any]:
     """One subscription card, closed words and counts. Its text stays here."""
     headers = card.locator(_HEADER)
     header = await _text(headers.nth(0), failed) if await _count(headers, failed) == 1 else ""
@@ -202,7 +202,7 @@ async def read_premium_account(page: Any) -> dict[str, Any]:
     cards = region.locator(_CARDS)
     for index in range(min(await _count(cards, failed), MAX_PARTS)):
         out["subscriptions_seen"] += 1
-        out["subscriptions"].append(await _card(cards.nth(index), out, failed))
+        out["subscriptions"].append(await _subscription_card(cards.nth(index), out, failed))
     out["reads_failed"] = failed[0]
     if not out["page_heading_drawn"]:
         raise ExtractionFailedError(
