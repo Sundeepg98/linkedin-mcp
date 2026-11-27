@@ -4,7 +4,7 @@
  "seconds": 596.7,
  "scope": "full-suite",
  "pytest_exit": 0,
- "test_files": 75,
+ "test_files": 80,
  "edges": {
   "tests/test_a_census_locator_names_its_row.py": [
    "_audit/_census/blocker-assignments.tsv",
@@ -2374,9 +2374,43 @@
   ],
   "tests/test_writes.py": [
    "tests/fixtures/job_detail.html",
-   "tests/fixtures/job_detail_following.html",
+   "tests/fixtures/jobs_tracker_empty.html",
+   "tests/fixtures/jobs_tracker_row.html",
+   "tests/fixtures/manage_pages_following_hydrated.html",
+   "tests/fixtures/profile_topcard.html"
+  ],
+  "tests/test_writes_conservation.py": [
+   "tests/fixtures/job_detail.html",
    "tests/fixtures/job_detail_following_hydrated.html",
    "tests/fixtures/job_detail_hydrated.html",
+   "tests/fixtures/jobs_tracker_row.html"
+  ],
+  "tests/test_writes_gate.py": [
+   "tests/fixtures/job_detail.html",
+   "tests/fixtures/job_detail_following.html",
+   "tests/fixtures/job_detail_following_hydrated.html",
+   "tests/fixtures/jobs_tracker_empty.html",
+   "tests/fixtures/jobs_tracker_row.html",
+   "tests/fixtures/manage_pages_following_hydrated.html",
+   "tests/fixtures/profile_topcard.html",
+   "tests/fixtures/synthetic/company_page_follow.html"
+  ],
+  "tests/test_writes_list.py": [
+   "tests/fixtures/job_detail.html",
+   "tests/fixtures/jobs_tracker_empty.html",
+   "tests/fixtures/manage_pages_following_hydrated.html",
+   "tests/fixtures/profile_topcard.html"
+  ],
+  "tests/test_writes_perform.py": [
+   "tests/fixtures/job_detail.html",
+   "tests/fixtures/jobs_tracker_empty.html",
+   "tests/fixtures/jobs_tracker_row.html",
+   "tests/fixtures/manage_pages_following_hydrated.html",
+   "tests/fixtures/profile_topcard.html"
+  ],
+  "tests/test_writes_state.py": [
+   "tests/fixtures/job_detail.html",
+   "tests/fixtures/job_detail_following_hydrated.html",
    "tests/fixtures/jobs_tracker_empty.html",
    "tests/fixtures/jobs_tracker_row.html",
    "tests/fixtures/manage_pages_following_hydrated.html",
@@ -2387,5 +2421,27 @@
   "tests/test_readers_emit_no_page_string.py",
   "tests/test_the_harness_grant_cannot_authorise_a_write.py",
   "tests/test_the_search_shaper_emits_no_name.py"
+ ],
+ "rerecorded": [
+  {
+   "taken_at": "2026-11-28",
+   "head": "3c67696f",
+   "seconds": 123.9,
+   "scope": "partial: tests/test_writes.py tests/test_writes_conservation.py tests/test_writes_gate.py tests/test_writes_perform.py tests/test_writes_state.py tests/test_writes_list.py -- tests/test_writes.py and the five files it was split into on 2026-11-27 (lane ci8); these entries replace the full recording's, every other entry is the full recording's",
+   "pytest_exit": 0,
+   "replaced": {
+    "tests/test_writes.py": [
+     "tests/fixtures/job_detail.html",
+     "tests/fixtures/job_detail_following.html",
+     "tests/fixtures/job_detail_following_hydrated.html",
+     "tests/fixtures/job_detail_hydrated.html",
+     "tests/fixtures/jobs_tracker_empty.html",
+     "tests/fixtures/jobs_tracker_row.html",
+     "tests/fixtures/manage_pages_following_hydrated.html",
+     "tests/fixtures/profile_topcard.html"
+    ]
+   },
+   "dropped": "'.git' from tests/test_writes_perform.py: in a git worktree .git is a FILE, so the recorder's '.git/' prefix filter and prune()'s is_file() test both let it through; a main-checkout recording prunes it as a directory"
+  }
  ]
 }
