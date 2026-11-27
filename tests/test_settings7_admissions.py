@@ -18,6 +18,17 @@ draws each as a setting link whose path words matched by keyed shape:
 * ``/mypreferences/m/download-my-data/``, labelled ``Download your data``
   (census ``P P3``, "Get a copy of his data"), under the same heading.
 
+And a third, on the orchestrator's order CONTACTS-PAGE-FROM-THE-SETTINGS-NAV
+(2026-11-27 13:25): his contact-syncing page, drawn on session 11's capture of
+his Account preferences category page (load 8;
+``tests/fixtures/live11/sessions_surface_words.html``) as ``Sync contacts``
+under ``Syncing options``, a link to ``/mynetwork/settings/manage-syncing``
+(census ``N 32`` and ``N 110``, whose next steps lane net7 re-aims). It trips
+``/settings/`` and ``settings``, the 2026-09-03 second gate over the
+toggle-bearing settings family -- an act's ground -- so its line is paired
+with ONE exemption excusing exactly those two for that anchored address alone
+(READ-PAST-AN-ACT-SUBSTRING, the "Sharing profile edits" precedent).
+
 READ-ONLY, ZERO PRESSES: clearing his search history and requesting his
 archive are each a write with its own row and spec; the press gate refuses
 every control on either page.
@@ -28,8 +39,10 @@ admit5-26 applied it (``tests/test_admit5_26_admissions.py``), unchanged:
 1. ONE exact, anchored pattern per address, carrying no wildcard.
 2. A control is shown failing: every sibling spelling is still refused, on the
    gate its entry names, and the refusal's own sentence is checked.
-3. No forbidden substring is crossed, so no exemption exists for either
-   address, and the forbidden tuple is unchanged.
+3. Where a forbidden substring is crossed, the exemption excuses EXACTLY the
+   substrings the address trips, for exactly that anchored address, and the
+   forbidden tuple is unchanged; otherwise no exemption exists. EITHER GATE
+   ALONE ADMITS NOTHING.
 4. The blast radius, measured on concrete urls before and after (never a
    grep): each admission newly admits exactly its own spellings and refuses
    nothing new.
@@ -56,6 +69,7 @@ import blast_radius  # noqa: E402
 B = "https://www.linkedin.com"
 
 ALLOWLIST_SENTENCE = "not on the read-only allowlist"
+PATTERN_WOULD_ADMIT = "A READ PATTERN DOES ADMIT THIS ADDRESS"
 
 #: The forbidden tuple's size when this lane began. An admission here never
 #: shortens it.
@@ -63,6 +77,7 @@ FORBIDDEN_TUPLE_SIZE = 33
 
 #: Where the spellings were measured.
 PRIVACY_WORDS = ROOT / "tests" / "fixtures" / "live12" / "privacy_words.html"
+ACCOUNT_WORDS = ROOT / "tests" / "fixtures" / "live11" / "sessions_surface_words.html"
 
 
 class Sibling(NamedTuple):
@@ -79,6 +94,11 @@ class Admission(NamedTuple):
     address: str
     label: str
     siblings: tuple
+    #: The forbidden substrings the address trips and its paired exemption
+    #: excuses; empty for an allowlist-silence admission.
+    excused: frozenset = frozenset()
+    #: The words fixture the spelling was measured on.
+    measured_on: Path = PRIVACY_WORDS
 
 
 def _slash_twin(url: str) -> str:
@@ -128,6 +148,29 @@ ADMISSIONS = (
             Sibling(f"{B}/psettings/member-data", "/psettings/", "the legacy namespace"),
         ),
     ),
+    Admission(
+        key="manage-syncing",
+        rows=("N 32", "N 110"),
+        address=f"{B}/mynetwork/settings/manage-syncing",
+        label="Sync contacts",
+        excused=frozenset({"/settings/", "settings"}),
+        measured_on=ACCOUNT_WORDS,
+        siblings=(
+            Sibling(f"{B}/mynetwork/settings/", "/settings/", "the settings root under /mynetwork/"),
+            Sibling(f"{B}/mynetwork/settings/manage-syncing/contacts/", "/settings/", "a sub-path"),
+            Sibling(f"{B}/mynetwork/settings/manage-syncing?trk=x", "/settings/", "a query"),
+            Sibling(f"{B}/mynetwork/settings/Manage-Syncing", "/settings/", "another case"),
+            Sibling(f"{B}/mynetwork/settings/manage-syncing-all", "/settings/", "a longer leaf"),
+            Sibling(f"{B}/mynetwork/settings/manage-calendar", "/settings/",
+                    "a sibling settings page, never drawn"),
+            Sibling(f"{B}/mypreferences/d/settings/manage-syncing", "/settings/",
+                    "the settings tree under /mypreferences/"),
+            Sibling(f"{B}/mynetwork/import-contacts/", None,
+                    "the address-book import page (CONTACT-IMPORT-STAYS-MANUAL)"),
+            Sibling(f"{B}/mynetwork/import-contacts/saved-contacts/", None,
+                    "the imported-contacts manager, which no capture has drawn"),
+        ),
+    ),
 )
 
 KEYS = [a.key for a in ADMISSIONS]
@@ -158,7 +201,7 @@ def _trips(url: str) -> frozenset:
 @pytest.mark.parametrize("adm", ADMISSIONS, ids=KEYS)
 def test_the_spelling_is_the_one_the_privacy_capture_draws_with_its_label(adm):
     """MEASURED: the address and its label are the words the capture drew."""
-    text = PRIVACY_WORDS.read_text(encoding="ascii")
+    text = adm.measured_on.read_text(encoding="ascii")
     assert text.count('href="%s"' % adm.address) == 1, adm.key
     link = text.split('href="%s"' % adm.address, 1)[1].split("</a>", 1)[0]
     assert "\n%s\n" % adm.label in link, adm.key
@@ -182,10 +225,33 @@ def test_exactly_one_anchored_line_carries_it_and_it_has_no_wildcard(adm):
 
 
 @pytest.mark.parametrize("adm", ADMISSIONS, ids=KEYS)
-def test_no_substring_is_crossed_and_no_exemption_exists(adm):
-    # MEASURED against the shipped tuple.
-    assert _trips(adm.address) == frozenset(), (adm.key, _trips(adm.address))
-    assert _exemptions_for(adm.address) == [], adm.key
+def test_the_exemption_excuses_exactly_what_the_address_trips(adm):
+    # MEASURED against the shipped tuple, not copied from the table above.
+    assert _trips(adm.address) == adm.excused, (adm.key, _trips(adm.address))
+    entries = _exemptions_for(adm.address)
+    if not adm.excused:
+        assert entries == [], (adm.key, entries)
+        return
+    assert len(entries) == 1, (adm.key, entries)
+    assert entries[0][1] == adm.excused, (adm.key, entries[0][1])
+
+
+@pytest.mark.parametrize(
+    "adm", [a for a in ADMISSIONS if a.excused],
+    ids=[a.key for a in ADMISSIONS if a.excused],
+)
+def test_without_the_exemption_the_substring_refuses_and_says_a_pattern_would_admit(
+    adm, monkeypatch
+):
+    """THE FIRST GATE ALONE: the allowlist line cannot admit it by itself."""
+    kept = tuple(
+        (p, s) for p, s in readonly._FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS
+        if not p.match(adm.address)
+    )
+    assert len(kept) == len(readonly._FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS) - 1
+    monkeypatch.setattr(readonly, "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS", kept)
+    assert not readonly.is_read_url(adm.address)
+    assert PATTERN_WOULD_ADMIT in _refusal(adm.address), adm.key
 
 
 @pytest.mark.parametrize("adm", ADMISSIONS, ids=KEYS)
@@ -225,22 +291,30 @@ def test_each_admission_newly_admits_exactly_its_own_spellings(adm):
         | {a.address for a in ADMISSIONS}
     )
     allow = readonly._ALLOWED_URL_PATTERNS
+    exempt = readonly._FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS
     after = {url: readonly.is_read_url(url) for url in corpus}
     try:
         readonly._ALLOWED_URL_PATTERNS = tuple(
             p for p in allow if not p.match(adm.address)
         )
+        readonly._FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS = tuple(
+            (p, s) for p, s in exempt if not p.match(adm.address)
+        )
         before = {url: readonly.is_read_url(url) for url in corpus}
     finally:
         readonly._ALLOWED_URL_PATTERNS = allow
+        readonly._FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS = exempt
     gained = sorted(u for u in corpus if after[u] and not before[u])
     lost = sorted(u for u in corpus if before[u] and not after[u])
     assert gained == sorted(own), (adm.key, gained)
     assert lost == [], (adm.key, lost)
 
 
-def test_the_forbidden_tuple_is_unchanged():
+def test_the_forbidden_tuple_is_unchanged_and_every_crossed_substring_is_in_it():
     assert len(readonly._FORBIDDEN_URL_SUBSTRINGS) == FORBIDDEN_TUPLE_SIZE
+    for adm in ADMISSIONS:
+        for bad in adm.excused:
+            assert bad in readonly._FORBIDDEN_URL_SUBSTRINGS, (adm.key, bad)
 
 
 def test_the_table_holds_no_duplicate_address():

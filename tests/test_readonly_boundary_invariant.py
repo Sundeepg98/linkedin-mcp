@@ -2051,7 +2051,13 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # line, his data-download page in the same tree, drawn on the same
     # category page, a named settings page in its own commit (allowlist
     # silence alone, no exemption); every other key byte-identical (17 of 18).
-    "_ALLOWED_URL_PATTERNS": "228d24c9fa344a2f",
+    #
+    # 228d24c9fa344a2f until lane settings7's third admission: one anchored
+    # line, his contact-syncing page, /mynetwork/settings/manage-syncing, on
+    # CONTACTS-PAGE-FROM-THE-SETTINGS-NAV (the orchestrator, 2026-11-27 13:25),
+    # paired with one exemption below; only this key and the
+    # pattern-exemption key moved (16 of 18 byte-identical).
+    "_ALLOWED_URL_PATTERNS": "0c47f74920c44695",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     # 419e64a3cd92ec7e until the same REVIEW: commit: a third entry, excusing
     # exactly {"/follow"} for exactly the anchored follower-list address.
@@ -2080,7 +2086,12 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # address trips, measured -- for exactly his Verifications settings page,
     # the per-address exemption VERIFICATIONS-PAGE-ADMITTED names; the
     # forbidden tuple is unchanged at 33.
-    "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "8a0202843de29ce2",
+    # 8a0202843de29ce2 until lane settings7's third admission (2026-11-27):
+    # one more, excusing exactly {"/settings/", "settings"} -- the two
+    # substrings the address trips, measured -- for exactly his
+    # contact-syncing page, /mynetwork/settings/manage-syncing; the forbidden
+    # tuple is unchanged at 33.
+    "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "59a59624d142d203",
     "_FORBIDDEN_URL_SUBSTRINGS": "b0291a66ec9bd51e",
     # 23aece1483afdee9 until 2026-09-19. See the re-freeze note above: eleven
     # detector classes added, zero removed, and the direction is pinned by

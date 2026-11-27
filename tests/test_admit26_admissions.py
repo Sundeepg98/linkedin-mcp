@@ -249,8 +249,13 @@ ADMISSIONS = (
                     "the network manager's root"),
             Sibling(f"{B}/mynetwork/invite-connect/invitations/", "/invite",
                     "the invitation surface the forbidden substrings exist for"),
-            Sibling(f"{B}/mynetwork/settings/manage-syncing/", "/settings/",
-                    "a syncing settings page"),
+            # The syncing settings page this control named,
+            # /mynetwork/settings/manage-syncing/, was admitted by name on its
+            # own line by lane settings7 (2026-11-27,
+            # CONTACTS-PAGE-FROM-THE-SETTINGS-NAV); the settings root beside
+            # it stays refused, on the same gate.
+            Sibling(f"{B}/mynetwork/settings/", "/settings/",
+                    "the settings root under /mynetwork/"),
             Sibling(f"{B}/mynetworkx/", None, "a longer word"),
             Sibling(f"{B}/mynetwork/x/../../in/someone-else/", None,
                     "a TRAVERSAL onto a third party"),

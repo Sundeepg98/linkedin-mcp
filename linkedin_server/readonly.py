@@ -2905,6 +2905,23 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # sub-path and a longer leaf stay refused, as does its sensitive
     # neighbour on the same heading, `/mypreferences/m/demographic-info/`.
     re.compile(r"^https://www\.linkedin\.com/mypreferences/m/download-my-data/?$"),
+    # His contact-syncing page (census N 32 and N 110, whose next steps lane
+    # net7 re-aims), on the orchestrator's order
+    # CONTACTS-PAGE-FROM-THE-SETTINGS-NAV (2026-11-27 13:25): drawn on
+    # session 11's capture of his Account preferences category page (load 8;
+    # `tests/fixtures/live11/sessions_surface_words.html`) as 'Sync
+    # contacts' under 'Syncing options', the settings nav's one contacts
+    # entry. THIS LINE IS HALF OF A TWO-GATE ADMISSION: the address trips
+    # "/settings/" and "settings", the 2026-09-03 second gate over the
+    # toggle-bearing settings family -- an act's ground, so
+    # READ-PAST-AN-ACT-SUBSTRING reads past it -- and the paired LANE
+    # SETTINGS7 entry in `_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS` excuses
+    # exactly those two for exactly this anchored address (the "Sharing
+    # profile edits" precedent); NEITHER HALF ALONE ADMITS ANYTHING. Every
+    # other page under /mynetwork/settings/, a query, a sub-path and the
+    # imported-contacts manager (`/mynetwork/import-contacts/...`, never
+    # drawn) stay refused. Its switches are writes the press gate refuses.
+    re.compile(r"^https://www\.linkedin\.com/mynetwork/settings/manage-syncing/?$"),
 )
 
 #: Substrings that must never appear in a navigation target, checked before
@@ -3430,6 +3447,18 @@ _FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS: tuple[
     (
         re.compile(r"^https://www\.linkedin\.com/mypreferences/d/verifications/?$"),
         frozenset({"verification"}),
+    ),
+    # LANE SETTINGS7 (2026-11-27) -- the second gate of the pair whose first
+    # gate is the matching LANE SETTINGS7 line in `_ALLOWED_URL_PATTERNS`;
+    # the argument and the order are written there. It excuses exactly the
+    # substrings its address trips, measured with the shipped tuple; the
+    # tuple itself is unchanged.
+    #
+    # His contact-syncing page, tripping "/settings/" and "settings" and
+    # nothing else.
+    (
+        re.compile(r"^https://www\.linkedin\.com/mynetwork/settings/manage-syncing/?$"),
+        frozenset({"/settings/", "settings"}),
     ),
 )
 
