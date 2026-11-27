@@ -119,6 +119,11 @@ EXPECTED_TOOLS = (
     "linkedin_my_following_list",
     "linkedin_my_unfollowed_list",
     "linkedin_my_advertising_data",
+    # 2026-11-27, lane settings7, each a READ of one admitted settings page
+    # built on live session 12's capture of it: his Verifications page
+    # (census P K1) and his Manage Premium account page (P N22).
+    "linkedin_my_verifications",
+    "linkedin_my_premium_account",
 )
 
 
@@ -510,4 +515,7 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # build-msg2's eight beside the ninety-nine; that lane's branch read
     # ninety-nine too, by its own eight, so the two equal asserts merged as one.
     # Measured off the merged registry, not summed.
-    assert len(_tool_names()) == 107
+    # ONE HUNDRED AND NINE ON LANE SETTINGS7 (2026-11-27): two READS,
+    # linkedin_my_verifications (P K1) and linkedin_my_premium_account
+    # (P N22), measured off this branch's registry.
+    assert len(_tool_names()) == 109

@@ -1127,6 +1127,71 @@ can return an ad's urn to him WITHOUT pressing ads he did not name. Option
 (b) is declined: it presses the menus of ads he did not name, for a low-value
 row. Row `N 200`: next step this question, held, until the reopener is met.
 
+### Q-VERIFICATION-DELETE -- a Delete drawn by name whose confirmation nobody has seen
+
+Added 2026-11-27 by lane settings7 (`_audit/2026-11-27-settings7.md`,
+section 7). Row: `P K7`, "Remove a verification". Session 12's capture of his
+Verifications page (load 15, served exact;
+`tests/fixtures/live12/verifications_words.html`) draws one Workplace
+verification whose delete section holds one button reading `Delete`, by
+name. What the press opens -- a confirmation, or the removal itself -- has
+never been captured, and the act has no exact inverse: a verification is
+re-earned through LinkedIn's own flow, not put back by a control. Lane
+settings7 builds reads only. The question: does a write lane build `P K7` on
+`J-19-BUILT-BEHIND-THE-GRANT`'s shape -- behind the grant, REFUSING until its
+confirm dialog is captured, fired only on his order -- or does it hold at
+GAP? The lane's default, with no answer on disk: it holds. Row `P K7`: next
+step this question.
+
+**Answered 2026-11-27 by the orchestrator** (`_TEAM_LEAD_RULINGS1`, 12:55 IST;
+integration 7 registers it): option (b), HOLD at GAP. Ground: removing a
+verification has no inverse and changes what other people see on his
+profile, and nothing captured shows that the first press of `Delete` only
+opens a confirmation -- if that press IS the act, a capture press would do
+the very thing the row is about. The lane was ordered to measure offline
+whether the captured control declares a popup or a controlled dialog; it
+does not: the button carries `class`, `id` and `type` only, with 0
+`aria-haspopup`, 0 `aria-controls` and 0 `aria-expanded` on it or on any
+ancestor up to `main`, and the page draws no dialog (lane settings7's record,
+section 7). So, by the answer, the row stays at RULING and only he can open
+it. Row `P K7`: next step this question, held.
+
+### Q-P-N22-SPLITS -- a compound row whose page draws its subscription half and not its payments half
+
+Added 2026-11-27 by lane settings7 (`_audit/2026-11-27-settings7.md`,
+section 7). Row: `P N22`, "Subscriptions and payments". Session 12's capture
+of his Manage Premium account page (load 33, served exact;
+`tests/fixtures/live12/premium_manage_account_words.html`) draws one
+subscription card: its plan, `Premium Career`, and three controls,
+`Switch plans`, `Manage subscription` and `Cancel subscription`. It draws NO
+date, price or payment: the card's two description lines carry no digit,
+measured on their keyed shapes. The lane built the subscription read
+(`linkedin_my_premium_account`, closed words, nothing pressed). The
+payments half is on his purchase page, which `Manage subscription` opens
+(`/manage/purchases-payments/purchases/<his purchase id>`, refused), with
+`View purchase history` (`/manage/purchases-payments/purchases/`, drawn --
+`P N22`'s cell, captured 2026-09-23 -- and refused) beside it. The halves now need different STATES,
+COMPOUND-ROW-SPLITS-ONLY-ON-STATE's ground, the `J-114-SPLITS` and
+`J-37-SPLITS` shape. The question: split `P N22` -- the subscription half
+COVERED-UNFIRED on the new read, the payments half the next free id, GAP,
+next step ADMIT his purchase page by name -- or hold it whole at GAP? The
+lane's default, with no answer on disk: it holds whole, at GAP. Row `P N22`:
+next step this question.
+
+**Answered 2026-11-27 by the orchestrator** (`_TEAM_LEAD_RULINGS1`, 12:55 IST;
+integration 7 registers it): option (a), SPLIT, under
+COMPOUND-ROW-SPLITS-ONLY-ON-STATE (the `J-114-SPLITS` / `J-37-SPLITS`
+precedent). The subscription half keeps `P N22`, COVERED-UNFIRED on the new
+read, which uses closed words, presses nothing and cites the Manage Premium
+capture (session 12, load 33). The payments half -- renewal and billing
+dates, price, payment method -- takes the next free id at GAP, its next step
+ADMIT of a STATIC, named purchases address under NAMED-SETTINGS-PAGES-RATIFIED;
+NEVER the page-drawn `/manage/purchases-payments/purchases/<id>`: a page may
+veto, it never supplies an address or an id. Applied by lane settings7: the
+payments half is `P N32`, next step ADMIT
+`https://www.linkedin.com/manage/purchases-payments/purchases/` ('View
+purchase history', drawn), not admitted by the lane.
+
 ### Q-MEDIA-POST-AUDIENCE -- a photo or a video on the composer whose audience is unread
 
 Added 2026-11-26 at integration 6, from lane build-msg2's question 2

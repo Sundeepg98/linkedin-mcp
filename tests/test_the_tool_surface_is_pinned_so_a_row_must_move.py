@@ -156,6 +156,10 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_my_following_list": (),
     "linkedin_my_unfollowed_list": (),
     "linkedin_my_advertising_data": (),
+    # 2026-11-27, lane settings7: two READS, no parameter each, built on live
+    # session 12's captures. Census P K1, P N22.
+    "linkedin_my_verifications": (),
+    "linkedin_my_premium_account": (),
     "linkedin_my_profile": ("details", "include_skills"),
     "linkedin_new_messages": (),
     "linkedin_newsletter_subscriptions": (),
@@ -858,7 +862,15 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: build-msg2's eight tools beside the ninety-nine and 148, counted off the
 #: merged registry, never summed; that lane's census decisions are its own,
 #: above.
-PINNED_TOOL_COUNT = 107
+#: **ON LANE SETTINGS7 (2026-11-27): 109 TOOLS AND 162 PARAMETERS** -- two
+#: READS of no parameter, `linkedin_my_verifications()` and
+#: `linkedin_my_premium_account()`, beside the one hundred and seven and 162,
+#: counted off `mcp.list_tools()`, never summed. THE CENSUS DECISION, IN THE
+#: SAME COMMIT: `P K1` GAP -> COVERED-UNFIRED on the verifications read, never
+#: fired; `P N22` STAYS GAP -- the read serves its subscription half, the page
+#: draws no date, price or payment, and whether the row splits is the
+#: orchestrator's (`Q-P-N22-SPLITS`). See `_audit/2026-11-27-settings7.md`.
+PINNED_TOOL_COUNT = 109
 PINNED_PARAMETER_COUNT = 162
 
 
