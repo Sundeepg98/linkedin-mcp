@@ -231,7 +231,7 @@ N 22	N	R	-	SIBLING:N 15	INFERRED	tests/fixtures/live12/mynetwork.html ; N 15
 N 24	N	R	-	CAPTURE:connections-sort-and-filters	MEASURED	tests/fixtures/synthetic/live12_connections_words.html ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
 N 28	N	R	-	SIBLING:N 91	INFERRED	tests/fixtures/synthetic/live12_people_panel_words.html ; N 91
 N 29	N	W	R3	TARGET:a 1st-degree connection he names for removal	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::`N 29`: the row menu of one connection he names ; RULING:RELATION-REMOVALS-BUILT-BEHIND-GRANTS
-N 32	N	R	-	ADMIT:https://www.linkedin.com/mynetwork/settings/manage-syncing/	MEASURED	_audit/2026-09-28-lane-s-settings.md::A-SYNCING ; tests/fixtures/live12/mynetwork.html
+N 32	N	R	-	CAPTURE:admit-mynetwork-settings-manage-syncing	MEASURED	tests/fixtures/live11/sessions_surface.html ; _audit/2026-09-28-lane-s-settings.md::A-SYNCING
 N 34	N	W	R1	TARGET:a member he names to follow or unfollow	INFERRED	RULING:NAMED-PROFILE-READ-BEHIND-A-GRANT ; _audit/_census/write-classes.tsv::queued:THIRD-PARTY-PROFILE-FORBIDDEN
 N 36	N	W	R1	TARGET:a member he names to follow or unfollow	INFERRED	RULING:NAMED-PROFILE-READ-BEHIND-A-GRANT ; _audit/_census/write-classes.tsv::queued:THIRD-PARTY-PROFILE-FORBIDDEN
 N 37	N	W	R1	CAPTURE:feed-item-permalink-menu	MEASURED	tests/fixtures/live11/permalink_member_post_menu_open.html ; RULING:HIS-OWN-CURATION-NOT-OUTWARD
@@ -273,7 +273,7 @@ N 99	N	R	-	TARGET:a school Page he names	NAMED	_audit/_census/read-addresses.tsv
 N 100	N	R	-	TARGET:a school Page he names	NAMED	_audit/_census/read-addresses.tsv::UNDER THE WHO/WHICH RULE, EXTENDED ; RULING:OPERATOR-NAMES-THE-TARGET
 N 103	N	R	-	SIBLING:lane-NP	MEASURED	_audit/2026-10-10-lane-b2-network-build.md::A third first render without the section
 N 104	N	R	-	RULING:Q-ORG-IDENTITY	MEASURED	_audit/2026-10-10-lane-b2-network-build.md::every segment carries letters
-N 110	N	W	R3	ADMIT:https://www.linkedin.com/mynetwork/settings/manage-syncing/	MEASURED	_audit/_census/completeness-annotations.tsv::Settings: sync calendar and contacts ; _audit/_census/write-classes.tsv::queued:CONTACTS-MANAGER-ADMISSION
+N 110	N	W	R3	CAPTURE:admit-mynetwork-settings-manage-syncing	MEASURED	tests/fixtures/live11/sessions_surface.html ; _audit/2026-09-28-lane-s-settings.md::A-SYNCING
 N 111	N	W	R3	TARGET:a 1st-degree connection he names, whose skill he endorses	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::| C3 | `endorse_skill` ; RULING:OPERATOR-NAMES-THE-TARGET
 N 112	N	W	R3	TARGET:a 1st-degree connection he names, whose skill he endorses	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::| C3 | `endorse_skill` ; RULING:OPERATOR-NAMES-THE-TARGET
 N 113	N	W	R3	TARGET:a 1st-degree connection he names, whose skill he endorses	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::| C3 | `endorse_skill` ; RULING:OPERATOR-NAMES-THE-TARGET
