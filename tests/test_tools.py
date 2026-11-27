@@ -1413,8 +1413,13 @@ async def test_a_checkbox_filter_emits_its_parameter_only_when_it_is_on(
     # `sort_by`, none of which happens. Five false positives per call site is
     # how a checker's output stops being read, which is the same failure as a
     # test that cannot fail.
-    on_kwargs: dict[str, Any] = {argument: True}
-    off_kwargs: dict[str, Any] = {argument: False}
+    # ``job_type`` RIDES BOTH CALLS SINCE LANE JOBS7 (2026-11-27): a keyword
+    # search setting only arguments the AI route honours asks for the AI
+    # address, which carries no filter, so ``easy_apply`` alone would never
+    # reach the classic composition this test is about. One refused argument
+    # keeps all four flags on it, on and off alike.
+    on_kwargs: dict[str, Any] = {argument: True, "job_type": "full_time"}
+    off_kwargs: dict[str, Any] = {argument: False, "job_type": "full_time"}
     await linkedin_search_jobs(keywords="node.js engineer", **on_kwargs)
     await linkedin_search_jobs(keywords="node.js engineer", **off_kwargs)
 

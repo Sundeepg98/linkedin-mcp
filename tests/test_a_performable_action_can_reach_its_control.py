@@ -160,9 +160,10 @@ _TARGETS: dict[str, object] = {
     # the autouse fixture above provides.
     "thread_and_file": {"thread": "2-SYNTHETICTHREADAAAA==", "file": "shape-example.png"},
     # 2026-11-25, lane build-jmn26 (J 31): one job search, as the one query
-    # spelling ``search_alert_switch.query_for`` composes from his keywords
-    # and location. Declared shapes, not his data.
-    "job_search": "keywords=some+role&location=somewhere",
+    # spelling ``search_alert_switch.query_for`` composes from his keywords.
+    # Declared shapes, not his data. Keywords alone since lane jobs7's AI arm
+    # (2026-11-27): a place is refused until the AI route's place is measured.
+    "job_search": "keywords=some+role",
     # 2026-11-26, lane build-jobs2 (J 163): his answer, one of the two
     # buttons the feedback block draws.
     "recommendations_feedback": "yes",

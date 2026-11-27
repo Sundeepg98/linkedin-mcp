@@ -18,7 +18,6 @@ J 17	J	R	-	CAPTURE:C-SRCH-2	MEASURED	_audit/2026-11-26-live-session-12.md::REDIR
 J 18	J	R	-	SIBLING:J 3	MEASURED	_audit/2026-11-26-live-session-12.md::REDIRECTED to the AI route ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
 J 19	J	W	-	TARGET:his order to clear his recent job searches, the press being the act	MEASURED	_audit/2026-11-25-build-jmn26.md::What the press opens -- a confirmation, or nothing ; RULING:J-19-BUILT-BEHIND-THE-GRANT
 J 28	J	W	-	TARGET:a job posting he names to report as closed	NAMED	_audit/2026-09-28-rulings-build-classes.md::a report is never fired for a proof unless he names a real item to report
-J 31	J	W	-	BUILD:tests/fixtures/ai_search/jobs_search_ai.html	MEASURED	_audit/2026-11-26-live-session-12.md::REDIRECTED to the AI route ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
 J 32	J	W	-	TARGET:a company Page he names, to create a job alert from	INFERRED	RULING:OPERATOR-NAMES-THE-TARGET ; J 32
 J 33	J	W	-	TARGET:a job alert of his he names	INFERRED	RULING:HIS-OWN-CURATION-NOT-OUTWARD ; J 33
 J 34	J	W	-	TARGET:a job alert of his he names	INFERRED	RULING:HIS-OWN-CURATION-NOT-OUTWARD ; J 33

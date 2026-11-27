@@ -13735,8 +13735,8 @@ def _search_alert_refusal(why: str) -> dict[str, Any]:
     return {
         "error": "bad_argument",
         "message": (
-            "a job alert is set on one search, composed from its keywords and "
-            f"an optional location: {why} Nothing was loaded."
+            "a job alert is set on one search, composed from its keywords: "
+            f"{why} Nothing was loaded."
         ),
         "performed": False,
     }
@@ -13748,19 +13748,23 @@ async def linkedin_set_search_job_alert(
 ) -> dict[str, Any]:
     """Turn ON LinkedIn's job alert for one job search -- a WRITE.
 
-    Presses the "Set alert" switch at the head of that search's results, which
-    makes LinkedIn send you new jobs matching it. A job alert is your own saved
-    search; nobody else sees it. Same two-step shape and the same five gates as
-    ``linkedin_save_job``: no ``confirm_token``, no action -- you get a block to
-    read and a token that works ONCE, only for this search, only for this verb,
-    within two minutes. Census row ``J 31``.
+    Presses the "Get job alerts for this search" switch at the head of that
+    search's results, which makes LinkedIn send you new jobs matching it. A job
+    alert is your own saved search; nobody else sees it. Same two-step shape
+    and the same five gates as ``linkedin_save_job``: no ``confirm_token``, no
+    action -- you get a block to read and a token that works ONCE, only for
+    this search, only for this verb, within two minutes. Census row ``J 31``.
 
-    THE SEARCH IS YOURS TO NAME: ``keywords`` and, optionally, ``location``,
-    composed into the classic job search's address the way
-    ``linkedin_search_jobs`` composes them; filters are not carried. THE
-    PREVIEW READS that search: exactly one alert toggle with LinkedIn's own
-    class and its word "Set alert", exactly one switch in it, reading off. A
-    switch already on is refused -- turning it off is
+    THE SEARCH IS YOURS TO NAME: ``keywords``, composed into LinkedIn's AI
+    job search's address the way ``linkedin_search_jobs`` composes a keyword
+    search; filters are not carried. A ``location`` is REFUSED before anything
+    loads: the classic job search no longer serves, and what the AI search does
+    with a typed place has not been measured, so an alert asked for "these
+    keywords in that place" could be set on the keywords alone. THE PREVIEW
+    READS that search: exactly one switch on the page, inside LinkedIn's
+    alert toggle and captioned with its words, reading off (on a classic page,
+    should LinkedIn serve one: the toggle with LinkedIn's own class and its
+    word "Set alert"). A switch already on is refused -- turning it off is
     ``linkedin_unset_search_job_alert``. A landing on any other search is
     refused.
 
@@ -13771,7 +13775,8 @@ async def linkedin_set_search_job_alert(
 
     Args:
         keywords: the search's keywords, as you would type them.
-        location: the search's location, as you would type it; empty for none.
+        location: leave empty: a place is refused until the AI search's place
+            is measured.
         confirm_token: leave empty to preview. Pass the token from that
             preview to actually press the switch.
     """
@@ -13791,9 +13796,12 @@ async def linkedin_unset_search_job_alert(
     """Turn OFF LinkedIn's job alert for one job search -- a WRITE, the inverse of
     ``linkedin_set_search_job_alert``.
 
-    Presses the same "Set alert" switch at the head of that search's results,
-    from on. Same two steps, same gates, a token bound to this search and this
-    verb. A switch reading off is refused -- turning it on is
+    Presses the same switch at the head of that search's results, from on, so
+    the alert you set is switched off -- on LinkedIn's AI job search, the one
+    captioned "Get job alerts for this search". Same two steps, same gates, a
+    token bound to this search and this verb, and a ``location`` refused
+    before anything loads, as there. A switch reading off is refused --
+    turning it on is
     ``linkedin_set_search_job_alert``. After the press the search is
     re-rendered and the switch read again; off means the alert is gone. The on
     reading this starts from is derived (no capture holds the switch on), so
@@ -13801,7 +13809,7 @@ async def linkedin_unset_search_job_alert(
 
     Args:
         keywords: the same keywords the alert was set with.
-        location: the same location, or empty.
+        location: leave empty, as for the set.
         confirm_token: leave empty to preview. Pass the token from that
             preview to actually press the switch.
     """
