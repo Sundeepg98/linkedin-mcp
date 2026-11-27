@@ -21,6 +21,7 @@ Nothing here reaches LinkedIn: the browser is a fake whose page answers
 """
 from __future__ import annotations
 
+import html
 import importlib.util
 import re
 from pathlib import Path
@@ -87,7 +88,17 @@ def read(stem: str) -> dict:
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.parametrize("stem", sorted(LIVE_CARDS))
+#: EVERY fixture the builder writes, each proved against its own capture (the
+#: two AI searches, the open resume menu and the products tab).
+BUILT_CAPTURES = sorted(spec[0] for spec in _builder().SPEC.values())
+
+
+def test_every_built_fixture_is_on_disk_and_proved_here():
+    on_disk = sorted(p.name[: -len("_words.html")] for p in LIVE12.glob("*_words.html"))
+    assert on_disk == BUILT_CAPTURES
+
+
+@pytest.mark.parametrize("stem", BUILT_CAPTURES)
 def test_each_words_fixture_differs_from_its_capture_only_by_declared_words_and_keys(stem):
     capture_stem, declared, _first, _alert = _builder().SPEC[stem + "_words"]
     assert capture_stem == stem
@@ -101,9 +112,12 @@ def test_each_words_fixture_differs_from_its_capture_only_by_declared_words_and_
     written_values: set[str] = set()
     for written, reduced in differing:
         if not written.startswith("<"):
-            # A text line: the declared word, where the capture reads x.
-            assert reduced == "x" and written in declared, (written[:60], reduced[:60])
-            written_values.add(written)
+            # A text line: the declared word, where the capture reads x. A word
+            # outside ASCII is written as a character reference, so it is
+            # compared unescaped.
+            word = html.unescape(written)
+            assert reduced == "x" and word in declared, (written[:60], reduced[:60])
+            written_values.add(word)
             continue
         mine, theirs = attribute.findall(written), attribute.findall(reduced)
         assert [name for name, _ in mine] == [name for name, _ in theirs]
@@ -111,9 +125,19 @@ def test_each_words_fixture_differs_from_its_capture_only_by_declared_words_and_
         for (name, value), (_name, was) in zip(mine, theirs):
             if value == was:
                 continue
-            assert was == "x", (name, was)
-            assert value in declared or value == alert_key or SYNTHETIC_CARD_KEY.fullmatch(value), name
-            written_values.add(value)
+            value, was = html.unescape(value), html.unescape(was)
+            if was == "x":
+                assert value in declared or value == alert_key or SYNTHETIC_CARD_KEY.fullmatch(value), name
+                written_values.add(value)
+                continue
+            # AN ADDRESS: each segment is its own keyed shape, so only WHOLE
+            # segments equal to a declared path word may differ from the copy.
+            ours, copy = value.split("/"), was.split("/")
+            assert len(ours) == len(copy), (name, value[:60])
+            for segment, reduced_segment in zip(ours, copy):
+                if segment != reduced_segment:
+                    assert reduced_segment == "x" and segment in declared, (name, segment)
+                    written_values.add(segment)
     # Every declared word was written somewhere (the builder refuses otherwise).
     assert set(declared) <= written_values
 

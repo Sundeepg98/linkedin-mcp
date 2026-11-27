@@ -1146,6 +1146,50 @@ after a press; `M C3`, `M C4`, `M C6` and `M C7` stay GAP and cite the
 ruling. Reopener: an audience the server can read. Rows `M C3` and `M C4`:
 next step this question, held, until the reopener is met.
 
+### Q-J169-SENIORITY -- a facet whose one measured control offers another
+
+Added 2026-11-27 by lane jobs7 (`_audit/2026-11-27-jobs7.md`, sections 4 and 7). Row: `J 169`
+("Premium Page Insights: headcount over time, notable alumni, job openings by seniority", split
+from `J 114` by J-114-SPLITS). Its step was `CAPTURE:C-RJ26-1`: the job-openings card's
+`Functions` dropdown opened as a disclosure, "the seniority view, if one is offered, then read
+offline". Session 12's load 20 opened it: by keyed shape the dropdown's items are JOB FUNCTIONS
+(the open page draws 14 of the 26 function words), and 0 of 10 seniority words and 0 of 5
+experience-level words match anywhere on the page. So no seniority view is offered behind the one
+control the row's step named; "notable alumni" is not drawn on this view; and the open page draws a
+table summarised `Total employee count`, the candidate for "headcount over time", its cells reduced.
+The lane asks: IS "JOB OPENINGS BY SENIORITY" A FACET LINKEDIN STILL DRAWS ANYWHERE -- so the row's
+next step is a capture of another Insights view -- OR DOES THE ROW SPLIT, its seniority facet closed
+by this measurement? The cell names no absence as its bar, so this lane moves nothing.
+
+### Q-J170-ROW-CONTROL -- an alert's own control that may open an editor
+
+Added 2026-11-27 by lane jobs7 (`_audit/2026-11-27-jobs7.md`, section 7). Row: `J 170` ("Manage
+all alerts", split from `J 37` by J-37-SPLITS). Its step was BUILD on session 11's alert-manager
+capture (`tests/fixtures/live11/jobs_alerts_manager.html`), but that capture never drew what an
+alert row's control opens: the control's label matched none of 23 candidates by keyed shape (an
+edit, a delete, a frequency, a menu word), and nothing was pressed. A build aimed at an unmeasured
+dialog would be built on synthetic markup and move nothing. Pressing the control to read it is not
+plainly a CAPTURE-PRESS-UNDER-PROBE-RULE disclosure: it may open an EDITOR, which that rule forbids
+pressing. The lane asks: MAY A CAPTURE PRESS ONE ALERT ROW'S CONTROL, read what it opens by keyed
+shape, and close it on Escape with nothing chosen -- as a disclosure if it opens a menu, and stop
+unpressed if it opens an editor? Until ruled, `J 170` stays GAP on this question.
+
+### Q-LEARNING-SPLITS -- three Learning rows, each captured on one half
+
+Added 2026-11-27 by lane jobs7 (`_audit/2026-11-27-jobs7.md`, section 7). Rows: `J 152`, `J 154`,
+`J 156`, each captured by session 12 on ONE half of a compound capability. `J 152` ("Browse
+LinkedIn Learning: its home, the catalogue, certifications, topic pages and showcase collections"):
+the home is captured (load 23: 16 course cards, each a type label and a duration by keyed shape);
+the catalogue and certifications pages are admitted and uncaptured; topic and showcase pages are
+refused. `J 154` ("View your LinkedIn Learning library: saved courses and the ones in progress"):
+load 25 landed one level deeper, on one tab drawing one course with `Unsave` beside it; the
+in-progress tab is uncaptured. `J 156` ("See and set career goals", R+W): load 24 draws a section
+labelled `Career goal`; the setting half is an editor, unmeasured. Each row's payload is WHICH items
+of other people's content (course titles; NAMES-AT-RUNTIME) or his own text (his goal;
+HIS-OWN-TEXT-AT-RUNTIME). The lane asks: DOES EACH SPLIT UNDER COMPOUND-ROW-SPLITS-ONLY-ON-STATE, as
+J-114-SPLITS and J-37-SPLITS split theirs -- the captured half building on its capture, the rest a
+new GAP row with its own next step? Until ruled, the three stay GAP on this question.
+
 ## 8. Preconditions and purposes
 
 PRECONDITION rows stay GAP; each waits on something he does not hold.

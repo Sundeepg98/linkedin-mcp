@@ -27,7 +27,7 @@ J 41	J	W	-	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 J 53	J	W	-	CAPTURE:C-JMN-1	MEASURED	_audit/2026-11-25-build-jmn26.md::No capture of the Archived tab with a row exists ; RULING:HIS-OWN-CURATION-NOT-OUTWARD
 J 54	J	W	-	TARGET:a tracked job of his he names	INFERRED	RULING:HIS-OWN-CURATION-NOT-OUTWARD ; J 54
 J 55	J	W	-	TARGET:a tracked job of his he names	MEASURED	_audit/2026-11-25-build-jmn26.md::CAPTURE-PRESS-UNDER-PROBE-RULE never opens ; RULING:HIS-OWN-CURATION-NOT-OUTWARD
-J 56	J	R	-	CAPTURE:C-JMN-2	MEASURED	_audit/2026-11-25-build-jmn26.md::options have never been drawn open ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE ; RULING:VIEW-SWITCH-PRESS-RESTORED
+J 56	J	R	-	CAPTURE:C-JMN-2b	MEASURED	_audit/2026-11-27-jobs7.md::the options are drawn, the filter's press needs a stage with a row ; RULING:VIEW-SWITCH-PRESS-RESTORED
 J 60	J	W	-	TARGET:a job with a multi-step Easy Apply he names to apply to	NAMED	_audit/_census/jobs.md::Easy Apply, MULTI-STEP form (a posting that draws Next) ; RULING:OPERATOR-NAMES-THE-TARGET
 J 61	J	W	-	TARGET:a job with a multi-step Easy Apply he names to apply to	NAMED	_audit/_census/jobs.md::Easy Apply, MULTI-STEP form (a posting that draws Next) ; RULING:OPERATOR-NAMES-THE-TARGET
 J 62	J	W	-	TARGET:a job with a multi-step Easy Apply he names to apply to	NAMED	_audit/_census/jobs.md::Easy Apply, MULTI-STEP form (a posting that draws Next) ; RULING:OPERATOR-NAMES-THE-TARGET
@@ -37,8 +37,8 @@ J 65	J	W	-	TARGET:a job with a multi-step Easy Apply he names to apply to	NAMED	
 J 68	J	W	-	TARGET:a job with a multi-step Easy Apply he names to apply to	NAMED	_audit/_census/jobs.md::Easy Apply, MULTI-STEP form (a posting that draws Next) ; RULING:OPERATOR-NAMES-THE-TARGET
 J 69	J	W	-	TARGET:a draft application of his he names to discard	INFERRED	RULING:OPERATOR-NAMES-THE-TARGET ; J 69
 J 70	J	W	-	SIBLING:lane-U	NAMED	_audit/2026-09-28-rulings-build-classes.md::`FILE-UPLOAD-UNSANCTIONED` is therefore a stale label.
-J 71	J	R+W	-	CAPTURE:C-RJ26-3	MEASURED	_audit/2026-11-26-readers-jobs26.md::THE OPTIONS MENU IS WHERE FIVE ROWS WAIT. ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
-J 72	J	R	-	CAPTURE:C-RJ26-3	MEASURED	_audit/2026-11-26-readers-jobs26.md::THE OPTIONS MENU IS WHERE FIVE ROWS WAIT. ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
+J 71	J	R+W	-	SIBLING:P M3	MEASURED	_audit/2026-11-27-jobs7.md::the menu is drawn, the builds are next ; RULING:OUTWARD-CLASSES-BUILT-BEHIND-GRANTS
+J 72	J	R	-	BUILD:tests/fixtures/live12/c_rj26_3_resume_menu-open_words.html	MEASURED	_audit/2026-11-27-jobs7.md::the menu is drawn, the builds are next ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
 J 73	J	R	-	TARGET:a job he applied to, and its poster	MEASURED	_audit/2026-11-26-readers-jobs26.md::THE PAGE TIES NO RESUME TO AN APPLICATION. ; RULING:OPERATOR-NAMES-THE-TARGET
 J 78	J	W	-	RULING:Q-AI-GENERATING-LOADS	INFERRED	_audit/_census/jobs-directions.tsv::Create cover letter ; RULING:READ-PAST-AN-ACT-SUBSTRING
 J 79	J	W	-	TARGET:a job he names to mark Top Choice (one of three monthly marks, not refunded)	INFERRED	RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS ; J 79
@@ -66,8 +66,8 @@ J 107	J	R	-	CAPTURE:C-SRCH-5	MEASURED	_audit/2026-11-26-live-session-12.md::REDI
 J 111	J	R	-	CAPTURE:C-RJ26-2	MEASURED	_audit/2026-11-26-readers-jobs26.md::That organisation has no ; RULING:READ-PAST-AN-ACT-SUBSTRING
 J 112	J	R	-	TARGET:a school Page he names	NAMED	_audit/_census/read-addresses.tsv::UNDER THE WHO/WHICH RULE, EXTENDED ; RULING:OPERATOR-NAMES-THE-TARGET
 J 151	J	R	-	CAPTURE:C-SRCH-2	MEASURED	_audit/2026-11-26-live-session-12.md::REDIRECTED to the AI route ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
-J 169	J	R	-	CAPTURE:C-RJ26-1	MEASURED	_audit/2026-11-26-readers-jobs26.md::sits behind the job-openings card's ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
-J 170	J	W	-	BUILD:tests/fixtures/live11/jobs_alerts_manager.html	NAMED	_audit/2026-11-26-build-jobs2.md::the detail line and the row button are not read ; RULING:COMPOUND-ROW-SPLITS-ONLY-ON-STATE ; RULING:HIS-OWN-CURATION-NOT-OUTWARD
+J 169	J	R	-	RULING:Q-J169-SENIORITY	MEASURED	_audit/2026-11-27-jobs7.md::the dropdown offers functions, not seniority ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
+J 170	J	W	-	RULING:Q-J170-ROW-CONTROL	MEASURED	_audit/2026-11-27-jobs7.md::matched none of 23 candidates ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
 J 115	J	R+W	-	CAPTURE:C-JMN-3	MEASURED	_audit/2026-11-25-build-jmn26.md::NEITHER CAPTURED POSTING DRAWS ONE ; RULING:OPERATOR-NAMES-THE-TARGET
 J 116	J	R	-	RULING:Q-AI-GENERATING-LOADS	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/preload/guideOverlay/?interop=guideOverlay&query=Show+match+details ; RULING:READ-PAST-AN-ACT-SUBSTRING
 J 117	J	R	-	RULING:Q-AI-GENERATING-LOADS	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/preload/guideOverlay/?interop=guideOverlay&query=Show+match+details ; RULING:READ-PAST-AN-ACT-SUBSTRING
@@ -93,9 +93,9 @@ J 147	J	R	-	SIBLING:lane-U	NAMED	_audit/2026-09-28-rulings-build-classes.md::`FI
 J 148	J	R+W	-	SIBLING:lane-U	NAMED	_audit/2026-09-28-rulings-build-classes.md::`FILE-UPLOAD-UNSANCTIONED` is therefore a stale label.
 J 149	J	R+W	-	SIBLING:lane-U	NAMED	_audit/2026-09-28-rulings-build-classes.md::`FILE-UPLOAD-UNSANCTIONED` is therefore a stale label.
 J 150	J	W	-	PRECONDITION:US Premium (the feature reaches select US subscribers)	NAMED	_audit/_census/jobs.md::select LinkedIn Premium subscribers in the United States
-J 152	J	R	-	CAPTURE:admit-learning	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/learning/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
-J 154	J	R	-	CAPTURE:admit-learning-me-my-library	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/learning/me/my-library/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
-J 156	J	R+W	-	CAPTURE:admit-learning-career-journey	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/learning/career-journey/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
+J 152	J	R	-	RULING:Q-LEARNING-SPLITS	MEASURED	_audit/2026-11-27-jobs7.md::each captured on one half ; RULING:COMPOUND-ROW-SPLITS-ONLY-ON-STATE
+J 154	J	R	-	RULING:Q-LEARNING-SPLITS	MEASURED	_audit/2026-11-27-jobs7.md::each captured on one half ; RULING:COMPOUND-ROW-SPLITS-ONLY-ON-STATE
+J 156	J	R+W	-	RULING:Q-LEARNING-SPLITS	MEASURED	_audit/2026-11-27-jobs7.md::each captured on one half ; RULING:COMPOUND-ROW-SPLITS-ONLY-ON-STATE
 J 157	J	W	-	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 J 160	J	R	-	BUILD:tests/fixtures/live11/career_insights.html	MEASURED	_audit/2026-11-26-readers-jobs26.md::the people and the companies the ; RULING:NAMES-AT-RUNTIME
 J 166	J	R	-	CAPTURE:admit-products-product	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/products/placeholder-product/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
@@ -454,9 +454,9 @@ P K9	P	W	R3	PRECONDITION:a Top Voice badge	NAMED	_audit/_census/write-classes.ts
 P L3	P	W	R3	CAPTURE:C-MSG26-4	NAMED	_audit/2026-09-28-lane-k-ledger.md::YES, as ONE CAPTURE, nothing typed: ; RULING:ARTICLE-COMPOSER-CAPTURE
 P L4	P	R	-	PRECONDITION:a newsletter he authors	INFERRED	_audit/_census/read-addresses.tsv::the page listing his newsletters links no analytics address
 P L7	P	R	-	CAPTURE:creator-hub-on-the-dashboard	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/creator-hub/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
-P M1	P	W	R3	CAPTURE:C-RJ26-3	MEASURED	_audit/2026-11-26-readers-jobs26.md::THE OPTIONS MENU IS WHERE FIVE ROWS WAIT. ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
-P M3	P	W	R3	CAPTURE:C-RJ26-3	MEASURED	_audit/2026-11-26-readers-jobs26.md::THE OPTIONS MENU IS WHERE FIVE ROWS WAIT. ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
-P M4	P	R	-	CAPTURE:C-RJ26-3	MEASURED	_audit/2026-11-26-readers-jobs26.md::THE OPTIONS MENU IS WHERE FIVE ROWS WAIT. ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
+P M1	P	W	R3	BUILD:tests/fixtures/live12/c_rj26_3_resume_menu-open_words.html	MEASURED	_audit/2026-11-27-jobs7.md::the menu is drawn, the builds are next ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
+P M3	P	W	R3	BUILD:tests/fixtures/live12/c_rj26_3_resume_menu-open_words.html	MEASURED	_audit/2026-11-27-jobs7.md::the menu is drawn, the builds are next ; RULING:OUTWARD-CLASSES-BUILT-BEHIND-GRANTS
+P M4	P	R	-	BUILD:tests/fixtures/live12/c_rj26_3_resume_menu-open_words.html	MEASURED	_audit/2026-11-27-jobs7.md::the menu is drawn, the builds are next ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
 P M5	P	R	-	TARGET:a job he applied to, and its poster	MEASURED	_audit/2026-11-26-readers-jobs26.md::THE PAGE TIES NO RESUME TO AN APPLICATION. ; RULING:OPERATOR-NAMES-THE-TARGET
 P M10	P	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 P M11	P	R+W	-	RULING:Q-RESUME-BUILDER	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/resume-builder/ ; RULING:READ-PAST-AN-ACT-SUBSTRING

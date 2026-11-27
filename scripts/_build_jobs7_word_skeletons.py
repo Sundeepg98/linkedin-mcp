@@ -156,6 +156,44 @@ SPEC: dict[str, tuple[str, tuple[str, ...], Optional[int], bool]] = {
         4000000301,
         True,
     ),
+    # J 71, J 72, P M1, P M3, P M4: load 9, his application settings page with
+    # the first resume card's options menu OPEN (C-RJ26-3). The page's ten
+    # words session 11 measured, all drawn again, and the menu's `Download`;
+    # its `Delete` is a furniture word the tracked copy already keeps.
+    "c_rj26_3_resume_menu-open_words": (
+        "c_rj26_3_resume_menu-open",
+        (
+            "Resumes and application data",
+            "Save resumes and application data",
+            "Allow LinkedIn to save your resumes and answers to application "
+            "questions. You may change your answers with each application.",
+            "Learn more about saved application data",
+            "Allow LinkedIn to save your resumes and answers",
+            "Share resume data with hirers",
+            "Hirers can view skills and experiences from the resumes you choose "
+            "to share when they search and view profiles and evaluate applicants "
+            "through LinkedIn" + chr(0x2019) + "s hiring tools.",
+            "Allow recruiters to view your resumes",
+            "Upload resume",
+            "DOC, DOCX, PDF (5MB)",
+            "Download",
+        ),
+        None,
+        False,
+    ),
+    # J 111: load 21, an organisation's Products tab (C-RJ26-2). The Page
+    # navigation's three tab words that are not furniture, the products
+    # button's label, the region's link word, and LinkedIn's PATH WORD
+    # `products` -- each address segment is its own keyed shape, so the word
+    # is written where it matched (the tab's own address, each product's page,
+    # the category search) and every slug beside it stays x; every product's
+    # own words stay x.
+    "c_rj26_2_products_words": (
+        "c_rj26_2_products",
+        ("Products", "Life", "Insights", "Show all products", "Learn more", "products"),
+        None,
+        False,
+    ),
 }
 
 
