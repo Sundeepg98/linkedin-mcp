@@ -7415,6 +7415,8 @@ bytes arrive CRLF here and LF there -- a byte comparison would pass on one and
 fail on the other, which is the local-passes/clone-fails shape this repository
 has paid for once already.
 
+**CORRECTED BY:** `_audit/2026-11-27-masterfix7.md` -- "false on CI" holds for the two ubuntu cells only: the windows cell checks out with `core.autocrlf=true` and reads the same committed bytes as CRLF (master run 46030101439, windows shards 2 and 5). The normalisation above is right on all three cells.
+
 `scripts/_check_audit_index_guard_can_fail.py` is the red proof, and it makes
 the claim the in-test controls cannot: it copies the tree, plants seven defects
 and runs THE REAL PYTEST SELECTOR against each.
@@ -13683,3 +13685,30 @@ search over its unmatched slots (`brute_dialog.py`, which ran past its
 | path | shown failing by |
 |---|---|
 | `tests/test_verifications_page.py::test_two_consent_sections_read_as_several_never_as_none`, `::test_a_consent_count_that_cannot_be_read_says_unread_never_none`, `::test_each_consent_reading_is_a_closed_word_and_none_means_no_section`; `linkedin_server/verifications_page.py` (`CONSENT_READINGS`) | the cold verification's F3: before the fix, two planted consent sections and a section count that raises each read `None`, the word for "no consent section" (2 failed by assertion, `assert None == ...`; the third by the missing closed tuple): 3 failed, 21 passed; after, 24 passed |
+
+## 120. A FIXTURE'S LINE ENDS ARE READ AS COMMITTED, AND A TIMED WORLD RUNS ON A CLOCK THE TEST HOLDS (masterfix7, 2026-11-27)
+
+Lane masterfix7 made master CI green again after integration 7. Four cells of
+master run 46030101439 failed on three causes: two were repaired at their
+cause, and the third, a starved Windows runner, was measured and left. The
+record is `_audit/2026-11-27-masterfix7.md`.
+
+    A TEST THAT READS COMMITTED BYTES READS THE CHECKOUT, AND A ZERO-WAIT TEST
+    AGAINST A TIMED WORLD RACES THE RUNNER. RENDER THE CRLF CHECKOUT IN THE
+    TEST, AND HOLD THE PAGE'S CLOCK WHILE THE GATE READS.
+
+### 120.1 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `tests/test_live12_settings_word_fixtures.py::test_a_crlf_checkout_of_each_fixture_opens_the_same`; `tests/test_live11_settings7_word_fixture.py::test_a_crlf_checkout_of_the_fixture_opens_the_same` (the committed bytes written as `core.autocrlf` writes them, held to the provenance check) | before `_as_committed` read CRLF as LF: 5 failed on an LF checkout, and the same 5 on a CRLF one beside the 5 on-disk checks; after, 27 passed on each |
+| `tests/test_group_composer.py::test_the_refusal_without_the_wait_holds_on_a_runner_slower_than_the_lag` (every composer reading held back 0.3 s of real time) | before the page's clock was held: 2 of 2 failed, `assert True is False` on `proceeded`, on py3.13 and on py3.10; after, 18 passed in the file |
+| the lateness check in `tests/test_group_composer.py::_refused_without_the_wait` (after the receipt, the clock run on by the world's lag draws the composer, or turns Post on) | the clock run on 1 ms short: 4 of 4 failed at that check |
+
+### 120.2 DECLARED DISPOSABLE
+
+The lane's scratch tools (`_state/lane-scratch/masterfix7/tools/`): the per-test
+and per-file duration readers over the shard reports' junit XML, and the
+page-clock probe. None was shown failing on a planted defect. The method is
+kept in the record's section 4.2: both attempts' shard reports, the same
+commit and plan, compared file by file.

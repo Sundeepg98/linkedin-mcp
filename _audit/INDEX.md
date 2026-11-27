@@ -27,16 +27,16 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 315 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 275 |
+| audit documents git tracks under `_audit` | 316 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 276 |
 | distinct dates | 23 |
 | documents with no level-1 heading | 2 |
-| `CORRECTS:` marker lines | 132 |
-| `CORRECTED BY:` marker lines | 132 |
-| distinct declared correction edges | 117 |
+| `CORRECTS:` marker lines | 133 |
+| `CORRECTED BY:` marker lines | 133 |
+| distinct declared correction edges | 118 |
 | documents something later corrects | 57 |
-| documents that correct something | 80 |
-| documents at either end of a cross-document edge | 113 |
+| documents that correct something | 81 |
+| documents at either end of a cross-document edge | 114 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
 | documents no correction marker touches at all | 200 |
@@ -598,6 +598,10 @@ document is dead; it says one thing in it was overtaken and names what.
 - CORRECTED BY [2026-09-05-the-newsletter-create-route.md](2026-09-05-the-newsletter-create-route.md)
 
   > the hypothesis above, that `M C50` may need no boundary change because `/article/new/` is already allowed, is refuted by a third address the live page draws.
+
+- CORRECTED BY [2026-11-27-masterfix7.md](2026-11-27-masterfix7.md)
+
+  > "false on CI" holds for the two ubuntu cells only: the windows cell checks out with `core.autocrlf=true` and reads the same committed bytes as CRLF (master run 46030101439, windows shards 2 and 5). The normalisation above is right on all three cells.
 
 ### [_census/jobs.md](_census/jobs.md)
 
@@ -1645,6 +1649,14 @@ reach is visible. The quoted reason here is the CORRECTOR's own
 
   > its sections 4.3 and 4.4 read session 11's one function table as the headcount distribution (each function's employee count and its share of headcount). Its summary and module heading are `Total job openings`, so its rows are job openings by function (`J 174`). `J 114` is re-based on session 12's load 20, which draws the table summarised `Headcount growth by function` (J114-READS-ITS-OWN-TABLE).
 
+### [2026-11-27-masterfix7.md](2026-11-27-masterfix7.md)
+
+2026-11-27 &middot; Lane masterfix7: master CI red after integration 7, four failing cells
+
+- CORRECTS [INSTRUMENTS.md](INSTRUMENTS.md)
+
+  > section 45.1 says `core.autocrlf` is "true on this machine and false on CI, so the same committed bytes arrive CRLF here and LF there". That holds for the two ubuntu cells. The windows cell checks out with `core.autocrlf=true` and reads the same committed bytes as CRLF, as the file read in master run 46030101439's windows shards 2 and 5 shows.
+
 ### [2026-11-27-msg7.md](2026-11-27-msg7.md)
 
 2026-11-27 &middot; msg7, 2026-11-27: the messaging and content rows session 12 captured, read offline
@@ -1664,7 +1676,7 @@ ways, which is a fact about markers and not a verdict on the document.
 
 | date | document | title | markers |
 | --- | --- | --- | --- |
-| (undated) | [INSTRUMENTS.md](INSTRUMENTS.md) | The instrument register | **CORRECTED x1** |
+| (undated) | [INSTRUMENTS.md](INSTRUMENTS.md) | The instrument register | **CORRECTED x2** |
 | (undated) | [RULINGS.md](RULINGS.md) | THE RULINGS REGISTER -- one entry per RULING, not per document |  |
 | (undated) | [_slice-activity-items.md](_slice-activity-items.md) | Slice: `linkedin_my_activity_items` -- item keys, for items measured to be his |  |
 | (undated) | [_census/_slice-analytics-press-preflight.md](_census/_slice-analytics-press-preflight.md) | Analytics press preflight -- OFFLINE slice for `what-is-reachable-now` |  |
@@ -1974,6 +1986,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-11-26 | [2026-11-26-session-12-plan.md](2026-11-26-session-12-plan.md) | Live session 12 -- the plan, written offline: 37 loads, 5 searches, 113 rows |  |
 | 2026-11-27 | [2026-11-27-integration-7.md](2026-11-27-integration-7.md) | Integration 7, 2026-11-27: the five wave-7 lanes onto master 68a4ff7, and the wave's rulings |  |
 | 2026-11-27 | [2026-11-27-jobs7.md](2026-11-27-jobs7.md) | Lane jobs7, 2026-11-27: the AI job search as the keyword search's own route, and session 12's captures read by keyed shape | corrects x1 |
+| 2026-11-27 | [2026-11-27-masterfix7.md](2026-11-27-masterfix7.md) | Lane masterfix7: master CI red after integration 7, four failing cells | corrects x1 |
 | 2026-11-27 | [2026-11-27-msg7.md](2026-11-27-msg7.md) | msg7, 2026-11-27: the messaging and content rows session 12 captured, read offline | corrects x1 |
 | 2026-11-27 | [2026-11-27-net7.md](2026-11-27-net7.md) | Lane net7, 2026-11-27: the network rows session 12 captured -- the panel read offline, four facets and one reader built, the rest re-aimed |  |
 | 2026-11-27 | [2026-11-27-prof7.md](2026-11-27-prof7.md) | Lane prof7 -- the self-profile loader waits for the rewrite, then session 12's profile cells |  |
