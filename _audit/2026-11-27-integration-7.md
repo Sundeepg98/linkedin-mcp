@@ -518,6 +518,11 @@ and was down at every test run from 20:15. The full suite is CI's.
 | merge 5 | the derived views, the envelope guard | 60 passed, 31 s |
 | merge 5 | the reader-leak guard | 1070 passed, 106 s |
 | merge 5 | the writes tables | 163 passed, 137 s, OVER the cap alone |
+| registration | the rulings register, the audit index, corrections, asserted names, banked evidence, holds, the refused-address pin (7 files) | 1 failed and 168 passed (four new citing pairs, each read and entered on NOT_A_CORRECTION), then green |
+| registration | next-step, directions, write classes, triage, the row pins, the literal guard, state cells (8 files) | 124 passed, 67 s |
+| registration | the covered-row, frontier, dialect, retired-row, blocker-map, write-off, pointer-graph guards, the products tab, the company boundary, navigation (10 files) | 1108 passed and 1 skipped, 113 s |
+| registration | the Insights session-8 rows, the surface-row pin, the census prose, exclusion basis, read addresses (5 files) | 214 passed, 22 s |
+| the CI fix | jobs7's AI-route file, settings7's fixture and reader tests, the literal guard (7 files) | 141 passed and 5 failed on the CRLF checkout (section 9), then 22 passed on LF copies of the blobs |
 
 ## 8. Questions, and items for others
 
@@ -581,3 +586,71 @@ and was down at every test run from 20:15. The full suite is CI's.
 - FOREGROUND, WITH A TIMEOUT, THROUGHOUT. After the orchestrator's 20:06 order,
   every step ran in the foreground with an explicit timeout, so nothing this
   lane started was pending at any turn's end.
+- A GUARD COUPLED THROUGH A DIRECTORY IS NOT FOUND BY ITS IMPORTS. Lane CI's
+  one red was lane jobs7's words-fixture guard. It enumerates
+  `tests/fixtures/live12/*_words.html` and claimed every file there as its
+  own builder's. Lane settings7's merge added four such files, and no
+  import, symbol or scoped batch here connects the two lanes. The scoped
+  batches chose tests by the files each merge touched, and missed it; CI's
+  full suite caught it. The fix kept the guard's force by naming the second
+  builder rather than narrowing the glob.
+
+## 9. The head and its CI
+
+- THE FIRST LANE CI RUN, on `5f21e22` (the registration): run 46026137615,
+  read by head sha through `lane_ci.py wait`, completed FAILURE in 6m12s, one
+  test in shard 1:
+  `tests/test_the_ai_search_is_the_search_route.py::test_every_built_fixture_is_on_disk_and_proved_here`
+  ("Left contains 4 more items, first extra item: 'job_prefs'").
+- THE CAUSE: lane jobs7's guard said every `live12/*_words.html` is its own
+  builder's, true on its branch. At the merge, lane settings7's builder had
+  written four more into the same directory, each proved by settings7's own
+  tests.
+- THE FIX, at the claim (`637d5c9`): the guard reads every declared live12
+  builder's SPEC off its syntax tree, without importing it. It refuses a
+  fixture claimed by two builders. It holds the words fixtures on disk to
+  exactly the builders' union. Shown failing: a planted
+  `live12/zz_planted_words.html` fails it, and removing it passes.
+- Settings7's provenance tests failed locally on this box's CRLF checkout
+  (`core.autocrlf`) and passed on LF copies of the blobs: 22 passed, and the
+  blobs hold 0 CR bytes. The cold verifier recorded the same artefact.
+- THE CERTIFIED HEAD: `637d5c9`, the fix over the registration `5f21e22`, over
+  the five merges, on master `68a4ff7`. It holds, merged in this order:
+  - prof7 (`754bf9a`, certified `4f84353`) as `51243e7`;
+  - jobs7 (`891a520`) as `01a2845`;
+  - msg7 (`7e9f61b`) as `c989546`;
+  - settings7 (`95123f6`, certified `ef3b703`) as `3f3dc74`;
+  - net7 (`fc38e7f`, certified `252c20f`) as `197fd61`.
+- The push: `scripts/lane_ci.py push` put it on `ci/integration7`. The
+  pre-push sweep found 0 hits across 1873 blobs and 226 needles.
+  `origin/master` read `68a4ff7` at both pushes.
+- LANE CI: run 46027604973, read by head sha through `lane_ci.py wait` and
+  again with `gh run view`: headSha `637d5c9` in full, push on
+  `ci/integration7`, SUCCESS, 6 of 6 jobs (the shard plan, four pytest
+  shards and the totals job), 6m07s wall.
+- MEASURED on `637d5c9`:
+  - DELIVERED broad 187 / 710 achievable (26.3%), strict 95 (13.4%);
+  - against the published surface, 187 / 784 (23.9%) and 95 (12.1%);
+  - GAP 506, the next-step ledger's own row count;
+  - population 784 rows, 74 out of scope (EXCLUDED-RULED 56, MEASURED-ABSENT
+    18);
+  - 111 tools and 168 parameters;
+  - 109 allowlist patterns and 19 pattern exemptions;
+  - 216 rulings registered.
+- Attribution: 0 hits in the 55 commits past master (the lanes' and this
+  lane's). The committed-blob identity test on the head: 1438 passed in 45 s.
+- This section and the next are a record-only commit on top of the head,
+  one file, checked locally: the three derived-view checks and the corpus
+  guards that read this record. The brief asked for ONE lane CI run, so this
+  commit has none of its own. Master CI runs on it after the fast-forward.
+  Master is the orchestrator's to fast-forward; this lane never touches it.
+
+## 10. The final message
+
+integrator7: integration 7 CERTIFIED 637d5c9 (lane CI 46027604973, 6 of 6 jobs, 6m07s), read by sha. A record-only commit on top carries sections 9 and 10. Records: _audit/2026-11-27-integration-7.md and _audit/2026-11-27-rulings-integration-7.md.
+1. Merged --no-ff, in order: prof7 754bf9a (cert 4f84353, 45994909996) as 51243e7; jobs7 891a520 (45994206737) as 01a2845; msg7 7e9f61b (45996312582) as c989546; settings7 95123f6 (cert ef3b703, 46015381304) as 3f3dc74; net7 fc38e7f (cert 252c20f, 46001861886) as 197fd61; then the registration 5f21e22 and the CI fix 637d5c9 (the first run, 46026137615, was red: jobs7's live12 words guard did not know settings7's builder).
+2. Headline from --check: the critic's merged figures are confirmed on merge 5 (gap 506, adjudicated 277, broad 186, strict 95, unfired 91, rows 783, achievable 709, out of scope 74). b3_admitted reads 32 and needs_session 5 after N 32's move to ADMITTED. After J111's split: adjudicated 278, broad 187/710 (26.3%), strict 95, unfired 92, rows 784, achievable 710, gap 506. 111 tools / 168 params, 109 patterns / 19 exemptions, EXPECTED_GAP_ROWS 77.
+3. Rank map: jobs7 142-148 kept; msg7 142-147 -> 149-154; settings7 142-147 -> 155-160; net7 142 -> 161, its manage-syncing mirror collapsed onto 158 (needs '-'). Citations annotated in place: net7 x10, settings7 x5.
+4. Rulings: 34 registered (182 -> 216): msg7 9, settings7 2, prof7 6, net7 7, jobs7 9, live 1. New ids COMMENTS-METRIC-NOT-ABSENT-ON-ONE-DROPDOWN, RECEIVED-LEAF-ADMITTED-WITH-ITS-READER, J175-ADMISSION-PASSES-NO-ACT-SUBSTRING. J111 applied: J 111 COVERED-UNFIRED (Products), J 176 new GAP (Services). RECEIVED-LEAF-SERVES-THE-INVITATION-WRITES accepts _RECEIVED_PATHS as built.
+5. Merged clean and wrong, caught by measuring: the allowlist cell (104/84 on both sides), gap_read 65, and job_alerts' exemption assert 18 (true 19).
+6. Q1: the prose guard reads 6000 chars of a growing cell, and it failed twice. I condensed the cell; should the guard read the row instead? Q2: SELF-LOADER registered, though integration 6 held it was an order; accept? Q3: the minted ids, and settings7's names from your 12:55 entry; accept? Q4: leave "registration owed at integration 7" in about 60 places, or sweep? Q5: J 111 narrowed to its Products tab, J 176 inherits its directions line; accept?
