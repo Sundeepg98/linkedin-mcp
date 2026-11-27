@@ -1,0 +1,37 @@
+<!doctype html>
+<!--
+  LANE CI8, 2026-11-28: a SKELETON of the people-search links LinkedIn wrote
+  with schoolFilter, industry or activelyHiring on the raw captures of
+  2026-09-20, built by scripts/_build_net7_facet_link_skeleton.py. Every link's
+  scheme, host, path and query keys are LinkedIn's, in LinkedIn's order; every
+  value is synthetic in the captured shape (each digit 9, JSON kept as JSON,
+  percent-encoded where the capture encoded it; a company id is the identity
+  guard's declared 902611), except activelyHiring's "true" and the origin
+  enums, which are LinkedIn's constants. No person,
+  name, slug, member id, employer or page text: the raws are gitignored and
+  are never committed. tests/test_people_search_sends_linkedins_facet_keys.py
+  reads it.
+-->
+<html><body><main>
+<section data-capture="collection-top-choice">
+  <a href="https://www.linkedin.com/search/results/people/?origin=JOB_PAGE_CANNED_SEARCH&amp;currentCompany=902611&amp;schoolFilter=99999999">link</a>
+</section>
+<section data-capture="premium-hub">
+  <a href="https://www.linkedin.com/search/results/people/?activelyHiring=%22true%22&amp;activelyHiringForJobTitles=%5B%22-999%22%5D">link</a>
+</section>
+<section data-capture="profile-views-captions">
+  <a href="https://www.linkedin.com/search/results/people/?keywords=example&amp;origin=WHO_VIEWED_ME&amp;industry=999&amp;geoUrn=99999999">link</a>
+  <a href="https://www.linkedin.com/search/results/people/?keywords=example&amp;origin=WHO_VIEWED_ME&amp;industry=999&amp;geoUrn=99999999">link</a>
+</section>
+<section data-capture="profile-views">
+  <a href="https://www.linkedin.com/search/results/people/?keywords=example&amp;origin=WHO_VIEWED_ME&amp;industry=999&amp;geoUrn=99999999">link</a>
+  <a href="https://www.linkedin.com/search/results/people/?keywords=example&amp;origin=WHO_VIEWED_ME&amp;industry=999&amp;geoUrn=99999999">link</a>
+</section>
+<section data-capture="roleplay-control">
+  <a href="https://www.linkedin.com/search/results/people/?activelyHiring=%22true%22&amp;activelyHiringForJobTitles=%5B%22-999%22%5D">link</a>
+</section>
+<section data-capture="search-appearances">
+  <a href="https://www.linkedin.com/search/results/people/?keywords=example&amp;origin=WHO_VIEWED_ME&amp;industry=999">link</a>
+  <a href="https://www.linkedin.com/search/results/people/?keywords=example&amp;origin=WHO_VIEWED_ME&amp;industry=999">link</a>
+</section>
+</main></body></html>
