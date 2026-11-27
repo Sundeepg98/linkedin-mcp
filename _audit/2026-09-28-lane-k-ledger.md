@@ -1163,6 +1163,8 @@ by this measurement? The cell names no absence as its bar, so this lane moves no
 
 **Answered 2026-11-27, 13:45 IST, by the orchestrator** (integration 7 registers it): J169-SPLITS-SENIORITY-REAIMED-UNDER-D6 -- split, the FUNCTION half keeping `J 169` and building on load 20, the SENIORITY half a new GAP row whose next step is a capture of the AI job search's experience-level facet for that company (not MEASURED-ABSENT on one dropdown). HELD by the lane: `J 169`'s capability names no function facet on disk (distribution by function is `J 114`), so the split cannot be applied as written without re-scoping the row (the lane's record, section 11.4); its step stays here, and the counts the ruling asked for are in its cell.
 
+**Answered again 2026-11-27, 14:05 IST, by the orchestrator** (integration 7 registers them): J169-BY-ITS-OWN-WORDS, plus JOB-OPENINGS-BY-FUNCTION-ADDED, replacing the 13:45 answer. The split is applied to the row's own words: load 20 draws headcount over time and notable alumni, so `J 169` keeps those two (step BUILD on `tests/fixtures/live12/c_rj26_1_functions-open.html`), and the seniority facet is `J 173`, GAP, step CAPTURE `C-J173-1` under D6. "Job openings by function" is a new row, `J 174`, drawn on load 20 with no selection (step BUILD on the same fixture); `J 114` is a different capability and is not merged. The counts stay in the cells. The lane's record, section 11.5.
+
 ### Q-J170-ROW-CONTROL -- an alert's own control that may open an editor
 
 Added 2026-11-27 by lane jobs7 (`_audit/2026-11-27-jobs7.md`, section 7). Row: `J 170` ("Manage
@@ -1197,6 +1199,8 @@ J-114-SPLITS and J-37-SPLITS split theirs -- the captured half building on its c
 new GAP row with its own next step? Until ruled, the three stay GAP on this question.
 
 **Answered 2026-11-27, 13:45 IST, by the orchestrator** (integration 7 registers it): LEARNING-ROWS-SPLIT -- all three split under COMPOUND-ROW-SPLITS-ONLY-ON-STATE, each captured half keeping its id. APPLIED to `J 152` (its other half `J 171`, step CAPTURE `C-LRN-1`) and `J 156` (its write half `J 172`, step CAPTURE `C-LRN-2`, session 14, attended). `J 154` is HELD: the ruling named in-progress as its other half, and disk says the captured tab is in-progress (the lane's record, section 11.2); its step stays here until the orchestrator rules again.
+
+**Answered again 2026-11-27, 14:05 IST, by the orchestrator** (integration 7 registers it): LEARNING-ROWS-SPLIT, re-ruled on the lane's measurement -- the IN-PROGRESS half keeps `J 154` and builds on load 25's capture (step BUILD on `tests/fixtures/live12/learning_library.html`); the SAVED half is `J 175`, GAP, its address ADMITTED by one anchored line, red first, its step CAPTURE `C-LRN-3` (session 14, the ADMIT-NOW-LANDING-IN-SESSION-14 shape). "Your corrected three sentences stand." The lane's record, section 11.5.
 
 ## 8. Preconditions and purposes
 

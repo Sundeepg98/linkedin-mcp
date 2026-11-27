@@ -1070,7 +1070,8 @@ PINNED = {
     #: 776 ON LANE BUILD-MSG2'S ROUND 2 (2026-11-26), MEASURED: `M M28` SPLIT on the orchestrator's ruling M-M28-SPLITS (round 2, to be registered at integration 6): the view half stayed `M M28`, COVERED-UNFIRED on `linkedin_archived_conversations`; the restore half entered as `M M54`, GAP, W (`_audit/2026-11-26-build-msg2.md` section 10) (was 775).
     #: 777 AT INTEGRATION 6'S MERGE OF LANE BUILD-MSG2 (2026-11-26), MEASURED on the merged tree by --check, never summed: the three lanes' moves above, together.
     #: 779 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 171` and `J 172` entered, split from `J 152` and `J 156` by the orchestrator's LEARNING-ROWS-SPLIT (`_audit/2026-11-27-jobs7.md` section 11.2): two GAP rows, `J 171` an admitted read, `J 172` a write, and `J 156` now a read alone.
-    "stated_rows": 779,
+    #: 782 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 173`, `J 174` and `J 175` entered by the orchestrator's corrected rulings of 14:05 IST (`_audit/2026-11-27-jobs7.md` section 11.5): `J 173` split from `J 169` (J169-BY-ITS-OWN-WORDS), `J 174` added (JOB-OPENINGS-BY-FUNCTION-ADDED), `J 175` split from `J 154` (LEARNING-ROWS-SPLIT as corrected); three GAP rows, each an admitted read.
+    "stated_rows": 782,
     #: 762 = 704 stated rows + 58 declared collapses, computed at HEAD. NOT the
     #: published 761 and NOT the counter docstring's 760: those two differ only
     #: by a `- 2 stateless` term whose two rows are already outside the 704.
@@ -1110,7 +1111,8 @@ PINNED = {
     #: 789 ON LANE BUILD-MSG2'S ROUND 2 (2026-11-26), MEASURED: `M M28` SPLIT on the orchestrator's ruling M-M28-SPLITS (round 2, to be registered at integration 6): the view half stayed `M M28`, COVERED-UNFIRED on `linkedin_archived_conversations`; the restore half entered as `M M54`, GAP, W (`_audit/2026-11-26-build-msg2.md` section 10) (was 788).
     #: 790 AT INTEGRATION 6'S MERGE OF LANE BUILD-MSG2 (2026-11-26), MEASURED on the merged tree by --check, never summed: the three lanes' moves above, together.
     #: 792 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 171` and `J 172` entered, split from `J 152` and `J 156` by the orchestrator's LEARNING-ROWS-SPLIT (`_audit/2026-11-27-jobs7.md` section 11.2): two GAP rows, `J 171` an admitted read, `J 172` a write, and `J 156` now a read alone.
-    "capabilities": 792,
+    #: 795 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 173`, `J 174` and `J 175` entered by the orchestrator's corrected rulings of 14:05 IST (`_audit/2026-11-27-jobs7.md` section 11.5): `J 173` split from `J 169` (J169-BY-ITS-OWN-WORDS), `J 174` added (JOB-OPENINGS-BY-FUNCTION-ADDED), `J 175` split from `J 154` (LEARNING-ROWS-SPLIT as corrected); three GAP rows, each an admitted read.
+    "capabilities": 795,
     #: 741 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: the achievable
     #: move, with `O6-O20`'s 14 unchanged.
     #: 742 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: `N 2` left the exclusions.
@@ -1138,7 +1140,8 @@ PINNED = {
     #: 718 ON LANE BUILD-MSG2'S ROUND 2 (2026-11-26), MEASURED: `M M28` SPLIT on the orchestrator's ruling M-M28-SPLITS (round 2, to be registered at integration 6): the view half stayed `M M28`, COVERED-UNFIRED on `linkedin_archived_conversations`; the restore half entered as `M M54`, GAP, W (`_audit/2026-11-26-build-msg2.md` section 10) (was 717).
     #: 719 AT INTEGRATION 6'S MERGE OF LANE BUILD-MSG2 (2026-11-26), MEASURED on the merged tree by --check, never summed: the three lanes' moves above, together.
     #: 721 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 171` and `J 172` entered, split from `J 152` and `J 156` by the orchestrator's LEARNING-ROWS-SPLIT (`_audit/2026-11-27-jobs7.md` section 11.2): two GAP rows, `J 171` an admitted read, `J 172` a write, and `J 156` now a read alone.
-    "capabilities_achievable": 721,
+    #: 724 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 173`, `J 174` and `J 175` entered by the orchestrator's corrected rulings of 14:05 IST (`_audit/2026-11-27-jobs7.md` section 11.5): `J 173` split from `J 169` (J169-BY-ITS-OWN-WORDS), `J 174` added (JOB-OPENINGS-BY-FUNCTION-ADDED), `J 175` split from `J 154` (LEARNING-ROWS-SPLIT as corrected); three GAP rows, each an admitted read.
+    "capabilities_achievable": 724,
     #: 43 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: 29 rows returned
     #: to GAP when OUTWARD-CLASSES-BUILT-BEHIND-GRANTS retired their key, and
     #: `P P2` at the merge (-30); `P N27` and `P P2` then EXCLUDED-RULED on
@@ -1194,7 +1197,8 @@ PINNED = {
     #: 705 ON LANE BUILD-MSG2'S ROUND 2 (2026-11-26), MEASURED: `M M28` SPLIT on the orchestrator's ruling M-M28-SPLITS (round 2, to be registered at integration 6): the view half stayed `M M28`, COVERED-UNFIRED on `linkedin_archived_conversations`; the restore half entered as `M M54`, GAP, W (`_audit/2026-11-26-build-msg2.md` section 10) (was 704).
     #: 706 AT INTEGRATION 6'S MERGE OF LANE BUILD-MSG2 (2026-11-26), MEASURED on the merged tree by --check, never summed: the three lanes' moves above, together.
     #: 708 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 171` and `J 172` entered, split from `J 152` and `J 156` by the orchestrator's LEARNING-ROWS-SPLIT (`_audit/2026-11-27-jobs7.md` section 11.2): two GAP rows, `J 171` an admitted read, `J 172` a write, and `J 156` now a read alone.
-    "achievable": 708,
+    #: 711 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 173`, `J 174` and `J 175` entered by the orchestrator's corrected rulings of 14:05 IST (`_audit/2026-11-27-jobs7.md` section 11.5): `J 173` split from `J 169` (J169-BY-ITS-OWN-WORDS), `J 174` added (JOB-OPENINGS-BY-FUNCTION-ADDED), `J 175` split from `J 154` (LEARNING-ROWS-SPLIT as corrected); three GAP rows, each an admitted read.
+    "achievable": 711,
     #: 205 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
     #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
     #: 179 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: the 30 returned
@@ -1661,7 +1665,8 @@ PINNED = {
     #: 515 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 1`, `J 20` and `J 40` GAP -> COVERED-UNFIRED, the AI job search as the keyword search's own route over session 12's two AI loads (`_audit/2026-11-27-jobs7.md` section 3); each a read entering bucket 1 held by no ruling, the three READER-gated jobs rows leaving the side table.
     #: 514 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 31` GAP -> COVERED-UNFIRED, the AI arm of the search's job-alert pair, its address the AI search's own and its switch that page's, over session 12's two AI loads (`_audit/2026-11-27-jobs7.md` section 5); a write entering bucket 1 held by no ruling, as its classic arm was until integration 6.
     #: 516 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 171` and `J 172` entered, split from `J 152` and `J 156` by the orchestrator's LEARNING-ROWS-SPLIT (`_audit/2026-11-27-jobs7.md` section 11.2): two GAP rows, `J 171` an admitted read, `J 172` a write, and `J 156` now a read alone.
-    "gap": 516,
+    #: 519 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 173`, `J 174` and `J 175` entered by the orchestrator's corrected rulings of 14:05 IST (`_audit/2026-11-27-jobs7.md` section 11.5): `J 173` split from `J 169` (J169-BY-ITS-OWN-WORDS), `J 174` added (JOB-OPENINGS-BY-FUNCTION-ADDED), `J 175` split from `J 154` (LEARNING-ROWS-SPLIT as corrected); three GAP rows, each an admitted read.
+    "gap": 519,
     #: 18 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: `M M1` built (`linkedin_message_from_profile`).
     #: 16 ON LANE L5'S ORDER OF 2026-09-27 23:36, MEASURED:
     #: `linkedin_send_message` RETIRED (aimed by a name): `M M2` to GAP and `N
@@ -1983,7 +1988,8 @@ PINNED = {
     #: 102 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 1`, `J 20` and `J 40` GAP -> COVERED-UNFIRED, the AI job search as the keyword search's own route over session 12's two AI loads (`_audit/2026-11-27-jobs7.md` section 3); each a read entering bucket 1 held by no ruling, the three READER-gated jobs rows leaving the side table.
     #: 101 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 31` GAP -> COVERED-UNFIRED, the AI arm of the search's job-alert pair, its address the AI search's own and its switch that page's, over session 12's two AI loads (`_audit/2026-11-27-jobs7.md` section 5); a write entering bucket 1 held by no ruling, as its classic arm was until integration 6.
     #: 103 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 171` and `J 172` entered, split from `J 152` and `J 156` by the orchestrator's LEARNING-ROWS-SPLIT (`_audit/2026-11-27-jobs7.md` section 11.2): two GAP rows, `J 171` an admitted read, `J 172` a write, and `J 156` now a read alone.
-    "gap_unknown": 103,
+    #: 106 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 173`, `J 174` and `J 175` entered by the orchestrator's corrected rulings of 14:05 IST (`_audit/2026-11-27-jobs7.md` section 11.5): `J 173` split from `J 169` (J169-BY-ITS-OWN-WORDS), `J 174` added (JOB-OPENINGS-BY-FUNCTION-ADDED), `J 175` split from `J 154` (LEARNING-ROWS-SPLIT as corrected); three GAP rows, each an admitted read.
+    "gap_unknown": 106,
     "gap_ambiguous": 0,
     #: BUCKET 3, MEASURED 2026-09-23 (`_audit/2026-09-23-bucket3-addresses.md`),
     #: counted off `_audit/_census/read-addresses.tsv`, whose every verdict
@@ -2539,7 +2545,8 @@ PINNED = {
     #: 102 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 1`, `J 20` and `J 40` GAP -> COVERED-UNFIRED, the AI job search as the keyword search's own route over session 12's two AI loads (`_audit/2026-11-27-jobs7.md` section 3); each a read entering bucket 1 held by no ruling, the three READER-gated jobs rows leaving the side table.
     #: 101 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 31` GAP -> COVERED-UNFIRED, the AI arm of the search's job-alert pair, its address the AI search's own and its switch that page's, over session 12's two AI loads (`_audit/2026-11-27-jobs7.md` section 5); a write entering bucket 1 held by no ruling, as its classic arm was until integration 6.
     #: 103 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 171` and `J 172` entered, split from `J 152` and `J 156` by the orchestrator's LEARNING-ROWS-SPLIT (`_audit/2026-11-27-jobs7.md` section 11.2): two GAP rows, `J 171` an admitted read, `J 172` a write, and `J 156` now a read alone.
-    "jobs_gap": 103,
+    #: 106 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 173`, `J 174` and `J 175` entered by the orchestrator's corrected rulings of 14:05 IST (`_audit/2026-11-27-jobs7.md` section 11.5): `J 173` split from `J 169` (J169-BY-ITS-OWN-WORDS), `J 174` added (JOB-OPENINGS-BY-FUNCTION-ADDED), `J 175` split from `J 154` (LEARNING-ROWS-SPLIT as corrected); three GAP rows, each an admitted read.
+    "jobs_gap": 106,
     #: 40 AT LANE S'S OFFLINE FRONTIER (2026-09-28), MEASURED: the five rows
     #: bucket 3 called blocked on nothing, taken one by one. `M M53`, `N 195`
     #: and `P S5` (three R rows ADMITTED and gated READER) and `J 107` (the one
@@ -2567,7 +2574,8 @@ PINNED = {
     #: 45 AT INTEGRATION 6'S REGISTRATION (2026-11-26), MEASURED by --check, never summed: RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE returned the 22 rows of search26's section 4.5 to GAP (21 COVERED-PROVEN, J 31 COVERED-UNFIRED), and FAILED-REPROOF-DEMOTES moved M C41 COVERED-PROVEN -> COVERED-UNFIRED.
     #: 42 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 1`, `J 20` and `J 40` GAP -> COVERED-UNFIRED, the AI job search as the keyword search's own route over session 12's two AI loads (`_audit/2026-11-27-jobs7.md` section 3); each a read entering bucket 1 held by no ruling, the three READER-gated jobs rows leaving the side table.
     #: 44 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 171` and `J 172` entered, split from `J 152` and `J 156` by the orchestrator's LEARNING-ROWS-SPLIT (`_audit/2026-11-27-jobs7.md` section 11.2): two GAP rows, `J 171` an admitted read, `J 172` a write, and `J 156` now a read alone.
-    "jobs_dir_r": 44,
+    #: 47 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 173`, `J 174` and `J 175` entered by the orchestrator's corrected rulings of 14:05 IST (`_audit/2026-11-27-jobs7.md` section 11.5): `J 173` split from `J 169` (J169-BY-ITS-OWN-WORDS), `J 174` added (JOB-OPENINGS-BY-FUNCTION-ADDED), `J 175` split from `J 154` (LEARNING-ROWS-SPLIT as corrected); three GAP rows, each an admitted read.
+    "jobs_dir_r": 47,
     #: 60 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: `J 69` and
     #: `J 87`, both W.
     #: 58 ON LANE K's APPLICATION OF THE RULINGS OF 2026-10-10, MEASURED: `J
@@ -2616,7 +2624,8 @@ PINNED = {
     #: 43 AT INTEGRATION 6'S REGISTRATION (2026-11-26), MEASURED by --check, never summed: RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE returned the 22 rows of search26's section 4.5 to GAP (21 COVERED-PROVEN, J 31 COVERED-UNFIRED), and FAILED-REPROOF-DEMOTES moved M C41 COVERED-PROVEN -> COVERED-UNFIRED.
     #: 40 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 1`, `J 20` and `J 40` GAP -> COVERED-UNFIRED, the AI job search as the keyword search's own route over session 12's two AI loads (`_audit/2026-11-27-jobs7.md` section 3); each a read entering bucket 1 held by no ruling, the three READER-gated jobs rows leaving the side table.
     #: 41 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 171` and `J 172` entered, split from `J 152` and `J 156` by the orchestrator's LEARNING-ROWS-SPLIT (`_audit/2026-11-27-jobs7.md` section 11.2): two GAP rows, `J 171` an admitted read, `J 172` a write, and `J 156` now a read alone.
-    "jobs_admitted": 41,
+    #: 44 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 173`, `J 174` and `J 175` entered by the orchestrator's corrected rulings of 14:05 IST (`_audit/2026-11-27-jobs7.md` section 11.5): `J 173` split from `J 169` (J169-BY-ITS-OWN-WORDS), `J 174` added (JOB-OPENINGS-BY-FUNCTION-ADDED), `J 175` split from `J 154` (LEARNING-ROWS-SPLIT as corrected); three GAP rows, each an admitted read.
+    "jobs_admitted": 44,
     #: 11 ON LANE A'S J 38 BUILD (2026-10-10), MEASURED: `J 38` GAP -> COVERED-UNFIRED by D6 --
     #: an alert's delivered job ids, read off the notifications page (never fired).
     #: 11 AT LANE A'S MERGE OF MASTER 71d83ca (2026-10-10), MEASURED on the
