@@ -53,7 +53,12 @@ CLASSIC_FIXTURE = FIXTURES / "jobs_search.html"
 BUILDER = REPO / "scripts" / "_build_ai_job_search_skeleton.py"
 
 ASKED = "https://www.linkedin.com/jobs/search/?keywords=synthetic+role"
+#: Since lane jobs7 (2026-11-27) a keyword search ASKS FOR the AI address
+#: itself, so for such a call this is both the asked-for address and the
+#: landing; the classic address is asked only by a call setting an argument
+#: the AI route refuses (``ASKED_FILTERED``).
 AI_LANDING = "https://www.linkedin.com/jobs/search-results/?keywords=synthetic+role"
+ASKED_FILTERED = "https://www.linkedin.com/jobs/search/?keywords=synthetic+role&f_JT=F"
 KEYWORDS = "synthetic role"
 SYNTHETIC_IDS = [str(4000000101 + n) for n in range(25)]
 AGO = re.compile(r"^\d+ (?:second|minute|hour|day|week|month|year)s? ago$")
@@ -274,19 +279,22 @@ async def test_the_ai_page_behind_the_classic_address_refuses_instead_of_returni
 
     The landing is the classic address -- the case the landing veto cannot
     see, a classic url serving the new page -- so the render veto alone stands
-    between this read and an empty shortlist.
+    between this read and an empty shortlist. Since lane jobs7 a keyword
+    search asks for the AI address itself, so the classic address is asked
+    only by a call that sets an argument the AI route refuses: ``job_type``
+    here.
     """
     page = _MarkupPage(evaluate_result=[], html=_ai_html())
     navigations = drive(page)
 
-    result = await linkedin_search_jobs(keywords=KEYWORDS)
+    result = await linkedin_search_jobs(keywords=KEYWORDS, job_type="full_time")
 
     assert result.get("error") == "extraction_failed", result
     assert "results" not in result and "count" not in result, result
     assert "25 AI result card(s)" in result["message"], result["message"]
     assert "SDUI screen semantic_job_details" in result["message"], result["message"]
-    assert result["url"] == ASKED
-    assert navigations == [ASKED]
+    assert result["url"] == ASKED_FILTERED
+    assert navigations == [ASKED_FILTERED]
 
 
 async def test_the_ai_page_fed_to_the_real_classic_harvest_refuses(monkeypatch):
@@ -348,16 +356,21 @@ async def test_a_landing_on_any_other_route_refuses_naming_only_its_shape(drive,
     assert "characters, containing" in result["message"], "the shape must still be described"
     for fragment in fragments:
         assert fragment not in result["message"], fragment
-    assert result["url"] == ASKED, "the field carries the asked-for address, never the landing"
+    # The asked-for address is the AI one since lane jobs7 (a keyword search).
+    assert result["url"] == AI_LANDING, "the field carries the asked-for address, never the landing"
 
 
 async def test_a_classic_landing_with_cards_reads_as_it_always_did(drive):
+    """Should LinkedIn serve its classic page again -- here at the AI address a
+    keyword search now asks for -- the classic reader reads it as before."""
     page = _MarkupPage(evaluate_result=[SEARCH_CARD], html=None)
-    drive(page)
+    page.redirect_to = ASKED
+    navigations = drive(page)
 
     result = await linkedin_search_jobs(keywords=KEYWORDS)
 
     assert "error" not in result, result
+    assert navigations == [AI_LANDING]
     assert result["route"] == route.CLASSIC
     assert result["count"] == 1 and result["results"][0]["job_id"] == "4111222333"
     assert page.content_calls == 0, "a healthy read pays for no evidence"
@@ -382,8 +395,9 @@ async def test_the_ai_fallback_returns_the_keyword_search_in_one_load(drive):
     assert result["results_label"] == {"shown": 99, "capped": True}
     assert result["pager"] == {"indicators": 3, "next_control": "visible"}
     assert result["easy_apply_filter"] == {"drawn": True, "checked": False}
-    # ONE LOAD, NO RE-QUERY: the fallback reads the page the request landed on.
-    assert navigations == [ASKED]
+    # ONE LOAD, NO RE-QUERY: the page the request landed on is read. Since lane
+    # jobs7 the request IS the AI address (a keyword search asks for it).
+    assert navigations == [AI_LANDING]
     assert result["pages_loaded"] == 1
     assert "AI job search" in result["note"]
 
@@ -477,8 +491,9 @@ async def test_easy_apply_on_the_ai_route_is_a_local_post_filter_on_each_cards_m
         "after": 8,
     }
     assert result["count"] == 8 and result["page_had"] == 25, result
-    # ONE LOAD: the classic request, unchanged, and nothing after it.
-    assert len(navigations) == 1 and "f_AL=true" in navigations[0], navigations
+    # ONE LOAD, and since lane jobs7 it is the AI address itself, carrying no
+    # Easy Apply key: the filter is the cards' own marks, never a sent one.
+    assert navigations == [AI_LANDING] and "f_AL" not in navigations[0], navigations
     # The toggle was neither pressed nor read as applied.
     assert result["easy_apply_filter"] == {"drawn": True, "checked": False}
     note = result["note"]
@@ -522,15 +537,37 @@ async def test_easy_apply_beside_an_unmeasured_filter_refuses_naming_only_that_f
 
 
 async def test_the_post_filter_is_never_applied_on_the_classic_route(drive):
+    """A classic composition carries LinkedIn's own filter, ``f_AL``. Since lane
+    jobs7 only a call setting an argument the AI route refuses is composed on
+    the classic address, so ``job_type`` rides beside ``easy_apply`` here."""
     page = _MarkupPage(evaluate_result=[SEARCH_CARD], html=None)
     navigations = drive(page)
 
-    result = await linkedin_search_jobs(keywords=KEYWORDS, easy_apply=True)
+    result = await linkedin_search_jobs(keywords=KEYWORDS, easy_apply=True, job_type="full_time")
 
     assert "error" not in result, result
     assert result["route"] == route.CLASSIC
     assert "easy_apply_post_filter" not in result
     assert "f_AL=true" in navigations[0], "classic carries LinkedIn's own measured filter"
+
+
+async def test_an_ai_routed_easy_apply_answered_with_the_classic_page_refuses(drive):
+    """RED BEFORE LANE JOBS7'S FIX: an easy_apply keyword search asks for the AI
+    address with NO filter on it, because easy_apply is applied there to each
+    card's own mark. Were LinkedIn to answer with its classic page, those rows
+    were never Easy Apply-filtered, so the call refuses rather than return them
+    as if they were."""
+    page = _MarkupPage(evaluate_result=[SEARCH_CARD], html=None)
+    page.redirect_to = ASKED
+    navigations = drive(page)
+
+    result = await linkedin_search_jobs(keywords=KEYWORDS, easy_apply=True)
+
+    assert navigations == [AI_LANDING]
+    assert result.get("error") == "extraction_failed", result
+    assert "results" not in result
+    assert "not Easy Apply postings" in result["message"], result["message"]
+    assert result["url"] == AI_LANDING
 
 
 def test_the_post_filter_keeps_exactly_the_cards_that_draw_the_mark():

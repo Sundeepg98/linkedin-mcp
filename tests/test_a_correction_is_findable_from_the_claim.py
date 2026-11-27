@@ -342,6 +342,20 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "MAKE THIS ENTRY WRONG:** a jobs row saying that ruling's text is stale "
         "while leaving its document unmarked."
     ),
+
+    # 2026-11-27, lane jobs7. READ, not inferred from the filenames: the
+    # notes are this lane's own, one per moved row (`J 1`, `J 20`, `J 40`).
+    ("jobs.md", "2026-11-27-jobs7.md"): (
+        "THREE CENSUS MOVES CITING THE LANE'S RECORD, NOT A CORRECTION OF IT. "
+        "Each moved row's one dated note cites the record as its evidence; none "
+        "says anything in that record does not hold. The matched words are "
+        "OLDER TEXT: TABLE-ROW PROXIMITY to `J 18`'s 2026-09-23 note two lines "
+        "above `J 20` ('THE ROW WAS PRICED ON THE WRONG ADDRESS'), and `J 40`'s "
+        "own 2026-09-21 history in the same cell ('THIS PROBE'S OWN CORRECTED "
+        "DEFECT', 'wrong by one'). **WHAT WOULD MAKE THIS ENTRY WRONG:** a jobs "
+        "row saying something in the lane's record does not hold while leaving "
+        "the record unmarked."
+    ),
     ("messaging-and-content.md", "2026-11-26-live-session-12.md"): (
         "A CENSUS MOVE UNDER A REGISTERED RULING, NOT A CORRECTION OF THE RECORD. "
         "Row `C41` gained one dated note citing the session record's E1, loads 1 "

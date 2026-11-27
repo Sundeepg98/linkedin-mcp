@@ -46,6 +46,23 @@ two vetoes and the fallback that close it:
   ``Q-FILTER-FIRES-SEARCH-CAP``: a filter-driven re-query would count as a
   search against ``D1-SEARCH-AS-READS``'s five a live session).
 
+## THE AI ROUTE AS THE SEARCH'S OWN ROUTE (lane jobs7, 2026-11-27)
+
+The classic search NO LONGER SERVES: live session 12's load 3 (``C-SRCH-1``,
+the decision load, 2026-11-26) asked for ``/jobs/search/`` and was REDIRECTED
+here, with no classic list, no deprecation banner and no classic anchor. So a
+call whose every argument this route honours (:func:`asks_the_ai_route`)
+ASKS FOR THIS ROUTE'S OWN ADDRESS (:func:`ai_search_url`, ``keywords`` and
+nothing else) and is read here as the search's PRIMARY route, not as a
+fallback behind a redirect. Measured on session 12's two AI loads, by keyed
+shape on the live lane's own skeletons (``tests/fixtures/live12/
+c_srch_1_words.html`` and ``c_srch_0b_words.html``): 25 and 18 cards, each
+with the head stack below, the hiring chip on 5 and on 13, proximity on 3 and
+on 3. A call that sets an argument this route has not been measured honouring
+is composed as before, and its landing here refuses by name
+(:func:`fallback_refusal`); a landing on the classic page, should LinkedIn
+serve it again, is still read by the classic reader.
+
 ## THE AI READER, AND WHAT EACH FIELD IS BOUND TO
 
 :func:`read_ai_search` reads the page's serialised HTML (``page.content()``,
@@ -71,7 +88,14 @@ never by a line's position in the text. Measured on the one capture there is,
   ``Posted N <unit> ago`` (25 of 25; the plain copy equals "Posted " + the
   visible one on 25 of 25);
 * ``proximity`` is the shipped ``shape.find_proximity`` over the card's lines
-  outside the head stack: integers, never a page string.
+  outside the head stack: integers, never a page string;
+* ``hiring`` is the hiring chips the card draws OUTSIDE the head stack, each
+  a text whose WHOLE text is one of :data:`HIRING_CHIPS`'s closed words,
+  returned as that table's literals (lane jobs7, census ``J 20``'s hiring
+  status). Measured: session 11's raw page drew each word on 5 cards
+  (search26 2.3); session 12's two loads drew ``Actively reviewing
+  applicants`` on 5 and 11 cards and ``Be an early applicant`` on 0 and 3, one
+  card drawing both. Omitted when none is drawn, as ``proximity`` is.
 
 PAGE TELEMETRY, NEVER A COUNT: ``99+ results`` is read as ``{shown, capped}``
 and the pager as the number of ``pagination-indicator-<n>`` test ids plus the
@@ -92,7 +116,7 @@ from __future__ import annotations
 import re
 from html.parser import HTMLParser
 from typing import Any, Iterable, Optional
-from urllib.parse import parse_qsl, urlsplit
+from urllib.parse import parse_qsl, urlencode, urlsplit
 
 from linkedin_server.shape import find_proximity, trim
 
@@ -257,6 +281,39 @@ def _as_int(value: Any) -> int:
         return int(value)
     except (TypeError, ValueError):
         return 0
+
+
+#: THE AI ROUTE'S OWN ADDRESS, admitted since 2026-10-10 (``readonly``'s line
+#: for ``/jobs/search-results/``, census ``J 16``) and the address session 12's
+#: load 4 asked for and was SERVED exactly (``C-SRCH-0b``).
+AI_SEARCH_URL = "https://www.linkedin.com/jobs/search-results/"
+
+
+def asks_the_ai_route(refused: Iterable[str], *, keywords: Any) -> bool:
+    """Whether a call ASKS FOR the AI route's own address (lane jobs7).
+
+    Exactly when the call has keywords and sets no argument the AI route
+    refuses (:func:`ai_route_refusals` named none): then every argument it
+    sets is honoured there -- ``keywords`` on the address, ``easy_apply``
+    locally, ``limit`` in this process -- and the classic address, which no
+    longer serves (live session 12, load 3), would only redirect here. Any
+    refused argument keeps the call on its classic composition, so it refuses
+    by name on the landing exactly as before.
+    """
+    return not list(refused or ()) and bool(" ".join(str(keywords or "").split()))
+
+
+def ai_search_url(keywords: Any) -> str:
+    """The AI route's own address for ONE keyword search: ``keywords`` and nothing else.
+
+    The words are the caller's, whitespace-folded the way the search box folds
+    them and urlencoded by the standard library. No filter, no place and no
+    offset is ever written here: none is measured honoured on this route
+    (:data:`AI_ROUTE_UNMEASURED`), and ``easy_apply`` is applied to the cards
+    this page returns, never sent.
+    """
+    words = " ".join(str(keywords or "").split())
+    return AI_SEARCH_URL + "?" + urlencode([("keywords", words)])
 
 
 def easy_apply_post_filter(rows: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], dict[str, Any]]:
@@ -498,6 +555,38 @@ EASY_APPLY_WORD = "Easy Apply"
 #: The toolbar toggle's own accessible name (session 11: 2 drawn, both off).
 EASY_APPLY_TOGGLE_LABEL = "Filter by Easy Apply"
 
+#: THE HIRING CHIPS AN AI CARD DRAWS, LinkedIn's own words -> this package's
+#: literals, closed and in output order (lane jobs7, census ``J 20``). Each
+#: word MEASURED: on session 11's raw page by string equality (search26 2.3,
+#: 5 cards each) and on session 12's two keyed skeletons by keyed shape
+#: (``Actively reviewing applicants`` 5 and 11 cards, ``Be an early
+#: applicant`` 0 and 3). A chip word outside this table is never read: it is
+#: absent, not guessed.
+HIRING_CHIPS: dict[str, str] = {
+    "Actively reviewing applicants": "actively_reviewing_applicants",
+    "Be an early applicant": "be_an_early_applicant",
+}
+
+
+def _card_hiring(card: _Node, stack: _Node) -> list[str]:
+    """The card's hiring chips, as :data:`HIRING_CHIPS` literals, in table order.
+
+    A chip is a drawn text OUTSIDE the head stack whose whole text is one of
+    the table's words -- on session 12 a ``p > span`` (the first) or a ``p``
+    (the second), so the text is matched and its wrapper is not. Each literal
+    once, however many copies the card draws.
+    """
+    found: set[str] = set()
+    for node in _walk(card):
+        if node is stack or _inside(node, stack):
+            continue
+        for child in node.children:
+            if isinstance(child, str):
+                literal = HIRING_CHIPS.get(" ".join(child.split()))
+                if literal:
+                    found.add(literal)
+    return [literal for literal in HIRING_CHIPS.values() if literal in found]
+
 
 def _one(nodes: list[_Node]) -> Optional[_Node]:
     return nodes[0] if len(nodes) == 1 else None
@@ -587,6 +676,11 @@ def _read_ai_card(card: _Node) -> Optional[dict[str, Any]]:
     if proximity.get("state"):
         # OMITTED WHEN NOT DRAWN, exactly as ``shape._job_card_out`` omits it.
         row["proximity"] = proximity
+    hiring = _card_hiring(card, stack)
+    if hiring:
+        # OMITTED WHEN NOT DRAWN, as ``proximity`` is: absent means no chip
+        # this package knows was drawn, never "not hiring".
+        row["hiring"] = hiring
     return row
 
 
@@ -728,6 +822,24 @@ def fallback_refusal(refused: list[str], toggle: dict[str, Any], *, html_read: b
         + f" ({grounds}). The page's Easy Apply toggle is {drawn}. "
         "Call again without the refused arguments for a keyword search; "
         "easy_apply is applied there locally, to each card's own mark."
+    )
+
+
+def classic_at_ai_refusal() -> str:
+    """The message when an AI-routed ``easy_apply`` call is answered with the classic page.
+
+    Lane jobs7: such a call asks for the AI address with no filter on it,
+    because ``easy_apply`` is applied there to each card's own mark. A classic
+    page served in its place was asked for no filter, so its rows are not Easy
+    Apply postings -- the accepted-and-ignored filter this module exists to
+    refuse.
+    """
+    return (
+        "LinkedIn served its classic job search at the AI search's own address, "
+        "and this call's easy_apply was to be applied to the AI page's own card "
+        "marks: the classic page was asked for no filter, so its rows are not "
+        "Easy Apply postings and are not returned. Call again without "
+        "easy_apply for the classic page's rows."
     )
 
 

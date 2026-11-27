@@ -716,6 +716,9 @@ async def test_more_rows_than_linkedin_counts_is_flagged_as_a_disagreement(drive
 
 async def test_a_search_result_is_shaped_like_the_other_job_rows(drive):
     page = FakePage(evaluate_result=[SEARCH_CARD])
+    # Since lane jobs7 a keyword search asks for the AI address; this page is
+    # LinkedIn serving its classic one there, read by the classic reader.
+    page.redirect_to = "https://www.linkedin.com/jobs/search/?keywords=node.js+engineer"
     navigations = drive(page)
 
     result = await linkedin_search_jobs(keywords="node.js engineer", limit=25)
@@ -730,7 +733,7 @@ async def test_a_search_result_is_shaped_like_the_other_job_rows(drive):
         }
     ]
     assert navigations == [
-        "https://www.linkedin.com/jobs/search/?keywords=node.js+engineer"
+        "https://www.linkedin.com/jobs/search-results/?keywords=node.js+engineer"
     ]
 
 
@@ -1272,12 +1275,15 @@ async def test_several_experience_levels_become_one_comma_joined_parameter(drive
 async def test_an_unfiltered_search_adds_no_filter_parameters(drive):
     """"any" has to mean no parameter, or every search is silently filtered."""
     page = FakePage(evaluate_result=[SEARCH_CARD])
+    page.redirect_to = "https://www.linkedin.com/jobs/search/?keywords=node.js+engineer"
     navigations = drive(page)
 
     await linkedin_search_jobs(keywords="node.js engineer")
 
+    # Since lane jobs7 an unfiltered keyword search asks for the AI address
+    # itself, which carries the keywords and nothing else.
     url = navigations[0]
-    assert url == "https://www.linkedin.com/jobs/search/?keywords=node.js+engineer"
+    assert url == "https://www.linkedin.com/jobs/search-results/?keywords=node.js+engineer"
     for absent in (
         "f_WT",
         "f_TPR",
@@ -1298,6 +1304,21 @@ async def test_an_unfiltered_search_adds_no_filter_parameters(drive):
         "f_FCE",
     ):
         assert absent not in url
+
+
+async def test_a_classic_composition_with_one_filter_emits_no_other_parameter(drive):
+    """The guarantee above, on the CLASSIC composition: since lane jobs7 that
+    address is composed only for a call setting an argument the AI route
+    refuses, so one filter is set here and every OFF filter must emit nothing."""
+    page = FakePage(evaluate_result=[SEARCH_CARD])
+    navigations = drive(page)
+
+    await linkedin_search_jobs(keywords="node.js engineer", job_type="full_time")
+
+    assert navigations[0] == "https://www.linkedin.com/jobs/search/?keywords=node.js+engineer&f_JT=F"
+    for absent in ("f_WT", "f_TPR", "f_E=", "sortBy", "start", "location",
+                   "f_AL", "f_EA", "f_JIYN", "f_FCE"):
+        assert absent not in navigations[0], absent
 
 
 async def test_the_search_echoes_back_the_query_it_actually_ran(drive):
@@ -1761,13 +1782,27 @@ ONE_ROW = {
 }
 
 
+#: Where LinkedIn serves its CLASSIC search for the search tool's call: since
+#: lane jobs7 (2026-11-27) a keyword search asks for the AI address, and these
+#: classic-shaped rows are read only where the classic page answers there.
+_CLASSIC_SEARCH_LANDING = "https://www.linkedin.com/jobs/search/?keywords=node.js+engineer"
+
+
+def _one_row_page(name: str) -> FakePage:
+    """One tool's one-row page; for the search, the classic page at the AI address."""
+    page = FakePage(evaluate_result=list(ONE_ROW[name]))
+    if name == "search_jobs":
+        page.redirect_to = _CLASSIC_SEARCH_LANDING
+    return page
+
+
 @pytest.mark.parametrize("asked", [99999, 10**9, 101])
 @pytest.mark.parametrize("name", sorted(LIMIT_TOOLS))
 async def test_an_oversized_limit_is_clamped_to_the_tools_own_maximum(
     drive, name, asked
 ):
     tool, _default, maximum = LIMIT_TOOLS[name]
-    page = FakePage(evaluate_result=list(ONE_ROW[name]))
+    page = _one_row_page(name)
     drive(page)
 
     result = await _call(tool, limit=asked)
@@ -1779,7 +1814,7 @@ async def test_an_oversized_limit_is_clamped_to_the_tools_own_maximum(
 @pytest.mark.parametrize("name", sorted(LIMIT_TOOLS))
 async def test_a_zero_or_negative_limit_is_clamped_to_at_least_one(drive, name, asked):
     tool, _default, _maximum = LIMIT_TOOLS[name]
-    page = FakePage(evaluate_result=list(ONE_ROW[name]))
+    page = _one_row_page(name)
     drive(page)
 
     result = await _call(tool, limit=asked)
@@ -1794,7 +1829,7 @@ async def test_a_limit_that_is_not_a_number_falls_back_to_the_default(
     drive, name, asked
 ):
     tool, default, _maximum = LIMIT_TOOLS[name]
-    page = FakePage(evaluate_result=list(ONE_ROW[name]))
+    page = _one_row_page(name)
     drive(page)
 
     result = await _call(tool, limit=asked)
@@ -1805,7 +1840,7 @@ async def test_a_limit_that_is_not_a_number_falls_back_to_the_default(
 @pytest.mark.parametrize("name", sorted(LIMIT_TOOLS))
 async def test_a_numeric_string_limit_is_honoured_rather_than_discarded(drive, name):
     tool, _default, _maximum = LIMIT_TOOLS[name]
-    page = FakePage(evaluate_result=list(ONE_ROW[name]))
+    page = _one_row_page(name)
     drive(page)
 
     result = await _call(tool, limit="3")

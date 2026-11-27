@@ -147,6 +147,10 @@ async def test_a_none_keyword_from_a_python_caller_is_the_employer_search_too(dr
 @pytest.mark.parametrize("company", ["", EMPLOYER])
 async def test_a_keyworded_search_builds_keywords_first_as_it_always_did(drive, company):
     page = FakePage(evaluate_result=[dict(SEARCH_CARD)])
+    if not company:
+        # Since lane jobs7 a keyword search with no other argument asks for
+        # the AI address; this page is LinkedIn serving its classic one there.
+        page.redirect_to = "https://www.linkedin.com/jobs/search/?keywords=node.js+engineer"
     navigations = drive(page)
 
     result = await linkedin_search_jobs(keywords="node.js engineer", company_id=company)
@@ -155,6 +159,7 @@ async def test_a_keyworded_search_builds_keywords_first_as_it_always_did(drive, 
     pairs = _pairs(navigations[0])
     assert pairs[0] == ("keywords", "node.js engineer"), pairs
     assert (("f_C", EMPLOYER) in pairs) is bool(company), pairs
+    assert ("/jobs/search-results/" in navigations[0]) is not bool(company), navigations
 
 
 # ---------------------------------------------------------------------------

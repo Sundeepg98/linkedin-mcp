@@ -5820,7 +5820,10 @@ async def _read_job_search(
       is REFUSED unless the page drew LinkedIn's own empty state, and no
       capture has shown the classic one, so today every zero refuses. It used
       to come back as ``results: []`` with a note blaming the filters.
-    * **AI** -- the fallback (``Q-SEARCH-ROUTE-POLICY``). ``refused_on_ai``
+    * **AI** -- the search's own route for a call that refuses nothing there
+      (lane jobs7: ``url`` is then the AI address itself), and the fallback
+      for a classic request LinkedIn redirected here (``Q-SEARCH-ROUTE-
+      POLICY``). ``refused_on_ai``
       names the arguments the AI route has not been measured honouring. The
       page is read once by ``job_search_route.read_ai_search`` (the refusal
       reports the Easy Apply toggle it drew), and any one of those arguments
@@ -5860,6 +5863,14 @@ async def _read_job_search(
             return html if isinstance(html, str) else ""
 
         if route == job_search_route.CLASSIC:
+            if easy_apply and job_search_route.landing_route(url) == job_search_route.AI:
+                # AN AI-ROUTED easy_apply ANSWERED WITH THE CLASSIC PAGE (lane
+                # jobs7): the AI address carried no filter, because easy_apply
+                # is applied there to each card's own mark, so the classic rows
+                # were never Easy Apply-filtered. Refused, not returned.
+                raise ExtractionFailedError(
+                    job_search_route.classic_at_ai_refusal(), url=url, hint=hint
+                )
             records = await dom.harvest_linked_cards(
                 page, href_pattern=dom.JOB_HREF, max_items=limit * 3
             )
@@ -5999,20 +6010,26 @@ async def linkedin_search_jobs(
     exactly as it would if you typed the query on the site. That is the only
     trace a search leaves, and it is on your account, not anyone else's.
 
-    WHICH PAGE IT READ, AND WHEN IT REFUSES (lane search-fix26, 2026-11-26).
-    LinkedIn draws a banner over this page: it is "gradually retiring classic
-    job search starting in September". This tool asks for the classic page and
-    reads whatever the load LANDED on, reported as ``route``: ``classic_search``,
-    or ``ai_search`` when LinkedIn served its AI search instead. Classic is the
-    PRIMARY route while it serves (ruling Q-SEARCH-ROUTE-POLICY). The AI route
-    is the FALLBACK and honours ``keywords``. There ``easy_apply`` narrows the
-    one window loaded, locally, to the cards whose own ``easy_apply`` field is
-    true -- it is not LinkedIn's Easy Apply filter, and the result says so in
-    ``easy_apply_post_filter`` with the count before and after. Every other
-    argument is REFUSED there, by name, until a fire measures LinkedIn
-    honouring it, because a filter accepted and ignored puts an unfiltered
-    shortlist in front of you. A landing on any other page refuses, naming only
-    its shape. AND A
+    WHICH PAGE IT READ, AND WHEN IT REFUSES (lane search-fix26, 2026-11-26;
+    lane jobs7, 2026-11-27). LinkedIn's classic job search NO LONGER SERVES:
+    on 2026-11-26 its address redirected to the AI search, with no classic
+    list. So a KEYWORD SEARCH -- keywords, optionally easy_apply and limit, and
+    nothing else -- asks for the AI search's own address and reads it as the
+    search's own route, reported as ``route: ai_search``. Each AI row carries
+    the card's own ``easy_apply`` reading, its posted line, any proximity line,
+    and ``hiring``, the hiring chips the card draws (``actively_reviewing_
+    applicants``, ``be_an_early_applicant``), omitted when none is drawn.
+    There ``easy_apply`` narrows the one window loaded, locally, to the cards
+    whose own ``easy_apply`` field is true -- it is not LinkedIn's Easy Apply
+    filter, and the result says so in ``easy_apply_post_filter`` with the
+    count before and after. A call that sets any OTHER argument is composed on
+    the classic address as before, and where LinkedIn serves the AI search for
+    it the call is REFUSED, by name, until a fire measures LinkedIn honouring
+    that argument there (ruling Q-SEARCH-ROUTE-POLICY), because a filter
+    accepted and ignored puts an unfiltered shortlist in front of you. Should
+    LinkedIn serve its classic page again, it is read by the classic reader and
+    reported as ``route: classic_search``. A landing on any other page refuses,
+    naming only its shape. AND A
     ZERO IS NEVER SILENT: a page with no readable card is refused unless it drew
     LinkedIn's own no-results state, which no capture has shown yet -- so an
     empty search, or an offset past the end, is reported as a failure, never as
@@ -6303,6 +6320,11 @@ async def linkedin_search_jobs(
             sort_by=sort_by,
             start=start,
         )
+        # THE AI ROUTE IS THE SEARCH'S OWN ROUTE FOR EVERY CALL IT HONOURS
+        # (lane jobs7, 2026-11-27; census J 1). The classic address redirected
+        # to it on live session 12's load 3, so a call refusing nothing there
+        # asks for its own address and is read there as the primary route.
+        on_ai = job_search_route.asks_the_ai_route(refused_on_ai, keywords=keywords)
 
         def _search_url(place: str) -> str:
             """The url for ONE place. The ONLY place a location reaches a url.
@@ -6312,7 +6334,13 @@ async def linkedin_search_jobs(
             and a repeated ``location`` key -- are unreachable from here because
             this takes ONE string and appends ONE pair. A fan-out that built its
             own url would be free to reinvent either of them.
+
+            A call on the AI route carries no place at all: ``location`` and
+            ``locations`` are refused there, so ``on_ai`` holds only when
+            ``place`` is empty, and the AI address is keywords alone.
             """
+            if on_ai:
+                return job_search_route.ai_search_url(keywords)
 
             # A KEYWORD-LESS CALL CARRIES NO keywords KEY AT ALL, not an empty
             # one: `/jobs/search/?f_C=<id>` is the address the boundary was
@@ -6377,17 +6405,33 @@ async def linkedin_search_jobs(
             # through the easy_apply post-filter, whose zero is an explained one
             # (cards were read, none drew the mark), never a believed no-results
             # page. The AI zero that is not explained refused upstream.
-            note = (
-                "LinkedIn served its AI job search in place of the classic one, "
-                "so this is the FALLBACK route (ruling Q-SEARCH-ROUTE-POLICY): "
-                "it honours keywords, applies easy_apply locally to each card's "
-                "own mark, and every other argument refuses there until a fire "
-                "measures LinkedIn honouring it. Its window was 25 cards on the "
-                "one load measured (2026-11-26). results_label is LinkedIn's own "
-                "capped label, not a count of matches, and its pager is buttons "
-                "with no address, so a next page cannot be asked for yet. Each "
-                "row's easy_apply is its card's own mark."
-            )
+            if on_ai:
+                # THE PRIMARY ROUTE, ASKED FOR AT ITS OWN ADDRESS (lane jobs7).
+                note = (
+                    "This is LinkedIn's AI job search, asked for at its own "
+                    "address: the classic job search no longer serves (its "
+                    "address redirected here on 2026-11-26). It honours "
+                    "keywords and applies easy_apply locally to each card's "
+                    "own mark; every other argument refuses here until a fire "
+                    "measures LinkedIn honouring it. Its window was 25 cards "
+                    "on the loads measured. results_label is LinkedIn's own "
+                    "label, capped at 99+, not a count of matches, and its "
+                    "pager is buttons with no address, so a next page cannot "
+                    "be asked for yet. Each row's easy_apply and hiring are "
+                    "its card's own marks."
+                )
+            else:
+                note = (
+                    "LinkedIn served its AI job search in place of the classic one, "
+                    "so this is the FALLBACK route (ruling Q-SEARCH-ROUTE-POLICY): "
+                    "it honours keywords, applies easy_apply locally to each card's "
+                    "own mark, and every other argument refuses there until a fire "
+                    "measures LinkedIn honouring it. Its window was 25 cards on the "
+                    "one load measured (2026-11-26). results_label is LinkedIn's own "
+                    "capped label, not a count of matches, and its pager is buttons "
+                    "with no address, so a next page cannot be asked for yet. Each "
+                    "row's easy_apply is its card's own mark."
+                )
             receipt = result.get("easy_apply_post_filter")
             if receipt:
                 note += (
