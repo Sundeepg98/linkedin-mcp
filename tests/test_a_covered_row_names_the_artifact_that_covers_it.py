@@ -768,7 +768,9 @@ def test_the_page_tab_chain_is_still_whole() -> None:
     2026-11-26) and ``J 109`` (lane build-jobs2, the same day): the tool ->
     each tab's own reader. The five rows claim COVERED-UNFIRED on it, and
     so do ``J 114`` (re-based) and ``J 174`` (lane jobs7, 2026-11-27, on
-    J114-READS-ITS-OWN-TABLE): the Insights reader's two function tables."""
+    J114-READS-ITS-OWN-TABLE): the Insights reader's two function tables;
+    and ``J 169`` (the same lane, on J169-BY-ITS-OWN-WORDS): its headcount
+    summary and notable alumni."""
     from linkedin_server import company_tabs
 
     assert _page_tab_calls(_source("server.py")) == {

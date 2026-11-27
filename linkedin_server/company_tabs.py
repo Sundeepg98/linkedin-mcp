@@ -587,6 +587,11 @@ async def _read_company_event_card(card: Any, key: str, out: dict[str, Any], fai
 INSIGHT_MODULES: dict[str, str] = {
     "Hiring trends": "hiring_trends",
     "Total job openings": "total_job_openings",
+    # Session 12's load 20 (lane jobs7, 2026-11-27): the page scrolled to its
+    # foot draws three more Premium modules, each under its own h2.
+    "Total employee count": "total_employee_count",
+    "Employee distribution and headcount growth by function": "headcount_growth_by_function",
+    "Notable company alumni": "notable_company_alumni",
 }
 
 #: THE SCREEN-READER DATA TABLES LinkedIn draws beside the Insights charts,
@@ -646,6 +651,55 @@ FUNCTION_TABLE_UNREAD: tuple[str, ...] = (
     "more_than_one_table_with_this_summary",
     "required_headers_not_drawn",
     "every_row_withheld",
+)
+
+#: HEADCOUNT OVER TIME (census row J 169), as the page draws it in text: the
+#: table LinkedIn summarises ``Total employee count``, under that module
+#: heading. MEASURED by keyed shape on session 12's load 20:
+#:
+#: * ONE data row of four cells, each naming its header through its
+#:   ``headers`` attribute;
+#: * the headers ``total employees`` (LinkedIn's own lower case), ``6m
+#:   growth``, ``1y growth`` and ``2y growth``;
+#: * the data row drawn ABOVE the header row, and neither inside a ``tbody``.
+#:
+#: The module's monthly chart is not drawn as text, so the total and its
+#: growth over three spans is what is read.
+HEADCOUNT_SUMMARY = "Total employee count"
+HEADCOUNT_SUMMARY_HEADERS: dict[str, str] = {
+    "total employees": "employees",
+    "6m growth": "growth_6_months_percent",
+    "1y growth": "growth_1_year_percent",
+    "2y growth": "growth_2_years_percent",
+}
+
+#: NOTABLE ALUMNI (census row J 169): the module LinkedIn heads ``Notable
+#: company alumni``, a carousel of member cards. MEASURED on load 20: four
+#: cards are drawn, three of them with a name link, a degree line and a
+#: current-role line.
+#:
+#: * It is read ONLY when the module's own heading is drawn.
+#: * Each card becomes a ``people_data.Person`` under NAMES-AT-RUNTIME:
+#:   declared fields only, sanitised, bounded, never stored.
+#: * A card with no single name is withheld and counted.
+#: * The carousel's Next button is never pressed: only the cards the page
+#:   drew are read.
+ALUMNI_CARD = 'div[class="org-notable-alumni-card"]'
+ALUMNI_NAME_LINK = 'a[class*="org-notable-alumni-card__alumni-name"]'
+ALUMNI_NAME = ALUMNI_NAME_LINK + ' span[aria-hidden="true"]'
+ALUMNI_DEGREE = 'p[class*="org-notable-alumni-card__degree"]'
+ALUMNI_CURRENT_ROLE = (
+    'div[class="org-notable-alumni-card__current-alumni-detail"] '
+    'p[class*="org-notable-alumni-card__alumni-title"]'
+)
+ALUMNI_BOUND = 12
+
+#: Why the alumni came back empty, in closed words: the module's heading is
+#: not drawn; it is drawn with no card; every card drawn was withheld.
+ALUMNI_UNREAD: tuple[str, ...] = (
+    "module_heading_not_drawn",
+    "no_alumni_card_drawn",
+    "every_card_withheld",
 )
 
 #: LinkedIn's job-function taxonomy -- a fixed list of LinkedIn's own words,
@@ -738,6 +792,81 @@ async def _read_function_table(
     return found, (None if found else "every_row_withheld")
 
 
+async def _read_headcount_summary(
+    page: Any, failed: list,
+) -> tuple[Optional[dict[str, Any]], Optional[str]]:
+    """The headcount summary's one reading, and why there is none when there
+    is none (a word of :data:`FUNCTION_TABLE_UNREAD`)."""
+    tables = page.locator(f'main table[summary="{HEADCOUNT_SUMMARY}"]')
+    drawn = await _count(tables, failed)
+    if drawn == 0:
+        return None, "no_table_with_this_summary"
+    if drawn > 1:
+        return None, "more_than_one_table_with_this_summary"
+    table = tables.nth(0)
+    heads = table.locator("th")
+    column: dict[str, str] = {}
+    for index in range(min(await _count(heads, failed), 8)):
+        key = HEADCOUNT_SUMMARY_HEADERS.get(collapsed(await _text(heads.nth(index), failed)))
+        ident = await _attribute(heads.nth(index), "id", failed)
+        if key is not None and ident:
+            column[ident] = key
+    if "employees" not in column.values():
+        return None, "required_headers_not_drawn"
+    reading: dict[str, Any] = {key: None for key in HEADCOUNT_SUMMARY_HEADERS.values()}
+    seen: set[str] = set()
+    # A CELL BELONGS TO THE HEADER ITS OWN ``headers`` ATTRIBUTE NAMES, as in
+    # the function tables; here the data row is drawn above the header row.
+    cells = table.locator("td[headers]")
+    for index in range(min(await _count(cells, failed), 8)):
+        cell = cells.nth(index)
+        key = column.get(await _attribute(cell, "headers", failed) or "")
+        if key is not None and key not in seen:
+            seen.add(key)
+            reading[key] = _cell_value(key, await _text(cell, failed))
+    if reading["employees"] is None:
+        return None, "every_row_withheld"
+    return reading, None
+
+
+async def _read_alumni(page: Any, failed: list) -> dict[str, Any]:
+    """Each notable alumni card the page drew, as a person record: the
+    records, the cards withheld, the cards past the bound, and why there is
+    no record when there is none (:data:`ALUMNI_UNREAD`). The caller reads
+    the cards only under the module's own heading."""
+    reading: dict[str, Any] = {"records": [], "withheld": 0, "beyond_bound": 0, "unread": None}
+    cards = page.locator(f"main {ALUMNI_CARD}")
+    total = await _count(cards, failed)
+    if total == 0:
+        reading["unread"] = "no_alumni_card_drawn"
+        return reading
+    for index in range(min(total, ALUMNI_BOUND)):
+        card = cards.nth(index)
+        names = card.locator(ALUMNI_NAME)
+        links = card.locator(ALUMNI_NAME_LINK)
+        if await _count(names, failed) != 1 or await _count(links, failed) != 1:
+            reading["withheld"] += 1
+            continue
+        degrees = card.locator(ALUMNI_DEGREE)
+        roles = card.locator(ALUMNI_CURRENT_ROLE)
+        person = people_data.Person.from_page(
+            name=await _text(names.nth(0), failed),
+            headline=(await _text(roles.nth(0), failed)
+                      if await _count(roles, failed) == 1 else None),
+            href=await _attribute(links.nth(0), "href", failed),
+            degree=(await _text(degrees.nth(0), failed)
+                    if await _count(degrees, failed) == 1 else None),
+        )
+        if person is None:
+            reading["withheld"] += 1
+            continue
+        reading["records"].append(person.envelope())
+    reading["beyond_bound"] = max(0, total - ALUMNI_BOUND)
+    if not reading["records"]:
+        reading["unread"] = "every_card_withheld"
+    return reading
+
+
 async def read_insights_tab(page: Any) -> dict[str, Any]:
     """The Insights tab ``page`` already shows: the modules it drew, and the
     rows of its two function tables, EACH CHOSEN BY ITS SUMMARY
@@ -749,8 +878,16 @@ async def read_insights_tab(page: Any) -> dict[str, Any]:
     growth. A field with no row says why in ``<field>_unread``
     (:data:`FUNCTION_TABLE_UNREAD`); both are None when rows were read.
 
-    Raises ``ExtractionFailedError`` when neither a known module nor a row of
-    either table was read.
+    ``headcount`` comes from the table summarised ``Total employee count``:
+    the total and its growth over 6 months, 1 year and 2 years
+    (:data:`HEADCOUNT_SUMMARY_HEADERS`). When there is no reading it is None,
+    and ``headcount_unread`` says why. ``notable_alumni`` is each member card
+    under the module heading ``Notable company alumni``, as a person record
+    (NAMES-AT-RUNTIME). ``alumni_withheld`` counts the cards not returned,
+    and ``notable_alumni_unread`` says why when none is (:data:`ALUMNI_UNREAD`).
+
+    Raises ``ExtractionFailedError`` when it reads no known module, no row of
+    either table, no headcount and no alumni card.
     """
     failed = [0]
     out: dict[str, Any] = {
@@ -764,6 +901,12 @@ async def read_insights_tab(page: Any) -> dict[str, Any]:
         "openings_by_function_unread": None,
         "rows_withheld": 0,
         "headers_unread": 0,
+        "headcount": None,
+        "headcount_unread": None,
+        "notable_alumni": [],
+        "notable_alumni_unread": None,
+        "alumni_withheld": 0,
+        "alumni_beyond_bound": 0,
     }
     for text in await _texts(page.locator("main h2"), failed, MAX_PARTS):
         key = INSIGHT_MODULES.get(collapsed(text))
@@ -773,8 +916,20 @@ async def read_insights_tab(page: Any) -> dict[str, Any]:
         rows, unread = await _read_function_table(page, summary, headers_map, out, failed)
         out[field] = rows
         out[field + "_unread"] = unread
+    out["headcount"], out["headcount_unread"] = await _read_headcount_summary(page, failed)
+    # THE ALUMNI ARE READ ONLY UNDER THEIR OWN HEADING: a card class alone is
+    # not the module.
+    if "notable_company_alumni" in out["modules"]:
+        alumni = await _read_alumni(page, failed)
+        out["notable_alumni"] = alumni["records"]
+        out["alumni_withheld"] = alumni["withheld"]
+        out["alumni_beyond_bound"] = alumni["beyond_bound"]
+        out["notable_alumni_unread"] = alumni["unread"]
+    else:
+        out["notable_alumni_unread"] = "module_heading_not_drawn"
     out["reads_failed"] = failed[0]
-    if not out["functions"] and not out["openings_by_function"] and not out["modules"]:
+    if (not out["functions"] and not out["openings_by_function"] and not out["modules"]
+            and out["headcount"] is None and not out["notable_alumni"]):
         raise ExtractionFailedError(
             "the Insights tab yielded no known module and no row of either "
             "function table; an empty answer here would be indistinguishable "

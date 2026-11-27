@@ -209,6 +209,9 @@ SPEC: dict[str, tuple[str, tuple[str, ...], Optional[int], bool]] = {
             "Functions", "Insights",
             "Function", "Number of employees", "Percentage of total headcount",
             "3 month growth", "6 month growth", "1 year growth",
+            # The headcount summary's first header, in LinkedIn's own lower
+            # case: 46 capitalised spellings matched nothing, this one did.
+            "total employees",
             "6m growth", "1y growth", "2y growth",
             "Engineering", "Information Technology", "Sales", "Program and Project Management",
             "Operations", "Product Management", "Business Development", "Arts and Design",

@@ -13448,7 +13448,8 @@ async def linkedin_company_page_tab(organisation_id: str, tab: str = "about") ->
     ``tab`` is exactly one of ``about``, ``events``, ``insights``, ``life`` or
     ``posts``; anything else is refused before any load. Census rows ``J 106``
     (About), ``J 165`` (Events), ``J 113`` (Insights, with its two function
-    tables ``J 114`` and ``J 174``), ``J 109`` (Life) and
+    tables ``J 114`` and ``J 174`` and ``J 169``'s headcount and notable
+    alumni), ``J 109`` (Life) and
     ``J 168`` (the posts), read under THIRD-PARTY-TEXT-AT-RUNTIME
     and NAMES-AT-RUNTIME: every string of the Page's own comes back inside a
     record whose ``untrusted_third_party_text`` marker says it is someone
@@ -13477,7 +13478,13 @@ async def linkedin_company_page_tab(organisation_id: str, tab: str = "about") ->
     percentage of the Page's openings and their 3- and 6-month growth. EACH
     TABLE IS CHOSEN BY ITS SUMMARY, never by its column words, which LinkedIn
     writes alike on both; a field with no row says why in
-    ``functions_unread`` or ``openings_by_function_unread``.
+    ``functions_unread`` or ``openings_by_function_unread``. ``headcount`` --
+    the table LinkedIn summarises "Total employee count": the Page's total
+    employees and its growth over 6 months, 1 year and 2 years in percent,
+    or None with ``headcount_unread`` saying why; and ``notable_alumni`` --
+    each member card under the heading "Notable company alumni", a person
+    record (name, headline, profile link, degree), with ``alumni_withheld``
+    counting the cards not returned. Only the cards the page drew are read.
 
     ``life``: ``modules`` (how many of each module LinkedIn drew, by key);
     ``trending`` -- the "Trending employee content" carousel's items, each a
@@ -13511,8 +13518,8 @@ async def linkedin_company_page_tab(organisation_id: str, tab: str = "about") ->
     rather than quoting it.
 
     THIS TOOL WRITES NOTHING. It does not follow the Page, press "I'm
-    interested", open an event, a photo or a spotlight's link, or open the
-    Insights tab's dropdown.
+    interested", open an event, a photo or a spotlight's link, open the
+    Insights tab's dropdown, or page the alumni carousel.
 
     Args:
         organisation_id: the numeric LinkedIn organisation id.

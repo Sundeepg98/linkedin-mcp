@@ -1354,7 +1354,8 @@ PINNED = {
     #: 262 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 1`, `J 20` and `J 40` GAP -> COVERED-UNFIRED, the AI job search as the keyword search's own route over session 12's two AI loads (`_audit/2026-11-27-jobs7.md` section 3); each a read entering bucket 1 held by no ruling, the three READER-gated jobs rows leaving the side table.
     #: 263 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 31` GAP -> COVERED-UNFIRED, the AI arm of the search's job-alert pair, its address the AI search's own and its switch that page's, over session 12's two AI loads (`_audit/2026-11-27-jobs7.md` section 5); a write entering bucket 1 held by no ruling, as its classic arm was until integration 6.
     #: 264 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 174` GAP -> COVERED-UNFIRED, job openings by function, read by `company_tabs.read_insights_tab` from the one table summarised `Total job openings` on J114-READS-ITS-OWN-TABLE (`_audit/2026-11-27-jobs7.md` section 11.6); a read entering bucket 1 held by no ruling.
-    "adjudicated": 264,
+    #: 265 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 169` GAP -> COVERED-UNFIRED, headcount over time and notable alumni, read by `company_tabs.read_insights_tab` from the table summarised `Total employee count` and the member cards under `Notable company alumni` on session 12's load 20 (`_audit/2026-11-27-jobs7.md` section 11.7); a read entering bucket 1 held by no ruling.
+    "adjudicated": 265,
     #: THE LIVE LANE'S FOUR ROWS, RE-DERIVED AT EACH OF ITS MERGES OF MASTER
     #: (2026-09-24; last over lane S): four rows fired live and banked
     #: (`_audit/2026-09-23-live-lane-session-1.md`). `P G6` COVERED-UNFIRED ->
@@ -1499,7 +1500,8 @@ PINNED = {
     #: 174 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 1`, `J 20` and `J 40` GAP -> COVERED-UNFIRED, the AI job search as the keyword search's own route over session 12's two AI loads (`_audit/2026-11-27-jobs7.md` section 3); each a read entering bucket 1 held by no ruling, the three READER-gated jobs rows leaving the side table.
     #: 175 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 31` GAP -> COVERED-UNFIRED, the AI arm of the search's job-alert pair, its address the AI search's own and its switch that page's, over session 12's two AI loads (`_audit/2026-11-27-jobs7.md` section 5); a write entering bucket 1 held by no ruling, as its classic arm was until integration 6.
     #: 176 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 174` GAP -> COVERED-UNFIRED, job openings by function, read by `company_tabs.read_insights_tab` from the one table summarised `Total job openings` on J114-READS-ITS-OWN-TABLE (`_audit/2026-11-27-jobs7.md` section 11.6); a read entering bucket 1 held by no ruling.
-    "delivered_broad": 176,
+    #: 177 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 169` GAP -> COVERED-UNFIRED, headcount over time and notable alumni, read by `company_tabs.read_insights_tab` from the table summarised `Total employee count` and the member cards under `Notable company alumni` on session 12's load 20 (`_audit/2026-11-27-jobs7.md` section 11.7); a read entering bucket 1 held by no ruling.
+    "delivered_broad": 177,
     #: 79 since the live lane's merge (see `adjudicated`): P G6, N 134, P O3
     #: and M C72 COVERED-PROVEN.
     #: 75 and 21 since the bucket-1 merge: `M C41` fired live and moved from
@@ -1669,7 +1671,8 @@ PINNED = {
     #: 516 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 171` and `J 172` entered, split from `J 152` and `J 156` by the orchestrator's LEARNING-ROWS-SPLIT (`_audit/2026-11-27-jobs7.md` section 11.2): two GAP rows, `J 171` an admitted read, `J 172` a write, and `J 156` now a read alone.
     #: 519 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 173`, `J 174` and `J 175` entered by the orchestrator's corrected rulings of 14:05 IST (`_audit/2026-11-27-jobs7.md` section 11.5): `J 173` split from `J 169` (J169-BY-ITS-OWN-WORDS), `J 174` added (JOB-OPENINGS-BY-FUNCTION-ADDED), `J 175` split from `J 154` (LEARNING-ROWS-SPLIT as corrected); three GAP rows, each an admitted read.
     #: 518 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 174` GAP -> COVERED-UNFIRED, job openings by function, read by `company_tabs.read_insights_tab` from the one table summarised `Total job openings` on J114-READS-ITS-OWN-TABLE (`_audit/2026-11-27-jobs7.md` section 11.6); a read entering bucket 1 held by no ruling.
-    "gap": 518,
+    #: 517 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 169` GAP -> COVERED-UNFIRED, headcount over time and notable alumni, read by `company_tabs.read_insights_tab` from the table summarised `Total employee count` and the member cards under `Notable company alumni` on session 12's load 20 (`_audit/2026-11-27-jobs7.md` section 11.7); a read entering bucket 1 held by no ruling.
+    "gap": 517,
     #: 18 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: `M M1` built (`linkedin_message_from_profile`).
     #: 16 ON LANE L5'S ORDER OF 2026-09-27 23:36, MEASURED:
     #: `linkedin_send_message` RETIRED (aimed by a name): `M M2` to GAP and `N
@@ -1828,7 +1831,8 @@ PINNED = {
     #: 78 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 1`, `J 20` and `J 40` GAP -> COVERED-UNFIRED, the AI job search as the keyword search's own route over session 12's two AI loads (`_audit/2026-11-27-jobs7.md` section 3); each a read entering bucket 1 held by no ruling, the three READER-gated jobs rows leaving the side table.
     #: 79 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 31` GAP -> COVERED-UNFIRED, the AI arm of the search's job-alert pair, its address the AI search's own and its switch that page's, over session 12's two AI loads (`_audit/2026-11-27-jobs7.md` section 5); a write entering bucket 1 held by no ruling, as its classic arm was until integration 6.
     #: 80 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 174` GAP -> COVERED-UNFIRED, job openings by function, read by `company_tabs.read_insights_tab` from the one table summarised `Total job openings` on J114-READS-ITS-OWN-TABLE (`_audit/2026-11-27-jobs7.md` section 11.6); a read entering bucket 1 held by no ruling.
-    "unfired": 80,
+    #: 81 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 169` GAP -> COVERED-UNFIRED, headcount over time and notable alumni, read by `company_tabs.read_insights_tab` from the table summarised `Total employee count` and the member cards under `Notable company alumni` on session 12's load 20 (`_audit/2026-11-27-jobs7.md` section 11.7); a read entering bucket 1 held by no ruling.
+    "unfired": 81,
     #: 104 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     #: 101 AT LANE S'S NAMES ADOPTION (2026-09-27), MEASURED: `N 79`, `N 172`
@@ -1994,7 +1998,8 @@ PINNED = {
     #: 103 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 171` and `J 172` entered, split from `J 152` and `J 156` by the orchestrator's LEARNING-ROWS-SPLIT (`_audit/2026-11-27-jobs7.md` section 11.2): two GAP rows, `J 171` an admitted read, `J 172` a write, and `J 156` now a read alone.
     #: 106 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 173`, `J 174` and `J 175` entered by the orchestrator's corrected rulings of 14:05 IST (`_audit/2026-11-27-jobs7.md` section 11.5): `J 173` split from `J 169` (J169-BY-ITS-OWN-WORDS), `J 174` added (JOB-OPENINGS-BY-FUNCTION-ADDED), `J 175` split from `J 154` (LEARNING-ROWS-SPLIT as corrected); three GAP rows, each an admitted read.
     #: 105 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 174` GAP -> COVERED-UNFIRED, job openings by function, read by `company_tabs.read_insights_tab` from the one table summarised `Total job openings` on J114-READS-ITS-OWN-TABLE (`_audit/2026-11-27-jobs7.md` section 11.6); a read entering bucket 1 held by no ruling.
-    "gap_unknown": 105,
+    #: 104 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 169` GAP -> COVERED-UNFIRED, headcount over time and notable alumni, read by `company_tabs.read_insights_tab` from the table summarised `Total employee count` and the member cards under `Notable company alumni` on session 12's load 20 (`_audit/2026-11-27-jobs7.md` section 11.7); a read entering bucket 1 held by no ruling.
+    "gap_unknown": 104,
     "gap_ambiguous": 0,
     #: BUCKET 3, MEASURED 2026-09-23 (`_audit/2026-09-23-bucket3-addresses.md`),
     #: counted off `_audit/_census/read-addresses.tsv`, whose every verdict
@@ -2465,7 +2470,8 @@ PINNED = {
     #: 51 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 1`, `J 20` and `J 40` GAP -> COVERED-UNFIRED, the AI job search as the keyword search's own route over session 12's two AI loads (`_audit/2026-11-27-jobs7.md` section 3); each a read entering bucket 1 held by no ruling, the three READER-gated jobs rows leaving the side table.
     #: 52 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 31` GAP -> COVERED-UNFIRED, the AI arm of the search's job-alert pair, its address the AI search's own and its switch that page's, over session 12's two AI loads (`_audit/2026-11-27-jobs7.md` section 5); a write entering bucket 1 held by no ruling, as its classic arm was until integration 6.
     #: 53 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 174` GAP -> COVERED-UNFIRED, job openings by function, read by `company_tabs.read_insights_tab` from the one table summarised `Total job openings` on J114-READS-ITS-OWN-TABLE (`_audit/2026-11-27-jobs7.md` section 11.6); a read entering bucket 1 held by no ruling.
-    "b1_no_ruling": 53,
+    #: 54 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 169` GAP -> COVERED-UNFIRED, headcount over time and notable alumni, read by `company_tabs.read_insights_tab` from the table summarised `Total employee count` and the member cards under `Notable company alumni` on session 12's load 20 (`_audit/2026-11-27-jobs7.md` section 11.7); a read entering bucket 1 held by no ruling.
+    "b1_no_ruling": 54,
     #: 7 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
     #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
     #: 4 AT THE LIVE LANE'S MERGE OF MASTER c2825a4 (2026-09-28), MEASURED on the
@@ -2553,7 +2559,8 @@ PINNED = {
     #: 103 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 171` and `J 172` entered, split from `J 152` and `J 156` by the orchestrator's LEARNING-ROWS-SPLIT (`_audit/2026-11-27-jobs7.md` section 11.2): two GAP rows, `J 171` an admitted read, `J 172` a write, and `J 156` now a read alone.
     #: 106 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 173`, `J 174` and `J 175` entered by the orchestrator's corrected rulings of 14:05 IST (`_audit/2026-11-27-jobs7.md` section 11.5): `J 173` split from `J 169` (J169-BY-ITS-OWN-WORDS), `J 174` added (JOB-OPENINGS-BY-FUNCTION-ADDED), `J 175` split from `J 154` (LEARNING-ROWS-SPLIT as corrected); three GAP rows, each an admitted read.
     #: 105 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 174` GAP -> COVERED-UNFIRED, job openings by function, read by `company_tabs.read_insights_tab` from the one table summarised `Total job openings` on J114-READS-ITS-OWN-TABLE (`_audit/2026-11-27-jobs7.md` section 11.6); a read entering bucket 1 held by no ruling.
-    "jobs_gap": 105,
+    #: 104 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 169` GAP -> COVERED-UNFIRED, headcount over time and notable alumni, read by `company_tabs.read_insights_tab` from the table summarised `Total employee count` and the member cards under `Notable company alumni` on session 12's load 20 (`_audit/2026-11-27-jobs7.md` section 11.7); a read entering bucket 1 held by no ruling.
+    "jobs_gap": 104,
     #: 40 AT LANE S'S OFFLINE FRONTIER (2026-09-28), MEASURED: the five rows
     #: bucket 3 called blocked on nothing, taken one by one. `M M53`, `N 195`
     #: and `P S5` (three R rows ADMITTED and gated READER) and `J 107` (the one
@@ -2583,7 +2590,8 @@ PINNED = {
     #: 44 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 171` and `J 172` entered, split from `J 152` and `J 156` by the orchestrator's LEARNING-ROWS-SPLIT (`_audit/2026-11-27-jobs7.md` section 11.2): two GAP rows, `J 171` an admitted read, `J 172` a write, and `J 156` now a read alone.
     #: 47 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 173`, `J 174` and `J 175` entered by the orchestrator's corrected rulings of 14:05 IST (`_audit/2026-11-27-jobs7.md` section 11.5): `J 173` split from `J 169` (J169-BY-ITS-OWN-WORDS), `J 174` added (JOB-OPENINGS-BY-FUNCTION-ADDED), `J 175` split from `J 154` (LEARNING-ROWS-SPLIT as corrected); three GAP rows, each an admitted read.
     #: 46 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 174` GAP -> COVERED-UNFIRED, job openings by function, read by `company_tabs.read_insights_tab` from the one table summarised `Total job openings` on J114-READS-ITS-OWN-TABLE (`_audit/2026-11-27-jobs7.md` section 11.6); a read entering bucket 1 held by no ruling.
-    "jobs_dir_r": 46,
+    #: 45 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 169` GAP -> COVERED-UNFIRED, headcount over time and notable alumni, read by `company_tabs.read_insights_tab` from the table summarised `Total employee count` and the member cards under `Notable company alumni` on session 12's load 20 (`_audit/2026-11-27-jobs7.md` section 11.7); a read entering bucket 1 held by no ruling.
+    "jobs_dir_r": 45,
     #: 60 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: `J 69` and
     #: `J 87`, both W.
     #: 58 ON LANE K's APPLICATION OF THE RULINGS OF 2026-10-10, MEASURED: `J
@@ -2634,7 +2642,8 @@ PINNED = {
     #: 41 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 171` and `J 172` entered, split from `J 152` and `J 156` by the orchestrator's LEARNING-ROWS-SPLIT (`_audit/2026-11-27-jobs7.md` section 11.2): two GAP rows, `J 171` an admitted read, `J 172` a write, and `J 156` now a read alone.
     #: 44 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 173`, `J 174` and `J 175` entered by the orchestrator's corrected rulings of 14:05 IST (`_audit/2026-11-27-jobs7.md` section 11.5): `J 173` split from `J 169` (J169-BY-ITS-OWN-WORDS), `J 174` added (JOB-OPENINGS-BY-FUNCTION-ADDED), `J 175` split from `J 154` (LEARNING-ROWS-SPLIT as corrected); three GAP rows, each an admitted read.
     #: 43 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 174` GAP -> COVERED-UNFIRED, job openings by function, read by `company_tabs.read_insights_tab` from the one table summarised `Total job openings` on J114-READS-ITS-OWN-TABLE (`_audit/2026-11-27-jobs7.md` section 11.6); a read entering bucket 1 held by no ruling.
-    "jobs_admitted": 43,
+    #: 42 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 169` GAP -> COVERED-UNFIRED, headcount over time and notable alumni, read by `company_tabs.read_insights_tab` from the table summarised `Total employee count` and the member cards under `Notable company alumni` on session 12's load 20 (`_audit/2026-11-27-jobs7.md` section 11.7); a read entering bucket 1 held by no ruling.
+    "jobs_admitted": 42,
     #: 11 ON LANE A'S J 38 BUILD (2026-10-10), MEASURED: `J 38` GAP -> COVERED-UNFIRED by D6 --
     #: an alert's delivered job ids, read off the notifications page (never fired).
     #: 11 AT LANE A'S MERGE OF MASTER 71d83ca (2026-10-10), MEASURED on the
@@ -3017,6 +3026,12 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
         #: header words) over session 11's load 19 and session 12's load 20; never
         #: fired. JOB-OPENINGS-BY-FUNCTION-ADDED entered the row; no ruling holds it.
         "J 174",
+        #: `J 169` ENTERED on lane jobs7, 2026-11-27: headcount over time (the table
+        #: summarised `Total employee count`) and notable alumni (person records
+        #: under their own heading), read by `company_tabs.read_insights_tab` over
+        #: session 12's load 20; never fired. J169-BY-ITS-OWN-WORDS kept the two
+        #: facets on this row; no ruling holds it.
+        "J 169",
     ),
 }
 

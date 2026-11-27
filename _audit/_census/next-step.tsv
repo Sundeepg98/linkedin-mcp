@@ -66,7 +66,6 @@ J 107	J	R	-	CAPTURE:C-SRCH-5	MEASURED	_audit/2026-11-26-live-session-12.md::REDI
 J 111	J	R	-	CAPTURE:C-RJ26-2	MEASURED	_audit/2026-11-26-readers-jobs26.md::That organisation has no ; RULING:READ-PAST-AN-ACT-SUBSTRING
 J 112	J	R	-	TARGET:a school Page he names	NAMED	_audit/_census/read-addresses.tsv::UNDER THE WHO/WHICH RULE, EXTENDED ; RULING:OPERATOR-NAMES-THE-TARGET
 J 151	J	R	-	CAPTURE:C-SRCH-2	MEASURED	_audit/2026-11-26-live-session-12.md::REDIRECTED to the AI route ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
-J 169	J	R	-	BUILD:tests/fixtures/live12/c_rj26_1_functions-open.html	MEASURED	_audit/2026-11-27-jobs7.md::keeps headcount over time and notable alumni, its step BUILD on that fixture ; RULING:COMPOUND-ROW-SPLITS-ONLY-ON-STATE
 J 170	J	W	-	CAPTURE:C-J170-1	MEASURED	_audit/2026-11-27-jobs7.md::one alert row's control, attended ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
 J 171	J	R	-	CAPTURE:C-LRN-1	MEASURED	_audit/2026-11-27-jobs7.md::LinkedIn's browsable index, the same for every member ; RULING:COMPOUND-ROW-SPLITS-ONLY-ON-STATE
 J 172	J	W	-	CAPTURE:C-LRN-2	MEASURED	_audit/2026-11-27-jobs7.md::seeing his goal is a read of his own page ; RULING:COMPOUND-ROW-SPLITS-ONLY-ON-STATE
