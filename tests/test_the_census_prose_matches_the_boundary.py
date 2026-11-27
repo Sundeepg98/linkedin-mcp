@@ -46,16 +46,44 @@ is the structural cause of anything is a judgement, and no test decides one.
    False verdicts cannot be produced by a dead instrument.
 3. **Shown failing.** :func:`test_the_claim_reader_can_fail` runs the same
    comparison against a mutated copy of the claim and requires a mismatch.
+
+## THE REACHABLE SURFACES ARE READ FROM THEIR ROW, NOT FROM A WINDOW (lane ci8, 2026-11-27)
+
+The check that the census names every surface this file calls reachable used
+to read the first 6000 characters of section 4 and look for each surface's
+first word anywhere in them. The count row above it grows by a clause with
+every admission, and on 2026-11-27 it pushed the reachable row past the
+window twice: the guard went red on a census that was right, and integration
+7 had to shorten the count cell's clauses to make it fit. The window also
+matched words wherever they fell, so "post" and "saved" were found in the
+COUNT row, not in the row that makes the claim.
+
+So the guard now reads the ROW: section 4's table row whose first cell opens
+"nothing in it reaches", split by the census's own cell reader
+(`scripts/count_census_states.py`, which honours an escaped pipe). Every
+surface this file calls reachable must be named in that row's MEASURED cell,
+by its name or by its address. Its controls:
+
+* :func:`test_a_cell_grown_past_the_old_window_cannot_hide_the_row` grows
+  the count cell past the window and shows the old reading missing surfaces
+  while the row reading misses none;
+* :func:`test_the_row_reader_can_fail` takes "saved posts" out of the
+  measured cell and requires the row reading to name exactly that surface.
 """
 
 from __future__ import annotations
 
 import pathlib
 import re
+import sys
 
 import pytest
 
 from linkedin_server import readonly
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent / "scripts"))
+
+import count_census_states  # noqa: E402 -- the census's own cell reader
 
 _CENSUS = (
     pathlib.Path(__file__).resolve().parent.parent
@@ -211,15 +239,157 @@ def test_the_census_does_not_still_claim_the_sanction_is_missing() -> None:
     assert "CORRECTED 2026-09-20" in body
 
 
+#: Section 4's heading, and the opening words of the left cell of the row that
+#: corrects the original "nothing in it reaches ..." sentence. The row is
+#: found by those words, so a reformat that loses them fails loudly instead
+#: of leaving this guard reading nothing.
+_SECTION_4 = "## 4. THE READ BOUNDARY"
+_REACHABLE_ROW_OPENS = "nothing in it reaches"
+
+
+def _section_4(text: str) -> str | None:
+    """Section 4's text, from its heading to the next ``## `` heading."""
+    if _SECTION_4 not in text:
+        return None
+    body = text.split(_SECTION_4, 1)[1]
+    end = re.search(r"^## ", body, flags=re.M)
+    return body[: end.start()] if end else body
+
+
+def _reachable_row(text: str) -> tuple[list[str] | None, str]:
+    """(the row's cells, or None, and what was found where it was looked for).
+
+    The rows of section 4's correction table sit in a blockquote, so each
+    opens ``> |``; the quote marker is cut and the census's own cell reader
+    splits the rest. Exactly one row may open with the claim's words, and it
+    must have two cells: what the section said, and what was measured.
+    """
+    section = _section_4(text)
+    if section is None:
+        return None, f"no {_SECTION_4!r} heading in the census"
+    rows = []
+    for line in section.splitlines():
+        body = line.strip()
+        if body.startswith(">"):
+            body = body[1:].strip()
+        if not body.startswith("|"):
+            continue
+        cells = count_census_states.cells(body)
+        if cells and cells[0].lower().startswith(_REACHABLE_ROW_OPENS):
+            rows.append(cells)
+    if len(rows) != 1:
+        return None, (
+            f"{len(rows)} rows of section 4 open with "
+            f"{_REACHABLE_ROW_OPENS!r}; the guard reads exactly one"
+        )
+    if len(rows[0]) != 2:
+        return None, f"the row has {len(rows[0])} cells, not 2: {rows[0]!r}"
+    return rows[0], "found"
+
+
+def _address_of(url: str) -> str:
+    """A claimed url as the census writes an address: its path, every run of
+    digits written ``<id>`` (the census names one post as
+    ``/analytics/post-summary/urn:li:activity:<id>/``)."""
+    path = re.sub(r"^https://www\.linkedin\.com", "", url)
+    return re.sub(r"\d+", "<id>", path)
+
+
+def _named_in(cell: str, surface: str, url: str) -> bool:
+    """Is the surface named in the cell, by its name or by its address?"""
+    lowered = cell.lower()
+    by_name = re.search(r"\b%s\b" % re.escape(surface), lowered)
+    return bool(by_name) or _address_of(url) in lowered
+
+
+def _unnamed_in_the_row(text: str) -> tuple[list[str] | None, str]:
+    """(every reachable surface the row's MEASURED cell does not name, or
+    None when the row cannot be read, and the reading's own account)."""
+    cells, found = _reachable_row(text)
+    if cells is None:
+        return None, found
+    measured = cells[1]
+    return [
+        surface
+        for surface, url in sorted(_CLAIMED_REACHABLE.items())
+        if not _named_in(measured, surface, url)
+    ], found
+
+
+def _unnamed_in_the_old_window(text: str) -> list[str]:
+    """THE READING THIS GUARD USED UNTIL 2026-11-27, carried verbatim as a
+    control: each surface's first word, anywhere in section 4's first 6000
+    characters. Only the controls below call it."""
+    block = text.split("## 4. THE READ BOUNDARY")[1][:6000].lower()
+    return [s for s in _CLAIMED_REACHABLE if s.split()[0] not in block]
+
+
 def test_the_reachable_surfaces_are_named_in_the_census() -> None:
     """The prose and this guard's list must name the same surfaces.
 
     Otherwise this file could go on passing while the census's table said
-    something else entirely.
+    something else entirely. Read from the reachable-surfaces ROW, its
+    measured cell, so the row's place in the section and the length of the
+    cells above it do not matter.
     """
-    block = _text().split("## 4. THE READ BOUNDARY")[1][:6000].lower()
-    for surface in _CLAIMED_REACHABLE:
-        assert surface.split()[0] in block, surface
+    unnamed, found = _unnamed_in_the_row(_text())
+    assert unnamed is not None, (
+        "the reachable-surfaces row of section 4 cannot be read (%s). If the "
+        "table moved or was reworded, this guard has to move with it; a "
+        "claim-checker that cannot find its claims passes over everything."
+        % found
+    )
+    assert unnamed == [], (
+        "the census's reachable-surfaces row does not name %s, which this "
+        "guard calls reachable. Either the census or this guard is wrong, and "
+        "the boundary decides which." % unnamed
+    )
+
+
+def _grown(text: str, chars: int) -> str:
+    """The census with the COUNT row's measured cell grown by ``chars`` of
+    clause, the way every admission grows it."""
+    lines = text.split("\n")
+    at = [i for i, line in enumerate(lines) if _COUNT_CLAIM.search(line)]
+    assert len(at) == 1, at
+    row = lines[at[0]].rstrip("\r")
+    assert row.endswith("|"), row[-40:]
+    clause = " and a further admitted line, named by its ruling" * (chars // 50 + 1)
+    lines[at[0]] = row[:-1].rstrip() + clause + " |"
+    return "\n".join(lines)
+
+
+def test_a_cell_grown_past_the_old_window_cannot_hide_the_row() -> None:
+    """RED FIRST, KEPT AS A CONTROL. Grow the count cell by 6000 characters:
+    the old window reading loses surfaces, the row reading loses none.
+
+    The first half is what makes the input discriminating: a grown census the
+    OLD reading still passed would show nothing about the new one.
+    """
+    grown = _grown(_text(), 6000)
+    assert _COUNT_CLAIM.search(grown), "growing the cell broke the count claim"
+    assert _section_4(grown) is not None, "the census has no section 4 to read"
+    lost = _unnamed_in_the_old_window(grown)
+    assert lost, "the grown cell did not push any surface out of the old window"
+    unnamed, found = _unnamed_in_the_row(grown)
+    assert unnamed == [], (unnamed, found)
+
+
+def test_the_row_reader_can_fail() -> None:
+    """SHOWN FAILING: take "saved posts" out of the measured cell, by name and
+    by address, and the row reading must name exactly that surface."""
+    text = _text()
+    cells, found = _reachable_row(text)
+    assert cells is not None, found
+    measured = cells[1]
+    stripped = measured.replace("saved posts", "a list").replace(
+        "/my-items/saved-posts/", "/a-list/"
+    )
+    assert stripped != measured, "the mutation changed nothing in the cell"
+    mutated = text.replace(measured, stripped, 1)
+    assert mutated != text, "the cell as read is not the cell as written"
+    unnamed, _found = _unnamed_in_the_row(mutated)
+    assert unnamed == ["saved posts"], unnamed
 
 
 # --------------------------------------------------------------------------
