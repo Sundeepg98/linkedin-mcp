@@ -23,6 +23,23 @@ from linkedin_server import press, readonly, self_profile
 BASE = "https://www.linkedin.com"
 
 
+@pytest.fixture(autouse=True)
+def _an_address_that_never_moves_is_not_waited_on(monkeypatch):
+    """THE SELF ALIAS'S WAIT, SHORTENED TO NOTHING FOR THIS FILE (2026-11-27).
+
+    ``press.disclose`` waits, bounded, while a page still names the bare self
+    alias, because LinkedIn now rewrites ``/in/me/`` client-side
+    (``self_profile.await_rewrite``). :class:`FakePage`'s address never moves,
+    so with the shipped five seconds every ``/in/me/`` page here would idle
+    the whole bound before the judgement these tests are about -- and judge
+    the alias exactly as it always did. The wait itself, its bound and what
+    the gate does when the address DOES move are
+    ``tests/test_self_profile_waits_for_the_rewrite.py``'s, on a page whose
+    own script moves it.
+    """
+    monkeypatch.setattr(self_profile, "SELF_REWRITE_BOUND_S", 0.0)
+
+
 class FakeLocator:
     def __init__(self, page, selector, expanded=("false", "false")):
         self.page = page

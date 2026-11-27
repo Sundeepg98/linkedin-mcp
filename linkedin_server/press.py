@@ -1547,11 +1547,26 @@ async def disclose(
     longer a function of the url. So for a member profile ROOT carrying NO
     marker -- and for no other url -- the page's edit controls for that member
     are COUNTED before the verdict (``self_profile.read_edit_routes``: locator
-    counts, no script, no string back), against the url read once here. Every
+    counts, no script, no string back), against the url read here. Every
     other page, his marker-carrying landing included, is admitted or refused
     exactly as before with the page never asked for anything.
+
+    **AND NOT ON A PAGE THAT HAS NOT ARRIVED** (2026-11-27). LinkedIn now
+    serves ``/in/me/`` as its own document and rewrites its address to his
+    member path client-side about a second later (the live lane's session
+    12). A page still at the bare self alias is therefore WAITED ON, bounded
+    (``self_profile.await_rewrite``, which only reads ``url``), and the url is
+    read again: the verdict is taken on where the page ARRIVED, by
+    :func:`self_landing`'s rule, unchanged -- so a press is never made during
+    the rewrite, and an alias that moves to a page that is not his is refused
+    like that page. An alias that never moves within the bound is judged as
+    the alias, exactly as before. The address is only ever read and judged,
+    never followed.
     """
     landed = getattr(page, "url", None)
+    if self_profile.awaits_rewrite(landed):
+        await self_profile.await_rewrite(page)
+        landed = getattr(page, "url", None)
     edit_routes = (
         await self_profile.read_edit_routes(page, landed)
         if self_profile.wants_structure(landed)

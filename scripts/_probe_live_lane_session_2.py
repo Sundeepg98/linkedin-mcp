@@ -1694,8 +1694,14 @@ async def _in_me_more(capture: bool) -> dict[str, Any]:
         # THE PRESS GATE'S OWN READING OF HIS LANDING. Since 2026-11-25 the url
         # carries no marker, so for a member profile root with none the page's
         # edit controls for that member are counted first (self_profile), as
-        # press.disclose itself does; the url is read once for both.
+        # press.disclose itself does. And since 2026-11-27 a page still at the
+        # bare self alias is waited on first, bounded, as press.disclose waits:
+        # LinkedIn rewrites /in/me/ client-side (session 12). The url is read
+        # after that wait, once for both.
         landed = page.url
+        if self_profile.awaits_rewrite(landed):
+            await self_profile.await_rewrite(page)
+            landed = page.url
         edit_routes = (await self_profile.read_edit_routes(page, landed)
                        if self_profile.wants_structure(landed) else None)
         on_his_profile = press.self_landing(landed, edit_routes)
