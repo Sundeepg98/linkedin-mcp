@@ -3730,6 +3730,10 @@ async def linkedin_people_search_shape(
     location_ids: str = "",
     connections_of: str = "",
     network: str = "",
+    followers_of: str = "",
+    school_ids: str = "",
+    industry_ids: str = "",
+    actively_hiring: bool = False,
     include_names: bool = False,
 ) -> dict[str, Any]:
     """What your people search OFFERS -- and, with include_names, WHO it found.
@@ -3764,6 +3768,16 @@ async def linkedin_people_search_shape(
     for the results as people records. Built over captured markup, NOT YET
     FIRED LIVE: whether LinkedIn applies the facet to the results is what
     ``query_kept`` reports on the first fire.
+
+    **FOLLOWERS OF A MEMBER, A SCHOOL, AN INDUSTRY, PEOPLE HIRING (census N 86,
+    N 88, N 89, N 82 and N 26b, 2026-11-27).** Four more of the All-filters
+    panel's sections, each sent as the address LinkedIn writes for it, because
+    the panel opens on a press this tool may not make: ``followers_of`` (one
+    member's token; LinkedIn's own result cards link this search),
+    ``school_ids``, ``industry_ids`` and ``actively_hiring``. With
+    ``network="F"`` beside a school or an industry it searches YOUR
+    connections by it. Built over captured markup, NOT YET FIRED LIVE: the
+    first fire's ``query_kept`` says what LinkedIn did with each.
 
     **THIS IS THE FIRST TOOL ON A THIRD-PARTY-DENSE SURFACE**, and every
     decision in it is shaped by that. A people-search page's entire payload is
@@ -3878,6 +3892,17 @@ async def linkedin_people_search_shape(
             ``connections_of``, ``network="F"`` returns the connections that
             member and you have in common. Any other value is refused,
             described by its shape.
+        followers_of: ONE member's opaque token, as ``connections_of`` takes
+            it, to list the people who follow that member. A slug is a name
+            and is refused. Never stored and never echoed.
+        school_ids: LinkedIn's NUMERIC organisation ids of schools (a school's
+            Page is an organisation), comma-separated, at most 5. A school's
+            name or slug is refused, described by its shape.
+        industry_ids: LinkedIn's NUMERIC industry codes (the digits it writes
+            under ``industry``), comma-separated, at most 5. An industry's
+            name is refused.
+        actively_hiring: ``True`` for people LinkedIn marks as actively
+            hiring, sent as the JSON string ``"true"`` LinkedIn writes.
         include_names: return the people the page draws as records (see the
             first paragraph). Off by default; the search is the same either
             way and still one page.
@@ -3893,6 +3918,10 @@ async def linkedin_people_search_shape(
             location_ids=location_ids,
             connections_of=connections_of,
             network=network,
+            followers_of=followers_of,
+            school_ids=school_ids,
+            industry_ids=industry_ids,
+            actively_hiring=actively_hiring,
         )
         if not composed["built"]:
             return people_search.refusal_envelope(composed)

@@ -229,7 +229,6 @@ N 19	N	R	-	PRECONDITION:an invitation carrying a personal note, pending in his r
 N 21	N	W	R3	SIBLING:N 15	INFERRED	tests/fixtures/live11/invitations.html ; N 15
 N 22	N	R	-	CAPTURE:admit-mynetwork	INFERRED	_audit/_census/read-addresses.tsv::the general R1 badge-cost ruling ; RULING:READ-PAST-AN-ACT-SUBSTRING
 N 24	N	R	-	CAPTURE:connections-sort-and-filters	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/mynetwork/invite-connect/connections/?foo=1 ; RULING:READ-PAST-AN-ACT-SUBSTRING
-N 26b	N	R	-	CAPTURE:search-people-first-degree	NAMED	_audit/_census/read-addresses.tsv::so the first thing past the boundary is a capture
 N 27	N	R	-	CAPTURE:connections-sort-and-filters	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/mynetwork/invite-connect/connections/?foo=1 ; RULING:READ-PAST-AN-ACT-SUBSTRING
 N 28	N	R	-	CAPTURE:connections-sort-and-filters	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/mynetwork/invite-connect/connections/?foo=1 ; RULING:READ-PAST-AN-ACT-SUBSTRING
 N 29	N	W	R3	TARGET:a 1st-degree connection he names for removal	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::`N 29`: the row menu of one connection he names ; RULING:RELATION-REMOVALS-BUILT-BEHIND-GRANTS
@@ -265,10 +264,6 @@ N 75	N	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 N 76	N	R	-	CAPTURE:in-me-profile	NAMED	RULING:NO-INDEX-PINNED-JUDGEMENTS ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
 N 77	N	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 N 78	N	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
-N 82	N	R	-	CAPTURE:search-people-labels	NAMED	RULING:FIXED-UI-LABEL-MATCH ; _audit/_census/read-addresses.tsv::Matched live (2, stably) and refused
-N 86	N	R	-	CAPTURE:search-people-labels	NAMED	RULING:CAPTURE-PRESS-UNDER-PROBE-RULE ; _audit/_census/read-addresses.tsv::TERMINAL BY THIS ROUTE
-N 88	N	R	-	CAPTURE:search-people-labels	MEASURED	RULING:CAPTURE-PRESS-UNDER-PROBE-RULE ; _audit/2026-10-10-lane-b2-network-build.md::So the first render draws no control labelled exactly
-N 89	N	R	-	CAPTURE:search-people-labels	MEASURED	RULING:CAPTURE-PRESS-UNDER-PROBE-RULE ; _audit/2026-10-10-lane-b2-network-build.md::So the first render draws no control labelled exactly
 N 90	N	R	-	CAPTURE:search-people-labels	NAMED	RULING:CAPTURE-PRESS-UNDER-PROBE-RULE ; _audit/_census/read-addresses.tsv::TERMINAL BY THIS ROUTE
 N 91	N	R	-	CAPTURE:search-people-labels	NAMED	RULING:CAPTURE-PRESS-UNDER-PROBE-RULE ; _audit/_census/read-addresses.tsv::TERMINAL BY THIS ROUTE
 N 92	N	R	-	CAPTURE:search-people-labels	NAMED	RULING:CAPTURE-PRESS-UNDER-PROBE-RULE ; _audit/_census/read-addresses.tsv::TERMINAL BY THIS ROUTE

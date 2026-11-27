@@ -166,8 +166,9 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_page_plugin_snippet": ("page_id",),
     "linkedin_item_viewer_demographics": ("item",),
     "linkedin_people_search_shape": (
-        "connections_of", "current_company_ids", "include_names", "keywords",
-        "location_ids", "network", "past_company_ids",
+        "actively_hiring", "connections_of", "current_company_ids",
+        "followers_of", "include_names", "industry_ids", "keywords",
+        "location_ids", "network", "past_company_ids", "school_ids",
     ),
     "linkedin_premium_job_collection": ("collection",),
     "linkedin_premium_status": (),
@@ -858,8 +859,14 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: build-msg2's eight tools beside the ninety-nine and 148, counted off the
 #: merged registry, never summed; that lane's census decisions are its own,
 #: above.
+#: **AT LANE NET7 (2026-11-27): 107 TOOLS AND 166 PARAMETERS** -- no tool
+#: added; `linkedin_people_search_shape` gains four, `followers_of`,
+#: `school_ids`, `industry_ids` and `actively_hiring`, beside the 162,
+#: counted off `mcp.list_tools()`, never summed. THE CENSUS DECISION, IN THE
+#: SAME COMMIT: `N 86`, `N 88`, `N 89`, `N 82` and `N 26b` GAP ->
+#: COVERED-UNFIRED on them, never fired. See `_audit/2026-11-27-net7.md`.
 PINNED_TOOL_COUNT = 107
-PINNED_PARAMETER_COUNT = 162
+PINNED_PARAMETER_COUNT = 166
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:

@@ -524,7 +524,9 @@ def test_a_name_search_of_his_first_degree_is_one_composition() -> None:
     assert [key for key, _value in _raw_query(verdict["url"])] == ["keywords", "network"]
     assert verdict["applied"] == {"keywords": 1, "current_company_ids": 0,
                                   "past_company_ids": 0, "location_ids": 0,
-                                  "network": 1, "connections_of": 0}
+                                  "network": 1, "connections_of": 0,
+                                  "followers_of": 0, "school_ids": 0,
+                                  "industry_ids": 0, "actively_hiring": 0}
     assert not any(NAME_SEARCH in text for _where, text in walk(verdict["applied"]))
 
 
@@ -540,13 +542,18 @@ def test_his_connections_filtered_by_place_or_employer_compose(argument, value, 
     assert readonly.is_read_url(url) is True
 
 
-def test_no_school_or_industry_facet_is_composed_yet() -> None:
-    """``N 26b``'s blocker, as code says it: the composer's facet table holds
-    no school and no industry key, and the tool takes no such argument."""
-    keys = {key.lower() for _arg, key, _kind, _most in people_search.FACETS}
-    assert not any("school" in key or "industr" in key for key in keys), keys
-    args = {arg for arg, _key in people_search.ARGUMENT_KEYS}
-    assert not any("school" in arg or "industr" in arg for arg in args), args
+def test_the_school_and_industry_facets_are_composed() -> None:
+    """``N 26b``'s blocker, as code said it until 2026-11-27 -- "the composer's
+    facet table holds no school and no industry key" -- is gone: lane net7
+    added ``schoolFilter`` and ``industry``, each a section session 12's open
+    panel draws (``tests/test_net7_people_search_facets.py``). Beside
+    ``network="F"`` they search his own connections by either."""
+    keys = {key: arg for arg, key, _kind, _most in people_search.FACETS}
+    assert keys["schoolFilter"] == "school_ids"
+    assert keys["industry"] == "industry_ids"
+    for argument, key in (("school_ids", "schoolFilter"), ("industry_ids", "industry")):
+        url = _composed(network="F", **{argument: "96"})
+        assert [k for k, _v in _raw_query(url)] == ["network", key]
 
 
 def _cell(row: str) -> tuple[str, str, str]:
@@ -598,29 +605,33 @@ def test_n26_banked_its_location_half_and_keeps_the_split_to_26b() -> None:
         assert words in head, words
 
 
-def test_n26b_is_gap_with_its_blocker_and_the_capture_named() -> None:
+def test_n26b_is_covered_unfired_on_the_facets_its_capture_named() -> None:
+    """GAP from its split (2026-09-28) until lane net7 (2026-11-27): the
+    capture its cell named was taken in live session 12, and the two facets
+    it waited on were built (``tests/test_net7_people_search_facets.py``)."""
     capability, state, cell = _cell("26b")
     assert capability == "Filter your connections by school or industry"
-    assert state == "GAP"
+    assert state == "COVERED-UNFIRED"
     assert cell.startswith("**Split from 26 on 2026-09-28"), cell[:120]
     for words in ("COMPOUND-ROW-SPLITS-ONLY-ON-STATE", "BLOCKER, NAMED:",
-                  "NO FACET IN THIS SEARCH YET", "THE CAPTURE THAT WOULD SETTLE IT"):
+                  "NO FACET IN THIS SEARCH YET", "THE CAPTURE THAT WOULD SETTLE IT",
+                  "LANE NET7, 2026-11-27", "THE CAPTURE THIS CELL NAMED IS TAKEN",
+                  "school_ids=", "industry_ids=",
+                  "tests/fixtures/synthetic/live12_first_degree_panel_words.html"):
         assert words in cell, words
 
 
-def test_n26b_sits_in_bucket_3_and_the_triage_as_a_read_gap_row() -> None:
+def test_n26b_left_bucket_3_and_the_triage() -> None:
     rows, problems = cra.load()
     assert not problems, problems
-    line = next((r for r in rows if (r["slice"], r["row"]) == ("N", "26b")), None)
-    assert line is not None, "N 26b is a read GAP row and has no address line"
-    assert line["class"] == "ADMITTED" and line["gate"] == "MEASURE", line
-    assert triage.TRIAGE["N 26b"][0] == "BUILDABLE"
+    assert ("N", "26b") not in {(r["slice"], r["row"]) for r in rows}
+    assert "N 26b" not in triage.TRIAGE
 
 
 def test_no_moved_row_is_in_the_address_table_or_the_read_triage() -> None:
     rows, problems = cra.load()
     assert not problems, problems
     by_row = {(r["slice"], r["row"]) for r in rows}
-    for row in ("30", "31", "81", "25", "26"):
+    for row in ("30", "31", "81", "25", "26", "26b"):
         assert ("N", row) not in by_row, f"N {row} left bucket 3 and still has a line"
         assert f"N {row}" not in triage.TRIAGE, f"N {row} left the read-gap set"
