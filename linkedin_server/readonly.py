@@ -2872,6 +2872,29 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # read by its own address, lane L1's `/in/me/overlay/contact-info/` line
     # above, under the same self-only anchors, labels only.
     re.compile(r"^https://www\.linkedin\.com/in/me/\?isSelfProfile=true$"),
+    # ======================================================================
+    # LANE SETTINGS7 (2026-11-27) -- NAMED SETTINGS PAGES OF HIS OWN, each BY
+    # NAME, in its own commit, under ONE-NAMED-SETTINGS-PAGE-AT-A-TIME as
+    # NAMED-SETTINGS-PAGES-RATIFIED reads it ("one named settings page per
+    # commit is within the ruling"), with HIS-OWN-SETTINGS-NOT-OUTWARD; the
+    # orchestrator confirmed each on 2026-11-27. Record:
+    # `_audit/2026-11-27-settings7.md` section 5; each line pinned, every
+    # sibling shown refused, in `tests/test_settings7_admissions.py` (lane
+    # admit26's harness). THE SPELLINGS ARE MEASURED, never named: each is a
+    # link a live capture drew, its path words matched by keyed shape. Each
+    # page is READ-ONLY here: its controls are writes with their own rows and
+    # specs, and the press gate refuses every one.
+    #
+    # His search history page (census N 96, "Clear your search history"),
+    # drawn on his Data privacy category page as the setting link 'Clear
+    # search history' under 'How LinkedIn uses your data' (session 12, load
+    # 10; `tests/fixtures/live12/privacy_words.html`), in the
+    # `/mypreferences/m/` tree LinkedIn draws it in. It trips no forbidden
+    # substring: refused by allowlist silence alone until now
+    # (READ-PAST-AN-ACT-SUBSTRING's second clause), so no exemption. The
+    # `/d/` spelling nothing draws, the jobs search history (`J 18`'s priced
+    # address), a query, a sub-path and a longer leaf stay refused.
+    re.compile(r"^https://www\.linkedin\.com/mypreferences/m/search-history/?$"),
 )
 
 #: Substrings that must never appear in a navigation target, checked before
