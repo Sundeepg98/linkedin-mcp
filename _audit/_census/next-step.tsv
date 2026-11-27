@@ -135,16 +135,16 @@ M C31	M	W	R3	TARGET:a comment of his he names for deletion	NAMED	_audit/2026-09-
 M C33	M	W	R3	CAPTURE:own-post-reactions	INFERRED	linkedin_server/press.py::"/feed/update/", ; RULING:OUTWARD-CLASSES-BUILT-BEHIND-GRANTS
 M C34	M	W	R3	TARGET:a comment he names	INFERRED	RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS ; M C26
 M C35b	M	W	R3	CAPTURE:own-post-reactions	NAMED	_audit/_census/messaging-and-content.md::capture the reactions menu ; M C33
-M C36	M	W	R1	CAPTURE:feed-menus	NAMED	_audit/_census/messaging-and-content.md::admit the address and run the landed-address check IN THE SAME WAVE
-M C37	M	W	R1	CAPTURE:feed-menus	NAMED	_audit/_census/write-classes.tsv::queued:SAVED-POSTS-SURFACE ; M C36
-M C39	M	R	-	CAPTURE:comments-metric-spelling	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/analytics/creator/content/?metricType=x ; RULING:READ-PAST-AN-ACT-SUBSTRING
+M C36	M	W	R1	ADMIT:https://www.linkedin.com/my-items/saved-posts/	MEASURED	_audit/2026-11-27-msg7.md::THE LEFT RAIL DRAWS ; _audit/2026-09-19-content-tail.md::run the landed-address check IN THE SAME WAVE ; tests/fixtures/live12/feed_s12.html
+M C37	M	W	R1	ADMIT:https://www.linkedin.com/my-items/saved-posts/	MEASURED	_audit/2026-11-27-msg7.md::THE LANDING NEEDS A LIVE LOAD IN THE SAME WAVE ; M C36
+M C39	M	R	-	CAPTURE:post-analytics-comments	MEASURED	_audit/2026-11-27-msg7.md::THE METRIC TYPE SELECTOR OFFERS TWO METRICS, AND NEITHER IS COMMENTS ; tests/fixtures/live12/creator_content_metric-open.html ; RULING:D6-CAPABILITY-OVER-AFFORDANCE
 M C42	M	R	-	TARGET:another member's post he names, by link	NAMED	_audit/_census/read-addresses.tsv::THE ROW HOLDS FOR OTHER PEOPLE'S POSTS ONLY
-M C44	M	W	R3	CAPTURE:C-MSG26-4	NAMED	_audit/2026-09-28-lane-k-ledger.md::YES, as ONE CAPTURE, nothing typed: ; RULING:ARTICLE-COMPOSER-CAPTURE
+M C44	M	W	R3	CAPTURE:C-MSG7-1	MEASURED	_audit/2026-11-27-msg7.md::NEXT DRAWS AN ERROR TOAST ON AN EMPTY ARTICLE ; tests/fixtures/live12/article_next-open.html ; RULING:ARTICLE-COMPOSER-CAPTURE
 M C45	M	W	R3	SIBLING:lane-U	NAMED	_audit/2026-09-28-rulings-build-classes.md::`FILE-UPLOAD-UNSANCTIONED` is therefore a stale label.
-M C46	M	W	R3	CAPTURE:C-MSG26-4	NAMED	_audit/2026-09-28-lane-k-ledger.md::YES, as ONE CAPTURE, nothing typed: ; RULING:ARTICLE-COMPOSER-CAPTURE
-M C47	M	R+W	-	CAPTURE:article-composer	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/pulse/drafts/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
+M C46	M	W	R3	SIBLING:M C44	MEASURED	_audit/2026-11-27-msg7.md::THE EMBED DIALOG IS ONE STEP OF THE ARTICLE WRITE ; tests/fixtures/live12/article_embed-open.html
+M C47	M	R+W	-	CAPTURE:article-composer	MEASURED	_audit/2026-11-27-msg7.md::THE MANAGE MENU DRAWS EIGHT BUTTONS AND NO ADDRESS ; tests/fixtures/live12/article_manage-open.html ; RULING:ARTICLE-COMPOSER-ONE-CAPTURE
 M C49	M	W	R3	PRECONDITION:an article he has published	INFERRED	M C49 ; M C77
-M C50	M	W	R3	CAPTURE:C-MSG26-4	NAMED	_audit/2026-09-28-lane-k-ledger.md::YES, as ONE CAPTURE, nothing typed: ; RULING:ARTICLE-COMPOSER-CAPTURE
+M C50	M	W	R3	CAPTURE:C-MSG7-2	MEASURED	_audit/2026-11-27-msg7.md::NOT BEHIND THE AUTHOR TOGGLE ; tests/fixtures/live12/article_manage-open.html ; RULING:ARTICLE-COMPOSER-ONE-CAPTURE
 M C51	M	W	R3	PRECONDITION:a newsletter he authors	INFERRED	_audit/_census/read-addresses.tsv::the page listing his newsletters links no analytics address
 M C52	M	W	R3	SIBLING:N 34	MEASURED	tests/fixtures/live11/unfollowed.html ; N 34
 M C54	M	W	R3	TARGET:the words of a collaborative post he names	INFERRED	_audit/_census/messaging-and-content.md::the post composer is an address already loaded
@@ -159,14 +159,13 @@ M C66	M	W	R2	TARGET:a member he names to mention	INFERRED	RULING:MENTION-COMPOSI
 M C67	M	W	R3	TARGET:a group post or comment of his he names	INFERRED	RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS ; M C67
 M C68	M	W	R3	TARGET:a group he names that holds posts for admin approval	INFERRED	RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS ; M C68
 M C69	M	W	R3	CAPTURE:C-B5-3	NAMED	_audit/2026-10-10-lane-b5-groups-build.md::| C-B5-3 | N 168, M C69 | ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
-M C70	M	R	-	CAPTURE:C-MSG26-1	MEASURED	_audit/_census/capture-queue.tsv::draws Posts, Sort by, Date posted, Content type, From member and All filters, and no group facet ; RULING:CONTENT-VERTICAL-NOT-ALL-RESULTS
 M C73	M	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 M C76	M	W	R3	PRECONDITION:an invitation to contribute to a collaborative article	INFERRED	M C76
 M C77	M	W	R3	PRECONDITION:an article he has published	INFERRED	M C49 ; M C77
-M C78	M	W	R3	CAPTURE:C-MSG26-4	NAMED	_audit/2026-09-28-lane-k-ledger.md::YES, as ONE CAPTURE, nothing typed: ; RULING:ARTICLE-COMPOSER-CAPTURE
+M C78	M	W	R3	CAPTURE:C-MSG7-1	INFERRED	_audit/2026-11-27-msg7.md::publish settings stay the likeliest place ; M C44 ; RULING:ARTICLE-COMPOSER-CAPTURE
 M C79	M	W	R1	RULING:Q-NAME-BEARING-ADDRESS-REDACTION	INFERRED	_audit/_census/messaging-and-content.md::`/pulse/` stays refused ; RULING:READ-PAST-AN-ACT-SUBSTRING
 M C80	M	W	R3	CAPTURE:admit-newsletters-id	NAMED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/newsletters/1234567890/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
-M C81	M	W	R3	CAPTURE:C-MSG26-4	NAMED	_audit/2026-09-28-lane-k-ledger.md::YES, as ONE CAPTURE, nothing typed: ; RULING:ARTICLE-COMPOSER-CAPTURE
+M C81	M	W	R3	CAPTURE:C-MSG7-2	INFERRED	_audit/2026-11-27-msg7.md::Whether its form offers a Page as the publisher ; M C50 ; RULING:ARTICLE-COMPOSER-ONE-CAPTURE
 M C82	M	W	R3	CAPTURE:admit-newsletters-id	NAMED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/newsletters/1234567890/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
 M C83	M	R	-	PRECONDITION:a newsletter he authors	INFERRED	_audit/_census/read-addresses.tsv::the page listing his newsletters links no analytics address
 M C84	M	W	R3	PRECONDITION:two or more newsletters he authors	INFERRED	M C84
@@ -179,7 +178,7 @@ M C90	M	W	R3	CAPTURE:C-B3-2	INFERRED	_audit/2026-10-10-lane-b3-messaging-build.m
 M C91	M	W	R3	SIBLING:M C32	INFERRED	RULING:D6-CAPABILITY-OVER-AFFORDANCE ; M C32
 M C92	M	W	R3	TARGET:an event he names	NAMED	_audit/_census/read-addresses.tsv::ADMITTED 2026-09-23 BY A REVIEW: COMMIT (lane L1): one event by its NUMERIC id ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
 M C94	M	W	R2	TARGET:a post and a connection he names	INFERRED	RULING:OPERATOR-NAMES-THE-TARGET ; M C94
-M C97	M	W	R3	CAPTURE:C-I3-1	MEASURED	_audit/2026-11-25-build-jmn26.md::WORD-MEASURED ON TODAY'S CAPTURES ; RULING:PAGE-MAY-VETO-NEVER-SUPPLY
+M C97	M	W	R3	CAPTURE:C-I3-1	MEASURED	_audit/2026-11-27-msg7.md::THE UNIQUENESS SESSION 12 DID NOT TAKE IN-PAGE IS ON ITS CAPTURE ; tests/fixtures/live12/notifications.html ; RULING:M-C97-LINK-KEYED-DELETE
 M C100	M	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 M C101	M	R	-	CAPTURE:admit-newsletters-id	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/newsletters/1234567890/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
 M M2	M	W	R2	TARGET:a non-connection he names (the act stops at the composer)	NAMED	_audit/2026-09-24-lane-l5-messaging.md::| C-P5 | the composer a NON-connection gets ; RULING:OPERATOR-NAMES-THE-TARGET
@@ -236,19 +235,19 @@ N 29	N	W	R3	TARGET:a 1st-degree connection he names for removal	NAMED	_audit/202
 N 32	N	R	-	CAPTURE:admit-mynetwork	INFERRED	_audit/_census/read-addresses.tsv::the general R1 badge-cost ruling ; RULING:READ-PAST-AN-ACT-SUBSTRING
 N 34	N	W	R1	TARGET:a member he names to follow or unfollow	INFERRED	RULING:NAMED-PROFILE-READ-BEHIND-A-GRANT ; _audit/_census/write-classes.tsv::queued:THIRD-PARTY-PROFILE-FORBIDDEN
 N 36	N	W	R1	TARGET:a member he names to follow or unfollow	INFERRED	RULING:NAMED-PROFILE-READ-BEHIND-A-GRANT ; _audit/_census/write-classes.tsv::queued:THIRD-PARTY-PROFILE-FORBIDDEN
-N 37	N	W	R1	CAPTURE:feed-item-permalink-menu	MEASURED	tests/fixtures/live11/permalink_member_post_menu_open.html ; RULING:HIS-OWN-CURATION-NOT-OUTWARD
+N 37	N	W	R1	CAPTURE:following-list-unfollow	MEASURED	_audit/2026-11-27-msg7.md::THE PERMALINK, WHERE HIS URN IS THE ADDRESS, DRAWS NO UNFOLLOW ; tests/fixtures/live11/following.html ; RULING:AD-HIDE-AIM-HELD ; RULING:D6-CAPABILITY-OVER-AFFORDANCE
 N 40	N	W	R1	SIBLING:N 34	MEASURED	tests/fixtures/live11/unfollowed.html ; N 34
 N 41	N	W	R1	RULING:Q-NAME-BEARING-ADDRESS-REDACTION	INFERRED	_audit/_census/messaging-and-content.md::`/pulse/` stays refused ; RULING:READ-PAST-AN-ACT-SUBSTRING
 N 42	N	W	R1	RULING:Q-NAME-BEARING-ADDRESS-REDACTION	INFERRED	_audit/_census/messaging-and-content.md::`/pulse/` stays refused ; RULING:READ-PAST-AN-ACT-SUBSTRING
-N 43	N	W	R3	CAPTURE:feed-item-permalink-menu	MEASURED	tests/fixtures/live11/permalink_member_post_menu_open.html ; RULING:HIS-OWN-CURATION-NOT-OUTWARD
+N 43	N	W	R3	CAPTURE:feed-item-permalink-menu	MEASURED	_audit/2026-11-27-msg7.md::THE AUTHOR-DIRECTED ENTRY FITS A 14-CHARACTER PREFIX ; tests/fixtures/live12/permalink_member_post_menu-open.html ; RULING:HIS-OWN-CURATION-NOT-OUTWARD
 N 49	N	W	R1	TARGET:a skills Page he names	INFERRED	RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS ; N 49
 N 50	N	W	R1	SIBLING:N 47	NAMED	_audit/_census/network.md::Only the ROUTE is retired, not the outcome ; RULING:D6-CAPABILITY-OVER-AFFORDANCE
-N 51	N	W	R3	CAPTURE:feed-item-permalink-menu	MEASURED	tests/fixtures/live11/feed_menus.html ; RULING:HIS-OWN-CURATION-NOT-OUTWARD
+N 51	N	W	R3	CAPTURE:feed-item-permalink-menu	MEASURED	_audit/2026-11-27-msg7.md::class B are author-directed ; tests/fixtures/live12/permalink_page_post_menu-open.html ; RULING:HIS-OWN-CURATION-NOT-OUTWARD
 N 55	N	W	R3	CAPTURE:admit-newsletters-id	NAMED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/newsletters/1234567890/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
 N 56	N	W	R3	CAPTURE:admit-newsletters-id	INFERRED	_audit/2026-10-10-lane-b2-network-build.md::The list draws no control to press
 N 58	N	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
-N 59	N	W	R1	CAPTURE:admit-search-results-content	NAMED	_audit/_census/read-addresses.tsv::/feed/hashtag/ has no pattern ; RULING:READ-PAST-AN-ACT-SUBSTRING
-N 60	N	W	R1	CAPTURE:admit-search-results-content	NAMED	_audit/_census/read-addresses.tsv::/feed/hashtag/ has no pattern ; RULING:READ-PAST-AN-ACT-SUBSTRING
+N 59	N	W	R1	ADMIT:https://www.linkedin.com/feed/hashtag/placeholder/	MEASURED	_audit/2026-11-27-msg7.md::A HASHTAG'S RESULTS DRAW NO FOLLOW CONTROL AND NO HASHTAG FEED ; tests/fixtures/live12/search_content.html ; RULING:READ-PAST-AN-ACT-SUBSTRING
+N 60	N	W	R1	ADMIT:https://www.linkedin.com/feed/hashtag/placeholder/	MEASURED	_audit/2026-11-27-msg7.md::A HASHTAG'S RESULTS DRAW NO FOLLOW CONTROL AND NO HASHTAG FEED ; N 59
 N 61	N	R	-	CAPTURE:admit-mynetwork-network-manager-people-follow-following	NAMED	_audit/_census/read-addresses.tsv::/feed/hashtag/ has no pattern ; RULING:READ-PAST-AN-ACT-SUBSTRING
 N 62	N	W	R1	CAPTURE:admit-mynetwork	INFERRED	_audit/_census/read-addresses.tsv::the general R1 badge-cost ruling ; RULING:READ-PAST-AN-ACT-SUBSTRING
 N 63	N	W	R3	CAPTURE:C-B5-1	NAMED	_audit/2026-10-10-lane-b5-groups-build.md::| C-B5-1 | N 63, M C61 | ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
@@ -455,7 +454,7 @@ P K6	P	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 P K7	P	W	R3	CAPTURE:admit-mypreferences-d-verifications	INFERRED	_audit/_census/profile.md::the verification management surface has never been captured
 P K8	P	R	-	PRECONDITION:a Top Voice badge awarded to his account	NAMED	tests/fixtures/live8/in_me.html ; _audit/2026-10-10-lane-b1-profile-build.md::MEASURED-ABSENT FOR
 P K9	P	W	R3	PRECONDITION:a Top Voice badge	NAMED	_audit/_census/write-classes.tsv::queued:NO-TOP-VOICE-BADGE
-P L3	P	W	R3	CAPTURE:C-MSG26-4	NAMED	_audit/2026-09-28-lane-k-ledger.md::YES, as ONE CAPTURE, nothing typed: ; RULING:ARTICLE-COMPOSER-CAPTURE
+P L3	P	W	R3	CAPTURE:C-MSG7-2	MEASURED	_audit/2026-11-27-msg7.md::second radiogroup is empty ; tests/fixtures/live12/article_author_toggle-open.html ; RULING:ARTICLE-COMPOSER-ONE-CAPTURE
 P L4	P	R	-	PRECONDITION:a newsletter he authors	INFERRED	_audit/_census/read-addresses.tsv::the page listing his newsletters links no analytics address
 P L7	P	R	-	CAPTURE:creator-hub-on-the-dashboard	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/creator-hub/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
 P M1	P	W	R3	CAPTURE:C-RJ26-3	MEASURED	_audit/2026-11-26-readers-jobs26.md::THE OPTIONS MENU IS WHERE FIVE ROWS WAIT. ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE

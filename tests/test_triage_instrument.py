@@ -485,7 +485,14 @@ AFTER_LANE_BUILD_MSG2_GROUP_POST = (112, {"R": 8, "W": 101, "R+W": 3})
 #: 101 + 1.
 AFTER_LANE_BUILD_MSG2_M28_SPLIT = (112, {"R": 8, "W": 102, "R+W": 2})
 
-EXPECTED_NOW = AFTER_LANE_BUILD_MSG2_M28_SPLIT
+#: ON LANE MSG7 (wave 7, 2026-11-27), MEASURED with this tree's guard: `C70`
+#: -- a READ -- left GAP, MEASURED-ABSENT on the orchestrator's
+#: GROUP-SEARCH-MEASURED-ABSENT: no search inside a group on either surface
+#: its plan named (`_audit/2026-11-27-msg7.md` section 5). 112 - 1 = 111,
+#: reads 8 - 1.
+AFTER_LANE_MSG7_C70 = (111, {"R": 7, "W": 102, "R+W": 2})
+
+EXPECTED_NOW = AFTER_LANE_MSG7_C70
 
 
 def test_the_headline_split_is_the_one_the_report_quotes():

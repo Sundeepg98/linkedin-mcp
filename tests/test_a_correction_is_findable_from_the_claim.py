@@ -3672,6 +3672,48 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "record says is mistaken while leaving the record untouched."
     ),
 
+    # 2026-11-27, lane msg7. READ, not inferred from the filenames: each line
+    # citing the lane's record was read with the matched words in its window.
+    ("messaging-and-content.md", "2026-11-27-msg7.md"): (
+        "A ROW'S MOVE OR NEXT STEP RECORDED, NOT A CORRECTION OF THE CITED "
+        "RECORD. Rows `C47`, `C44`, `C46`, `C50`, `C78`, `C81`, `C36`, `C37`, "
+        "`C70`, `C39` and `C97` each gained one dated note citing lane msg7's "
+        "record -- session 12's readings of the article composer, the feed's "
+        "saved-items link, the content search's filter panel, the metric "
+        "selector and the notifications page, `C70`'s move to MEASURED-ABSENT, "
+        "and each row's answered next step -- and none says anything in that "
+        "record does not hold. The matched words are older text in the same "
+        "rows: `C36`'s own 2026-09-19 'COST CORRECTED', and in `C50`, `C81` the "
+        "lane's note calling the cell's OWN earlier DERIVED premise wrong. That "
+        "premise is lane readers-msg26's, and the correction of it is DECLARED "
+        "between the two records (`CORRECTS:` in lane msg7's, `CORRECTED BY:` "
+        "in readers-msg26's section 6). **WHAT WOULD MAKE THIS ENTRY WRONG:** a "
+        "messaging-and-content row asserting that something lane msg7's record "
+        "says is mistaken while leaving the record unmarked."
+    ),
+    ("network.md", "2026-11-27-msg7.md"): (
+        "A ROW'S NEXT STEP RECORDED, NOT A CORRECTION. Rows `37`, `43`, `51` and "
+        "`59` each gained one dated note citing lane msg7's record -- session "
+        "12's item menus and the hashtag search, and each row's answered next "
+        "step -- and none withdraws anything in it. The matched words are the "
+        "rows' own older text (row `37`'s 2026-09-27 'RESTATED' paragraph, "
+        "which corrects lane L8's key, not this record). **WHAT WOULD MAKE "
+        "THIS ENTRY WRONG:** a network row asserting that something lane msg7's "
+        "record says is mistaken while leaving the record unmarked."
+    ),
+    ("profile.md", "2026-11-27-msg7.md"): (
+        "A ROW'S NEXT STEP RECORDED, NOT A CORRECTION OF THE CITED RECORD. Row "
+        "`L3` gained one dated note citing lane msg7's record -- the author "
+        "toggle's open form and `Manage`'s `Create newsletter` -- and corrects "
+        "nothing in that record. The matched word is the row's own 2026-09-21 "
+        "sentence ('no published cell is false of any of them'). The note's "
+        "reading does refute readers-msg26's DERIVED toggle premise quoted in "
+        "the same cell, and that correction is declared between the two "
+        "records. **WHAT WOULD MAKE THIS ENTRY WRONG:** a profile row asserting "
+        "that something lane msg7's record says is mistaken while leaving the "
+        "record unmarked."
+    ),
+
 }
 
 
