@@ -533,6 +533,21 @@ jobs:
           python -m pytest --collect-only -q $(cat shard-files.txt) \
             | tee shard-collected.txt | tail -1
 
+      - name: What this runner has, before the run
+        # ADDED 2026-11-27 (lane ci8). Master run 46030101439's windows shard 1
+        # stalled in its parallel phase and passed on the re-run, and the job
+        # said nothing about the runner it stalled on: not how many workers
+        # `-n auto` started, not how many CPUs there were, not how much memory
+        # was free -- the measurement _audit/2026-09-21-the-windows-shard.md
+        # asked for in its 7.1. This records the three, stdlib only, in this log
+        # and in runner-facts.json, which the report step below carries into the
+        # shard's report, so the totals job prints every shard's runner side by
+        # side. The worker count is xdist's own resolution of `-n auto` in this
+        # job's interpreter, asked just before the run. A fact it cannot read is
+        # recorded as unknown, never as a failure. tests/test_ci_runner_facts.py
+        # pins this step's place and runs the script on both platforms.
+        run: python scripts/ci_runner_facts.py --out runner-facts.json
+
       - name: Run this shard
         # No -m filter, no --ignore, no --deselect anywhere in this line, and
         # that is load-bearing: the check below fails if the number that ran is
@@ -575,6 +590,7 @@ jobs:
           python scripts/ci_shard_totals.py record \
             --plan shard-plan.json --junit junit.xml \
             --cell '${{ toJSON(matrix.cell) }}' \
+            --runner runner-facts.json \
             --out "reports/${{ matrix.cell.os }}-${{ matrix.cell['python-version'] }}-${{ matrix.shard }}.json"
 
       - name: Keep this shard's junit for the timings table
