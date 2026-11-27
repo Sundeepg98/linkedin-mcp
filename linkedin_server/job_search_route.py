@@ -283,6 +283,17 @@ def _as_int(value: Any) -> int:
         return 0
 
 
+#: THE CLASSIC ROUTE IS MEASURED RETIRED: live session 12's load 3 (``C-SRCH-1``,
+#: the decision load, 2026-11-26) asked for ``/jobs/search/`` and was redirected
+#: here, with no classic list, no banner and no classic anchor
+#: (RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE). So, by the orchestrator's ruling
+#: REFUSE-BEFORE-LOAD-ON-A-RETIRED-ROUTE (2026-11-27), a call that sets an
+#: argument this route refuses is refused BEFORE ANY LOAD
+#: (:func:`retired_route_refusal`): zero loads, zero of D1's searches. The
+#: classic composition stays for the REOPENER -- a capture showing the classic
+#: route serving again sets this False -- and its tests run it that way.
+CLASSIC_ROUTE_RETIRED: bool = True
+
 #: THE AI ROUTE'S OWN ADDRESS, admitted since 2026-10-10 (``readonly``'s line
 #: for ``/jobs/search-results/``, census ``J 16``) and the address session 12's
 #: load 4 asked for and was SERVED exactly (``C-SRCH-0b``).
@@ -822,6 +833,30 @@ def fallback_refusal(refused: list[str], toggle: dict[str, Any], *, html_read: b
         + f" ({grounds}). The page's Easy Apply toggle is {drawn}. "
         "Call again without the refused arguments for a keyword search; "
         "easy_apply is applied there locally, to each card's own mark."
+    )
+
+
+def retired_route_refusal(refused: list[str]) -> str:
+    """The pre-load refusal (REFUSE-BEFORE-LOAD-ON-A-RETIRED-ROUTE): names only.
+
+    Every name is a key of :data:`AI_ROUTE_UNMEASURED` -- the tool's own
+    parameter names -- with its ground; no value the caller passed is repeated.
+    """
+    refusing = [argument for argument in refused if argument in AI_ROUTE_UNMEASURED]
+    grounds = "; ".join(
+        f"{argument}: {why}"
+        for argument, why in AI_ROUTE_UNMEASURED.items()
+        if argument in refusing
+    )
+    return (
+        "LinkedIn's classic job search is retired (a capture on 2026-11-26 found "
+        "its address redirected to the AI job search), and the AI job search "
+        "honours " + ", ".join(AI_ROUTE_HONOURED) + " only, so this call is "
+        "refused before any page loads rather than spend a load and a search to "
+        "refuse after one. Refused: " + ", ".join(refusing) + f" ({grounds}). "
+        "Call again without the refused arguments for a keyword search; "
+        "easy_apply is applied there locally, to each card's own mark. Nothing "
+        "was loaded."
     )
 
 

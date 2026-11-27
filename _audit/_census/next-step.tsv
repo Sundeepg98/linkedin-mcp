@@ -67,7 +67,9 @@ J 111	J	R	-	CAPTURE:C-RJ26-2	MEASURED	_audit/2026-11-26-readers-jobs26.md::That 
 J 112	J	R	-	TARGET:a school Page he names	NAMED	_audit/_census/read-addresses.tsv::UNDER THE WHO/WHICH RULE, EXTENDED ; RULING:OPERATOR-NAMES-THE-TARGET
 J 151	J	R	-	CAPTURE:C-SRCH-2	MEASURED	_audit/2026-11-26-live-session-12.md::REDIRECTED to the AI route ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
 J 169	J	R	-	RULING:Q-J169-SENIORITY	MEASURED	_audit/2026-11-27-jobs7.md::the dropdown offers functions, not seniority ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
-J 170	J	W	-	RULING:Q-J170-ROW-CONTROL	MEASURED	_audit/2026-11-27-jobs7.md::matched none of 23 candidates ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
+J 170	J	W	-	CAPTURE:C-J170-1	MEASURED	_audit/2026-11-27-jobs7.md::one alert row's control, attended ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
+J 171	J	R	-	CAPTURE:C-LRN-1	MEASURED	_audit/2026-11-27-jobs7.md::LinkedIn's browsable index, the same for every member ; RULING:COMPOUND-ROW-SPLITS-ONLY-ON-STATE
+J 172	J	W	-	CAPTURE:C-LRN-2	MEASURED	_audit/2026-11-27-jobs7.md::seeing his goal is a read of his own page ; RULING:COMPOUND-ROW-SPLITS-ONLY-ON-STATE
 J 115	J	R+W	-	CAPTURE:C-JMN-3	MEASURED	_audit/2026-11-25-build-jmn26.md::NEITHER CAPTURED POSTING DRAWS ONE ; RULING:OPERATOR-NAMES-THE-TARGET
 J 116	J	R	-	RULING:Q-AI-GENERATING-LOADS	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/preload/guideOverlay/?interop=guideOverlay&query=Show+match+details ; RULING:READ-PAST-AN-ACT-SUBSTRING
 J 117	J	R	-	RULING:Q-AI-GENERATING-LOADS	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/preload/guideOverlay/?interop=guideOverlay&query=Show+match+details ; RULING:READ-PAST-AN-ACT-SUBSTRING
@@ -93,9 +95,9 @@ J 147	J	R	-	SIBLING:lane-U	NAMED	_audit/2026-09-28-rulings-build-classes.md::`FI
 J 148	J	R+W	-	SIBLING:lane-U	NAMED	_audit/2026-09-28-rulings-build-classes.md::`FILE-UPLOAD-UNSANCTIONED` is therefore a stale label.
 J 149	J	R+W	-	SIBLING:lane-U	NAMED	_audit/2026-09-28-rulings-build-classes.md::`FILE-UPLOAD-UNSANCTIONED` is therefore a stale label.
 J 150	J	W	-	PRECONDITION:US Premium (the feature reaches select US subscribers)	NAMED	_audit/_census/jobs.md::select LinkedIn Premium subscribers in the United States
-J 152	J	R	-	RULING:Q-LEARNING-SPLITS	MEASURED	_audit/2026-11-27-jobs7.md::each captured on one half ; RULING:COMPOUND-ROW-SPLITS-ONLY-ON-STATE
+J 152	J	R	-	BUILD:tests/fixtures/live12/learning.html	MEASURED	_audit/2026-11-27-jobs7.md::the home is the landing page's own sections of courses ; RULING:COMPOUND-ROW-SPLITS-ONLY-ON-STATE
 J 154	J	R	-	RULING:Q-LEARNING-SPLITS	MEASURED	_audit/2026-11-27-jobs7.md::each captured on one half ; RULING:COMPOUND-ROW-SPLITS-ONLY-ON-STATE
-J 156	J	R+W	-	RULING:Q-LEARNING-SPLITS	MEASURED	_audit/2026-11-27-jobs7.md::each captured on one half ; RULING:COMPOUND-ROW-SPLITS-ONLY-ON-STATE
+J 156	J	R	-	BUILD:tests/fixtures/live12/learning_journey.html	MEASURED	_audit/2026-11-27-jobs7.md::seeing his goal is a read of his own page ; RULING:COMPOUND-ROW-SPLITS-ONLY-ON-STATE
 J 157	J	W	-	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 J 160	J	R	-	BUILD:tests/fixtures/live11/career_insights.html	MEASURED	_audit/2026-11-26-readers-jobs26.md::the people and the companies the ; RULING:NAMES-AT-RUNTIME
 J 166	J	R	-	CAPTURE:admit-products-product	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/products/placeholder-product/ ; RULING:READ-PAST-AN-ACT-SUBSTRING

@@ -64,6 +64,21 @@ SYNTHETIC_IDS = [str(4000000101 + n) for n in range(25)]
 AGO = re.compile(r"^\d+ (?:second|minute|hour|day|week|month|year)s? ago$")
 
 
+@pytest.fixture(autouse=True)
+def _classic_route_serving_again(monkeypatch):
+    """THE REOPENER'S WORLD (lane jobs7, 2026-11-27). Since the orchestrator's
+    REFUSE-BEFORE-LOAD-ON-A-RETIRED-ROUTE, the classic route is measured
+    retired and a search setting an argument the AI route refuses is refused
+    before any load. The tests in this file exercise the CLASSIC composition
+    and its reads, which run again only once a capture shows the classic route
+    serving -- the ruling's reopener -- so they run with it marked serving.
+    The shipped refusal is tested in
+    ``tests/test_the_ai_search_is_the_search_route.py``."""
+    from linkedin_server import job_search_route as _route
+
+    monkeypatch.setattr(_route, "CLASSIC_ROUTE_RETIRED", False)
+
+
 def _ai_html() -> str:
     return AI_FIXTURE.read_text(encoding="ascii")
 

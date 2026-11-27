@@ -1161,6 +1161,8 @@ The lane asks: IS "JOB OPENINGS BY SENIORITY" A FACET LINKEDIN STILL DRAWS ANYWH
 next step is a capture of another Insights view -- OR DOES THE ROW SPLIT, its seniority facet closed
 by this measurement? The cell names no absence as its bar, so this lane moves nothing.
 
+**Answered 2026-11-27, 13:45 IST, by the orchestrator** (integration 7 registers it): J169-SPLITS-SENIORITY-REAIMED-UNDER-D6 -- split, the FUNCTION half keeping `J 169` and building on load 20, the SENIORITY half a new GAP row whose next step is a capture of the AI job search's experience-level facet for that company (not MEASURED-ABSENT on one dropdown). HELD by the lane: `J 169`'s capability names no function facet on disk (distribution by function is `J 114`), so the split cannot be applied as written without re-scoping the row (the lane's record, section 11.4); its step stays here, and the counts the ruling asked for are in its cell.
+
 ### Q-J170-ROW-CONTROL -- an alert's own control that may open an editor
 
 Added 2026-11-27 by lane jobs7 (`_audit/2026-11-27-jobs7.md`, section 7). Row: `J 170` ("Manage
@@ -1174,6 +1176,8 @@ pressing. The lane asks: MAY A CAPTURE PRESS ONE ALERT ROW'S CONTROL, read what 
 shape, and close it on Escape with nothing chosen -- as a disclosure if it opens a menu, and stop
 unpressed if it opens an editor? Until ruled, `J 170` stays GAP on this question.
 
+**Answered 2026-11-27, 13:45 IST, by the orchestrator** (on disk to the lane; integration 7 registers it): JOB-ALERT-ROW-CONTROL-ATTENDED -- accepted as a SESSION-14 capture, ATTENDED: one alert row's control pressed; a menu read and closed on Escape; an editor or dialog read for labels and states only, nothing typed or chosen, closed by Escape or its exact Dismiss and verified gone; the alert manager read before and after, no change; no Save, Delete or Remove press in the closed list. `J 170` stays GAP, its step now CAPTURE `C-J170-1` (the lane's record, section 11.3); wave 8 builds on that capture.
+
 ### Q-LEARNING-SPLITS -- three Learning rows, each captured on one half
 
 Added 2026-11-27 by lane jobs7 (`_audit/2026-11-27-jobs7.md`, section 7). Rows: `J 152`, `J 154`,
@@ -1182,13 +1186,17 @@ LinkedIn Learning: its home, the catalogue, certifications, topic pages and show
 the home is captured (load 23: 16 course cards, each a type label and a duration by keyed shape);
 the catalogue and certifications pages are admitted and uncaptured; topic and showcase pages are
 refused. `J 154` ("View your LinkedIn Learning library: saved courses and the ones in progress"):
-load 25 landed one level deeper, on one tab drawing one course with `Unsave` beside it; the
-in-progress tab is uncaptured. `J 156` ("See and set career goals", R+W): load 24 draws a section
+load 25 landed one level deeper, on the IN-PROGRESS tab (its link marked `aria-current="page"`),
+drawing one course with `Unsave` beside it; the saved list is uncaptured, and the read boundary
+refuses its address (NO-PATTERN). (This sentence first named the other tab; the lane's record,
+section 11.2, holds the reading that settled it.) `J 156` ("See and set career goals", R+W): load 24 draws a section
 labelled `Career goal`; the setting half is an editor, unmeasured. Each row's payload is WHICH items
 of other people's content (course titles; NAMES-AT-RUNTIME) or his own text (his goal;
 HIS-OWN-TEXT-AT-RUNTIME). The lane asks: DOES EACH SPLIT UNDER COMPOUND-ROW-SPLITS-ONLY-ON-STATE, as
 J-114-SPLITS and J-37-SPLITS split theirs -- the captured half building on its capture, the rest a
 new GAP row with its own next step? Until ruled, the three stay GAP on this question.
+
+**Answered 2026-11-27, 13:45 IST, by the orchestrator** (integration 7 registers it): LEARNING-ROWS-SPLIT -- all three split under COMPOUND-ROW-SPLITS-ONLY-ON-STATE, each captured half keeping its id. APPLIED to `J 152` (its other half `J 171`, step CAPTURE `C-LRN-1`) and `J 156` (its write half `J 172`, step CAPTURE `C-LRN-2`, session 14, attended). `J 154` is HELD: the ruling named in-progress as its other half, and disk says the captured tab is in-progress (the lane's record, section 11.2); its step stays here until the orchestrator rules again.
 
 ## 8. Preconditions and purposes
 

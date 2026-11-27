@@ -24,15 +24,22 @@ from __future__ import annotations
 import html
 import importlib.util
 import re
+import sys
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 import pytest
 
+from linkedin_server import browser as browser_module
+from linkedin_server import call_ceiling
 from linkedin_server import job_search_route as route
 from linkedin_server import readonly, shape
 from linkedin_server.server import linkedin_search_jobs
-from tests.test_job_search_route import _MarkupPage
+from tests.test_job_search_route import REFUSED_CASES, _MarkupPage
 from tests.test_tools import SEARCH_CARD, drive  # noqa: F401 - drive is used by injection
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
+import _probe_live_lane_session_2 as harness  # noqa: E402  the live lane's D1 search counter
 
 REPO = Path(__file__).resolve().parent.parent
 LIVE12 = REPO / "tests" / "fixtures" / "live12"
@@ -272,7 +279,12 @@ async def test_easy_apply_is_applied_to_the_cards_and_never_sent(drive):
     assert all(row["easy_apply"] is True for row in result["results"])
 
 
-async def test_a_refused_argument_keeps_its_classic_composition_and_refuses_by_name(drive):
+async def test_with_classic_serving_again_a_refused_argument_composes_classic_and_refuses_on_the_ai_landing(
+        drive, monkeypatch):
+    """THE REOPENER'S PATH: should a capture show the classic route serving
+    again (``CLASSIC_ROUTE_RETIRED`` False), a refused argument is composed on
+    the classic address as before, and an AI landing refuses it by name."""
+    monkeypatch.setattr(route, "CLASSIC_ROUTE_RETIRED", False)
     page = _MarkupPage(html=words("c_srch_1"))
     page.redirect_to = AI_ASKED
     navigations = drive(page)
@@ -281,6 +293,65 @@ async def test_a_refused_argument_keeps_its_classic_composition_and_refuses_by_n
     assert "f_JT=F" in navigations[0]
     assert result["error"] == "extraction_failed"
     assert "Refused: job_type" in result["message"]
+
+
+# ---------------------------------------------------------------------------
+# 4. REFUSE-BEFORE-LOAD-ON-A-RETIRED-ROUTE (the orchestrator, 2026-11-27)
+# ---------------------------------------------------------------------------
+
+
+async def _counted(monkeypatch, page, **kwargs):
+    """Run the tool with LOADS counted the way the real browser counts them --
+    ``call_ceiling.count_load`` inside an armed ``per_call`` budget, before the
+    page is touched -- and SEARCHES counted by the live harness's own D1
+    counter, ``searches_spent``, over a ledger of the call's search loads."""
+    navigations: list[str] = []
+
+    @asynccontextmanager
+    async def fake_session():
+        yield page
+
+    async def counting_goto(target_page, url, **_kwargs):
+        call_ceiling.count_load(url)
+        navigations.append(url)
+        await target_page.goto(url)
+        return target_page.url
+
+    monkeypatch.setattr(browser_module.BROWSER, "session", fake_session)
+    monkeypatch.setattr(browser_module.BROWSER, "goto", counting_goto)
+    with call_ceiling.per_call(tool="linkedin_search_jobs"):
+        result = await linkedin_search_jobs(**kwargs)
+        loads = call_ceiling.made()
+    ledger = [{"surface": harness.SEARCH_SURFACE} for url in navigations
+              if route.landing_route(url) in (route.CLASSIC, route.AI)]
+    return result, loads, harness.searches_spent(ledger), navigations
+
+
+def test_the_classic_route_is_measured_retired():
+    assert route.CLASSIC_ROUTE_RETIRED is True
+
+
+@pytest.mark.parametrize("argument", sorted(REFUSED_CASES))
+async def test_an_argument_the_ai_route_refuses_is_refused_before_any_load(monkeypatch, argument):
+    """RED BEFORE THE RULING: the call composed the classic address, LinkedIn
+    redirected it to the AI page, and it refused THERE -- one load and one of
+    D1's searches spent to say no."""
+    page = _MarkupPage(html=words("c_srch_1"))
+    page.redirect_to = AI_ASKED
+    result, loads, searches, navigations = await _counted(
+        monkeypatch, page, keywords=KEYWORDS, **REFUSED_CASES[argument])
+    assert result["error"] == "bad_argument", result
+    assert f"Refused: {argument}" in result["message"]
+    assert "retired" in result["message"] and "Nothing was loaded" in result["message"]
+    assert (loads, searches, navigations) == (0, 0, [])
+
+
+async def test_the_keyword_path_still_spends_exactly_one_load_and_one_search(monkeypatch):
+    """The control: the counters count, so their zeros above are readings."""
+    page = _MarkupPage(html=words("c_srch_1"))
+    result, loads, searches, navigations = await _counted(monkeypatch, page, keywords=KEYWORDS)
+    assert result["route"] == route.AI and result["count"] == 25
+    assert (loads, searches, navigations) == (1, 1, [AI_ASKED])
 
 
 async def test_a_classic_page_served_at_the_ai_address_is_still_read_as_classic(drive):

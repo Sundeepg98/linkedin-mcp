@@ -6022,14 +6022,18 @@ async def linkedin_search_jobs(
     There ``easy_apply`` narrows the one window loaded, locally, to the cards
     whose own ``easy_apply`` field is true -- it is not LinkedIn's Easy Apply
     filter, and the result says so in ``easy_apply_post_filter`` with the
-    count before and after. A call that sets any OTHER argument is composed on
-    the classic address as before, and where LinkedIn serves the AI search for
-    it the call is REFUSED, by name, until a fire measures LinkedIn honouring
-    that argument there (ruling Q-SEARCH-ROUTE-POLICY), because a filter
-    accepted and ignored puts an unfiltered shortlist in front of you. Should
-    LinkedIn serve its classic page again, it is read by the classic reader and
-    reported as ``route: classic_search``. A landing on any other page refuses,
-    naming only its shape. AND A
+    count before and after. A call that sets any OTHER argument -- a place,
+    any filter, an offset, an employer -- is REFUSED BEFORE ANYTHING LOADS,
+    naming the arguments: the classic route is retired and the AI search has
+    not been measured honouring them (rulings Q-SEARCH-ROUTE-POLICY and
+    REFUSE-BEFORE-LOAD-ON-A-RETIRED-ROUTE), because a filter accepted and
+    ignored puts an unfiltered shortlist in front of you, and refusing first
+    spends no page load and none of your searches. The notes below on places,
+    filters, offsets and employers describe the classic route, which runs
+    again only once a capture shows it serving; should LinkedIn serve its
+    classic page at the AI address meanwhile, it is read by the classic reader
+    and reported as ``route: classic_search``. A landing on any other page
+    refuses, naming only its shape. AND A
     ZERO IS NEVER SILENT: a page with no readable card is refused unless it drew
     LinkedIn's own no-results state, which no capture has shown yet -- so an
     empty search, or an offset past the end, is reported as a failure, never as
@@ -6320,6 +6324,19 @@ async def linkedin_search_jobs(
             sort_by=sort_by,
             start=start,
         )
+        # REFUSED BEFORE ANY LOAD ON A RETIRED ROUTE (the orchestrator's
+        # REFUSE-BEFORE-LOAD-ON-A-RETIRED-ROUTE, 2026-11-27; lane jobs7). The
+        # classic route is measured retired, so a call setting an argument the
+        # AI route refuses could only land there and refuse after spending a
+        # load and one of D1's searches. It refuses here instead, naming the
+        # arguments and the retired route, at zero loads. The classic
+        # composition below runs only once a capture shows classic serving
+        # again (the reopener, ``job_search_route.CLASSIC_ROUTE_RETIRED``).
+        if refused_on_ai and job_search_route.CLASSIC_ROUTE_RETIRED:
+            return {
+                "error": "bad_argument",
+                "message": job_search_route.retired_route_refusal(refused_on_ai),
+            }
         # THE AI ROUTE IS THE SEARCH'S OWN ROUTE FOR EVERY CALL IT HONOURS
         # (lane jobs7, 2026-11-27; census J 1). The classic address redirected
         # to it on live session 12's load 3, so a call refusing nothing there
