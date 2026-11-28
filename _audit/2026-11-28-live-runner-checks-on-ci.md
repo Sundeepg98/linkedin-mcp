@@ -174,27 +174,25 @@ runs the rest.
 
 ## 6. Certification
 
-**This READY was for `355ddfa6`.** Question (c) (section 10) adds commits on top of it. At the merge,
-the head integrated with master is certified again, by lane CI and the full matrix by sha.
-
-**READY**, on the certified sha `87f9ea95`: branch `ci-checks28`, three commits on master
-`9ec91965`.
+**READY**, on the certified sha `3472fd46`: branch `ci-checks28`, with master `b7db2f7a` merged in
+(section 11) and question (c) built (section 10). Master is an ancestor of it, so it fast-forwards
+master.
 
 | run | on | result |
 |---|---|---|
-| lane CI, 46145540707 | `87f9ea95`, ubuntu py3.13, 4 shards | success, 6m22s. One shard reads "skipped 15 (15 declared)": the guard's 15, tolerated by name. 0 failed and 0 errors in every shard |
-| the full matrix, 46146119772 | `87f9ea95`, 3 cells x 6 shards (`lane_ci.py wait <sha> --full`) | success, 11m38s, 18 of 18 shard jobs |
-| an earlier lane CI run, 46144818568 | `cab03baa` | failure: one test, the correction finder on a row of this record (section 8). That row was reworded in `87f9ea95` |
+| lane CI, 46151713586 | `3472fd46`, ubuntu py3.13, 4 shards | success, 6m56s. The totals job printed "1 by-cell rule(s)", then "NOT CHECKED in this run: the rule that 15 test(s) run on windows-latest", which is the lane fast path's due |
+| the full matrix, 46152290793 | `3472fd46`, 3 cells x 6 shards (`lane_ci.py wait <sha> --full`) | success, 13m48s, 18 of 18 shard jobs. The totals job printed "1 by-cell rule(s)" and no NOT CHECKED line, so failure mode 7 held both halves: each ubuntu cell skipped the 15 by name, the Windows cell ran them, and no Windows shard declared a guard skip |
 
-**The Windows cell RAN the guard** (VERIFIED from the full run's log):
+**The earlier heads**, in order:
 
-- on windows-latest py3.13, `tests/test_start_chrome_guard_behaviour.py` is in shard 0;
-- shard 0's 2 declared skips belong to other files;
-- so all 15 guard tests executed there and passed;
-- each ubuntu cell printed the 15 by name as declared skips;
-- the chrome judge ran in the Windows cell's shard 1, and the page rules in its shard 4.
+| head | runs | result |
+|---|---|---|
+| `cab03baa` | lane 46144818568 | red on one test, the correction finder on a row of this record |
+| `87f9ea95` | lane 46145540707, full 46146119772 | green; the first READY, before (c). The Windows cell ran the guard: its shard 0 holds the module, and its 2 declared skips are other files' |
+| `355ddfa6` | lane 46147264245 | green, record only |
+| `dddb46de` | lane 46150719805 | red on one test, the cited-sha guard on three slotted tokens in section 11 (section 8) |
 
-This section is a record-only commit on top of `87f9ea95`. By the standing rules, it may be
+This section is a record-only commit on top of `3472fd46`. By the standing rules, it may be
 fast-forwarded on that certification, and master's own run then covers the record.
 
 **HOLD** for the orchestrator's merge.
