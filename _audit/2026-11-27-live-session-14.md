@@ -2521,7 +2521,8 @@ The check sets and their builders are pinned beside them, `patch_s14c_r2.py`
   29 (11.8).
 - The pinned ledger at 19:37 IST: 5 loads in the trailing 12 h, so 35 free.
   14a's 3 leave the window at 20:39:17 IST, giving 37, and 14b's 2 at
-  04:58:19 IST on 11-29, giving 40.
+  04:58:19 IST on 11-29, giving 40. (Corrected in 14.5: 38, not 37. Only
+  14b's 2 remain after 20:39:17, and the preflight read 38.)
 
 | free | at most loads, the plan reaches | with 2 loads held for `root_settle` |
 |---|---|---|
@@ -2744,6 +2745,590 @@ as ruled.
 comes after review14c28's warm re-check of r2 to r3 reads GO, and master is
 fast-forwarded to this head. The session runs unattended.
 
+## 14. Live session 14c and its continuation 14c-bis, the runs (2026-11-28, unattended)
+
+**Two sittings, one session folder (`live16`), one pinned runner.** 14c ran
+phases 1 to 3 and ended at phase 3's STOP-ALL (14.1 to 14.7). 14c-bis, on the
+orchestrator's second GO, continued from phase 4 with rank 150 skipped, and
+ended at phase 9's STOP-ALL (14.8 to 14.14). One close-out covers both (14.15
+to 14.17).
+
+**Run by `live14b`**, on r3 (`runner_s14c.py`, sha256 `c0d61e0dd07b5ed7`)
+and the live16 pins of 20:10:47. Both ran in 13.8's order, with 11.9's
+commands and 13.8's substitutions. Nobody was at the window, and no step asked
+anyone to front, click or watch one (LIVE-SESSIONS-RUN-WITHOUT-HIM). No pinned
+file was edited.
+
+**THE GO** (`_TEAM_LEAD_GO.md`, 20:33 IST). It was deleted as the ack at
+20:34:15, after a copy was kept in the lane's gitignored scratch.
+
+- The head `acd9df5c`, which master equals, with 13.10's pins.
+- Loads: at most the smaller of the ledger's free count at the preflight and
+  40, at least 20 s apart. Searches: at most 5, with 3 or 4 expected. An
+  unexpected All filters re-query counts as one.
+- Phase-level stops: `scroll_no_progress`, a K6 window skip, and a lost
+  target. Every other STOP ends the session.
+- No step takes the OS foreground. UNREAD-SKIPPED. Accepted for this session
+  only: the start script's plain launch, Q1's press race, and LIVE-WINDOW-CDP,
+  now unattended.
+
+**BEFORE CHROME** (20:34 to 20:39 IST, VERIFIED):
+
+- `verify_pins_s14c.py`, without `--before-fast-forward`: ALL-MATCH True, on
+  all 14 of its checks. They include the branch head, the clean tracked tree
+  and the main checkout's start script.
+- `os_check` (20:34:28): 9224 down, 0 clients, no Chrome on the dedicated
+  profile, no lock, no flag. Port 9223 had 0 listeners.
+- The pinned ledger: session 14's 3 left the window at 20:39:17. Read at
+  20:39:26, it held 2 in the trailing 12 h, 14b's, so **38 free**. That set
+  14c's room at 38 loads.
+
+**THE START** (0 loads, VERIFIED):
+
+- 20:39:40: the main checkout's `scripts/start_chrome.ps1
+  -RefuseSessionRestore`. Outcome `started`, Chrome 158, `exit_type` Normal
+  before and after. The startup setting was absent, with 0 startup pages and
+  0 on LinkedIn. The browser's pid was kept for the close.
+- 20:40:32: `os_check`. 9224 was held by one listener, the dedicated profile's
+  one browser process (started 20:39:45), with 0 clients and no lock.
+- 20:40:51: the flag raised.
+- 20:41:11: `tabs_check`. 1 page, 0 on LinkedIn, 1 blank; 1 listener, the
+  dedicated one. Exit 0.
+- 20:41:51: `attach_check`, as `--only attach_check`. PASS, 4 events,
+  `[0, 1, 0]`, restored, 0 loads.
+- 20:42:30: phase 1's window gate read the tab usable at its first reading.
+  Focus emulation was on, the window `normal` (`minimised_at_gate` False), and
+  the tab visible and focused. Phases 2 and 3 are not K6 phases, so they were
+  not gated. Every phase's window line read "usable over CDP (the gate)" or
+  "no OS foreground taken".
+
+### 14.1 14c's loads
+
+| load | IST | phase | landing | what it read |
+|---|---|---|---|---|
+| 1 | 20:42:36 | 1 `profile` (E5) | served, same depth, another url: his root | E5 at its first load; the top card; the scroll pass, 8 steps to main's bottom |
+| 2 | 20:44:12 | 2 `c_srch_3a` | served exact | the AI-route search; Easy Apply on and back, RESTORED True; All filters opened, read and closed |
+| 3 | 20:46:59 | 3 `newsletter_form` | served exact: the new-article address | the composer; Manage opened; Create newsletter pressed; STOP-ALL `publishing_control` |
+
+- Every load was recorded in the pinned ledger before it was made.
+- None drew a wall, a checkpoint or a challenge (each: walled False, 0
+  challenge terms).
+- They were 95 s and 168 s apart, by the session ledger's own times.
+- No press loaded a document. The click site and the document watch counted
+  none, so the session ledger holds these 3 and nothing else.
+
+### 14.2 14c's searches
+
+| search | IST | what |
+|---|---|---|
+| 1 | 20:44:12 | load 2 itself: the AI-route search |
+| 2 | 20:44:35 | the Easy Apply ON press, a filter re-query recorded before the press |
+| 3 | 20:44:55 | the Easy Apply OFF press, recorded before the press |
+
+Opening All filters re-queried nothing: the view was unchanged, and no search
+was counted. That is 3 of the 5, as expected.
+
+### 14.3 What each of 14c's phases showed
+
+**Phase 1, `profile`: exit 0, 1 load.**
+
+- **E5:** his root served through the shipped loader, and the self rule
+  proved it at its first load, by his edit controls (2 on the landed member,
+  0 edit routes on another). The alias rewrite arrived after 795 ms.
+- People gate v2 withheld the raw (L1 10, N1 52, R1 11, R2 9), and the
+  skeleton was kept.
+- The top card drew as in 14a and 14b: More 1 (0 visible), Resources 1 (1),
+  Open to 2 (1), Enhance profile 2 (1) and Add profile section 0. The editor
+  routes on the first render: `edit/forms/summary/new/` 1, `edit/intro/` 1,
+  `edit/secondary-language/` 1, and 1 other form.
+- **OUT by content, found and not pressed** (r3d): the top-card opener
+  (Resources) and the photo (1 image button). Add custom button was drawn 0
+  times.
+- **The scroll pass held live (C2, VERIFIED).**
+  - Its target was `main` itself (depth 0), as 13.2 measured on 14b's
+    skeleton.
+  - It made 8 steps, and each one moved. Main's elements went from 2,577 to
+    3,184, with 2 structure changes. It reached the bottom with no stall, and
+    the target never changed. Proved True.
+  - After it, Experience and Education each drew once in main; in 14b both
+    read 0. Skills, Services and Recommendations still read 0.
+  - The editor routes after it add `certification/new/`, `education/new/`
+    and `project/new/` once each, and `position/<digits>/` 4 times.
+  - The scrolled skeleton differs from the first, by sha256 (393,933 bytes
+    against 324,614). In 14b the two were identical.
+- **E23's input:** 0 skill ids and 1 insight index, kept in gitignored state
+  and never printed. So `name_items_s14c.py skill` printed "drawn by E5's
+  reading: 0" and NOTHING TO NAME (exit 2), and `skill_index` named the first
+  index (exit 0). Phase 7 has no item; phase 24 has its item.
+- **Rank 31: not pressed.** The add-a-position link
+  (`edit/forms/position/new/`) was drawn 0 times (`not_exactly_one_link`).
+  The Experience scope matched 2 elements, so the reader, which reads exactly
+  one, did not read its controls.
+
+**Phase 2, `c_srch_3a`: exit 0, 1 load, 3 searches.**
+
+- Served exact. People gate v2 withheld the raw (R2 1), and the skeleton was
+  kept.
+- **The first view:** the AI route; 25 cards, ids and rows, 0 unparsed; the
+  total capped at 99 shown. The Easy Apply toggle had 2 inputs (1 visible),
+  0 checked. The address keys: `currentJobId` and `keywords`.
+- **ON** (search 2, 20:44:35): checked 2, and 6 ids shared with the first
+  view. `f_AL` (true), `origin` and `referralSearchId` were added, and
+  `currentJobId` changed. No document loaded.
+- **OFF** (search 3, 20:44:55): checked 0, and 25 of 25 ids shared with the
+  first view. The keys: `currentJobId`, `keywords`, `origin` and
+  `referralSearchId`. No document loaded.
+- **The judge read RESTORED True (C1, VERIFIED live).** Every condition held:
+  the first view's id set, every `f_*` key, the toggle at 0, no key added or
+  missing but `origin` and `referralSearchId` by name, and every key the
+  press touched back. The same address: False, as in 14b.
+- **All filters** (the toolbar's one button, drawn and visible once) was
+  pressed. It added 29 controls, 26 checkboxes and 3 radios, and the panel
+  drew one close word, Close.
+  - **The close took five steps** (VERIFIED, the reading's `close_steps`).
+    3 Escapes (20:45:30, :34 and :39) left it open. The trigger's re-press
+    was not actionable. The observation (20:46:06) read the focus inside an
+    `aside`, no modal, the panel visible, and no late close. That is
+    `did_not_close`, and the not-closed skeleton was kept, byte-identical to
+    the open one.
+  - The phase then pressed the panel's one close word, Close, and the
+    controls the panel had added were gone. The view was unchanged and the
+    address unmoved. No re-query was counted.
+
+**Phase 3, `newsletter_form`: exit 4, STOP-ALL `publishing_control`, 1
+load.**
+
+- The composer served exact on the new-article address. People gate v2
+  fired no rule, since no other member was drawn. Its S line asks for no
+  raw, so only the skeleton was kept.
+- **Two presses** (VERIFIED, the pace stamps and the skeletons):
+  - Manage's trigger. Its open menu was kept as a skeleton at 20:47:24: 8
+    items, each a `div` with `role=button` and no address, as in session 12.
+  - Then the one item named exactly Create newsletter, stamped at 20:47:41.
+- **After the second press:**
+  - No document loaded (VERIFIED): the click site's request listener and the
+    document watch counted none.
+  - A dialog was drawn, and it did not change across the 1 s modal read
+    (DERIVED, from the timing). The read ends at once only on an unchanged
+    dialog. The stamp, the 1.5 s settle, one 1 s read and the close all end
+    within 2.7 s, before a second read could start.
+  - Health: walled False, 0 challenge terms. 0 commit signs, and no save
+    drawn pressed.
+  - **Then the article guard raised STOP-ALL `publishing_control`.** No
+    autosave word had risen. So, by the guard's own code, the address's path
+    was no longer `/article/new` and was not an `/article/edit/` path
+    (DERIVED). The press moved the address with no document: an in-page
+    route.
+- **Nothing was typed, and nothing in the form was pressed** (DERIVED). The
+  one click site made no press after Create newsletter, because the STOP came
+  before the form was read. The runner closed its tab with the form
+  unsubmitted. A newsletter needs a title typed and the form's own create
+  control pressed, so none was created (DERIVED; UNVERIFIED by a read, since
+  nothing loads after a STOP-ALL).
+- **What disk does not hold: the landing.** The phase re-raises a STOP-ALL
+  without recording its reading, and `_article_guard` keeps none. So the path
+  the press reached is lost: there is no `newsletter_form.json` and no form
+  skeleton (lesson 26).
+
+### 14.4 14c's close: no load after the STOP-ALL
+
+- No compare of his root was deferred: `root_signatures.json` is absent, and
+  phase 1 pressed nothing on his root. `root_settle` was not run.
+- 20:48:01: `close_chrome_s14b.py --port 9224 --pid <the browser's>
+  --profile <the dedicated profile>`, with the flag standing. It judged "the
+  dedicated browser", with 1 listener on the port, owned by the pid.
+  `Browser.close` was answered in 0.36 s, and the browser exited 8.81 s
+  later, inside the 30 s wait. The path: `cdp_browser_close`. Nothing was
+  killed. Exit 0.
+- 20:48:38: the flag lowered; no compare was pending.
+- 20:48:42: `os_check`. 9224 down, 0 listeners, 0 clients, no Chrome on the
+  profile, no lock, no flag. Port 9223 had 0 listeners. His own Chrome was
+  never named or signalled.
+- **No restore prompt.** After the close, the profile's `Preferences` read
+  `profile.exit_type` Normal (VERIFIED, a read only). So the next start
+  offers none (DERIVED, as in 12.3).
+- **The runner's processes are gone** (VERIFIED, 20:51). No python, Chrome,
+  PowerShell or node process had a command line naming the s14c runner
+  folder, the teardown, the check clock, the dedicated profile or port 9224.
+  The filter was by command line only, never an image-wide kill.
+- The session folder is preserved in the main checkout's gitignored
+  `_state/preserved/live16-2026-11-28`: 23 files, each identical by sha256.
+  No raw page was kept.
+
+### 14.5 The ledgers after 14c
+
+- The session ledger (`live16`): 3 loads, at 20:42:36, 20:44:12 and
+  20:46:59, and 3 searches.
+- The pinned account ledger, read at 20:48:46: 3 records for 14c
+  (`live-s13/16/live_census`) and 14b's 2. That is 5 in the trailing 12 h,
+  so **35 free**. 14b's 2 leave the window at 04:58:19 IST on 11-29, and
+  14c's 3 by 08:46:47 IST on 11-29.
+- The two ledgers agree at 3.
+- **A correction to 13.8:** it gave 37 free after 20:39:17. The preflight
+  read 38: session 14's 3 had left, and only 14b's 2 remained.
+
+### 14.6 14c's accepted residuals, as met
+
+- **The start script's plain launch:** Chrome started at 20:39:40. Whether
+  its window took the OS foreground is the orchestrator's measurement, with
+  its own read-only sampler, not this lane's.
+- **No runner step took the foreground.** r3 has no bring-to-front, window
+  or foreground call (13.10, by AST and at runtime), and every phase printed
+  its window line as above.
+- **Q1's press race:** not met. No press ended in `press_outcome_unread`.
+- **LIVE-WINDOW-CDP:** 9224 was bound to 127.0.0.1. It was down before the
+  start and after the close, with 0 clients at 20:40:32, before load 1.
+  Whether another local process attached during the session is not measured;
+  that is the accepted residual.
+- **The 30 s exit wait:** the browser exited 8.81 s after the reply.
+- **The phase-level stops did not fire.** The scroll pass proved, the gate
+  read usable, and no target was lost.
+
+### 14.7 What 14c did not reach
+
+- **Not run because of the STOP-ALL:** phases 4 to 20 and 22 to 27. 14c-bis
+  took them up (14.8).
+- **No item:** phase 7, since E5's reading drew no skill id. Phase 24 had
+  its item.
+- **OFF by 13.8:** phases 21 and 28.
+- **From phase 1:** rank 31's press, with no link drawn. **From phase 3:**
+  the form's read and its close.
+
+### 14.8 14c-bis: the GO, before Chrome, and the start
+
+**THE GO** (`_TEAM_LEAD_GO.md`, 21:2x IST). It came after the lane's answer,
+read from the runner's code, that a continuation needed no code change. It
+was read in full, copied to the lane's gitignored scratch, and deleted as the
+ack at 21:21:26.
+
+- The same certified head `acd9df5c`, the same r3 and the same live16 pins,
+  with no code change.
+- Start at `discovery` and go on in 11.9's order. NEVER call
+  `newsletter_form`: rank 150 is skipped by procedure, not by code. Phase 7
+  is vetoed, and phases 21 and 28 are OFF.
+- E5 carries over from 14c's phase 1, with no `profile` re-run.
+  `self_member_changed` stays STOP-ALL, so a stale E5 can only stop.
+- A continuation of `live16`, as the code enforces it (the runner refuses any
+  other session folder). Loads: at most the ledger's free count at the
+  preflight, under the session's 37 and 3 a call. Searches: at most 2, since
+  live16 holds 3 of the 5.
+- Stops:
+  - `tabs_check`'s exit 4 is a session STOP, by procedure. The meter asks for
+    the tabs reading before a session's load 1 only, and live16 already held
+    loads.
+  - The three phase-level stops, as in 14c.
+  - Every STOP-ALL ends the session.
+- Restated for this sitting: LIVE-WINDOW-CDP, the start script's plain
+  launch, and Q1's press race.
+- The orchestrator merges nothing into master during the session.
+
+**BEFORE CHROME** (21:21 to 21:22 IST, VERIFIED):
+
+- The lane's uncommitted record and INSTRUMENTS edits were copied out to its
+  gitignored scratch, identical by sha256, and restored from HEAD. Nothing
+  was merged into `live-s13`.
+- `verify_pins_s14c.py` (21:21:36): ALL-MATCH True, with
+  `tracked_tree_clean` and `branch_head` True.
+- `os_check` (21:21:51): 9224 down, 0 clients, no Chrome on the profile, no
+  lock, no flag. Port 9223 had 0 listeners.
+- The pinned ledger at 21:21:57: 5 in the trailing 12 h, so **35 free**.
+  That set 14c-bis's room at 35 loads, under the session's 37.
+
+**THE START** (0 loads, VERIFIED):
+
+- 21:22:07: the main checkout's `scripts/start_chrome.ps1
+  -RefuseSessionRestore`. Outcome `started`, Chrome 158, `exit_type` Normal
+  before and after. The startup setting was absent, with 0 startup pages.
+  The pid was kept for the close.
+- 21:22:26: `os_check`. One listener, the dedicated profile's one browser
+  process (started 21:22:11), with 0 clients and no lock.
+- 21:22:49: the flag raised.
+- 21:22:56: `tabs_check`. 1 page, 0 on LinkedIn, 1 blank; 1 listener, the
+  dedicated one, on a new launch. Exit 0, so the procedural STOP did not
+  apply.
+- 21:23:16: `attach_check`, as `--only attach_check`. PASS, 4 events,
+  `[0, 1, 0]`, restored, 0 loads.
+
+### 14.9 14c-bis's loads and searches
+
+| load | IST | phase | landing | what it read |
+|---|---|---|---|---|
+| 4 | 21:23:51 | 4 `discovery` | served exact | the suggestions page: 0 cards, 1 heading |
+| 5 | 21:24:27 | 5 `featured` | redirected, path depth 4 to 2 | his root, as in session 11 |
+| 6 | 21:25:19 | 6 `manage_syncing` | served, same depth, another url | the contacts entries' words; the raw kept |
+| 7 | 21:26:01 | 8 `intro_landing` | served, same depth, another url | the intro editor's path, a modal drawn |
+| 8 | 21:26:38 | 9 `contact_info` | served, same depth, another url: his root | E5's member again; the overlay and the form; STOP-ALL `editor_not_closed` |
+
+- Every load was recorded in the pinned ledger before it was made.
+- None drew a wall, a checkpoint or a challenge.
+- They were 36.7, 51.5, 42.6 and 36.6 s apart, by the session ledger's own
+  times.
+- No press loaded a document.
+- **No search was made.** live16 still holds 3 of the 5.
+- Phase 7 (`skill_form`) was not called. E5 drew no skill id, so there was no
+  item to give it (14.3).
+
+### 14.10 What each of 14c-bis's phases showed
+
+**Phase 4, `discovery` (rank 161): exit 0, 1 load.** It served exact.
+People gate v2 fired no rule, and the skeleton was kept, with no raw asked.
+The page drew 0 suggestion cards, 0 dismiss, connect or follow controls, and
+1 heading. The invitation badge read unreadable before and after. Nothing was
+pressed.
+
+**Phase 5, `featured` (rank 34): exit 0, 1 load.** The address REDIRECTED,
+path depth 4 to 2, as session 11's did, so the landing is his root. People
+gate v2 withheld the raw (L1 10, N1 41, R1 10, R2 9, R4 1). The reading drew 7
+controls, with Featured 1, Posts 1, Edit 1 and Show all 15 as words, and 20
+`/feed/update/` and 75 `/in/` addresses. Nothing was pressed.
+
+**Phase 6, `manage_syncing` (rank 158): exit 0, 1 load.** It served at the
+same depth on another address. People gate v2 kept the raw, since no other
+member was drawn, and the S+R line kept it in gitignored state. Contacts 1
+and Remove all 3 were drawn as words; the reading counted 0 controls. Nothing
+was pressed.
+
+**Phase 8, `intro_landing` (rank 103's address): exit 0, 1 load.** The alias
+rewrite arrived after 777 ms, and the address landed on the editor's path
+with a modal drawn. People gate v2 withheld the raw (L1 10, N1 36, R1 10, R2
+9, R4 1). Its words included Edit intro 2, Headline 1, Industry 1 and Save 3.
+Nothing was typed or pressed, and the tab was closed with the editor unsaved.
+
+**Phase 9, `contact_info` (rank 30): exit 4, STOP-ALL `editor_not_closed`, 1
+load.**
+
+- The window gate read the tab usable at its first reading: focus emulation
+  on, the window `normal`, visible and focused.
+- His root served through the shipped loader. The self rule proved it at its
+  first load, by his edit controls (2 on the landed member, 0 on another),
+  and **the member was the one E5 proved** (VERIFIED). People gate v2
+  withheld the raw (L1 10, N1 41, R1 10, R2 10, R4 1).
+- **Press 1, the overlay:** the top card's Contact info link, which the one
+  matcher answered `match`. It landed on its target with no document, and
+  drew one dialog: 1 button, 2 headings and 3 links, with Contact info, Edit
+  contact info, Email, Phone and Dismiss among its words.
+- **Press 2, the form inside it:** Edit contact info, `match` again. It
+  landed on its target with no document. The dialog then drew 6 buttons, 1
+  editor, 1 input and 3 selects, with Save 3, Back 3 and Dismiss 1 among its
+  words. Nothing was typed.
+- **The close: 3 Escapes, then the STOP.** No Dismiss was pressed. The STOP
+  came 1.5 s after the third Escape (the press stamp at 21:27:25, the
+  not-closed skeleton at 21:27:27), and a press waits 20 s.
+- **The page had closed** (VERIFIED, by sha256). The not-closed skeleton is
+  byte-identical to his root's skeleton from before press 1. The form and the
+  overlay were both gone, and his root was drawn as it was first read, its
+  text the same by hash.
+- **So the STOP was false** (DERIVED, from `close_opened` and the skeleton).
+  - The judge calls the form closed only when no more modals are visible than
+    before ITS press (1, the overlay) AND the address is the one before its
+    press: the overlay's.
+  - The modal count passed, at 0. So the address is what failed: the page
+    had gone back past the overlay, to his root.
+  - A judge that measures a nested opening's close against its parent's
+    address reads a full close as "not closed" (lesson 28).
+- **A POSSIBLE CPU-contention artifact** (the orchestrator, 21:3x). Another
+  lane ran a 4-worker local pytest from about 21:25 to 21:27 IST while the
+  flag was up, against the box rule. The close ran from 21:27:22 to 21:27:27,
+  at that window's tail. Two causes fit the identical skeleton, and disk
+  cannot separate them:
+  - (A) STRUCTURAL: one Escape on the form returns the page to his root,
+    closing the overlay with it, so every run of rank 30 stops so;
+  - (B) CONTENTION: the form closed slower than the judge's 1.5 s settle, so
+    a second Escape was sent and closed the overlay too.
+  - The box's own traces while the flag was up (21:22:49 to 21:28:15), with
+    the lanes not attributed: pytest temp folders written at 21:22:45 to
+    21:23:55, at 21:25:52 and at 21:28:14 to 21:28:19, and a basetemp
+    written up to 21:26:49. At 21:39:50, after the session, the CPU read 54
+    to 97% over 5 samples.
+  - **RULED (the orchestrator, 21:4x): no re-run.** 14d's fix makes the close
+    judge accept a return to his root's pre-press skeleton, byte for byte, as
+    CLOSED. That fixes the stop under A and B alike, so telling them apart is
+    not worth pausing the fleet.
+- **His root:** the compare after the closes was not reached. The skeleton
+  identity above is the evidence that it is unchanged.
+
+### 14.11 14c-bis's close: no load after the STOP-ALL
+
+- No compare of his root was deferred: `root_signatures.json` is absent.
+  `root_settle` was not run.
+- 21:27:55: `close_chrome_s14b.py`, with the flag standing. It judged the
+  dedicated browser, with 1 listener owned by the pid. `Browser.close` was
+  answered in 0.06 s, and the browser exited 0.99 s later. The path:
+  `cdp_browser_close`. Nothing was killed. Exit 0.
+- 21:28:15: the flag lowered; no compare was pending.
+- 21:28:19: `os_check`. 9224 down, 0 listeners, 0 clients, no Chrome on the
+  profile, no lock, no flag. Port 9223 had 0 listeners. His own Chrome was
+  never named or signalled.
+- The profile's `Preferences` read `exit_type` Normal (VERIFIED, a read
+  only).
+- **The runner's processes are gone** (VERIFIED, 21:28:33). No python,
+  Chrome, PowerShell or node process had a command line naming the s14c
+  runner folder, the teardown, the check clock, the harness, the dedicated
+  profile or port 9224. The filter was by command line only.
+- The session folder is preserved again, as
+  `_state/preserved/live16-bis-2026-11-28`: 38 files, each identical by
+  sha256. 14c's snapshot stays as it was.
+- The lane's held edits were put back after the session, each matching its
+  held sha256.
+- Master moved to `e6aaf960` at 21:30:08 (master's reflog), after the flag
+  was lowered at 21:28:15. So nothing was merged during the session.
+
+### 14.12 The ledgers after both
+
+- The session ledger (`live16`): 8 loads, 14c's 3 and 14c-bis's 5, and 3
+  searches, all of them 14c's.
+- The pinned account ledger, read at 21:28:23: 8 records for live16
+  (`live-s13/16/live_census`) and 14b's 2. That is 10 in the trailing 12 h,
+  so **30 free**. 14b's 2 leave the window at 04:58:19 IST on 11-29, and
+  live16's last at 09:26:36 IST on 11-29.
+- The two ledgers agree at 8.
+
+### 14.13 14c-bis's accepted residuals, as met
+
+- **`tabs_check`:** exit 0, on the new launch, so the procedural STOP was not
+  needed.
+- **E5 carried over:** phase 9's own proof found the member E5 proved. It
+  neither stopped nor misled.
+- **LIVE-WINDOW-CDP:** 9224 was bound to 127.0.0.1. It was down before the
+  start and after the close, with 0 clients at 21:22:26.
+- **The start script's plain launch:** Chrome started at 21:22:07. Whether
+  it took the OS foreground is the orchestrator's outside measurement.
+- **No runner step took the foreground.** Every phase printed "no OS
+  foreground taken" or the gate's line.
+- **Q1's press race:** not met. Phases 25 to 27 were not reached.
+- **The phase-level stops did not fire.**
+
+### 14.14 What the two did not reach
+
+- **Not run because of 14c-bis's STOP-ALL:** phases 10 to 20 and 22 to 27.
+- **Skipped by procedure:** rank 150, phase 3, was never called in 14c-bis.
+- **No item:** phase 7.
+- **OFF:** phases 21 and 28.
+- **From 14c's phase 3:** the form's read and its close. **From 14c-bis's
+  phase 9:** the form's close as the runner judges it, and his root's compare
+  after it.
+
+### 14.15 Rows moved: none
+
+Each line was a capture, and a capture moves no row by itself (10.7).
+
+- The capture queue's `captured_already` cells for eight lines now name the
+  sittings' skeletons, in the preserved folders: ranks 3, 31 and 132 (14c),
+  and ranks 161, 34, 158, 103 and 30 (14c-bis). Each cell was appended to, on
+  master's queue after census-calls28's edits.
+- Rank 150's cell is unchanged. Its form was never read, so no skeleton of
+  it exists.
+- No skeleton is exported to tracked fixtures: no order named an export.
+
+### 14.16 What needs the orchestrator
+
+1. **Rank 30's close judge reads a full close as "not closed"** (14c-bis;
+   the skeleton identity VERIFIED, the cause DERIVED). The form's close is
+   measured against the overlay's address, and the page had gone back past
+   the overlay to his root.
+   - Two hypotheses fit, and neither is separated (14.10). (A) STRUCTURAL:
+     one Escape on the form closes the overlay too. (B) CONTENTION: the form
+     closed slower than the 1.5 s settle, so a second Escape closed the
+     overlay. The box's traces while the flag was up, lanes not attributed:
+     pytest temp folders at 21:22:45 to 21:23:55, 21:25:52 and 21:28:14 to
+     21:28:19, a basetemp up to 21:26:49, and a 4-worker run from about 21:25
+     to 21:27 (the orchestrator).
+   - RULED (the orchestrator, 21:4x): no re-run. 14d's fix, red first: the
+     close judge accepts a return to his root's pre-press skeleton, byte for
+     byte, as CLOSED. That fixes the stop under A and B alike.
+   - Only rank 30 runs the close judge on one opening inside another; every
+     other self-root press closes back to his root.
+2. **Rank 150's press moves the address, and the guard ends the session on
+   it** (14c). DERIVED: Create newsletter drew a dialog and moved the path off
+   the new-article address with no document. The article guard reads any
+   such move as `publishing_control`. Two things for 14d:
+   - a ruling: is the form's own route a landing the phase may read, by
+     closed path words, or does the press stay a session stop?
+   - either way, the guard keeps the reading it raised on, red first: the
+     landing's path words and the dialog's counts (lesson 26).
+3. **All filters on the AI route ignores Escape and its own trigger** (14c).
+   Only its Close closed it, after close steps from 20:45:30 to 20:46:06. 14d
+   can aim the one close word the panel draws first, if ruled.
+4. **Rank 31's link is not drawn on his root** (14c), even after a proved
+   scroll that drew the Experience section. Its line needs a re-aim. The
+   Experience scope matched 2 elements, so its controls were not read either.
+5. **No skill id is drawn on his root after the scroll** (14c), and Skills
+   reads 0 in main. Phase 7 (rank 40) has no item; phase 24 (rank 71) has
+   one.
+6. **The account:** 30 free now, 32 after 04:58 IST on 11-29, and 40 after
+   09:27 IST on 11-29.
+7. **The GO's harvest list and the review differed by one name: RULED**
+   (the orchestrator, 21:1x). INSTRUMENTS 125 holds the review's
+   shown-failing six, `c2_r2check.py` among them. `c2_variant.py`, which the
+   GO had named, is struck: its author declared it disposable.
+8. **The next sitting** (RULED, the orchestrator, 21:4x): no further sitting
+   tonight. Phases 10 onward and rank 30's capture go to a deliberately quiet
+   box, likely on 11-29 after the ledger is back, with the CPU sampler
+   running alongside. From the runner's code (nothing run), for its GO:
+   - **Phase 10 (`article_drafts`) can stop falsely** (DERIVED). The article
+     guard is not called after the Drafts press. But Drafts is a `div` with
+     `role=button` in the same menu as Create newsletter, which moved the
+     path with no document in 14c. If Drafts does the same, the phase closes
+     Manage with `close_all`, whose close check needs the composer's path
+     back. That raises `did_not_close`, and the phase turns it into STOP-ALL
+     `press_outcome_unread`. Run phase 10 last, or move it to 14d.
+   - **The session ledger binds:** live16 holds 8 of its 40, so 32 remain,
+     even after the account is back to 40. Phases 10 to 24 need 27 at most,
+     and phases 10 to 27 need 36.
+   - **A re-pin:** after this close-out's commit, the worktree head is no
+     longer `acd9df5c`, so `verify_pins_s14c.py`'s `branch_head` fails. No
+     file the runner pins or imports changed on master `e6aaf960` or on
+     census-calls28 (VERIFIED, by git diff on those paths), so a re-pin moves
+     the head alone.
+   - **Exit 3:** `did_not_close` and `article_landing_not_new` are not STOP-ALL
+     kinds. The GO should name whether such a stop ends the session.
+   - **RULED for 14c-ter** (the orchestrator, 22:0x IST,
+     `_TEAM_LEAD_RULINGS_14CTER.md`, deleted as the ack with this commit; a
+     copy is kept in the lane's gitignored scratch). The lane's answer above
+     was ACCEPTED, and:
+     1. Phase 10 (`article_drafts`) runs LAST, after 27. A `did_not_close`
+        there is evidence for 14d's fix, and a clean close refutes the
+        hypothesis. If the cap leaves no room, phase 10 is the one dropped.
+     2. Phases 25 to 27 are IN, at the end, before 10. K6 stands: focus
+        emulation only, and no step ever takes the OS foreground.
+     3. RE-PIN rather than hold the close-out: the close-out gates the census
+        re-judge and the admissions lanes. The re-pin moves `branch_head`
+        only, certified by lane CI on the close-out head.
+     4. An exit 3 ENDS THE SESSION: any anomaly after a press does
+        (`did_not_close`, `article_landing_not_new`, and every other exit-3
+        kind). Only read-only anomalies continue, and NIT-5's
+        `scroll_no_progress` stays the only one.
+     5. The order: phases 11 to 20 and 22 to 24, then 25 to 27, then 10.
+        Phases 3, 9, 7, 21 and 28 are not called. Loads at most the smaller of
+        the account's free count at the GO and the session's 32, at least 20 s
+        apart. 0 searches are expected. UNREAD-SKIPPED and unattended stand.
+     6. The box is quiesced before the GO, with no lane CPU work in the
+        window, and the CPU sampler runs alongside (INSTRUMENTS 125.3).
+   - **The git-diff check on this close-out's tree** (VERIFIED,
+     `runner_import_census.py`, disposable, in the lane's scratch). It imports
+     the pinned runner by file location with no browser, and lists every
+     module it loads from the worktree: 109. With the 5 pinned tracked files,
+     that is 110 files watched. Against `git diff --name-only acd9df5c HEAD`
+     on this commit's tree (36 files changed, all of them master's), the
+     watched files that changed: **none**. Its control, a base from before the
+     harness's last change, reports the changed modules and exits 1. So the
+     re-pin moves `branch_head` alone.
+
+### 14.17 The close-out, and THE HEAD
+
+- **Merged master FIRST:** `live-s13` had no commit after `acd9df5c`, so
+  merging master `4c5be651` (census-calls28 on it) was a fast-forward.
+  This close-out's edits were held out of the tree by sha256, the tree was
+  clean for the merge, and the edits were applied back with `git apply
+  --3way`, cleanly. INSTRUMENTS 123 (ci-checks28) stands, and 125 follows
+  124.
+- **THE HEAD** is the commit that adds this close-out: this record, the
+  eight queue cells (14.15), INSTRUMENTS 125, and the derived views
+  regenerated on top of `4c5be651`.
+- **After it:** the live16 pins are re-pinned, `branch_head` only, and lane
+  CI is run on this head and read by sha. The ids are in the READY message.
+  The next sitting's GO names this head.
+
 ## Lessons (for the orchestrator to harvest)
 
 1. **`Path.write_text` on Windows writes CRLF.** Three patch scripts turned
@@ -2856,4 +3441,23 @@ fast-forwarded to this head. The session runs unattended.
     Chromium's source shows the call does take it once Windows' foreground lock
     times out (13.10). Before ruling an act safe on a "did not happen", name
     the conditions under which it would happen, and measure those.
+26. **The guard that ends a session must keep what it read.** The article
+    guard read the address, raised STOP-ALL and kept nothing, and the phase
+    re-raises a STOP-ALL past its own record. So 14c knows only that the
+    path was neither of two names (14.3). Lesson 10 reached the phase stops,
+    not the STOP-ALL path. A guard writes its reading before it raises.
+27. **Escape closes only what a page wires to it.** The AI route's All
+    filters panel is an `aside` that holds the focus. It stayed open through
+    3 Escapes and a re-press of its own trigger, and only its own Close
+    closed it (14.3). A close order that starts at Escape spends its time on
+    such a panel. The words a panel draws when it opens tell which close it
+    has.
+28. **A nested close is judged where the page went, not where it was.** Rank
+    30's form opens inside the contact overlay. Its close was judged against
+    the overlay's address, but the page had gone back past the overlay to
+    his root, by one Escape or by two (14.10). The judge read "not closed"
+    over a skeleton byte-identical to his root's first. When one opening sits
+    inside another, the inner close must also accept the outer one closing
+    with it. The page's return to its own first state is the strongest
+    evidence of a close.
 

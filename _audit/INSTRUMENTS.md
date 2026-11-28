@@ -13974,3 +13974,83 @@ The lane's scratch tools (`_state/lane-scratch/hygiene28/`), each run for one ch
 cites, refusing a double cite), `correction_pairs.py` (every line behind a correction-guard pair, through
 the guard's own functions) and `mutants_resolver.py` (the fourteen mutants, the tool restored by sha256
 after every run).
+
+## 125. A CHANGED JUDGE IS RUN BESIDE THE OLD ONE ON EVERY CASE, AND A FOREGROUND CALL IS COUNTED WHERE IT IS SENT (review14c28 for live-s13, 2026-11-28)
+
+The cold reviewer of session 14c's runner, review14c28, built these against r3e, r1, r2 and r3 (the
+main checkout's gitignored `_state/live-runner/s14c/`). They stay in the main checkout's gitignored
+`_state/lane-scratch/review14c28/`, beside their outputs and the review itself, `review.md`. Each is
+named by its sha256 (short), so a changed copy shows. None of them loads LinkedIn: the shapes ran in
+Playwright's own headless Chromium, over a pipe, with every request aborted, and the gate and load stubs
+ran with no browser. The record is `_audit/2026-11-27-live-session-14.md`, sections 13 and 14. Session
+14c met two of the fixes these measured, live (14.3): the C1 judge read RESTORED True, and the scroll
+pass proved 8 steps on main.
+
+    A CHANGED JUDGE IS RUN BESIDE THE OLD ONE ON EVERY CASE, AND EVERY NEW
+    ACCEPT IS EXPLAINED BY THE CHANGE OR IT IS A FINDING. A CALL THAT MAY
+    TAKE THE FOREGROUND IS COUNTED WHERE IT IS SENT: BY AST, PER LOAD, PER
+    GATE ATTEMPT, AND IN EVERYTHING THE RUNNER IMPORTS.
+
+### 125.1 THE ENTRIES
+
+| path, in `_state/lane-scratch/review14c28/` | sha256 | what it measures | shown failing by |
+|---|---|---|---|
+| `c1_differential.py` | `494807c367258c04` | two runners' Easy Apply restore judges, each taken by AST from its own source, on 33,075 synthetic (base, on, back) triples: every key and every pair over 10 names, around 14b's live key names, with 25 ids and the toggle at 0, 2, 0 | on r3e: 8,211 triples r3e refused and 14c restores, all 8,211 explained by `referralSearchId` alone. It also shows 14c's own accepted class: 828 triples where a key outside the volatile names changed (NIT-2) |
+| `c2_shapes.py` | `8354fff280f6f836` | the runner's own scroll pass, on 12 synthetic shapes | on r1: `inside_main_1`, `inside_main_2`, `body` and `grid_inner` read target none, and `lost_target` read as the bottom (NIT-1) |
+| `c2_r2check.py` | `419fc3e67f1c186a` | the same pass on r1, r2 and r3, with 14b-like, chained and late-outside shapes added | on r1: `s14b_like` read target none, `chained` proved with no lower section filled, and `lost_target` read proved. r2 and r3 prove `s14b_like` and stall `lost_target` |
+| `r2_gate_stub.py` | `0a5dbdb6353d4b7c` | a runner's real `main_async` and `window_gate_14c` over stubs, with no browser and a dead CDP port: every CDP and page send, per case | on r2: Page.bringToFront sent 2, 1 and 1 times in cases A, B and C; in C, after `minimised_at_gate` read True. On r3, none |
+| `r3_load_stub.py` | `103f1e6a3ef73a5e` | each runner's real `load()` and `capture()` on a fake page that records every page method called, 3 loads each | on r2: 1.0 Page.bringToFront per load. On r3, 0.0 |
+| `r3_reach.py` | `2e774c65f2ba2df2` | by AST, a runner's foreground calls and CDP sends; and an import census of the runner with no browser (1,332 modules), each module file outside the standard library searched for foreground and keystroke names | on r2: 2 `bring_to_front` call sites, in `capture` and `window_gate_14c`. On r3, 0 |
+
+These six are the review's shown-failing set, as the orchestrator ruled it at 21:1x. The GO for 14c had
+named `c2_variant.py` in place of `c2_r2check.py`; it is struck, since its author declared it disposable
+(125.3).
+
+### 125.2 THE LANE'S OWN CHECKS THAT ALSO HELD LIVE
+
+Slice c14 of `gate_checks_s14c.py` (in `_state/live-runner/s14c/`), in check mode (the record, 13.4,
+13.7 and 13.10):
+
+- **C1's checks:** R1, R3b and E1 red on r3e; R2, R2b, R3 and E2 red on a check-only mutant that makes
+  `referralSearchId` volatile without the conditions. HELD LIVE at 14c's load 2: RESTORED True, with
+  only the two keys left over.
+- **C2's checks:** S1 to S3 red on r3e, S1 reproducing 14b's live signature (1 step, 0 skill ids, rank
+  31 not pressed). HELD LIVE at 14c's load 1: main scrolled to its bottom in 8 steps, and the lower
+  sections drew.
+- **W7 and W8,** the Page.bringToFront counts: red on r2 (8 sends in W1 to W6, and 21 across the slice),
+  0 on r3. They are offline counts and never meet the page.
+- **W1 to W4,** the window gate without the OS foreground: red on r1 (13.7). HELD LIVE twice, at 14c's
+  phase 1 and 14c-bis's phase 9: the tab read usable at the first reading, and each phase ran.
+- **`runner_import_census.py`** (the lane's gitignored scratch), the re-pin's check. It imports the
+  pinned runner by file location with no browser, takes every module it loads from the worktree (109)
+  plus the 5 pinned tracked files, and intersects them with `git diff --name-only <base> <head>`.
+  SHOWN FAILING on a base from before the harness's last change: it named the changed modules and
+  exited 1. HELD on the close-out: `acd9df5c` to the close-out's tree, none (the record, 14.16 item 8).
+
+**Held live, red first not recorded** (not entered): the panel rule that a panel deaf to Escape and its
+trigger is closed by the ONE close word it draws (D2). 14c's All filters panel met it live and closed
+(14.3), but no run of D2 failing is on record.
+
+**Fired live, verdict DERIVED** (not entered):
+
+- The article guard's path rule ended 14c at rank 150's press (14.3). The press moved the path with no
+  document. Whether that was an act or the form's own route is not on disk, because the guard kept no
+  reading.
+- `close_opened`'s check that the page is closed ended 14c-bis at rank 30's form (14.10), and it read
+  FALSE. The not-closed skeleton is byte-identical to his root's first one, so both the form and the
+  overlay had closed. The judge wanted the overlay's address back, and the page had gone back to his
+  root (lesson 28).
+
+### 125.3 DECLARED DISPOSABLE
+
+- **The review's own** (its folder): `run_gate_slice.py`, `c2_variant.py` (N1's corrected walk, tried in
+  its own copy of the scroll script before r2 took it), `main_children_probe.py`, `aside_lca_probe.py`,
+  `inline_style_probe.py`, `lca_probe.py`, `r2_reach.py`, `r2_callgraph.py` and `r3_win32_importers.py`,
+  each run for one question the review answers.
+- **The lane's** (its gitignored scratch): the three occlusion probes, `crash_watch_s14c.ps1`,
+  `reach_s14c.py`, `scroll_structure_s14c.py`, `go_pins_check_s14b.py` and the capture queue's cell
+  patch, each run for one proof the record holds. The runner's own kit (the patches, the pins writer
+  and its verifier, `ast_delta_s14c.py` and `name_items_s14c.py`) is pinned with the runner in 13.8.
+- **Kept for the next sitting, not entered:** `cpu_sampler.ps1` (the lane's scratch), the box's CPU load
+  once a second for a bounded time, to run beside the next live sitting (the record, 14.16 item 8). It
+  has only been tried, for 3 s; it has not yet been shown to catch the thing it is for.
