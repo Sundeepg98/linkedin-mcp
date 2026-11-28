@@ -1014,7 +1014,9 @@ hypothesis per model. Each model works on the captured editor's own
     it opened nothing;
   - a landing on a thread is STOP-ALL; a landing anywhere else presses
     nothing;
-  - then session 13's `_archived_round_trip` runs, unchanged;
+  - then session 13's `_archived_round_trip` runs. From r2b on, its menus are
+    closed here by their own trigger, never by Escape, and the watch is held
+    from before the tool's load (round 2);
   - nothing is typed (M M34 is not in the ruling).
 - **K10.** Rank 151, part 1: the admitted `/my-items/saved-posts/`, loaded
   once, read-only, skeleton only.
@@ -1100,12 +1102,66 @@ is in the lane's scratch under `review-s14b/`.
 
 The 14b table's checks: r1b passes 0 of 9, r2 passes 9 of 9.
 
+**ROUND 2, on r2 (`c6f6fe2e`): a warm re-check and a cold review of K8-K11.
+No BLOCKER, no MAJOR, three MINOR, one NIT.**
+
+- **Round 1's findings:** every one CLOSED on r2, re-run with the reviewer's
+  own probes. The focus race now activates nothing; the late closes read
+  `dismiss` and `closed_late`; the inline panel counts.
+- **The lane's add-on is agreed:** K6 had moved ahead of two entry refusals.
+  The reviewer's refined order is: every refusal first, and the id's file
+  deleted last of all, after the preflight and the driver lock.
+- **MINOR-A:** a panel drawn inside a section the press REDRAWS was still
+  discounted.
+- **MINOR-B (K9):** K9 pressed Escape on the composer's page, where Escape was
+  never measured.
+  - On a pessimistic model, an Escape that leaves compose lands the
+    conversation LinkedIn chooses: the unread top row.
+  - The guard stops only after that.
+- **MINOR-C (K9):** the document watch started after the shipped tool's load,
+  so a document in that window was in no ledger.
+- **NIT:** `NEEDS_FRONTED` still named the Open-to-Work editor.
+
+**r2b (`patch_s14b_r2b.py`), each fixed red first:**
+
+- **E1:** the entry runs `parse_items`, then judges the id's files without
+  deleting, then the required items, then K6, the preflight and the driver
+  lock. Only then is the id's file deleted.
+- **MINOR-A:** a control is "late" only when main's sections also GREW over the
+  press.
+- **MINOR-B:** on the composer's page, the round trip closes its menus by
+  their own trigger, NEVER by Escape. Ending off the composer's path is a phase
+  stop.
+- **MINOR-C:** the watch is held on our own tab from BEFORE the tool's load,
+  outside its session.
+- **NIT:** fixed.
+
+`composer_checks_s14b.py` runs the round trip END TO END, on the reviewer's
+synthetic composer (its menus toggle on their own trigger). It goes through
+the shipped `linkedin_list_conversations`, with the call armed and both
+ledgers and the store redirected (VERIFIED):
+
+| mode | r2 | r2b |
+|---|---|---|
+| inert (control) | the round trip runs, the folder is restored | the same |
+| an Escape that leaves compose | 3 Escapes, the unread top row opened 3 times, then STOP-ALL | 0 Escapes, nothing opened |
+| a document 30 ms after the load | 2 served, 1 in each ledger | 2 served, 2 in each ledger |
+| the address ends off the composer's path | recorded, exit 0 | a phase stop (`address_moved`) |
+
+In no mode, on either runner, was a row pressed.
+
 ### 11.5 The 14b plan
 
 The order is section 1's, by `rows_per_load`, with:
 
 - 14a's done line and the Open-to-Work editor out;
-- the composer's Archived round trip in the inbox's old slot;
+- the composer's Archived round trip LAST BUT ONE, not in the inbox's old slot,
+  for two reasons:
+  - its B2 rule makes any failure after Archived a STOP-ALL;
+  - on the composer, its menus' close by their own trigger is unmeasured. Each
+    captured row and folder trigger carries `aria-expanded` (VERIFIED, 4
+    skeletons), but no capture shows a re-press closing one.
+  - A stop there costs the fewest lines;
 - rank 151's read last.
 
 The session directory is `live15`: 40 loads and 5 searches of its own, under
@@ -1117,33 +1173,33 @@ the account's 40 in the trailing 12 h.
 | 2 | `c_srch_3a` (TOGGLE-FIRST) | 132 | 3 | 1 | 3 | `job_kw` | -- | -- |
 | 3 | `newsletter_form` | 150 | 3 | 1 | 0 | -- | -- | -- |
 | 4 | `discovery` | 161 | 1 | 1 | 0 | -- | -- | -- |
-| 5 | `messaging_archived_composer` | 6 | 3 | 1 | 0 | -- | -- | yes |
-| 6 | `featured` | 34 | 1 | 1 | 0 | -- | -- | -- |
-| 7 | `manage_syncing` | 158 | 1 | 1 | 0 | -- | -- | -- |
-| 8 | `skill_form` | 40, 102 | 1 | 1 | 0 | `skill` (named off E5) | -- | -- |
-| 9 | `intro_landing` | 103 | 1 | 1 | 0 | -- | -- | -- |
-| 10 | `contact_info` | 30 | 3 | 1 | 0 | -- | yes | yes |
-| 11 | `article_drafts` | 1 | 3 | 2 | 0 | -- | -- | -- |
-| 12 | `invitation_filter` | 26 | 2 | 1 | 0 | -- | -- | -- |
-| 13 | `permalink_menus` | 95 | 3 | 2 | 0 | `member_post`, `page_post` | -- | -- |
-| 14 | `key_skills` | 102 | 1 | 1 | 0 | -- | yes | -- |
-| 15 | `connections_pills` | 109 | 2 | 1 | 0 | -- | -- | -- |
-| 16 | `creator_hub` | 111 | 2 | 1 | 0 | -- | -- | -- |
-| 17 | `notifications_card` | 115 | 2 | 1 | 0 | -- | -- | -- |
-| 18 | `self_variant` | 117 | 2 | 2 | 0 | -- | -- | -- |
-| 19 | `learning_goal` | 144 | 3 | 1 | 0 | -- | yes | yes |
-| 20 | `alert_row` | 145 | 3 | 1 | 0 | -- | yes | yes |
-| 21 | `learning_saved` | 147 | 1 | 1 | 0 | -- | -- | -- |
-| 22 | `post_analytics` | 154 | 1 | 1 | 0 | `own_post`, ONLY if he volunteers it | yes | -- |
-| 23 | `search_history` | 156 | 1 | 1 | 0 | -- | -- | -- |
-| 24 | `download_data` | 157 | 1 | 1 | 0 | -- | -- | -- |
-| 25 | `skill_insights` | 71 | 1 | 1 | 0 | `skill_index` (named off E5) | -- | -- |
-| 26-28 | `self_press` x3 (About, profile language, services) | 64, 67, 68 | 3 each | 1 each | 0 | -- | yes | yes |
-| 29 | `self_press_volunteering` | 69 | 3 | 1 | 0 | his profile id, ONLY if he volunteers it | yes | yes |
+| 5 | `featured` | 34 | 1 | 1 | 0 | -- | -- | -- |
+| 6 | `manage_syncing` | 158 | 1 | 1 | 0 | -- | -- | -- |
+| 7 | `skill_form` | 40, 102 | 1 | 1 | 0 | `skill` (named off E5) | -- | -- |
+| 8 | `intro_landing` | 103 | 1 | 1 | 0 | -- | -- | -- |
+| 9 | `contact_info` | 30 | 3 | 1 | 0 | -- | yes | yes |
+| 10 | `article_drafts` | 1 | 3 | 2 | 0 | -- | -- | -- |
+| 11 | `invitation_filter` | 26 | 2 | 1 | 0 | -- | -- | -- |
+| 12 | `permalink_menus` | 95 | 3 | 2 | 0 | `member_post`, `page_post` | -- | -- |
+| 13 | `key_skills` | 102 | 1 | 1 | 0 | -- | yes | -- |
+| 14 | `connections_pills` | 109 | 2 | 1 | 0 | -- | -- | -- |
+| 15 | `creator_hub` | 111 | 2 | 1 | 0 | -- | -- | -- |
+| 16 | `notifications_card` | 115 | 2 | 1 | 0 | -- | -- | -- |
+| 17 | `self_variant` | 117 | 2 | 2 | 0 | -- | -- | -- |
+| 18 | `learning_goal` | 144 | 3 | 1 | 0 | -- | yes | yes |
+| 19 | `alert_row` | 145 | 3 | 1 | 0 | -- | yes | yes |
+| 20 | `learning_saved` | 147 | 1 | 1 | 0 | -- | -- | -- |
+| 21 | `post_analytics` | 154 | 1 | 1 | 0 | `own_post`, ONLY if he volunteers it | yes | -- |
+| 22 | `search_history` | 156 | 1 | 1 | 0 | -- | -- | -- |
+| 23 | `download_data` | 157 | 1 | 1 | 0 | -- | -- | -- |
+| 24 | `skill_insights` | 71 | 1 | 1 | 0 | `skill_index` (named off E5) | -- | -- |
+| 25-27 | `self_press` x3 (About, profile language, services) | 64, 67, 68 | 3 each | 1 each | 0 | -- | yes | yes |
+| 28 | `self_press_volunteering` | 69 | 3 | 1 | 0 | his profile id, ONLY if he volunteers it | yes | yes |
+| 29 | `messaging_archived_composer` | 6 | 3 | 1 | 0 | -- | -- | yes |
 | 30 | `saved_posts` (part 1) | 151 | 1 | 1 | 0 | -- | -- | -- |
 | -- | `root_settle`, only while a compare of his root is deferred | -- | 2 | 1 | 0 | -- | -- | -- |
 
-**The totals** (DERIVED from the table), without phases 22 and 29: 57 most
+**The totals** (DERIVED from the table), without phases 21 and 28: 57 most
 loads, 31 expected, 3 searches.
 
 **How far 14b reaches** (DERIVED, by the GO's stop rule: stop when the next
