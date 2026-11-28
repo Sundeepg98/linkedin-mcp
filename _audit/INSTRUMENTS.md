@@ -13911,3 +13911,30 @@ after phase 3, including:
 and its verifier, `ast_delta_s14.py`, `skeleton_delta.py`, `tree_compare.py`
 and the capture queue's cell patch. `ast_delta_s14.py` has a self-equality
 control and a one-constant mutation control, but it was built for one proof.
+
+## 124. A COUNT IN PROSE IS HELD WHERE IT IS WRITTEN, AND A MERGE TOOL EDITS ONLY THE TREE IT RUNS IN, SECTION BY SECTION (hygiene28, 2026-11-28)
+
+Lane hygiene28 was a hygiene lane. It held the census's reachable row to its own pattern count, moved the
+INSTRUMENTS.md conflict resolver into the tracked tree with a guard against the main checkout's file,
+made it order sections rather than blocks, and gave three facet rows the test that holds their keys to
+LinkedIn's links. The record is `_audit/2026-11-28-hygiene28.md`.
+
+    A COUNT IN PROSE IS READ FROM THE ROW THAT STATES IT, NOT FROM THE ROW
+    ABOVE. A TOOL FINDS ITS FILE FROM WHERE IT IS RUN, NEVER FROM WHERE IT
+    IS STORED, AND IT ORDERS THE UNIT ITS CONTRACT NAMES.
+
+### 124.1 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `tests/test_the_census_prose_matches_the_boundary.py`, the reachable row's own claim: `test_the_reachable_rows_claim_is_readable`, `test_the_reachable_rows_pattern_count_is_the_boundarys`, `test_each_substring_the_reachable_row_names_matches_as_it_says`, `test_the_reachable_rows_claim_reader_can_fail` | on the census at base, 1 failed (`assert 41 == 109`); the reader's own control reads one pattern too many, and a substring every pattern carries, as disagreements |
+| `scripts/resolve_instruments_order.py` with `tests/test_resolve_instruments_order.py` sections 1 to 3: a real main checkout with a worktree nested inside it, and the tool stored in both places it is run from | against the original `_state` tool, 17 failed: 3 are the hazard itself in its real layout, 13 its crash when stored anywhere else, and 1 the missing `target:` line; 1 vacuous pass. Then eight mutants, one per guard, each killed by FAILED: the default taken from its own location, no refusal, no identity comparison, no environment scrub, an unplaceable file allowed, the path not resolved first, no `target:` line, and a file in no checkout refused |
+| the same, section 4: section order, and a number claimed twice or already used | against the guard commit's tool, 5 failed, `['1', '114', '117', '116']` among them; six more mutants, each killed by FAILED |
+
+### 124.2 DECLARED DISPOSABLE
+
+The lane's scratch tools (`_state/lane-scratch/hygiene28/`), each run for one change the record holds:
+`derive_reachable_count.py` (wrote the row's count from the allowlist), `cite_facet_test.py` (the three
+cites, refusing a double cite), `correction_pairs.py` (every line behind a correction-guard pair, through
+the guard's own functions) and `mutants_resolver.py` (the fourteen mutants, the tool restored by sha256
+after every run).

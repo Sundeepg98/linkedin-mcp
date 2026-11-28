@@ -69,6 +69,27 @@ by its name or by its address. Its controls:
   while the row reading misses none;
 * :func:`test_the_row_reader_can_fail` takes "saved posts" out of the
   measured cell and requires the row reading to name exactly that surface.
+
+## THE REACHABLE ROW'S OWN COUNT IS READ TOO (lane hygiene28, 2026-11-28)
+
+The same row ends with a claim about the allowlist itself: *"`schedul`,
+`hashtag`, `live` and `video` each match **0** of the 41 patterns"*. Nothing
+read it. The count row above it was held to the boundary, so it moved to 109
+with every admission, while this row kept the 41 it was written with on
+2026-09-20 -- the stale-prose shape this file exists for, one row down, and
+lane ci8's record named it: "nothing asserts the 41".
+
+So the row's claim is now read from its measured cell -- the backticked
+substrings, the match count stated for each, and the pattern count -- and
+held to ``readonly._ALLOWED_URL_PATTERNS``. A substring MATCHES a pattern when
+it occurs in the pattern's source, case folded (the stricter reading: it finds
+everything the exact one finds). Its controls:
+
+* :func:`test_the_reachable_rows_claim_is_readable` fails loudly when the
+  claim cannot be found, rather than checking nothing;
+* :func:`test_the_reachable_rows_claim_reader_can_fail` states one pattern too
+  many, and then names a substring every pattern carries, and requires each
+  mutation to be read as a disagreement.
 """
 
 from __future__ import annotations
@@ -94,7 +115,7 @@ _CENSUS = (
 
 #: The correction block's row for the pattern count reads, in part:
 #:
-#:     | the read allowlist is **22** url patterns | **41**. Twenty of ...
+#:     | the read allowlist is **22** url patterns | **<n>**. Twenty of ...
 #:
 #: so the claim is the first bolded integer in the RIGHT-hand cell. Anchored on
 #: the left cell's wording so a different row cannot be read by accident.
@@ -390,6 +411,125 @@ def test_the_row_reader_can_fail() -> None:
     assert mutated != text, "the cell as read is not the cell as written"
     unnamed, _found = _unnamed_in_the_row(mutated)
     assert unnamed == ["saved posts"], unnamed
+
+
+#: The reachable row's claim about the allowlist, in its MEASURED cell:
+#:
+#:     `schedul`, `hashtag`, `live` and `video` each match **0** of the <n> patterns
+#:
+#: Group 1 is the backticked substrings (one, or several separated by commas or
+#: "and"), group 2 the match count stated for each, group 3 the pattern count.
+_SUBSTRING_CLAIM = re.compile(
+    r"((?:`[^`]+`(?:,\s*|\s+and\s+))*`[^`]+`)\s+each\s+match\s+"
+    r"\*\*(\d+)\*\*\s+of\s+the\s+(\d+)\s+patterns"
+)
+
+
+def _row_claim(text: str) -> tuple[tuple[list[str], int, int] | None, str]:
+    """((the substrings, the match count stated for each, the pattern count
+    stated), or None, and what was found where it was looked for)."""
+    cells, found = _reachable_row(text)
+    if cells is None:
+        return None, found
+    claim = _SUBSTRING_CLAIM.search(cells[1])
+    if claim is None:
+        return None, (
+            "the reachable row's measured cell carries no \"... each match "
+            "**k** of the n patterns\" claim"
+        )
+    return (re.findall(r"`([^`]+)`", claim.group(1)), int(claim.group(2)),
+            int(claim.group(3))), "found"
+
+
+def _patterns_matching(substring: str) -> list[str]:
+    """The allowlist's pattern sources that carry the substring, case folded."""
+    return [
+        pattern.pattern
+        for pattern in readonly._ALLOWED_URL_PATTERNS
+        if substring.lower() in pattern.pattern.lower()
+    ]
+
+
+def _row_claim_disagreements(text: str) -> list[str] | None:
+    """Every way the row's claim disagrees with the shipped boundary, or None
+    when the claim cannot be read."""
+    claim, _found = _row_claim(text)
+    if claim is None:
+        return None
+    substrings, each, stated = claim
+    actual = len(readonly._ALLOWED_URL_PATTERNS)
+    wrong = []
+    if stated != actual:
+        wrong.append(f"says {stated} patterns; the allowlist holds {actual}")
+    for substring in substrings:
+        hits = _patterns_matching(substring)
+        if len(hits) != each:
+            wrong.append(f"says {substring!r} matches {each}; it matches "
+                         f"{len(hits)}: {hits[:3]}")
+    return wrong
+
+
+def test_the_reachable_rows_claim_is_readable() -> None:
+    """Control: the claim is FOUND, with substrings in it, or this fails."""
+    claim, found = _row_claim(_text())
+    assert claim is not None, (
+        "the reachable-surfaces row's allowlist claim cannot be read (%s). If "
+        "the row was reworded, this guard has to move with it; a "
+        "claim-checker that cannot find its claim checks nothing." % found
+    )
+    substrings, _each, _stated = claim
+    assert len(substrings) >= 1, claim
+
+
+def test_the_reachable_rows_pattern_count_is_the_boundarys() -> None:
+    claim, found = _row_claim(_text())
+    assert claim is not None, found
+    _substrings, _each, stated = claim
+    actual = len(readonly._ALLOWED_URL_PATTERNS)
+    assert stated == actual, (
+        "the census's reachable-surfaces row says its substrings were checked "
+        "against %d patterns, and the read allowlist holds %d. Re-derive the "
+        "row's count from readonly._ALLOWED_URL_PATTERNS -- the count row "
+        "above it states the same figure -- and re-check its substrings."
+        % (stated, actual)
+    )
+
+
+def test_each_substring_the_reachable_row_names_matches_as_it_says() -> None:
+    claim, found = _row_claim(_text())
+    assert claim is not None, found
+    substrings, each, _stated = claim
+    for substring in substrings:
+        hits = _patterns_matching(substring)
+        assert len(hits) == each, (
+            "the census's reachable-surfaces row says %r matches %d of the "
+            "allowlist's patterns; it matches %d: %s. A surface the row calls "
+            "refused may now be admitted." % (substring, each, len(hits), hits)
+        )
+
+
+def test_the_reachable_rows_claim_reader_can_fail() -> None:
+    """SHOWN FAILING, twice: one pattern too many, then a substring every
+    pattern carries. Each mutation must be read as a disagreement."""
+    text = _text()
+    cells, found = _reachable_row(text)
+    assert cells is not None, found
+    claim = _SUBSTRING_CLAIM.search(cells[1])
+    assert claim is not None, cells[1][-200:]
+    actual = len(readonly._ALLOWED_URL_PATTERNS)
+    assert _row_claim_disagreements(text) is not None
+
+    one_more = claim.group(0).replace(
+        "of the %s patterns" % claim.group(3), "of the %d patterns" % (actual + 1))
+    assert one_more != claim.group(0), "the count mutation changed nothing"
+    wrong = _row_claim_disagreements(text.replace(claim.group(0), one_more, 1))
+    assert wrong and any("allowlist holds" in w for w in wrong), wrong
+
+    # Every pattern source names the site, so this substring matches them all.
+    assert len(_patterns_matching("linkedin")) == actual
+    everywhere = claim.group(0).replace(claim.group(1), "`linkedin`", 1)
+    wrong = _row_claim_disagreements(text.replace(claim.group(0), everywhere, 1))
+    assert wrong and any("'linkedin' matches" in w for w in wrong), wrong
 
 
 # --------------------------------------------------------------------------
