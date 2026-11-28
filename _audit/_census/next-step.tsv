@@ -1,6 +1,6 @@
 row	slice	dir	class	next	basis	source
 J 2	J	R	-	CAPTURE:C-SRCH-3f	MEASURED	_audit/2026-11-26-live-session-12.md::REDIRECTED to the AI route ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
-J 3	J	R	-	CAPTURE:C-SRCH-2	MEASURED	_audit/2026-11-26-live-session-12.md::REDIRECTED to the AI route ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
+J 3	J	R	-	CAPTURE:C-SRCH-2b	MEASURED	_audit/2026-11-27-live-session-13.md::The AI job search ignores a text ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
 J 4	J	R	-	CAPTURE:C-SRCH-3a	MEASURED	_audit/2026-11-26-live-session-12.md::REDIRECTED to the AI route ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
 J 5	J	R	-	CAPTURE:C-SRCH-3a	MEASURED	_audit/2026-11-26-live-session-12.md::REDIRECTED to the AI route ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
 J 6	J	R	-	CAPTURE:C-SRCH-3a	MEASURED	_audit/2026-11-26-live-session-12.md::REDIRECTED to the AI route ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
@@ -14,7 +14,7 @@ J 13	J	R	-	CAPTURE:C-SRCH-3e	MEASURED	_audit/2026-11-26-live-session-12.md::REDI
 J 14	J	R	-	CAPTURE:C-SRCH-3e	MEASURED	_audit/2026-11-26-live-session-12.md::REDIRECTED to the AI route ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
 J 15	J	R	-	CAPTURE:C-SRCH-3a	MEASURED	_audit/2026-11-26-live-session-12.md::REDIRECTED to the AI route ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
 J 16	J	R	-	CAPTURE:admit-jobs-search-results-keywords	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/jobs/search-results/?keywords=placeholder ; RULING:READ-PAST-AN-ACT-SUBSTRING
-J 17	J	R	-	CAPTURE:C-SRCH-2	MEASURED	_audit/2026-11-26-live-session-12.md::REDIRECTED to the AI route ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
+J 17	J	R	-	CAPTURE:C-SRCH-2b	MEASURED	_audit/2026-11-27-live-session-13.md::The AI job search ignores a text ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
 J 18	J	R	-	SIBLING:J 3	MEASURED	_audit/2026-11-26-live-session-12.md::REDIRECTED to the AI route ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
 J 19	J	W	-	TARGET:his order to clear his recent job searches, the press being the act	MEASURED	_audit/2026-11-25-build-jmn26.md::What the press opens -- a confirmation, or nothing ; RULING:J-19-BUILT-BEHIND-THE-GRANT
 J 28	J	W	-	TARGET:a job posting he names to report as closed	NAMED	_audit/2026-09-28-rulings-build-classes.md::a report is never fired for a proof unless he names a real item to report
@@ -48,7 +48,6 @@ J 82	J	R	-	PRECONDITION:his Easy Apply daily limit reached (observable only then
 J 83	J	W	-	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 J 84	J	W	-	TARGET:a job in a search of his he names to hide	MEASURED	_audit/2026-11-25-build-jmn26.md::on 7 of 7 cards its aria-label is that card's own title ; RULING:HIS-OWN-CURATION-NOT-OUTWARD
 J 85	J	W	-	SIBLING:J 84	NAMED	_audit/2026-09-28-rulings-build-classes.md::the act is proven only through that undo
-J 86	J	W	-	SIBLING:P I14	INFERRED	RULING:D6-CAPABILITY-OVER-AFFORDANCE ; P I14
 J 87	J	W	-	ADMIT:https://www.linkedin.com/mypreferences/m/manage-data-and-activity/	INFERRED	tests/fixtures/live12/privacy_words.html ; _audit/_census/jobs.md::NO MEASURED LABEL ON THE CATEGORY PAGE NAMES AN EXPRESSED-INTEREST RECORD ; RULING:NAMED-SETTINGS-PAGES-RATIFIED
 J 89	J	W	-	SIBLING:P I2	INFERRED	P I2
 J 90	J	W	-	SIBLING:P I3	INFERRED	P I3
@@ -64,7 +63,7 @@ J 99	J	W	-	SIBLING:P I12	NAMED	_audit/_census/jobs.md::Container: `P I12`
 J 100	J	W	-	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 J 107	J	R	-	CAPTURE:C-SRCH-5	MEASURED	_audit/2026-11-26-live-session-12.md::REDIRECTED to the AI route ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
 J 112	J	R	-	TARGET:a school Page he names	NAMED	_audit/_census/read-addresses.tsv::UNDER THE WHO/WHICH RULE, EXTENDED ; RULING:OPERATOR-NAMES-THE-TARGET
-J 151	J	R	-	CAPTURE:C-SRCH-2	MEASURED	_audit/2026-11-26-live-session-12.md::REDIRECTED to the AI route ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
+J 151	J	R	-	CAPTURE:C-SRCH-2b	MEASURED	_audit/2026-11-27-live-session-13.md::The AI job search ignores a text ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
 J 170	J	W	-	CAPTURE:C-J170-1	MEASURED	_audit/2026-11-27-jobs7.md::one alert row's control, attended ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
 J 171	J	R	-	CAPTURE:C-LRN-1	MEASURED	_audit/2026-11-27-jobs7.md::LinkedIn's browsable index, the same for every member ; RULING:COMPOUND-ROW-SPLITS-ONLY-ON-STATE
 J 172	J	W	-	CAPTURE:C-LRN-2	MEASURED	_audit/2026-11-27-jobs7.md::seeing his goal is a read of his own page ; RULING:COMPOUND-ROW-SPLITS-ONLY-ON-STATE
@@ -112,7 +111,7 @@ M C7	M	W	R3	SIBLING:M C3	NAMED	M C7 ; M C3
 M C8	M	W	R3	TARGET:the poll question and options he names	INFERRED	M C8 ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
 M C9	M	W	R3	TARGET:the occasion and the words he names	NAMED	_audit/_census/messaging-and-content.md::Celebrate an occasion
 M C10	M	W	R3	TARGET:a member he names to mention	INFERRED	RULING:MENTION-COMPOSITION-RULING ; RULING:OPERATOR-NAMES-THE-TARGET
-M C11	M	W	R3	SIBLING:M C1	INFERRED	RULING:D6-CAPABILITY-OVER-AFFORDANCE ; M C1
+M C11	M	W	R3	SIBLING:M C1	INFERRED	_audit/_census/messaging-and-content.md::whether LinkedIn turns a typed hashtag into an entity is unmeasured ; _audit/2026-11-28-census-calls.md::M C11 RIDES INSIDE M C1'S FIRST NAMED FIRE ; M C1
 M C12	M	W	R3	TARGET:the words of a draft he names	INFERRED	RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS ; M C12
 M C13	M	W	R3	TARGET:a post he names to schedule	NAMED	_audit/_census/messaging-and-content.md::Schedule post is a button opening a modal nobody has opened
 M C15	M	W	R3	PRECONDITION:a post he has scheduled	MEASURED	_audit/2026-11-26-readers-msg26.md::No scheduled posts yet ; RULING:MEASURED-ABSENT-OR-PRECONDITION
@@ -152,7 +151,7 @@ M C57	M	W	R3	TARGET:the event he names to create (title and time)	INFERRED	RULIN
 M C58	M	W	R3	TARGET:an event he names	NAMED	_audit/_census/read-addresses.tsv::ADMITTED 2026-09-23 BY A REVIEW: COMMIT (lane L1): one event by its NUMERIC id ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
 M C61	M	W	R3	CAPTURE:C-B5-1	NAMED	_audit/2026-10-10-lane-b5-groups-build.md::| C-B5-1 | N 63, M C61 | ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
 M C62	M	W	R3	TARGET:a group he has a pending request to join	NAMED	_audit/_census/write-classes.tsv::queued:GROUP-REQUEST-PENDING ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
-M C65	M	W	R3	SIBLING:M C25	INFERRED	RULING:D6-CAPABILITY-OVER-AFFORDANCE ; M C25
+M C65	M	W	R3	CAPTURE:C-GROUP-POST-1	MEASURED	N 175 ; _audit/_census/network.md::A group feed's post permalinks do not wear that route ; _audit/2026-11-28-census-calls.md::M C65 AND M C91 NEED THE GROUP FEED'S OWN ROUTE
 M C66	M	W	R2	TARGET:a member he names to mention	INFERRED	RULING:MENTION-COMPOSITION-RULING ; RULING:OPERATOR-NAMES-THE-TARGET
 M C67	M	W	R3	TARGET:a group post or comment of his he names	INFERRED	RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS ; M C67
 M C68	M	W	R3	TARGET:a group he names that holds posts for admin approval	INFERRED	RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS ; M C68
@@ -173,7 +172,7 @@ M C87	M	W	R3	TARGET:a post he names where he is mentioned or tagged	INFERRED	RUL
 M C88	M	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 M C89	M	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 M C90	M	W	R3	CAPTURE:C-B3-2	INFERRED	_audit/2026-10-10-lane-b3-messaging-build.md::the first place to look, in the same capture ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE ; RULING:HIS-OWN-CURATION-NOT-OUTWARD
-M C91	M	W	R3	SIBLING:M C32	INFERRED	RULING:D6-CAPABILITY-OVER-AFFORDANCE ; M C32
+M C91	M	W	R3	CAPTURE:C-GROUP-POST-1	MEASURED	N 175 ; _audit/_census/network.md::A group feed's post permalinks do not wear that route ; _audit/2026-11-28-census-calls.md::M C65 AND M C91 NEED THE GROUP FEED'S OWN ROUTE
 M C92	M	W	R3	TARGET:an event he names	NAMED	_audit/_census/read-addresses.tsv::ADMITTED 2026-09-23 BY A REVIEW: COMMIT (lane L1): one event by its NUMERIC id ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
 M C94	M	W	R2	TARGET:a post and a connection he names	INFERRED	RULING:OPERATOR-NAMES-THE-TARGET ; M C94
 M C97	M	W	R3	CAPTURE:C-I3-1	MEASURED	_audit/2026-11-27-msg7.md::THE UNIQUENESS SESSION 12 DID NOT TAKE IN-PAGE IS ON ITS CAPTURE ; tests/fixtures/live12/notifications.html ; RULING:M-C97-LINK-KEYED-DELETE
@@ -213,7 +212,6 @@ M M48	M	W	R3	TARGET:a conversation he names whose last message is his, under 60 
 M M50	M	W	R3	SIBLING:lane-S	NAMED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD ; RULING:MESSAGING-SETTINGS-CAPABILITY-LEVEL
 M M51	M	W	R2	CAPTURE:msg-thread-footer	MEASURED	_audit/2026-11-26-readers-msg26.md::that conversation's last message is HIS ; RULING:OWN-INBOX-READS-COVERED-BY-B
 M M52	M	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
-N 3	N	W	R2	SIBLING:N 1	INFERRED	RULING:D6-CAPABILITY-OVER-AFFORDANCE ; N 1
 N 5	N	W	R2	TARGET:a member he names to invite, with a note	NAMED	_audit/2026-09-24-lane-l5-messaging.md::| C-P3 | the invitation dialog ; RULING:OPERATOR-NAMES-THE-TARGET
 N 7	N	W	R3	TARGET:a Page and the connections he names to invite	INFERRED	RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS ; N 7
 N 8	N	W	R3	TARGET:a Page and the connections he names to invite	INFERRED	RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS ; N 7
@@ -237,14 +235,13 @@ N 41	N	W	R1	RULING:Q-NAME-BEARING-ADDRESS-REDACTION	INFERRED	_audit/_census/mess
 N 42	N	W	R1	RULING:Q-NAME-BEARING-ADDRESS-REDACTION	INFERRED	_audit/_census/messaging-and-content.md::`/pulse/` stays refused ; RULING:READ-PAST-AN-ACT-SUBSTRING
 N 43	N	W	R3	CAPTURE:feed-item-permalink-menu	MEASURED	_audit/2026-11-27-msg7.md::THE AUTHOR-DIRECTED ENTRY FITS A 14-CHARACTER PREFIX ; tests/fixtures/live12/permalink_member_post_menu-open.html ; RULING:HIS-OWN-CURATION-NOT-OUTWARD
 N 49	N	W	R1	TARGET:a skills Page he names	INFERRED	RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS ; N 49
-N 50	N	W	R1	SIBLING:N 47	NAMED	_audit/_census/network.md::Only the ROUTE is retired, not the outcome ; RULING:D6-CAPABILITY-OVER-AFFORDANCE
+N 50b	N	W	R1	TARGET:a school Page he names	NAMED	_audit/_census/network.md::no shipped write acts on a school ; RULING:OPERATOR-NAMES-THE-TARGET
 N 51	N	W	R3	CAPTURE:feed-item-permalink-menu	MEASURED	_audit/2026-11-27-msg7.md::class B are author-directed ; tests/fixtures/live12/permalink_page_post_menu-open.html ; RULING:HIS-OWN-CURATION-NOT-OUTWARD
 N 55	N	W	R3	CAPTURE:admit-newsletters-id	NAMED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/newsletters/1234567890/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
 N 56	N	W	R3	CAPTURE:admit-newsletters-id	INFERRED	_audit/2026-10-10-lane-b2-network-build.md::The list draws no control to press
 N 58	N	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 N 59	N	W	R1	ADMIT:https://www.linkedin.com/feed/hashtag/placeholder/	MEASURED	_audit/2026-11-27-msg7.md::A HASHTAG'S RESULTS DRAW NO FOLLOW CONTROL AND NO HASHTAG FEED ; tests/fixtures/live12/search_content.html ; RULING:READ-PAST-AN-ACT-SUBSTRING
 N 60	N	W	R1	ADMIT:https://www.linkedin.com/feed/hashtag/placeholder/	MEASURED	_audit/2026-11-27-msg7.md::A HASHTAG'S RESULTS DRAW NO FOLLOW CONTROL AND NO HASHTAG FEED ; N 59
-N 61	N	R	-	CAPTURE:admit-mynetwork-network-manager-people-follow-following	NAMED	_audit/_census/read-addresses.tsv::/feed/hashtag/ has no pattern ; RULING:READ-PAST-AN-ACT-SUBSTRING
 N 62	N	W	R1	CAPTURE:admit-mynetwork-discovery-see-all	NAMED	_audit/_census/completeness-annotations.tsv::My Network: full discovery lists ; tests/fixtures/live12/mynetwork.html
 N 63	N	W	R3	CAPTURE:C-B5-1	NAMED	_audit/2026-10-10-lane-b5-groups-build.md::| C-B5-1 | N 63, M C61 | ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
 N 65	N	R	-	SIBLING:lane-NP	NAMED	_audit/2026-10-10-rulings-ledger-questions.md::Already answered by NAMED-PROFILE-DETAIL-PAGES (lane NP)
@@ -280,14 +277,14 @@ N 116	N	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 N 117	N	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 N 119	N	W	R3	TARGET:a 1st-degree connection he names, to ask for a recommendation	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::| C4 | `request_recommendation` ; RULING:OPERATOR-NAMES-THE-TARGET
 N 120	N	W	R3	TARGET:a 1st-degree connection he names, to recommend	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::| C5 | `give_recommendation` ; RULING:OPERATOR-NAMES-THE-TARGET
-N 121	N	W	R3	CAPTURE:admit-in-me-details-recommendations	MEASURED	tests/fixtures/live12/recommendations.html ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
-N 122	N	W	R3	CAPTURE:admit-in-me-details-recommendations	MEASURED	tests/fixtures/live12/recommendations.html ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
-N 123	N	W	R3	CAPTURE:admit-in-me-details-recommendations	MEASURED	tests/fixtures/live12/recommendations.html ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
+N 121	N	W	R3	PRECONDITION:a recommendation he has received	MEASURED	_audit/2026-11-27-live-session-14.md::first view: 0 entries and 0 member links ; tests/fixtures/live14/recommendations.html
+N 122	N	W	R3	PRECONDITION:a recommendation he has received	MEASURED	_audit/2026-11-27-live-session-14.md::first view: 0 entries and 0 member links ; tests/fixtures/live14/recommendations.html
+N 123	N	W	R3	PRECONDITION:a recommendation he has received	MEASURED	_audit/2026-11-27-live-session-14.md::first view: 0 entries and 0 member links ; tests/fixtures/live14/recommendations.html
 N 124	N	W	R3	TARGET:a 1st-degree connection he names, to recommend	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::| C5 | `give_recommendation` ; RULING:OPERATOR-NAMES-THE-TARGET
-N 125	N	W	R3	CAPTURE:admit-in-me-details-recommendations	MEASURED	tests/fixtures/live12/recommendations.html ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
-N 126	N	W	R3	CAPTURE:admit-in-me-details-recommendations	MEASURED	tests/fixtures/live12/recommendations.html ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
-N 127	N	W	R3	CAPTURE:admit-in-me-details-recommendations	MEASURED	tests/fixtures/live12/recommendations.html ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
-N 128	N	W	R3	CAPTURE:admit-in-me-details-recommendations	MEASURED	tests/fixtures/live12/recommendations.html ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
+N 125	N	W	R3	PRECONDITION:a recommendation he has given	MEASURED	_audit/2026-11-27-live-session-14.md::Its view: 0 entries and 1 member link ; tests/fixtures/live14/recommendations_given.html
+N 126	N	W	R3	PRECONDITION:a recommendation he has received	MEASURED	_audit/2026-11-27-live-session-14.md::first view: 0 entries and 0 member links ; tests/fixtures/live14/recommendations.html
+N 127	N	W	R3	PRECONDITION:a recommendation he has given	MEASURED	_audit/2026-11-27-live-session-14.md::Its view: 0 entries and 1 member link ; tests/fixtures/live14/recommendations_given.html
+N 128	N	W	R3	PRECONDITION:a recommendation request someone has sent him	MEASURED	_audit/2026-11-27-live-session-14.md::first view: 0 entries and 0 member links ; tests/fixtures/live14/recommendations.html
 N 137	N	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 N 138	N	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 N 139	N	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
@@ -397,15 +394,15 @@ P E4	P	W	R3	TARGET:a 1st-degree connection he names, whose skill he endorses	NAM
 P E5	P	W	R3	TARGET:a 1st-degree connection he names, whose skill he endorses	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::| C3 | `endorse_skill` ; RULING:OPERATOR-NAMES-THE-TARGET
 P E6	P	W	R3	PRECONDITION:an endorsement he has received	NAMED	_audit/_census/write-classes.tsv::queued:NO-ENDORSEMENT-DRAWN
 P E8	P	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
-P F1	P	R	-	CAPTURE:admit-in-me-details-recommendations	MEASURED	tests/fixtures/live12/recommendations.html ; _audit/_census/read-addresses.tsv::https://www.linkedin.com/in/me/details/recommendations/=>True
+P F1	P	R	-	PRECONDITION:a recommendation he has received, so that a reader meets an entry -- an empty list is not a believable zero until one entry's shape is captured	MEASURED	_audit/2026-11-27-live-session-14.md::first view: 0 entries and 0 member links ; tests/fixtures/live14/recommendations.html
 P F2	P	W	R3	TARGET:a 1st-degree connection he names, to ask for a recommendation	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::| C4 | `request_recommendation` ; RULING:OPERATOR-NAMES-THE-TARGET
 P F3	P	W	R3	TARGET:a 1st-degree connection he names, to recommend	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::| C5 | `give_recommendation` ; RULING:OPERATOR-NAMES-THE-TARGET
 P F4	P	W	R3	TARGET:a 1st-degree connection he names, to recommend	NAMED	_audit/2026-09-24-lane-l8-outward-classes.md::| C5 | `give_recommendation` ; RULING:OPERATOR-NAMES-THE-TARGET
-P F5	P	W	R3	CAPTURE:admit-in-me-details-recommendations	MEASURED	tests/fixtures/live12/recommendations.html ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
-P F6	P	W	R3	CAPTURE:admit-in-me-details-recommendations	MEASURED	tests/fixtures/live12/recommendations.html ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
-P F7	P	W	R3	CAPTURE:admit-in-me-details-recommendations	MEASURED	tests/fixtures/live12/recommendations.html ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
-P F8	P	W	R3	CAPTURE:admit-in-me-details-recommendations	MEASURED	tests/fixtures/live12/recommendations.html ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
-P F9	P	W	R3	CAPTURE:admit-in-me-details-recommendations	MEASURED	tests/fixtures/live12/recommendations.html ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
+P F5	P	W	R3	PRECONDITION:a recommendation he has given	MEASURED	_audit/2026-11-27-live-session-14.md::Its view: 0 entries and 1 member link ; tests/fixtures/live14/recommendations_given.html
+P F6	P	W	R3	PRECONDITION:a recommendation he has received	MEASURED	_audit/2026-11-27-live-session-14.md::first view: 0 entries and 0 member links ; tests/fixtures/live14/recommendations.html
+P F7	P	W	R3	PRECONDITION:a recommendation he has received	MEASURED	_audit/2026-11-27-live-session-14.md::first view: 0 entries and 0 member links ; tests/fixtures/live14/recommendations.html
+P F8	P	W	R3	PRECONDITION:a recommendation request someone has sent him	MEASURED	_audit/2026-11-27-live-session-14.md::first view: 0 entries and 0 member links ; tests/fixtures/live14/recommendations.html
+P F9	P	W	R3	PRECONDITION:a recommendation he has received	MEASURED	_audit/2026-11-27-live-session-14.md::first view: 0 entries and 0 member links ; tests/fixtures/live14/recommendations.html
 P G2	P	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 P G3	P	W	R3	SIBLING:lane-U	INFERRED	linkedin_server/uploads.py ; _audit/2026-09-28-rulings-build-classes.md::`FILE-UPLOAD-UNSANCTIONED` is therefore a stale label.
 P G4	P	W	R3	CAPTURE:admit-in-me-details-featured	INFERRED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/in/me/details/featured/ ; RULING:SELF-PROFILE-EDITS-NOT-OUTWARD

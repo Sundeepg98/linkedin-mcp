@@ -904,8 +904,12 @@ def selftest(box: pathlib.Path) -> int:
     # positional 'same tool, same gate' when `M M1` moved to another tool, which
     # took ITS branch from 66 to 65 as well. Both sides typed "65", so git
     # merged the two moves as one; the pointers they removed are different.
+    # 63 ON LANE CENSUS-CALLS28 (2026-11-28), MEASURED by `--check`: `N 61`
+    # went MEASURED-ABSENT on the orchestrator's ruling and its positional
+    # "Same uncertainty" was struck for evidence of its own, so it is no
+    # longer a pointer.
     record("G5 CALIBRATION -- whitespace in P D15's capability cell", False, out, rc,
-           "PASS -- all 64 pinned pointers")
+           "PASS -- all 63 pinned pointers")
 
     print("THE POINTER-GRAPH GUARD, SHOWN FAILING")
     print("=" * 92)

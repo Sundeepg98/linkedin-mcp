@@ -198,10 +198,8 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
                            "profile, R4's refusal until 2026-09-28"),
     "N 103": ("RULING", "", "the similar-profiles rail is on another "
                             "member's profile, R4's refusal until 2026-09-28"),
-    "N 61": ("ADDRESS", "REFUSED", "both followed-hashtag spellings contain "
-                                   "/follow, matching inside the word "
-                                   "'followed' -- a substring hit, not a "
-                                   "ruling anybody wrote"),
+    # N 61 LEFT 2026-11-28 (lane census-calls28): MEASURED-ABSENT on
+    # N61-FOLLOWED-HASHTAGS-MEASURED-ABSENT -- see LEFT THE READ-GAP SET below.
     "N 76": ("PRESS", "", "named by the disclosing-press ruling as a consumer; "
                           "nothing has pressed the control and no tool builds "
                           "a personal follow link"),
@@ -442,7 +440,18 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
 #:     N 197  COVERED-UNFIRED  (was PRESS) -- the group's link, composed from
 #:            the caller's id and returned by linkedin_group_page when the
 #:            landing is that group (CALLER-COMPOSITION-UNDER-D6)
+#:
+#: LEFT THE READ-GAP SET 2026-11-28, on lane census-calls28 (the orchestrator's
+#: ruling N61-FOLLOWED-HASHTAGS-MEASURED-ABSENT): one reading retired. Its
+#: MEASURED_PAST_BY_BUCKET3 entry left with it, since that table's keys must
+#: stay TRIAGE keys.
+#:
+#:     N 61   MEASURED-ABSENT  (was ADDRESS) -- the network manager's nav draws
+#:            no followed-hashtags entry, and a hashtag's results draw no
+#:            follow control and no hashtag feed
 
+#: THREE SINCE 2026-11-28: `N 61` left the read-GAP set (MEASURED-ABSENT, lane
+#: census-calls28), and its entry left with it, as a TRIAGE key must.
 #: These four 2026-09-21 verdicts were measured past by the bucket-3 address
 #: table (`_audit/_census/read-addresses.tsv`, audit
 #: `_audit/2026-09-23-bucket3-addresses.md`, whose CORRECTS line names exactly
@@ -457,9 +466,6 @@ MEASURED_PAST_BY_BUCKET3: dict[str, str] = {
     "P L4": "waits on a LIVE READ of which address serves newsletter "
             "analytics (bucket-3 NEEDS-SESSION), not on a refused address "
             "anybody has seen served",
-    "N 61": "waits on a LIVE READ of where followed hashtags are drawn "
-            "(bucket-3 NEEDS-SESSION), not on a refused address anybody has "
-            "seen served",
 }
 
 #: RULING verdicts whose decision a REGISTERED ruling has since made -- the

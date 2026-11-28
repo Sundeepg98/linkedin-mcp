@@ -237,10 +237,19 @@ def test_the_split_is_the_one_the_lane_report_quotes():
     365 ON THE SAME LANE'S ROUND 2, MEASURED: `M M54` entered, the restore half
     split from `M M28` (M-M28-SPLITS), a W GAP row, so its R3 line
     (messaging-manage) enters the table. 364 + 1 = 365 = 16 R1 + 33 R2 + 316
-    R3."""
+    R3.
+
+    366 ON LANE CENSUS-CALLS28 (2026-11-28), MEASURED
+    (`_audit/2026-11-28-census-calls.md`, section 4.2): `N 50` split under
+    COMPOUND-ROW-SPLITS-ONLY-ON-STATE on the orchestrator's answer to Q2. `N 50`
+    keeps its R1 line as `built:follow_company` (COVERED-PROVEN by D6), and
+    `N 50b`, the school half, enters GAP with an R1 line of its own (act follow,
+    queued:SCHOOL-PAGE-SURFACE). The same lane's `N 3` kept its R2 line as
+    `built:send_invitation`, which moves no class. 365 + 1 = 366 = 17 R1 + 33 R2
+    + 316 R3."""
     rows, _ = cwc.load()
     split = cwc.split(rows)
-    assert (split["R1"], split["R2"], split["R3"]) == (16, 33, 316)
+    assert (split["R1"], split["R2"], split["R3"]) == (17, 33, 316)
     assert split["R1:built"] + split["R1:queued"] == split["R1"]
 
 
