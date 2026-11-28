@@ -678,6 +678,216 @@ and each step runs in the foreground.
    Neither can reach the runner, whose member always comes off a
    parser-normalised landing.
 
+---
+
+## 10. Live session 14a, the run (2026-11-28, attended)
+
+**THE RULINGS ON SECTION 9** (the orchestrator, by message, after the amended
+READY): no question asks the operator anything, and each takes its default.
+
+- Phase 30 (rank 69) drops to 14b, "no operator-supplied profileId".
+- Phase 23 (rank 154) drops to 14b, "no operator-named post".
+- Either may come back only if he volunteers the item at the GO.
+- UNREAD's composer-address route (item 3) is YES, for 14b. It is built after
+  14a, offline and reviewed, with its own READY.
+
+**THE GO** (`_TEAM_LEAD_GO.md`, written 08:31 IST; deleted as the ack at
+08:35:11, before Chrome started; a copy is in the lane's gitignored scratch):
+
+- The operator was at the console from 08:30.
+- It named all 11 pins of `pins.json` (06:45:54).
+- The budget: the pinned ledger is the authority. 14a runs in order, and
+  stops when the next phase's most loads would pass what is free.
+- UNREAD-SKIPPED: M M28, M M54 and M M34 are not run.
+- Phases 23 and 30 are not supplied.
+- TOGGLE-FIRST; E18 and E19 through `await_rewrite`; every self-root press
+  through `exact_link_verdict`.
+- Section 3's 22 kinds are the stop lines.
+- A status message goes to the orchestrator before each attended phase. One
+  was sent before phase 1 and one before phase 3.
+
+**BEFORE THE FIRST LOAD** (08:34 IST, VERIFIED):
+
+- `go_pins_check_s14.py` (disposable, the lane's scratch) read the GO's 11 pin
+  lines. All 11 equal `pins.json`, and the three files the GO names beyond
+  `verify_pins_s14.py`'s set hash to the GO's values: GO-MATCH True.
+- `verify_pins_s14.py`: ALL-MATCH True (head `70ac75fa`, tracked tree clean).
+- The pinned ledger: 0 LinkedIn page loads in the trailing 12 h, so 40 free;
+  the live state down.
+- `os_check`: 9224 down, 0 clients, no Chrome on the dedicated profile, no
+  lock, no flag. No live runner process on the box.
+
+**THE START** (0 loads):
+
+- 08:35:16: the dedicated Chrome started by the main checkout's
+  `scripts/start_chrome.ps1` (outcome `started`, Chrome 158, its two flags
+  only).
+- 08:35:24: `os_check`. 9224 was held by the profile's one browser process,
+  with 0 clients and no lock.
+- 08:35:33: the flag raised.
+- `attach_check`: PASS `[0, 1, 0]`, restored, 0 loads.
+
+### 10.1 The loads
+
+| load | IST | phase | landing | what it read |
+|---|---|---|---|---|
+| 1 | 08:36:00 | 1 `profile` (E5) | served, same depth, another url: his root | E5 proved his root; the top card; the More menu; then the photo press stopped the phase |
+| 2 | 08:37:55 | 2 `recommendations` | served exact | the Received and Given switch, round trip restored; the section's disclosure |
+| 3 | 08:39:19 | 3 `otw_editor` (attended) | served, same depth, another url: his root | the same member proven; the card; Edit pressed; STOP-ALL `otw_editor_not_closed` |
+
+Every load was recorded in the pinned ledger before it was made. No load drew
+a wall, a checkpoint or a challenge (each: walled False, 0 challenge terms).
+The closest two loads were 84 s apart.
+
+### 10.2 What each phase showed
+
+**Phase 1, `profile`: exit 3, a phase stop after 1 load.**
+
+- **E5:** his root served through the shipped loader, and the self rule
+  proved it at its first load. The proof was kept in the session's gitignored
+  state, so the self block was open.
+- People gate v2 withheld the raw, and the skeleton was kept.
+- The top card drew More 1 (0 visible), Resources 1 (1), Open to 2 (1),
+  Enhance profile 2 (1) and Add profile section 0.
+- Editor routes on the first render: `edit/forms/summary/new/` 1,
+  `edit/intro/` 1, `edit/secondary-language/` 1, and 1 other form.
+- The top-card opener (Resources) drew a menu of 5 items, closed on the first
+  Escape.
+- The photo press was `did_not_close` at `in_me_photo`, so the phase stopped
+  and closed its tab. Nothing was chosen or saved.
+- Not reached:
+  - the custom-button press;
+  - the scroll pass and the Experience section;
+  - rank 31's press;
+  - E5's skill ids and insight indices.
+- So phases 9 (`skill_form`) and 26 (`skill_insights`) have no item to name.
+- Phase 1's readings are in its run log only. The stop raised before the
+  phase recorded them.
+
+**Phase 2, `recommendations`: exit 0, 1 load.**
+
+- The self alias wait ended `not_within_bound` after 5008 ms, and the page
+  still served exact. People gate v2 fired N1 1, R1 1 and R2 1 and withheld the raw;
+  the skeleton was kept.
+- The switch is two labelled checkboxes: Received checked, Given not. The
+  first view: 0 entries and 0 member links.
+- Given pressed once: Given checked, Received not. Its view: 0 entries and 1
+  member link.
+- Received pressed back: restored True.
+- The section's disclosure drew 2 items and closed on its first Escape.
+
+**Phase 3, `otw_editor`, attended: exit 4, STOP-ALL, 1 load.**
+
+- The loader proved his root again, and the member was the one E5 proved
+  (`the member E5 proved True`). The R3 ruling's check held, in its passing
+  direction.
+- The card before the press: drawn 1, audience "Recruiters only", Edit in the
+  card 1 (visible), hydrated 2, the top-card photo not framed.
+- Edit pressed. The editor opened as a modal: buttons 3, checkboxes 1 (1
+  checked), inputs 1, switches 1, links 1, headings 1, editors 1. Nothing in
+  it was drawn as pressed (save or confirm 0). Its words: Delete 3, Next 3,
+  Dismiss 1, Locations 1, On 1.
+- The close (3 Escapes, then the Dismiss step) left a modal visible beyond
+  those before the press. That is STOP-ALL `otw_editor_not_closed`. The runner
+  closed its tab, and the session ended.
+- The window was `raised_unfocused` for this phase; it was `fronted` for
+  phases 1 and 2.
+- **UNVERIFIED: whether the close made a save request, and whether his card
+  is unchanged.** The request summary and the card's after-read run only
+  after a close succeeds. Nothing in the editor was pressed but the close
+  attempts.
+
+### 10.3 The close: no load after the STOP-ALL
+
+- 08:40:57: the flag was lowered. No compare of his root was pending, so
+  `root_settle` had nothing to settle, and it was not run: nothing loads after
+  a STOP-ALL.
+- The dedicated Chrome was closed BY ITS PID after its command line was
+  checked (the debugging port and the dedicated profile). 0 processes were
+  left on the profile and 0 listeners on 9224.
+- 08:41:08: `os_check` showed 9224 down, 0 clients, no Chrome on the profile,
+  no lock, no flag. His own Chrome was untouched.
+- The session folder is preserved in the main checkout's gitignored
+  `_state/preserved/live14-2026-11-28`: 24 files, each identical by sha256. No
+  raw page was kept (`raw_kept` False in both readings that carry it).
+
+### 10.4 The ledgers
+
+- The session ledger: 3 loads, 0 searches.
+- The pinned account ledger: 3 records for session 14
+  (`live-s13/14/live_census`), so 3 in the trailing 12 h and 37 free. They
+  leave the window at 20:39 IST.
+- The two ledgers agree at 3.
+
+### 10.5 The two close failures, measured offline
+
+`skeleton_delta.py` (disposable, the lane's scratch) counts tags and close
+words in the tracked skeletons. It prints no page text.
+
+- **The Open-to-Work editor is a native `<dialog open>`** (VERIFIED).
+  - The press added ONE `<dialog>` carrying `open`; the page's four other
+    `<dialog>` elements stay closed. It also added 3 buttons, 1 input and 1
+    label. Counted as an element's whole text or label, Dismiss, Delete and
+    Next each appear once more.
+  - After the 3 Escapes and the Dismiss step, the page's skeleton is
+    byte-identical to the settled open one.
+- **The room guard did not skip the Escapes** (DERIVED). Offline, against the
+  same ledgers, `press_room()` returns None for a call with 1 load.
+- **UNVERIFIED: why the dialog stayed.** Neither is it known whether the
+  Dismiss control was found and pressed, because the close path records
+  nothing when it raises. Two candidates, for 14b to measure offline first:
+  - the Escapes reached an element outside the dialog (the window was
+    `raised_unfocused`);
+  - the dialog takes no Escape, and needs its own control pressed inside
+    `dialog[open]`.
+- **This was the editor's first live press.** Session 12 never pressed Edit:
+  its record lists E37' as not loaded. So the close rule had never met the
+  editor. The STOP-ALL did what session 12's check V3 built it for: it
+  refused to call the editor closed.
+- **The photo press added no dialog** (VERIFIED).
+  - It added 152 `div`, 58 `span`, 47 `p`, 29 `a`, 14 `figure`, 14 `img`, 7
+    `h2`, 7 `button`, 5 `section`, 5 `input` and 5 `label`.
+  - No close word was added (Dismiss, Close, Edit and Next unchanged).
+  - The 5 inputs are what 119.2's panel rule counts as a panel opened.
+  - After 3 Escapes the skeleton is byte-identical.
+- **A reading, not proven:** five sections, with headings, images and links,
+  read like profile sections that rendered late, not a panel the press
+  opened. If so, the stop was a false `did_not_close`. UNVERIFIED either way.
+
+### 10.6 What 14a did not reach (all to 14b)
+
+- **Not run because of the STOP-ALL:** phases 4-8, 10-22, 24, 25 and 27-29.
+- **Not run for want of their items:** phases 9 and 26. E5's skill items were
+  never read.
+- **Not supplied (the GO):** phases 23 and 30, "no operator-named post" and
+  "no operator-supplied profileId".
+- **From phase 1:** rank 31's press, the scroll pass and the custom button.
+- **From phase 3:** rank 24's close and the card's after-read.
+- **14b's own lines:** ranks 2, 149 and 151, and the composer-address route
+  for M M28 and M M54.
+
+### 10.7 Rows moved: none
+
+Every line was a capture, and a capture moves no row by itself.
+
+- The capture queue's `captured_already` cells for ranks 23 and 24 now name
+  the session-14 skeletons.
+- `tests/fixtures/live14/` holds 11 tracked copies. Two of them are
+  byte-identical "not closed" copies, kept as the stops' evidence.
+
+### 10.8 What needs the orchestrator
+
+1. **His Open-to-Work card after the STOP-ALL is UNVERIFIED** (10.2, phase 3).
+   A glance by him needs no load. Until it is checked, the next live session
+   reads the card before anything else on his root.
+2. **14b's GO waits on the close failures** (10.5). Its runner needs, each red
+   first and reviewed, with its own READY:
+   - the close path recording which steps ran;
+   - a phase stop recording what was read before it;
+   - the Open-to-Work close aimed inside `dialog[open]`;
+   - the panel rule kept apart from sections that render late.
+3. **The account:** 37 free now. Session 14's 3 leave the window at 20:39 IST.
+
 ## Lessons (for the orchestrator to harvest)
 
 1. **`Path.write_text` on Windows writes CRLF.** Three patch scripts turned
@@ -712,4 +922,13 @@ and each step runs in the foreground.
    `self_member_changed`, were missing even from the prose. `stop_lines_check_s14.py` reads the kinds by
    AST and refuses a section 3 that misses one. It was red on the committed
    text and is green now, so it is a candidate for INSTRUMENTS 122.
+9. **A close that leaves no trace cannot be judged afterwards.** Both stops
+   left byte-identical skeletons and no record of which close steps ran, so
+   the cause stays UNVERIFIED. A close path records each step it took before
+   it raises.
+10. **A stop must record what was read before it.** Phase 1's top card, menu
+    and editor routes survive only in its run log.
+11. **A close rule first meets its control live.** The Open-to-Work close was
+    built before anyone had pressed Edit, and the editor is a native
+    `<dialog open>`. The STOP-ALL is what made that first meeting safe.
 

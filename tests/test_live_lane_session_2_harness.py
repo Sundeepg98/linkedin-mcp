@@ -745,8 +745,11 @@ def test_a_non_ascii_word_survives_the_copy_as_a_reference() -> None:
 #: `live13` 13 AT THE MERGE OF MASTER INTO LANE LIVE-S13 (2026-11-27), counted
 #: on disk on the merged tree: session 13's tracked skeletons, beside master's
 #: counts for the other sessions.
+#: `live14` 11 AT SESSION 14'S CLOSE-OUT (2026-11-28), counted on disk: the
+#: tracked skeletons of its three loads, two of them byte-identical "not
+#: closed" copies kept as the stops' evidence.
 LIVE_FIXTURE_COUNTS = {"live1": 5, "live2": 31, "live3": 14, "live4": 4, "live5": 1, "live7": 1, "live8": 8, "live9": 1,
-                       "live11": 62, "live12": 56, "live13": 13}
+                       "live11": 62, "live12": 56, "live13": 13, "live14": 11}
 
 
 @pytest.mark.parametrize("session_dir", sorted(LIVE_FIXTURE_COUNTS))

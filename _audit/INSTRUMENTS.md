@@ -13785,3 +13785,86 @@ and per-file duration readers over the shard reports' junit XML, and the
 page-clock probe. None was shown failing on a planted defect. The method is
 kept in the record's section 4.2: both attempts' shard reports, the same
 commit and plan, compared file by file.
+
+## 122. AN EDITOR THAT WILL NOT CLOSE ENDS THE SESSION, AND A READY'S STOP LINES ARE THE RUNNER'S KINDS BY NAME (live-s13, 2026-11-28)
+
+The live lane's session-14 runner (`runner_s14.py`, sha256 `8094c4a0`, kept in
+the main checkout's gitignored `_state/live-runner/s14/`) and its check set
+(`gate_checks_s14.py`, 82 checks). Each instrument below was SHOWN FAILING
+offline before it was trusted: against `runner_s13`, or against the snapshot a
+review finding was made on. The record says where session 14 held it. Session
+14 made 3 loads before a STOP-ALL ended it, so few instruments met the page.
+The record is `_audit/2026-11-27-live-session-14.md`, sections 3, 6, 7 and 10.
+Only those that also HELD enter here; the rest are named at the end.
+
+### 122.1 An editor that will not close is STOP-ALL, and the session ends there
+
+The Open-to-Work editor is closed by Escape, then by its own Dismiss, and then
+verified gone: no modal visible beyond those before the press. If it is not
+gone, the result is STOP-ALL `otw_editor_not_closed`. The phase ends, the
+session ends, and nothing loads after it.
+
+- SHOWN FAILING: session 12's V3, where an editor that would not close read
+  "ok" on a runner without the verification. It is ported here
+  (`otw_checks_s14_port.py`, 8 of 8 on the final runner).
+- HELD LIVE: load 3, the editor's first live press. The editor, a native
+  `<dialog open>`, stayed after 3 Escapes and the Dismiss step. The runner
+  refused to call it closed, closed its tab and ended the session. The flag
+  was lowered, Chrome was closed by its PID, and no load followed.
+
+    AN EDITOR IS CLOSED BY ITS OWN EVIDENCE, OR THE SESSION STOPS.
+
+### 122.2 His root is proven by the shipped loader, and another member is STOP-ALL
+
+Every self line proves his root through the shipped loader (SELF-LOADER,
+integration 7), and compares the member it proves with the one E5 proved.
+Another member is STOP-ALL `self_member_changed`, raised before any file is
+touched (the R3 ruling).
+
+- SHOWN FAILING: Q14, red on r4, which did not compare the member.
+- HELD LIVE, in its passing direction: E5 proved his root at its first load
+  (load 1), and phase 3's loader proved the same member (load 3). It never
+  fired.
+
+### 122.3 A view switch is pressed back and verified restored, or it is STOP-ALL
+
+Rank 23's Received and Given switch works like this. The unchecked one is
+pressed once, as a view switch, and its view is read. Then the first one is
+pressed back, and the restore is VERIFIED from the checked states. A switch
+that does not restore is STOP-ALL `restore_failed`.
+
+- SHOWN FAILING: G1a and G1b, red on `runner_s13`.
+- HELD LIVE: load 2, restored True.
+
+### 122.4 A READY's stop lines are the runner's STOP-ALL kinds, by name
+
+`stop_lines_check_s14.py`, beside the runner, reads `STOP_ALL_KINDS` from the
+runner by AST and reads the record's section 3. It refuses a section that
+names fewer kinds. Its control: an empty section misses every kind.
+
+- SHOWN FAILING: red on the first READY's section 3, which named 4 of the 22
+  kinds; three were not even in its prose.
+- HELD: green on the amended READY and on the text the GO was written on (22
+  of 22). It is a READY-time check and never meets the page.
+
+**Fired live, verdict UNVERIFIED** (not entered): 119.2's panel rule stopped
+phase 1 at the photo press (`did_not_close`). The press added no dialog. It
+added 5 inputs among 5 sections with headings and images, which may be
+sections rendering late rather than a panel (the record, 10.5).
+
+**Shown failing, NOT exercised live** (candidates, not entered): everything
+after phase 3, including:
+
+- TOGGLE-FIRST's Easy Apply round trip;
+- the one typing site;
+- the self-root press's landing judge (`press_landing_not_target`);
+- the deferred compare of his root and `root_settle`;
+- the deletion of the profile-id file;
+- the label verdict's refusal of a toggle;
+- the Drafts press's wrapper.
+
+**Disposable** (the lane's scratch folder and the runner's folder):
+`go_pins_check_s14.py` (the GO's pins against `pins.json`), the pins writer
+and its verifier, `ast_delta_s14.py`, `skeleton_delta.py`, `tree_compare.py`
+and the capture queue's cell patch. `ast_delta_s14.py` has a self-equality
+control and a one-constant mutation control, but it was built for one proof.
