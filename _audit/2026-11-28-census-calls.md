@@ -9,23 +9,38 @@ Evidence classes: VERIFIED means read on disk in this lane, MEASURED means an
 instrument counted it on a tracked file in this lane, DERIVED means computed from
 what was read, UNVERIFIED means not checked. People by role only.
 
-STATUS: IN PROGRESS. Sections 2 and 3 are final; sections 4 to 6 are held (section 1).
+STATUS: READY, AND HOLDING. READY: J 86's move at `118d4008`, certified by lane CI run
+46145558412 (success, 7 jobs) and full-matrix run 46146396940 (success, 3 cells x 6
+shards), both read by sha; the commits above it carry only this record and the derived
+views it moves. HOLDING: every other item, analysed here and written as a tried ready
+patch (section 1), waits on hygiene28's merge (Q1) and on questions Q2 to Q5.
 
 ## 1. The order, and what holds what
 
 | item | rows | outcome | where |
 |---|---|---|---|
-| 1. J 86, the D6 call on P I14 | J 86 | GAP -> COVERED-UNFIRED | section 2, committed |
+| 1. J 86, the D6 call on P I14 | J 86 | GAP -> COVERED-UNFIRED, committed | section 2 |
 | 2. the code reads | M C65, M C91 | both stay GAP: neither tool reaches a group post | section 3 |
-| 3. D6 calls | N 3, N 50 | held, network.md | section 4 |
-| 4. the orchestrator's ruling | N 61 | held, network.md | section 5 |
-| 5. the re-judges | M C11, rank 23's 13 rows, J 3, J 17, J 151 | no row moves | section 6 |
+| 3. D6 calls | N 3 | COVERED-UNFIRED, written and held (network.md) | section 4.1 |
+| 3. D6 calls | N 50 | stopped: the school half is delivered by nothing (Q2) | section 4.2 |
+| 4. the orchestrator's ruling | N 61 | MEASURED-ABSENT, written and held (network.md, and one queue line, Q3) | section 5 |
+| 5. the re-judges | M C11 | step re-pointed, written and held (messaging-and-content.md) | section 6.1 |
+| 5. the re-judges | rank 23's 13 rows | all PRECONDITION; coupled to queue rank 23 (Q4) | section 6.2 |
+| 5. the re-judges | J 3, J 17, J 151 | a new place capture, `C-SRCH-2b` (Q5) | section 6.3 |
+| 5. the re-judges | M C65, M C91 | a group-feed capture (Q5) | section 6.4 |
+
+WHAT "HELD" MEANS HERE. The held edits exist as a tested ready patch in the lane's
+scratch directory (gitignored, so this record states what each edit is, and section 5.2
+and 6 give the exact lines): an apply script anchored on each line's own text, run in
+steps `n3`, `n61`, `msg` and `delta`, refusing on any anchor it cannot find exactly
+once. A queue step exists only for the queue's owner, and is never run by default.
 
 THE BASE HOLD. The brief puts `network.md` and `messaging-and-content.md` after
 hygiene28's merge, because that lane edits both. Master was `9ec91965` at every check
-in this lane, without hygiene28's merge, so every edit to those two slices is written as
-a ready patch under the lane's scratch directory and held. `jobs.md`, `profile.md` and
-the side tables are not hygiene28's.
+in this lane, the last at 18:34 IST, and hygiene28's branch was not an ancestor of it,
+so every edit to those two slices is written as a ready patch under the lane's scratch
+directory and held. The brief holds "the rest" with them, so the M C11 step and the
+re-judges are held too, though `next-step.tsv` is not hygiene28's.
 
 ## 2. J 86: COVERED-UNFIRED by D6 on P I14's tool
 
@@ -129,15 +144,197 @@ which this lane does not write.
 
 ## 4. N 3 and N 50 (held)
 
-To be written with the held patch.
+### 4.1 N 3: COVERED-UNFIRED by D6, written and held
+
+The ledger's call "`N 3` on `N 1`". N 3 is "Send an invitation from People You May
+Know"; its blocker is the `/mynetwork/` surface's unmeasured badge cost. The payload is
+an invitation to a person LinkedIn suggests, and the package sends one by two
+sanctioned routes, neither from `/mynetwork/`:
+
+1. `linkedin_send_invitation(profile, confirm_token)`, `N 1`'s tool (COVERED-UNFIRED,
+   never fired). It presses the one invitation control in his own profile's rail
+   whose card links to the profile he names (`dom.rail_invite_control_selector`).
+   MEASURED in this lane, on the two tracked skeletons of his profile
+   (`tests/fixtures/live11/in_me_profile.html`,
+   `tests/fixtures/live14/in_me_profile.html`): 5 of the 6 buttons whose text reads
+   `Connect` sit in the section whose `h2` reads 'People you may know', and the sixth
+   under a heading the skeleton blanks. So that rail IS LinkedIn's People You May Know
+   list, drawn on his profile. The skeletons blank every name-bearing label to `x`
+   (125 of 176 labels), so they cannot show the invitation label's own shape; `N 1`'s
+   cell holds that measurement, on keyed captures.
+2. `linkedin_connect_from_profile(profile, confirm_token)`, `N 4`'s route by D6
+   (COVERED-UNFIRED, never fired), for a suggestion the rail does not draw.
+
+Both are UNFIRED, so N 3 is COVERED-UNFIRED. It is a W row, so `ruling_holds` holds it
+by OPERATOR-NAMES-THE-TARGET with no marker: it fires only at a person he names. Its
+write-class line keeps its R2 class and becomes `built:send_invitation`
+(`send_invitation` is in `writes.PERFORMABLE`), on the `N 4` precedent, so the class
+split `test_write_classes.py` pins (16, 33, 316) does not move.
+
+The probe that counted the buttons is DISPOSABLE (lane scratch, never shown failing).
+It walked each tracked page with Python's `html.parser` and counted, per nearest
+enclosing `section`'s first `h2`, the buttons whose text is exactly `Connect`.
+
+A FINDING FOR `N 4`'s OWNER, not acted on. `N 4`'s write-class line says its undo is
+"NOT through this server ... withdrawing is destruction, in PERMANENTLY_FORBIDDEN, and
+the Sent manager is a forbidden address". On this tree `linkedin_withdraw_invitation`
+withdraws one pending invitation he sent, from the Sent tab (census row `N 10`,
+COVERED-UNFIRED), and `linkedin_sent_invitations` reads that tab. N 3's held line
+states that undo; `N 4`'s line is not this lane's to edit.
+
+### 4.2 N 50: STOPPED, because disk disagrees with the plan's premise
+
+N 50 is "Follow a company or school via an off-site Follow button". The plan expected
+COVERED-UNFIRED, "D6 on `N 47`". Two facts on this tree say otherwise.
+
+- THE SCHOOL HALF IS DELIVERED BY NOTHING. `linkedin_follow_company` acts on
+  `/jobs/view/<id>/` (a posting's employer), and `linkedin_follow_company_page` acts on
+  `/company/<numeric id>/` (`writes.py` url patterns). No write spec acts on
+  `/school/`; the boundary admits `/school/<slug>/` for reading only (`readonly.py`),
+  and `J 112`'s cell says a school's slug is a name. Whether `/company/<id>/` reaches
+  a school by its numeric id is UNVERIFIED.
+- THE COMPANY HALF RESTS ON A LIVE-PROVEN ROUTE. `linkedin_follow_company` was fired
+  and banked in the live lane's session 8 (`N 46` and `J 103` are COVERED-PROVEN on
+  that fire). D6 says a row rests on its routes' proofs, "COVERED-PROVEN if they are
+  live-proven"; `N 80`, `N 133` and `N 155` were banked PROVEN that way.
+
+So the two halves need different states, and COMPOUND-ROW-SPLITS-ONLY-ON-STATE splits
+such a row. Every recent split was the orchestrator's own per-row call (`N 26` to
+`N 26b` on the call of 17:46, 2026-09-28; `J-110-SPLITS-HOME-AND-POSTS`;
+`J-114-SPLITS`). N 50 is not moved, and nothing for it is in the held patch. Question
+Q2 (section 9).
 
 ## 5. N 61 (held)
 
-To be written with the held patch.
+### 5.1 NO FOLLOWED-HASHTAGS VIEW IS DRAWN
+
+The orchestrator's ruling on the plan's section 2b, made 2026-11-28 at 17:1x IST (as
+the lane's brief gives the time), for the integrator to copy into the rulings register:
+
+- id: N61-FOLLOWED-HASHTAGS-MEASURED-ABSENT
+- claim: N 61, viewing his followed hashtags, is MEASURED-ABSENT on two independent
+  observations: the network manager's own nav draws no hashtags entry and no
+  hashtag-feed link, and a hashtag's results draw no follow control and no hashtag
+  feed.
+- binds: census row N 61
+- under: MEASURED-ABSENT-OR-PRECONDITION, on the precedents
+  GROUP-SEARCH-MEASURED-ABSENT and KEYWORD-FIELDS-MEASURED-ABSENT
+- reopener: if rank 152's `/feed/hashtag/` load (for N 59 and N 60, under
+  HASHTAG-ADMISSION-WAITS-FOR-A-REFUSING-BASIS) ever draws a follow control or a
+  followed-hashtags list, N 61 reopens.
+- citations, both VERIFIED in this lane:
+  1. `_audit/2026-11-27-live-session-13.md`, load 3 (`tests/fixtures/live13/following.html`):
+     "the network manager's own nav draws `people-follow` (2) and no hashtags entry;
+     0 hashtag-feed links (N 61)", and its finding 5, "The network manager no longer
+     lists followed hashtags in its own nav".
+  2. `_audit/2026-11-27-msg7.md`, section 5.1 (live session 12, load 13): "A HASHTAG'S
+     RESULTS DRAW NO FOLLOW CONTROL AND NO HASHTAG FEED" -- 0 of 92 links reach
+     `/feed/hashtag/`, and 0 buttons are named exactly `Follow`.
+
+### 5.2 What the move touches, and the one piece this lane cannot do
+
+Written as the held patch's `n61` step (section 1), each piece on its precedent (net7's
+N 93 and N 27, msg7's M C70):
+
+- `network.md`: the state, and the reason cell. Its positional "Same uncertainty" is
+  struck for evidence of its own, as `M C63`'s 'same' was, so N 61 leaves the pointer
+  graph. No row below it reads its argument through it (`pointer-graph.tsv`).
+- `exclusion-basis.tsv`: an `M+` line whose source is this section's heading.
+- `next-step.tsv` and `read-addresses.tsv`: N 61's lines leave (it was NEEDS-SESSION
+  in bucket 3).
+- `scripts/triage_read_gap_rows.py`: both N 61 entries leave, the TRIAGE one and the
+  `MEASURED_PAST_BY_BUCKET3` one (its test holds that table's keys inside TRIAGE), with
+  a LEFT THE READ-GAP SET note.
+- `scripts/measure_pointer_graph.py`: its calibration literal "PASS -- all 64 pinned
+  pointers" becomes 63, with a history line, as at `M C63`'s and `M M2`'s write-outs;
+  then `--pin` re-pins `pointer-graph.tsv`. The 63 is to be MEASURED by `--check`, not
+  assumed.
+- THE CAPTURE QUEUE, WHICH THIS LANE DOES NOT WRITE. Rank 83,
+  `admit-mynetwork-network-manager-people-follow-following`, lists N 61 alone with
+  needs `-`, and `scripts/check_next_step.py` requires every member of such a line to
+  carry the step `CAPTURE:<that line>`. Once N 61 leaves GAP it has no step, so the
+  checker goes RED on rank 83 until that line leaves the queue: N 61 cannot move
+  without one queue edit. Question Q3.
 
 ## 6. The re-judges (no row moves)
 
-To be written.
+### 6.1 M C11 RIDES INSIDE M C1'S FIRST NAMED FIRE
+
+The ledger's D6 call "`M C11` on `M C1`" fails on M C11's own sentence, "whether
+LinkedIn turns a typed hashtag into an entity is unmeasured": `linkedin_publish_post`
+types his words verbatim, a '#' he types is his own text, and what LinkedIn makes of it
+has never been read. The kind stays `SIBLING:M C1`, as a step inside another row's
+act (the ledger's own sub-kind); its source moves off D6 to that sentence and to this
+section. The step: `M C1`'s first named fire, a post whose words he supplies with a
+hashtag in them, its published render read for whether the hashtag became a link.
+Held patch step `msg`: the cell note, and the `next-step.tsv` line
+
+    M C11  M  W  R3  SIBLING:M C1  INFERRED
+           _audit/_census/messaging-and-content.md::whether LinkedIn turns a typed
+           hashtag into an entity is unmeasured ; _audit/2026-11-28-census-calls.md::
+           M C11 RIDES INSIDE M C1'S FIRST NAMED FIRE ; M C1
+
+### 6.2 Rank 23's 13 rows: every one waits on a precondition, not a capture
+
+Live session 14, phase 2 (`_audit/2026-11-27-live-session-14.md`), read his
+recommendations page served exact: the first view (Received) drew "0 entries and 0
+member links", and the Given view "0 entries and 1 member link". The plan sent the
+given side to "one capture of an entry's menu"; with no given entry there is no menu to
+open, so disk disagrees with that half of the plan. Re-judged from each row's own cell:
+
+| rows | the act | proposed step |
+|---|---|---|
+| N 121, N 122, P F6 | accept or dismiss a received recommendation | `PRECONDITION:a recommendation he has received` |
+| N 123, P F7 | ask for a revision of one received | `PRECONDITION:a recommendation he has received` |
+| N 126, P F9 | hide or unhide one received | `PRECONDITION:a recommendation he has received` |
+| N 128, P F8 | decline a recommendation request | `PRECONDITION:a recommendation request someone has sent him` |
+| N 125, P F5 | delete a recommendation he sent | `PRECONDITION:a recommendation he has given` |
+| N 127 | set the visibility of one he gave | `PRECONDITION:a recommendation he has given` |
+| P F1 | read the recommendations he received | `PRECONDITION:a recommendation he has received` -- an empty list is not a believable zero until one entry's shape is captured |
+
+Each with basis MEASURED and the source
+`_audit/2026-11-27-live-session-14.md::Its view: 0 entries and 1 member link` (the
+Given rows) or `::first view: 0 entries and 0 member links` (the rest), plus
+`tests/fixtures/live14/recommendations.html`. THIS IS COUPLED TO THE QUEUE: rank 23,
+`admit-in-me-details-recommendations`, lists all 13 with needs `-`, and
+`check_next_step.py` requires each to step `CAPTURE:admit-in-me-details-recommendations`.
+The capture it names is done (session 14). So the 13 lines and the rank 23 line move
+together, and the queue is not this lane's. Question Q4.
+
+### 6.3 J 3, J 17 and J 151: the step is a new place capture
+
+Live session 13 (`_audit/2026-11-27-live-session-13.md`, loads 1 and 2) captured
+`C-SRCH-2`, queue rank 133: "the AI route DROPS a text `location` (no `geoId` written
+in its place)", and its 25 cards are the 25 the search without a location returns.
+Finding 1 there: "The AI job search ignores a text `location`." So rank 133's own
+address, `...&location=placeholder-place`, cannot discriminate any of the three rows
+again. Each reopener needs an AI-route fire whose results move with the place.
+
+The step named here: a new queue line, `C-SRCH-2b`, the AI route's own place, 2 loads
+and 2 searches as `C-SRCH-2` was (with and without the place, the id sets compared).
+The place goes in by the AI route's own means, either a `geoId` or the place written
+into the AI search's own words; the boundary admits both spellings today
+(`readonly.is_read_url` True on
+`https://www.linkedin.com/jobs/search-results/?keywords=placeholder&geoId=1234567` and
+on `...?keywords=placeholder-in-placeholder-place`, read in this lane). Which one is the
+queue owner's design. The proposed `next-step.tsv` line for each of the three:
+
+    J 3   J  R  -  CAPTURE:C-SRCH-2b  MEASURED
+          _audit/2026-11-27-live-session-13.md::The AI job search ignores a text ;
+          RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
+
+Per the plan, the queue line itself is written after 14b's close-out; the three
+`next-step.tsv` lines go in with it, since a CAPTURE step must name a line that exists.
+
+### 6.4 M C65 and M C91: the step the code reads point at
+
+Both stay GAP (section 3), and their ledger step, `SIBLING:M C25` / `SIBLING:M C32` on
+D6, is now answered. The next step is a capture on the feed of a group he belongs to,
+`https://www.linkedin.com/groups/1234567/` (admitted): the route a group post's
+permalink wears, and that post's comment and reaction controls, read with nothing
+pressed. That needs a queue line, which this lane does not write, so their
+`next-step.tsv` lines are left as they are, with this section as their re-judge.
+Question Q5.
 
 ## 7. Pins re-derived
 
@@ -182,10 +379,78 @@ No live session was on (`_state/LIVE_SESSION_ON` absent at each check).
   disk 91.2% idle, with two other lanes' pytest runs on the box. The five slowest were
   corpus-wide guards (58 s, 57 s, 56 s, 29 s, 27 s). Later gates in this lane run the
   census instruments for the changed tables only; the corpus-wide guards run on CI.
+- After the commit: the pre-commit identity gate was armed ("226 spellings; 0 hits"),
+  and `tests/test_no_committed_identity.py` passed, 1481 tests, on the committed blobs.
+
+### 8.1a CI on J 86's head, read by sha
+
+- `scripts/lane_ci.py push` put `118d4008` on `ci/census-calls28`; the pre-push gate
+  swept it clean and confirmed it descends from master.
+- `lane_ci.py wait 118d4008...`: run 46145558412, success, 7 jobs, 6m52s.
+- `lane_ci.py wait 118d4008... --full`: run 46146396940, success, 21 jobs, 17m10s;
+  ubuntu py3.10, ubuntu py3.13 and windows py3.13 each 6 of 6 shards.
+
+### 8.2 The held patch, tried on this tree and reverted
+
+The held patch was applied to this worktree at `118d4008` in steps `before`,
+`n3,n61,msg` and `delta`, measured, and then every file it touched was restored from
+HEAD; `git status` showed only this record afterwards. On that trial tree:
+
+- The DELTA it measured on `network.md`: COVERED-UNFIRED 28 -> 29, MEASURED-ABSENT 5 ->
+  6, GAP 129 -> 127, stated rows 216.
+- `census_completion.py --check` moved 11 pins: achievable 710 -> 709, adjudicated
+  279 -> 281, b1_standing 29 -> 30, b3_needs_session 5 -> 4, capabilities_achievable
+  723 -> 722, delivered_broad 188 -> 189, gap 505 -> 503, gap_read 56 -> 55, gap_write
+  346 -> 345, out_of_scope 74 -> 75, unfired 93 -> 94. N 3 entered bucket 1 held by
+  OPERATOR-NAMES-THE-TARGET. These are the trial's readings; the real commit
+  re-measures on the merged tree and re-pins from that.
+- `measure_pointer_graph.py --check`: POINTER GONE 1 (N 61); RE-POINTED 0 and DONOR
+  VERDICT MOVED 0, so `M C66` still reads `M C64` through M C65's kept 'same'. After
+  `--pin`, 63 pinned and 63 measured: the calibration literal's 63 is that reading.
+- `check_next_step.py` RED with exactly one problem: "queue
+  admit-mynetwork-network-manager-people-follow-following: N 61's step is '', not
+  CAPTURE:admit-mynetwork-network-manager-people-follow-following". With the queue
+  owner's step applied in the trial (rank 83's line removed), GREEN (503 =
+  census_completion's gap). The queue file was restored at once.
+- GREEN: `check_jobs_directions.py` (103 of 103), `check_write_classes.py` (365
+  lines, so N 3's built line kept the count), `check_read_addresses.py` (55 of 55),
+  `ruling_holds.py`, `check_exclusion_basis.py` (population 75, table 75, 0 untraced)
+  and `triage_read_gap_rows.py`.
+- pytest, the tests that hold the patch's own pieces
+  (`test_pointer_graph_guard.py` with its selftest, `test_triage_read_gap_rows.py`,
+  `test_exclusion_basis.py`, `test_write_classes.py`, `test_read_addresses.py`,
+  `test_ruling_holds.py`): 175 passed in 74 s, `-n 4`.
+- `build_blocker_map.py --check`: 8 lines, N 61's `state_today` and seven
+  reason-locator re-ranks (J 112, N 99, N 100, N 133, N 134, N 136, P O3), all derived.
 
 ## 9. Questions for the orchestrator
 
-To be written.
+- **Q1, THE BASE.** Master stayed `9ec91965` at every check in this lane; hygiene28's
+  branch was not merged, and it now also edits N 82, N 88 and N 89 in `network.md`.
+  The held patch is anchored on row text, not line numbers, and refuses on any anchor
+  it cannot find once. On hygiene28's merge: `merge master`, apply it, measure, re-pin,
+  gate, certify.
+- **Q2, N 50 SPLITS?** Ground, section 4.2: the company half is delivered by D6 on a
+  live-proven route (`linkedin_follow_company`, `N 46` and `J 103` banked PROVEN on
+  its session-8 fire), and the school half by nothing (no write acts on `/school/`).
+  The halves need different states, and COMPOUND-ROW-SPLITS-ONLY-ON-STATE splits such
+  a row. The recommendation: split on the `N 26` -> `N 26b` precedent; the company half
+  stays N 50 at COVERED-PROVEN by D6 on that fire, with `linkedin_follow_company_page`
+  (`N 47`, UNFIRED) as its by-id route, and the school half enters as `N 50b` at GAP,
+  its step the school's address from him (as `J 112`). If the by-id route should be
+  the row's proof instead, the company half is COVERED-UNFIRED, as the plan had it.
+- **Q3, N 61 NEEDS ONE QUEUE EDIT.** Ground, section 5.2: queue rank 83 lists N 61
+  alone with needs `-`, its capture is done (session 13, load 3), and
+  `check_next_step.py` goes RED on that line the moment N 61 leaves GAP. May this lane
+  remove that one line in N 61's move commit, or does live14b's close-out remove it
+  first?
+- **Q4, RANK 23 LEAVES THE QUEUE?** Ground, section 6.2: all 13 rows re-judged
+  PRECONDITION, because session 14 read both views empty. The 13 `next-step.tsv` lines
+  and the rank 23 line must move in one commit. Whose commit?
+- **Q5, TWO NEW QUEUE LINES.** Ground, sections 6.3 and 6.4: `C-SRCH-2b` for J 3, J 17
+  and J 151, after 14b's close-out as the plan says, and a group-feed capture for M C65
+  and M C91. Each `next-step.tsv` line follows its queue line, so the queue's owner
+  writes both, or this lane writes the step lines after the queue lines land.
 
 ## 10. Lessons
 
@@ -194,3 +459,20 @@ To be written.
   read 0 CRLF in 506 lines). The commit was unaffected, because the index stores LF,
   but the check could not fail. Count line endings on bytes, and edit CRLF tables
   with a bytes-aware script, not `sed -i`.
+- A census move can be coupled to a table the lane does not own. `check_next_step.py`
+  ties every member of a capture-queue line with needs `-` to the step
+  `CAPTURE:<that line>`, so a row leaving GAP, or re-stepped to any other kind, turns
+  that line RED until the queue changes with it. Read the queue membership of every row
+  before planning a lane's files; here it decided N 61, rank 23's 13 rows, and the
+  C-SRCH-2 follow-up.
+- Writing out a positional 'same' re-points every 'same' below it. M C66 reads M C64
+  THROUGH M C65, so M C65's note had to follow its 'same', not replace it.
+  `scripts/measure_pointer_graph.py --check` proved it: RE-POINTED 0.
+- A new `_audit` record moves derived views far from the rows it discusses. This
+  record re-ranked the reason locator's candidates on 80 blocker-map lines it never
+  names, each top candidate unchanged. Read a derived diff by column before
+  accepting it.
+- A plan's "a shipped tool may already reach it" needs the tool's address read, not
+  its name. Both group rows failed on one `url_pattern` and one live count
+  (`N 175`'s zero `/feed/update/` links), and N 50 on two `url_pattern`s that never
+  name `/school/`.
