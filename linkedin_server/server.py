@@ -1,4 +1,17 @@
-"""The tool surface: one hundred and eleven tools, thirty-six of which write to LinkedIn.
+"""The tool surface: one hundred and fifteen tools, thirty-six of which write to LinkedIn.
+
+THE HUNDRED-AND-TWELFTH TO HUNDRED-AND-FIFTEENTH, 2026-11-28, on lane build28
+(the census wave's lane B): four READS. ``linkedin_download_resume`` (census
+``J 72`` / ``P M4``) downloads ONE stored resume he names by its file name:
+its card's options menu opened, its one Download item pressed inside the
+download transport's capture on his own browser, the menu read closed again,
+Delete never pressed. ``linkedin_learning_home``, ``linkedin_learning_in_progress``
+and ``linkedin_learning_career_goal`` (``J 152``, ``J 154``, ``J 156``) each
+read one admitted LinkedIn Learning page with no press: the courses its home
+lists, those on his in-progress tab, each title a record, and his career
+goal, his own text. Measured off this branch's registry, not summed. The
+headline read "one hundred and eleven tools, thirty-six of which write" until
+then.
 
 THE HUNDRED-AND-EIGHTH TO HUNDRED-AND-ELEVENTH, 2026-11-27, at integration 7's
 merges of lanes msg7, settings7 and net7. Lane msg7's ``linkedin_save_post``
@@ -548,9 +561,9 @@ assigned to anybody -- it waits for whoever next runs the suite, and in the
 meantime the pin goes on asserting the old number with full confidence.
 
 THE NUMBERS ABOVE ARE DERIVED NOW, and that is a statement about a test rather
-than about an intention. One hundred and eleven is ``len(await mcp.list_tools())``,
+than about an intention. One hundred and fifteen is ``len(await mcp.list_tools())``,
 pinned in ``test_server_surface.py`` by
-``test_the_surface_is_exactly_the_one_hundred_and_eleven_tools``; the split is pinned by
+``test_the_surface_is_exactly_the_one_hundred_and_fifteen_tools``; the split is pinned by
 ``tests/test_prose_that_makes_a_claim.py::test_the_server_docstring_numbers_are_derived``,
 which reads THESE WORDS and fails if any of the three disagrees with the
 registry.
@@ -563,9 +576,11 @@ POINTER to it was dangling, so a reader who followed it found nothing and
 would reasonably conclude these numbers are unchecked. A citation is a claim
 like any other.
 The surface splits three ways and the split is the part a reader actually
-needs: SEVENTY-ONE read, THIRTY-SIX write, and FOUR are write-shaped,
-registered, gated and unable to act. Seventy-one plus thirty-six plus four is
-one hundred and eleven. (Seventy, thirty-six and four, summing to one
+needs: SEVENTY-FIVE read, THIRTY-SIX write, and FOUR are write-shaped,
+registered, gated and unable to act. Seventy-five plus thirty-six plus four is
+one hundred and fifteen. (Seventy-one, thirty-six and four, summing to one
+hundred and eleven, until lane build28's four reads, 2026-11-28.
+Seventy, thirty-six and four, summing to one
 hundred and ten, until integration 7's merge of lane net7's read,
 2026-11-27; that lane's branch read sixty-nine, thirty-five and four,
 summing to one hundred and eight.
@@ -15198,8 +15213,8 @@ async def linkedin_download_resume(file_name: str) -> dict[str, Any]:
     application data page (``/jobs/application-settings/``); then, on the ONE
     resume card whose name reads ``file_name`` exactly, its options menu is
     opened by one click, its ``Download`` item pressed once, and the menu read
-    closed again (one Escape if it stayed open). ``Delete`` is never pressed,
-    nothing is typed, and no other address is opened.
+    closed again (one Escape if it stayed open). Nothing else in the menu is
+    ever pressed, nothing is typed, and no other address is opened.
 
     THE FILE IS TAKEN BY THE DOWNLOAD TRANSPORT ON YOUR OWN BROWSER
     (``cdp_download``, ruling D4-NO-OWN-BROWSER-CONTEXT): for the moment of

@@ -1,4 +1,10 @@
-"""The tool surface: one hundred and eleven tools, seventy-one of which do not write.
+"""The tool surface: one hundred and fifteen tools, seventy-five of which do not write.
+
+**IT READ "one hundred and eleven tools, seventy-one of which do not write"
+UNTIL LANE BUILD28 (2026-11-28)**: four READS -- ``linkedin_download_resume``
+(census ``J 72`` / ``P M4``) and the three Learning reads (``J 152``,
+``J 154``, ``J 156``) -- so seventy-five do not write. Measured off this
+branch's registry, not summed; the integrator re-derives it on the merged tree.
 
 **IT READ "one hundred and ten tools, seventy of which do not write" UNTIL
 INTEGRATION 7 MERGED LANE NET7 (2026-11-27)**, its one READ beside the
@@ -529,6 +535,14 @@ EXPECTED_TOOLS = {
     # one READ of one admitted page with no press -- his Premium networking
     # matches, each member a people record beside a job id (census N 199).
     "linkedin_premium_matches",
+    # 2026-11-28, lane build28 (the census wave's lane B), four READS: one
+    # stored resume he names, downloaded through its own card's menu by the
+    # download transport (census J 72 / P M4), and LinkedIn Learning's home,
+    # his in-progress tab and his career goal (J 152, J 154, J 156).
+    "linkedin_download_resume",
+    "linkedin_learning_home",
+    "linkedin_learning_in_progress",
+    "linkedin_learning_career_goal",
     # THE THIRTY-EIGHTH, 2026-09-05: linkedin_events_home, a READ. No
     # write was added. It is the only tool here whose whole answer can be
     # ZERO, and its reader returns that integer only when four
@@ -971,8 +985,13 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_one_hundred_and_eleven_tools(tools):
-    """RENAMED AGAIN AT INTEGRATION 7 (2026-11-27), merge 5, to
+async def test_the_surface_is_exactly_the_one_hundred_and_fifteen_tools(tools):
+    """RENAMED AGAIN ON LANE BUILD28 (2026-11-28), to
+    ``..._one_hundred_and_fifteen_tools``: four READS (census J 72 / P M4,
+    J 152, J 154, J 156) beside the one hundred and eleven. MEASURED off this
+    branch's registry; the name moved with the pin.
+
+    RENAMED AGAIN AT INTEGRATION 7 (2026-11-27), merge 5, to
     ``..._one_hundred_and_eleven_tools``: lane net7's read (census N 199)
     beside the one hundred and ten, measured off the merged registry.
 
@@ -1642,7 +1661,9 @@ async def test_the_surface_is_exactly_the_one_hundred_and_eleven_tools(tools):
     # linkedin_premium_matches. MEASURED off mcp.list_tools(), not summed.
     # ONE HUNDRED AND ELEVEN AT INTEGRATION 7, MERGE 5 (2026-11-27): every lane's tools, MEASURED off
     # mcp.list_tools() on the merged tree, not summed.
-    assert len(tools) == 111
+    # ONE HUNDRED AND FIFTEEN ON LANE BUILD28 (2026-11-28): four READS, so the
+    # split moves on its read side. MEASURED off mcp.list_tools(), not summed.
+    assert len(tools) == 115
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -1959,8 +1980,10 @@ async def test_the_surface_is_exactly_the_one_hundred_and_eleven_tools(tools):
     # linkedin_premium_matches. MEASURED.
     # SEVENTY-ONE AND ONE HUNDRED AND ELEVEN AT INTEGRATION 7, MERGE 5 (2026-11-27): net7's read
     # beside the others in one registry, MEASURED.
-    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 71
-    assert len(tools) == 111
+    # SEVENTY-FIVE AND ONE HUNDRED AND FIFTEEN ON LANE BUILD28 (2026-11-28):
+    # its four READS, MEASURED.
+    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 75
+    assert len(tools) == 115
 
 
 def test_the_read_that_was_nearly_named_a_write():

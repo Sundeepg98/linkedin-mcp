@@ -127,6 +127,14 @@ EXPECTED_TOOLS = (
     # 2026-11-27, lane net7, a READ of one admitted page built on live
     # session 12's capture of it: his Premium networking matches (N 199).
     "linkedin_premium_matches",
+    # 2026-11-28, lane build28 (the census wave's lane B), four READS: one
+    # stored resume he names, downloaded through its own card's menu by the
+    # download transport (census J 72 / P M4), and LinkedIn Learning's home,
+    # his in-progress tab and his career goal (J 152, J 154, J 156).
+    "linkedin_download_resume",
+    "linkedin_learning_home",
+    "linkedin_learning_in_progress",
+    "linkedin_learning_career_goal",
 )
 
 
@@ -530,4 +538,7 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # registry; the integrator re-derives it on the merged tree.
     # ONE HUNDRED AND ELEVEN AT INTEGRATION 7, MERGE 5 (2026-11-27): every lane's tools, measured off the
     # merged registry.
-    assert len(_tool_names()) == 111
+    # ONE HUNDRED AND FIFTEEN ON LANE BUILD28 (2026-11-28): four READS, the
+    # resume download and the three Learning reads, measured off this
+    # branch's registry; the integrator re-derives it on the merged tree.
+    assert len(_tool_names()) == 115
