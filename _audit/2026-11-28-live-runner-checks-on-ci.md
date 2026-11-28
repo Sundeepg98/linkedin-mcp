@@ -398,4 +398,31 @@ head fast-forwards master. hygiene28 and this lane met in three files, each appe
 - `scripts/census_completion.py`: "every headline figure matches its pin";
 - `scripts/check_cited_shas_resolve.py`: OK.
 
+### 11.1 The second integration: master `d87d97ec` (session 14c READY)
+
+**The READY push of 19:48 was refused by the pre-push gate, and nothing was pushed.** origin's
+master had moved to `d87d97ec` while the full matrix ran. Those are the live lane's 5 commits, and
+they touch only its session 14 record. The master note had foreseen this case: once the live lane's
+r2 lands, integrate again.
+
+**The merge** is `4565b4a4`. It merged cleanly, master is an ancestor of it, and all three derived
+views passed `--check` against the merged corpus.
+
+**The pins at 19:50 IST** (VERIFIED). No live session was on.
+
+- `live15`: the runner and the teardown match their pins (sha256 `fd3bf239` and `83d17023`). The
+  tracked module matches them 13 of 13.
+- `live16`, written at 19:39, pins the 14c runner and the same teardown:
+  - the teardown matches its pin (sha256 `83d17023`);
+  - the runner's pin names `runner_s14c.py` with sha256 `04b30b3d`, which is r2;
+  - **the file of that name now holds r3**: sha256 `459d339d`, written at 19:44:25, the same bytes
+    as `runner_s14c_r3.py`. The live lane's gate checks on r3 were still running at 19:51;
+  - r2's pinned bytes survive as `runner_s14c_r2.py` (sha256 `04b30b3d`).
+  - The tracked module matches r2 13 of 13 (measured at 19:04) and r3 13 of 13 (measured at 19:50).
+  - That pin is the live lane's to renew. This lane only read the files.
+
+**Gates on the merged tree** (local, under 2 minutes, no live flag): the correction finder, the
+audit index, the rulings register, the register's numbers, and the ignored-path and prose guards
+passed 99. `scripts/check_cited_shas_resolve.py`: OK.
+
 Certification of the integrated head is in section 6.
