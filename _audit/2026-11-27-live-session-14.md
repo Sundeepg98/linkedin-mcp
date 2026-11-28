@@ -923,6 +923,125 @@ the orchestrator, with him at the console. Master 9aa4c94 is already merged
 (the merge commit after section 10's close-out). Item 4 merges again if
 master has moved by then.
 
+## 11. Session 14b, PHASE A (offline): the close fix and the 14b table
+
+Everything here is offline: zero loads, no browser started or attached, 9224
+untouched, the flag never raised. The runner and its checks live in the main
+checkout's gitignored `_state/live-runner/s14b/`.
+
+### 11.1 The diagnosis, red first against both skeletons
+
+`close_checks_s14b.py` drives the runner's REAL close path (`otw_capture`,
+`press_open`, `otw_close`, `close_all`, `_click`, `press_read_close`) and the
+panel rule's own scripts. It runs in a local headless Chromium with every
+request aborted, on session 14's tracked skeletons. A skeleton holds no
+script, so what LinkedIn's page does with a key or a click is MODELLED, one
+hypothesis per model. Each model works on the captured editor's own
+`<dialog>` and its own Dismiss:
+
+| model | what it holds | session 14's runner | 14b r1 |
+|---|---|---|---|
+| `escape_inside` | the dialog hears Escape only when focus is inside it | STOP-ALL `otw_editor_not_closed`, the dialog open (the live outcome) | closed by `escape_1` |
+| `covered` | a click cannot reach Dismiss; Enter on it works | STOP-ALL, the dialog open (the live outcome) | closed by `dismiss_enter` |
+| `click` | Dismiss closes on a click | closed by `dismiss` | closed by `dismiss` |
+| `none` | nothing closes it | STOP-ALL | STOP-ALL, with every step recorded |
+
+- **Two models reproduce the live outcome on session 14's runner**
+  (VERIFIED): Escape heard only inside the dialog, and a Dismiss the pointer
+  cannot reach. The `click` model closes the dialog even on session 14's
+  runner. So had LinkedIn's Dismiss worked on a dispatched click, the old
+  runner would have closed it.
+- **DERIVED, from timing only:** the phase ended at 08:40:02.8, about 20 s
+  after the Edit press, which is the Dismiss press's pace. That fits a
+  dispatched Dismiss click that changed nothing. It does not fit a click that
+  timed out (5 s more), or no Dismiss press at all (about 10 s less).
+- **UNVERIFIED: why the live dialog ignored both.** The window was
+  `raised_unfocused` for that phase only.
+- **The photo press, on the real pair** (VERIFIED, the runner's own
+  `FORM_SIGS_JS` and `FORM_DELTA_JS` across the two skeletons):
+  - session 14's runner counts 5 added checkboxes;
+  - r1 counts 0, and 5 `in_main_sections`;
+  - all three real panels still count, and identically on both runners:
+    session 13's jobs All filters 29, session 12's content All filters 13,
+    and session 12's people All filters 11.
+
+### 11.2 The fix: r1 (`runner_s14b.py`, built from `8094c4a0` by `patch_s14b_r1.py`)
+
+- **K1.** The close path records every step it takes (`close_steps`): each
+  Escape, the Dismiss found or not, and its press `clicked`, `not_actionable`
+  or `no_room`, with the modals visible after each. A failed close leaves
+  the press's reading in the session state.
+- **K2.** A native `<dialog open>` the press opened is closed inside itself:
+  - focus moves onto its own Dismiss, with no press, before each Escape;
+  - Dismiss is looked for inside that dialog;
+  - a Dismiss the pointer cannot reach is pressed by Enter, only while it
+    holds the focus, checked before and after the pace;
+  - each close gets a 2.5 s grace.
+- **K3.** A control added inside `main`'s sections is the page rendering on,
+  never a panel the press opened. It is counted apart.
+- **K4.** The Open-to-Work editor's request summary is made on every exit, a
+  STOP-ALL's included.
+- **K5.** Phase 1 records its readings before each of its presses.
+- **K6.** A phase that presses an editor, an overlay or a self-root link (the
+  self block and the attended set) runs only with the window in front. It is
+  refused before any load otherwise. The evidence is thin: one failure while
+  `raised_unfocused`, against the closes that held while `fronted`. It fails
+  toward not pressing.
+- **K7.** The session directory is `live15`, because the harness admits only
+  `live` and one or two digits. 14b is a sitting of its own.
+
+**Red first** (VERIFIED, `close_checks_s14b.py`):
+
+- session 14's runner: 0 of 9 red-class checks pass, and 6 of 6 controls;
+- r1: 9 of 9, and 6 of 6.
+- Among the controls, a dialog nothing closes is still STOP-ALL on r1, and the
+  three real panels still count as panels.
+
+**Nothing regressed on r1** (VERIFIED):
+
+- session 14's 82 gate checks, repointed to `live15`: 82 of 82;
+- session 12's Open-to-Work checks: 8 of 8;
+- the entry refusals: 14 of 14, each before any browser contact, the pinned
+  store unchanged.
+
+### 11.3 The 14b table: r2 (`patch_s14b_r2.py`, on r1 as reviewed)
+
+- **K8.** `recommendations` (done in 14a) and `otw_editor` (not in the
+  orchestrator's 14b list) are not runnable.
+- **K9.** Rank 6's Archived round trip (M M28, M M54) rides the composer's
+  page, under the ruling on section 9, item 3:
+  - the shipped `linkedin_list_conversations` lands it, and must report that
+    it opened nothing;
+  - a landing on a thread is STOP-ALL; a landing anywhere else presses
+    nothing;
+  - then session 13's `_archived_round_trip` runs, unchanged;
+  - nothing is typed (M M34 is not in the ruling).
+- **K10.** Rank 151, part 1: the admitted `/my-items/saved-posts/`, loaded
+  once, read-only, skeleton only.
+- **K11.** The flag and the pinned ledger's records carry session 15, so 14a's
+  3 records and 14b's are told apart.
+- **Red first** (VERIFIED, `table_checks_s14b.py`): r1 passes 0 of 9, the r2
+  candidate 9 of 9, and both pass the control.
+
+**What 14b cannot hold** (measured on disk; the orchestrator was told
+2026-11-28 at about 09:50):
+
+- **Rank 2 cannot share a session with C-SRCH-3a.** Each takes 3 searches,
+  and the cap is 5.
+- **Rank 149's deletion is aimed at the Drafts list** that rank 1 (phase 12)
+  captures first, and 14a never reached it.
+- **Rank 151's save and unsave ride a post he names.**
+
+The default, until the orchestrator rules otherwise:
+
+- all three go to 14c (only part 2 of rank 151);
+- 14b keeps phase 4's searches.
+
+### 11.4 The cold review
+
+The reviewer of rounds 1-5 was resumed, cold to the fix, on r1 (`93d7fd3e`).
+Its report is due at `review-s14b/round-1.md`, in the lane's scratch.
+
 ## Lessons (for the orchestrator to harvest)
 
 1. **`Path.write_text` on Windows writes CRLF.** Three patch scripts turned
