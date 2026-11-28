@@ -174,6 +174,9 @@ runs the rest.
 
 ## 6. Certification
 
+**This READY was for `355ddfa6`.** Question (c) (section 10) adds commits on top of it. At the merge,
+the head integrated with master is certified again, by lane CI and the full matrix by sha.
+
 **READY**, on the certified sha `87f9ea95`: branch `ci-checks28`, three commits on master
 `9ec91965`.
 
@@ -241,6 +244,10 @@ entry refusals are local by design.
   46144818568 failed on it: `tests/test_a_correction_is_findable_from_the_claim.py` reads an
   audit file name within two lines of its vocabulary ("stale") as an undeclared correction. Re-run
   the audit-reading tests after the LAST edit to a record, not after the first.
+- **A new rule read from the repository's own declaration file also reaches every test that feeds
+  the script a synthetic suite.** Two existing tests went red on (c)'s first cut, because their
+  ubuntu cell "failed" to skip tests it never had. Scope a rule to the runs it can speak for (here,
+  runs in which some cell reported its tests), and close the remaining gap where the tests live.
 
 ## 9. Questions for the orchestrator
 
@@ -256,3 +263,89 @@ entry refusals are local by design.
    tolerated even on the Windows cell. This module closes that gap itself: it skips on the platform
    alone, and fails on Windows when `powershell` is missing. Should the file instead learn a
    per-cell rule?
+
+**All three are answered** (the orchestrator's hold note, 18:44 IST, deleted as the ack, with a copy
+in the lane's scratch):
+
+- (a) section 123 stands for now. hygiene28's instruments-order guard judges it at the integration.
+- (b) YES, after session 14c, as part of 14d's prep. The live lane owns that runner edit, and it
+  imports `scripts/live_runner_rules.py`. It is not built here, because 14c runs its runner exactly
+  as pinned.
+- (c) YES. It is built in section 10.
+
+## 10. Question (c): a skip declared BY CELL
+
+**The ruling.** The Windows cell must RUN all 15 guard tests, and a skip there is a failure. Each
+ubuntu cell must skip them by name. A skip declared by name passes whether or not the Windows cell
+ran the tests. Show it failing first, with a control in which the Windows cell skips one of them.
+
+**What was built.** Failure mode 7, in `scripts/ci_shard_totals.py`, the cross-shard totals job:
+
+- `scripts/ci_expected_skips.json` gains a `by_cell` list. Its one rule names the 15 guard tests,
+  `skipped_on_os: ubuntu-latest` and `executed_on_os: windows-latest`. A rule only narrows a
+  declaration: every test it names is still declared by name under `expected`.
+- `record` writes each ruled test's outcome from the shard's junit into the report,
+  as `ruled_outcomes`.
+- `verify` holds each cell to its system's half of each rule:
+  - each test must be skipped, by name, in exactly one shard, where the system must skip it;
+  - it must be passed, failed or xfailed in exactly one shard, where the system must run it. An
+    error does not count as a run;
+  - a system the rule does not name is itself a finding.
+- **A rule holds a run only when some cell reported one of its tests.** The suite's own tests feed
+  `verify` synthetic suites, and the first cut turned two of them red:
+  `tests/test_ci_shard.py::test_record_writes_what_verify_reads` and
+  `tests/test_ci_runner_facts.py::test_the_totals_job_shows_every_shards_runner`. Their ubuntu cell
+  could not skip 15 tests it never had. In every real run the ubuntu cells report all 15, so a
+  Windows skip, or a test Windows never collected, stays strict.
+- **Tests that vanish from every cell at once** (a conftest that ignores the module, or a rename) are
+  caught where the rule's tests live. The new test file collects the guard module on every cell, and
+  holds the rule's names to the module's 15 functions.
+- **`verify` names what a run cannot check.** The lane fast path prints "NOT CHECKED in this run:
+  the rule that 15 test(s) run on windows-latest", and the full matrix checks both halves.
+- `scripts/ci_full_run_check.py`, the per-shard check, is untouched. Its docstring says it is
+  byte-shared with ats-jobs.
+
+**Red first, on the REAL full matrix (VERIFIED, `real_data_c.py` in scratch).** These are the 18 shard
+reports of run 46146119772, the run that certified `87f9ea95`:
+
+- each report's ruled outcomes come from its own junit, read by the new reader. That is exactly what
+  the new `record` writes: 15 skipped on each ubuntu cell, and 15 passed on Windows;
+- each plant keeps every count consistent, so only failure mode 7 can see it;
+- the old gate is master's `ci_shard_totals.py` at `9ec91965`, reading the same declaration file.
+
+| the reports | the old gate | the new gate |
+|---|---|---|
+| as CI wrote them | OK | OK |
+| **the ruling's control:** the Windows cell skips one guard test (G13) | **OK**, which is the blindness | exit 1: G13 "must RUN on windows-latest, and this cell reported it skipped" |
+| the Windows cell never collected G13 | OK | exit 1: "never collected or reported it" |
+| ubuntu py3.10 ran G13 | OK | exit 1: "declared to SKIP on ubuntu-latest, by name, and this cell reported it passed" |
+
+**The tracked test**, `tests/test_a_skip_declared_by_cell_holds_on_every_cell.py`, has 23 tests:
+
+- the control;
+- the blindness, kept on the record: the same reports judged by name alone find nothing;
+- each way a cell can break its half;
+- the outcome reader;
+- the real declaration against the guard module and the workflow's two systems;
+- the collection of the guard module on the cell that runs it;
+- `verify` end to end, both the full matrix and the lane fast path's NOT CHECKED line.
+
+**Its mutants (VERIFIED, `plants_c.py` in scratch).** Each is one edit to the shipped source. All 12
+were convicted, with no ERROR, and the control passed 23 of 23:
+
+| mutant | failed |
+|---|---|
+| the name-only tolerance (no per-cell check at all) | 9 of 23 |
+| no rule active | 9 |
+| the RUN half dropped | 5 |
+| a missing test taken as fine | 3 |
+| the SKIP half dropped | 2 |
+| every rule active, even on another suite | 1 |
+| an error counted as a run | 1 |
+| an unnamed system allowed | 1 |
+| no duplicate check | 1 |
+| no check for a report without ruled outcomes | 1, by name: "raised KeyError instead of naming a problem" |
+| the reader taking an error, or a skip, as passed | 1 each |
+
+**Gates** (local, under 2 minutes, no live flag): the new file with `tests/test_ci_shard.py`,
+`tests/test_ci_runner_facts.py`, `tests/test_lane_ci.py` and the import-safety sweep, 531 passed.
