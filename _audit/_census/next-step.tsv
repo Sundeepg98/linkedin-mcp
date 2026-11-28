@@ -111,7 +111,7 @@ M C7	M	W	R3	SIBLING:M C3	NAMED	M C7 ; M C3
 M C8	M	W	R3	TARGET:the poll question and options he names	INFERRED	M C8 ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
 M C9	M	W	R3	TARGET:the occasion and the words he names	NAMED	_audit/_census/messaging-and-content.md::Celebrate an occasion
 M C10	M	W	R3	TARGET:a member he names to mention	INFERRED	RULING:MENTION-COMPOSITION-RULING ; RULING:OPERATOR-NAMES-THE-TARGET
-M C11	M	W	R3	SIBLING:M C1	INFERRED	RULING:D6-CAPABILITY-OVER-AFFORDANCE ; M C1
+M C11	M	W	R3	SIBLING:M C1	INFERRED	_audit/_census/messaging-and-content.md::whether LinkedIn turns a typed hashtag into an entity is unmeasured ; _audit/2026-11-28-census-calls.md::M C11 RIDES INSIDE M C1'S FIRST NAMED FIRE ; M C1
 M C12	M	W	R3	TARGET:the words of a draft he names	INFERRED	RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS ; M C12
 M C13	M	W	R3	TARGET:a post he names to schedule	NAMED	_audit/_census/messaging-and-content.md::Schedule post is a button opening a modal nobody has opened
 M C15	M	W	R3	PRECONDITION:a post he has scheduled	MEASURED	_audit/2026-11-26-readers-msg26.md::No scheduled posts yet ; RULING:MEASURED-ABSENT-OR-PRECONDITION
@@ -212,7 +212,6 @@ M M48	M	W	R3	TARGET:a conversation he names whose last message is his, under 60 
 M M50	M	W	R3	SIBLING:lane-S	NAMED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD ; RULING:MESSAGING-SETTINGS-CAPABILITY-LEVEL
 M M51	M	W	R2	CAPTURE:msg-thread-footer	MEASURED	_audit/2026-11-26-readers-msg26.md::that conversation's last message is HIS ; RULING:OWN-INBOX-READS-COVERED-BY-B
 M M52	M	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
-N 3	N	W	R2	SIBLING:N 1	INFERRED	RULING:D6-CAPABILITY-OVER-AFFORDANCE ; N 1
 N 5	N	W	R2	TARGET:a member he names to invite, with a note	NAMED	_audit/2026-09-24-lane-l5-messaging.md::| C-P3 | the invitation dialog ; RULING:OPERATOR-NAMES-THE-TARGET
 N 7	N	W	R3	TARGET:a Page and the connections he names to invite	INFERRED	RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS ; N 7
 N 8	N	W	R3	TARGET:a Page and the connections he names to invite	INFERRED	RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS ; N 7

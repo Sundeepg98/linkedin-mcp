@@ -9,13 +9,15 @@ Evidence classes: VERIFIED means read on disk in this lane, MEASURED means an
 instrument counted it on a tracked file in this lane, DERIVED means computed from
 what was read, UNVERIFIED means not checked. People by role only.
 
-STATUS: READY, AND HOLDING. READY: J 86's move at `118d4008` (on this lane's branch,
-`census-calls28`, and nowhere on `master` until the orchestrator's merge; its subject is
-"census: J 86 COVERED-UNFIRED by D6 on P I14's tool -- the lane-K ledger's call, made"),
-certified by lane CI run 46145558412 (success, 7 jobs) and full-matrix run 46146396940
-(success, 3 cells x 6 shards), both read by sha; the commits above it carry only this
-record and the derived views it moves. HOLDING: every other item, analysed here and written as a tried ready
-patch (section 1), waits on hygiene28's merge (Q1) and on questions Q2 to Q5.
+STATUS: IN PROGRESS, AND HOLDING FOR THE MERGE ORDER. J 86's move at `118d4008` (on
+this lane's branch, `census-calls28`, and nowhere on `master` until the orchestrator's
+merge; its subject is "census: J 86 COVERED-UNFIRED by D6 on P I14's tool -- the lane-K
+ledger's call, made") was certified by lane CI run 46145558412 and full-matrix run
+46146396940, both success, read by sha. After hygiene28 reached master (`b7db2f7a`) the
+branch merged it, and N 3's move, M C11's step and the M C65 and M C91 notes were
+applied (section 1). The orchestrator's merge order puts this lane after the live
+lane's r2, with master merged in before the certifying run, so the final certification
+waits on that. N 61, N 50, rank 23's rows and the new capture steps wait on Q2 to Q5.
 
 ## 1. The order, and what holds what
 
@@ -23,10 +25,11 @@ patch (section 1), waits on hygiene28's merge (Q1) and on questions Q2 to Q5.
 |---|---|---|---|
 | 1. J 86, the D6 call on P I14 | J 86 | GAP -> COVERED-UNFIRED, committed | section 2 |
 | 2. the code reads | M C65, M C91 | both stay GAP: neither tool reaches a group post | section 3 |
-| 3. D6 calls | N 3 | COVERED-UNFIRED, written and held (network.md) | section 4.1 |
+| 3. D6 calls | N 3 | GAP -> COVERED-UNFIRED, applied after hygiene28's merge | section 4.1 |
 | 3. D6 calls | N 50 | stopped: the school half is delivered by nothing (Q2) | section 4.2 |
-| 4. the orchestrator's ruling | N 61 | MEASURED-ABSENT, written and held (network.md, and one queue line, Q3) | section 5 |
-| 5. the re-judges | M C11 | step re-pointed, written and held (messaging-and-content.md) | section 6.1 |
+| 4. the orchestrator's ruling | N 61 | MEASURED-ABSENT, written and held: it needs one queue line (Q3) | section 5 |
+| 5. the re-judges | M C11 | step re-pointed and cell noted, applied | section 6.1 |
+| 2. the code reads | M C65, M C91 | the cell notes, applied | section 3 |
 | 5. the re-judges | rank 23's 13 rows | all PRECONDITION; coupled to queue rank 23 (Q4) | section 6.2 |
 | 5. the re-judges | J 3, J 17, J 151 | a new place capture, `C-SRCH-2b` (Q5) | section 6.3 |
 | 5. the re-judges | M C65, M C91 | a group-feed capture (Q5) | section 6.4 |
@@ -39,10 +42,12 @@ once. A queue step exists only for the queue's owner, and is never run by defaul
 
 THE BASE HOLD. The brief puts `network.md` and `messaging-and-content.md` after
 hygiene28's merge, because that lane edits both. Master was `9ec91965` at every check
-in this lane, the last at 18:34 IST, and hygiene28's branch was not an ancestor of it,
-so every edit to those two slices is written as a ready patch under the lane's scratch
-directory and held. The brief holds "the rest" with them, so the M C11 step and the
-re-judges are held too, though `next-step.tsv` is not hygiene28's.
+until 18:34 IST, without hygiene28, so every edit to those two slices was written as a
+ready patch under the lane's scratch directory and held, with "the rest" the brief
+held beside them. At 18:57 IST the orchestrator's note said master was `b7db2f7a`,
+hygiene28's head, and that those two slices could go ahead. The branch merged master
+then (a merge, not a rebase), and the patch's steps `n3` and `msg` applied on the
+merged tree with every anchor found once.
 
 ## 2. J 86: COVERED-UNFIRED by D6 on P I14's tool
 
@@ -146,7 +151,7 @@ which this lane does not write.
 
 ## 4. N 3 and N 50 (held)
 
-### 4.1 N 3: COVERED-UNFIRED by D6, written and held
+### 4.1 N 3: COVERED-UNFIRED by D6, applied after hygiene28's merge
 
 The ledger's call "`N 3` on `N 1`". N 3 is "Send an invitation from People You May
 Know"; its blocker is the `/mynetwork/` surface's unmeasured badge cost. The payload is
@@ -269,7 +274,7 @@ has never been read. The kind stays `SIBLING:M C1`, as a step inside another row
 act (the ledger's own sub-kind); its source moves off D6 to that sentence and to this
 section. The step: `M C1`'s first named fire, a post whose words he supplies with a
 hashtag in them, its published render read for whether the hashtag became a link.
-Held patch step `msg`: the cell note, and the `next-step.tsv` line
+Applied (the patch's step `msg`): the cell note, and the `next-step.tsv` line
 
     M C11  M  W  R3  SIBLING:M C1  INFERRED
            _audit/_census/messaging-and-content.md::whether LinkedIn turns a typed
@@ -357,6 +362,20 @@ each.
 `--check` reported it, and joins that tuple. After the re-pin `--check` ends "every
 headline figure matches its pin".
 
+After N 3's move, on the tree that merged master `b7db2f7a`, `--check` MEASURED six
+moves, re-pinned the same way:
+
+    adjudicated        279 -> 280
+    b1_standing         29 ->  30
+    delivered_broad    188 -> 189
+    gap                505 -> 504
+    gap_write          346 -> 345
+    unfired             93 ->  94
+
+`PINNED_B1_ROWS`: N 3 entered COVERED-UNFIRED held by OPERATOR-NAMES-THE-TARGET (a W
+row, held with no marker). The class split `test_write_classes.py` pins is unchanged,
+because N 3 keeps its R2 line as a `built:` line.
+
 ## 8. Gates
 
 ### 8.1 J 86's commit
@@ -391,6 +410,30 @@ No live session was on (`_state/LIVE_SESSION_ON` absent at each check).
 - `lane_ci.py wait 118d4008...`: run 46145558412, success, 7 jobs, 6m52s.
 - `lane_ci.py wait 118d4008... --full`: run 46146396940, success, 21 jobs, 17m10s;
   ubuntu py3.10, ubuntu py3.13 and windows py3.13 each 6 of 6 shards.
+
+### 8.1b The merge of master `b7db2f7a`, and N 3's commit
+
+- The merge conflicted only in the derived `_audit/INDEX.md` and `blocker-map.tsv`.
+  Both were regenerated with `--write` on the merged corpus, as was the rulings
+  register's count. Then `census_completion.py --check` matched every pin, and
+  `check_next_step.py`, `check_jobs_directions.py`, `check_write_classes.py`,
+  `check_read_addresses.py`, `ruling_holds.py` and `measure_pointer_graph.py --check`
+  were green.
+- N 3 and the messaging notes applied with every anchor found once. Then
+  `census_completion.py --check` measured the six moves of section 7, re-pinned, and
+  ended "every headline figure matches its pin".
+- GREEN after the move: `check_next_step.py` (504 = census_completion's gap; M C11's
+  new source resolves), `check_jobs_directions.py` (103 of 103),
+  `check_write_classes.py` (365 lines), `check_read_addresses.py` (56 of 56),
+  `ruling_holds.py`, `check_exclusion_basis.py` (74 of 74) and
+  `triage_read_gap_rows.py`. `measure_pointer_graph.py --check` read 64 pinned and 64
+  measured, so M C65's note kept its pointer and re-pointed nothing.
+- pytest, the census instruments for the changed tables (19 files, `-n 4`): 442
+  passed in 199 s, over the 2-minute cap. Sampled while it ran: CPU 54.2% busy and
+  disk 95.4% idle, with two other repositories' pytest runs on the box. So the box
+  was not saturated; the wall time is a few long single tests. The repository-wide
+  literal sweep took 58 s, the pointer guard's two selftests 40 s and 37 s, and the
+  Playwright teardowns 7 to 10 s each. The corpus-wide guards are left to lane CI.
 
 ### 8.2 The held patch, tried on this tree and reverted
 
@@ -427,11 +470,11 @@ HEAD; `git status` showed only this record afterwards. On that trial tree:
 
 ## 9. Questions for the orchestrator
 
-- **Q1, THE BASE.** Master stayed `9ec91965` at every check in this lane; hygiene28's
-  branch was not merged, and it now also edits N 82, N 88 and N 89 in `network.md`.
-  The held patch is anchored on row text, not line numbers, and refuses on any anchor
-  it cannot find once. On hygiene28's merge: `merge master`, apply it, measure, re-pin,
-  gate, certify.
+- **Q1, THE BASE -- ANSWERED.** hygiene28 reached master (`b7db2f7a`, the
+  orchestrator's note of 18:57 IST), the branch merged it, and N 3 and the messaging
+  notes were applied. What remains of Q1 is the merge order the same note gives: this
+  lane merges after the live lane's r2, with master merged in again before the
+  certifying run.
 - **Q2, N 50 SPLITS?** Ground, section 4.2: the company half is delivered by D6 on a
   live-proven route (`linkedin_follow_company`, `N 46` and `J 103` banked PROVEN on
   its session-8 fire), and the school half by nothing (no write acts on `/school/`).

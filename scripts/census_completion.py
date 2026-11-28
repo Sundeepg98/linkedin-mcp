@@ -1389,7 +1389,8 @@ PINNED = {
     #: 277 AT INTEGRATION 7, MERGE 5 (lane net7 onto the other four; 2026-11-27), MEASURED by --check on the merged tree, never summed: the lanes' moves above in one tree, with N 32's read-address line moved NEEDS-SESSION -> ADMITTED at settings7's admission (_audit/2026-11-27-integration-7.md).
     #: 278 AT INTEGRATION 7'S REGISTRATION (2026-11-27), MEASURED by --check, never summed: J111-SPLITS-PRODUCTS-FROM-SERVICES applied -- J 111 GAP -> COVERED-UNFIRED on its Products half (linkedin_company_page_tab, tab=products; bucket 1, no ruling), J 176 (the Services tab) entered at GAP (_audit/2026-11-27-integration-7.md section 4).
     #: 279 ON LANE CENSUS-CALLS28 (2026-11-28), MEASURED by --check, never summed: `J 86` GAP -> COVERED-UNFIRED by D6-CAPABILITY-OVER-AFFORDANCE, the lane-K ledger's call on `P I14` made: `linkedin_mark_company_interest` presses the very 'I'm interested' control that J 86's own Help article documents (`_audit/2026-11-28-census-calls.md` section 2); a W row entering bucket 1 held by OPERATOR-NAMES-THE-TARGET (was 278).
-    "adjudicated": 279,
+    #: 280 ON LANE CENSUS-CALLS28 (2026-11-28), MEASURED by --check, never summed: `N 3` GAP -> COVERED-UNFIRED by D6-CAPABILITY-OVER-AFFORDANCE, the lane-K ledger's call on `N 1` made: his own profile's People You May Know rail (`linkedin_send_invitation`) and `N 4`'s named-profile route (`_audit/2026-11-28-census-calls.md` section 4.1); a W row entering bucket 1 held by OPERATOR-NAMES-THE-TARGET (was 279).
+    "adjudicated": 280,
     #: THE LIVE LANE'S FOUR ROWS, RE-DERIVED AT EACH OF ITS MERGES OF MASTER
     #: (2026-09-24; last over lane S): four rows fired live and banked
     #: (`_audit/2026-09-23-live-lane-session-1.md`). `P G6` COVERED-UNFIRED ->
@@ -1544,7 +1545,8 @@ PINNED = {
     #: 186 AT INTEGRATION 7, MERGE 5 (lane net7 onto the other four; 2026-11-27), MEASURED by --check on the merged tree, never summed: the lanes' moves above in one tree, with N 32's read-address line moved NEEDS-SESSION -> ADMITTED at settings7's admission (_audit/2026-11-27-integration-7.md).
     #: 187 AT INTEGRATION 7'S REGISTRATION (2026-11-27), MEASURED by --check, never summed: J111-SPLITS-PRODUCTS-FROM-SERVICES applied -- J 111 GAP -> COVERED-UNFIRED on its Products half (linkedin_company_page_tab, tab=products; bucket 1, no ruling), J 176 (the Services tab) entered at GAP (_audit/2026-11-27-integration-7.md section 4).
     #: 188 ON LANE CENSUS-CALLS28 (2026-11-28), MEASURED by --check, never summed: `J 86` GAP -> COVERED-UNFIRED by D6-CAPABILITY-OVER-AFFORDANCE, the lane-K ledger's call on `P I14` made: `linkedin_mark_company_interest` presses the very 'I'm interested' control that J 86's own Help article documents (`_audit/2026-11-28-census-calls.md` section 2); a W row entering bucket 1 held by OPERATOR-NAMES-THE-TARGET (was 187).
-    "delivered_broad": 188,
+    #: 189 ON LANE CENSUS-CALLS28 (2026-11-28), MEASURED by --check, never summed: `N 3` GAP -> COVERED-UNFIRED by D6-CAPABILITY-OVER-AFFORDANCE, the lane-K ledger's call on `N 1` made: his own profile's People You May Know rail (`linkedin_send_invitation`) and `N 4`'s named-profile route (`_audit/2026-11-28-census-calls.md` section 4.1); a W row entering bucket 1 held by OPERATOR-NAMES-THE-TARGET (was 188).
+    "delivered_broad": 189,
     #: 79 since the live lane's merge (see `adjudicated`): P G6, N 134, P O3
     #: and M C72 COVERED-PROVEN.
     #: 75 and 21 since the bucket-1 merge: `M C41` fired live and moved from
@@ -1726,7 +1728,8 @@ PINNED = {
     #: 510 ON LANE NET7 (2026-11-27), MEASURED by --check, never summed: `N 199` GAP -> COVERED-UNFIRED, his Premium networking matches as people records (`linkedin_premium_matches`; `_audit/2026-11-27-net7.md`, section 5): an R row entering bucket 1 held by no ruling (was 511).
     #: 506 AT INTEGRATION 7, MERGE 5 (lane net7 onto the other four; 2026-11-27), MEASURED by --check on the merged tree, never summed: the lanes' moves above in one tree, with N 32's read-address line moved NEEDS-SESSION -> ADMITTED at settings7's admission (_audit/2026-11-27-integration-7.md).
     #: 505 ON LANE CENSUS-CALLS28 (2026-11-28), MEASURED by --check, never summed: `J 86` GAP -> COVERED-UNFIRED by D6-CAPABILITY-OVER-AFFORDANCE, the lane-K ledger's call on `P I14` made: `linkedin_mark_company_interest` presses the very 'I'm interested' control that J 86's own Help article documents (`_audit/2026-11-28-census-calls.md` section 2); a W row entering bucket 1 held by OPERATOR-NAMES-THE-TARGET (was 506).
-    "gap": 505,
+    #: 504 ON LANE CENSUS-CALLS28 (2026-11-28), MEASURED by --check, never summed: `N 3` GAP -> COVERED-UNFIRED by D6-CAPABILITY-OVER-AFFORDANCE, the lane-K ledger's call on `N 1` made: his own profile's People You May Know rail (`linkedin_send_invitation`) and `N 4`'s named-profile route (`_audit/2026-11-28-census-calls.md` section 4.1); a W row entering bucket 1 held by OPERATOR-NAMES-THE-TARGET (was 505).
+    "gap": 504,
     #: 18 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: `M M1` built (`linkedin_message_from_profile`).
     #: 16 ON LANE L5'S ORDER OF 2026-09-27 23:36, MEASURED:
     #: `linkedin_send_message` RETIRED (aimed by a name): `M M2` to GAP and `N
@@ -1896,7 +1899,8 @@ PINNED = {
     #: 91 AT INTEGRATION 7, MERGE 5 (lane net7 onto the other four; 2026-11-27), MEASURED by --check on the merged tree, never summed: the lanes' moves above in one tree, with N 32's read-address line moved NEEDS-SESSION -> ADMITTED at settings7's admission (_audit/2026-11-27-integration-7.md).
     #: 92 AT INTEGRATION 7'S REGISTRATION (2026-11-27), MEASURED by --check, never summed: J111-SPLITS-PRODUCTS-FROM-SERVICES applied -- J 111 GAP -> COVERED-UNFIRED on its Products half (linkedin_company_page_tab, tab=products; bucket 1, no ruling), J 176 (the Services tab) entered at GAP (_audit/2026-11-27-integration-7.md section 4).
     #: 93 ON LANE CENSUS-CALLS28 (2026-11-28), MEASURED by --check, never summed: `J 86` GAP -> COVERED-UNFIRED by D6-CAPABILITY-OVER-AFFORDANCE, the lane-K ledger's call on `P I14` made: `linkedin_mark_company_interest` presses the very 'I'm interested' control that J 86's own Help article documents (`_audit/2026-11-28-census-calls.md` section 2); a W row entering bucket 1 held by OPERATOR-NAMES-THE-TARGET (was 92).
-    "unfired": 93,
+    #: 94 ON LANE CENSUS-CALLS28 (2026-11-28), MEASURED by --check, never summed: `N 3` GAP -> COVERED-UNFIRED by D6-CAPABILITY-OVER-AFFORDANCE, the lane-K ledger's call on `N 1` made: his own profile's People You May Know rail (`linkedin_send_invitation`) and `N 4`'s named-profile route (`_audit/2026-11-28-census-calls.md` section 4.1); a W row entering bucket 1 held by OPERATOR-NAMES-THE-TARGET (was 93).
+    "unfired": 94,
     #: 104 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     #: 101 AT LANE S'S NAMES ADOPTION (2026-09-27), MEASURED: `N 79`, `N 172`
@@ -2029,7 +2033,8 @@ PINNED = {
     #: 353 ON LANE BUILD-MSG2'S ROUND 2 (2026-11-26), MEASURED: `M M28` SPLIT on the orchestrator's ruling M-M28-SPLITS (round 2, to be registered at integration 6): the view half stayed `M M28`, COVERED-UNFIRED on `linkedin_archived_conversations`; the restore half entered as `M M54`, GAP, W (`_audit/2026-11-26-build-msg2.md` section 10) (was 352).
     #: 347 AT INTEGRATION 6'S MERGE OF LANE BUILD-MSG2 (2026-11-26), MEASURED on the merged tree by --check, never summed: the three lanes' moves above, together.
     #: 346 ON LANE MSG7 (2026-11-27), MEASURED by --check, never summed: `M C36` GAP -> COVERED-UNFIRED on `linkedin_save_post` (SAVE-POST-UNDER-OWN-CURATION, the orchestrator's, registration owed at integration 7): one feed item he names, saved from its own permalink menu, built over live sessions 11 and 12's captures and never fired (`_audit/2026-11-27-msg7.md` section 3.4) (was 347).
-    "gap_write": 346,
+    #: 345 ON LANE CENSUS-CALLS28 (2026-11-28), MEASURED by --check, never summed: `N 3` GAP -> COVERED-UNFIRED by D6-CAPABILITY-OVER-AFFORDANCE, the lane-K ledger's call on `N 1` made: his own profile's People You May Know rail (`linkedin_send_invitation`) and `N 4`'s named-profile route (`_audit/2026-11-28-census-calls.md` section 4.1); a W row entering bucket 1 held by OPERATOR-NAMES-THE-TARGET (was 346).
+    "gap_write": 345,
     #: All 54 are `jobs.md`, which has no per-row R/W column (56 until the
     #: lane-L3 merge built J 18 and J 39). Not a coincidence
     #: and not a defect in the finder: it is the whole of that slice's still-GAP
@@ -2448,7 +2453,8 @@ PINNED = {
     #: 27 AT INTEGRATION 6'S MERGE OF LANE BUILD-MSG2 (2026-11-26), MEASURED on the merged tree by --check, never summed: the three lanes' moves above, together.
     #: 28 ON LANE MSG7 (2026-11-27), MEASURED by --check, never summed: `M C36` GAP -> COVERED-UNFIRED on `linkedin_save_post` (SAVE-POST-UNDER-OWN-CURATION, the orchestrator's, registration owed at integration 7): one feed item he names, saved from its own permalink menu, built over live sessions 11 and 12's captures and never fired (`_audit/2026-11-27-msg7.md` section 3.4) (was 27).
     #: 29 ON LANE CENSUS-CALLS28 (2026-11-28), MEASURED by --check, never summed: `J 86` GAP -> COVERED-UNFIRED by D6-CAPABILITY-OVER-AFFORDANCE, the lane-K ledger's call on `P I14` made: `linkedin_mark_company_interest` presses the very 'I'm interested' control that J 86's own Help article documents (`_audit/2026-11-28-census-calls.md` section 2); a W row entering bucket 1 held by OPERATOR-NAMES-THE-TARGET (was 28).
-    "b1_standing": 29,
+    #: 30 ON LANE CENSUS-CALLS28 (2026-11-28), MEASURED by --check, never summed: `N 3` GAP -> COVERED-UNFIRED by D6-CAPABILITY-OVER-AFFORDANCE, the lane-K ledger's call on `N 1` made: his own profile's People You May Know rail (`linkedin_send_invitation`) and `N 4`'s named-profile route (`_audit/2026-11-28-census-calls.md` section 4.1); a W row entering bucket 1 held by OPERATOR-NAMES-THE-TARGET (was 29).
+    "b1_standing": 30,
     "b1_relayed": 0,
     "b1_pending": 0,
     #: 22 AT THE ORCHESTRATOR'S MERGE OF LANE D (2026-09-27), MEASURED: lane D
@@ -2862,12 +2868,16 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
     #: (`linkedin_mark_company_interest`), never fired -- one capability counted
     #: in two slices. Held as `P I14` is: it fires only at a posting he names,
     #: and only once `P I15`'s undo control has been captured.
+    #: `N 3` entered ON LANE CENSUS-CALLS28 (2026-11-28), MEASURED: an
+    #: invitation from People You May Know, by D6 on `N 1`'s rail tool and
+    #: `N 4`'s named-profile route, never fired. Held until he names the
+    #: person -- never one a page supplies.
     "OPERATOR-NAMES-THE-TARGET": (
         "J 86", "J 128", "J 163",
         "M C1", "M C25", "M C32", "M C35", "M C36", "M C63", "M C64", "M M10", "M M14", "M M15", "M M18",
         "M M26",
         "M M27", "M M29", "M M31",
-        "N 1", "N 2", "N 4", "N 6", "N 10", "N 15", "N 16", "N 47", "N 64", "N 154",
+        "N 1", "N 2", "N 3", "N 4", "N 6", "N 10", "N 15", "N 16", "N 47", "N 64", "N 154",
         "P I14",
     ),
     #: `J 18` and `J 39` entered with the lane-L3 merge, 2026-09-23: reads
