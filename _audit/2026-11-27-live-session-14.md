@@ -216,26 +216,39 @@ counts in phase 8's loads, not in its searches.
 
 ## 3. The stop lines
 
-STOP-ALL ends the session (exit 4). It fires on:
+STOP-ALL ends the session (exit 4). The list is the final runner's
+`STOP_ALL_KINDS`, all 22 kinds by name; `stop_lines_check_s14.py`, disposable,
+beside the runner, reads them by AST and refuses a section 3 that misses one.
+It fires on:
 
-- any wall, checkpoint, challenge or password prompt;
+- any wall, checkpoint, challenge or password prompt
+  (`auth_wall_or_challenge`);
 - the flag not being this lane's, a second client on 9224, or a listener that
-  is not the dedicated profile's browser;
-- `ledger_count_failed`;
-- a failed restore: a switch, the toggle or the folder;
+  is not the dedicated profile's browser (`flag_not_ours`,
+  `second_client_on_9224`, `listener_not_the_dedicated_profile`);
+- a count of the ledgers by hand that failed (`ledger_count_failed`);
+- a failed restore: a switch, the toggle or the folder (`restore_failed`);
 - a publishing or creating control as a press aim, or a commit or autosave
-  sign;
-- a Save, Submit, Delete or Remove drawn as pressed;
-- his root's structure changed after an editor;
-- the Open-to-Work card changed;
-- a conversation opened, or the guard's premise broken;
+  sign (`publishing_control`, `commit_sign`, `autosave_sign`);
+- a Save, Submit, Delete or Remove drawn as pressed (`save_drawn_pressed`),
+  or a save request sent by the Open-to-Work editor's close
+  (`save_request_on_close`);
+- his root's structure changed after an editor (`profile_changed`);
+- the Open-to-Work card changed (`otw_card_changed`);
+- a conversation opened, or the guard's premise broken
+  (`conversation_opened`, `guard_premise_broke`);
 - a self-root or attended press that landed anywhere but its target
   (`press_landing_not_target`);
+- an error after a press that may have changed something, which is never a
+  plain abort (`press_outcome_unread`);
+- the shipped loader proving a member other than the one this session's proof
+  names (`self_member_changed`, the R3 ruling);
 - an editor, overlay or attended menu that will not close
-  (`editor_not_closed`);
+  (`editor_not_closed`, `post_editor_not_closed`, `otw_editor_not_closed`);
 - a typing site asked for a text that is not one of its constants, or whose
   text reached a composer (`typing_not_closed`);
-- a deletion that cannot be verified (phase 33, 14b).
+- a deletion that cannot be verified (phase 33, 14b; built for 14b's own
+  READY, so not a kind of this runner).
 
 A phase stops (exit 3) on:
 
@@ -525,9 +538,10 @@ written after the commit that adds this section):
 | the prepared items (gitignored) | `842bced39d3678bb` |
 | `os_check.ps1` | `455cc21796054c94` |
 
-The branch head is the commit that amends this section with the AST-equality
-line below; the first READY's commit is its parent. Its sha is in the amended
-READY message and in `pins.json`.
+The branch head is the commit that last amends READY. Two amendments follow
+the first READY's commit: the AST-equality line below, then section 3's stop
+lines, completed to all 22 of the runner's kinds. The head's sha is in the
+amended READY message and in `pins.json`.
 
 **THE AST-EQUALITY LINE** (`ast_delta_s14.py`, disposable, beside the runner;
 run 06:36 IST; VERIFIED by instrument):
@@ -692,4 +706,10 @@ and each step runs in the foreground.
    added code after r4. The close-out had already run on the final sha, and
    the AST delta names the three code statements. So the claim the message
    asked for is replaced by a measured one.
+8. **A stop-line list kept by hand drifts from the runner.** The first READY's
+   section 3 named 4 of the runner's 22 STOP-ALL kinds. Three of them,
+   `press_outcome_unread`, `save_request_on_close` and the R3 ruling's
+   `self_member_changed`, were missing even from the prose. `stop_lines_check_s14.py` reads the kinds by
+   AST and refuses a section 3 that misses one. It was red on the committed
+   text and is green now, so it is a candidate for INSTRUMENTS 122.
 
