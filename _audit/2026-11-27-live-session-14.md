@@ -1840,7 +1840,9 @@ The runner and its tools are in the main checkout's
    - `runner_s14b.py tabs_check`: exactly one page, none on LinkedIn, and the
      port's one listener the dedicated profile's browser, or a STOP before
      load 1. The meter refuses load 1 without this reading.
-   - The harness's `attach_check`, 0 loads.
+   - The harness's `attach_check`, as `--only attach_check` (it takes its
+     keys by `--only`, and refuses before any contact without it; 12, THE
+     START), 0 loads.
 3. **The phases, in 11.8's order.** The preflight refuses a phase whose most
    loads do not fit the room, and the next one is then tried.
    - After `profile`, the caller names the items E5's reading drew
@@ -1860,6 +1862,690 @@ The runner and its tools are in the main checkout's
    - `flag_off`, which refuses while a compare is pending;
    - `os_check.ps1`: 9224 down, 0 clients, no Chrome on the profile, no
      lock, no flag.
+
+## 12. Live session 14b, the run (2026-11-28, attended)
+
+**Run by `live14b`, the successor lane.** live-s13 prepared and certified
+14b (11.8). It could not be resumed after the machine restart, because its
+history stalled, and it is STOPPED. live14b worked only from this record, its
+pinned files and the GO, in 11.9's order exactly. It edited none of the
+pinned files: `verify_pins_s14b.py` read ALL-MATCH before Chrome started and
+again after the close.
+
+**THE GO** (`_TEAM_LEAD_GO.md`, 16:2x IST, with `_TEAM_LEAD_CWD.md`). Both
+were deleted as the ack at 16:53:58, after a copy of each was kept in the
+lane's gitignored scratch.
+
+- The head `9ec91965`, with 11.8's nine pins. The orchestrator measured
+  master fast-forwarded to it, and lane CI, the full matrix and master's push
+  CI green on that sha.
+- The operator at the console ("resume with full throttle max", 16:19).
+- At most 37 loads (the ledger read 3 at 16:20), at most 40 a session, 20 s
+  apart, and at most 3 searches. UNREAD-SKIPPED. `post_analytics` and
+  `self_press_volunteering` OFF. Any STOP ends the session.
+- The CWD note: every git command takes `-C` and this worktree, and every
+  write an absolute path.
+
+**BEFORE CHROME** (16:53 to 16:54 IST, VERIFIED):
+
+- `go_pins_check_s14b.py` (disposable, the lane's scratch) read the GO's nine
+  pin lines and its head. All equal `pins.json`: GO-MATCH True.
+- `verify_pins_s14b.py`, without `--before-fast-forward`: ALL-MATCH True.
+  The main checkout's start script was counted and matched; the head
+  `9ec91965`; the tracked tree clean.
+- `os_check` (16:54:07): 9224 down, 0 clients, no Chrome on the dedicated
+  profile, no lock, no flag.
+- The pinned ledger (`ledger_state.py`, live-s13's read-only disposable): 3
+  LinkedIn page loads in the trailing 12 h, so 37 free. Session 14's 3 leave
+  the window at 20:39:17 IST.
+- **Disk and the GO differ on one point.** `os_check`'s boot time reads
+  2026-11-26 08:55, before and after the session, not a restart at about
+  16:15. A power cycle under Windows fast startup keeps the last full boot's
+  time (DERIVED; UNVERIFIED here). No step depends on it: the premises the run
+  needs (9224 down, no Chrome on the profile) were measured.
+
+**THE START** (0 loads, VERIFIED):
+
+- 16:54:46: the main checkout's `scripts/start_chrome.ps1
+  -RefuseSessionRestore`. Outcome `started`, Chrome 158, `exit_type` Normal
+  before and after. The startup setting was absent from both files, with 0
+  startup pages and 0 on LinkedIn. The browser's pid was kept for the close.
+- 16:55:15: `os_check`. 9224 was held by one listener, the dedicated
+  profile's one browser process (`listener_is_the_profile_browser` True), with
+  0 clients and no lock.
+- 16:55:42: the flag raised.
+- 16:55:50: `tabs_check`. Answered: 1 page, 0 on LinkedIn, 1 blank; 1
+  listener, and it is the dedicated one; the launch digest kept. Exit 0.
+- `attach_check`. The first call, named as 11.9 names it, refused before any
+  contact: the harness takes its keys by `--only`. With `--only
+  attach_check`: PASS `[0, 1, 0]`, restored, 0 loads (16:56:18).
+- A status message went to the orchestrator before phase 1. K6 asks him to
+  keep the dedicated Chrome in front during the attended phases.
+
+### 12.1 The loads
+
+| load | IST | phase | landing | what it read |
+|---|---|---|---|---|
+| 1 | 16:57:26 | 1 `profile` (E5) | served, same depth, another url: his root | E5 proved his root at its first load; the top card; the scroll pass; no skill item |
+| 2 | 16:58:22 | 2 `c_srch_3a` | served exact | the AI-route search; Easy Apply pressed on and back; STOP-ALL `restore_failed` |
+
+Every load was recorded in the pinned ledger before it was made. Neither drew
+a wall, a checkpoint or a challenge (each: walled False, 0 challenge terms).
+The two were 56 s apart, and the window was `fronted` for both.
+
+### 12.2 What each phase showed
+
+**Phase 1, `profile`: exit 0, 1 load.**
+
+- **E5:** his root served through the shipped loader, and the self rule
+  proved it at its first load, by his edit controls (4 on the landed member,
+  0 edit routes on another). The self block was open.
+- People gate v2 withheld the raw (L1 10, N1 52, R1 11, R2 9), and the
+  skeleton was kept.
+- The top card drew More 1 (0 visible), Resources 1 (1), Open to 2 (1),
+  Enhance profile 2 (1) and Add profile section 0, as in 14a. The editor
+  routes were `edit/forms/summary/new/` 1, `edit/intro/` 1,
+  `edit/secondary-language/` 1 and 1 other form, and the same after the
+  scroll pass.
+- **OUT by content, found and not pressed** (r3d): the top-card opener
+  (Resources), the photo (1 image button) and Add custom button (0 drawn).
+- **The scroll pass: 1 step.** After it, the section words Experience,
+  Education, Skills, Services and Recommendations each read 0 in `main`.
+  E23's input: 0 skill ids and 0 insight indices.
+- **Rank 31: not pressed.** No Experience section was found, and the
+  add-a-position link was drawn 0 times (`not_exactly_one_link`).
+- **The scrolled skeleton is byte-identical to the first** (VERIFIED, by
+  sha256).
+- **DERIVED, from the code and the output:** the pass tests for the bottom
+  before each scroll. So "1 step" means the document already read as at its
+  bottom at the first test, and no scroll was made. A page that scrolls in an
+  inner element, not the document, reads that way. Which element scrolls is
+  UNVERIFIED. 14a's photo-press reading also saw sections render late (10.5).
+- So `name_items_s14b.py skill` and `skill_index` each printed "drawn by
+  E5's reading: 0" and NOTHING TO NAME (exit 2). Phases 7 and 24 have no item.
+
+**Phase 2, `c_srch_3a`: exit 4, STOP-ALL `restore_failed`, 1 load, 3
+searches.**
+
+- Served exact. People gate v2 withheld the raw (R1 1, R2 1), and the
+  skeleton was kept.
+- **The first view:** the AI route; 25 cards, ids and rows, 0 unparsed; the
+  total capped at 99 shown; the pager's 3 indicators and a visible next
+  control. The Easy Apply toggle had 2 inputs (1 visible), 0 checked. The
+  address keys: `currentJobId` and `keywords`.
+- **ON** (search 2, recorded before the press at 16:58:44): it took effect.
+  Checked 2 and 6 ids shared with the first view. The keys `f_AL` (true),
+  `origin` and `referralSearchId` were added, and `currentJobId` changed. No
+  document loaded.
+- **OFF** (search 3, recorded before the press at 16:59:04): checked 0, and
+  25 of 25 ids shared with the first view. The keys: `currentJobId`,
+  `keywords`, `origin` and `referralSearchId`. No document loaded.
+- **The judge read RESTORED False.** The toggle and the id set came back, and
+  `f_AL` is gone. But `origin` and `referralSearchId`, which the ON press
+  added, stayed, and the address is not the one before the press. Values are
+  not kept, so whether `currentJobId` came back is not shown. STOP-ALL
+  `restore_failed` at `c_srch_3a_easy_apply`; the runner closed its tab.
+  **Corrected in 13.1:** the judge already ignored `origin`, so
+  `referralSearchId` alone failed it.
+- Not reached: All filters, opened, read and closed.
+
+### 12.3 The close: no load after the STOP-ALL
+
+- No compare of his root was deferred: phase 1 pressed nothing on his root,
+  and `root_signatures.json` is absent. `root_settle` was not run, since
+  nothing loads after a STOP-ALL.
+- 16:59:50: `close_chrome_s14b.py --port 9224 --pid <the browser's> --profile
+  <the dedicated profile>`, with the flag standing. It judged "the dedicated
+  browser", 1 listener on the port, owned by the pid. `Browser.close` was
+  sent and answered in 0.96 s, and the browser exited 1.56 s later. The path:
+  `cdp_browser_close`. Nothing was killed. Exit 0.
+- 17:00:07: the flag lowered; no compare was pending.
+- 17:00:13: `os_check`. 9224 down, 0 listeners, 0 clients, no Chrome on the
+  profile, no lock, no flag. His own Chrome was never named or signalled.
+- **No restore prompt.** After the close, the profile's `Preferences` read
+  `profile.exit_type` Normal (VERIFIED, a read only). Chrome offers a restore
+  only on a Crashed mark (the start script's measurement, in its header), so
+  the next start offers none (DERIVED).
+- The session folder is preserved in the main checkout's gitignored
+  `_state/preserved/live15-2026-11-28`: 16 files, each identical by sha256.
+  No raw page was kept (`raw_kept` False in both readings).
+
+### 12.4 The ledgers
+
+- The session ledger: 2 loads, 3 searches.
+- The pinned account ledger: 2 records for 14b (`live-s13/15/live_census`),
+  so 5 in the trailing 12 h and 35 free. Session 14's 3 leave the window at
+  20:39:17 IST, and 14b's 2 at 04:58:19 IST on 11-29.
+- The two ledgers agree at 2.
+
+### 12.5 The GO's accepted departures, recorded
+
+The GO's ruling 1 ACCEPTED all three named in 11.8, each stricter than ruled:
+
+- the teardown's 30 s exit wait. Here the browser exited 1.56 s after the
+  reply;
+- the tabs gate's same-launch condition. It held: the reading was taken on
+  this launch;
+- the start script's refusal of a preferences file it cannot read. It was not
+  met: both files were read.
+
+### 12.6 What 14b did not reach
+
+- **Not run because of the STOP-ALL:** phases 3 to 20, 22, 23 and 25 to 27.
+- **No item either:** phases 7 and 24, since E5's reading drew no skill item.
+- **OFF by the GO:** phases 21 and 28.
+- **From phase 1:** rank 31's press. **From phase 2:** All filters.
+
+### 12.7 Rows moved: none
+
+Each line was a capture, and a capture moves no row by itself (10.7). The two
+skeletons are preserved, not exported to tracked fixtures: no order named an
+export for this session.
+
+### 12.8 What needs the orchestrator
+
+1. **Rank 132's round trip cannot pass this judge on this route.** LinkedIn
+   added `origin` and `referralSearchId` on the ON press and kept them after
+   the OFF press. The view came back (the toggle unchecked, `f_AL` gone, 25 of
+   25 ids), but the judge asks for every touched key back. It needs a ruling:
+   either the two keys are judged volatile, as `ROOT_VOLATILE` is for his
+   root, or the toggle's round trip is dropped from 14c. (Ruled VOLATILE,
+   narrowly, in 13; and corrected in 13.1: `origin` was volatile already.)
+2. **Phase 1's scroll pass made no scroll.** E23's skill items, rank 31's
+   link, and phases 7 and 24 wait on a pass that scrolls the element that
+   scrolls and waits for the late sections. That is offline work, red first
+   on this session's skeleton, before 14c.
+3. **The account:** 35 free now, 37 after 20:39 IST, and 40 after 04:58 IST
+   on 11-29.
+4. **Disk and the GO** differ on the boot time (BEFORE CHROME, above).
+
+## 13. Session 14c, PHASE A (offline): the three fixes
+
+Everything here is offline. There were zero loads, and 9224 was untouched;
+the flag was never raised. The only browsers were the checks' own headless
+Chromiums, with every request aborted.
+
+**THE ORDER** (`_TEAM_LEAD_14C.md`, 17:1x IST). It was deleted as the ack at
+17:12:35, and a copy is in the lane's gitignored scratch.
+
+- **Ruling 1 (12.8.1), VOLATILE narrowly.** After a filter round trip,
+  `origin` and `referralSearchId` are judged by NAME, their values ignored.
+  - That holds ONLY when every `f_*` key, the first view's ids (all 25)
+    and the 0-checked toggle restore exactly.
+  - Any other added or missing key still STOPs.
+  - Red first, with three fixtures.
+- **Ruling 2:**
+  - measure why phase 1 never scrolled, and fix it;
+  - each step must prove that the position or the skeleton changed;
+  - zero progress is a named STOP (`scroll_no_progress`) before any item
+    is drawn;
+  - red first, on a fake page where the old code reports done without
+    moving.
+- **Ruling 3:** 11.9's attach_check line gains `--only attach_check`. Done
+  in 11.9 above.
+- **The scope:** 14c is r3e plus these three fixes and nothing else. K9,
+  K10, ranks 2, 149 and 151 and the Open-to-Work re-press move to 14d.
+
+### 13.1 What failed 14b's restore, measured (a correction to 12.2, 12.8 and lesson 17)
+
+- **r3e's judge (`view_restored`) already treats `origin` as volatile.** It
+  is one of the ten `VOLATILE_KEYS` the warm re-check listed as LinkedIn's
+  bookkeeping keys, so the judge never looked at it.
+- **`referralSearchId` alone failed it** (VERIFIED, check L1 below):
+  - the shipped judge, on 14b's live key names, reads False;
+  - it reads True once `referralSearchId` alone is taken away;
+  - the values are not kept, so synthetic ones stand in. The verdict
+    depends only on which keys are present and equal (DERIVED from the
+    judge's code).
+- Section 12 named both keys as the cause. The reading was right that both
+  stayed; the cause was one of them.
+
+### 13.2 Why phase 1 never scrolled (the measurement the order's item 2 asked for)
+
+- **Focus and visibility: ruled out.** The window was `fronted`, and the page
+  `visible` (VERIFIED, the phase's own reading). The pass's
+  `window.scrollBy` needs neither, and it was never called (below).
+- **The method and the target: the cause.**
+  - The pass tests the DOCUMENT's bottom (`innerHeight + scrollY >=
+    documentElement.scrollHeight - 8`) before each scroll, and scrolls the
+    WINDOW.
+  - It printed 1 step, so the test read True before the first scroll, and
+    no scroll was made (DERIVED from the code and the live output).
+  - At that moment `main` held 15 sections, 14 headings and 2,576
+    elements. VERIFIED: counted on the preserved skeleton by
+    `scroll_structure_s14c.py` (disposable).
+  - A page whose main holds 15 headed sections does not read as its own
+    bottom in one window unless it scrolls INSIDE an element (DERIVED).
+  - Which element is UNVERIFIED. The page's classes are hashed, and a
+    skeleton keeps no style.
+- **The late sections.** Two of main's sections were 27-element shells.
+  - They sit where 14a's later skeleton, after the photo press, drew seven
+    filled sections: 5 more sections and 7 more headings than its first
+    render (VERIFIED, counts).
+  - What fills them is UNVERIFIED. Being scrolled into view is the likely
+    trigger.
+- So C2 finds the element that scrolls by walking up from main. It does not
+  name it.
+
+### 13.3 The fixes
+
+**THE FILES.** `runner_s14c.py` is built from r3e by `patch_s14c_r1.py`.
+The runner, its tools and its checks are in the main checkout's gitignored
+`_state/live-runner/s14c/`. The patch:
+
+- refuses unless its source hashes to r3e's pin;
+- replaces each anchor exactly once;
+- writes LF bytes.
+
+**C1, `restore_verdict`.** It returns `restored`, or the FIRST condition
+that fails, by a closed word:
+
+- `ids_not_exact`;
+- `toggle_not_0`;
+- `f_key_not_restored`;
+- `key_added_or_missing`: any key name but the two;
+- `touched_key_not_back`: r3e's own rule, with the two judged by name only.
+
+The round trip records the word, and the volatile key NAMES present.
+
+**C2, `scroll_pass_14c`.**
+
+- **The target.** It takes the nearest of main and its ancestors that
+  scrolls vertically: overflow-y auto, scroll or overlay, with more to
+  scroll than it shows. Else it takes the document, when that scrolls. If
+  neither does, it looks again, 16 times, 0.5 s apart.
+- **Each step:** it scrolls that element by 85% of what it shows, waits
+  1.2 s, and reads again.
+- **Progress:** a step progressed when the position moved by 1 px or more,
+  or main's structure changed. The structure is main's element count and a
+  hash of its tag sequence, with no text, so a ticking counter is not
+  progress.
+- **Proved** only when every step progressed and at least one moved the
+  position.
+- **Otherwise** phase 1 records the pass's reading, then stops with
+  `scroll_no_progress`. That comes before the skill items, the Experience
+  reading and rank 31's press.
+
+**`scroll_no_progress` is a PHASE stop (exit 3), not a STOP-ALL.**
+
+- The order says "a named STOP". Section 3 uses that word for a phase stop.
+- Nothing has been pressed at that point, so the session goes on to phase 2.
+- If the orchestrator means STOP-ALL, it is one word added to
+  `STOP_ALL_KINDS`.
+
+**Mechanical, named:** the session folder is `live16`, and the session
+number 16. 14b's `live15` holds its 2 loads and 3 searches.
+
+**THE REACH, by AST** (`ast_delta_s14c.py`, disposable): 416 top-level
+definitions become 423.
+
+- Changed: the module docstring, `SESSION`, `easy_apply_round_trip`,
+  `main_async` and `phase_profile_s14`.
+- Added: `ROUND_TRIP_VOLATILE`, `_f_keys`, `restore_verdict`, `SCROLL_JS`,
+  `SCROLL_MAX_STEPS`, `SCROLL_FIND_TRIES` and `scroll_pass_14c`.
+- Removed: none.
+
+### 13.4 Red first (VERIFIED, check mode, `gate_checks_s14c.py` slice c14)
+
+The checks ran on three runners:
+
+- 14c;
+- r3e;
+- `runner_s14c_loose.py`, a CHECK-ONLY mutant of r3e. It simply adds
+  `referralSearchId` to `VOLATILE_KEYS`, which is the obvious fix the
+  ruling's "any other added or missing key still STOPs" rules out. Its
+  entry point refuses.
+
+| check | what it asks | r3e | the mutant | 14c |
+|---|---|---|---|---|
+| R0 | control: the first view exactly back is restored | pass | pass | pass |
+| R1 | fixture 1: only the two keys left over is restored | **red** | pass | pass |
+| R2 | fixture 2: the two plus one unknown key is a STOP | pass | **red** | pass |
+| R2b | the two, with another key missing, is a STOP | pass | **red** | pass |
+| R3 | fixture 3: a missing `f_*` key is a STOP | pass | **red** | pass |
+| R3b | a missing `f_*` key, neither volatile key present, is a STOP | **red** | **red** | pass |
+| R4, R5 | controls: 24 of 25 ids back; the toggle left checked | pass | pass | pass |
+| L1 | the live STOP's cause (13.1) | pass | -- | pass |
+| E1 | end to end: a toggle that writes and keeps the two keys, as live: restored, All filters reached | **red** (STOP-ALL `restore_failed`) | pass | pass |
+| E2 | the same, with one unknown key added at the press back: STOP-ALL | pass | **red** | pass |
+| S1 | his root as 14b met it, scrolling inside an element whose lower sections render in view: scrolled, a skill id drawn, rank 31 pressed once | **red** (1 step, 0 skill ids, not pressed) | **red** | pass (5 steps, 5 moved) |
+| S2 | nothing scrolls: a STOP before any item | **red** (done; rank 31 pressed) | **red** | pass |
+| S3 | the document overflows, but every scroll is undone: a STOP after step 1 | **red** (24 steps, then done) | **red** | pass |
+| S4 | control: the document scrolls, and the lower sections render | pass | pass | pass |
+
+- **The totals:**
+  - 14c: 15 of 15;
+  - r3e: 9 of 15, with C1's R1, E1 and R3b and C2's S1 to S3 red;
+  - the mutant: 6 of 14, with C1's strict class (R2, R2b, R3, E2) and R3b
+    red.
+- **R3b is a hole r3e already had.** An `f_*` key that a round trip lost
+  without touching it read as restored.
+- **S1 on r3e reproduces 14b's live signature:** 1 step, 0 skill ids, rank
+  31 not pressed.
+
+### 13.5 The check sets
+
+**THE HARNESS EDITS** (`port_checks_s14c.py`, anchored, each from its set's
+14b pin):
+
+- runner_s14c and live16 by default;
+- F2 and K11 expect session 16;
+- H1 and H2's synthetic root gains a 2,400 px spacer, because 14c's pass
+  STOPs where nothing scrolls;
+- the AI route gains two modes, for E1 and E2;
+- the gate gains slice c14.
+
+**RE-RUN ON 14c** (check mode, each step under 2 minutes):
+
+| set | 14c | r3e's last green (`final2/`, 15:31 to 15:46) |
+|---|---|---|
+| the gate, slices main / phase / r1 / r2 | 31 / 20 / 16 / 16, all passed | the same |
+| the close set | 23 in a full run before the bound, then the other 8 alone (`close_k5k6_s14c.py --k1`): 31 of 31 | 31 of 31 |
+| the table checks | red class 3 of 3, control 1 of 1 | the same |
+| the tabs checks | 18 of 18 | 18 of 18 |
+| the entry refusals | every refusal as named, before any browser contact | the same |
+
+**NOT RE-RUN.** These reach no changed code, so their last green is
+`final2/` on r3e:
+
+- the Open-to-Work checks;
+- the composer checks (14d's code);
+- the teardown, the restore guard and the start script's test, whose files
+  are unchanged; the tools here are byte-identical copies;
+- the items: `live16`'s copy is byte-identical (842bced3);
+- provenance, which runs again at READY.
+
+**WHAT THE BOX DID** (VERIFIED, sampled):
+
+- **Two gate runs crashed.** In each, the headless renderer died ("Page
+  crashed", "Target crashed") at a different check: D2, then D1, and Q9.
+  - Those were the four slices together, and then main and r2 as a pair.
+  - The CPU read 57 to 97% in the second run, with other lanes' pytest
+    runs on the box.
+  - A third run of main and r2 passed, 31 of 31 and 16 of 16, with the CPU
+    at 31 to 100%.
+  - The crashes' cause is UNVERIFIED. They followed the load, not the code.
+- **The full close set could not finish.** It ran in 106 s on r3e on a
+  quiet box. Here it ran past the 115 s bound three times, with the CPU at
+  96 to 100% before it started.
+  - One of those runs failed K2g, a real-time check: a dialog that closes
+    6 s after its Dismiss.
+  - So the 8 checks the first run did not reach were run alone.
+
+### 13.6 For the cold review: the delta only
+
+- `delta_r3e_to_s14c_r1.diff`: r3e to r1, 186 changed lines;
+- `runner_s14c_r1.py`, the same bytes as `runner_s14c.py` (sha256
+  `372d4da91faee5fa`);
+- `patch_s14c_r1.py`;
+- `port_checks_s14c.py`, with slice c14;
+- this section.
+
+Candidates for INSTRUMENTS, each shown red above: slice c14's C1 and C2
+checks. `scroll_structure_s14c.py`, `ast_delta_s14c.py` and
+`close_k5k6_s14c.py` are disposable.
+
+### 13.7 r2: the chained shell, LIVE-SESSIONS-RUN-WITHOUT-HIM, and the cold review
+
+**THE ORDERS.** Each note was deleted as the ack, and a copy is in the lane's
+gitignored scratch.
+
+- **17:2x, by message:** `scroll_no_progress` stays a PHASE stop. A failed
+  scroll in one phase must not stop the others.
+- **17:4x, by message:** the chained-shell fix goes into r2 after the review.
+  A bottom counts only when it still holds after one more 1.2 s read. Red
+  first, on a chained-shell page.
+- **`_TEAM_LEAD_UNATTENDED.md`** (18:2x, acked 18:31:36), LIVE-SESSIONS-RUN-WITHOUT-HIM:
+  - nobody fronts, clicks or watches a window;
+  - the lane keeps its own window usable over CDP before each K6 phase, with
+    one retry, then a skip at no load cost;
+  - launch flags only if a covered page is measured to stop rendering.
+- **`_TEAM_LEAD_K6_RULING.md`** (18:50, acked 18:58:55):
+  - the measurements below are accepted;
+  - no step of the runner may ever take the OS foreground, so there is no
+    restore step either;
+  - `Page.bringToFront` stays;
+  - whether the window was minimised is recorded, measured.
+- **The cold review** (`review14c28`, 18:10 to 18:30): NO-GO, on one NATURAL
+  finding (N1) and eight NITs.
+- **`_TEAM_LEAD_MASTER_B7DB2F7A.md`** (18:57, acked 19:12:21): master was
+  merged in before the certifying CI.
+
+**THE MEASUREMENTS** (VERIFIED). They used the installed Chrome 158, with
+throwaway profiles on ports 9351 and 9352 and every host mapped to NOTFOUND
+(`occlusion_probe_s14c.py`, `occlusion_probe2_s14c.py`,
+`occlusion_probe3_s14c.py`; disposable).
+
+| window A | Playwright attached (every phase) | no client attached |
+|---|---|---|
+| covered by window B | 60 frames/s, visible, focused | hidden; 18 frames/s over 4 s, timers throttled |
+| minimised (windowState minimized, IsIconic) | 60 frames/s, visible, focused | hidden; 0 frames/s, timers 1/s |
+
+- **The runner's own kind of tab** (`ctx.new_page()`): attached while another
+  window held the OS foreground, it read visible and focused, at 61 frames/s.
+- **Focus emulation:** Playwright sends `Emulation.setFocusEmulationEnabled`
+  for every page it attaches (VERIFIED in its bundled source). That is what
+  keeps an attached page live (DERIVED).
+- **The OS foreground:** `Page.bringToFront` did not take it.
+  `Browser.setWindowBounds` "normal" on a minimised window did, twice.
+- **What K6 checked:** the OS FOREGROUND. `front_chrome.ps1` required
+  `GetForegroundWindow` to be the dedicated browser's window. It checked
+  neither visibility nor focus.
+- **So the launch flags' condition is not met.** A covered page does not stop
+  rendering during a phase, and `scripts/start_chrome.ps1` is unchanged.
+- **14b's empty scroll was not occlusion:** its window read fronted and
+  visible (12.2).
+
+**r2.** `runner_s14c.py`, the same bytes as `runner_s14c_r2.py` (sha256
+`04b30b3d42002257`), is built from r1 by `patch_s14c_r2.py`, which refuses
+unless its source is r1. It carries five changes.
+
+- **R2-1, the chained shell.** A bottom counts only when it still holds after
+  one more read 1.2 s later. Otherwise the pass steps on, inside the same 24
+  steps.
+- **R2-2, LIVE-SESSIONS-RUN-WITHOUT-HIM.**
+  - K6 is no longer the OS foreground. `window_gate_14c` runs on the runner's
+    own tab, after the preflight and the lock and before the id's file is
+    deleted.
+  - It turns focus emulation on (explicitly, besides Playwright's own),
+    records the window's state (`minimised_at_gate`, measured, never changed)
+    and calls `Page.bringToFront`. The page must then read visible and
+    focused.
+  - One retry; then the phase is SKIPPED (exit 2, no load), with its reason in
+    `window_gate_<phase>.json`.
+  - No step of the runner takes the OS foreground. No phase calls
+    `front_window()`, neither as K6's refusal nor for the "### the window"
+    line, and there is no restore.
+- **N1, the review's NATURAL finding.** The walk for the element that scrolls
+  starts INSIDE main, at the lowest element holding every section main holds
+  (on 14b's root, main > div > div). Body counts when it scrolls on its own.
+  The target's depth is now signed from main.
+- **NIT-1.** A target lost or changed in a step, or at the bottom's re-read,
+  is a stall, never a bottom.
+- **NIT-7.** The round trip's docstring names `restore_verdict`, and its
+  RESTORED line names the condition that failed. r1's patch script says
+  `view_restored` is "called by" `restore_verdict`. It is not:
+  `restore_verdict` re-implements the touched rule. r1's script stays as r1's
+  build record.
+
+**THE REACH, by AST:** 176 lines changed from r1
+(`delta_r1_to_s14c_r2.diff`).
+
+- Changed: the docstring, `SCROLL_JS`, `easy_apply_round_trip`, `main_async`
+  and `scroll_pass_14c`.
+- Added: `WINDOW_TRIES`, `_WINDOW_CDP`, `window_reading`, `window_gate_14c`
+  and `_window_gate_cleanup`.
+
+**RED FIRST** (VERIFIED, slice c14, check mode). S5 is a named real-time case,
+because the test is the pass's own 1.2 s waits.
+
+| check | what it asks | r1 | r2 |
+|---|---|---|---|
+| S5 | chained shells: the second exists only after the first renders, 1.8 s after the bottom; its skill id is drawn | **red** (proved, 0 skill ids) | pass |
+| S6 | N1: 14b's own structure, main > div > div scrolling, with the aside inside it | **red** (target none: a phase STOP) | pass (depth -2) |
+| S7 | N1: body scrolls on its own under html's overflow hidden | **red** (target none) | pass |
+| S8 | control: html visible and body auto, so the document is the target | pass | pass |
+| S9 | NIT-1: the scroller locks in step 2 while main gains a node: a STOP before any item | **red** (read as proved) | pass (a stall at step 2) |
+| W1 | unattended, with the OS foreground refused: the gate keeps the tab usable, and the phase runs | **red** (refused) | pass |
+| W2 | a first unusable reading is retried once, and the phase runs on the second | **red** | pass |
+| W3 | still unusable after the retry: SKIPPED, no load, the reason named | **red** | pass |
+| W4 | a minimised window is recorded and never restored, and the phase runs | **red** | pass |
+| W5 | control: a window that keeps a phase from running leaves rank 69's id file | pass | pass |
+| W6 | control: a phase that presses nothing never meets the gate | pass | pass |
+| W7 | no phase asked Windows for the foreground (W1 to W6) | **red** (6 calls) | pass (0) |
+
+- r2 passes 27 of 27.
+- r1 passes 18 of 27. Its 9 reds are exactly S5, S6, S7, S9, W1 to W4 and W7,
+  and every check of 13.4 still passes on both runners.
+
+**THE CHECK SETS ON r2** (check mode):
+
+| set | r2 |
+|---|---|
+| slice c14 | 27 of 27 |
+| the gate, slices main and r2 | 31 of 31, and 16 of 16 (twice) |
+| the close set's K1b, K1e, K1f, K5, K6, K6b, K6c and K7 | 8 of 8 |
+| the table checks | red class 3 of 3, control 1 of 1 |
+| the tabs checks | 18 of 18 |
+| the entry refusals | every refusal as named, before any browser contact |
+| provenance | the same as r3e's |
+
+- **THE HARNESS EDITS** (`port_checks_s14c.py`, r2):
+  - The close set's `window_refusal` stubs the gate UNUSABLE, so no offline
+    check opens a tab or reaches for 9224. Its K6 words name both meanings.
+  - The entry set's two K6 cases now expect the self block's veto, the first
+    refusal before the gate. On r1 those two read NOT AS EXPECTED, as they
+    must.
+  - Slice c14 gains S5 to S9 and W1 to W7.
+- **NOT RE-RUN, since they reach no changed code:**
+  - the gate's phase and r1 slices (20 of 20 and 16 of 16 on r1, 18:2x);
+  - the close set's other 23 checks;
+  - the Open-to-Work, composer, teardown, guard, starter and items sets
+    (`final2/`).
+- **WHAT THE BOX DID:**
+  - The r2 slice's two passing runs ended their work at 131 s (with five
+    sets beside it) and at 112.9 s, each past my 115 s bound during the
+    teardown.
+  - A run alone, with the CPU at 100% from other lanes, failed Q1 only. Q1
+    is a named real-time check (a 7 s slow answer) on code r2 does not reach.
+  - Q5, the slice's one check on changed code (`flag_off` through
+    `main_async`), passed in all three runs.
+
+**THE REVIEW'S OTHER NITS, for the orchestrator** (not in r2):
+
+- **NIT-2 (pre-existing in r3e).** A non-`f_*`, non-volatile key whose value
+  only the OFF press changed is accepted. On 14b's route only `keywords` is
+  such a key, and all 25 ids must still come back. The review's fix, if
+  wanted: `_filters(back) == _filters(base)`, with the two keys removed.
+- **NIT-3:** as ruled ("any other added or missing key still STOPs").
+- **NIT-4 (pre-existing):** the path is not judged; `same_address_as_before`
+  records it.
+- **NIT-5, for the GO:** `scroll_no_progress` and a window SKIP are
+  phase-level, so the GO's "any STOP ends the session" should not cover them.
+- **NIT-6, for the GO:** All filters becomes reachable live. An unexpected
+  re-query there would be search 4: under the runner's cap of 5, but past a
+  GO's "at most 3".
+- **NIT-8:** slice c14's module line counts kind `red` only; its C14 SUMMARY
+  line and the exit code carry the result. S6 models the aside inside main,
+  as on 14b.
+
+**ANSWERED for the orchestrator.**
+
+- `tabs_checks_s14b.py`'s 15:39:17 edit is live-s13's waits fix (its line
+  57: "parallel runs each take their own fake port").
+- Pass 2's tabs runs wrote their outputs from 15:39:34, after that edit, so
+  `final2/`'s tabs results are on `8f5ffa6a`, the pinned sha.
+- The summary's `967cf23c` is the sha before the edit (DERIVED from the
+  mtimes).
+
+**A RESIDUAL, UNVERIFIED:** the session's start (`scripts/start_chrome.ps1`)
+opens the dedicated Chrome's window, which may take the OS foreground once,
+at launch. It is not a runner step.
+
+### 13.8 READY for session 14c (2026-11-28, 19:4x IST)
+
+**THE HEAD** is the commit that adds this section: the record alone, on top of
+`16ed7817`.
+
+- `16ed7817` is certified by sha: lane CI 46151495063 and the full matrix
+  46152089610, all three cells.
+- It descends from master `b7db2f7a`, merged in at `f811d01f` (a merge, not a
+  rebase). So the head is a fast-forward of master.
+- The master merge changed none of the files the runner imports: the people
+  gate, the harness, the matcher, the shipped wait and the start script each
+  hash to their 14b pins.
+
+**HOLD.** PHASE B starts only on a `_TEAM_LEAD_GO.md` that names these pins. It
+comes after the warm re-check of the r1-to-r2 delta and the orchestrator's
+fast-forward of master. The operator is not a step
+(LIVE-SESSIONS-RUN-WITHOUT-HIM).
+
+**THE PINS.** The full values go in the session's gitignored
+`_state/live16/pins.json`, written after the commit that adds this section;
+`verify_pins_s14c.py` re-hashes them.
+
+| pin | sha256 (short) |
+|---|---|
+| `runner_s14c.py` (r2) | `04b30b3d42002257` |
+| `scripts/people_gate.py` | `6ff3afb732ed1546` (unchanged) |
+| the harness, `scripts/_probe_live_lane_session_2.py` | `a5c10ae992f691b8` (unchanged) |
+| `linkedin_server/volunteering_route.py` (the one matcher) | `5635e69f595bfa3c` (unchanged) |
+| `linkedin_server/self_profile.py` (the shipped wait) | `b39b615b2c476b94` (unchanged) |
+| `scripts/start_chrome.ps1` (tracked; the main checkout's copy already matches) | `fe00bd14416e64e8` (unchanged) |
+| `close_chrome_s14b.py` (the teardown; a byte-identical copy) | `83d17023fc3a9da4` |
+| `os_check.ps1` (every phase's preflight; a byte-identical copy) | `0134d152b71bd613` |
+| `front_chrome.ps1` (a copy; no phase calls it in r2) | `76c98dc7f949dc1c` |
+| `name_items_s14c.py` | `5a401fb9623a6004` |
+| the prepared items (`live16`) | `842bced39d3678bb` (identical to 14a's and 14b's) |
+
+The check sets and their builders are pinned beside them, `patch_s14c_r2.py`
+(`7d4ed91aab08616c`) among them.
+
+**THE PHASES:** 11.8's table, unchanged.
+
+- Phases 21 (`post_analytics`) and 28 (`self_press_volunteering`) stay OFF
+  unless he names a post or his profile id. Each refuses before any browser
+  contact.
+- K9, K10, ranks 2, 149 and 151 and the Open-to-Work re-press are in 14d.
+
+**THE BUDGET** (VERIFIED, `reach_s14c.py`, disposable, from r2's own
+`PHASES`):
+
+- The 26 phases total 53 most loads and 3 searches. The expected spending is
+  29 (11.8).
+- The pinned ledger at 19:37 IST: 5 loads in the trailing 12 h, so 35 free.
+  14a's 3 leave the window at 20:39:17 IST, giving 37, and 14b's 2 at
+  04:58:19 IST on 11-29, giving 40.
+
+| free | at most loads, the plan reaches | with 2 loads held for `root_settle` |
+|---|---|---|
+| 35 | phases 1 to 17, then 20: 18 phases, 35 loads | phases 1 to 16, then 20: 17 phases, 33 loads |
+| 37 | phases 1 to 18: 18 phases, 37 loads | phases 1 to 17, then 20: 18 phases, 35 loads |
+| 40 | phases 1 to 19: 19 phases, 40 loads | phases 1 to 18, then 20: 19 phases, 38 loads |
+
+- The 2 loads are held only while a compare of his root is deferred: a
+  contact overlay, or a self-press page, left open.
+- A window skip costs no load, nor does a refused phase; the next phase is
+  then tried.
+
+**THE COMMANDS:** 11.9's, with these substitutions:
+
+- the main checkout's `_state/live-runner/s14c/`, and
+  `LIVE_LANE_SESSION_DIR=live16`;
+- `verify_pins_s14c.py`, without `--before-fast-forward`;
+- `name_items_s14c.py`, and `--items _state/live16/items_prepared.json`;
+- `attach_check` as `--only attach_check` (C3);
+- the K6 phases need nobody. The runner's window gate keeps its own tab
+  usable, or skips the phase at no load (exit 2, `window_gate_<phase>.json`).
+
+**THE STOP LINES:**
+
+- section 3's 22 STOP-ALL kinds, unchanged in r2;
+- two new phase-level stops, each with no further load in its phase:
+  `scroll_no_progress` (phase 1, before any item), and a window skip (exit
+  2, before any load);
+- for the GO's words: these two do not end the session (NIT-5), and the GO
+  should name the search cap it means (NIT-6).
 
 ## Lessons (for the orchestrator to harvest)
 
@@ -1930,4 +2616,37 @@ The runner and its tools are in the main checkout's
     harness needs its own clock from the first day. It should name the few
     checks that test a wait itself, and run its independent sets side by
     side.
+17. **A restore judged on the whole address fails where the site adds keys
+    and never takes them back.** On the AI route, the Easy Apply press added
+    `origin` and `referralSearchId`, and the press back left them. The toggle
+    and all 25 ids came back, and the judge still read RESTORED False (12.2).
+    A round trip's judge has to know which keys the site owns, measured on a
+    capture before the live press. (Corrected in 13.1: the judge already
+    ignored `origin`; `referralSearchId` alone failed it. See lesson 20.)
+18. **A scroll pass that tests for the bottom first can end before its first
+    scroll.** "1 step" read like a pass, but the scrolled skeleton was
+    byte-identical to the first, so the pass measured nothing (12.2). Count
+    the scrolls made, not the loop's steps, and compare the skeletons before
+    and after.
+19. **A git hooks folder held in a shell variable reads as the consent hook's
+    protected folder.** `$GD/hooks/` was denied by name (R2), and nothing ran.
+    Read with the Read tool, or spelled as a literal path, it is judged by its
+    path, as the denial itself says.
+20. **Name a STOP's cause from the judge, not from the reading.** 14b's
+    reading showed two keys left over, and section 12 named both. The judge
+    already ignored one of them (13.1). Run the judge on the reading's names
+    before naming its cause.
+21. **A check set that runs near its bound on a quiet box fails on a shared
+    one.** The close set took 106 s alone. With other lanes' tests holding
+    the CPU at 96 to 100%, it could not finish in 115 s, and a real-time
+    check failed (13.5). Keep each step well under the bound, and run the
+    checks a delta reaches on their own.
+22. **A page under a debugger is not the page a person sees.** With
+    Playwright attached, a minimised window rendered at 60 frames/s and read
+    visible and focused. Detached, the same window was hidden, at 0 frames/s
+    (13.7). Measure a window's state with the client the run uses, and say
+    which client that was.
+23. **A walk up from a landmark cannot find what is below it.** C2 started at
+    main and went up, and 14b's page scrolls two levels below main (13.7, N1).
+    Start the search where the content is.
 
