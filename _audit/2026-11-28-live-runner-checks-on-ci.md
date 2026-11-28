@@ -425,4 +425,38 @@ views passed `--check` against the merged corpus.
 audit index, the rulings register, the register's numbers, and the ignored-path and prose guards
 passed 99. `scripts/check_cited_shas_resolve.py`: OK.
 
+That head, `5992d6a6`, was green on lane CI (46154678640) and the full matrix (46155307618). At
+20:17, r3's final runner (`runner_s14c.py`, sha256 `c0d61e0d`, pinned in live16 at 20:10:47)
+matched the tracked module 13 of 13. Every runner name the module mirrors was byte-identical to
+the 14b runner it was extracted from, 11 of 11, and none was among r3's changes:
+
+- `capture`, `scroll_pass_14c` and `window_gate_14c` changed;
+- `SCROLL_CENSUS_JS` was added.
+
+The diff tool's control, run against r1, found 4 of 11 the same.
+
+### 11.2 The integration: master `acd9df5c` and vendor-pin28, with this lane as integrator
+
+The orchestrator made this lane the integrator at 20:5x IST. Session 14c had ended, and master was
+`acd9df5c`, the live lane's r3 READY. One full matrix on this branch certifies all three lanes, and
+master fast-forwards to its head.
+
+- **Merge 1:** master `acd9df5c`. Its two commits touch only the live lane's session 14 record. It
+  merged cleanly.
+- **Merge 2:** vendor-pin28, head `ddf45cae`, jobcore-fast28's lane. It brings four files:
+  `.github/workflows/vendored-current.yml`, `scripts/check_vendored_current.py`,
+  `tests/test_check_vendored_current.py` and `tests/test_vendored_buildinfo.py`. It shares no file
+  with this lane, and merged cleanly.
+- **No conflict anywhere**, in or outside the derived views.
+- **The derived views**, each regenerated with its own `--write`: the audit index (321 documents),
+  the rulings register (216 rulings) and the blocker map (409 lines). Each came out byte-identical
+  to the merged tree. The blocker map's only working-tree difference was its line ends, and staging
+  it changed nothing.
+- **`scripts/census_completion.py --check`:** "every headline figure matches its pin".
+- **This lane's tests, serially:**
+  - the four new modules passed 113;
+  - `tests/test_ci_shard.py`, `tests/test_ci_runner_facts.py`,
+    `tests/test_start_chrome_restore_guard.py` and the import-safety sweep passed 438.
+- **The identity gate** examined each merge against 235 spellings, where it had 226 before.
+
 Certification of the integrated head is in section 6.
