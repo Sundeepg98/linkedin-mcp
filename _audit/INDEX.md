@@ -27,8 +27,8 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 321 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 281 |
+| audit documents git tracks under `_audit` | 322 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 282 |
 | distinct dates | 24 |
 | documents with no level-1 heading | 2 |
 | `CORRECTS:` marker lines | 134 |
@@ -39,7 +39,7 @@ are listed as `(undated)`; no date is taken from git history, because
 | documents at either end of a cross-document edge | 116 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
-| documents no correction marker touches at all | 203 |
+| documents no correction marker touches at all | 204 |
 | blockquoted markers naming ANOTHER document | 0 |
 | edges missing one of their two markers | 0 |
 | edges declared a different number of times in each direction | 2 |
