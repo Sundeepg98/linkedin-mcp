@@ -792,10 +792,15 @@ The closest two loads were 84 s apart.
   closed its tab, and the session ended.
 - The window was `raised_unfocused` for this phase; it was `fronted` for
   phases 1 and 2.
-- **UNVERIFIED: whether the close made a save request, and whether his card
-  is unchanged.** The request summary and the card's after-read run only
+- **No instrument read whether the close made a save request, or whether his
+  card is unchanged.** The request summary and the card's after-read run only
   after a close succeeds. Nothing in the editor was pressed but the close
   attempts.
+- **The answer is OPERATOR-OBSERVED** (08:43 IST, confirmed 08:44, relayed by
+  the orchestrator's `_TEAM_LEAD_AFTER14.md`). His Open-to-Work card still
+  reads "Recruiters only", with no green frame, and his photo is unchanged.
+  OPERATOR-OBSERVED is its own class: he saw it, and no instrument of this
+  lane measured it.
 
 ### 10.3 The close: no load after the STOP-ALL
 
@@ -877,9 +882,10 @@ Every line was a capture, and a capture moves no row by itself.
 
 ### 10.8 What needs the orchestrator
 
-1. **His Open-to-Work card after the STOP-ALL is UNVERIFIED** (10.2, phase 3).
-   A glance by him needs no load. Until it is checked, the next live session
-   reads the card before anything else on his root.
+1. **His Open-to-Work card after the STOP-ALL: answered, OPERATOR-OBSERVED**
+   (10.2, phase 3). It still reads "Recruiters only", with no green frame, and
+   his photo is unchanged. The next live session still reads the card before
+   anything else on his root, so an instrument measures it too.
 2. **14b's GO waits on the close failures** (10.5). Its runner needs, each red
    first and reviewed, with its own READY:
    - the close path recording which steps ran;
@@ -887,6 +893,35 @@ Every line was a capture, and a capture moves no row by itself.
    - the Open-to-Work close aimed inside `dialog[open]`;
    - the panel rule kept apart from sections that render late.
 3. **The account:** 37 free now. Session 14's 3 leave the window at 20:39 IST.
+
+### 10.9 The orders after the STOP-ALL
+
+These are `_TEAM_LEAD_AFTER14.md` (the orchestrator, 2026-11-28 09:00 IST). It
+was deleted as the ack in the commit that adds this section. NO LIVE LOADS:
+everything below is offline.
+
+1. The close-out: the record, the skeleton export, the ledgers reconciled at
+   3. Done in this record's section 10, with his check recorded as
+   OPERATOR-OBSERVED.
+2. The close-failure diagnosis, from the skeletons:
+   - the native-`<dialog>` hypothesis tested RED FIRST against both
+     skeletons;
+   - the close sequence AND its check fixed, through the cold reviewer as in
+     rounds 1-5.
+3. 14b's runner, built on that fix, with its own READY and pins. It covers:
+   - phases 4-29;
+   - phase 1's unreached parts (rank 31's press and the skill ids);
+   - phases 9 and 26;
+   - ranks 2, 149 and 151;
+   - phases 23 and 30, only if he volunteers their items;
+   - the composer-address route for M M28 and M M54.
+4. Merge master (9aa4c94 or later), then lane CI plus the full matrix, by
+   sha. Then FINAL, then HOLD.
+
+There is no GO for 14b until the close fix is reviewed. 14b's GO comes from
+the orchestrator, with him at the console. Master 9aa4c94 is already merged
+(the merge commit after section 10's close-out). Item 4 merges again if
+master has moved by then.
 
 ## Lessons (for the orchestrator to harvest)
 
