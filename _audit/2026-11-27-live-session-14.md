@@ -2464,6 +2464,10 @@ at launch. It is not a runner step.
 
 ### 13.8 READY for session 14c (2026-11-28, 19:4x IST)
 
+**Superseded by 13.9.** This READY named r2. r2 lacks the census of the
+orchestrator's review message (item 2), which reached this lane only after
+this section was committed. 13.9 is r3's READY.
+
 **THE HEAD** is the commit that adds this section: the record alone, on top of
 `16ed7817`.
 
@@ -2546,6 +2550,79 @@ The check sets and their builders are pinned beside them, `patch_s14c_r2.py`
   2, before any load);
 - for the GO's words: these two do not end the session (NIT-5), and the GO
   should name the search cap it means (NIT-6).
+
+### 13.9 r3, and READY for session 14c (2026-11-28, 20:0x IST)
+
+**WHY r3.** The orchestrator's "build r2" message carried the review's five
+items, and it reached this lane only after 13.8's READY.
+
+- r2 carried items 1 (N1), 3 (the chained shell) and 4 (UNATTENDED).
+- It lacked item 2, a census on "target none", and item 5, NIT-8.
+- r3 adds both. 13.8's READY, which named r2, is superseded.
+
+**r3.** `runner_s14c.py`, the same bytes as `runner_s14c_r3.py` (sha256
+`459d339d38ed99d6`), is built from r2 by `patch_s14c_r3.py`, which refuses
+unless its source is r2.
+
+- **R3-1, the census.** With NO target at all, the scroll pass records, before
+  its STOP:
+  - every element in main, by its depth below main, and main and its
+    ancestors (0 and up), whose overflow-y is auto, scroll or overlay
+    ("styled");
+  - how many of those have more to scroll than they show ("overflowing");
+  - html's, body's and main's overflow-y words, and whether the document
+    overflows.
+  - Counts and closed CSS words only. A STOP is then a measurement.
+- **THE REACH, by AST:** changed, the docstring and `scroll_pass_14c`; added,
+  `SCROLL_CENSUS_JS`. 43 lines (`delta_r2_to_s14c_r3.diff`).
+- **NIT-8, in the harness.** S1's fixture now holds the sections, the aside
+  and a footer inside main, under main > div > div, as on 14b's page. Its
+  scroller stays main's parent; S6 has the scroller at main > div > div.
+
+**RED FIRST** (VERIFIED, slice c14, check mode):
+
+| check | what it asks | r1 | r2 | r3 |
+|---|---|---|---|---|
+| S10 | nothing scrolls: the STOP carries the census | **red** | **red** | pass |
+| S11 | a styled scroller inside main, with nothing to scroll, is counted: styled, not overflowing | **red** | **red** | pass |
+| S1 | NIT-8's realistic DOM, with main's parent scrolling | pass | pass | pass |
+
+- r3 passes 29 of 29.
+- r2 passes 27 of 29, red exactly on S10 and S11.
+- r1 passes 18 of 29.
+
+**THE SETS:**
+
+- **The gate's main slice on r3:** 31 of 31 (19:52 to 19:54).
+- **Two earlier runs failed one check each**, with the CPU at 62 to 99% from
+  other lanes. One failed H2 (an error after rank 31's press), the other D3
+  (the page closed). Neither check reaches r3's change.
+- **A sampler beside the passing run** saw its browser alive to the end, and
+  no kill command on the box. The two failures' cause is UNVERIFIED.
+- **Not re-run:** `main_async` is unchanged from r2, and the close, entry,
+  table and tabs sets are byte-identical to r2's runs (13.7).
+
+**THE HEAD** is the commit that adds this section: the record alone, on top of
+the certified `16ed7817`, and through 13.8's commit.
+
+- The runner is gitignored, so no tracked file but this record changes.
+- `16ed7817` is certified by lane CI 46151495063 and the full matrix
+  46152089610.
+- The standing rules let a head carrying only the lane's own record on top of
+  a full-matrix-certified sha be fast-forwarded on that certification.
+
+**THE PINS.** The full values go in `_state/live16/pins.json`, written after
+the commit that adds this section.
+
+- `runner_s14c.py` (r3) is `459d339d38ed99d6`.
+- Every other pin is 13.8's.
+
+13.8's phases, budget, commands and stop lines stand. A phase-1 STOP
+`scroll_no_progress` with no target now records the census.
+
+**HOLD.** PHASE B starts only on a `_TEAM_LEAD_GO.md` that names r3's pins. It
+comes after the warm re-check of r1 to r2 and of r2 to r3, and the
+orchestrator's fast-forward of master. The session runs unattended.
 
 ## Lessons (for the orchestrator to harvest)
 
@@ -2649,4 +2726,9 @@ The check sets and their builders are pinned beside them, `patch_s14c_r2.py`
 23. **A walk up from a landmark cannot find what is below it.** C2 started at
     main and went up, and 14b's page scrolls two levels below main (13.7, N1).
     Start the search where the content is.
+24. **An order can arrive after the work it orders has shipped.** The
+    orchestrator's "build r2" message, holding the review's five items,
+    reached this lane after r2's READY. Two items were missing from the head
+    (13.9). At every HOLD, check each order that has arrived against the head,
+    and recall a READY that lacks one.
 
