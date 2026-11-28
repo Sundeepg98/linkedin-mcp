@@ -1381,6 +1381,20 @@ WHAT_WOULD_DRIVE_IT: dict[str, str] = {
         "reads one card, one button, one list and six searches. Its answers "
         "are counts and one boolean, so a drive would come back clean."
     ),
+    # LANE BUILD28, 2026-11-28 (census J 72 / P M4): one stored resume he
+    # names, downloaded through its card's own menu.
+    "resume_files:download_resume": (
+        "ACTION: two presses on his application settings page -- the named "
+        "card's options trigger, then its one Download item inside the C8 "
+        "transport's capture -- and the harness's landing is not that page, "
+        "so it refuses before any read. Its success path runs in a headless "
+        "browser over tests/fixtures/live12/c_rj26_3_resume_menu-open_words.html "
+        "in tests/test_resume_files.py: "
+        "test_the_named_resume_is_downloaded_through_its_own_cards_menu opens "
+        "the second card's menu and presses its Download once, the transport "
+        "doubled. Its answers are counts, closed words and the transport's "
+        "verdict, so a drive would come back clean."
+    ),
     "writes:_read_recent_searches_clear": (
         "WORDS: a thin wrapper over recent_searches_clear.read_clear_control "
         "and its verdict, so it misses its success path on the planted page "

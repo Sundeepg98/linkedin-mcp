@@ -367,11 +367,28 @@ def test_the_row_is_blocked_by_the_press_and_not_by_the_transport_or_the_boundar
     COVERED-UNFIRED: re-file ``P C8`` in ``_audit/_census/profile.md`` and its
     line in ``_audit/_census/read-addresses.tsv``, and delete this test's
     last assertion in the same commit -- do not relax it.
+
+    THE TRANSPORT GOT ITS FIRST CALLER ON 2026-11-28, AND IT IS NOT P C8's.
+    Lane build28 wired ``resume_files.download_resume`` (census ``J 72`` /
+    ``P M4``): a stored resume's own ``Download`` item, on his application
+    settings page. The caller list below names that one module, and the
+    module is held to that page, so the tripwire still fires the moment ANY
+    other module calls the capture -- the profile's "Save to PDF" included.
+    Stated as an exact list, not loosened to "at most one": a second caller is
+    a second press, and it must be read before this list is edited.
     """
+    from linkedin_server import application_settings, resume_files
+
     readonly.assert_read_url("https://www.linkedin.com/in/me/")
     sources = _package_sources()
     assert download_capability(sources)["can_name_a_file"] is True
-    assert _callers_of_the_capture(sources) == [], (
-        "something now calls cdp_download.capture_download. P C8's press has "
-        "landed: re-file the row rather than relaxing this test."
+    assert _callers_of_the_capture(sources) == ["resume_files.py"], (
+        "something new calls cdp_download.capture_download. If it is P C8's "
+        "press, it has landed: re-file the row rather than relaxing this test."
     )
+    # The one caller presses on his application settings page and nowhere
+    # else: its module's one page is that page's admitted address, and no
+    # profile address appears in it.
+    assert resume_files.PAGE_URL == application_settings.PAGE_URL
+    assert "/in/" not in sources["resume_files.py"]
+    assert "Save to PDF" not in sources["resume_files.py"]

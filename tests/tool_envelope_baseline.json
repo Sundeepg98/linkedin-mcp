@@ -18,6 +18,7 @@
     "linkedin_connect_from_profile": "not_driven:never read the page",
     "linkedin_connections": "returns_text:the plant reached a published payload",
     "linkedin_creator_analytics": "clean",
+    "linkedin_download_resume": "not_driven:never read the page",
     "linkedin_draft_applications": "clean",
     "linkedin_endorse_skill": "not_driven:never read the page",
     "linkedin_events_home": "clean",

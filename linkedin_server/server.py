@@ -15177,6 +15177,70 @@ async def linkedin_premium_matches() -> dict[str, Any]:
 # ---- end lane net7 ----
 
 
+# ---- lane B (build28) ----
+# Lane build28, 2026-11-28 (record _audit/2026-11-28-build28.md), on the
+# orchestrator's census wave plan, section 3 "Lane B": census J 72 / P M4 (one
+# stored resume he names, downloaded through its card's own options menu by
+# the C8 transport). Every tool this lane registers is in this one contiguous
+# block, its imports with it.
+from linkedin_server import cdp_download, resume_files  # noqa: E402 -- lane B's one block
+
+
+@mcp.tool()
+async def linkedin_download_resume(file_name: str) -> dict[str, Any]:
+    """Download ONE of your stored resumes, named by its file name, from your application settings page.
+
+    Census rows ``J 72`` and ``P M4``. ONE LOAD of your Resumes and
+    application data page (``/jobs/application-settings/``); then, on the ONE
+    resume card whose name reads ``file_name`` exactly, its options menu is
+    opened by one click, its ``Download`` item pressed once, and the menu read
+    closed again (one Escape if it stayed open). ``Delete`` is never pressed,
+    nothing is typed, and no other address is opened.
+
+    THE FILE IS TAKEN BY THE DOWNLOAD TRANSPORT ON YOUR OWN BROWSER
+    (``cdp_download``, ruling D4-NO-OWN-BROWSER-CONTEXT): for the moment of
+    the press your browser writes downloads into a folder of this server's
+    under ``_state/downloads/``, then its own download behaviour is restored.
+    The file is named ``resume`` with the suffix your card's name carries, and
+    its first bytes are checked against that kind.
+
+    Args:
+        file_name: the resume's file name EXACTLY as
+            ``linkedin_application_settings`` returns it. A name that matches
+            no card, or more than one, is refused with nothing pressed.
+
+    WHAT COMES BACK: ``downloaded`` (true only when the file was saved),
+    ``file`` (where, as a path relative to this server's folder, never an
+    absolute path), ``bytes``, ``type`` (``pdf``, ``docx``, ``doc`` or
+    ``other``), ``magic_ok``, ``menu_closed``, ``pressed_steps`` and the
+    transport's own verdict. Your file name is not repeated back.
+
+    IT REFUSES BEFORE LOADING ANYTHING when the transport is off (set
+    ``LINKEDIN_ENABLE_CDP_DOWNLOADS=1``), when this server is not attached to
+    your own browser, or when the name is not one the list tool returns. Not
+    yet shown live: no download has been fired through this tool.
+    """
+    name, why = resume_files.checked_file_name(file_name)
+    if name is None:
+        return resume_files.refused_before_load("bad_file_name", why)
+    if not cdp_download.downloads_enabled():
+        return resume_files.refused_before_load("downloads_disabled", resume_files.DOWNLOADS_OFF)
+    if BROWSER.mode != "attach":
+        return resume_files.refused_before_load("not_attached", resume_files.NOT_ATTACHED)
+    try:
+        async with BROWSER.session() as page:
+            landed = await BROWSER.goto(page, resume_files.PAGE_URL)
+            _authwall_refusal_without_the_landing(landed, surface="resumes and application data page")
+            browser = cdp_download.attached_browser(page, attached=BROWSER.attached)
+            result = await resume_files.download_resume(page, landed, name, browser=browser)
+            return {"pages_loaded": 1, **result}
+    except Exception as exc:
+        return _error(exc)
+
+
+# ---- end lane B (build28) ----
+
+
 def main() -> None:  # pragma: no cover - process entry point
     logging.basicConfig(level=logging.WARNING)
     mcp.run()

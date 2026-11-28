@@ -4550,6 +4550,38 @@ SANCTIONED_MUTATIONS: tuple[tuple[str, str, str], ...] = (
     # where a kept draft would show. ``tests/test_scheduled_posts.py`` pins
     # the module's one pressing call site and its two callers.
     ("linkedin_server/scheduled_posts.py", "_press", "click"),
+    # THE TWENTY-THIRD AND TWENTY-FOURTH, 2026-11-28 (lane build28, census
+    # J 72 / P M4): ONE STORED RESUME HE NAMES, DOWNLOADED, on the
+    # orchestrator's order of that day (the lane's brief: "ONE resume-download
+    # tool over the resume card's menu, using the C8 transport") and
+    # D4-NO-OWN-BROWSER-CONTEXT, which scopes the transport to his attached
+    # browser. ``resume_files._press``, the one drain point:
+    #
+    #   click   resume_files._press -- step ``open``, the ONE
+    #           ``button[aria-expanded]`` on the ONE card whose name reads
+    #           the name he gave, pressed only while it reads closed with no
+    #           item drawn and no other card's menu open; and step
+    #           ``download``, the menu's ONE item whose whole word is
+    #           ``Download``, among exactly the two words session 12 measured
+    #           (``Delete`` is never pressed);
+    #   press   resume_files._press -- step ``close``, the one Escape on that
+    #           trigger, only when the menu still reads open after the
+    #           download.
+    #
+    # WHY IT IS ARGUABLE RATHER THAN A WIDENING. It is a READ: a download asks
+    # LinkedIn for a file HE uploaded and sends nothing outward -- no member
+    # is notified, no setting moves, nothing is stored on LinkedIn. The page
+    # is admitted (NAMED-SETTINGS-PAGES-RATIFIED) and the press never extends
+    # reach (``press.check_address`` first); the target is chosen by the name
+    # the list tool returned, matched exactly, never by position; the
+    # download press runs only inside ``cdp_download.capture_download``, off
+    # unless LINKEDIN_ENABLE_CDP_DOWNLOADS turns it on; and after each press a
+    # moved address or a drawn dialog stops everything, while the card count,
+    # the named card and both switches are re-read and any change reported.
+    # ``tests/test_resume_files.py`` pins that ``_press`` is the module's only
+    # pressing site and refuses any step but its three.
+    ("linkedin_server/resume_files.py", "_press", "click"),
+    ("linkedin_server/resume_files.py", "_press", "press"),
 )
 
 

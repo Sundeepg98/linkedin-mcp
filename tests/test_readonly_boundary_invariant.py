@@ -1759,7 +1759,17 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # b7ef8ab795d32162, minus build-net2's two to build-msg2's
     # eafe00fa647db768, and minus all six to the base c51296e034af63eb.
     # No refusal moved; every other pinned digest is untouched by the merge.
-    "SANCTIONED_MUTATIONS": "a6f158bd7b033419",
+    # RE-FROZEN 2026-11-28 (lane build28, census J 72 / P M4): ONE digest
+    # moved, SANCTIONED_MUTATIONS a6f158bd7b033419 -> 627b696518ff64e1,
+    # 22 -> 24 -- resume_files._press's click (the named card's options
+    # trigger, then its one Download item) and its one Escape, a READ declared
+    # on the orchestrator's order of that day and D4-NO-OWN-BROWSER-CONTEXT,
+    # with its argument beside the entries in readonly.py. ATTRIBUTION, with
+    # this file's ast_digest: readonly.py minus exactly those two entry lines
+    # hashes to a6f158bd7b033419 on this key and to the pin on every other.
+    # Control: dropping scheduled_posts' entry instead lands on
+    # a5f2ca68ca373dcc. A PERMISSION was declared; no refusal moved.
+    "SANCTIONED_MUTATIONS": "627b696518ff64e1",
     # PINNED FROM 2026-09-24, lane G's merge of master: the replacement scan's
     # four tables (unchanged since lane G built them; pinned late, see PINNED)
     # and the scanner's sanctioned list, born with ONE entry -- the live

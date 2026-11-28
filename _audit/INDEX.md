@@ -27,9 +27,9 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 319 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 279 |
-| distinct dates | 23 |
+| audit documents git tracks under `_audit` | 320 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 280 |
+| distinct dates | 24 |
 | documents with no level-1 heading | 2 |
 | `CORRECTS:` marker lines | 134 |
 | `CORRECTED BY:` marker lines | 134 |
@@ -39,7 +39,7 @@ are listed as `(undated)`; no date is taken from git history, because
 | documents at either end of a cross-document edge | 116 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
-| documents no correction marker touches at all | 201 |
+| documents no correction marker touches at all | 202 |
 | blockquoted markers naming ANOTHER document | 0 |
 | edges missing one of their two markers | 0 |
 | edges declared a different number of times in each direction | 2 |
@@ -2011,6 +2011,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-11-27 | [2026-11-27-prof7.md](2026-11-27-prof7.md) | Lane prof7 -- the self-profile loader waits for the rewrite, then session 12's profile cells |  |
 | 2026-11-27 | [2026-11-27-rulings-integration-7.md](2026-11-27-rulings-integration-7.md) | Orchestrator rulings of 2026-11-27 (12:35 to 17:50 IST), registered at integration 7 |  |
 | 2026-11-27 | [2026-11-27-settings7.md](2026-11-27-settings7.md) | Lane settings7, 2026-11-27: his four settings pages session 12 captured -- what each drew, measured by keyed shape, and what each row's bar lets move |  |
+| 2026-11-28 | [2026-11-28-build28.md](2026-11-28-build28.md) | Lane build28, 2026-11-28: the stored resume downloaded by its own card's menu, LinkedIn Learning read, the resume delete and upload built refusing |  |
 
 ## 6. What the scan rejected, could not join, or had to repair
 
