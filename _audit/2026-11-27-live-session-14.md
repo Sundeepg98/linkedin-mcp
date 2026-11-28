@@ -1039,8 +1039,124 @@ The default, until the orchestrator rules otherwise:
 
 ### 11.4 The cold review
 
-The reviewer of rounds 1-5 was resumed, cold to the fix, on r1 (`93d7fd3e`).
-Its report is due at `review-s14b/round-1.md`, in the lane's scratch.
+The reviewer of rounds 1-5 was resumed, cold to the fix. Each round's report
+is in the lane's scratch under `review-s14b/`.
+
+**ROUND 1, on r1 (`93d7fd3e`): no BLOCKER, one MAJOR, three MINOR.**
+
+- **What 14a's own evidence says.** This is the review's section 0, from the
+  preserved files' times and its own timing of `_click`.
+  - The Dismiss click was dispatched 0.03 s into its run, so it was neither
+    covered (that raises at 5.0 s) nor refused.
+  - The dialog was byte-identical 1.5 s later.
+  - So the shape 14a supports is a Dismiss that closed LATE, or a page that
+    ignored the click. It is not the covered shape K2's Enter fallback was
+    for.
+  - K2's 2.5 s grace is the part of the fix that meets the evidence.
+- **MAJOR-1: K2's Enter fallback could activate another control.**
+  - The focus can move between the last focus check and the key. The
+    `press_room` store guard sits in between.
+  - Shown: Delete activated once on a synthetic dialog.
+- **MINOR-1: K3 discounted every control inside any section of main**, so an
+  inline panel in an existing section was left open, as "nothing opened".
+- **MINOR-2: the close checks wrote nothing to the real ledgers, but nothing
+  stopped them from doing so.** The session ledger and the pinned store were
+  not redirected, and the CDP variables were set.
+- **MINOR-3: the check set had no model for the late close, nor for the two
+  findings.**
+- **NITs:**
+  - K6 held three readers;
+  - it was checked after rank 69's file was read;
+  - the grace reads a replaced dialog as closed. The Open-to-Work path's modal
+    count still stops on that.
+
+**r1b (`ba0aa6bb`, `patch_s14b_r1b.py`), each finding fixed red first:**
+
+- **MAJOR-1:** the Enter fallback is REMOVED. A Dismiss the pointer cannot
+  reach stays STOP-ALL, as in session 14.
+- **MINOR-1:** K3 discounts only a control whose nearest section of main did
+  NOT exist when the press's snapshot was taken.
+- **Section 0:** at a native dialog's `did_not_close`:
+  - OBSERVE-ONLY readings are recorded: the document's focus and visibility,
+    the dialog's `:modal`, the focus inside it, and whether the Dismiss's
+    centre is the Dismiss;
+  - then its own evidence is watched 15 s more, pressing nothing;
+  - a dialog that closes in that time is `closed_late`.
+- **NIT:** K6 holds only phases that reach a press. The window is checked
+  BEFORE any item is read.
+- **MINOR-2:** the checks redirect both ledgers and the store, and drop the
+  CDP variables.
+- **MINOR-3:** the checks gained the late-close models (2.5 s and 6 s), the
+  focus race, K3's inline panels (the reviewer's and the photo's own real
+  checkboxes revealed in place), and K6 before the items.
+
+**The close checks, three runners** (VERIFIED, `close_checks_s14b.py`):
+
+| runner | red (11, red on session 14's runner) | red-r1 (8, round 1's findings) | controls (7) |
+|---|---|---|---|
+| `runner_s14` | 0 of 11 | 6 of 8 (its two K6 checks need K6) | 7 of 7 |
+| `runner_s14b_r1` | 9 of 11 (the late close and the observe readings are r1b's) | 0 of 8 | 7 of 7 |
+| r2 (`c6f6fe2e`, on r1b) | 11 of 11 | 8 of 8 | 7 of 7 |
+
+The 14b table's checks: r1b passes 0 of 9, r2 passes 9 of 9.
+
+### 11.5 The 14b plan
+
+The order is section 1's, by `rows_per_load`, with:
+
+- 14a's done line and the Open-to-Work editor out;
+- the composer's Archived round trip in the inbox's old slot;
+- rank 151's read last.
+
+The session directory is `live15`: 40 loads and 5 searches of its own, under
+the account's 40 in the trailing 12 h.
+
+| # | phase | rank | most | expected | searches | items | attended | needs the window in front |
+|---|---|---|---|---|---|---|---|---|
+| 1 | `profile` (E5, rank 31's press, the skill items) | 3, 31 | 3 | 1 | 0 | -- | yes (31) | yes |
+| 2 | `c_srch_3a` (TOGGLE-FIRST) | 132 | 3 | 1 | 3 | `job_kw` | -- | -- |
+| 3 | `newsletter_form` | 150 | 3 | 1 | 0 | -- | -- | -- |
+| 4 | `discovery` | 161 | 1 | 1 | 0 | -- | -- | -- |
+| 5 | `messaging_archived_composer` | 6 | 3 | 1 | 0 | -- | -- | yes |
+| 6 | `featured` | 34 | 1 | 1 | 0 | -- | -- | -- |
+| 7 | `manage_syncing` | 158 | 1 | 1 | 0 | -- | -- | -- |
+| 8 | `skill_form` | 40, 102 | 1 | 1 | 0 | `skill` (named off E5) | -- | -- |
+| 9 | `intro_landing` | 103 | 1 | 1 | 0 | -- | -- | -- |
+| 10 | `contact_info` | 30 | 3 | 1 | 0 | -- | yes | yes |
+| 11 | `article_drafts` | 1 | 3 | 2 | 0 | -- | -- | -- |
+| 12 | `invitation_filter` | 26 | 2 | 1 | 0 | -- | -- | -- |
+| 13 | `permalink_menus` | 95 | 3 | 2 | 0 | `member_post`, `page_post` | -- | -- |
+| 14 | `key_skills` | 102 | 1 | 1 | 0 | -- | yes | -- |
+| 15 | `connections_pills` | 109 | 2 | 1 | 0 | -- | -- | -- |
+| 16 | `creator_hub` | 111 | 2 | 1 | 0 | -- | -- | -- |
+| 17 | `notifications_card` | 115 | 2 | 1 | 0 | -- | -- | -- |
+| 18 | `self_variant` | 117 | 2 | 2 | 0 | -- | -- | -- |
+| 19 | `learning_goal` | 144 | 3 | 1 | 0 | -- | yes | yes |
+| 20 | `alert_row` | 145 | 3 | 1 | 0 | -- | yes | yes |
+| 21 | `learning_saved` | 147 | 1 | 1 | 0 | -- | -- | -- |
+| 22 | `post_analytics` | 154 | 1 | 1 | 0 | `own_post`, ONLY if he volunteers it | yes | -- |
+| 23 | `search_history` | 156 | 1 | 1 | 0 | -- | -- | -- |
+| 24 | `download_data` | 157 | 1 | 1 | 0 | -- | -- | -- |
+| 25 | `skill_insights` | 71 | 1 | 1 | 0 | `skill_index` (named off E5) | -- | -- |
+| 26-28 | `self_press` x3 (About, profile language, services) | 64, 67, 68 | 3 each | 1 each | 0 | -- | yes | yes |
+| 29 | `self_press_volunteering` | 69 | 3 | 1 | 0 | his profile id, ONLY if he volunteers it | yes | yes |
+| 30 | `saved_posts` (part 1) | 151 | 1 | 1 | 0 | -- | -- | -- |
+| -- | `root_settle`, only while a compare of his root is deferred | -- | 2 | 1 | 0 | -- | -- | -- |
+
+**The totals** (DERIVED from the table), without phases 22 and 29: 57 most
+loads, 31 expected, 3 searches.
+
+**How far 14b reaches** (DERIVED, by the GO's stop rule: stop when the next
+phase's most loads would pass what is free):
+
+- with 37 free (before 20:39 IST): phases 1-18 at most loads, or all of them
+  at the expected spending;
+- with 40 free (after 20:39 IST): phases 1-19 at most loads, or all of them
+  at the expected spending.
+
+**K6 asks one thing of him:** keep the dedicated Chrome in front while a "yes"
+phase in the last column runs. A refusal costs no load; the phase is simply
+run again.
 
 ## Lessons (for the orchestrator to harvest)
 
