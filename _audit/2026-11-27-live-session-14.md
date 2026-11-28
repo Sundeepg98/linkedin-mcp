@@ -2462,6 +2462,91 @@ because the test is the pass's own 1.2 s waits.
 opens the dedicated Chrome's window, which may take the OS foreground once,
 at launch. It is not a runner step.
 
+### 13.8 READY for session 14c (2026-11-28, 19:4x IST)
+
+**THE HEAD** is the commit that adds this section: the record alone, on top of
+`16ed7817`.
+
+- `16ed7817` is certified by sha: lane CI 46151495063 and the full matrix
+  46152089610, all three cells.
+- It descends from master `b7db2f7a`, merged in at `f811d01f` (a merge, not a
+  rebase). So the head is a fast-forward of master.
+- The master merge changed none of the files the runner imports: the people
+  gate, the harness, the matcher, the shipped wait and the start script each
+  hash to their 14b pins.
+
+**HOLD.** PHASE B starts only on a `_TEAM_LEAD_GO.md` that names these pins. It
+comes after the warm re-check of the r1-to-r2 delta and the orchestrator's
+fast-forward of master. The operator is not a step
+(LIVE-SESSIONS-RUN-WITHOUT-HIM).
+
+**THE PINS.** The full values go in the session's gitignored
+`_state/live16/pins.json`, written after the commit that adds this section;
+`verify_pins_s14c.py` re-hashes them.
+
+| pin | sha256 (short) |
+|---|---|
+| `runner_s14c.py` (r2) | `04b30b3d42002257` |
+| `scripts/people_gate.py` | `6ff3afb732ed1546` (unchanged) |
+| the harness, `scripts/_probe_live_lane_session_2.py` | `a5c10ae992f691b8` (unchanged) |
+| `linkedin_server/volunteering_route.py` (the one matcher) | `5635e69f595bfa3c` (unchanged) |
+| `linkedin_server/self_profile.py` (the shipped wait) | `b39b615b2c476b94` (unchanged) |
+| `scripts/start_chrome.ps1` (tracked; the main checkout's copy already matches) | `fe00bd14416e64e8` (unchanged) |
+| `close_chrome_s14b.py` (the teardown; a byte-identical copy) | `83d17023fc3a9da4` |
+| `os_check.ps1` (every phase's preflight; a byte-identical copy) | `0134d152b71bd613` |
+| `front_chrome.ps1` (a copy; no phase calls it in r2) | `76c98dc7f949dc1c` |
+| `name_items_s14c.py` | `5a401fb9623a6004` |
+| the prepared items (`live16`) | `842bced39d3678bb` (identical to 14a's and 14b's) |
+
+The check sets and their builders are pinned beside them, `patch_s14c_r2.py`
+(`7d4ed91aab08616c`) among them.
+
+**THE PHASES:** 11.8's table, unchanged.
+
+- Phases 21 (`post_analytics`) and 28 (`self_press_volunteering`) stay OFF
+  unless he names a post or his profile id. Each refuses before any browser
+  contact.
+- K9, K10, ranks 2, 149 and 151 and the Open-to-Work re-press are in 14d.
+
+**THE BUDGET** (VERIFIED, `reach_s14c.py`, disposable, from r2's own
+`PHASES`):
+
+- The 26 phases total 53 most loads and 3 searches. The expected spending is
+  29 (11.8).
+- The pinned ledger at 19:37 IST: 5 loads in the trailing 12 h, so 35 free.
+  14a's 3 leave the window at 20:39:17 IST, giving 37, and 14b's 2 at
+  04:58:19 IST on 11-29, giving 40.
+
+| free | at most loads, the plan reaches | with 2 loads held for `root_settle` |
+|---|---|---|
+| 35 | phases 1 to 17, then 20: 18 phases, 35 loads | phases 1 to 16, then 20: 17 phases, 33 loads |
+| 37 | phases 1 to 18: 18 phases, 37 loads | phases 1 to 17, then 20: 18 phases, 35 loads |
+| 40 | phases 1 to 19: 19 phases, 40 loads | phases 1 to 18, then 20: 19 phases, 38 loads |
+
+- The 2 loads are held only while a compare of his root is deferred: a
+  contact overlay, or a self-press page, left open.
+- A window skip costs no load, nor does a refused phase; the next phase is
+  then tried.
+
+**THE COMMANDS:** 11.9's, with these substitutions:
+
+- the main checkout's `_state/live-runner/s14c/`, and
+  `LIVE_LANE_SESSION_DIR=live16`;
+- `verify_pins_s14c.py`, without `--before-fast-forward`;
+- `name_items_s14c.py`, and `--items _state/live16/items_prepared.json`;
+- `attach_check` as `--only attach_check` (C3);
+- the K6 phases need nobody. The runner's window gate keeps its own tab
+  usable, or skips the phase at no load (exit 2, `window_gate_<phase>.json`).
+
+**THE STOP LINES:**
+
+- section 3's 22 STOP-ALL kinds, unchanged in r2;
+- two new phase-level stops, each with no further load in its phase:
+  `scroll_no_progress` (phase 1, before any item), and a window skip (exit
+  2, before any load);
+- for the GO's words: these two do not end the session (NIT-5), and the GO
+  should name the search cap it means (NIT-6).
+
 ## Lessons (for the orchestrator to harvest)
 
 1. **`Path.write_text` on Windows writes CRLF.** Three patch scripts turned
