@@ -9,10 +9,12 @@ Evidence classes: VERIFIED means read on disk in this lane, MEASURED means an
 instrument counted it on a tracked file in this lane, DERIVED means computed from
 what was read, UNVERIFIED means not checked. People by role only.
 
-STATUS: READY, AND HOLDING. READY: J 86's move at `118d4008`, certified by lane CI run
-46145558412 (success, 7 jobs) and full-matrix run 46146396940 (success, 3 cells x 6
-shards), both read by sha; the commits above it carry only this record and the derived
-views it moves. HOLDING: every other item, analysed here and written as a tried ready
+STATUS: READY, AND HOLDING. READY: J 86's move at `118d4008` (on this lane's branch,
+`census-calls28`, and nowhere on `master` until the orchestrator's merge; its subject is
+"census: J 86 COVERED-UNFIRED by D6 on P I14's tool -- the lane-K ledger's call, made"),
+certified by lane CI run 46145558412 (success, 7 jobs) and full-matrix run 46146396940
+(success, 3 cells x 6 shards), both read by sha; the commits above it carry only this
+record and the derived views it moves. HOLDING: every other item, analysed here and written as a tried ready
 patch (section 1), waits on hygiene28's merge (Q1) and on questions Q2 to Q5.
 
 ## 1. The order, and what holds what
@@ -472,6 +474,11 @@ HEAD; `git status` showed only this record afterwards. On that trial tree:
   record re-ranked the reason locator's candidates on 80 blocker-map lines it never
   names, each top candidate unchanged. Read a derived diff by column before
   accepting it.
+- A record that cites its own lane's sha is red on the lane's own CI until the merge:
+  `tests/test_a_cited_sha_resolves.py` asks whether `master` has the sha as an
+  ancestor, not whether the store holds it. Write the subject and the branch-only
+  fact beside the first citation. The J 86 gate missed this only because the record
+  did not yet cite that sha; the record head's lane CI caught it.
 - A plan's "a shipped tool may already reach it" needs the tool's address read, not
   its name. Both group rows failed on one `url_pattern` and one live count
   (`N 175`'s zero `/feed/update/` links), and N 50 on two `url_pattern`s that never
