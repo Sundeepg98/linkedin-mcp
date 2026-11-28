@@ -20,8 +20,22 @@ from linkedin_server import buildinfo
 from linkedin_server.server import BUILD, linkedin_server_info
 
 
+def settle_build_stamp():
+    """Wait for the background half of the build stamp, where there is one.
+
+    Since jobcore 50da018 (vendored here as linkedin_server/buildinfo.py) a
+    stamp reads its commit at import and resolves ``dirty``, ``dirty_files``
+    and ``committed_at`` on a background thread; until that lands the payload
+    says "pending" for them. That is the honest answer, and it is not the shape
+    the test below asserts. An older copy has no ``settled``.
+    """
+    if hasattr(BUILD, "settled"):
+        BUILD.settled()
+
+
 async def test_the_build_block_carries_a_commit_and_a_dirty_flag():
     """The two facts that make the stamp actionable rather than decorative."""
+    settle_build_stamp()
     code = (await linkedin_server_info())["build"]["code"]
 
     assert code["source"] == "git", code
