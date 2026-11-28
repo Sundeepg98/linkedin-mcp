@@ -3846,6 +3846,34 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "2026-09-20). **WHAT WOULD MAKE THIS ENTRY WRONG:** the record saying "
         "a census claim is untrue that the census still states unmarked."
     ),
+    ("2026-11-28-hygiene28.md", "2026-11-27-ci8.md"): (
+        "THIS GUARD DESCRIBED, NOT A CORRECTION. The record cites lane ci8's "
+        "record where the facet-key test's red counts are kept (its section "
+        "13.3) and reports the pair this guard listed on network.md. Every "
+        "matched word is this guard's own name or vocabulary: the heading "
+        "'The correction-pair guard', the phrase 'correction vocabulary', and "
+        "the module name `test_a_correction_is_findable_from_the_claim.py`. "
+        "Nothing in the record says the ci8 record is untrue. **WHAT WOULD "
+        "MAKE THIS ENTRY WRONG:** the record saying something in the ci8 "
+        "record does not hold while leaving it unmarked."
+    ),
+    # 2026-11-28, lane hygiene28. READ, not inferred from the filenames: every
+    # network.md line citing lane ci8's record was listed with this module's
+    # own vocabulary and window, and every match placed; none is in a sentence
+    # of this lane.
+    ("network.md", "2026-11-27-ci8.md"): (
+        "THREE CITES, NOT A CORRECTION. Rows 82, 88 and 89 each gained one "
+        "paragraph citing tests/test_people_search_sends_linkedins_facet_keys.py "
+        "and this record's section 13.3 for its red counts. No row moved, and "
+        "none says an earlier paragraph of its row, or anything in the ci8 "
+        "record, was untrue. Every matched word is older text in the rows' own "
+        "cells or their neighbours: 'False' for `reachable_by_this_route` in "
+        "rows 80, 81, 88 and 89; row 83's 'CORRECTED 2026-09-21' and "
+        "'correction'; and 'BLOCKER CORRECTED 2026-09-21, AND THE CORRECTION "
+        "...' with 'False' in rows 84, 86, 87, 90 and 91. **WHAT WOULD MAKE "
+        "THIS ENTRY WRONG:** a paragraph of this lane saying an earlier "
+        "paragraph of its row was untrue while leaving it unmarked."
+    ),
 
 }
 
