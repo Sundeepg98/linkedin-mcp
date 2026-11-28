@@ -8,9 +8,9 @@
 
 **THIS REGISTER IS NOT THE CORPUS AND DOES NOT CLAIM TO BE COMPLETE.** Read section 4 before concluding a question is unruled: the scan that keeps it honest reads ONE marker, and the ruling that caused this file to be written does not carry it.
 
-    rulings registered       216
+    rulings registered       217
     documents scanned        322
-    RULED: declarations      202 claimed, 7 triaged, 0 unclaimed
+    RULED: declarations      203 claimed, 7 triaged, 0 unclaimed
 
 ---
 
@@ -469,6 +469,7 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | `ONE-ENTRY-IS-ONE-SHAPE` | SEARCH-BOX-TYPEAHEAD-DISCLOSURE's one sanctioned-mutation entry is one sanctioned SHAPE, not one line: one drain function with exactly two call sites, the click that opens and the Escape that closes, so readonly.SANCTIONED_MUTATIONS holds two lines for it; every other key and every fill refused. | the search box's typeahead (N 95) | 2026-11-26 | [2026-11-26-rulings-integration-6.md](2026-11-26-rulings-integration-6.md)<br>*3. Lane build-net2's one (about 20:00; recorded 20:36, 21:46 and 21:55)* |
 | `SEARCH-BOX-TYPEAHEAD-DISCLOSURE` | The search box's typeahead is a sanctioned disclosure shape over [role=search] input[aria-autocomplete] on an admitted page, refused at runtime unless exactly one is drawn; nothing is typed, only the recent-searches group is read (HIS-OWN-TEXT-AT-RUNTIME), people options are never read, and Escape closes it with the listbox verified gone. | the search box's recent searches (N 95) | 2026-11-26 | [2026-11-26-rulings-integration-5.md](2026-11-26-rulings-integration-5.md)<br>*2. Two answers for lane build-net2 (17:10)* |
 | `SELF-ROOT-LINK-PRESS-BY-EXACT-MATCH` | A link drawn on his own profile root is pressed, attended only, only when its target is EXACTLY the address the read boundary admits, including any constant query the admission carries, with the proven landed member read as me; any other query, parameter or fragment vetoes; a navigating press is a load; nothing typed or saved; closed and verified gone; the root read before and after. | links on his own profile root (session 14) | 2026-11-27 | [2026-11-27-rulings-integration-7.md](2026-11-27-rulings-integration-7.md)<br>*3. Lane prof7's six (22:21 the day before; 13:00, 13:10 and 17:20)* |
+| `RESUME-MENU-DOWNLOAD-SANCTIONED` | A tool or capture may open his own stored resume's card menu and press its Download item. It fetches his own file through P C8's transport (D4-NO-OWN-BROWSER-CONTEXT) and changes nothing on his account. Any sign that the item does more than download (a dialog, a share sheet, a state change) stops the act and is recorded. | his stored resumes' Download item (J 72, P M4) | 2026-11-28 | [2026-11-28-build28.md](2026-11-28-build28.md)<br>*6. Questions for the orchestrator, and the answers (19:35 IST)* |
 
 ### read boundary
 
@@ -1075,6 +1076,8 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 **`RESUME-BUILDER-UNDER-ARTICLE-COMPOSER-CAPTURE`** -- Orchestrator's call on lane admit26, applying ARTICLE-COMPOSER-CAPTURE. Reopener: a capture that finds where LinkedIn draws it.
 
+**`RESUME-MENU-DOWNLOAD-SANCTIONED`** -- Orchestrator's answer to lane build28's question 1 (19:35). Cited by both readonly.SANCTIONED_MUTATIONS entries for resume_files._press; the download stops on any sign of more than a download. Reopener: a sign recorded on a live fire.
+
 **`RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE`** -- Orchestrator's call on the classic search's retirement. Its trigger was met in live session 12: load 3, C-SRCH-1, was redirected to the AI route. Applied at integration 6 to the 22 rows of search26's report, section 4.5 (J 1 to J 15, J 17, J 18, J 20, J 40, J 107, J 151, and J 31, built on the classic switch), each to GAP with its next step on the AI route and a reopener. Four of them are COVERED-UNFIRED again, built on the AI route by lane jobs7 and merged in integration 7 (J 1, J 20, J 40, and J 31's AI arm); REFUSE-BEFORE-LOAD-ON-A-RETIRED-ROUTE refuses the classic arguments before any load. Reopener: none stated.
 
 **`REVEAL-BUTTON-IS-A-DISCLOSURE`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable.
@@ -1274,6 +1277,7 @@ Every `RULED:` line in the corpus, and what became of it. An UNCLAIMED row fails
 | [2026-11-27-rulings-integration-7.md](2026-11-27-rulings-integration-7.md) | RULED: (orchestrator, 2026-11-27) KEYWORD-FIELDS-MEASURED-ABSENT -- at 13:25: | `KEYWORD-FIELDS-MEASURED-ABSENT` |
 | [2026-11-27-rulings-integration-7.md](2026-11-27-rulings-integration-7.md) | RULED: (orchestrator, 2026-11-27) REFUSE-BEFORE-LOAD-ON-A-RETIRED-ROUTE -- at | `REFUSE-BEFORE-LOAD-ON-A-RETIRED-ROUTE` |
 | [2026-11-27-rulings-integration-7.md](2026-11-27-rulings-integration-7.md) | RULED: (orchestrator, 2026-11-27) INBOX-SEARCH-IS-NOT-A-D1-SEARCH -- at 13:35: | `INBOX-SEARCH-IS-NOT-A-D1-SEARCH` |
+| [2026-11-28-build28.md](2026-11-28-build28.md) | RULED: (orchestrator, 2026-11-28) RESUME-MENU-DOWNLOAD-SANCTIONED -- at 19:35 IST, answeri | `RESUME-MENU-DOWNLOAD-SANCTIONED` |
 
 ### 5.1 Triaged -- a declaration hit that is not a ruling made here
 

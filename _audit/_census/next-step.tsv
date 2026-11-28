@@ -38,7 +38,6 @@ J 68	J	W	-	TARGET:a job with a multi-step Easy Apply he names to apply to	NAMED	
 J 69	J	W	-	TARGET:a draft application of his he names to discard	INFERRED	RULING:OPERATOR-NAMES-THE-TARGET ; J 69
 J 70	J	W	-	SIBLING:lane-U	NAMED	_audit/2026-09-28-rulings-build-classes.md::`FILE-UPLOAD-UNSANCTIONED` is therefore a stale label.
 J 71	J	R+W	-	SIBLING:P M3	MEASURED	_audit/2026-11-27-jobs7.md::the menu is drawn, the builds are next ; RULING:OUTWARD-CLASSES-BUILT-BEHIND-GRANTS
-J 72	J	R	-	BUILD:tests/fixtures/live12/c_rj26_3_resume_menu-open_words.html	MEASURED	_audit/2026-11-27-jobs7.md::the menu is drawn, the builds are next ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
 J 73	J	R	-	TARGET:a job he applied to, and its poster	MEASURED	_audit/2026-11-26-readers-jobs26.md::THE PAGE TIES NO RESUME TO AN APPLICATION. ; RULING:OPERATOR-NAMES-THE-TARGET
 J 78	J	W	-	RULING:Q-AI-GENERATING-LOADS	INFERRED	_audit/_census/jobs-directions.tsv::Create cover letter ; RULING:READ-PAST-AN-ACT-SUBSTRING
 J 79	J	W	-	TARGET:a job he names to mark Top Choice (one of three monthly marks, not refunded)	INFERRED	RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS ; J 79
@@ -95,11 +94,8 @@ J 147	J	R	-	SIBLING:lane-U	NAMED	_audit/2026-09-28-rulings-build-classes.md::`FI
 J 148	J	R+W	-	SIBLING:lane-U	NAMED	_audit/2026-09-28-rulings-build-classes.md::`FILE-UPLOAD-UNSANCTIONED` is therefore a stale label.
 J 149	J	R+W	-	SIBLING:lane-U	NAMED	_audit/2026-09-28-rulings-build-classes.md::`FILE-UPLOAD-UNSANCTIONED` is therefore a stale label.
 J 150	J	W	-	PRECONDITION:US Premium (the feature reaches select US subscribers)	NAMED	_audit/_census/jobs.md::select LinkedIn Premium subscribers in the United States
-J 152	J	R	-	BUILD:tests/fixtures/live12/learning.html	MEASURED	_audit/2026-11-27-jobs7.md::the home is the landing page's own sections of courses ; RULING:COMPOUND-ROW-SPLITS-ONLY-ON-STATE
-J 154	J	R	-	BUILD:tests/fixtures/live12/learning_library.html	MEASURED	_audit/2026-11-27-jobs7.md::keeps the in-progress list and builds on load 25's capture ; RULING:COMPOUND-ROW-SPLITS-ONLY-ON-STATE
-J 156	J	R	-	BUILD:tests/fixtures/live12/learning_journey.html	MEASURED	_audit/2026-11-27-jobs7.md::seeing his goal is a read of his own page ; RULING:COMPOUND-ROW-SPLITS-ONLY-ON-STATE
 J 157	J	W	-	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
-J 160	J	R	-	BUILD:tests/fixtures/live11/career_insights.html	MEASURED	_audit/2026-11-26-readers-jobs26.md::the people and the companies the ; RULING:NAMES-AT-RUNTIME
+J 160	J	R	-	CAPTURE:C-CAREER-INSIGHTS-1	MEASURED	_audit/2026-11-28-build28.md::the next step becomes CAPTURE and the row stays GAP ; RULING:PEOPLE-DATA-MITIGATIONS
 J 166	J	R	-	CAPTURE:admit-products-product	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/products/placeholder-product/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
 J 167	J	R	-	CAPTURE:admit-showcase-showcase	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/showcase/placeholder-showcase/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
 M C2	M	W	R3	SIBLING:M C12	NAMED	_audit/_census/messaging-and-content.md::which is why the two rows close together or not at all
@@ -443,9 +439,8 @@ P K9	P	W	R3	PRECONDITION:a Top Voice badge	NAMED	_audit/_census/write-classes.ts
 P L3	P	W	R3	CAPTURE:C-MSG7-2	MEASURED	_audit/2026-11-27-msg7.md::second radiogroup is empty ; tests/fixtures/live12/article_author_toggle-open.html ; RULING:ARTICLE-COMPOSER-ONE-CAPTURE
 P L4	P	R	-	PRECONDITION:a newsletter he authors	INFERRED	_audit/_census/read-addresses.tsv::the page listing his newsletters links no analytics address
 P L7	P	R	-	CAPTURE:creator-hub-on-the-dashboard	MEASURED	tests/fixtures/live12/dashboard.html ; _audit/2026-11-27-prof7.md::CREATOR-IDEAS-NOT-ABSENT-ON-ONE-SURFACE
-P M1	P	W	R3	BUILD:tests/fixtures/live12/c_rj26_3_resume_menu-open_words.html	MEASURED	_audit/2026-11-27-jobs7.md::the menu is drawn, the builds are next ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
-P M3	P	W	R3	BUILD:tests/fixtures/live12/c_rj26_3_resume_menu-open_words.html	MEASURED	_audit/2026-11-27-jobs7.md::the menu is drawn, the builds are next ; RULING:OUTWARD-CLASSES-BUILT-BEHIND-GRANTS
-P M4	P	R	-	BUILD:tests/fixtures/live12/c_rj26_3_resume_menu-open_words.html	MEASURED	_audit/2026-11-27-jobs7.md::the menu is drawn, the builds are next ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
+P M1	P	W	R3	TARGET:the file he names, uploaded and read back, then deleted by P M3 in the same session, the inverse proven first	MEASURED	_audit/2026-11-28-build28.md::a round trip inside one session ; RULING:OPERATOR-NAMES-THE-TARGET
+P M3	P	W	R3	TARGET:the file he names, deleted after P M1's upload of it in one session's round trip, Delete's dialog captured inside the act	MEASURED	_audit/2026-11-28-build28.md::delete the same copy (the inverse) ; RULING:OPERATOR-NAMES-THE-TARGET
 P M5	P	R	-	TARGET:a job he applied to, and its poster	MEASURED	_audit/2026-11-26-readers-jobs26.md::THE PAGE TIES NO RESUME TO AN APPLICATION. ; RULING:OPERATOR-NAMES-THE-TARGET
 P M10	P	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 P M11	P	R+W	-	RULING:Q-RESUME-BUILDER	MEASURED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/resume-builder/ ; RULING:READ-PAST-AN-ACT-SUBSTRING

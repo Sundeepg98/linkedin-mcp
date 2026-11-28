@@ -100,6 +100,18 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     # 2026-11-26 (lane readers-jobs26, census P M2): his resumes and
     # application data page, the two switches and the stored resumes.
     "linkedin_application_settings": (),
+    # 2026-11-28 (lane build28, census J 72 / P M4): one stored resume he
+    # names, downloaded through its own card's menu by the C8 transport.
+    "linkedin_download_resume": ("file_name",),
+    # 2026-11-28 (lane build28, census J 152, J 154, J 156): LinkedIn
+    # Learning's home, his in-progress tab and his career goal.
+    "linkedin_learning_home": (),
+    "linkedin_learning_in_progress": (),
+    "linkedin_learning_career_goal": (),
+    # 2026-11-28 (lane build28, census P M3, P M1): the resume delete and
+    # upload, built behind the grant and REFUSING; no row moves for them.
+    "linkedin_set_resume_deleted": ("confirm_token", "resume"),
+    "linkedin_set_resume_uploaded": ("confirm_token", "file"),
     "linkedin_compose_fields": (),
     "linkedin_connect_from_profile": ("confirm_token", "profile"),
     "linkedin_connections": ("limit",),
@@ -897,8 +909,17 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: `linkedin_premium_matches()` and its four people-search parameters beside
 #: the 110 tools and 164 parameters above, counted off `mcp.list_tools()` on
 #: the merged tree, never summed. No census decision is made in the merge.
-PINNED_TOOL_COUNT = 111
-PINNED_PARAMETER_COUNT = 168
+#: **117 TOOLS AND 173 PARAMETERS ON LANE BUILD28 (2026-11-28)** -- four READS,
+#: `linkedin_download_resume(file_name)` and the three Learning reads of no
+#: parameter, and two refusing WRITES, `linkedin_set_resume_deleted(confirm_token,
+#: resume)` and `linkedin_set_resume_uploaded(confirm_token, file)`, beside the
+#: 111 and 168, counted off `mcp.list_tools()`, never summed. THE CENSUS
+#: DECISION, IN THE SAME COMMIT: `J 72` / `P M4`, `J 152`, `J 154` and `J 156`
+#: GAP -> COVERED-UNFIRED, never fired; NO ROW MOVES for `P M3` and `P M1`,
+#: built refusing (the brief: the rule is inverse-proven-first). See
+#: `_audit/2026-11-28-build28.md`.
+PINNED_TOOL_COUNT = 117
+PINNED_PARAMETER_COUNT = 173
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:

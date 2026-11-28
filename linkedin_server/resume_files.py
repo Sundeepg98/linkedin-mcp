@@ -49,9 +49,14 @@ Then, on the one admitted page, refusing at the first failed step:
    (step ``close``), and the closure verified.
 
 AFTER EACH PRESS, A REFUTER STOPS EVERYTHING: the address moved, or a dialog
-drawn. And after the download, the page is re-read for what a download never
-changes -- the number of resume cards, the named card still drawn once, both
-switches' states -- and any difference is reported as ``page_changed``, loud.
+drawn. And after the download the page is re-read, before any further press,
+for what a download never does -- an address moved, a dialog drawn, a tab
+opened, the number of resume cards or the named card changed, either switch
+moved. Any of them STOPS THE ACT and is returned in ``signs`` under the refusal
+``did_more_than_download``, with nothing more pressed, not even the Escape:
+RESUME-MENU-DOWNLOAD-SANCTIONED (the orchestrator, 2026-11-28), "Any sign that
+the item does more than download (a dialog, a share sheet, a state change)
+stops the act and is recorded."
 
 ## WHAT THIS IS NOT
 
@@ -545,23 +550,12 @@ async def download_resume(
         )
     moved = str(page.url) != address_before
     after = (await _read_page_state(page, name)) if not moved else {"error": "address_moved"}
-    if not moved and not (facts(after)["expanded"] == "false" and not facts(after)["items"]):
-        after = await _settle(page, name, want_open=False)
-    if not moved and facts(after)["expanded"] == "true":
-        try:
-            await _press(trigger, "close")
-            pressed["escapes"] = 1
-        except Exception:  # noqa: BLE001 -- reported below as not closed
-            pass
-        after = await _settle(page, name, want_open=False)
-    closed = (not moved) and facts(after)["expanded"] == "false" and not facts(after)["items"]
-    common["observed"]["after"] = facts(after)
-    common["menu_closed"] = closed
     tabs_after = _tabs(page)
-    common["tabs_opened"] = (
+    tabs_opened = (
         max(tabs_after - tabs_before, 0)
         if isinstance(tabs_before, int) and isinstance(tabs_after, int) else None
     )
+    common["tabs_opened"] = tabs_opened
     if capture is not None:
         common["transport"] = {
             key: capture.get(key)
@@ -570,14 +564,50 @@ async def download_resume(
                         "behaviour_restored", "restore_error", "error",
                         "context_created", "transport")
         }
-    if moved:
+    if pressed["downloads"]:
+        # RESUME-MENU-DOWNLOAD-SANCTIONED (the orchestrator, 2026-11-28): "Any
+        # sign that the item does more than download (a dialog, a share sheet,
+        # a state change) stops the act and is recorded." Read BEFORE any
+        # further press, so nothing -- not even the closing Escape, which could
+        # dismiss what the press opened -- touches the page after a sign.
+        signs = ["address_moved"] if moved else _changed(facts(before), facts(after))
+        if tabs_opened:
+            signs.append("tab_opened")
+        if signs:
+            assert capture is not None
+            saved = bool(capture.get("saved"))
+            common["observed"]["after"] = facts(after)
+            common.update({
+                "menu_closed": None,
+                "signs": signs,
+                "downloaded": saved,
+                "file": capture.get("file") if saved else None,
+                "bytes": capture.get("bytes") if saved else None,
+                "magic_ok": capture.get("magic_ok"),
+            })
+            return {**_refuse(
+                "did_more_than_download",
+                f"after the Download press the page showed {signs}, which a download "
+                "never does (RESUME-MENU-DOWNLOAD-SANCTIONED), so the act stopped there: "
+                "nothing more was pressed, not even the Escape. Look at your browser.",
+                terminal=False), **common}
+    elif moved:
         return {**_refuse("address_moved",
-                          "the address moved after the Download press, so the page is not "
-                          "shown as found and nothing more was pressed. Look at your browser.",
-                          terminal=False), **common}
-    changed = _changed(facts(before), facts(after))
-    if changed:
-        common["page_changed"] = changed
+                          "the address moved while the menu was open, so the page is not "
+                          "shown as found and nothing more was pressed.", terminal=False),
+                **common, "menu_closed": None}
+    if not (facts(after)["expanded"] == "false" and not facts(after)["items"]):
+        after = await _settle(page, name, want_open=False)
+    if facts(after)["expanded"] == "true":
+        try:
+            await _press(trigger, "close")
+            pressed["escapes"] = 1
+        except Exception:  # noqa: BLE001 -- reported below as not closed
+            pass
+        after = await _settle(page, name, want_open=False)
+    closed = facts(after)["expanded"] == "false" and not facts(after)["items"]
+    common["observed"]["after"] = facts(after)
+    common["menu_closed"] = closed
     if menu.get("refused"):
         return {**menu, **common, "observed": common["observed"]}
     if not closed:

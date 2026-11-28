@@ -107,6 +107,14 @@ _SCRIPT = """(opts) => {
             if (word === 'Download' && opts.onDownload === 'hash') { location.hash = 'moved'; }
             if (word === 'Download' && opts.onDownload === 'drop_card') { cards[3].remove(); }
             if (word === 'Download' && opts.onDownload === 'stay_open') return;
+            if (word === 'Download' && opts.onDownload === 'dialog') {
+              const d = document.createElement('div'); d.setAttribute('role', 'dialog');
+              document.body.appendChild(d); return;
+            }
+            if (word === 'Download' && opts.onDownload === 'tab') { window.open('about:blank'); }
+            if (word === 'Download' && opts.onDownload === 'switch') {
+              document.querySelector('div[role=main] input[role=switch]').setAttribute('aria-checked', 'false');
+            }
             close(card);
           });
           inner.appendChild(item);
@@ -402,17 +410,36 @@ async def test_an_address_that_moved_after_the_download_stops_everything(page, c
     await _world(page, onDownload="hash")
     result = await _download(page, "Example resume.pdf")
     seen = await _witness(page)
-    assert result["refused"] == "address_moved"
+    assert result["refused"] == "did_more_than_download"
+    assert result["signs"] == ["address_moved"]
     assert seen["escapes"] == 0  # nothing pressed on a page that is not the one found
 
 
+#: RESUME-MENU-DOWNLOAD-SANCTIONED (the orchestrator, 2026-11-28): "Any sign
+#: that the item does more than download (a dialog, a share sheet, a state
+#: change) stops the act and is recorded." Each world below makes the Download
+#: press do one more thing; each must stop the act with that sign recorded and
+#: NOTHING MORE PRESSED -- in particular no Escape, which could dismiss what
+#: the press opened.
 @IN_MODULE_LOOP
-async def test_a_page_that_changed_under_the_download_says_so(page, capture):
-    """A download changes no card: a card gone after it is reported, loud."""
-    await _world(page, onDownload="drop_card")
+@pytest.mark.parametrize(
+    ("world", "sign"),
+    [("drop_card", "card_count"), ("dialog", "dialog"), ("switch", "switches"),
+     ("tab", "tab_opened")],
+)
+async def test_any_sign_the_item_did_more_than_download_stops_the_act(page, capture, world, sign):
+    await _world(page, onDownload=world)
     result = await _download(page, "Example resume.pdf")
-    assert result["page_changed"] == ["card_count"]
-    assert result["observed"]["before"]["cards"] == 4 and result["observed"]["after"]["cards"] == 3
+    seen = await _witness(page)
+    assert result["refused"] == "did_more_than_download", result
+    assert sign in result["signs"], result["signs"]
+    assert seen["escapes"] == 0 and seen["pressed"] == [[0, "Download"]]
+    assert result["pressed_steps"] == {"opens": 1, "downloads": 1, "escapes": 0}
+    assert result["menu_closed"] is None
+    # The file the transport took is still reported, beside the refusal.
+    assert result["downloaded"] is True and result["file"] == capture.answer["file"]
+    if world == "drop_card":
+        assert result["observed"]["before"]["cards"] == 4 and result["observed"]["after"]["cards"] == 3
 
 
 @IN_MODULE_LOOP

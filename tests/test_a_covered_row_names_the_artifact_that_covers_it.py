@@ -861,3 +861,46 @@ def test_control_the_application_settings_chain_convicts_a_dropped_page() -> Non
     thinned = dataclasses.replace(
         page, controls=(page.controls[0], dataclasses.replace(page.controls[1], rows=())))
     assert _settings_rows((pages[0], thinned)) != _APPLICATION_SETTINGS_ROWS
+
+
+#: LANE BUILD28 (2026-11-28): each tool -> the reader it calls, and the census
+#: rows that claim COVERED-UNFIRED on it.
+_BUILD28_CHAINS: dict[str, tuple[str, tuple[tuple[str, str], ...]]] = {
+    "linkedin_download_resume": (
+        "resume_files.download_resume", (("jobs.md", "72"), ("profile.md", "M4"))),
+    "linkedin_learning_home": ("learning.read_learning_home", (("jobs.md", "152"),)),
+    "linkedin_learning_in_progress": ("learning.read_in_progress", (("jobs.md", "154"),)),
+    "linkedin_learning_career_goal": ("learning.read_career_goal", (("jobs.md", "156"),)),
+}
+
+
+def _tool_calls(source: str, tool: str) -> set[str]:
+    tree = ast.parse(source)
+    return {
+        ast.unparse(inner.func)
+        for node in ast.walk(tree)
+        if isinstance(node, ast.AsyncFunctionDef) and node.name == tool
+        for inner in ast.walk(node)
+        if isinstance(inner, ast.Call)
+    }
+
+
+def test_the_build28_chains_are_still_whole() -> None:
+    """``J 72`` / ``P M4``, ``J 152``, ``J 154``, ``J 156`` (lane build28,
+    2026-11-28): each tool still calls its reader, and each row still claims
+    COVERED-UNFIRED on it."""
+    source = _source("server.py")
+    for tool, (reader, rows) in _BUILD28_CHAINS.items():
+        assert reader in _tool_calls(source, tool), f"{tool} no longer calls {reader}"
+        for slice_name, row in rows:
+            assert _states(slice_name).get(row) == "COVERED-UNFIRED", (tool, slice_name, row)
+
+
+def test_control_the_build28_chain_convicts_a_dropped_reader() -> None:
+    """SHOWN FAILING against a MUTATED SOURCE: the download tool's reader renamed."""
+    source = _source("server.py")
+    start = source.index("async def linkedin_download_resume(")
+    mutated = source[:start] + source[start:].replace(
+        "resume_files.download_resume(", "resume_files.download_gone(", 1)
+    assert "resume_files.download_resume" in _tool_calls(source, "linkedin_download_resume")
+    assert "resume_files.download_resume" not in _tool_calls(mutated, "linkedin_download_resume")

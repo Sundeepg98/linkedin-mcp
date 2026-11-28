@@ -2590,6 +2590,26 @@ REGISTER: tuple = (
              "_audit/2026-09-20-the-decides.md section 1, and registered on "
              "that record. The date shown is the record's, 2026-09-20.",
     ),
+    # REGISTERED 2026-11-28 BY LANE BUILD28, on the orchestrator's order (its
+    # rulings file of 19:35: "register a ruling ... Register it in your record,
+    # in the shape build_rulings_index reads, and cite it from both readonly
+    # entries").
+    Ruling(
+        id="RESUME-MENU-DOWNLOAD-SANCTIONED",
+        claim="A tool or capture may open his own stored resume's card menu and "
+              "press its Download item. It fetches his own file through P C8's "
+              "transport (D4-NO-OWN-BROWSER-CONTEXT) and changes nothing on his "
+              "account. Any sign that the item does more than download (a "
+              "dialog, a share sheet, a state change) stops the act and is "
+              "recorded.",
+        binds="presses -- his stored resumes' Download item (J 72, P M4)",
+        document="_audit/2026-11-28-build28.md",
+        anchor="RULED: (orchestrator, 2026-11-28) RESUME-MENU-DOWNLOAD-SANCTIONED",
+        note="Orchestrator's answer to lane build28's question 1 (19:35). Cited "
+             "by both readonly.SANCTIONED_MUTATIONS entries for "
+             "resume_files._press; the download stops on any sign of more than "
+             "a download. Reopener: a sign recorded on a live fire.",
+    ),
 )
 
 

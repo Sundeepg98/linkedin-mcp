@@ -221,8 +221,8 @@ def test_the_sanctioned_list_is_exactly_these_calls():
     # two beside build-msg2's four, measured off the merged list.
     # TWENTY-FOUR, 2026-11-28 (lane build28, census J 72 / P M4):
     # resume_files._press's click (the named card's trigger, then its one
-    # Download item) and its one Escape, a READ declared on the orchestrator's
-    # order of that day (argument beside the entries in readonly.py).
+    # Download item) and its one Escape, a READ declared on
+    # RESUME-MENU-DOWNLOAD-SANCTIONED (argument beside the entries in readonly.py).
     assert len(readonly.SANCTIONED_MUTATIONS) == 24
     # THE KINDS ARE ASSERTED SEPARATELY, because the count alone would let a
     # click be swapped for a fill without moving the number, and those are

@@ -1763,8 +1763,10 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # moved, SANCTIONED_MUTATIONS a6f158bd7b033419 -> 627b696518ff64e1,
     # 22 -> 24 -- resume_files._press's click (the named card's options
     # trigger, then its one Download item) and its one Escape, a READ declared
-    # on the orchestrator's order of that day and D4-NO-OWN-BROWSER-CONTEXT,
-    # with its argument beside the entries in readonly.py. ATTRIBUTION, with
+    # on RESUME-MENU-DOWNLOAD-SANCTIONED (the orchestrator, 2026-11-28) and
+    # D4-NO-OWN-BROWSER-CONTEXT, with its argument beside the entries in
+    # readonly.py; the ruling's citation there is a comment, which moves no
+    # digest (ast_digest reads values and function bodies). ATTRIBUTION, with
     # this file's ast_digest: readonly.py minus exactly those two entry lines
     # hashes to a6f158bd7b033419 on this key and to the pin on every other.
     # Control: dropping scheduled_posts' entry instead lands on

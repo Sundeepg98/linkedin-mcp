@@ -1399,7 +1399,8 @@ PINNED = {
     #: 280 ON LANE CENSUS-CALLS28 (2026-11-28), MEASURED by --check, never summed: `N 3` GAP -> COVERED-UNFIRED by D6-CAPABILITY-OVER-AFFORDANCE, the lane-K ledger's call on `N 1` made: his own profile's People You May Know rail (`linkedin_send_invitation`) and `N 4`'s named-profile route (`_audit/2026-11-28-census-calls.md` section 4.1); a W row entering bucket 1 held by OPERATOR-NAMES-THE-TARGET (was 279).
     #: 281 ON LANE CENSUS-CALLS28 (2026-11-28), MEASURED by --check, never summed: `N 61` GAP -> MEASURED-ABSENT on the orchestrator's N61-FOLLOWED-HASHTAGS-MEASURED-ABSENT (registration owed at the next integration), under MEASURED-ABSENT-OR-PRECONDITION: no followed-hashtags view on the network manager's nav and no follow control on a hashtag's results (`_audit/2026-11-28-census-calls.md` section 5); out of scope, off bucket 3, and queue rank 83 left with it (was 280).
     #: 282 ON LANE CENSUS-CALLS28 (2026-11-28), MEASURED by --check, never summed: `N 50` split under COMPOUND-ROW-SPLITS-ONLY-ON-STATE on the orchestrator's answer to Q2 (19:04 IST), the `N 26` -> `N 26b` shape: `N 50`, the company half, GAP -> COVERED-PROVEN by D6-CAPABILITY-OVER-AFFORDANCE on `linkedin_follow_company`'s session-8 fire (the fire `N 46` and `J 103` rest on), and `N 50b`, the school half, entered at GAP (`_audit/2026-11-28-census-calls.md` section 4.2) (was 281).
-    "adjudicated": 282,
+    #: 287 ON LANE BUILD28 (2026-11-28), MEASURED by --check on the tree merged with master, never summed: `J 72` and `P M4` (`linkedin_download_resume`) and `J 152`, `J 154`, `J 156` (`linkedin_learning_home`, `linkedin_learning_in_progress`, `linkedin_learning_career_goal`) GAP -> COVERED-UNFIRED, each over its session-12 capture with LinkedIn's words measured by keyed shape (`_audit/2026-11-28-build28.md`, sections 1 and 2) (was 282).
+    "adjudicated": 287,
     #: THE LIVE LANE'S FOUR ROWS, RE-DERIVED AT EACH OF ITS MERGES OF MASTER
     #: (2026-09-24; last over lane S): four rows fired live and banked
     #: (`_audit/2026-09-23-live-lane-session-1.md`). `P G6` COVERED-UNFIRED ->
@@ -1556,7 +1557,8 @@ PINNED = {
     #: 188 ON LANE CENSUS-CALLS28 (2026-11-28), MEASURED by --check, never summed: `J 86` GAP -> COVERED-UNFIRED by D6-CAPABILITY-OVER-AFFORDANCE, the lane-K ledger's call on `P I14` made: `linkedin_mark_company_interest` presses the very 'I'm interested' control that J 86's own Help article documents (`_audit/2026-11-28-census-calls.md` section 2); a W row entering bucket 1 held by OPERATOR-NAMES-THE-TARGET (was 187).
     #: 189 ON LANE CENSUS-CALLS28 (2026-11-28), MEASURED by --check, never summed: `N 3` GAP -> COVERED-UNFIRED by D6-CAPABILITY-OVER-AFFORDANCE, the lane-K ledger's call on `N 1` made: his own profile's People You May Know rail (`linkedin_send_invitation`) and `N 4`'s named-profile route (`_audit/2026-11-28-census-calls.md` section 4.1); a W row entering bucket 1 held by OPERATOR-NAMES-THE-TARGET (was 188).
     #: 190 ON LANE CENSUS-CALLS28 (2026-11-28), MEASURED by --check, never summed: `N 50` split under COMPOUND-ROW-SPLITS-ONLY-ON-STATE on the orchestrator's answer to Q2 (19:04 IST), the `N 26` -> `N 26b` shape: `N 50`, the company half, GAP -> COVERED-PROVEN by D6-CAPABILITY-OVER-AFFORDANCE on `linkedin_follow_company`'s session-8 fire (the fire `N 46` and `J 103` rest on), and `N 50b`, the school half, entered at GAP (`_audit/2026-11-28-census-calls.md` section 4.2) (was 189).
-    "delivered_broad": 190,
+    #: 195 ON LANE BUILD28 (2026-11-28), MEASURED by --check on the tree merged with master, never summed: `J 72` and `P M4` (`linkedin_download_resume`) and `J 152`, `J 154`, `J 156` (`linkedin_learning_home`, `linkedin_learning_in_progress`, `linkedin_learning_career_goal`) GAP -> COVERED-UNFIRED, each over its session-12 capture with LinkedIn's words measured by keyed shape (`_audit/2026-11-28-build28.md`, sections 1 and 2) (was 190).
+    "delivered_broad": 195,
     #: 79 since the live lane's merge (see `adjudicated`): P G6, N 134, P O3
     #: and M C72 COVERED-PROVEN.
     #: 75 and 21 since the bucket-1 merge: `M C41` fired live and moved from
@@ -1741,7 +1743,8 @@ PINNED = {
     #: 505 ON LANE CENSUS-CALLS28 (2026-11-28), MEASURED by --check, never summed: `J 86` GAP -> COVERED-UNFIRED by D6-CAPABILITY-OVER-AFFORDANCE, the lane-K ledger's call on `P I14` made: `linkedin_mark_company_interest` presses the very 'I'm interested' control that J 86's own Help article documents (`_audit/2026-11-28-census-calls.md` section 2); a W row entering bucket 1 held by OPERATOR-NAMES-THE-TARGET (was 506).
     #: 504 ON LANE CENSUS-CALLS28 (2026-11-28), MEASURED by --check, never summed: `N 3` GAP -> COVERED-UNFIRED by D6-CAPABILITY-OVER-AFFORDANCE, the lane-K ledger's call on `N 1` made: his own profile's People You May Know rail (`linkedin_send_invitation`) and `N 4`'s named-profile route (`_audit/2026-11-28-census-calls.md` section 4.1); a W row entering bucket 1 held by OPERATOR-NAMES-THE-TARGET (was 505).
     #: 503 ON LANE CENSUS-CALLS28 (2026-11-28), MEASURED by --check, never summed: `N 61` GAP -> MEASURED-ABSENT on the orchestrator's N61-FOLLOWED-HASHTAGS-MEASURED-ABSENT (registration owed at the next integration), under MEASURED-ABSENT-OR-PRECONDITION: no followed-hashtags view on the network manager's nav and no follow control on a hashtag's results (`_audit/2026-11-28-census-calls.md` section 5); out of scope, off bucket 3, and queue rank 83 left with it (was 504).
-    "gap": 503,
+    #: 498 ON LANE BUILD28 (2026-11-28), MEASURED by --check on the tree merged with master, never summed: `J 72` and `P M4` (`linkedin_download_resume`) and `J 152`, `J 154`, `J 156` (`linkedin_learning_home`, `linkedin_learning_in_progress`, `linkedin_learning_career_goal`) GAP -> COVERED-UNFIRED, each over its session-12 capture with LinkedIn's words measured by keyed shape (`_audit/2026-11-28-build28.md`, sections 1 and 2) (was 503).
+    "gap": 498,
     #: 18 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: `M M1` built (`linkedin_message_from_profile`).
     #: 16 ON LANE L5'S ORDER OF 2026-09-27 23:36, MEASURED:
     #: `linkedin_send_message` RETIRED (aimed by a name): `M M2` to GAP and `N
@@ -1912,7 +1915,8 @@ PINNED = {
     #: 92 AT INTEGRATION 7'S REGISTRATION (2026-11-27), MEASURED by --check, never summed: J111-SPLITS-PRODUCTS-FROM-SERVICES applied -- J 111 GAP -> COVERED-UNFIRED on its Products half (linkedin_company_page_tab, tab=products; bucket 1, no ruling), J 176 (the Services tab) entered at GAP (_audit/2026-11-27-integration-7.md section 4).
     #: 93 ON LANE CENSUS-CALLS28 (2026-11-28), MEASURED by --check, never summed: `J 86` GAP -> COVERED-UNFIRED by D6-CAPABILITY-OVER-AFFORDANCE, the lane-K ledger's call on `P I14` made: `linkedin_mark_company_interest` presses the very 'I'm interested' control that J 86's own Help article documents (`_audit/2026-11-28-census-calls.md` section 2); a W row entering bucket 1 held by OPERATOR-NAMES-THE-TARGET (was 92).
     #: 94 ON LANE CENSUS-CALLS28 (2026-11-28), MEASURED by --check, never summed: `N 3` GAP -> COVERED-UNFIRED by D6-CAPABILITY-OVER-AFFORDANCE, the lane-K ledger's call on `N 1` made: his own profile's People You May Know rail (`linkedin_send_invitation`) and `N 4`'s named-profile route (`_audit/2026-11-28-census-calls.md` section 4.1); a W row entering bucket 1 held by OPERATOR-NAMES-THE-TARGET (was 93).
-    "unfired": 94,
+    #: 99 ON LANE BUILD28 (2026-11-28), MEASURED by --check on the tree merged with master, never summed: `J 72` and `P M4` (`linkedin_download_resume`) and `J 152`, `J 154`, `J 156` (`linkedin_learning_home`, `linkedin_learning_in_progress`, `linkedin_learning_career_goal`) GAP -> COVERED-UNFIRED, each over its session-12 capture with LinkedIn's words measured by keyed shape (`_audit/2026-11-28-build28.md`, sections 1 and 2) (was 94).
+    "unfired": 99,
     #: 104 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     #: 101 AT LANE S'S NAMES ADOPTION (2026-09-27), MEASURED: `N 79`, `N 172`
@@ -1982,7 +1986,8 @@ PINNED = {
     #: 58 ON LANE NET7 (2026-11-27), MEASURED by --check, never summed: `N 199` GAP -> COVERED-UNFIRED, his Premium networking matches as people records (`linkedin_premium_matches`; `_audit/2026-11-27-net7.md`, section 5): an R row entering bucket 1 held by no ruling (was 59).
     #: 56 AT INTEGRATION 7, MERGE 5 (lane net7 onto the other four; 2026-11-27), MEASURED by --check on the merged tree, never summed: the lanes' moves above in one tree, with N 32's read-address line moved NEEDS-SESSION -> ADMITTED at settings7's admission (_audit/2026-11-27-integration-7.md).
     #: 55 ON LANE CENSUS-CALLS28 (2026-11-28), MEASURED by --check, never summed: `N 61` GAP -> MEASURED-ABSENT on the orchestrator's N61-FOLLOWED-HASHTAGS-MEASURED-ABSENT (registration owed at the next integration), under MEASURED-ABSENT-OR-PRECONDITION: no followed-hashtags view on the network manager's nav and no follow control on a hashtag's results (`_audit/2026-11-28-census-calls.md` section 5); out of scope, off bucket 3, and queue rank 83 left with it (was 56).
-    "gap_read": 55,
+    #: 54 ON LANE BUILD28 (2026-11-28), MEASURED by --check on the tree merged with master, never summed: `J 72` and `P M4` (`linkedin_download_resume`) and `J 152`, `J 154`, `J 156` (`linkedin_learning_home`, `linkedin_learning_in_progress`, `linkedin_learning_career_goal`) GAP -> COVERED-UNFIRED, each over its session-12 capture with LinkedIn's words measured by keyed shape (`_audit/2026-11-28-build28.md`, sections 1 and 2) (was 55).
+    "gap_read": 54,
     #: 151, not the 152 published by `_audit/2026-09-21-the-write-ceiling.md`.
     #: That document scoped itself to `profile.md`, `network.md` and
     #: `messaging-and-content.md`; measured at HEAD those three carry W 151 and
@@ -2090,7 +2095,8 @@ PINNED = {
     #: 105 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 174` GAP -> COVERED-UNFIRED, job openings by function, read by `company_tabs.read_insights_tab` from the one table summarised `Total job openings` on J114-READS-ITS-OWN-TABLE (`_audit/2026-11-27-jobs7.md` section 11.6); a read entering bucket 1 held by no ruling.
     #: 104 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 169` GAP -> COVERED-UNFIRED, headcount over time and notable alumni, read by `company_tabs.read_insights_tab` from the table summarised `Total employee count` and the member cards under `Notable company alumni` on session 12's load 20 (`_audit/2026-11-27-jobs7.md` section 11.7); a read entering bucket 1 held by no ruling.
     #: 103 ON LANE CENSUS-CALLS28 (2026-11-28), MEASURED by --check, never summed: `J 86` GAP -> COVERED-UNFIRED by D6-CAPABILITY-OVER-AFFORDANCE, the lane-K ledger's call on `P I14` made: `linkedin_mark_company_interest` presses the very 'I'm interested' control that J 86's own Help article documents (`_audit/2026-11-28-census-calls.md` section 2); a W row entering bucket 1 held by OPERATOR-NAMES-THE-TARGET (was 104).
-    "gap_unknown": 103,
+    #: 99 ON LANE BUILD28 (2026-11-28), MEASURED by --check on the tree merged with master, never summed: `J 72` and `P M4` (`linkedin_download_resume`) and `J 152`, `J 154`, `J 156` (`linkedin_learning_home`, `linkedin_learning_in_progress`, `linkedin_learning_career_goal`) GAP -> COVERED-UNFIRED, each over its session-12 capture with LinkedIn's words measured by keyed shape (`_audit/2026-11-28-build28.md`, sections 1 and 2) (was 103).
+    "gap_unknown": 99,
     "gap_ambiguous": 0,
     #: BUCKET 3, MEASURED 2026-09-23 (`_audit/2026-09-23-bucket3-addresses.md`),
     #: counted off `_audit/_census/read-addresses.tsv`, whose every verdict
@@ -2236,7 +2242,8 @@ PINNED = {
     #: 33 ON LANE NET7 (2026-11-27), MEASURED by --check, never summed: `N 93` and `N 27` GAP -> MEASURED-ABSENT on the orchestrator's rulings of 13:25 (KEYWORD-FIELDS-MEASURED-ABSENT, CONNECTIONS-CONTROLS-MEASURED-ABSENT; `_audit/2026-11-27-net7.md`, section 10): out of scope, off bucket 3 (was 34).
     #: 32 ON LANE NET7 (2026-11-27), MEASURED by --check, never summed: `N 199` GAP -> COVERED-UNFIRED, his Premium networking matches as people records (`linkedin_premium_matches`; `_audit/2026-11-27-net7.md`, section 5): an R row entering bucket 1 held by no ruling (was 33).
     #: 32 AT INTEGRATION 7, MERGE 5 (lane net7 onto the other four; 2026-11-27), MEASURED by --check on the merged tree, never summed: the lanes' moves above in one tree, with N 32's read-address line moved NEEDS-SESSION -> ADMITTED at settings7's admission (_audit/2026-11-27-integration-7.md).
-    "b3_admitted": 32,
+    #: 31 ON LANE BUILD28 (2026-11-28), MEASURED by --check on the tree merged with master, never summed: `J 72` and `P M4` (`linkedin_download_resume`) and `J 152`, `J 154`, `J 156` (`linkedin_learning_home`, `linkedin_learning_in_progress`, `linkedin_learning_career_goal`) GAP -> COVERED-UNFIRED, each over its session-12 capture with LinkedIn's words measured by keyed shape (`_audit/2026-11-28-build28.md`, sections 1 and 2) (was 32).
+    "b3_admitted": 31,
     #: 38 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     #: 40 ON LANE L5'S ORDER OF 2026-09-28 12:32, MEASURED: `N 30`, `N 31`, `N 65`
@@ -2591,7 +2598,8 @@ PINNED = {
     #: 54 ON LANE NET7 (2026-11-27), MEASURED by --check, never summed: `N 199` GAP -> COVERED-UNFIRED, his Premium networking matches as people records (`linkedin_premium_matches`; `_audit/2026-11-27-net7.md`, section 5): an R row entering bucket 1 held by no ruling (was 53).
     #: 63 AT INTEGRATION 7, MERGE 5 (lane net7 onto the other four; 2026-11-27), MEASURED by --check on the merged tree, never summed: the lanes' moves above in one tree, with N 32's read-address line moved NEEDS-SESSION -> ADMITTED at settings7's admission (_audit/2026-11-27-integration-7.md).
     #: 64 AT INTEGRATION 7'S REGISTRATION (2026-11-27), MEASURED by --check, never summed: J111-SPLITS-PRODUCTS-FROM-SERVICES applied -- J 111 GAP -> COVERED-UNFIRED on its Products half (linkedin_company_page_tab, tab=products; bucket 1, no ruling), J 176 (the Services tab) entered at GAP (_audit/2026-11-27-integration-7.md section 4).
-    "b1_no_ruling": 64,
+    #: 69 ON LANE BUILD28 (2026-11-28), MEASURED by --check on the tree merged with master, never summed: `J 72` and `P M4` (`linkedin_download_resume`) and `J 152`, `J 154`, `J 156` (`linkedin_learning_home`, `linkedin_learning_in_progress`, `linkedin_learning_career_goal`) GAP -> COVERED-UNFIRED, each over its session-12 capture with LinkedIn's words measured by keyed shape (`_audit/2026-11-28-build28.md`, sections 1 and 2) (was 64).
+    "b1_no_ruling": 69,
     #: 7 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
     #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
     #: 4 AT THE LIVE LANE'S MERGE OF MASTER c2825a4 (2026-09-28), MEASURED on the
@@ -2681,7 +2689,8 @@ PINNED = {
     #: 105 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 174` GAP -> COVERED-UNFIRED, job openings by function, read by `company_tabs.read_insights_tab` from the one table summarised `Total job openings` on J114-READS-ITS-OWN-TABLE (`_audit/2026-11-27-jobs7.md` section 11.6); a read entering bucket 1 held by no ruling.
     #: 104 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 169` GAP -> COVERED-UNFIRED, headcount over time and notable alumni, read by `company_tabs.read_insights_tab` from the table summarised `Total employee count` and the member cards under `Notable company alumni` on session 12's load 20 (`_audit/2026-11-27-jobs7.md` section 11.7); a read entering bucket 1 held by no ruling.
     #: 103 ON LANE CENSUS-CALLS28 (2026-11-28), MEASURED by --check, never summed: `J 86` GAP -> COVERED-UNFIRED by D6-CAPABILITY-OVER-AFFORDANCE, the lane-K ledger's call on `P I14` made: `linkedin_mark_company_interest` presses the very 'I'm interested' control that J 86's own Help article documents (`_audit/2026-11-28-census-calls.md` section 2); a W row entering bucket 1 held by OPERATOR-NAMES-THE-TARGET (was 104).
-    "jobs_gap": 103,
+    #: 99 ON LANE BUILD28 (2026-11-28), MEASURED by --check on the tree merged with master, never summed: `J 72` and `P M4` (`linkedin_download_resume`) and `J 152`, `J 154`, `J 156` (`linkedin_learning_home`, `linkedin_learning_in_progress`, `linkedin_learning_career_goal`) GAP -> COVERED-UNFIRED, each over its session-12 capture with LinkedIn's words measured by keyed shape (`_audit/2026-11-28-build28.md`, sections 1 and 2) (was 103).
+    "jobs_gap": 99,
     #: 40 AT LANE S'S OFFLINE FRONTIER (2026-09-28), MEASURED: the five rows
     #: bucket 3 called blocked on nothing, taken one by one. `M M53`, `N 195`
     #: and `P S5` (three R rows ADMITTED and gated READER) and `J 107` (the one
@@ -2712,7 +2721,8 @@ PINNED = {
     #: 47 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 173`, `J 174` and `J 175` entered by the orchestrator's corrected rulings of 14:05 IST (`_audit/2026-11-27-jobs7.md` section 11.5): `J 173` split from `J 169` (J169-BY-ITS-OWN-WORDS), `J 174` added (JOB-OPENINGS-BY-FUNCTION-ADDED), `J 175` split from `J 154` (LEARNING-ROWS-SPLIT as corrected); three GAP rows, each an admitted read.
     #: 46 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 174` GAP -> COVERED-UNFIRED, job openings by function, read by `company_tabs.read_insights_tab` from the one table summarised `Total job openings` on J114-READS-ITS-OWN-TABLE (`_audit/2026-11-27-jobs7.md` section 11.6); a read entering bucket 1 held by no ruling.
     #: 45 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 169` GAP -> COVERED-UNFIRED, headcount over time and notable alumni, read by `company_tabs.read_insights_tab` from the table summarised `Total employee count` and the member cards under `Notable company alumni` on session 12's load 20 (`_audit/2026-11-27-jobs7.md` section 11.7); a read entering bucket 1 held by no ruling.
-    "jobs_dir_r": 45,
+    #: 41 ON LANE BUILD28 (2026-11-28), MEASURED by --check on the tree merged with master, never summed: `J 72` and `P M4` (`linkedin_download_resume`) and `J 152`, `J 154`, `J 156` (`linkedin_learning_home`, `linkedin_learning_in_progress`, `linkedin_learning_career_goal`) GAP -> COVERED-UNFIRED, each over its session-12 capture with LinkedIn's words measured by keyed shape (`_audit/2026-11-28-build28.md`, sections 1 and 2) (was 45).
+    "jobs_dir_r": 41,
     #: 60 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: `J 69` and
     #: `J 87`, both W.
     #: 58 ON LANE K's APPLICATION OF THE RULINGS OF 2026-10-10, MEASURED: `J
@@ -2765,7 +2775,8 @@ PINNED = {
     #: 44 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 173`, `J 174` and `J 175` entered by the orchestrator's corrected rulings of 14:05 IST (`_audit/2026-11-27-jobs7.md` section 11.5): `J 173` split from `J 169` (J169-BY-ITS-OWN-WORDS), `J 174` added (JOB-OPENINGS-BY-FUNCTION-ADDED), `J 175` split from `J 154` (LEARNING-ROWS-SPLIT as corrected); three GAP rows, each an admitted read.
     #: 43 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 174` GAP -> COVERED-UNFIRED, job openings by function, read by `company_tabs.read_insights_tab` from the one table summarised `Total job openings` on J114-READS-ITS-OWN-TABLE (`_audit/2026-11-27-jobs7.md` section 11.6); a read entering bucket 1 held by no ruling.
     #: 42 ON LANE JOBS7 (2026-11-27), MEASURED by --check, never summed: `J 169` GAP -> COVERED-UNFIRED, headcount over time and notable alumni, read by `company_tabs.read_insights_tab` from the table summarised `Total employee count` and the member cards under `Notable company alumni` on session 12's load 20 (`_audit/2026-11-27-jobs7.md` section 11.7); a read entering bucket 1 held by no ruling.
-    "jobs_admitted": 42,
+    #: 38 ON LANE BUILD28 (2026-11-28), MEASURED by --check on the tree merged with master, never summed: `J 72` and `P M4` (`linkedin_download_resume`) and `J 152`, `J 154`, `J 156` (`linkedin_learning_home`, `linkedin_learning_in_progress`, `linkedin_learning_career_goal`) GAP -> COVERED-UNFIRED, each over its session-12 capture with LinkedIn's words measured by keyed shape (`_audit/2026-11-28-build28.md`, sections 1 and 2) (was 42).
+    "jobs_admitted": 38,
     #: 11 ON LANE A'S J 38 BUILD (2026-10-10), MEASURED: `J 38` GAP -> COVERED-UNFIRED by D6 --
     #: an alert's delivered job ids, read off the notifications page (never fired).
     #: 11 AT LANE A'S MERGE OF MASTER 71d83ca (2026-10-10), MEASURED on the
@@ -3200,6 +3211,19 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
         #: page over live session 12's capture; never fired. NAMES-AT-RUNTIME and
         #: PEOPLE-DATA-MITIGATIONS permit and shape it; none holds it.
         "N 199",
+        #: `J 72` and `P M4` entered on lane build28 (2026-11-28): one stored
+        #: resume he names, downloaded through its own card's menu by the C8
+        #: transport (`linkedin_download_resume`), over session 12's capture of
+        #: the open menu; never fired. A read of his own file:
+        #: RESUME-MENU-DOWNLOAD-SANCTIONED sanctions the press and
+        #: D4-NO-OWN-BROWSER-CONTEXT scopes its transport; no ruling holds it.
+        "J 72", "P M4",
+        #: `J 152`, `J 154` and `J 156` entered on the same lane: LinkedIn
+        #: Learning's home and his in-progress tab (course titles as records,
+        #: NAMES-AT-RUNTIME) and his career goal (his own text,
+        #: HIS-OWN-TEXT-AT-RUNTIME), each one admitted page over session 12's
+        #: capture; never fired. Reads; no ruling holds them.
+        "J 152", "J 154", "J 156",
     ),
 }
 

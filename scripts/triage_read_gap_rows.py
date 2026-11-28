@@ -320,7 +320,10 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
     # `P M2` LEFT THE READ-GAP SET 2026-11-26 (lane readers-jobs26):
     # COVERED-UNFIRED on linkedin_application_settings over session 11's
     # capture of his application settings page.
-    "P M4": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
+    # `P M4` LEFT THE READ-GAP SET 2026-11-28 (lane build28): COVERED-UNFIRED
+    # on linkedin_download_resume over live session 12's capture of the resume
+    # card's open menu, so its line goes, as a line whose row left GAP must --
+    # see LEFT THE READ-GAP SET below.
     "P M5": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
     "P N9": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
     # `P N13` LEFT GAP 2026-10-10: EXCLUDED-RULED on SIGN-IN-CHALLENGES-ARE-HIS
@@ -449,6 +452,14 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
 #:     N 61   MEASURED-ABSENT  (was ADDRESS) -- the network manager's nav draws
 #:            no followed-hashtags entry, and a hashtag's results draw no
 #:            follow control and no hashtag feed
+#:
+#: LEFT THE READ-GAP SET 2026-11-28, on lane build28's download (the
+#: orchestrator's ruling RESUME-MENU-DOWNLOAD-SANCTIONED): built offline over
+#: live session 12's capture of the resume card's open menu and never fired.
+#:
+#:     P M4   COVERED-UNFIRED  (was RETURNED) -- one stored resume he names,
+#:            downloaded through its own card's Download item by the C8
+#:            transport (resume_files.download_resume)
 
 #: THREE SINCE 2026-11-28: `N 61` left the read-GAP set (MEASURED-ABSENT, lane
 #: census-calls28), and its entry left with it, as a TRIAGE key must.

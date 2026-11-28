@@ -4551,11 +4551,15 @@ SANCTIONED_MUTATIONS: tuple[tuple[str, str, str], ...] = (
     # the module's one pressing call site and its two callers.
     ("linkedin_server/scheduled_posts.py", "_press", "click"),
     # THE TWENTY-THIRD AND TWENTY-FOURTH, 2026-11-28 (lane build28, census
-    # J 72 / P M4): ONE STORED RESUME HE NAMES, DOWNLOADED, on the
-    # orchestrator's order of that day (the lane's brief: "ONE resume-download
-    # tool over the resume card's menu, using the C8 transport") and
-    # D4-NO-OWN-BROWSER-CONTEXT, which scopes the transport to his attached
-    # browser. ``resume_files._press``, the one drain point:
+    # J 72 / P M4): ONE STORED RESUME HE NAMES, DOWNLOADED, on the ruling
+    # RESUME-MENU-DOWNLOAD-SANCTIONED (the orchestrator, 2026-11-28 19:35,
+    # registered in _audit/2026-11-28-build28.md): "A tool or capture may open
+    # his own stored resume's card menu and press its Download item. It
+    # fetches his own file through P C8's transport (D4-NO-OWN-BROWSER-CONTEXT)
+    # and changes nothing on his account. Any sign that the item does more
+    # than download (a dialog, a share sheet, a state change) stops the act
+    # and is recorded." D4-NO-OWN-BROWSER-CONTEXT scopes the transport to his
+    # attached browser. ``resume_files._press``, the one drain point:
     #
     #   click   resume_files._press -- step ``open``, the ONE
     #           ``button[aria-expanded]`` on the ONE card whose name reads
@@ -4575,11 +4579,13 @@ SANCTIONED_MUTATIONS: tuple[tuple[str, str, str], ...] = (
     # reach (``press.check_address`` first); the target is chosen by the name
     # the list tool returned, matched exactly, never by position; the
     # download press runs only inside ``cdp_download.capture_download``, off
-    # unless LINKEDIN_ENABLE_CDP_DOWNLOADS turns it on; and after each press a
-    # moved address or a drawn dialog stops everything, while the card count,
-    # the named card and both switches are re-read and any change reported.
-    # ``tests/test_resume_files.py`` pins that ``_press`` is the module's only
-    # pressing site and refuses any step but its three.
+    # unless LINKEDIN_ENABLE_CDP_DOWNLOADS turns it on; and after the
+    # download press, any sign of more than a download -- a moved address, a
+    # dialog, a new tab, a card or a switch changed -- stops the act before
+    # any further press, the closing Escape included, and is returned as the
+    # ruling's record (``signs``). ``tests/test_resume_files.py`` pins that
+    # ``_press`` is the module's only pressing site, refuses any step but its
+    # three, and stops on each sign (RESUME-MENU-DOWNLOAD-SANCTIONED).
     ("linkedin_server/resume_files.py", "_press", "click"),
     ("linkedin_server/resume_files.py", "_press", "press"),
 )
