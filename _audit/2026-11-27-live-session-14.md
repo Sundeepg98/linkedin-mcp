@@ -2285,6 +2285,183 @@ Candidates for INSTRUMENTS, each shown red above: slice c14's C1 and C2
 checks. `scroll_structure_s14c.py`, `ast_delta_s14c.py` and
 `close_k5k6_s14c.py` are disposable.
 
+### 13.7 r2: the chained shell, LIVE-SESSIONS-RUN-WITHOUT-HIM, and the cold review
+
+**THE ORDERS.** Each note was deleted as the ack, and a copy is in the lane's
+gitignored scratch.
+
+- **17:2x, by message:** `scroll_no_progress` stays a PHASE stop. A failed
+  scroll in one phase must not stop the others.
+- **17:4x, by message:** the chained-shell fix goes into r2 after the review.
+  A bottom counts only when it still holds after one more 1.2 s read. Red
+  first, on a chained-shell page.
+- **`_TEAM_LEAD_UNATTENDED.md`** (18:2x, acked 18:31:36), LIVE-SESSIONS-RUN-WITHOUT-HIM:
+  - nobody fronts, clicks or watches a window;
+  - the lane keeps its own window usable over CDP before each K6 phase, with
+    one retry, then a skip at no load cost;
+  - launch flags only if a covered page is measured to stop rendering.
+- **`_TEAM_LEAD_K6_RULING.md`** (18:50, acked 18:58:55):
+  - the measurements below are accepted;
+  - no step of the runner may ever take the OS foreground, so there is no
+    restore step either;
+  - `Page.bringToFront` stays;
+  - whether the window was minimised is recorded, measured.
+- **The cold review** (`review14c28`, 18:10 to 18:30): NO-GO, on one NATURAL
+  finding (N1) and eight NITs.
+- **`_TEAM_LEAD_MASTER_B7DB2F7A.md`** (18:57, acked 19:12:21): master was
+  merged in before the certifying CI.
+
+**THE MEASUREMENTS** (VERIFIED). They used the installed Chrome 158, with
+throwaway profiles on ports 9351 and 9352 and every host mapped to NOTFOUND
+(`occlusion_probe_s14c.py`, `occlusion_probe2_s14c.py`,
+`occlusion_probe3_s14c.py`; disposable).
+
+| window A | Playwright attached (every phase) | no client attached |
+|---|---|---|
+| covered by window B | 60 frames/s, visible, focused | hidden; 18 frames/s over 4 s, timers throttled |
+| minimised (windowState minimized, IsIconic) | 60 frames/s, visible, focused | hidden; 0 frames/s, timers 1/s |
+
+- **The runner's own kind of tab** (`ctx.new_page()`): attached while another
+  window held the OS foreground, it read visible and focused, at 61 frames/s.
+- **Focus emulation:** Playwright sends `Emulation.setFocusEmulationEnabled`
+  for every page it attaches (VERIFIED in its bundled source). That is what
+  keeps an attached page live (DERIVED).
+- **The OS foreground:** `Page.bringToFront` did not take it.
+  `Browser.setWindowBounds` "normal" on a minimised window did, twice.
+- **What K6 checked:** the OS FOREGROUND. `front_chrome.ps1` required
+  `GetForegroundWindow` to be the dedicated browser's window. It checked
+  neither visibility nor focus.
+- **So the launch flags' condition is not met.** A covered page does not stop
+  rendering during a phase, and `scripts/start_chrome.ps1` is unchanged.
+- **14b's empty scroll was not occlusion:** its window read fronted and
+  visible (12.2).
+
+**r2.** `runner_s14c.py`, the same bytes as `runner_s14c_r2.py` (sha256
+`04b30b3d42002257`), is built from r1 by `patch_s14c_r2.py`, which refuses
+unless its source is r1. It carries five changes.
+
+- **R2-1, the chained shell.** A bottom counts only when it still holds after
+  one more read 1.2 s later. Otherwise the pass steps on, inside the same 24
+  steps.
+- **R2-2, LIVE-SESSIONS-RUN-WITHOUT-HIM.**
+  - K6 is no longer the OS foreground. `window_gate_14c` runs on the runner's
+    own tab, after the preflight and the lock and before the id's file is
+    deleted.
+  - It turns focus emulation on (explicitly, besides Playwright's own),
+    records the window's state (`minimised_at_gate`, measured, never changed)
+    and calls `Page.bringToFront`. The page must then read visible and
+    focused.
+  - One retry; then the phase is SKIPPED (exit 2, no load), with its reason in
+    `window_gate_<phase>.json`.
+  - No step of the runner takes the OS foreground. No phase calls
+    `front_window()`, neither as K6's refusal nor for the "### the window"
+    line, and there is no restore.
+- **N1, the review's NATURAL finding.** The walk for the element that scrolls
+  starts INSIDE main, at the lowest element holding every section main holds
+  (on 14b's root, main > div > div). Body counts when it scrolls on its own.
+  The target's depth is now signed from main.
+- **NIT-1.** A target lost or changed in a step, or at the bottom's re-read,
+  is a stall, never a bottom.
+- **NIT-7.** The round trip's docstring names `restore_verdict`, and its
+  RESTORED line names the condition that failed. r1's patch script says
+  `view_restored` is "called by" `restore_verdict`. It is not:
+  `restore_verdict` re-implements the touched rule. r1's script stays as r1's
+  build record.
+
+**THE REACH, by AST:** 176 lines changed from r1
+(`delta_r1_to_s14c_r2.diff`).
+
+- Changed: the docstring, `SCROLL_JS`, `easy_apply_round_trip`, `main_async`
+  and `scroll_pass_14c`.
+- Added: `WINDOW_TRIES`, `_WINDOW_CDP`, `window_reading`, `window_gate_14c`
+  and `_window_gate_cleanup`.
+
+**RED FIRST** (VERIFIED, slice c14, check mode). S5 is a named real-time case,
+because the test is the pass's own 1.2 s waits.
+
+| check | what it asks | r1 | r2 |
+|---|---|---|---|
+| S5 | chained shells: the second exists only after the first renders, 1.8 s after the bottom; its skill id is drawn | **red** (proved, 0 skill ids) | pass |
+| S6 | N1: 14b's own structure, main > div > div scrolling, with the aside inside it | **red** (target none: a phase STOP) | pass (depth -2) |
+| S7 | N1: body scrolls on its own under html's overflow hidden | **red** (target none) | pass |
+| S8 | control: html visible and body auto, so the document is the target | pass | pass |
+| S9 | NIT-1: the scroller locks in step 2 while main gains a node: a STOP before any item | **red** (read as proved) | pass (a stall at step 2) |
+| W1 | unattended, with the OS foreground refused: the gate keeps the tab usable, and the phase runs | **red** (refused) | pass |
+| W2 | a first unusable reading is retried once, and the phase runs on the second | **red** | pass |
+| W3 | still unusable after the retry: SKIPPED, no load, the reason named | **red** | pass |
+| W4 | a minimised window is recorded and never restored, and the phase runs | **red** | pass |
+| W5 | control: a window that keeps a phase from running leaves rank 69's id file | pass | pass |
+| W6 | control: a phase that presses nothing never meets the gate | pass | pass |
+| W7 | no phase asked Windows for the foreground (W1 to W6) | **red** (6 calls) | pass (0) |
+
+- r2 passes 27 of 27.
+- r1 passes 18 of 27. Its 9 reds are exactly S5, S6, S7, S9, W1 to W4 and W7,
+  and every check of 13.4 still passes on both runners.
+
+**THE CHECK SETS ON r2** (check mode):
+
+| set | r2 |
+|---|---|
+| slice c14 | 27 of 27 |
+| the gate, slices main and r2 | 31 of 31, and 16 of 16 (twice) |
+| the close set's K1b, K1e, K1f, K5, K6, K6b, K6c and K7 | 8 of 8 |
+| the table checks | red class 3 of 3, control 1 of 1 |
+| the tabs checks | 18 of 18 |
+| the entry refusals | every refusal as named, before any browser contact |
+| provenance | the same as r3e's |
+
+- **THE HARNESS EDITS** (`port_checks_s14c.py`, r2):
+  - The close set's `window_refusal` stubs the gate UNUSABLE, so no offline
+    check opens a tab or reaches for 9224. Its K6 words name both meanings.
+  - The entry set's two K6 cases now expect the self block's veto, the first
+    refusal before the gate. On r1 those two read NOT AS EXPECTED, as they
+    must.
+  - Slice c14 gains S5 to S9 and W1 to W7.
+- **NOT RE-RUN, since they reach no changed code:**
+  - the gate's phase and r1 slices (20 of 20 and 16 of 16 on r1, 18:2x);
+  - the close set's other 23 checks;
+  - the Open-to-Work, composer, teardown, guard, starter and items sets
+    (`final2/`).
+- **WHAT THE BOX DID:**
+  - The r2 slice's two passing runs ended their work at 131 s (with five
+    sets beside it) and at 112.9 s, each past my 115 s bound during the
+    teardown.
+  - A run alone, with the CPU at 100% from other lanes, failed Q1 only. Q1
+    is a named real-time check (a 7 s slow answer) on code r2 does not reach.
+  - Q5, the slice's one check on changed code (`flag_off` through
+    `main_async`), passed in all three runs.
+
+**THE REVIEW'S OTHER NITS, for the orchestrator** (not in r2):
+
+- **NIT-2 (pre-existing in r3e).** A non-`f_*`, non-volatile key whose value
+  only the OFF press changed is accepted. On 14b's route only `keywords` is
+  such a key, and all 25 ids must still come back. The review's fix, if
+  wanted: `_filters(back) == _filters(base)`, with the two keys removed.
+- **NIT-3:** as ruled ("any other added or missing key still STOPs").
+- **NIT-4 (pre-existing):** the path is not judged; `same_address_as_before`
+  records it.
+- **NIT-5, for the GO:** `scroll_no_progress` and a window SKIP are
+  phase-level, so the GO's "any STOP ends the session" should not cover them.
+- **NIT-6, for the GO:** All filters becomes reachable live. An unexpected
+  re-query there would be search 4: under the runner's cap of 5, but past a
+  GO's "at most 3".
+- **NIT-8:** slice c14's module line counts kind `red` only; its C14 SUMMARY
+  line and the exit code carry the result. S6 models the aside inside main,
+  as on 14b.
+
+**ANSWERED for the orchestrator.**
+
+- `tabs_checks_s14b.py`'s 15:39:17 edit is live-s13's waits fix (its line
+  57: "parallel runs each take their own fake port").
+- Pass 2's tabs runs wrote their outputs from 15:39:34, after that edit, so
+  `final2/`'s tabs results are on `8f5ffa6a`, the pinned sha.
+- The summary's `967cf23c` is the sha before the edit (DERIVED from the
+  mtimes).
+
+**A RESIDUAL, UNVERIFIED:** the session's start (`scripts/start_chrome.ps1`)
+opens the dedicated Chrome's window, which may take the OS foreground once,
+at launch. It is not a runner step.
+
 ## Lessons (for the orchestrator to harvest)
 
 1. **`Path.write_text` on Windows writes CRLF.** Three patch scripts turned
@@ -2379,4 +2556,12 @@ checks. `scroll_structure_s14c.py`, `ast_delta_s14c.py` and
     the CPU at 96 to 100%, it could not finish in 115 s, and a real-time
     check failed (13.5). Keep each step well under the bound, and run the
     checks a delta reaches on their own.
+22. **A page under a debugger is not the page a person sees.** With
+    Playwright attached, a minimised window rendered at 60 frames/s and read
+    visible and focused. Detached, the same window was hidden, at 0 frames/s
+    (13.7). Measure a window's state with the client the run uses, and say
+    which client that was.
+23. **A walk up from a landmark cannot find what is below it.** C2 started at
+    main and went up, and 14b's page scrolls two levels below main (13.7, N1).
+    Start the search where the content is.
 
