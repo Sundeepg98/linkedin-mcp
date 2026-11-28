@@ -13,13 +13,13 @@ Evidence classes: VERIFIED means read on disk in this lane, MEASURED means an
 instrument counted it on a tracked file in this lane, DERIVED means computed from
 what was read, UNVERIFIED means not checked. People by role only.
 
-STATUS: READY, HOLDING FOR THE ORCHESTRATOR'S MERGE. The certified head is `9f5e61ca`
+STATUS: READY, HOLDING FOR THE ORCHESTRATOR'S MERGE. The certified head is `cc2a4598`
 (on this lane's branch, `census-calls28`, and nowhere on `master` until that merge; its
-subject is "merge master acd9df5c (session 14c r3) into census-calls28 before its
-certifying run"). It merges master `acd9df5c`, the live lane's r3, which landed after
-this branch had merged r2, so it is a fast-forward of master. Lane CI run 46159330206
-passed (7 jobs). Full-matrix run 46159946074 passed on attempt 2 (3 cells x 6 shards),
-both read by sha. Only this record sits above it. Every item is applied, the last four on the orchestrator's answers
+subject is "derived views: INDEX.md and RULINGS.md regenerated after the merge of master
+e6aaf960"). It merges master `e6aaf960` (ci-checks28's integration, which landed after
+r2 and r3), so it is a fast-forward of master. Lane CI run 46164188200 passed (7 jobs)
+and full-matrix run 46164831627 passed (3 cells x 6 shards), both read by sha. Only this
+record sits above it. Every item is applied, the last four on the orchestrator's answers
 to Q2 to Q5 (section 1), and nothing is held for a ruling. Earlier, J 86's move at
 `118d4008` (subject "census: J 86 COVERED-UNFIRED by D6 on P I14's tool -- the lane-K
 ledger's call, made", nowhere on `master` until the merge) was certified by runs
@@ -548,7 +548,7 @@ sentence of this lane, and none says a record is untrue. So the three pairs are 
 that test's `NOT_A_CORRECTION` with those readings, which is the guard's own remedy
 for table-row proximity. Its 15 tests then passed locally in 24 s.
 
-### 8.1d The certifying runs, after masters `d87d97ec` and `acd9df5c`
+### 8.1d The certifying runs, after masters `d87d97ec`, `acd9df5c` and `e6aaf960`
 
 - The first push after the triage commit was REFUSED by the pre-push gate: "origin/master
   d87d97ec7d0d is NOT an ancestor ... merge origin/master into the branch first". The
@@ -572,6 +572,14 @@ for table-row proximity. Its 15 tests then passed locally in 24 s.
   rerun --failed`), which the orchestrator had been told first.
 - Attempt 2 passed: 21 jobs, each of the three cells 6 of 6 shards, every shard
   reported, read by run id with no new dispatch.
+- Master moved a third time, to `e6aaf960` (lane ci-checks28's integration: 15 files,
+  none a census file or the queue). The branch merged it without conflict, but both
+  sides had added an `_audit` record, so the auto-merged `INDEX.md` and `RULINGS.md`
+  each held one side's count; both were regenerated with `--write` in their own commit.
+  Every instrument was green on that tree.
+- Lane CI run 46164188200 on that head passed: 7 jobs, 6m43s.
+- Full-matrix run 46164831627 passed: 21 jobs, 11m14s, each cell 6 of 6 shards.
+  Master had not moved at its end.
 
 ### 8.1e A BREACH OF THE BOX RULE, REPORTED AT ONCE
 
