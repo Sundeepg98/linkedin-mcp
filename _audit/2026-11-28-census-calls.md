@@ -1,9 +1,13 @@
 # Lane census-calls28 (lane A): the census calls, no code
 
 Lane A of the census wave plan of 2026-11-28 (`census-plan28`, section 3), branched
-from master `9ec91965`. Census only: no file under `linkedin_server/` is touched, nor
-`capture-queue.tsv`, `INSTRUMENTS.md` or the rulings register by hand. Nothing loaded
-LinkedIn; no browser, port or session was touched.
+from master `9ec91965`. Census only, no code. No file under `linkedin_server/` is
+touched, nor `INSTRUMENTS.md`, nor the rulings register by hand. The files under
+`scripts/` and `tests/` that it edits hold census pins and their literals: the
+`census_completion.py` pins, the triage table, the pointer guard's calibration, the row
+total and the write-class split. `capture-queue.tsv` is touched only as the
+orchestrator's amended rule of 19:04 IST allows (sections 4.2, 5, 6.2 and 6.4). Nothing
+loaded LinkedIn; no browser, port or session was touched.
 
 Evidence classes: VERIFIED means read on disk in this lane, MEASURED means an
 instrument counted it on a tracked file in this lane, DERIVED means computed from
@@ -14,31 +18,33 @@ this lane's branch, `census-calls28`, and nowhere on `master` until the orchestr
 merge; its subject is "census: J 86 COVERED-UNFIRED by D6 on P I14's tool -- the lane-K
 ledger's call, made") was certified by lane CI run 46145558412 and full-matrix run
 46146396940, both success, read by sha. After hygiene28 reached master (`b7db2f7a`) the
-branch merged it, and N 3's move, M C11's step and the M C65 and M C91 notes were
-applied (section 1). The orchestrator's merge order puts this lane after the live
-lane's r2, with master merged in before the certifying run, so the final certification
-waits on that. N 61, N 50, rank 23's rows and the new capture steps wait on Q2 to Q5.
+branch merged it, and every other item was applied, the last four on the
+orchestrator's answers to Q2 to Q5 (section 1). Nothing is held for a ruling. The
+orchestrator's merge order puts this lane after the live lane's r2, with master merged
+in again before the certifying run (lane CI, then the full matrix), so READY waits on
+that.
 
 ## 1. The order, and what holds what
 
 | item | rows | outcome | where |
 |---|---|---|---|
 | 1. J 86, the D6 call on P I14 | J 86 | GAP -> COVERED-UNFIRED, committed | section 2 |
-| 2. the code reads | M C65, M C91 | both stay GAP: neither tool reaches a group post | section 3 |
+| 2. the code reads | M C65, M C91 | both stay GAP: neither tool reaches a group post; the cell notes applied | section 3 |
 | 3. D6 calls | N 3 | GAP -> COVERED-UNFIRED, applied after hygiene28's merge | section 4.1 |
 | 3. D6 calls | N 50 | split (Q2, answered): N 50 GAP -> COVERED-PROVEN by D6; N 50b enters at GAP | section 4.2 |
 | 4. the orchestrator's ruling | N 61 | GAP -> MEASURED-ABSENT, applied with queue rank 83's line (Q3, answered) | section 5 |
 | 5. the re-judges | M C11 | step re-pointed and cell noted, applied | section 6.1 |
-| 2. the code reads | M C65, M C91 | the cell notes, applied | section 3 |
 | 5. the re-judges | rank 23's 13 rows | all stepped PRECONDITION, with queue rank 23's line (Q4, answered); no state moves | section 6.2 |
 | 5. the re-judges | J 3, J 17, J 151 | stepped to a new place capture, `C-SRCH-2b` (Q5, answered) | section 6.3 |
 | 5. the re-judges | M C65, M C91 | stepped to a group-feed capture, `C-GROUP-POST-1` (Q5, answered) | section 6.4 |
 
-WHAT "HELD" MEANS HERE. The held edits exist as a tested ready patch in the lane's
-scratch directory (gitignored, so this record states what each edit is, and section 5.2
-and 6 give the exact lines): an apply script anchored on each line's own text, run in
-steps `n3`, `n61`, `msg` and `delta`, refusing on any anchor it cannot find exactly
-once. A queue step exists only for the queue's owner, and is never run by default.
+HOW THE HELD WORK WAS APPLIED. While the two slices waited, every edit lived as a
+ready patch in the lane's scratch directory. It was tried on this tree and reverted
+(section 8.2). The patch is an apply script anchored on each line's own text, which
+refuses on any anchor it does not find exactly once. After the merge it applied in
+steps `n3` and `msg`, then `n61` with its queue line, and three more such scripts did
+the split, rank 23 and Q5. Those scripts are gitignored and DISPOSABLE (never shown
+failing as instruments), so each edit they made is stated here and in its commit.
 
 THE BASE HOLD. The brief puts `network.md` and `messaging-and-content.md` after
 hygiene28's merge, because that lane edits both. Master was `9ec91965` at every check
@@ -513,6 +519,21 @@ No live session was on (`_state/LIVE_SESSION_ON` absent at each check).
   literal sweep took 58 s, the pointer guard's two selftests 40 s and 37 s, and the
   Playwright teardowns 7 to 10 s each. The corpus-wide guards are left to lane CI.
 
+### 8.1c The four commits on the orchestrator's answers (Q2 to Q5)
+
+Each was gated before its commit, with no live session on, `-n 4 -p no:randomly`.
+
+| commit | what | instruments | pytest |
+|---|---|---|---|
+| N 61 | MEASURED-ABSENT, queue rank 83 out | `census_completion --check` re-pinned (7 moves); pointer guard 63 of 63 after `--pin`; `check_next_step` 503; `check_exclusion_basis` 75 of 75; the other four table checkers and `triage_read_gap_rows` green | 8 files, 160 passed in 109 s |
+| N 50 split | N 50 PROVEN, N 50b GAP, queue rank 13 4 rows | `count_census_states`; `pin_census_rows --check` red ("1 added ... N 50b") then `--write` and green; `census_completion --check` re-pinned (7 moves); the write-class split read from the table (17, 33, 316); every table checker green | 13 files, 330 passed in 72 s |
+| rank 23 | 13 steps PRECONDITION, queue rank 23 out | `census_completion --check` with no move; `check_next_step` 503; the pointer guard and table checkers green | 9 files, 211 passed in 48 s |
+| Q5 | queue 162 and 163 appended, rank 133 out, 5 steps | `check_next_step` 503, every source and payload resolving; the table checkers green | 5 files, 123 passed in 48 s |
+
+The derived views were checked before each commit, and `--write` ran wherever one was
+stale. Each time that was only the blocker map's `state_today` and the reason locator's
+candidate counts.
+
 ### 8.2 The held patch, tried on this tree and reverted
 
 The held patch was applied to this worktree at `118d4008` in steps `before`,
@@ -600,6 +621,14 @@ HEAD; `git status` showed only this record afterwards. On that trial tree:
   ancestor, not whether the store holds it. Write the subject and the branch-only
   fact beside the first citation. The J 86 gate missed this only because the record
   did not yet cite that sha; the record head's lane CI caught it.
+- An answer can name a state the census does not have. "The 13 rows to PRECONDITION"
+  could only mean their steps, because PRECONDITION is a next-step kind and the six
+  states are GAP, the three COVERED ones, EXCLUDED-RULED and MEASURED-ABSENT. The
+  record says how it was read, and `census_completion --check` showed that no state
+  moved.
+- Moving a queue line's last rows retires the line. Rank 133 had to leave with J 3,
+  J 17 and J 151, though no answer named it, because `check_next_step.py` holds a
+  needs `-` line's members to that line.
 - A plan's "a shipped tool may already reach it" needs the tool's address read, not
   its name. Both group rows failed on one `url_pattern` and one live count
   (`N 175`'s zero `/feed/update/` links), and N 50 on two `url_pattern`s that never
