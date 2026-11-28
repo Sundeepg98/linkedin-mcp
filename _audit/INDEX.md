@@ -2013,6 +2013,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-11-27 | [2026-11-27-settings7.md](2026-11-27-settings7.md) | Lane settings7, 2026-11-27: his four settings pages session 12 captured -- what each drew, measured by keyed shape, and what each row's bar lets move |  |
 | 2026-11-28 | [2026-11-28-census-calls.md](2026-11-28-census-calls.md) | Lane census-calls28 (lane A): the census calls, no code |  |
 | 2026-11-28 | [2026-11-28-hygiene28.md](2026-11-28-hygiene28.md) | Lane hygiene28: the reachable row's pattern count, a resolver that edits only the tree it runs in, and the facet-key cites |  |
+| 2026-11-28 | [2026-11-28-live-runner-checks-on-ci.md](2026-11-28-live-runner-checks-on-ci.md) | Live-runner checks on CI (lane ci-checks28, 2026-11-28) |  |
 
 ## 6. What the scan rejected, could not join, or had to repair
 

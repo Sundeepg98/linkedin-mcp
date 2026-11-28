@@ -43,6 +43,29 @@ a control in tests/test_ci_shard.py:
      measurement.
   6. the shards of one cell DISAGREE about how many tests that cell collected,
      which makes the denominator a guess.
+  7. a skip declared BY CELL did not hold on a cell (added 2026-11-28, lane
+     ci-checks28). A skip declared by NAME alone is tolerated on every cell,
+     so it passes whether or not the cell meant to RUN the test ran it: the
+     tolerance cannot see a lost source. So ``ci_expected_skips.json``'s
+     ``by_cell`` rules name, for each test, the operating systems that must
+     skip it and the ones that must run it. ``record`` writes each ruled
+     test's outcome into the shard's report (``ruled_outcomes``), and every
+     cell is held to its system's half of each rule:
+       * a system that must SKIP a test must skip it, by name, in exactly
+         one shard;
+       * a system that must RUN it must report it run -- passed, failed or
+         xfailed -- in exactly one shard. A skip there is a failure, and so
+         is a test the cell never collected;
+       * a system a rule does not name at all is a finding too, so a cell
+         added to the matrix cannot arrive unconstrained.
+     A run without a cell of some named system cannot check that half, and
+     ``verify`` says so by name instead of passing in silence. A rule holds a
+     run only when SOME cell reported at least one of its tests: a run in which
+     none did is another suite's (this repository's own tests feed ``verify``
+     synthetic ones), and ``verify`` says that by name too. Tests that vanish
+     from EVERY cell at once are caught where the rule's tests live:
+     ``tests/test_a_skip_declared_by_cell_holds_on_every_cell.py`` collects
+     them on every cell.
 
 WHY EACH CELL IS SUMMED SEPARATELY rather than everything at once. Collection
 is per-checkout-per-platform: a module that fails to import on 3.10 would be
@@ -159,6 +182,40 @@ def junit_totals(path: str) -> dict:
     return totals
 
 
+def junit_outcomes(path: str, names: set[str]) -> dict[str, str]:
+    """The outcome of every NAMED test in one shard's junit report.
+
+    Only the tests a ``by_cell`` rule names are read, so a report stays small:
+    the rule needs to know that the Windows cell RAN its tests, not what every
+    other test did. An outcome is one word -- ``passed``, ``failed``,
+    ``error``, ``xfailed`` or ``skipped`` -- read from the testcase's own
+    children, with an error first and the xfail kept apart from the skip, as
+    :func:`junit_totals` keeps them.
+    """
+    root = ET.parse(path).getroot()
+    suite = root if root.tag == "testsuite" else root.find("testsuite")
+    if suite is None:
+        raise SystemExit(f"FAIL: {path} contains no <testsuite> element")
+    outcomes: dict[str, str] = {}
+    for case in suite.iter("testcase"):
+        name = f"{case.get('classname')}::{case.get('name')}"
+        if name not in names:
+            continue
+        skipped = case.find("skipped")
+        if case.find("error") is not None:
+            outcome = "error"
+        elif case.find("failure") is not None:
+            outcome = "failed"
+        elif skipped is None:
+            outcome = "passed"
+        elif skipped.get("type", "") == "pytest.xfail":
+            outcome = "xfailed"
+        else:
+            outcome = "skipped"
+        outcomes[name] = outcome
+    return outcomes
+
+
 def publish(line: str) -> None:
     print(line, flush=True)
     summary = os.environ.get("GITHUB_STEP_SUMMARY")
@@ -182,6 +239,7 @@ def record(args) -> int:
     plan = json.loads(Path(args.plan).read_text(encoding="utf-8"))
     totals = junit_totals(args.junit)
     runner = runner_facts(args.runner)
+    ruled = ruled_names(cell_rules())
     report = {
         "cell": cell_label(json.loads(args.cell)),
         "index": plan["index"],
@@ -195,6 +253,10 @@ def record(args) -> int:
         "failures": totals["failures"],
         "errors": totals["errors"],
         "runner": runner,
+        # Failure mode 7: the outcome of each test a by-cell rule names, so the
+        # totals job can tell a cell that RAN it from one that skipped it or
+        # never collected it. Empty when no rule names a test in this shard.
+        "ruled_outcomes": junit_outcomes(args.junit, ruled) if ruled else {},
     }
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -225,19 +287,108 @@ def expected_skips(path: Path = EXPECTED_SKIPS_PATH) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))["expected"]
 
 
+def cell_rules(path: Path = EXPECTED_SKIPS_PATH) -> list[dict]:
+    """The skips declared BY CELL (failure mode 7), from the same file.
+
+    Each rule is ``{"why", "skipped_on_os", "executed_on_os", "tests"}``.
+    A rule only NARROWS a declaration and never widens it: every test it names
+    must also be declared by name under ``expected``, which is what lets the
+    per-shard check tolerate the skip at all. Absent means no rules, so a file
+    without the key keeps the name-only behaviour it always had.
+    """
+    if not path.exists():
+        return []
+    return json.loads(path.read_text(encoding="utf-8")).get("by_cell", [])
+
+
+def ruled_names(rules: list[dict]) -> set[str]:
+    return {name for rule in rules for name in rule["tests"]}
+
+
+def active_rules(reports: list[dict], rules: list[dict]) -> list[dict]:
+    """The rules this run can hold its cells to: each one at least one of whose tests SOME cell
+    reported. A rule none of whose tests any cell reported is a run of another suite, which
+    ``verify`` names as not checked."""
+    reported = {name for report in reports for name in report.get("ruled_outcomes", {})}
+    return [rule for rule in rules if reported & set(rule["tests"])]
+
+
+def os_of(label: str) -> str:
+    """The operating system of a :func:`cell_label`, its one spelling read back."""
+    return label.rsplit(" py", 1)[0]
+
+
+#: Outcomes that mean a test RAN on a cell. An error is not one of them: a test
+#: whose setup failed never ran its body.
+RAN = frozenset({"passed", "failed", "xfailed"})
+
+
+def cell_rule_problems(label: str, found: list[dict], rules: list[dict]) -> list[str]:
+    """Failure mode 7 for one cell: each rule's half for this cell's system."""
+    system = os_of(label)
+    problems: list[str] = []
+    outcomes: dict[str, list[str]] = {}
+    for report in found:
+        if "ruled_outcomes" not in report:
+            problems.append(
+                f"{label}: shard {report.get('index')}'s report carries no ruled "
+                f"outcomes, so the by-cell rules cannot be checked against it. "
+                f"A rule nobody can check is a name-only declaration again."
+            )
+            continue
+        for name, outcome in report["ruled_outcomes"].items():
+            outcomes.setdefault(name, []).append(outcome)
+    for rule in rules:
+        skip_on, run_on = set(rule["skipped_on_os"]), set(rule["executed_on_os"])
+        if system not in skip_on | run_on:
+            problems.append(
+                f"{label}: a by-cell rule over {len(rule['tests'])} test(s) says "
+                f"nothing about {system}, so this cell is unconstrained. Name it "
+                f"under skipped_on_os or executed_on_os."
+            )
+            continue
+        for name in rule["tests"]:
+            seen = outcomes.get(name, [])
+            if len(seen) > 1:
+                problems.append(
+                    f"{label}: {name} was reported by {len(seen)} shards of this "
+                    f"cell, so the shard plan is not a partition here."
+                )
+                continue
+            got = seen[0] if seen else None
+            said = "never collected or reported it" if got is None else f"reported it {got}"
+            if system in skip_on and got != "skipped":
+                problems.append(
+                    f"{label}: {name} is declared to SKIP on {system}, by name, "
+                    f"and this cell {said}."
+                )
+            elif system in run_on and got not in RAN:
+                problems.append(
+                    f"{label}: {name} must RUN on {system}, and this cell {said}. "
+                    f"A skip declared by name is tolerated on every cell, so "
+                    f"without this rule nothing would have said so."
+                )
+    return problems
+
+
 def problems_in(
     reports: list[dict],
     labels: list[str],
     of: int,
     declared: dict | None = None,
+    rules: list[dict] | None = None,
 ) -> list[str]:
     """Every way this set of reports fails to account for the whole suite.
 
     Returns ALL of them rather than the first. A run where one shard vanished
     AND another ran short is two findings, and stopping at the first would send
     somebody back for a second look after they had fixed one of them.
+
+    ``rules`` are the by-cell rules (failure mode 7); None checks none, which is
+    how every caller before them reads.
     """
     declared = {} if declared is None else declared
+    rules = active_rules(reports, rules or [])
     problems: list[str] = []
     by_cell: dict[str, list[dict]] = {label: [] for label in labels}
 
@@ -282,6 +433,8 @@ def problems_in(
             )
         if not found:
             continue
+        if rules:
+            problems.extend(cell_rule_problems(label, found, rules))
 
         collected = {report["collected_total"] for report in found}
         if len(collected) > 1:
@@ -341,11 +494,29 @@ def verify(args) -> int:
         raise SystemExit(f"FAIL: the declared cells are not distinct: {labels}")
 
     declared = expected_skips()
+    rules = cell_rules()
     publish(
         f"shard reports: {len(reports)} found, "
         f"{len(labels)} cell(s) x {args.of} shard(s) expected, "
-        f"{len(declared)} declared skip(s)"
+        f"{len(declared)} declared skip(s), {len(rules)} by-cell rule(s)"
     )
+    # WHAT THIS RUN CANNOT CHECK, said by name. The lane fast path has no
+    # Windows cell, so a rule's Windows half is checked only by the full matrix.
+    systems = {os_of(label) for label in labels}
+    live = active_rules(reports, rules)
+    for rule in rules:
+        if rule not in live:
+            publish(
+                f"  NOT CHECKED in this run: a by-cell rule over {len(rule['tests'])} "
+                f"test(s) -- no cell reported any of them"
+            )
+            continue
+        for half, named in (("skip", rule["skipped_on_os"]), ("run", rule["executed_on_os"])):
+            for system in sorted(set(named) - systems):
+                publish(
+                    f"  NOT CHECKED in this run: the rule that {len(rule['tests'])} "
+                    f"test(s) {half} on {system} -- no {system} cell in this run"
+                )
     for label in labels:
         found = [report for report in reports if report.get("cell") == label]
         if found:
@@ -364,7 +535,7 @@ def verify(args) -> int:
         else:
             publish(f"  {label}: NO REPORTS")
 
-    problems = problems_in(reports, labels, args.of, declared)
+    problems = problems_in(reports, labels, args.of, declared, rules)
     if problems:
         for problem in problems:
             print(f"FAIL: {problem}", file=sys.stderr)
