@@ -13912,6 +13912,42 @@ and its verifier, `ast_delta_s14.py`, `skeleton_delta.py`, `tree_compare.py`
 and the capture queue's cell patch. `ast_delta_s14.py` has a self-equality
 control and a one-constant mutation control, but it was built for one proof.
 
+## 123. A LIVE RUNNER'S PURE RULES ARE TRACKED, AND THEIR CHECKS RUN ON CI, THE START SCRIPT'S GUARD ON THE WINDOWS CELL (ci-checks28, 2026-11-28)
+
+Lane ci-checks28 moved the live runner's check sets that test PURE code into tracked tests, which
+free CI runs on every cell (the proposal in `_audit/2026-11-27-live-session-14.md`, 11.7). The
+subject is `scripts/live_runner_rules.py`, the identity-free pure pieces of session 14b's runner
+and teardown, each verbatim or re-cut. The record is
+`_audit/2026-11-28-live-runner-checks-on-ci.md`: its section 1 classifies all nine sets, and its
+section 7 names the checks that stayed local.
+
+    A CHECK WHOSE SUBJECT IS PURE RUNS WHERE THE MINUTES ARE FREE. EACH WAS SHOWN FAILING ON A
+    REAL PREVIOUS STATE WHERE ONE IS ON DISK, AND ON A COPY MIRRORING IT WHERE NONE IS.
+
+### 123.1 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `tests/test_live_runner_chrome_judge.py` (49 tests: the teardown's judge and precheck, T3-T9 and the control; the tabs check's reading and STOP, T1-T6; the dedicated listener, N2-N6; the gate on load 1, G1-G8 and its control G5; and the property that the gate accepts exactly what the tabs check passes) | copies mirroring each earlier decision, with the live checks' own red side for that state in brackets: the teardown's r1, 9 failed [T5, T6, T7, T8]; r1b, 2 [T8]; r2, 1 [T9]; os_check's first-row judge, 1, N3 [O3, O4]; the runner's r3b, 20 [the r3c class]; and r3d, 8 [N2-N6]. Each failed by assertion or by a failure that names the raise. With no defect, 49 passed |
+| `tests/test_live_runner_page_rules.py` (26 tests: K3's evidence on session 14's tracked skeletons, from `FORM_SIGS_JS` and `FORM_DELTA_JS`; Q6 and R4's half, the region digest; R6, the close and publish words; Q7 and five more landings, `press_landing`) | the REAL previous states, read from the runner snapshots: session 14's panel rule failed 3 (K3a, K3c, and counted apart) [the "red" class]; r1's, 4 (K3x, K3z, K3w, counted apart) [red-r1]; r1b's, which is also r2's, 2 (K3w, and an existing section's controls counted apart) [red-r2]; session 14 r1's digest, Q6 and R4; its r2's digest, Q6; its r2's `press_landing`, Q7; its r1's close words, R6 |
+| `tests/test_start_chrome_guard_behaviour.py` (15 tests, G1-G15: the guard cut from the TRACKED `scripts/start_chrome.ps1` by its own markers and run in Windows PowerShell 5.1 on synthetic profiles; the ubuntu cells skip by name, declared in `scripts/ci_expected_skips.json`) | the four earlier copies of the script that the live lane's red sides ran on. Each was red CASE FOR CASE as the live checks were: `307aa411` G12-G14; json1 G11-G14; nit5 G8, G9 and G11-G14; round 4's G2, G4, G5, G8, G9 and G11-G14. On the script itself, 15 passed |
+| `scripts/ci_shard_totals.py` failure mode 7 (a skip declared BY CELL: the `by_cell` rules of `scripts/ci_expected_skips.json`, the reports' `ruled_outcomes`, and `verify` holding each cell to its system's half), with its 23 tests in `tests/test_a_skip_declared_by_cell_holds_on_every_cell.py` (2026-11-28, the orchestrator's ruling on the lane's question (c)) | on the REAL reports of full run 46146119772, three planted defects: the Windows cell skipping one guard test, which is the ruling's control; the Windows cell never collecting one; and ubuntu py3.10 running one. Master's totals gate said OK to each, and the new one failed each, naming the test and the cell. 12 one-edit mutants of the shipped source were each convicted by FAILED, never by ERROR, with 1 to 9 failing tests apiece, and the control passed 23 of 23 |
+
+### 123.2 DECLARED DISPOSABLE
+
+These are the lane's scratch tools (`_state/lane-scratch/ci-checks28/`):
+
+- `verbatim_check.py` reads the tracked module, the pinned runner and the pinned teardown as text.
+  It found 13 of 13 the same on the pins (`fd3bf239`, `83d17023`), and its control, on r1, found
+  5 of 13;
+- `plants.py` is the red-first plugin: it rebinds a tracked name and never edits a test;
+- `red_runs.sh` runs every plant, each in its own process;
+- `real_data_c.py` judges a full run's real shard reports with the old and new totals gates, with
+  and without a planted defect;
+- `plants_c.py` applies the 12 mutants of failure mode 7, each one edit to the shipped source.
+
+Each ran for a measurement that the record holds, in its sections 3, 4 and 10.
+
 ## 124. A COUNT IN PROSE IS HELD WHERE IT IS WRITTEN, AND A MERGE TOOL EDITS ONLY THE TREE IT RUNS IN, SECTION BY SECTION (hygiene28, 2026-11-28)
 
 Lane hygiene28 was a hygiene lane. It held the census's reachable row to its own pattern count, moved the
