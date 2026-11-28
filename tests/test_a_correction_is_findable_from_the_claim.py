@@ -3831,6 +3831,21 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "integration record says is mistaken while leaving the record "
         "unmarked."
     ),
+    # 2026-11-28, lane hygiene28. READ, not inferred from the filenames: every
+    # line of the record citing the census slice was listed with this module's
+    # own vocabulary and window (the lane's scratch lister imports this file),
+    # and every match placed.
+    ("2026-11-28-hygiene28.md", "messaging-and-content.md"): (
+        "AN IN-PLACE UPDATE REPORTED, NOT A CORRECTION. The record reports "
+        "that the reachable-surfaces row's pattern count was re-derived from "
+        "the allowlist and written into the row itself (41 -> 109, with a "
+        "clause naming the guard that now holds it), so the census carries "
+        "the figure in place and a reader starting from the row reaches it. "
+        "Every matched word is the name of the table that row sits in, "
+        "section 4's 'correction table' (the block headed CORRECTED "
+        "2026-09-20). **WHAT WOULD MAKE THIS ENTRY WRONG:** the record saying "
+        "a census claim is untrue that the census still states unmarked."
+    ),
 
 }
 
