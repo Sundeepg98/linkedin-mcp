@@ -534,6 +534,19 @@ The derived views were checked before each commit, and `--write` ran wherever on
 stale. Each time that was only the blocker map's `state_today` and the reason locator's
 candidate counts.
 
+THE PRE-CHECK ON LANE CI WAS RED, AND IT WAS THIS LANE'S. Run 46153066520 on
+`dd2c3a6e` failed one test,
+`test_a_correction_is_findable_from_the_claim.py::test_every_candidate_pair_is_declared_or_triaged`:
+"3 candidate correction(s) nobody has triaged". The cells this lane wrote cite its record
+(and N 61 cites session 13's), and the guard reads 2 lines around every citation for a
+loose correction vocabulary. Every match was a NEIGHBOUR's own older self-correction:
+row 4's "THE STATED REASON WAS FALSE AT HEAD AND IS CORRECTED IN PLACE" one line below
+row 3, row 63's "THAT ADDRESS CLAUSE IS FALSE ... THE CORRECTION" two lines below row
+61, and row C67's split trigger ("false of either") two lines below C65. None is a
+sentence of this lane, and none says a record is untrue. So the three pairs are filed in
+that test's `NOT_A_CORRECTION` with those readings, which is the guard's own remedy
+for table-row proximity. Its 15 tests then passed locally in 24 s.
+
 ### 8.2 The held patch, tried on this tree and reverted
 
 The held patch was applied to this worktree at `118d4008` in steps `before`,
@@ -621,6 +634,12 @@ HEAD; `git status` showed only this record afterwards. On that trial tree:
   ancestor, not whether the store holds it. Write the subject and the branch-only
   fact beside the first citation. The J 86 gate missed this only because the record
   did not yet cite that sha; the record head's lane CI caught it.
+- A cell that gains a citation of an `_audit` record imports its neighbours' old
+  corrections. `test_a_correction_is_findable_from_the_claim.py` reads 2 lines around
+  every citation, so the cells beside row 4's and row 63's 2026-09-21 self-corrections
+  became pairs to triage. The scoped local gates skipped that corpus-wide guard as
+  slow, and it takes 24 s. Run it locally whenever a census cell gains a record
+  citation; lane CI caught it here.
 - An answer can name a state the census does not have. "The 13 rows to PRECONDITION"
   could only mean their steps, because PRECONDITION is a next-step kind and the six
   states are GAP, the three COVERED ones, EXCLUDED-RULED and MEASURED-ABSENT. The

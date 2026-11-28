@@ -3874,6 +3874,42 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "THIS ENTRY WRONG:** a paragraph of this lane saying an earlier "
         "paragraph of its row was untrue while leaving it unmarked."
     ),
+    # 2026-11-28, lane census-calls28. READ, not inferred from the filenames:
+    # every line of the two slices citing the lane's record or session 13's
+    # was listed with this module's own vocabulary and window, and every match
+    # placed. Each is a neighbouring row's own older text, never a sentence of
+    # this lane, and none of this lane's sentences says a record was untrue.
+    ("messaging-and-content.md", "2026-11-28-census-calls.md"): (
+        "TABLE-ROW PROXIMITY, NOT A CORRECTION OF THE RECORD. Rows C11, C65 "
+        "and C91 cite the lane's record for a D6 call answered no and a "
+        "re-pointed step. Both matches are 'false' in row C67's own split "
+        "trigger, two lines below C65 ('so no published cell is false of "
+        "either', 'the state cell would then be false of the edit half'). "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** a messaging row saying something "
+        "in the census-calls28 record does not hold while leaving it unmarked."
+    ),
+    ("network.md", "2026-11-28-census-calls.md"): (
+        "TABLE-ROW PROXIMITY, NOT A CORRECTION OF THE RECORD. Rows 3, 50, 50b, "
+        "61, 121 to 123 and 125 to 128, and the slice's three DELTA paragraphs "
+        "of that lane, cite its record for their own moves and steps. Every "
+        "match is a neighbour's own 2026-09-21 correction of its own text: row "
+        "4's 'THE STATED REASON WAS FALSE AT HEAD AND IS CORRECTED IN PLACE', "
+        "one line below row 3, and row 63's 'THAT ADDRESS CLAUSE IS FALSE AT "
+        "THIS TREE AND THE STATE DOES NOT MOVE ON THE CORRECTION', two lines "
+        "below row 61. **WHAT WOULD MAKE THIS ENTRY WRONG:** a network row "
+        "saying something in the census-calls28 record does not hold while "
+        "leaving it unmarked."
+    ),
+    ("network.md", "2026-11-27-live-session-13.md"): (
+        "TABLE-ROW PROXIMITY, NOT A CORRECTION OF THE RECORD. Row 61's "
+        "MEASURED-ABSENT cell (lane census-calls28, 2026-11-28) cites session "
+        "13's load 3 as one of its two readings, and agrees with it. The "
+        "matches are row 63's own 2026-09-21 paragraph, two lines below ('THAT "
+        "ADDRESS CLAUSE IS FALSE AT THIS TREE AND THE STATE DOES NOT MOVE ON "
+        "THE CORRECTION'), about row 63's own address. **WHAT WOULD MAKE THIS "
+        "ENTRY WRONG:** a network row saying something in the session 13 "
+        "record does not hold while leaving it unmarked."
+    ),
 
 }
 
