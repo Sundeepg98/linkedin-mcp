@@ -124,6 +124,10 @@ TARGET_CLASSES: dict[str, str] = {
         "an identifier the caller supplies, and a file of his own from the "
         "declared upload root"
     ),
+    # ADDED BY LANE BUILD28 (2026-11-28), for set_resume_uploaded: a FILE he
+    # put in the declared upload root, and nothing else -- not his words, not
+    # an identifier, not a person.
+    "own_file": "a file of his own from the declared upload root",
     NAME_CLASS: "a word for a person, matched against what the page draws",
 }
 
@@ -240,6 +244,21 @@ TARGET_KIND_CLASS: dict[str, tuple[str, str]] = {
     # PAID 2026-09-27: ``member_and_text`` -- send_message's subject half, a
     # name typed into the recipient typeahead -- left the registry with that
     # action, which was retired rather than converted.
+    # 2026-11-28, lane build28 (census P M3, P M1): the refusing resume pair.
+    # The delete is aimed by one of HIS OWN stored resumes' file names, his
+    # own text, exactly as linkedin_application_settings returns it, compared
+    # in the page; the upload by a file in the declared root, root-relative.
+    # Neither chooses a person.
+    "resume_file": (
+        "own_text",
+        "set_resume_deleted: the file name of one of his own stored resumes, "
+        "exactly as linkedin_application_settings returns it, which picks no person",
+    ),
+    "resume_upload": (
+        "own_file",
+        "set_resume_uploaded: a file in the declared upload root, held root-relative "
+        "by attachments.canonical_file, which picks no person",
+    ),
 }
 
 #: THE NAME-AIMED WRITES THAT EXIST TODAY. Declared, not waived.

@@ -232,6 +232,7 @@ from linkedin_server import (
     people_seam,
     profile_editor,
     recent_searches_clear,
+    resume_files,
     search_alert_switch,
     settings_writer,
     shape,
@@ -3493,6 +3494,140 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "a verification reading the card after it."
         ),
     ),
+    # LANE BUILD28, 2026-11-28 (census rows ``P M3`` and ``P M1``, the
+    # orchestrator's order in the lane's brief: "each built REFUSING, in the
+    # J-19 shape ... P M1 stays GAP, because its inverse P M3 can only be
+    # built refusing and the rule is inverse-proven-first"). Deleting one of
+    # his stored resumes, and uploading one. SANCTIONED AND NOT PERFORMABLE,
+    # each: its preview reads his application settings page for itself
+    # (``_read_resume_delete`` / ``_read_resume_upload``) and prints what it
+    # saw; ``mint`` refuses a grant at issue; its own refusal in
+    # ``_NINE_REFUSALS`` names the capture that would lift it. Built so that
+    # one attended session can run the upload, then the delete, on a file he
+    # names. The upload is NOT in :data:`UPLOAD_ACTIONS`: that set is the one
+    # place an upload becomes possible, and this one cannot perform.
+    "linkedin_set_resume_deleted": WriteSpec(
+        action="set_resume_deleted",
+        tool_name="linkedin_set_resume_deleted",
+        url_template=None,
+        url_pattern=None,
+        exempt_substring=None,
+        summary=(
+            "Delete ONE of your stored resumes, named by its file name, from "
+            "your application settings page (census P M3)."
+        ),
+        from_state=resume_files.RESUME_LISTED,
+        to_state="resume_deleted",
+        target_kind="resume_file",
+        state_from="application_settings_resume_delete",
+        direction_source=(
+            "your application settings page, /jobs/application-settings/, read "
+            "by this gate: the one resume card whose name reads the name you "
+            "gave, its one options trigger reading closed, and no menu open -- "
+            "counted, never read out. The menu holding Delete is NOT opened by "
+            "this preview, and WHAT THE DELETE ITEM OPENS IS NOT READ: no "
+            "capture shows it (measured on "
+            "tests/fixtures/live12/c_rj26_3_resume_menu-open_words.html, session "
+            "12's load 9, where the first card's menu draws Delete and Download)."
+        ),
+        wrong_state_note=(
+            "This act starts from a page that draws exactly one card of the "
+            "name you gave, its options trigger closed. A name no card reads, "
+            "two cards of one name, or a menu already open is not read as "
+            "anything to delete."
+        ),
+        reversibility="STILL-UNKNOWN whether anything restores a deleted resume",
+        reversibility_measured=False,
+        reversibility_class="STILL-UNKNOWN",
+        reversibility_evidence=(
+            "NOT MEASURED: no resume has been deleted or watched being deleted, "
+            "and what the Delete item opens -- a confirm dialog, likely -- has "
+            "never been captured. The page draws an Upload resume control, so "
+            "the same FILE can be put back if he holds a copy; what else a "
+            "delete takes with it is unmeasured."
+        ),
+        reversible_by=(
+            "NOT this server today: its upload refuses too. By hand, he can "
+            "upload the same file again from his own copy -- "
+            "linkedin_download_resume takes one first. Whether its dates come "
+            "back with it is unmeasured."
+        ),
+        residue=(
+            "UNMEASURED: whether a deleted resume is also taken from the "
+            "applications that sent it, whether its last-used date or its share "
+            "with hirers survives a re-upload, and whether LinkedIn asks to "
+            "confirm. Treated as having no inverse until a capture says "
+            "otherwise."
+        ),
+        irreversible=True,
+        reversibility_procedure=(
+            "The press, ONCE, AT HIS ORDER, on a resume he names -- the capture "
+            "this act waits on: open the card's menu, press Delete, read "
+            "whatever it opens WITHOUT confirming it, close it on Escape and "
+            "read the card again. Then a reader requiring exactly that "
+            "dialog's confirm control, and a verification reading the card "
+            "gone. Run after the upload (P M1) of a file he names, so the "
+            "resume deleted is the one just put there."
+        ),
+    ),
+    "linkedin_set_resume_uploaded": WriteSpec(
+        action="set_resume_uploaded",
+        tool_name="linkedin_set_resume_uploaded",
+        url_template=None,
+        url_pattern=None,
+        exempt_substring=None,
+        summary=(
+            "Upload ONE resume file of yours, from this server's declared "
+            "upload folder, to your application settings page (census P M1)."
+        ),
+        from_state=resume_files.UPLOAD_OFFERED,
+        to_state="resume_uploaded",
+        target_kind="resume_upload",
+        state_from="application_settings_upload",
+        direction_source=(
+            "your application settings page, /jobs/application-settings/, read "
+            "by this gate: its one 'Upload resume' label bound by for to its "
+            "one file input, its rule ('DOC, DOCX, PDF (5MB)' measured), and "
+            "the file you named checked against that rule, its type and its "
+            "size -- the page vetoes, it never chooses. WHAT THE PAGE DOES "
+            "WITH A FILE HANDED TO ITS INPUT IS NOT READ: no capture shows it "
+            "(measured on tests/fixtures/live11/application_settings_words.html "
+            "and tests/fixtures/live12/c_rj26_3_resume_menu-open_words.html)."
+        ),
+        wrong_state_note=(
+            "This act starts from a page that draws its one Upload resume "
+            "control, bound to one file input, and a rule the file you named "
+            "passes. A file whose type the rule does not list, or over its "
+            "size, is refused by the page's own words."
+        ),
+        reversibility="STILL-UNKNOWN whether an uploaded resume can be taken back",
+        reversibility_measured=False,
+        reversibility_class="STILL-UNKNOWN",
+        reversibility_evidence=(
+            "NOT MEASURED: no resume has been uploaded or watched being "
+            "uploaded. Its inverse is the delete (P M3), whose own press opens "
+            "a step no capture shows, so neither half of the round trip is "
+            "proven -- the rule is inverse-proven-first."
+        ),
+        reversible_by=(
+            "NOT this server today: its delete refuses too. By hand, from the "
+            "card's own options menu on the same page."
+        ),
+        residue=(
+            "UNMEASURED: what LinkedIn draws after the file is taken (a "
+            "progress state, a dialog, a new card), whether a fifth resume "
+            "pushes the oldest out (the page lists four), and whether hirers "
+            "can see it at once while his share-resume-data switch reads on."
+        ),
+        reversibility_procedure=(
+            "The upload, ONCE, AT HIS ORDER, of a file he names from the "
+            "declared folder -- the capture this act waits on: hand the file "
+            "to the input and read what the page draws WITHOUT pressing "
+            "anything it offers, then the cards again. Then the delete (P M3) "
+            "of that same resume, captured the same way, to prove the inverse "
+            "first."
+        ),
+    ),
     # LANE BUILD-JOBS2, 2026-11-26 (census row ``J 163``, ruled
     # J-163-RECEIPT-ONLY-WRITE): answering the question LinkedIn draws under
     # his recommended jobs, yes or no. PERFORMABLE, behind writes_enabled()
@@ -5444,6 +5579,25 @@ def _target_for(spec: WriteSpec, target: Any) -> str:
                 "repeated here."
             )
         return raw
+    if spec.target_kind == "resume_file":
+        # ONE OF HIS OWN STORED RESUMES, BY ITS FILE NAME (lane build28,
+        # 2026-11-28, P M3): exactly as linkedin_application_settings returns
+        # it -- his own text, HIS-OWN-TEXT-AT-RUNTIME -- compared in the page,
+        # never typed and never a person. The refusal never repeats the value.
+        name, why = resume_files.checked_file_name(target if isinstance(target, str) else raw)
+        if name is None:
+            raise WriteAttemptError(
+                f"{spec.action!r} is addressed by one stored resume's file name, "
+                f"exactly as linkedin_application_settings returns it: {why}"
+            )
+        return name
+    if spec.target_kind == "resume_upload":
+        # ONE FILE OF HIS, FROM THE DECLARED UPLOAD ROOT (lane build28,
+        # 2026-11-28, P M1), canonical as its path relative to that root --
+        # the attachment's own spelling (``attachments.canonical_file``), so
+        # every check on the path runs before a preview loads anything and
+        # no absolute path, which carries a username, is bound or printed.
+        return attachments.canonical_file(raw)
     if spec.target_kind == "self":
         if raw.casefold() not in {"self", "me", ""}:
             raise WriteAttemptError(
@@ -7033,6 +7187,47 @@ async def _read_recent_searches_clear(
     return dict(reading), state, why
 
 
+async def _read_resume_delete(
+    page: Any, spec: WriteSpec, *, target: str
+) -> tuple[dict[str, Any], str, str]:
+    """``set_resume_deleted``' preview read: the named resume's card.
+
+    LANE BUILD28, 2026-11-28 (census ``P M3``). Counts only, off the one load
+    ``observe`` made (``resume_files.read_delete_control``): the heading, the
+    cards, the ONE card whose name reads the target and its one options
+    trigger, closed. The menu is NOT opened, and ``delete_dialog_read`` is
+    ``False`` in the facts: what the Delete item opens has never been
+    captured, and that is the refusal's ground.
+    """
+    reading = await resume_files.read_delete_control(page, target)
+    state, why = resume_files.delete_state_of(reading)
+    return dict(reading), state, why
+
+
+async def _read_resume_upload(
+    page: Any, spec: WriteSpec, *, target: str
+) -> tuple[dict[str, Any], str, str]:
+    """``set_resume_uploaded``' preview read: the page's upload control and rule.
+
+    LANE BUILD28, 2026-11-28 (census ``P M1``). Counts and the page's own rule
+    (``resume_files.read_upload_control``), and the file the target names,
+    checked against that rule -- its type and size, never its name or bytes.
+    The page VETOES the file; it never chooses one. Nothing is handed to the
+    input: what the page does with a file has never been captured, and that
+    is the refusal's ground.
+    """
+    reading = await resume_files.read_upload_control(page)
+    upload = uploads.resolve_upload_file(target)
+    state, why = resume_files.upload_state_of(
+        reading, suffix=upload.suffix, size_bytes=upload.size_bytes
+    )
+    facts = dict(reading)
+    facts["file_suffix"] = upload.suffix.lower()
+    facts["file_size"] = upload.size_note
+    facts["file_handed_over"] = False
+    return facts, state, why
+
+
 #: WHICH SURFACE EACH REFUSING ACTION READS, and it is chosen by the SPEC's own
 #: ``state_from`` rather than by anything a caller passes -- the same rule the
 #: four original actions follow. Each entry is (url, surface name for the
@@ -7081,6 +7276,15 @@ _SURFACE_READS: dict[str, tuple[str, str, Any]] = {
     # mints nothing.
     "jobs_home_recent_searches": (
         recent_searches_clear.HOME_URL, "jobs home", _read_recent_searches_clear,
+    ),
+    # LANE BUILD28, 2026-11-28: his application settings page, for the
+    # refusing ``set_resume_deleted`` (census P M3) and ``set_resume_uploaded``
+    # (census P M1) -- each reads, prints and mints nothing.
+    "application_settings_resume_delete": (
+        resume_files.PAGE_URL, "application settings", _read_resume_delete,
+    ),
+    "application_settings_upload": (
+        resume_files.PAGE_URL, "application settings", _read_resume_upload,
     ),
 }
 
@@ -8181,6 +8385,14 @@ def _render(
         # "self" kind's branch below names his profile, which this act never
         # touches. What the page showed is counts only.
         where["whose"] = "your own jobs home: the recent job searches card"
+        where["what_the_page_showed"] = observation.facts
+    elif spec.target_kind in ("resume_file", "resume_upload"):
+        # HIS OWN APPLICATION SETTINGS PAGE (lane build28, P M3 / P M1): the
+        # resume he named by its file name, or the file from the declared
+        # folder by its root-relative path, printed back as he gave it -- his
+        # own text; what the page showed is counts, the rule and closed words.
+        where["whose"] = "your own application settings page: your stored resumes"
+        where["resume" if spec.target_kind == "resume_file" else "file"] = observation.target
         where["what_the_page_showed"] = observation.facts
     elif spec.target_kind == "self":
         where["whose"] = "your own LinkedIn profile"
@@ -9893,6 +10105,35 @@ _NINE_REFUSALS: dict[str, str] = {
         "(J-19-BUILT-BEHIND-THE-GRANT: it fires only on his order); then a "
         "reader requiring exactly that dialog's confirm control, and a "
         "verification reading the card after it."
+    ),
+    # LANE BUILD28, 2026-11-28 (census P M3 and P M1, the orchestrator's order
+    # in the lane's brief): refusing until each one's step after the press is
+    # captured; the upload's inverse is the delete, proven first.
+    "set_resume_deleted": (
+        "set_resume_deleted is sanctioned and cannot be performed: what its "
+        "press opens has never been captured. MEASURED on "
+        "tests/fixtures/live12/c_rj26_3_resume_menu-open_words.html, session "
+        "12's load 9: each resume card draws one options trigger, and its menu "
+        "draws two items, Delete and Download. What the Delete item opens -- a "
+        "confirm dialog, likely, and with what control -- has never been read, "
+        "and no capture shows a deleted resume put back. WHAT WOULD LIFT IT: "
+        "the press, ONCE, AT HIS ORDER, on a resume he names, with whatever it "
+        "opens read and closed on Escape and nothing confirmed; then a reader "
+        "requiring exactly that dialog's confirm control, and a verification "
+        "reading the card gone."
+    ),
+    "set_resume_uploaded": (
+        "set_resume_uploaded is sanctioned and cannot be performed: what the "
+        "page does with a file handed to its input has never been captured, "
+        "and its inverse, set_resume_deleted, cannot be performed either -- "
+        "the rule is inverse-proven-first. MEASURED on "
+        "tests/fixtures/live11/application_settings_words.html: one 'Upload "
+        "resume' label bound by for to one file input, and the rule 'DOC, "
+        "DOCX, PDF (5MB)'. WHAT WOULD LIFT IT: the delete's capture first; "
+        "then the upload, ONCE, AT HIS ORDER, of a file he names from the "
+        "declared folder, with what the page draws after it read and nothing "
+        "it offers pressed; then a verification reading the new card, and the "
+        "delete of that same resume."
     ),
 }
 

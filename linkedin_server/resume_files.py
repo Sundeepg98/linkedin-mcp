@@ -70,6 +70,19 @@ whether its first bytes match its kind, and how the menu ended. NOT the file
 name he gave (he knows it), NOT any word the page drew outside the closed
 vocabulary, and NOT the download's address: the transport never returns it.
 
+## THE TWO WRITES BUILT TO REFUSE: THE DELETE (``P M3``) AND THE UPLOAD (``P M1``)
+
+Ruled by the orchestrator in the lane's brief: "P M3 (delete) and P M1
+(upload), each built REFUSING, in the J-19 shape ... P M1 stays GAP, because
+its inverse P M3 can only be built refusing and the rule is
+inverse-proven-first." ``writes`` holds both specs (``set_resume_deleted`` and
+``set_resume_uploaded``, sanctioned and NOT performable) and their preview
+reads, which are :func:`read_delete_control` and :func:`read_upload_control`
+here -- COUNTS ONLY, pressing nothing -- and their refusals, which name the
+capture that lifts each: what the ``Delete`` item opens, and what the page
+does with a file handed to its input. Both are built so that one attended
+session can run the upload and then the delete on a file he names.
+
 ## THE CALL SITES
 
 ``readonly.SANCTIONED_MUTATIONS`` holds two lines for this module, both in
@@ -584,3 +597,125 @@ async def download_resume(
             f"{capture.get('why')!r} (cdp_download.WHY). Nothing else was pressed.",
             terminal=False), **common}
     return {**common, "pressed": True}
+
+
+# ---------------------------------------------------------------------------
+# The two refusing writes' preview reads (P M3, P M1): counts, never a press
+# ---------------------------------------------------------------------------
+
+#: The state each refusing write's preview reads, else :data:`UNKNOWN`.
+RESUME_LISTED = "resume_listed"
+UPLOAD_OFFERED = "upload_offered"
+UNKNOWN = "unknown"
+
+#: The upload control's word and the page's labels, as the shipped reader
+#: reads them (session 11; drawn again on session 12's load 9).
+UPLOAD_LABEL = application_settings.UPLOAD_LABEL
+LABELS = MAIN + " label"
+FILE_INPUTS = MAIN + ' input[type="file"]'
+PARAGRAPHS = MAIN + " p"
+
+
+async def read_delete_control(page: Any, file_name: str) -> dict[str, Any]:
+    """What the page draws around the named resume's options menu, in counts.
+
+    READ ONLY, and never raises: the same reading the download takes before
+    its first press (the heading, the cards, the named card's one trigger and
+    whether it reads closed, any menu open, the dialogs), and nothing pressed
+    to take it -- the menu that holds ``Delete`` is not opened by a preview.
+    ``file_name`` is compared in the page and never returned.
+    """
+    name, _why = checked_file_name(file_name)
+    reading = await _read_page_state(page, name or "")
+    return {**facts(reading), "name_ok": name is not None,
+            "delete_dialog_read": False, "error": reading.get("error")}
+
+
+def delete_state_of(reading: Any) -> tuple[str, str]:
+    """``(state, why)`` off a :func:`read_delete_control` reading. PURE."""
+    reading = reading if isinstance(reading, dict) else {}
+    if not reading.get("name_ok"):
+        return UNKNOWN, "the name is not one linkedin_application_settings returns."
+    verdict = start_verdict(reading)
+    if verdict.get("refused"):
+        return UNKNOWN, str(verdict.get("why"))
+    return RESUME_LISTED, (
+        "one card on the page reads the name given, with its one options "
+        "trigger closed and no menu open."
+    )
+
+
+async def read_upload_control(page: Any) -> dict[str, Any]:
+    """What the page draws around its upload control, in counts and the rule.
+
+    READ ONLY, and never raises: the heading, the labels reading
+    :data:`UPLOAD_LABEL` and how many name a file input by ``for``, the file
+    inputs, the upload rule (``DOC, DOCX, PDF (5MB)`` measured, parsed into a
+    closed list and an integer) and the resume cards. Nothing is pressed and
+    no file is handed to anything.
+    """
+    out: dict[str, Any] = {
+        "headings": 0, "upload_labels": 0, "bound_labels": 0, "file_inputs": 0,
+        "rule": None, "cards": 0, "error": None,
+    }
+    try:
+        headings = page.locator(MAIN + " h1")
+        texts = [await _text(headings.nth(i)) for i in range(min(await _count(headings), 5))]
+        out["headings"] = texts.count(PAGE_HEADING)
+        inputs = page.locator(FILE_INPUTS)
+        ids = [await _attribute(inputs.nth(i), "id") for i in range(min(await _count(inputs), 5))]
+        out["file_inputs"] = len(ids)
+        labels = page.locator(LABELS)
+        for index in range(min(await _count(labels), MAX_PARTS)):
+            label = labels.nth(index)
+            if await _text(label) != UPLOAD_LABEL:
+                continue
+            out["upload_labels"] += 1
+            target = await _attribute(label, "for")
+            if target and target in ids:
+                out["bound_labels"] += 1
+        paragraphs = page.locator(PARAGRAPHS)
+        for index in range(min(await _count(paragraphs), MAX_PARTS)):
+            rule = application_settings.upload_rule(await _text(paragraphs.nth(index)))
+            if rule is not None:
+                out["rule"] = rule
+        out["cards"] = min(await _count(page.locator(CARD_NAMES)), MAX_PARTS)
+    except Exception as exc:  # noqa: BLE001 -- the TYPE is the whole report
+        out["error"] = type(exc).__name__
+    return out
+
+
+def upload_state_of(reading: Any, *, suffix: str = "", size_bytes: int = 0) -> tuple[str, str]:
+    """``(state, why)`` off a :func:`read_upload_control` reading, and the
+    PAGE'S OWN VETO on the file named: a type its rule does not list, or a
+    size over its cap, refuses. PURE; the file's name is never read here."""
+    reading = reading if isinstance(reading, dict) else {}
+    if reading.get("error"):
+        return UNKNOWN, f"the page could not be read ({reading['error']})."
+    if coerce.as_count(reading.get("headings")) != 1:
+        return UNKNOWN, f"the page does not draw its heading {PAGE_HEADING!r} once."
+    if coerce.as_count(reading.get("bound_labels")) != 1 or coerce.as_count(reading.get("file_inputs")) != 1:
+        return UNKNOWN, (
+            f"the page draws {coerce.as_count(reading.get('bound_labels'))} "
+            f"{UPLOAD_LABEL!r} label(s) bound to its "
+            f"{coerce.as_count(reading.get('file_inputs'))} file input(s), where "
+            "exactly one of each is required."
+        )
+    rule = reading.get("rule")
+    if not isinstance(rule, dict):
+        return UNKNOWN, "the page draws no upload rule this reader knows, so no file is checked against it."
+    kind = suffix.lower().lstrip(".")
+    if kind not in rule.get("types", []):
+        return UNKNOWN, (
+            f"the page's own rule admits {sorted(rule.get('types', []))}, and the "
+            "file named is not one of them."
+        )
+    if size_bytes > int(rule.get("max_megabytes", 0)) * 1024 * 1024:
+        return UNKNOWN, (
+            f"the page's own rule caps a resume at {rule.get('max_megabytes')} MB, "
+            "and the file named is larger."
+        )
+    return UPLOAD_OFFERED, (
+        "the page draws its one Upload resume control, bound to one file input, "
+        "and the file named passes the page's own rule."
+    )

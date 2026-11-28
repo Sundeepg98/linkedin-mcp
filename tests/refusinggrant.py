@@ -170,6 +170,16 @@ SYNTHETIC_RAW_TARGETS: dict[str, Any] = {
     # driven for ANY spec -- measured on that lane's gate, as the rows above
     # record.
     "group_and_text": {"group": "10001", "text": "example harness group post"},
+    # THE REFUSING RESUME PAIR (lane build28, 2026-11-28, P M3 and P M1). The
+    # delete's: one stored resume's file name, in the form
+    # ``resume_files.checked_file_name`` admits. The upload's: a FILE, checked
+    # against the declared root like ``thread_and_file``'s and canonicalised
+    # root-relative, so the name must exist in the harness's root when
+    # ``_target_for`` runs: see :func:`synthetic_target`. Missing, either row
+    # would stop every writes reader being driven for ANY spec, as the rows
+    # above record.
+    "resume_file": "example-harness-resume.pdf",
+    "resume_upload": "example-harness-resume.pdf",
 }
 
 #: The harness's own upload root, made once per process on first use and
@@ -185,6 +195,8 @@ def _harness_upload_root() -> pathlib.Path:
         (root / "example-harness-file.png").write_bytes(
             bytes([0x89]) + b"PNG-harness-example"
         )
+        # The ``resume_upload`` row's file (lane build28, 2026-11-28).
+        (root / "example-harness-resume.pdf").write_bytes(b"%PDF-harness-example")
         _HARNESS_ROOT = root
     return _HARNESS_ROOT
 
@@ -236,7 +248,7 @@ def synthetic_target(spec: writes.WriteSpec) -> str:
     raw = SYNTHETIC_RAW_TARGETS_BY_ACTION.get(
         spec.action, SYNTHETIC_RAW_TARGETS[spec.target_kind]
     )
-    if spec.target_kind == "thread_and_file":
+    if spec.target_kind in ("thread_and_file", "resume_upload"):
         declared = config.UPLOAD_ROOT
         config.UPLOAD_ROOT = _harness_upload_root()
         try:

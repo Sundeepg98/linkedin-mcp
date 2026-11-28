@@ -509,6 +509,24 @@ JOBS_HOME_WORDS = (
     Path(__file__).parent / "fixtures" / "live2" / "j18_words.html"
 ).read_text(encoding="ascii").replace('"https://x/', '"data:,')
 
+#: HIS APPLICATION SETTINGS PAGE, lane build28 (census P M3, P M1): session
+#: 11's capture with LinkedIn's words written by keyed shape, every resume
+#: card's menu closed, its four names planted SYNTHETIC -- the first the
+#: delete's target. Reduced-host resources inlined as above.
+_SETTINGS_NAME = '<h3 class="ui-attachment__filename jobs-resume-card__filedata">\nx\n</h3>'
+
+
+def _settings_words() -> str:
+    markup = (
+        Path(__file__).parent / "fixtures" / "live11" / "application_settings_words.html"
+    ).read_text(encoding="ascii").replace('"https://x/', '"data:,')
+    for name in ("Example resume.pdf", "Example resume two.pdf", "Example cv.docx", "Example cv old.doc"):
+        markup = markup.replace(_SETTINGS_NAME, _SETTINGS_NAME.replace("\nx\n", "\n" + name + "\n"), 1)
+    return markup
+
+
+SETTINGS_WORDS = _settings_words()
+
 
 def _nine_pages() -> dict[str, str]:
     """All three surfaces at once, so a reader asking for the wrong one is
@@ -528,6 +546,10 @@ def _nine_pages() -> dict[str, str]:
         # ``set_recent_job_searches_cleared`` reads -- session 2's capture with
         # LinkedIn's words written by keyed shape (census J 19).
         writes.recent_searches_clear.HOME_URL: JOBS_HOME_WORDS,
+        # LANE BUILD28, 2026-11-28: his application settings page, which the
+        # refusing ``set_resume_deleted`` and ``set_resume_uploaded`` read --
+        # session 11's capture, its four names planted (census P M3, P M1).
+        writes.resume_files.PAGE_URL: SETTINGS_WORDS,
     }
 
 
@@ -583,6 +605,10 @@ TARGETS: dict[str, object] = {
     "withdraw_endorsement": {"profile": NAMED_LINK, "skill": "Node.js"},
     # LANE BUILD-JOBS2, 2026-11-26: his own jobs home, no id (census J 19).
     "set_recent_job_searches_cleared": "self",
+    # LANE BUILD28, 2026-11-28: one of his stored resumes by its file name,
+    # and one file in the declared upload folder (census P M3, P M1).
+    "set_resume_deleted": "Example resume.pdf",
+    "set_resume_uploaded": "example-resume.pdf",
 }
 
 #: A clean value for every component name the five composite kinds use, so a
@@ -628,6 +654,10 @@ def _a_declared_root_for_the_file_kind(tmp_path, monkeypatch):
     root.mkdir()
     for name in ("clean-example.png",) + _FILE_CONTENTS:
         (root / name).write_bytes(b"\x89PNG\r\n\x1a\n" + name.encode("ascii"))
+    # LANE BUILD28, 2026-11-28: the refusing ``set_resume_uploaded`` (census
+    # P M1) canonicalises its target against the same root, and its preview
+    # checks the file's type and size against the page's rule: a small PDF.
+    (root / "example-resume.pdf").write_bytes(b"%PDF-1.4\n" + b"0" * 2048)
     monkeypatch.setattr(config, "UPLOAD_ROOT", root)
 
 
@@ -1565,7 +1595,10 @@ def test_every_surface_these_actions_read_is_already_on_the_read_boundary():
     # by the refusing ``set_tracker_stage`` -- the equality below holds it.
     # SIX SINCE 2026-11-26 (lane build-jobs2): ``jobs_home_recent_searches``,
     # claimed by the refusing ``set_recent_job_searches_cleared`` (census J 19).
-    assert len(writes._SURFACE_READS) == 6
+    # EIGHT SINCE 2026-11-28 (lane build28): ``application_settings_resume_delete``
+    # and ``application_settings_upload``, claimed by the refusing
+    # ``set_resume_deleted`` and ``set_resume_uploaded`` (census P M3, P M1).
+    assert len(writes._SURFACE_READS) == 8
     covered = set(REFUSING) | set(LIFTED)
     state_froms = {spec_for_action(a).state_from for a in covered}
     # THIS WAS A FLAT EQUALITY UNTIL 2026-09-02 and it could not survive

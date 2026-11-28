@@ -541,4 +541,6 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # ONE HUNDRED AND FIFTEEN ON LANE BUILD28 (2026-11-28): four READS, the
     # resume download and the three Learning reads, measured off this
     # branch's registry; the integrator re-derives it on the merged tree.
-    assert len(_tool_names()) == 115
+    # ONE HUNDRED AND SEVENTEEN ON THE SAME LANE: two write-shaped tools that
+    # refuse (census P M3, P M1), measured off the registry.
+    assert len(_tool_names()) == 117

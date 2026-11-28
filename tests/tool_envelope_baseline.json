@@ -99,6 +99,8 @@
     "linkedin_set_conversation_deleted": "not_driven:never read the page",
     "linkedin_set_conversation_muted": "not_driven:never read the page",
     "linkedin_set_recent_job_searches_cleared": "not_driven:never read the page",
+    "linkedin_set_resume_deleted": "not_driven:never read the page",
+    "linkedin_set_resume_uploaded": "not_driven:never read the page",
     "linkedin_set_search_job_alert": "not_driven:never read the page",
     "linkedin_set_similar_jobs_alert": "not_driven:never read the page",
     "linkedin_set_tracker_stage": "not_driven:never read the page",

@@ -263,6 +263,9 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         # clearing his recent job searches (census J 19), refusing until the
         # dialog its press opens is captured (J-19-BUILT-BEHIND-THE-GRANT).
         "set_recent_job_searches_cleared",
+        # LANE BUILD28, 2026-11-28 (census P M3, P M1): the same shape.
+        "set_resume_deleted",
+        "set_resume_uploaded",
     }
     # THREE UNTIL 2026-08-25, four until 2026-08-30, five since. This line read
     # ``{"save_job", "unsave_job", "unfollow_company"}``.
@@ -480,6 +483,9 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         "withdraw_endorsement",
         # LANE BUILD-JOBS2, 2026-11-26 (census J 19), by registration again.
         "set_recent_job_searches_cleared",
+        # LANE BUILD28, 2026-11-28 (census P M3, P M1): the same shape.
+        "set_resume_deleted",
+        "set_resume_uploaded",
     }
     # AND EVERY ONE OF THEM MUST SAY WHY, individually. The dict is keyed by
     # action, so a fourteenth spec that is not performable and writes no
@@ -510,6 +516,9 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         "set_tracker_stage", "endorse_skill", "withdraw_endorsement",
         # LANE BUILD-JOBS2, 2026-11-26 (census J 19).
         "set_recent_job_searches_cleared",
+        # LANE BUILD28, 2026-11-28 (census P M3, P M1): the same shape.
+        "set_resume_deleted",
+        "set_resume_uploaded",
     }, sorted(writes._NINE_REFUSALS)
     for action in sanctioned_actions - writes.PERFORMABLE:
         if action == "set_open_to_work":
@@ -593,6 +602,9 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         "withdraw_endorsement",
         # LANE BUILD-JOBS2, 2026-11-26: refusing (census J 19), the same.
         "set_recent_job_searches_cleared",
+        # LANE BUILD28, 2026-11-28 (census P M3, P M1): the same shape.
+        "set_resume_deleted",
+        "set_resume_uploaded",
     }
     # AND THE ONE THAT LEFT, asserted rather than left as an absence -- the
     # same treatment apply got when its surface was measured.
@@ -903,9 +915,17 @@ async def test_exactly_the_performable_writes_are_registered():
     #       census J 19) reads the jobs home -- the card headed Recent job
     #       searches, its one Clear button, its searches, counted -- and
     #       refuses because what the press opens has never been captured.
+    #   linkedin_set_resume_deleted and linkedin_set_resume_uploaded (lane
+    #       build28, 2026-11-28, census P M3, P M1) read his application
+    #       settings page -- the named card's closed trigger; the upload
+    #       control, its rule and the file named against it -- and refuse
+    #       because what the Delete item opens, and what the page does with a
+    #       file, have never been captured.
     assert grant_incapable == [
         "linkedin_endorse_skill",
         "linkedin_set_recent_job_searches_cleared",
+        "linkedin_set_resume_deleted",
+        "linkedin_set_resume_uploaded",
         "linkedin_set_tracker_stage",
         "linkedin_withdraw_endorsement",
     ], (

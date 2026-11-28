@@ -1,4 +1,16 @@
-"""The tool surface: one hundred and fifteen tools, thirty-six of which write to LinkedIn.
+"""The tool surface: one hundred and seventeen tools, thirty-six of which write to LinkedIn.
+
+THE HUNDRED-AND-SIXTEENTH AND HUNDRED-AND-SEVENTEENTH ARE WRITE-SHAPED AND
+REFUSE, 2026-11-28, on the same lane (census ``P M3`` and ``P M1``, the
+orchestrator's order in its brief): ``linkedin_set_resume_deleted``, deleting
+one stored resume he names, and ``linkedin_set_resume_uploaded``, uploading one
+file from the declared upload folder. Each is sanctioned and gated, reads his
+application settings page, prints what it saw and mints no token: what the
+Delete item opens, and what the page does with a file, have never been
+captured, and the upload's inverse is the delete, proven first. Measured off
+this branch's registry, not summed: thirty-six write and six are
+write-shaped. The headline read "one hundred and fifteen tools, thirty-six of
+which write" until then.
 
 THE HUNDRED-AND-TWELFTH TO HUNDRED-AND-FIFTEENTH, 2026-11-28, on lane build28
 (the census wave's lane B): four READS. ``linkedin_download_resume`` (census
@@ -561,9 +573,9 @@ assigned to anybody -- it waits for whoever next runs the suite, and in the
 meantime the pin goes on asserting the old number with full confidence.
 
 THE NUMBERS ABOVE ARE DERIVED NOW, and that is a statement about a test rather
-than about an intention. One hundred and fifteen is ``len(await mcp.list_tools())``,
+than about an intention. One hundred and seventeen is ``len(await mcp.list_tools())``,
 pinned in ``test_server_surface.py`` by
-``test_the_surface_is_exactly_the_one_hundred_and_fifteen_tools``; the split is pinned by
+``test_the_surface_is_exactly_the_one_hundred_and_seventeen_tools``; the split is pinned by
 ``tests/test_prose_that_makes_a_claim.py::test_the_server_docstring_numbers_are_derived``,
 which reads THESE WORDS and fails if any of the three disagrees with the
 registry.
@@ -576,9 +588,11 @@ POINTER to it was dangling, so a reader who followed it found nothing and
 would reasonably conclude these numbers are unchecked. A citation is a claim
 like any other.
 The surface splits three ways and the split is the part a reader actually
-needs: SEVENTY-FIVE read, THIRTY-SIX write, and FOUR are write-shaped,
-registered, gated and unable to act. Seventy-five plus thirty-six plus four is
-one hundred and fifteen. (Seventy-one, thirty-six and four, summing to one
+needs: SEVENTY-FIVE read, THIRTY-SIX write, and SIX are write-shaped,
+registered, gated and unable to act. Seventy-five plus thirty-six plus six is
+one hundred and seventeen. (Seventy-five, thirty-six and four, summing to one
+hundred and fifteen, until lane build28's two refusing writes, 2026-11-28.
+Seventy-one, thirty-six and four, summing to one
 hundred and eleven, until lane build28's four reads, 2026-11-28.
 Seventy, thirty-six and four, summing to one
 hundred and ten, until integration 7's merge of lane net7's read,
@@ -792,11 +806,15 @@ the moment ``update_profile_field`` was given an address while still refusing.
 always meant: an address is not a permission.
 
 NOTE THE ACTION THAT HAS NO TOOL. ``writes.SANCTIONED_WRITES`` holds
-FORTY actions where this surface registers THIRTY-NINE write-shaped
+FORTY-THREE actions where this surface registers FORTY-TWO write-shaped
 tools, and the missing one is ``set_open_to_work``: it is sanctioned, it is
 refused by ``_refuse_unperformable``, and no tool was ever registered for it.
-So thirty-nine counts TOOLS and forty counts ACTIONS, and a reader comparing
-the two numbers is not looking at a discrepancy. (THIRTY-FOUR and
+So forty-two counts TOOLS and forty-three counts ACTIONS, and a reader
+comparing the two numbers is not looking at a discrepancy. (FORTY-ONE and
+FORTY, MEASURED on lane build28's base, master 9ec91965 -- this sentence read
+forty and thirty-nine there, one behind each, lane msg7's save_post never
+added to it -- until that lane's two refusing writes, 2026-11-28, added two
+to each. THIRTY-FOUR and
 THIRTY-THREE until integration 6's merge of lane build-msg2's six writes,
 2026-11-26, added six to each; that lane's branch read THIRTY-FOUR and
 THIRTY-THREE too, by its own six. THIRTY and
@@ -1451,7 +1469,13 @@ mcp = FastMCP(
         "linkedin_set_recent_job_searches_cleared, clearing the recent job "
         "searches on his jobs home; it reads the card and its Clear button "
         "and refuses, because what that press opens has never been captured, "
-        "and it fires only on his order. "
+        "and it fires only on his order. AND TWO MORE: "
+        "linkedin_set_resume_deleted, one stored resume he names by its file "
+        "name, and linkedin_set_resume_uploaded, one file from the declared "
+        "upload folder; each reads his application settings page and refuses, "
+        "because what the Delete item opens and what the page does with a file "
+        "have never been captured -- take a copy first with "
+        "linkedin_download_resume. "
         "THE NINETEENTH, linkedin_set_admitted_setting, changes ONE control "
         "on ONE settings page of his own account that is admitted by name, "
         "one page at a time; two are admitted: Share profile updates, whose "
@@ -10122,6 +10146,20 @@ _WHY_NOT_PERFORMED: dict[str, str] = {
         "preview reads the card, its one Clear button and its searches, and "
         "refuses; mint declines a grant at issue."
     ),
+    # LANE BUILD28, 2026-11-28 (census P M3, P M1): sanctioned and refusing,
+    # the upload's inverse first, at his order.
+    "set_resume_deleted": (
+        "what the resume card's Delete item opens has never been captured -- a "
+        "confirmation, likely -- and nothing restores a deleted resume but his "
+        "own copy. The preview reads the named card and its closed trigger, "
+        "and refuses; mint declines a grant at issue."
+    ),
+    "set_resume_uploaded": (
+        "what the page does with a file handed to its input has never been "
+        "captured, and its inverse, the delete, cannot perform either. The "
+        "preview checks the file against the page's own rule, and refuses; "
+        "mint declines a grant at issue."
+    ),
 }
 
 
@@ -15350,6 +15388,72 @@ async def linkedin_learning_career_goal() -> dict[str, Any]:
             if not learning.landed_on(landed, learning.JOURNEY_PATH):
                 return learning.landed_elsewhere()
             return {"ok": True, "pages_loaded": 1, **(await learning.read_career_goal(page))}
+    except Exception as exc:
+        return _error(exc)
+
+
+# Census P M3 and P M1 (lane build28, the same block): deleting one stored
+# resume and uploading one, each built REFUSING in the J-19 shape on the
+# orchestrator's order in the lane's brief -- the upload's inverse is the
+# delete, and the rule is inverse-proven-first. Neither can perform.
+
+
+@mcp.tool()
+async def linkedin_set_resume_deleted(resume: str, confirm_token: str = "") -> dict[str, Any]:
+    """Delete ONE of your stored resumes -- a write, and it REFUSES today.
+
+    Census row ``P M3``, built behind the grant on the orchestrator's order:
+    refusing until the step its press opens is captured, and it fires only on
+    your order. THIS TOOL CANNOT PERFORM, and it says why rather than guessing:
+    each resume card's options menu draws Delete beside Download (session 12's
+    capture), and what Delete opens -- a confirmation, likely -- has never
+    been captured. Nothing here puts a deleted resume back; take a copy first
+    with ``linkedin_download_resume``.
+
+    WHAT A CALL DOES. Your application settings page is read live, once: the
+    one card whose name reads ``resume``, its options trigger, and whether any
+    menu is open, counted and never read out. The menu is not opened. NO
+    CONFIRM TOKEN IS ISSUED, at any step: the block is a warning, and its
+    refusal names the capture that would lift it.
+
+    Args:
+        resume: the resume's file name EXACTLY as
+            ``linkedin_application_settings`` returns it.
+        confirm_token: accepted for the shape every write shares; no token is
+            ever issued for this tool, so none can be redeemed.
+    """
+    try:
+        return await _write_tool("set_resume_deleted", resume, confirm_token)
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_set_resume_uploaded(file: str, confirm_token: str = "") -> dict[str, Any]:
+    """Upload ONE resume file to your application settings page -- a write, and it REFUSES today.
+
+    Census row ``P M1``, built behind the grant on the orchestrator's order:
+    refusing, because what the page does with a file handed to its input has
+    never been captured AND its inverse, ``linkedin_set_resume_deleted``,
+    cannot perform either -- the rule is inverse-proven-first. It fires only
+    on your order once both are lifted.
+
+    WHAT A CALL DOES. The file is checked first, before anything loads: it
+    must sit in this server's declared upload folder, a real file with no
+    link on its path and within the size cap. Then your application settings
+    page is read live, once: its one "Upload resume" control, the file input
+    it names, and its own rule (measured "DOC, DOCX, PDF (5MB)") -- and the
+    file's type and size are checked against that rule. Nothing is handed to
+    the page. NO CONFIRM TOKEN IS ISSUED, at any step.
+
+    Args:
+        file: a path inside the declared upload folder, relative to it or
+            absolute; it is printed back relative to that folder only.
+        confirm_token: accepted for the shape every write shares; no token is
+            ever issued for this tool, so none can be redeemed.
+    """
+    try:
+        return await _write_tool("set_resume_uploaded", file, confirm_token)
     except Exception as exc:
         return _error(exc)
 

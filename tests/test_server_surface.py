@@ -1,4 +1,9 @@
-"""The tool surface: one hundred and fifteen tools, seventy-five of which do not write.
+"""The tool surface: one hundred and seventeen tools, seventy-five of which do not write.
+
+**IT READ "one hundred and fifteen tools, seventy-five of which do not write"
+UNTIL LANE BUILD28'S TWO REFUSING WRITES (2026-11-28)**:
+``linkedin_set_resume_deleted`` and ``linkedin_set_resume_uploaded`` (census
+``P M3``, ``P M1``), sanctioned and refusing, so the non-write count holds.
 
 **IT READ "one hundred and eleven tools, seventy-one of which do not write"
 UNTIL LANE BUILD28 (2026-11-28)**: four READS -- ``linkedin_download_resume``
@@ -376,6 +381,9 @@ SANCTIONED_WRITE_TOOLS = frozenset(SANCTIONED_WRITES) & {
     "linkedin_withdraw_endorsement",
     # 2026-11-26 (lane build-jobs2): sanctioned and REFUSING (census J 19).
     "linkedin_set_recent_job_searches_cleared",
+    # 2026-11-28 (lane build28): sanctioned and REFUSING (census P M3, P M1).
+    "linkedin_set_resume_deleted",
+    "linkedin_set_resume_uploaded",
     # 2026-11-26 (lane build-net2, census N 15, N 16, N 10): one pending
     # invitation he names, accepted, ignored or withdrawn. Their NAMES announce
     # the write ("accept" beside "connect"; "connect"; "withdraw") and their
@@ -889,6 +897,9 @@ EXPECTED_TOOLS = {
     "linkedin_withdraw_endorsement",
     # 2026-11-26 (lane build-jobs2): a WRITE that refuses (census J 19).
     "linkedin_set_recent_job_searches_cleared",
+    # 2026-11-28 (lane build28): two WRITES that refuse (census P M3, P M1).
+    "linkedin_set_resume_deleted",
+    "linkedin_set_resume_uploaded",
     # 2026-11-26 (lane build-jobs2): a READ -- his job alerts off LinkedIn's
     # alert manager on the jobs home (census J 37, the list half).
     "linkedin_job_alerts",
@@ -985,8 +996,10 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_one_hundred_and_fifteen_tools(tools):
+async def test_the_surface_is_exactly_the_one_hundred_and_seventeen_tools(tools):
     """RENAMED AGAIN ON LANE BUILD28 (2026-11-28), to
+    ``..._one_hundred_and_seventeen_tools``: its two refusing writes (census
+    P M3, P M1) beside its four reads. And first to
     ``..._one_hundred_and_fifteen_tools``: four READS (census J 72 / P M4,
     J 152, J 154, J 156) beside the one hundred and eleven. MEASURED off this
     branch's registry; the name moved with the pin.
@@ -1663,7 +1676,9 @@ async def test_the_surface_is_exactly_the_one_hundred_and_fifteen_tools(tools):
     # mcp.list_tools() on the merged tree, not summed.
     # ONE HUNDRED AND FIFTEEN ON LANE BUILD28 (2026-11-28): four READS, so the
     # split moves on its read side. MEASURED off mcp.list_tools(), not summed.
-    assert len(tools) == 115
+    # ONE HUNDRED AND SEVENTEEN ON THE SAME LANE: two WRITES that refuse
+    # (census P M3, P M1), so the split moves on its write side.
+    assert len(tools) == 117
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -1726,6 +1741,9 @@ async def test_the_surface_is_exactly_the_one_hundred_and_fifteen_tools(tools):
         "linkedin_withdraw_endorsement",
         # 2026-11-26 (lane build-jobs2): sanctioned and REFUSING (census J 19).
         "linkedin_set_recent_job_searches_cleared",
+        # 2026-11-28 (lane build28): sanctioned and REFUSING (census P M3, P M1).
+        "linkedin_set_resume_deleted",
+        "linkedin_set_resume_uploaded",
         # 2026-11-26 (lane build-net2): the three invitation answers.
         "linkedin_accept_invitation_to_connect",
         "linkedin_ignore_invitation_to_connect",
@@ -1982,8 +2000,10 @@ async def test_the_surface_is_exactly_the_one_hundred_and_fifteen_tools(tools):
     # beside the others in one registry, MEASURED.
     # SEVENTY-FIVE AND ONE HUNDRED AND FIFTEEN ON LANE BUILD28 (2026-11-28):
     # its four READS, MEASURED.
+    # SEVENTY-FIVE AND ONE HUNDRED AND SEVENTEEN ON THE SAME LANE: its two
+    # refusing writes hold the non-write count. MEASURED.
     assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 75
-    assert len(tools) == 115
+    assert len(tools) == 117
 
 
 def test_the_read_that_was_nearly_named_a_write():
@@ -2122,6 +2142,9 @@ async def test_the_exemption_covers_only_the_names_on_it(tools):
         "linkedin_withdraw_endorsement",
         # 2026-11-26 (lane build-jobs2): sanctioned and REFUSING (census J 19).
         "linkedin_set_recent_job_searches_cleared",
+        # 2026-11-28 (lane build28): sanctioned and REFUSING (census P M3, P M1).
+        "linkedin_set_resume_deleted",
+        "linkedin_set_resume_uploaded",
         # 2026-11-26 (lane build-net2): the three invitation answers.
         "linkedin_accept_invitation_to_connect",
         "linkedin_ignore_invitation_to_connect",
@@ -2836,9 +2859,13 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
     # refusing for want of a capture of the control it would press.
     # set_recent_job_searches_cleared JOINED 2026-11-26 (lane build-jobs2,
     # census J 19): refusing until the dialog its press opens is captured.
+    # set_resume_deleted AND set_resume_uploaded JOINED 2026-11-28 (lane
+    # build28, census P M3, P M1): refusing until what the Delete item opens,
+    # and what the page does with a file, are captured -- the delete first.
     assert set(not_performed) == {
         "set_open_to_work", "set_tracker_stage", "endorse_skill",
         "withdraw_endorsement", "set_recent_job_searches_cleared",
+        "set_resume_deleted", "set_resume_uploaded",
     }
     assert "update_setting" not in set(not_performed)
     # update_profile_field LEFT THIS FIELD ON 2026-09-02 by shipping, which is
@@ -3266,9 +3293,12 @@ async def test_the_server_instructions_name_every_write_that_ships():
     # send_message, looked at and named in the instructions.
     # AND ONE MORE 2026-11-26 (lane build-jobs2, census J 19), looked at and
     # named in the instructions beside the three.
+    # AND TWO MORE 2026-11-28 (lane build28, census P M3, P M1), looked at and
+    # named in the instructions beside the four.
     assert examined == {
         "set_tracker_stage", "endorse_skill", "withdraw_endorsement",
         "set_recent_job_searches_cleared",
+        "set_resume_deleted", "set_resume_uploaded",
     }, examined
     # AND THE CLAIM THAT NAMED THEM AS REFUSING HAD TO BE CORRECTED. It said
     # "none of them can act" of a set that is now empty, and a sentence

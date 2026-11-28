@@ -147,6 +147,9 @@ _UNMEASURED_REVERSIBILITY = {
     "withdraw_endorsement",
     # 2026-11-26 (lane build-jobs2, J 19). No clear has been made or watched.
     "set_recent_job_searches_cleared",
+    # 2026-11-28 (lane build28, P M3, P M1). No delete or upload has been made.
+    "set_resume_deleted",
+    "set_resume_uploaded",
 }
 
 REVERSIBILITY_CLASS = {
@@ -223,6 +226,9 @@ REVERSIBILITY_CLASS = {
     "withdraw_endorsement": "STILL-UNKNOWN",
     # 2026-11-26 (lane build-jobs2): see _UNMEASURED_REVERSIBILITY.
     "set_recent_job_searches_cleared": "STILL-UNKNOWN",
+    # 2026-11-28 (lane build28): see _UNMEASURED_REVERSIBILITY.
+    "set_resume_deleted": "STILL-UNKNOWN",
+    "set_resume_uploaded": "STILL-UNKNOWN",
 }
 
 #: Which actions have had their reversibility MEASURED. Split out from the
@@ -272,6 +278,8 @@ REVERSIBILITY_MEASURED = {
     "endorse_skill": False,
     "withdraw_endorsement": False,
     "set_recent_job_searches_cleared": False,
+    "set_resume_deleted": False,
+    "set_resume_uploaded": False,
 }
 
 def test_the_two_reversibility_tables_agree_with_each_other():
