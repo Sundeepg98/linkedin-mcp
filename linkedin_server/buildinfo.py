@@ -3,7 +3,7 @@
 #
 # Canonical source:
 #     D:\workspace\projects\job-hunting\mcp-servers\jobcore\src\jobcore\buildinfo.py
-# Vendored from jobcore commit: 998baf1
+# Vendored from jobcore commit: 50da018
 #
 # WHY A COPY AND NOT A DEPENDENCY. This server does not depend on jobcore and
 # must not start. Adding the dependency for a debug field would turn
@@ -43,16 +43,53 @@ touching git. ``tests/test_buildinfo.py`` proves it by committing to a real
 temporary repository *after* the first call and asserting the stamp still names
 the old commit.
 
-**Unknown is a value, never a guess.** No git executable, no work tree, a
-repository with no commits yet, a git that hangs -- each returns
-``source="unknown"`` with ``detail`` saying which, and ``commit=None``. A
-plausible-looking hash that nobody measured is the failure this module exists
-to prevent, so there is no fallback that invents one.
+**Import pays for file reads, never for git.** Until 2026-11-28 the stamp ran
+three git processes at import, each capped at :data:`GIT_TIMEOUT_SECONDS`, and
+every consumer takes two stamps (its own checkout and jobcore's). After a logon
+with the D: hard disk cold, uplers and instahyre took longer than the client's
+30 s connect timeout to start, and those six processes were part of what they
+waited for. The stamp is now taken in two halves:
+
+* AT IMPORT, from the repository's own files, with no subprocess: ``commit``,
+  ``commit_full`` and ``branch``. They come from ``HEAD``, the loose refs and
+  ``packed-refs``, following a worktree's or a submodule's ``.git`` FILE to its
+  git dir and that dir's ``commondir`` to the shared refs. That is a handful of
+  small reads. They are the identity, and reading them before import returns IS
+  the freeze: a commit landed afterwards cannot move them.
+* IN THE BACKGROUND, on one daemon thread per stamp, started at import:
+  ``dirty`` and ``dirty_files`` (``git status``) and ``committed_at`` (``git
+  show`` of the commit ALREADY READ -- never of ``HEAD``, which may have moved
+  by then). Each is resolved once and then frozen; nothing computes them per
+  call.
+
+A field the background has not delivered yet reads differently on the two
+paths, on purpose:
+
+* ``as_dict()`` -- the payload a ``*_server_info`` tool returns -- never waits.
+  The field reads :data:`PENDING`. A request is never held on git.
+* The ATTRIBUTE (``stamp.dirty``) waits for it, bounded, because code that
+  DECIDES on the value needs the value, and "pending" is not one. naukri's
+  scorer fingerprint reads ``JOBCORE_BUILD.dirty`` at its own import; a
+  fingerprint that said "pending" on one start and ``False`` on the next would
+  call an unchanged scorer changed. A consumer that asks at import pays for
+  exactly the fact it asked for; one that does not ask pays nothing.
+* :meth:`BuildStamp.settled` waits for all of them and returns a plain stamp.
+
+When the files cannot be read or understood (permissions, a ref format this
+reader does not know, such as reftable), the stamp falls back to the git
+subprocess path, still off the import path and on the same kind of thread, and
+every git field reads :data:`PENDING` until it lands.
+
+**Unknown is a value, never a guess.** No git work tree, a repository with no
+commits yet, a git that hangs -- each answers ``source="unknown"`` with
+``detail`` saying which, and ``commit=None``. A plausible-looking hash that
+nobody measured is the failure this module exists to prevent, so there is no
+fallback that invents one.
 
 **Nothing here may break server import.** Every git call is bounded by
-:data:`GIT_TIMEOUT_SECONDS` and every exception is caught and turned into an
-``unknown`` stamp, because this runs at module import of a server whose actual
-job is something else.
+:data:`GIT_TIMEOUT_SECONDS`, every exception is caught and turned into an
+``unknown`` field, and a background thread that never delivers is given up on
+at a deadline rather than waited for forever.
 
 Pure stdlib, like the rest of jobcore. Servers that do not depend on jobcore
 (linkedin, ats-jobs) vendor a copy rather than acquiring a cross-repo sibling
@@ -64,13 +101,14 @@ from __future__ import annotations
 
 import os
 import shutil
+import stat
 import subprocess
 import threading
 import time
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, fields
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Mapping, Optional
+from typing import Any, Callable, Mapping, NamedTuple, Optional, Union
 
 __all__ = [
     "BuildStamp",
@@ -78,19 +116,57 @@ __all__ = [
     "self_stamp",
     "GIT_TIMEOUT_SECONDS",
     "SHORT_HASH_LENGTH",
+    "PENDING",
     "resolve",
     "stamp",
     "invalidate_cache",
 ]
 
-#: Per-git-invocation budget. This runs during a server's import, so a hung git
-#: (a network-mounted repo, a stuck index.lock, an antivirus scan) must degrade
-#: to "unknown" rather than hold the whole server at the import line.
+#: Per-git-invocation budget. A hung git (a network-mounted repo, a stuck
+#: index.lock, an antivirus scan) must degrade to "unknown" rather than hold
+#: anything for long -- once the import line, now the background thread.
 GIT_TIMEOUT_SECONDS = 5.0
 
 #: Twelve is unambiguous in any repository this family will ever have and is
 #: short enough to read aloud when comparing two servers.
 SHORT_HASH_LENGTH = 12
+
+#: What ``as_dict()`` reports for a field the background has not delivered.
+#: Only the payload ever carries it: an attribute read waits for the value.
+PENDING = "pending"
+
+#: Added to the git budget to make a background thread's deadline: process
+#: creation on a loaded box is not free. Past the deadline a reader stops
+#: waiting and the owed fields freeze as unknown.
+_BACKGROUND_SLACK_SECONDS = 10.0
+
+#: The background half's process launcher and PATH lookup, bound ONCE, here.
+#: Suites across this family prove "the request path runs no git" by making
+#: ``subprocess.run`` raise and calling a tool twice. The background half is
+#: not the request path -- it is the one resolution that import started -- and
+#: if it read ``subprocess.run`` at call time, such a test landing while it was
+#: still running would kill it and freeze ``dirty`` as unknown for the rest of
+#: that process. A test that means to steer the background half patches THESE.
+_spawn = subprocess.run
+_which = shutil.which
+
+#: What ``git rev-parse --local-env-vars`` prints: variables that point git at
+#: a DIFFERENT repository than the one this module was asked about. A hook, or
+#: a suite run from inside one, has them set. Inherited, they would make git
+#: describe the hook's repository while the file reader describes ``start``'s,
+#: and one stamp would carry halves of two repositories.
+_REPO_ENV = frozenset({
+    "GIT_ALTERNATE_OBJECT_DIRECTORIES", "GIT_CONFIG", "GIT_CONFIG_PARAMETERS",
+    "GIT_CONFIG_COUNT", "GIT_OBJECT_DIRECTORY", "GIT_DIR", "GIT_WORK_TREE",
+    "GIT_IMPLICIT_WORK_TREE", "GIT_GRAFT_FILE", "GIT_INDEX_FILE",
+    "GIT_NO_REPLACE_OBJECTS", "GIT_REPLACE_REF_BASE", "GIT_PREFIX",
+    "GIT_SHALLOW_FILE", "GIT_COMMON_DIR",
+})
+
+#: git's own limit on following symbolic refs (SYMREF_MAXDEPTH).
+_SYMREF_MAX_DEPTH = 5
+
+_HEX = frozenset("0123456789abcdefABCDEF")
 
 
 @dataclass(frozen=True)
@@ -118,6 +194,10 @@ class BuildStamp:
     def as_dict(self) -> dict:
         """A plain dict for a tool payload. Key order is the reading order."""
         return asdict(self)
+
+    def settled(self, timeout: Optional[float] = None) -> "BuildStamp":
+        """This stamp with every field resolved. A plain stamp already is."""
+        return self
 
 
 class ProcessClock:
@@ -153,6 +233,564 @@ class ProcessClock:
         }
 
 
+# ------------------------------------------------ the background half ------
+
+
+class _Background:
+    """The fields a daemon thread still owes one stamp, and when to stop waiting.
+
+    ``owed`` maps each owed field to the value it freezes as if the thread never
+    delivers. Delivery and give-up are both final: whichever lands first is
+    what every later read sees, so a stamp moves at most once, from "pending"
+    to its value, and never again.
+    """
+
+    def __init__(self, owed: Mapping[str, Any], budget: float, waiting: str):
+        self._cond = threading.Condition()
+        self._owed = dict(owed)
+        self._values: dict = {}
+        self._budget = budget
+        self._deadline = time.monotonic() + budget
+        #: How a payload's ``detail`` begins while anything is still owed; the
+        #: names of the fields still owed follow it.
+        self.waiting = waiting
+
+    def deliver(self, **values: Any) -> None:
+        with self._cond:
+            for name, value in values.items():
+                if name in self._owed:
+                    del self._owed[name]
+                    self._values[name] = value
+            self._cond.notify_all()
+
+    def abandon(self, why: str) -> None:
+        """Freeze whatever is still owed as unknown. A no-op once delivered."""
+        with self._cond:
+            self._freeze_owed(why)
+            self._cond.notify_all()
+
+    def _freeze_owed(self, why: str) -> None:
+        if not self._owed:
+            return
+        for name, fallback in self._owed.items():
+            self._values[name] = fallback
+        if "detail" in self._owed:
+            self._values["detail"] = why
+        self._owed.clear()
+
+    def _late(self) -> str:
+        return (
+            "the background git resolution did not finish within %g s; "
+            "the fields it owed are unknown" % self._budget
+        )
+
+    def get(self, name: str) -> Any:
+        """``name``'s value, waiting for the thread while it is still owed."""
+        with self._cond:
+            while name in self._owed:
+                remaining = self._deadline - time.monotonic()
+                if remaining <= 0:
+                    self._freeze_owed(self._late())
+                    break
+                self._cond.wait(remaining)
+            return self._values[name]
+
+    def wait_all(self, timeout: Optional[float]) -> bool:
+        """Wait until nothing is owed. ``False`` only if ``timeout`` ran out."""
+        with self._cond:
+            give_up_at = None if timeout is None else time.monotonic() + timeout
+            while self._owed:
+                now = time.monotonic()
+                if now >= self._deadline:
+                    self._freeze_owed(self._late())
+                    break
+                limit = self._deadline - now
+                if give_up_at is not None:
+                    if now >= give_up_at:
+                        return False
+                    limit = min(limit, give_up_at - now)
+                self._cond.wait(limit)
+            return True
+
+    def snapshot(self) -> tuple:
+        """``(arrived, still_owed)`` right now, without waiting."""
+        with self._cond:
+            if self._owed and time.monotonic() >= self._deadline:
+                self._freeze_owed(self._late())
+            return dict(self._values), frozenset(self._owed)
+
+
+class _Owed:
+    """A stamp field the background may still owe: reading it waits for it."""
+
+    def __init__(self, name: str) -> None:
+        self.name = name
+
+    def __get__(self, obj: Any, owner: Any = None) -> Any:
+        if obj is None:
+            return self
+        value = obj.__dict__["_background"].get(self.name)
+        # Final once delivered, so it is safe to keep: later reads are plain.
+        object.__setattr__(obj, self.name, value)
+        return value
+
+
+class _LiveStamp(BuildStamp):
+    """What :func:`stamp` returns: import-time fields plus fields still owed.
+
+    It IS a :class:`BuildStamp` -- same fields, same payload keys, comparable
+    and hashable by value -- whose owed fields are filled in once, by the
+    background thread. See the module docstring for why reading one through
+    an attribute waits and reading it through ``as_dict()`` does not.
+    """
+
+    def as_dict(self) -> dict:
+        background = self.__dict__.get("_background")
+        if background is None:
+            return {f.name: getattr(self, f.name) for f in fields(BuildStamp)}
+        arrived, owed = background.snapshot()
+        out = {}
+        for f in fields(BuildStamp):
+            if f.name in self.__dict__:
+                out[f.name] = self.__dict__[f.name]
+            elif f.name in arrived:
+                out[f.name] = arrived[f.name]
+            elif f.name == "detail":
+                out[f.name] = "%s: %s" % (background.waiting, ", ".join(
+                    g.name for g in fields(BuildStamp) if g.name in owed and g.name != "detail"
+                ) or "detail")
+            else:
+                out[f.name] = PENDING
+        return out
+
+    def settled(self, timeout: Optional[float] = None) -> BuildStamp:
+        """A plain, fully resolved :class:`BuildStamp`, waiting if need be.
+
+        ``timeout=None`` waits at most until this stamp's own deadline, after
+        which the fields it still owed freeze as unknown -- so it always
+        returns. A shorter ``timeout`` that runs out raises ``TimeoutError``
+        rather than return a stamp that is not settled.
+        """
+        background = self.__dict__.get("_background")
+        if background is not None and not background.wait_all(timeout):
+            raise TimeoutError("this build stamp is still resolving in the background")
+        return BuildStamp(**{f.name: getattr(self, f.name) for f in fields(BuildStamp)})
+
+    def __eq__(self, other: Any) -> bool:
+        if isinstance(other, BuildStamp):
+            return BuildStamp.__eq__(self.settled(), other.settled())
+        return NotImplemented
+
+    def __hash__(self) -> int:
+        return hash(self.settled())
+
+    def __repr__(self) -> str:
+        return "BuildStamp(%s)" % ", ".join(
+            "%s=%r" % item for item in self.as_dict().items()
+        )
+
+    def __reduce__(self):
+        # A copy or a pickle is a plain stamp: the thread belongs to this one.
+        plain = self.settled()
+        return (BuildStamp, tuple(getattr(plain, f.name) for f in fields(BuildStamp)))
+
+
+for _field in fields(BuildStamp):
+    setattr(_LiveStamp, _field.name, _Owed(_field.name))
+del _field
+
+
+def _run_background(background: _Background, work: Callable[[_Background], None]) -> None:
+    try:
+        work(background)
+    except Exception as exc:  # never die silently with fields still owed
+        background.abandon(
+            "the background git resolution raised %s; the fields it owed are unknown"
+            % type(exc).__name__
+        )
+    finally:
+        background.abandon("the background git resolution ended without delivering")
+
+
+def _live(
+    known: Mapping[str, Any],
+    owed: Mapping[str, Any],
+    budget: float,
+    waiting: str,
+    work: Callable[[_Background], None],
+) -> _LiveStamp:
+    """A stamp holding ``known`` now, with ``work`` delivering ``owed`` later."""
+    result = object.__new__(_LiveStamp)
+    for name, value in known.items():
+        object.__setattr__(result, name, value)
+    background = _Background(owed, budget, waiting)
+    object.__setattr__(result, "_background", background)
+    try:
+        threading.Thread(
+            target=_run_background,
+            args=(background, work),
+            name="jobcore-buildinfo",
+            daemon=True,
+        ).start()
+    except Exception as exc:  # e.g. at interpreter shutdown: never break import
+        background.abandon(
+            "no background thread could be started (%s); the fields it would "
+            "have resolved are unknown" % type(exc).__name__
+        )
+    return result
+
+
+# ------------------------------------------- reading git's own files -------
+
+
+class _Unreadable(Exception):
+    """The git files exist but cannot be read or understood. Ask git instead.
+
+    Messages name a FILE ROLE ("HEAD", "packed-refs"), never a path: they end up
+    in a payload's ``detail``, and a payload must not carry this machine's
+    layout.
+    """
+
+
+class _Repo(NamedTuple):
+    work_tree: Path  # the directory that holds ``.git``
+    git_dir: Path    # ``.git`` itself, or what a ``.git`` FILE points at
+    common_dir: Path  # where the shared refs and objects live
+
+
+class _Head(NamedTuple):
+    repo: _Repo
+    commit_full: str
+    branch: Optional[str]
+
+
+_NOT_A_WORK_TREE = "not inside a git work tree"
+_NO_COMMITS = "git work tree has no commits yet"
+
+
+def _read_text(path: Path, role: str, limit: int = -1) -> Optional[str]:
+    """The file's text; ``None`` when nothing is there (or a directory is)."""
+    try:
+        with open(path, "rb") as fh:
+            data = fh.read(limit)
+    except (FileNotFoundError, NotADirectoryError, IsADirectoryError):
+        return None
+    except PermissionError as exc:
+        # Windows refuses to open a directory with PermissionError, and a ref
+        # probe can land on one (``refs/remotes/origin``): that is absence.
+        if os.path.isdir(path):
+            return None
+        raise _Unreadable("%s could not be read (%s)" % (role, type(exc).__name__)) from exc
+    except OSError as exc:
+        raise _Unreadable("%s could not be read (%s)" % (role, type(exc).__name__)) from exc
+    try:
+        return data.decode("utf-8")
+    except UnicodeDecodeError as exc:
+        raise _Unreadable("%s is not UTF-8" % role) from exc
+
+
+def _oid_at_start(text: str) -> Optional[str]:
+    """The object id a ref file starts with, as git parses it, else ``None``.
+
+    40 hex digits (SHA-1) or 64 (SHA-256), then the end or whitespace -- git
+    accepts trailing data after the id, which is how FETCH_HEAD is written.
+    """
+    for size in (64, 40):
+        token, after = text[:size], text[size:size + 1]
+        if len(token) == size and all(c in _HEX for c in token) and (
+            after == "" or after.isspace()
+        ):
+            return token.lower()
+    return None
+
+
+def _parse_ref(text: str) -> Optional[str]:
+    """A loose ref file's value: ``"ref: <target>"``, an object id, or ``None``."""
+    if text.startswith("ref:"):
+        target = text[4:].strip()
+        return "ref: " + target if target else None
+    return _oid_at_start(text)
+
+
+def _common_dir(git_dir: Path) -> Path:
+    text = _read_text(git_dir / "commondir", "commondir")
+    if text is None or not text.strip():
+        return git_dir
+    target = text.strip()
+    return Path(target) if os.path.isabs(target) else git_dir / target
+
+
+def _is_git_dir(git_dir: Path) -> bool:
+    """git's own test: a HEAD here, and an objects store in the common dir."""
+    return os.path.isfile(git_dir / "HEAD") and os.path.isdir(_common_dir(git_dir) / "objects")
+
+
+def _find_repo(start_dir: Path) -> Optional[_Repo]:
+    """The repository ``start_dir`` is in, found the way git finds it.
+
+    Walk up looking for ``.git``. A ``.git`` DIRECTORY that is not a repository
+    is walked past, as git does; a ``.git`` FILE (a linked worktree, a
+    submodule) must point at one, and when it does not, git would refuse and
+    so does this -- by handing the question to git.
+    """
+    for directory in (start_dir, *start_dir.parents):
+        dot_git = directory / ".git"
+        try:
+            mode = os.stat(dot_git).st_mode
+        except (FileNotFoundError, NotADirectoryError):
+            continue
+        except OSError as exc:
+            raise _Unreadable(".git could not be examined (%s)" % type(exc).__name__) from exc
+        if stat.S_ISDIR(mode):
+            if _is_git_dir(dot_git):
+                return _Repo(directory, dot_git, _common_dir(dot_git))
+            continue
+        text = _read_text(dot_git, "the .git file", 4096)
+        if text is None or not text.startswith("gitdir:"):
+            raise _Unreadable("the .git file does not name a git directory")
+        target = text[len("gitdir:"):].strip()
+        git_dir = Path(target) if os.path.isabs(target) else directory / target
+        if not _is_git_dir(git_dir):
+            raise _Unreadable("the .git file names a directory that is not a repository")
+        return _Repo(directory, git_dir, _common_dir(git_dir))
+    return None
+
+
+class _Refs:
+    """One repository's refs as git's files backend stores them."""
+
+    def __init__(self, repo: _Repo) -> None:
+        self._repo = repo
+        self._packed: Optional[dict] = None
+
+    def _loose_path(self, name: str) -> Path:
+        # Per-worktree refs and pseudorefs (HEAD, ORIG_HEAD, ...) live in this
+        # worktree's own git dir; every other ref lives in the common dir.
+        if name.startswith(("refs/worktree/", "refs/bisect/", "refs/rewritten/")) or all(
+            c.isupper() or c in "-_" for c in name
+        ):
+            return self._repo.git_dir / name
+        return self._repo.common_dir / name
+
+    def _packed_refs(self) -> dict:
+        if self._packed is None:
+            text = _read_text(self._repo.common_dir / "packed-refs", "packed-refs")
+            packed = {}
+            for line in (text or "").splitlines():
+                if not line or line[0] in "#^":
+                    continue
+                oid, _, name = line.partition(" ")
+                oid = _oid_at_start(oid)
+                if oid is None or not name.strip():
+                    raise _Unreadable("packed-refs has a line this reader does not understand")
+                packed[name.strip()] = oid
+            self._packed = packed
+        return self._packed
+
+    def value(self, name: str, strict: bool) -> Optional[str]:
+        """``"ref: <target>"``, an object id, or ``None`` when ``name`` is not a ref.
+
+        ``strict`` is for the ref the stamp is about: a loose file that holds
+        neither form is corruption, and git -- not this -- should rule on it.
+        For an ambiguity probe it just means "no such ref", as it does to git.
+        """
+        text = _read_text(self._loose_path(name), "a loose ref", 4096)
+        if text is not None:
+            parsed = _parse_ref(text)
+            if parsed is None and strict:
+                raise _Unreadable("a loose ref holds neither a ref nor an object id")
+            return parsed
+        if name.startswith("refs/"):
+            return self._packed_refs().get(name)
+        return None
+
+    def resolve(self, name: str, strict: bool) -> Optional[tuple]:
+        """``(final ref name, object id)`` after following symrefs, or ``None``."""
+        followed = 0
+        while True:
+            raw = self.value(name, strict)
+            if raw is None:
+                return None
+            if not raw.startswith("ref: "):
+                return name, raw
+            followed += 1
+            if followed >= _SYMREF_MAX_DEPTH:
+                if strict:
+                    raise _Unreadable("a symbolic ref chain is deeper than git follows")
+                return None
+            name = raw[len("ref: "):]
+
+    def exists(self, name: str) -> bool:
+        return self.resolve(name, strict=False) is not None
+
+
+#: git's ``ref_rev_parse_rules``: how a short name expands to a full one.
+_REV_PARSE_RULES = (
+    "%s", "refs/%s", "refs/tags/%s", "refs/heads/%s", "refs/remotes/%s", "refs/remotes/%s/HEAD",
+)
+
+
+def _abbrev(refname: str, exists: Callable[[str], bool]) -> str:
+    """``git rev-parse --abbrev-ref`` of a full ref name, in git's default mode.
+
+    The shortest name that no OTHER rule also resolves (strict mode, which
+    ``core.warnAmbiguousRefs`` -- default on -- selects): with a tag also
+    called ``feature``, branch ``feature`` abbreviates to ``heads/feature``,
+    exactly as git prints it. A repository that turns warnAmbiguousRefs off can
+    see git print a shorter name where a remote shares the branch's name.
+    """
+    for i in range(len(_REV_PARSE_RULES) - 1, 0, -1):
+        prefix, suffix = _REV_PARSE_RULES[i].split("%s")
+        if len(refname) <= len(prefix) + len(suffix):
+            continue
+        if not (refname.startswith(prefix) and refname.endswith(suffix)):
+            continue
+        short = refname[len(prefix):len(refname) - len(suffix)]
+        if not any(
+            exists(rule % short) for j, rule in enumerate(_REV_PARSE_RULES) if j != i
+        ):
+            return short
+    return refname
+
+
+def _read_head(start_dir: Path) -> Union[_Head, str]:
+    """``commit`` and ``branch`` from the repository's own files. No subprocess.
+
+    Returns a :class:`_Head`, or the ``detail`` of a definite unknown (not a
+    work tree; no commits yet). Raises :class:`_Unreadable` when the answer is
+    on disk but this reader cannot get it out.
+    """
+    if not os.path.isdir(start_dir):
+        return _NOT_A_WORK_TREE
+    repo = _find_repo(start_dir)
+    if repo is None:
+        return _NOT_A_WORK_TREE
+    if os.path.islink(repo.git_dir / "HEAD"):
+        raise _Unreadable("HEAD is a symbolic link")
+    refs = _Refs(repo)
+    head = refs.value("HEAD", strict=True)
+    if head is None:
+        raise _Unreadable("HEAD holds neither a ref nor an object id")
+    if not head.startswith("ref: "):
+        return _Head(repo, head, None)  # detached: the hash is the identity
+    target = head[len("ref: "):]
+    if target == "refs/heads/.invalid":
+        # The placeholder a reftable repository writes for older readers.
+        raise _Unreadable("the refs are stored in a format this reader does not know")
+    resolved = refs.resolve(target, strict=True)
+    if resolved is None:
+        if os.path.isdir(repo.common_dir / "reftable"):
+            raise _Unreadable("the refs are stored in a format this reader does not know")
+        return _NO_COMMITS
+    name, oid = resolved
+    branch = _abbrev(name, refs.exists)
+    return _Head(repo, oid, None if branch == "HEAD" else branch)
+
+
+# ------------------------------------------------------- running git -------
+
+
+def _git_env() -> dict:
+    """The environment for a git call about ``start``'s repository, and only it."""
+    env = {k: v for k, v in os.environ.items() if k.upper() not in _REPO_ENV}
+    # `git status` otherwise takes index.lock to write a refreshed index back,
+    # and a build stamp must never be why the operator's own commit fails.
+    env["GIT_OPTIONAL_LOCKS"] = "0"
+    return env
+
+
+def _git_call(run: Callable[..., Any], cmd: list, env: Optional[dict]) -> Any:
+    return run(
+        cmd,
+        stdin=subprocess.DEVNULL,  # an MCP server's stdin is its protocol pipe
+        capture_output=True,
+        timeout=GIT_TIMEOUT_SECONDS,
+        env=env if env is not None else _git_env(),
+        # Windows: keep a console window from flashing when a GUI-launched
+        # client imports the server.
+        creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+    )
+
+
+def _run_git(
+    cwd: Path, *args: str, run: Optional[Callable[..., Any]] = None, env: Optional[dict] = None
+) -> Optional[str]:
+    """One bounded git call. ``None`` on any failure, never an exception."""
+    try:
+        proc = _git_call(run if run is not None else subprocess.run,
+                         ["git", "-C", str(cwd), *args], env)
+    except (OSError, subprocess.SubprocessError, ValueError):
+        return None
+    if proc.returncode != 0:
+        return None
+    return proc.stdout.decode("utf-8", "replace")
+
+
+#: The answer to "why did that background git call fail" that changes what is
+#: worth trying next: with no git at all there is no second call to make.
+_NO_GIT = "no git executable on PATH"
+
+
+def _background_git(repo: _Repo, env: dict, *args: str) -> tuple:
+    """``(stdout, None)`` or ``(None, why)``, pinned to exactly ``repo``.
+
+    ``--git-dir``/``--work-tree`` rather than ``-C``: git's own discovery could
+    land somewhere else (a ceiling, an unusual layout), and the background half
+    must describe the repository whose files gave the commit.
+    """
+    cmd = [
+        "git", "--git-dir=%s" % repo.git_dir, "--work-tree=%s" % repo.work_tree, *args,
+    ]
+    try:
+        proc = _git_call(_spawn, cmd, env)
+    except FileNotFoundError:
+        return None, _NO_GIT
+    except (OSError, subprocess.SubprocessError, ValueError):
+        return None, "failed"
+    if proc.returncode != 0:
+        return None, "failed"
+    return proc.stdout.decode("utf-8", "replace"), None
+
+
+def _slow_fields(background: _Background, repo: _Repo, commit_full: str, env: dict) -> None:
+    """Deliver ``dirty``/``dirty_files``, then ``committed_at``, then ``detail``.
+
+    ``dirty`` first: it is what decision code waits on (naukri's scorer
+    fingerprint), so it is not held behind the commit-time lookup.
+    """
+    problems = []
+
+    # Untracked files COUNT as dirty. The question this field answers is "does
+    # the loaded code differ from that commit", and a new, untracked, imported
+    # module differs from it just as much as an edited tracked one does. The
+    # count is reported alongside so "dirty" can be judged rather than feared.
+    out, why = _background_git(repo, env, "status", "--porcelain")
+    if out is None:
+        dirty: Optional[bool] = None
+        dirty_files: Optional[int] = None
+        problems.append(
+            "no git executable on PATH; dirtiness and commit time unknown"
+            if why == _NO_GIT else "git status failed; dirtiness unknown"
+        )
+    else:
+        entries = [line for line in out.splitlines() if line.strip()]
+        dirty = bool(entries)
+        dirty_files = len(entries)
+    background.deliver(dirty=dirty, dirty_files=dirty_files)
+
+    committed_at: Optional[str] = None
+    if why != _NO_GIT:
+        # The commit READ AT IMPORT, never HEAD: HEAD may have moved since.
+        out, _ = _background_git(repo, env, "show", "-s", "--format=%cI", commit_full)
+        committed_at = out.strip() if out and out.strip() else None
+        if committed_at is None:
+            problems.append("git show failed; commit time unknown")
+    background.deliver(committed_at=committed_at, detail="; ".join(problems) or None)
+
+
+# ------------------------------------------------------------ resolving ----
+
+
 def _git_dir(start: Any) -> Optional[Path]:
     """The directory to run git in: ``start`` itself, or its parent if a file."""
     try:
@@ -162,25 +800,6 @@ def _git_dir(start: Any) -> Optional[Path]:
     return p if p.is_dir() else p.parent
 
 
-def _run_git(cwd: Path, *args: str) -> Optional[str]:
-    """One bounded git call. ``None`` on any failure, never an exception."""
-    try:
-        proc = subprocess.run(
-            ["git", "-C", str(cwd), *args],
-            capture_output=True,
-            text=True,
-            timeout=GIT_TIMEOUT_SECONDS,
-            # Windows: keep a console window from flashing when a GUI-launched
-            # client imports the server.
-            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
-        )
-    except (OSError, subprocess.SubprocessError, ValueError):
-        return None
-    if proc.returncode != 0:
-        return None
-    return proc.stdout
-
-
 def _installed_version(distribution: Optional[str]) -> Optional[str]:
     """The version of an INSTALLED distribution, or ``None``.
 
@@ -188,6 +807,10 @@ def _installed_version(distribution: Optional[str]) -> Optional[str]:
     different situation. A dependency installed from a wheel or a git URL has
     no work tree to interrogate, so "which commit" has no answer there -- but
     "which release" does, and it is the answer that identifies the code.
+
+    Always read on the CALLING thread, at import: it imports
+    ``importlib.metadata``, and an import started from a background thread
+    while the main thread is mid-import is how module locks deadlock.
     """
     if not distribution:
         return None
@@ -199,12 +822,29 @@ def _installed_version(distribution: Optional[str]) -> Optional[str]:
         return None
 
 
+_UNSET: Any = object()
+
+
+def _unknown(now: str, version: Optional[str], distribution: Optional[str], detail: str) -> BuildStamp:
+    """No git answer. Report the installed version if there is one."""
+    if version is not None:
+        return BuildStamp(
+            version=version,
+            resolved_at=now,
+            source="package",
+            detail="%s; reporting the installed %s version instead" % (detail, distribution),
+        )
+    return BuildStamp(resolved_at=now, source="unknown", detail=detail)
+
+
 def resolve(start: Any, distribution: Optional[str] = None) -> BuildStamp:
-    """Read the working tree's git state NOW. Not memoised -- see :func:`stamp`.
+    """Read the working tree's git state NOW, through git. Not memoised.
 
     Public because it is the honest counterpart in the staleness test: compare
     a held :func:`stamp` against a fresh :func:`resolve` and a stale process is
-    visible as a disagreement. Servers should not call it on a request path.
+    visible as a disagreement. It asks git itself -- an instrument independent
+    of the file reader :func:`stamp` uses at import -- and it runs git on the
+    calling thread, so servers must not call it on a request path.
 
     ``distribution`` names the installed package this path belongs to, and it
     is what keeps the answer useful off a developer box. CI found the hole on
@@ -216,36 +856,43 @@ def resolve(start: Any, distribution: Optional[str] = None) -> BuildStamp:
     because mapping a file back to the distribution that shipped it is a guess
     and this module does not guess.
     """
+    return _resolve_by_git(start, distribution)
+
+
+def _resolve_by_git(
+    start: Any,
+    distribution: Optional[str],
+    *,
+    run: Optional[Callable[..., Any]] = None,
+    which: Optional[Callable[[str], Optional[str]]] = None,
+    version: Any = _UNSET,
+    env: Optional[dict] = None,
+) -> BuildStamp:
+    """:func:`resolve`'s body. The background fallback passes the launchers
+    bound at import and the version the calling thread already read."""
     now = datetime.now(timezone.utc).isoformat()
 
+    def installed() -> Optional[str]:
+        return _installed_version(distribution) if version is _UNSET else version
+
     def unknown(detail: str) -> BuildStamp:
-        """No git answer. Report the installed version if there is one."""
-        ver = _installed_version(distribution)
-        if ver is not None:
-            return BuildStamp(
-                version=ver,
-                resolved_at=now,
-                source="package",
-                detail="%s; reporting the installed %s version instead"
-                % (detail, distribution),
-            )
-        return BuildStamp(resolved_at=now, source="unknown", detail=detail)
+        return _unknown(now, installed(), distribution, detail)
 
     cwd = _git_dir(start)
     if cwd is None:
         return unknown("could not resolve a directory from the given start path")
-    if shutil.which("git") is None:
-        return unknown("no git executable on PATH")
+    if (which if which is not None else shutil.which)("git") is None:
+        return unknown(_NO_GIT)
 
     # %H full hash, %cI committer date in strict ISO 8601. One call, and it is
     # also the existence check: it fails on a non-repository and on a repository
     # with no commits, which are different `detail` answers below.
-    head = _run_git(cwd, "show", "-s", "--format=%H%n%cI", "HEAD")
+    head = _run_git(cwd, "show", "-s", "--format=%H%n%cI", "HEAD", run=run, env=env)
     if not head:
-        inside = _run_git(cwd, "rev-parse", "--is-inside-work-tree")
+        inside = _run_git(cwd, "rev-parse", "--is-inside-work-tree", run=run, env=env)
         if not inside or inside.strip() != "true":
-            return unknown("not inside a git work tree")
-        return unknown("git work tree has no commits yet")
+            return unknown(_NOT_A_WORK_TREE)
+        return unknown(_NO_COMMITS)
 
     lines = head.strip().splitlines()
     commit_full = lines[0].strip() if lines else ""
@@ -253,16 +900,13 @@ def resolve(start: Any, distribution: Optional[str] = None) -> BuildStamp:
     if not commit_full:
         return unknown("git returned an empty HEAD hash")
 
-    branch_out = _run_git(cwd, "rev-parse", "--abbrev-ref", "HEAD")
+    branch_out = _run_git(cwd, "rev-parse", "--abbrev-ref", "HEAD", run=run, env=env)
     branch = branch_out.strip() if branch_out else None
     if branch == "HEAD":  # detached; the hash is the identity, not a name
         branch = None
 
-    # Untracked files COUNT as dirty. The question this field answers is "does
-    # the loaded code differ from that commit", and a new, untracked, imported
-    # module differs from it just as much as an edited tracked one does. The
-    # count is reported alongside so "dirty" can be judged rather than feared.
-    status = _run_git(cwd, "status", "--porcelain")
+    # Untracked files COUNT as dirty -- see _slow_fields.
+    status = _run_git(cwd, "status", "--porcelain", run=run, env=env)
     if status is None:
         dirty: Optional[bool] = None
         dirty_files: Optional[int] = None
@@ -280,10 +924,69 @@ def resolve(start: Any, distribution: Optional[str] = None) -> BuildStamp:
         committed_at=committed_at,
         dirty=dirty,
         dirty_files=dirty_files,
-        version=_installed_version(distribution),
+        version=installed(),
         resolved_at=now,
         source="git",
         detail=detail,
+    )
+
+
+def _by_git_in_background(
+    background: _Background, start: Any, distribution: Optional[str],
+    version: Optional[str], env: dict,
+) -> None:
+    """The fallback: today's subprocess path, run off the import path."""
+    by_git = _resolve_by_git(
+        start, distribution, run=_spawn, which=_which, version=version, env=env
+    )
+    background.deliver(**{
+        f.name: getattr(by_git, f.name) for f in fields(BuildStamp) if f.name != "version"
+    })
+
+
+def _stamp_now(start: Any, distribution: Optional[str]) -> BuildStamp:
+    """The import-time half of :func:`stamp`: file reads, plus a thread started.
+
+    Never runs a subprocess on the calling thread.
+    """
+    now = datetime.now(timezone.utc).isoformat()
+    version = _installed_version(distribution)
+    cwd = _git_dir(start)
+    if cwd is None:
+        return _unknown(now, version, distribution,
+                        "could not resolve a directory from the given start path")
+    env = _git_env()
+    try:
+        head = _read_head(cwd)
+    except Exception as exc:  # _Unreadable, or a reader bug: git decides
+        why = str(exc) if isinstance(exc, _Unreadable) else (
+            "the git files could not be read (%s)" % type(exc).__name__
+        )
+        gave_up = _unknown(now, version, distribution, why)
+        return _live(
+            {"version": version},
+            {f.name: getattr(gave_up, f.name) for f in fields(BuildStamp) if f.name != "version"},
+            3 * GIT_TIMEOUT_SECONDS + _BACKGROUND_SLACK_SECONDS,
+            "%s; resolving through git in the background" % why,
+            lambda background: _by_git_in_background(
+                background, start, distribution, version, env
+            ),
+        )
+    if isinstance(head, str):
+        return _unknown(now, version, distribution, head)
+    return _live(
+        {
+            "commit": head.commit_full[:SHORT_HASH_LENGTH],
+            "commit_full": head.commit_full,
+            "branch": head.branch,
+            "version": version,
+            "resolved_at": now,
+            "source": "git",
+        },
+        {"committed_at": None, "dirty": None, "dirty_files": None, "detail": None},
+        2 * GIT_TIMEOUT_SECONDS + _BACKGROUND_SLACK_SECONDS,
+        "still resolving in the background",
+        lambda background: _slow_fields(background, head.repo, head.commit_full, env),
     )
 
 
@@ -294,13 +997,17 @@ _CACHE_LOCK = threading.Lock()
 def stamp(start: Any, distribution: Optional[str] = None) -> BuildStamp:
     """The import-time stamp for ``start``'s repository. Resolved at most once.
 
-    THE CONTRACT: the first call shells out to git; every later call for the
-    same ``start`` returns that first result and touches nothing. A commit made
-    after the first call does not change what comes back, which is the whole
-    reason this function exists rather than servers calling :func:`resolve`.
+    THE CONTRACT: the first call reads the commit and branch from the
+    repository's files before it returns, and starts the one background
+    resolution of the rest; every later call for the same ``start`` returns
+    that same object and touches nothing. A commit made after the first call
+    does not change what comes back, which is the whole reason this function
+    exists rather than servers calling :func:`resolve`.
 
-    Call it once, at module import, and hold the result in a module constant.
-    Calling it per request is harmless but pointless -- the answer is frozen.
+    The first call runs no subprocess on the calling thread, so it is safe at
+    module import. Call it once, there, and hold the result in a module
+    constant. Calling it per request is harmless but pointless -- the answer is
+    frozen.
     """
     try:
         key = str(Path(start).resolve())
@@ -317,8 +1024,8 @@ def stamp(start: Any, distribution: Optional[str] = None) -> BuildStamp:
         if cached is not None:
             return cached
         try:
-            result = resolve(start, distribution)
-        except Exception as exc:  # pragma: no cover - resolve catches its own
+            result = _stamp_now(start, distribution)
+        except Exception as exc:  # pragma: no cover - _stamp_now catches its own
             result = BuildStamp(
                 resolved_at=datetime.now(timezone.utc).isoformat(),
                 source="unknown",
