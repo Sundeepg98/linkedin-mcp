@@ -27,8 +27,8 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 321 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 281 |
+| audit documents git tracks under `_audit` | 322 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 282 |
 | distinct dates | 24 |
 | documents with no level-1 heading | 2 |
 | `CORRECTS:` marker lines | 134 |
@@ -39,7 +39,7 @@ are listed as `(undated)`; no date is taken from git history, because
 | documents at either end of a cross-document edge | 116 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
-| documents no correction marker touches at all | 203 |
+| documents no correction marker touches at all | 204 |
 | blockquoted markers naming ANOTHER document | 0 |
 | edges missing one of their two markers | 0 |
 | edges declared a different number of times in each direction | 2 |
@@ -2011,6 +2011,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-11-27 | [2026-11-27-prof7.md](2026-11-27-prof7.md) | Lane prof7 -- the self-profile loader waits for the rewrite, then session 12's profile cells |  |
 | 2026-11-27 | [2026-11-27-rulings-integration-7.md](2026-11-27-rulings-integration-7.md) | Orchestrator rulings of 2026-11-27 (12:35 to 17:50 IST), registered at integration 7 |  |
 | 2026-11-27 | [2026-11-27-settings7.md](2026-11-27-settings7.md) | Lane settings7, 2026-11-27: his four settings pages session 12 captured -- what each drew, measured by keyed shape, and what each row's bar lets move |  |
+| 2026-11-28 | [2026-11-28-census-calls.md](2026-11-28-census-calls.md) | Lane census-calls28 (lane A): the census calls, no code |  |
 | 2026-11-28 | [2026-11-28-hygiene28.md](2026-11-28-hygiene28.md) | Lane hygiene28: the reachable row's pattern count, a resolver that edits only the tree it runs in, and the facet-key cites |  |
 | 2026-11-28 | [2026-11-28-live-runner-checks-on-ci.md](2026-11-28-live-runner-checks-on-ci.md) | Live-runner checks on CI (lane ci-checks28, 2026-11-28) |  |
 
@@ -2049,7 +2050,7 @@ against the same line, so a missing continuation satisfies it.
 - REASON PAST ITS LINE [2026-11-25-admit26.md](2026-11-25-admit26.md) line 15 -- a line-scoped reader sees 26 of 482 characters.
 - REASON PAST ITS LINE [2026-11-26-readers-msg26.md](2026-11-26-readers-msg26.md) line 458 -- a line-scoped reader sees 32 of 357 characters.
 - REASON PAST ITS LINE [2026-11-27-msg7.md](2026-11-27-msg7.md) line 14 -- a line-scoped reader sees 22 of 269 characters.
-- REASON PAST ITS LINE [_census/jobs.md](_census/jobs.md) line 484 -- a line-scoped reader sees 825 of 1189 characters.
+- REASON PAST ITS LINE [_census/jobs.md](_census/jobs.md) line 496 -- a line-scoped reader sees 825 of 1189 characters.
 
 - TIGHTEST ADMISSION MARGIN [2026-09-03-linkedin-gap-blockers.md](2026-09-03-linkedin-gap-blockers.md) line 272 clears the 20-character floor by 0. The floor is applied to the marker's OWN LINE, so a reason of 723 characters is admitted on the strength of 20. Reflow that paragraph by one word and a guard rejects it saying it *carries no reason after the citation*, which would not be true. Reported every regeneration rather than counted, because a count of rejections reads zero until the day it does not.
 
