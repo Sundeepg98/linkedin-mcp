@@ -30,7 +30,7 @@ waits on that. N 61, N 50, rank 23's rows and the new capture steps wait on Q2 t
 | 4. the orchestrator's ruling | N 61 | GAP -> MEASURED-ABSENT, applied with queue rank 83's line (Q3, answered) | section 5 |
 | 5. the re-judges | M C11 | step re-pointed and cell noted, applied | section 6.1 |
 | 2. the code reads | M C65, M C91 | the cell notes, applied | section 3 |
-| 5. the re-judges | rank 23's 13 rows | all PRECONDITION; coupled to queue rank 23 (Q4) | section 6.2 |
+| 5. the re-judges | rank 23's 13 rows | all stepped PRECONDITION, with queue rank 23's line (Q4, answered); no state moves | section 6.2 |
 | 5. the re-judges | J 3, J 17, J 151 | a new place capture, `C-SRCH-2b` (Q5) | section 6.3 |
 | 5. the re-judges | M C65, M C91 | a group-feed capture (Q5) | section 6.4 |
 
@@ -336,7 +336,15 @@ Given rows) or `::first view: 0 entries and 0 member links` (the rest), plus
 `admit-in-me-details-recommendations`, lists all 13 with needs `-`, and
 `check_next_step.py` requires each to step `CAPTURE:admit-in-me-details-recommendations`.
 The capture it names is done (session 14). So the 13 lines and the rank 23 line move
-together, and the queue is not this lane's. Question Q4.
+together, and the queue was not this lane's. Question Q4.
+
+APPLIED on the orchestrator's answer (19:04 IST: "YOUR commit"), in one commit: each of
+the 13 cells gains a note citing session 14's reading by record and section
+(`_audit/2026-11-27-live-session-14.md`, section 10.2, phase 2), the 13 `next-step.tsv`
+lines become the PRECONDITION steps above (basis MEASURED), and rank 23's line leaves
+the queue. No row's STATE moves: PRECONDITION is a next-step kind, not a census state,
+so "the 13 rows to PRECONDITION" is read as their steps, and every pin held
+(`census_completion.py --check`).
 
 ### 6.3 J 3, J 17 and J 151: the step is a new place capture
 
@@ -541,7 +549,7 @@ HEAD; `git status` showed only this record afterwards. On that trial tree:
   3), and `check_next_step.py` goes RED on that line the moment N 61 leaves GAP. The
   orchestrator amended the queue rule for this lane, for exactly that, and the line
   left in N 61's commit.
-- **Q4, RANK 23 LEAVES THE QUEUE?** Ground, section 6.2: all 13 rows re-judged
+- **Q4, RANK 23 LEAVES THE QUEUE? -- ANSWERED: THIS LANE'S COMMIT (19:04 IST); APPLIED.** Ground, section 6.2: all 13 rows re-judged
   PRECONDITION, because session 14 read both views empty. The 13 `next-step.tsv` lines
   and the rank 23 line must move in one commit. Whose commit?
 - **Q5, TWO NEW QUEUE LINES.** Ground, sections 6.3 and 6.4: `C-SRCH-2b` for J 3, J 17
