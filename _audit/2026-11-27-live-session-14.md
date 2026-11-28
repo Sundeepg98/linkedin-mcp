@@ -1861,6 +1861,199 @@ The runner and its tools are in the main checkout's
    - `os_check.ps1`: 9224 down, 0 clients, no Chrome on the profile, no
      lock, no flag.
 
+## 12. Live session 14b, the run (2026-11-28, attended)
+
+**Run by `live14b`, the successor lane.** live-s13 prepared and certified
+14b (11.8). It could not be resumed after the machine restart, because its
+history stalled, and it is STOPPED. live14b worked only from this record, its
+pinned files and the GO, in 11.9's order exactly. It edited none of the
+pinned files: `verify_pins_s14b.py` read ALL-MATCH before Chrome started and
+again after the close.
+
+**THE GO** (`_TEAM_LEAD_GO.md`, 16:2x IST, with `_TEAM_LEAD_CWD.md`). Both
+were deleted as the ack at 16:53:58, after a copy of each was kept in the
+lane's gitignored scratch.
+
+- The head `9ec91965`, with 11.8's nine pins. The orchestrator measured
+  master fast-forwarded to it, and lane CI, the full matrix and master's push
+  CI green on that sha.
+- The operator at the console ("resume with full throttle max", 16:19).
+- At most 37 loads (the ledger read 3 at 16:20), at most 40 a session, 20 s
+  apart, and at most 3 searches. UNREAD-SKIPPED. `post_analytics` and
+  `self_press_volunteering` OFF. Any STOP ends the session.
+- The CWD note: every git command takes `-C` and this worktree, and every
+  write an absolute path.
+
+**BEFORE CHROME** (16:53 to 16:54 IST, VERIFIED):
+
+- `go_pins_check_s14b.py` (disposable, the lane's scratch) read the GO's nine
+  pin lines and its head. All equal `pins.json`: GO-MATCH True.
+- `verify_pins_s14b.py`, without `--before-fast-forward`: ALL-MATCH True.
+  The main checkout's start script was counted and matched; the head
+  `9ec91965`; the tracked tree clean.
+- `os_check` (16:54:07): 9224 down, 0 clients, no Chrome on the dedicated
+  profile, no lock, no flag.
+- The pinned ledger (`ledger_state.py`, live-s13's read-only disposable): 3
+  LinkedIn page loads in the trailing 12 h, so 37 free. Session 14's 3 leave
+  the window at 20:39:17 IST.
+- **Disk and the GO differ on one point.** `os_check`'s boot time reads
+  2026-11-26 08:55, before and after the session, not a restart at about
+  16:15. A power cycle under Windows fast startup keeps the last full boot's
+  time (DERIVED; UNVERIFIED here). No step depends on it: the premises the run
+  needs (9224 down, no Chrome on the profile) were measured.
+
+**THE START** (0 loads, VERIFIED):
+
+- 16:54:46: the main checkout's `scripts/start_chrome.ps1
+  -RefuseSessionRestore`. Outcome `started`, Chrome 158, `exit_type` Normal
+  before and after. The startup setting was absent from both files, with 0
+  startup pages and 0 on LinkedIn. The browser's pid was kept for the close.
+- 16:55:15: `os_check`. 9224 was held by one listener, the dedicated
+  profile's one browser process (`listener_is_the_profile_browser` True), with
+  0 clients and no lock.
+- 16:55:42: the flag raised.
+- 16:55:50: `tabs_check`. Answered: 1 page, 0 on LinkedIn, 1 blank; 1
+  listener, and it is the dedicated one; the launch digest kept. Exit 0.
+- `attach_check`. The first call, named as 11.9 names it, refused before any
+  contact: the harness takes its keys by `--only`. With `--only
+  attach_check`: PASS `[0, 1, 0]`, restored, 0 loads (16:56:18).
+- A status message went to the orchestrator before phase 1. K6 asks him to
+  keep the dedicated Chrome in front during the attended phases.
+
+### 12.1 The loads
+
+| load | IST | phase | landing | what it read |
+|---|---|---|---|---|
+| 1 | 16:57:26 | 1 `profile` (E5) | served, same depth, another url: his root | E5 proved his root at its first load; the top card; the scroll pass; no skill item |
+| 2 | 16:58:22 | 2 `c_srch_3a` | served exact | the AI-route search; Easy Apply pressed on and back; STOP-ALL `restore_failed` |
+
+Every load was recorded in the pinned ledger before it was made. Neither drew
+a wall, a checkpoint or a challenge (each: walled False, 0 challenge terms).
+The two were 56 s apart, and the window was `fronted` for both.
+
+### 12.2 What each phase showed
+
+**Phase 1, `profile`: exit 0, 1 load.**
+
+- **E5:** his root served through the shipped loader, and the self rule
+  proved it at its first load, by his edit controls (4 on the landed member,
+  0 edit routes on another). The self block was open.
+- People gate v2 withheld the raw (L1 10, N1 52, R1 11, R2 9), and the
+  skeleton was kept.
+- The top card drew More 1 (0 visible), Resources 1 (1), Open to 2 (1),
+  Enhance profile 2 (1) and Add profile section 0, as in 14a. The editor
+  routes were `edit/forms/summary/new/` 1, `edit/intro/` 1,
+  `edit/secondary-language/` 1 and 1 other form, and the same after the
+  scroll pass.
+- **OUT by content, found and not pressed** (r3d): the top-card opener
+  (Resources), the photo (1 image button) and Add custom button (0 drawn).
+- **The scroll pass: 1 step.** After it, the section words Experience,
+  Education, Skills, Services and Recommendations each read 0 in `main`.
+  E23's input: 0 skill ids and 0 insight indices.
+- **Rank 31: not pressed.** No Experience section was found, and the
+  add-a-position link was drawn 0 times (`not_exactly_one_link`).
+- **The scrolled skeleton is byte-identical to the first** (VERIFIED, by
+  sha256).
+- **DERIVED, from the code and the output:** the pass tests for the bottom
+  before each scroll. So "1 step" means the document already read as at its
+  bottom at the first test, and no scroll was made. A page that scrolls in an
+  inner element, not the document, reads that way. Which element scrolls is
+  UNVERIFIED. 14a's photo-press reading also saw sections render late (10.5).
+- So `name_items_s14b.py skill` and `skill_index` each printed "drawn by
+  E5's reading: 0" and NOTHING TO NAME (exit 2). Phases 7 and 24 have no item.
+
+**Phase 2, `c_srch_3a`: exit 4, STOP-ALL `restore_failed`, 1 load, 3
+searches.**
+
+- Served exact. People gate v2 withheld the raw (R1 1, R2 1), and the
+  skeleton was kept.
+- **The first view:** the AI route; 25 cards, ids and rows, 0 unparsed; the
+  total capped at 99 shown; the pager's 3 indicators and a visible next
+  control. The Easy Apply toggle had 2 inputs (1 visible), 0 checked. The
+  address keys: `currentJobId` and `keywords`.
+- **ON** (search 2, recorded before the press at 16:58:44): it took effect.
+  Checked 2 and 6 ids shared with the first view. The keys `f_AL` (true),
+  `origin` and `referralSearchId` were added, and `currentJobId` changed. No
+  document loaded.
+- **OFF** (search 3, recorded before the press at 16:59:04): checked 0, and
+  25 of 25 ids shared with the first view. The keys: `currentJobId`,
+  `keywords`, `origin` and `referralSearchId`. No document loaded.
+- **The judge read RESTORED False.** The toggle and the id set came back, and
+  `f_AL` is gone. But `origin` and `referralSearchId`, which the ON press
+  added, stayed, and the address is not the one before the press. Values are
+  not kept, so whether `currentJobId` came back is not shown. STOP-ALL
+  `restore_failed` at `c_srch_3a_easy_apply`; the runner closed its tab.
+- Not reached: All filters, opened, read and closed.
+
+### 12.3 The close: no load after the STOP-ALL
+
+- No compare of his root was deferred: phase 1 pressed nothing on his root,
+  and `root_signatures.json` is absent. `root_settle` was not run, since
+  nothing loads after a STOP-ALL.
+- 16:59:50: `close_chrome_s14b.py --port 9224 --pid <the browser's> --profile
+  <the dedicated profile>`, with the flag standing. It judged "the dedicated
+  browser", 1 listener on the port, owned by the pid. `Browser.close` was
+  sent and answered in 0.96 s, and the browser exited 1.56 s later. The path:
+  `cdp_browser_close`. Nothing was killed. Exit 0.
+- 17:00:07: the flag lowered; no compare was pending.
+- 17:00:13: `os_check`. 9224 down, 0 listeners, 0 clients, no Chrome on the
+  profile, no lock, no flag. His own Chrome was never named or signalled.
+- **No restore prompt.** After the close, the profile's `Preferences` read
+  `profile.exit_type` Normal (VERIFIED, a read only). Chrome offers a restore
+  only on a Crashed mark (the start script's measurement, in its header), so
+  the next start offers none (DERIVED).
+- The session folder is preserved in the main checkout's gitignored
+  `_state/preserved/live15-2026-11-28`: 16 files, each identical by sha256.
+  No raw page was kept (`raw_kept` False in both readings).
+
+### 12.4 The ledgers
+
+- The session ledger: 2 loads, 3 searches.
+- The pinned account ledger: 2 records for 14b (`live-s13/15/live_census`),
+  so 5 in the trailing 12 h and 35 free. Session 14's 3 leave the window at
+  20:39:17 IST, and 14b's 2 at 04:58:19 IST on 11-29.
+- The two ledgers agree at 2.
+
+### 12.5 The GO's accepted departures, recorded
+
+The GO's ruling 1 ACCEPTED all three named in 11.8, each stricter than ruled:
+
+- the teardown's 30 s exit wait. Here the browser exited 1.56 s after the
+  reply;
+- the tabs gate's same-launch condition. It held: the reading was taken on
+  this launch;
+- the start script's refusal of a preferences file it cannot read. It was not
+  met: both files were read.
+
+### 12.6 What 14b did not reach
+
+- **Not run because of the STOP-ALL:** phases 3 to 20, 22, 23 and 25 to 27.
+- **No item either:** phases 7 and 24, since E5's reading drew no skill item.
+- **OFF by the GO:** phases 21 and 28.
+- **From phase 1:** rank 31's press. **From phase 2:** All filters.
+
+### 12.7 Rows moved: none
+
+Each line was a capture, and a capture moves no row by itself (10.7). The two
+skeletons are preserved, not exported to tracked fixtures: no order named an
+export for this session.
+
+### 12.8 What needs the orchestrator
+
+1. **Rank 132's round trip cannot pass this judge on this route.** LinkedIn
+   added `origin` and `referralSearchId` on the ON press and kept them after
+   the OFF press. The view came back (the toggle unchecked, `f_AL` gone, 25 of
+   25 ids), but the judge asks for every touched key back. It needs a ruling:
+   either the two keys are judged volatile, as `ROOT_VOLATILE` is for his
+   root, or the toggle's round trip is dropped from 14c.
+2. **Phase 1's scroll pass made no scroll.** E23's skill items, rank 31's
+   link, and phases 7 and 24 wait on a pass that scrolls the element that
+   scrolls and waits for the late sections. That is offline work, red first
+   on this session's skeleton, before 14c.
+3. **The account:** 35 free now, 37 after 20:39 IST, and 40 after 04:58 IST
+   on 11-29.
+4. **Disk and the GO** differ on the boot time (BEFORE CHROME, above).
+
 ## Lessons (for the orchestrator to harvest)
 
 1. **`Path.write_text` on Windows writes CRLF.** Three patch scripts turned
@@ -1930,4 +2123,19 @@ The runner and its tools are in the main checkout's
     harness needs its own clock from the first day. It should name the few
     checks that test a wait itself, and run its independent sets side by
     side.
+17. **A restore judged on the whole address fails where the site adds keys
+    and never takes them back.** On the AI route, the Easy Apply press added
+    `origin` and `referralSearchId`, and the press back left them. The toggle
+    and all 25 ids came back, and the judge still read RESTORED False (12.2).
+    A round trip's judge has to know which keys the site owns, measured on a
+    capture before the live press.
+18. **A scroll pass that tests for the bottom first can end before its first
+    scroll.** "1 step" read like a pass, but the scrolled skeleton was
+    byte-identical to the first, so the pass measured nothing (12.2). Count
+    the scrolls made, not the loop's steps, and compare the skeletons before
+    and after.
+19. **A git hooks folder held in a shell variable reads as the consent hook's
+    protected folder.** `$GD/hooks/` was denied by name (R2), and nothing ran.
+    Read with the Read tool, or spelled as a literal path, it is judged by its
+    path, as the denial itself says.
 
