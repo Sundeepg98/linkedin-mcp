@@ -174,14 +174,22 @@ runs the rest.
 
 ## 6. Certification
 
-**READY**, on the certified sha `3472fd46`: branch `ci-checks28`, with master `b7db2f7a` merged in
-(section 11) and question (c) built (section 10). Master is an ancestor of it, so it fast-forwards
-master.
+**READY**, on the certified sha `3423d04a`. This is the integration branch, and it carries three
+lanes:
+
+- this lane, `5992d6a6`, green on lane CI 46154678640 and the full matrix 46155307618;
+- master `acd9df5c`, the live lane's session 14c r3 READY;
+- vendor-pin28, head `ddf45cae` (section 11.2).
+
+Master is an ancestor of it, so it fast-forwards master.
 
 | run | on | result |
 |---|---|---|
-| lane CI, 46151713586 | `3472fd46`, ubuntu py3.13, 4 shards | success, 6m56s. The totals job printed "1 by-cell rule(s)", then "NOT CHECKED in this run: the rule that 15 test(s) run on windows-latest", which is the lane fast path's due |
-| the full matrix, 46152290793 | `3472fd46`, 3 cells x 6 shards (`lane_ci.py wait <sha> --full`) | success, 13m48s, 18 of 18 shard jobs. The totals job printed "1 by-cell rule(s)" and no NOT CHECKED line, so failure mode 7 held both halves: each ubuntu cell skipped the 15 by name, the Windows cell ran them, and no Windows shard declared a guard skip |
+| lane CI, 46160352024 | `3423d04a`, ubuntu py3.13, 4 shards | success, 6m38s |
+| the full matrix, 46160990546 | `3423d04a`, 3 cells x 6 shards (`lane_ci.py wait <sha> --full`) | success, 9m40s, 18 of 18 shard jobs. The totals job printed "1 by-cell rule(s)" and no NOT CHECKED line, and no Windows shard declared a guard skip. So failure mode 7 held both halves: each ubuntu cell skipped the 15 by name, and the Windows cell ran them |
+
+CI is the only workflow that ran on this sha. vendor-pin28's `vendored-current.yml` runs on a push to
+master, on a schedule and on dispatch, never on a `ci/` ref. So its first run is master's push.
 
 **The earlier heads**, in order:
 
@@ -191,8 +199,10 @@ master.
 | `87f9ea95` | lane 46145540707, full 46146119772 | green; the first READY, before (c). The Windows cell ran the guard: its shard 0 holds the module, and its 2 declared skips are other files' |
 | `355ddfa6` | lane 46147264245 | green, record only |
 | `dddb46de` | lane 46150719805 | red on one test, the cited-sha guard on three slotted tokens in section 11 (section 8) |
+| `3472fd46` | lane 46151713586, full 46152290793 | green, with (c) and master `b7db2f7a` merged in. Its READY was never pushed: master had moved to `d87d97ec` (section 11.1) |
+| `5992d6a6` | lane 46154678640, full 46155307618 | green, with master `d87d97ec` merged in |
 
-This section is a record-only commit on top of `3472fd46`. By the standing rules, it may be
+This section is a record-only commit on top of `3423d04a`. By the standing rules, it may be
 fast-forwarded on that certification, and master's own run then covers the record.
 
 **HOLD** for the orchestrator's merge.
