@@ -257,7 +257,7 @@ gate v2 cannot learn him without the slug).
 |---|---|---|
 | `runner_s14.py` | the main checkout's gitignored `_state/live-runner/s14/` | session 14's runner: 31 phases plus `root_settle`, `flag_on`, `flag_off`, `provenance` |
 | `runner_s13.py` | beside it | session 13's runner, byte-identical (`4f0adbed`): the red side of every check |
-| `runner_s14_r1.py`, `runner_s14_r2.py` | beside it | the snapshots the cold review read (round 1) and re-checked (round 2) |
+| `runner_s14_r1.py` .. `runner_s14_r4.py` | beside it | the snapshots the cold review read (round 1) and re-checked warm (rounds 2-4) |
 | `s14_block_1.py` .. `s14_block_5.py`, `assemble_s14.py` | beside it | the session-14 code and the script that builds the runner from session 13's (each insertion asserts its anchor once) |
 | `gate_checks_s14.py` | beside it | the red-first checks (section 5) |
 | `scripts/people_gate.py` | tracked, unchanged by the merge | PEOPLE-GATE v2, IMPORTED from this worktree |
@@ -397,4 +397,268 @@ The review's section 4 disagreements are corrected in sections 1-3 above.
 | NIT-E, NIT-F | the STOP-ALL line names the composer; the JS handles are disposed | -- |
 
 NIT-B (an in-page opening is judged by URL only) is documented, not changed.
+
+**ROUND 3, the warm close-out** (`review-s14/round-3.md`, on `runner_s14_r3.py`,
+`c17487ed`).
+
+- The matcher held, 20/20.
+- Both of round 2's majors were CLOSED, and so were its minors. MINOR-B was
+  CLOSED WITH A NEW ISSUE.
+- No BLOCKER and no MAJOR remained. Two new MINORS were found, fixed in round 4,
+  red first (red on r3, green on r4):
+
+| finding | fix | check |
+|---|---|---|
+| MINOR-D (MAJOR-A's class): `DocumentWatch.reconcile` read a page whose navigation was pending, and the self press's close and compare sat outside the STOP-ALL wrapper | `reconcile` waits for a late document's navigation as `_click` does; the close and compare (and rank 30's two closes) run under the wrapper | Q9, Q10 |
+| MINOR-E (MINOR-B's fix): `root_settle`'s proof rewrote E5's file, re-opening the self block | `his_root(prove=True, persist=False)`: proven by the loader's rule, nothing written | Q11 |
+| NIT-G: dead switch code under `if False:` | removed | Q12 |
+| NIT-H: an error after the Drafts press was a plain abort | the aftermath under the STOP-ALL wrapper | Q13 |
+
+**ROUND 4, the final warm confirmation** (`review-s14/round-4.md`, on
+`runner_s14_r4.py`, `1468b62b`, which also carries UNREAD-SKIPPED's change to
+the table). Every round-3 finding is CLOSED:
+
+- N1: `reconcile` waits for a 7 s late document, and it is counted once.
+- X18: an Escape that navigates slowly is judged through.
+- X19a/b: an error inside a close is STOP-ALL.
+- N2 x2: `root_settle` writes no proof file.
+- N4: `flag_off` refuses with a compare pending.
+
+The UNREAD-SKIPPED delta is VERIFIED:
+
+- the inbox's two phases refuse as unknown;
+- `featured` makes 1 load and presses nothing;
+- a client-side move after its load is counted.
+
+Every earlier probe stays closed, and the matcher still holds (20/20).
+**"Nothing above a NIT remains. This is the close-out."**
+
+THE NITS THAT STAND:
+
+- NIT-B (an in-page opening is judged by URL) and NIT-4 (E19's wait) are
+  documented.
+- NIT-8 is prof7's.
+- T10b's residual: a hostile focus pull lands the fixed token in a composer
+  before the STOP-ALL, and the STOP-ALL line tells him to clear it. The one
+  typing site is unreachable in session 14: no runnable phase loads
+  `/messaging/`.
+- The `if True:` shims are style only.
+- The one NIT new in round 4, the S6 header item, is fixed in r5
+  (documentation only).
+
+**THE ORCHESTRATOR'S RULING ON ROUND 3** (`_TEAM_LEAD_R3.md`, 2026-11-28 02:25,
+deleted as the ack in the commit adding READY).
+
+- It ordered all four items fixed, red first. They already were in r4, each
+  with its check (section 6, round 3's table).
+- It added one requirement to MINOR-E: "make a proof of any other member a
+  STOP-ALL". That is r5's one behavioural change. If the shipped loader proves
+  a member other than the one this session's proof names, `his_root` raises
+  STOP-ALL `self_member_changed` before any file is touched. This covers a self
+  line, E5's own re-run, and `root_settle`, which passes the deferred slug as
+  `expected_member`.
+- A loader that proves nothing is still "not proven".
+- Check Q14 is red on r4 and green on r5.
+
+**ROUND 5, the warm close-out on the FINAL sha** (`review-s14/round-5.md`, on
+`runner_s14.py` = `runner_s14_r5.py`, `8094c4a0`):
+
+- V1-V3: the new STOP-ALL, VERIFIED on a self line, on E5's re-run and in
+  `root_settle`, each leaving `self.json` untouched.
+- V5: a loader that proves nothing is never STOP-ALL.
+- Every earlier probe gives the same result as on r4, and the matcher holds
+  20/20. **"Nothing above a NIT remains on the final sha. This is the
+  close-out."**
+- One NIT is new, and accepted as it fails toward stopping. The member is
+  compared case-sensitively, so E5's slug in another letter case would be
+  STOP-ALL. LinkedIn's rewrite lands on one canonical spelling, and the
+  matcher itself must stay case-exact.
+
+## 7. The final pass, serially, on the FINAL runner
+
+The final runner is `runner_s14.py` (`8094c4a0`, = `runner_s14_r5.py`), with
+the check file `gate_checks_s14.py` (`6ea192d6`). The pass is
+`final_pass_s14.sh`, in four chunks, 2026-11-28 05:15-06:28 IST, the flag
+down at every step. The outputs are in `final/`, beside the runner.
+
+| check set | runner | result |
+|---|---|---|
+| `provenance` | final | every gate module from where it must be (5 of 5 True) |
+| `gate_checks_s14.py` | **final** | **82 of 82 passed** (78 red-class, 4 controls) |
+| the same | `runner_s14_r4` | 1 red-class failed: Q14, the R3 ruling's STOP-ALL |
+| the same | `runner_s14_r3` | 6 red-class failed: Q9-Q14 |
+| the same | `runner_s14_r2` | 16 red-class failed: round 2's and later findings |
+| the same | `runner_s14_r1` | 28 red-class failed: every round's findings, and S1 |
+| the same | `runner_s13` | 54 of 54 red-class failed; its 2 controls passed |
+| session 13's `gate_checks_s13.py`, on the shared code | final | 49 of 57 passed (below) |
+| session 12's Open-to-Work checks (`otw_checks_s14_port.py`) | final | 8 of 8 |
+| `entry_refusals_s14.py` | final | 14 of 14 refusals as named, before any browser contact; the pinned store unchanged; no flag, ledger, lock or self proof made |
+| `prepare_items_s14.py` | -- | 3 items, every check passed (shapes, the identity-key veto, rank 95's veto, 21 of 21 addresses admitted, the AI route) |
+
+Session 13's check set fails 8 checks on the final runner, each for a named
+session-14 difference, not a defect:
+
+- 3 are its 28-load caps (now 40);
+- 3 are its inbox phase's vetoes (that phase is not runnable here);
+- 1 is its "no typing site" control (session 14 has one);
+- 1 is its runnable-phase set.
+
+The other 49 checks of the shared code pass.
+
+## READY (2026-11-28, 06:35 IST)
+
+Session 14's Phase A is done. The runner, its checks and the cold review are
+closed, and the final pass ran on the final sha. HOLD: PHASE B starts only on
+a `_TEAM_LEAD_GO.md` that names these pins, with the operator at the
+console.
+
+**THE PINS** (full values in the session's gitignored `_state/live14/pins.json`,
+written after the commit that adds this section):
+
+| pin | sha256 (short) |
+|---|---|
+| `runner_s14.py` | `8094c4a0d9419b26` |
+| `scripts/people_gate.py` | `6ff3afb732ed1546` (unchanged by the merge) |
+| the harness, `scripts/_probe_live_lane_session_2.py` | `a5c10ae992f691b8` |
+| `linkedin_server/volunteering_route.py` (the one matcher) | `5635e69f595bfa3c` |
+| `linkedin_server/self_profile.py` (the shipped wait) | `b39b615b2c476b94` |
+| the prepared items (gitignored) | `842bced39d3678bb` |
+| `os_check.ps1` | `455cc21796054c94` |
+
+The branch head is the commit that adds this section. Its sha is in the
+READY message and in `pins.json`.
+
+**THE SPLIT** (section 1):
+
+- **14a:**
+  - with 33 free (before 08:02 IST): phases 1-15 and 22 at most-loads (33), or
+    phases 1-28 at the expected spending (31);
+  - with 40 free (after 08:10 IST): phases 1-19 at most-loads (40), or all 30
+    at the expected spending (33);
+  - its searches are 3, C-SRCH-3a's.
+- **14b**, a session of its own after the window:
+  - whatever 14a deferred, plus ranks 2 (3 loads, 3 searches), 149 (2 loads)
+    and 151 (3 loads);
+  - those three are built for 14b's own READY.
+
+**THE BOX AND THE LEDGERS** (06:28 IST):
+
+- `os_check`: 9224 down, 0 clients, no Chrome on the dedicated profile, no
+  lock, no flag.
+- The pinned ledger: 7 LinkedIn loads in the trailing 12 h, 33 free.
+  Session 13's leave by 08:10 IST.
+
+**THE ATTENDED ITEMS** (session 14 is attended):
+
+- phase 1, rank 31: his add-a-position editor, opened and closed;
+- phase 3: his Open-to-Work Edit (OPEN-TO-WORK-EDITOR-ATTENDED-ONLY);
+- phase 11: his contact-info overlay and its form;
+- phase 15: his key skills;
+- phase 20: the Career goal control;
+- phase 21: one alert row's control, pressed only on an allowed label that is
+  no toggle;
+- phases 27-30: his About, profile-language, services and volunteering
+  presses.
+
+What he names at the GO:
+
+- a post of his, for phase 23;
+- his profile id in a gitignored items file, for phase 30.
+
+Without them, those phases drop with the reason. UNREAD is answered (`skip`).
+
+**THE STOP LINES:** section 3. Every STOP-ALL ends the session, and nothing
+loads LinkedIn after it until the orchestrator reconciles the ledgers.
+
+**NOT IN THIS READY:**
+
+- the INSTRUMENTS section 122, written at the close-out from what held live,
+  as section 119 was;
+- 14b's three lines.
+
+## 8. The commands for PHASE B, on GO
+
+Every runner call takes the same environment:
+`LINKEDIN_CDP_ATTACH=1 LINKEDIN_CDP_PORT=9224 LINKEDIN_MIN_INTERVAL_S=20 LIVE_LANE_SESSION_DIR=live14`.
+The runner and its tools are in the main checkout's `_state/live-runner/s14/`,
+and each step runs in the foreground.
+
+1. **Before the first load:**
+   - `verify_pins_s14.py` must print ALL-MATCH against the GO's pins.
+   - `os_check.ps1`: 9224 down, no flag, no lock.
+   - The pinned ledger's free count is read; it sets 14a's room.
+2. **Chrome and the flag:**
+   - the dedicated Chrome is started with the main checkout's
+     `scripts/start_chrome.ps1`, its two flags only;
+   - `os_check.ps1` again;
+   - `runner_s14.py flag_on`;
+   - the harness's `attach_check`, 0 loads.
+3. **The phases, in section 1's order.** The preflight refuses a phase
+   whose most-loads do not fit the room, and the next one is then tried.
+   - After `profile`, the caller names the items E5's reading drew
+     (`name_items_s14.py skill`, then `name_items_s14.py skill_index`).
+   - `c_srch_3a` and `permalink_menus` take
+     `--items _state/live14/items_prepared.json`.
+   - `post_analytics` takes the post he names.
+   - `self_press_volunteering` takes his profile id, from a gitignored items
+     file the runner deletes once read. Without one, phase 30 drops
+     (section 9).
+4. **The end:**
+   - `root_settle`, if a compare of his root is pending;
+   - `flag_off`, which refuses while a compare is pending;
+   - the dedicated Chrome closed BY ITS PID, verified by its command line;
+   - `os_check.ps1`: 9224 down, 0 clients, no Chrome on the profile, no
+     lock, no flag.
+
+## 9. What needs the orchestrator
+
+1. **Rank 69's profile id has no source on disk.** The orders name "the
+   gitignored identity key's operator class". That class holds 5 values, none
+   of the member-id shape (VERIFIED, counts only). Under
+   VOLUNTEERING-FALLBACK-BOUNDARY the page may never supply the id. So the GO
+   must carry it in a gitignored items file, or phase 30 drops with that
+   reason.
+2. **Rank 154 needs a post of his, named by him at the GO.** Without one,
+   phase 23 drops.
+3. **UNREAD's optional round trip.** The two cells' definitions do not call
+   for one. M M28 is the Archived view, and M M54 restores an archived row;
+   neither is about a conversation's read state. And marking another
+   conversation unread would not change what `/messaging/`'s landing opens.
+
+   A route with no outward effect is on disk, though: the composer's own
+   address. Session 13's load 7 of it drew the list with nothing opened, and
+   its tracked skeleton (`tests/fixtures/live13/messaging_list.html`) draws
+   the same folder pill and folder dropdown (VERIFIED by attribute). So the
+   Archived capture could ride the composer's page, where no conversation is
+   landed in. It is proposed for a ruling and not built.
+4. **prof7's matcher, two notes, for its owner** (the cold review's NIT-8):
+   - `_why_not` names a scheme-case difference `query`;
+   - a dot-segment member passes the matcher's own member check.
+
+   Neither can reach the runner, whose member always comes off a
+   parser-normalised landing.
+
+## Lessons (for the orchestrator to harvest)
+
+1. **`Path.write_text` on Windows writes CRLF.** Three patch scripts turned
+   an LF file CRLF this session, and one assembly refused on it. A patch
+   writes bytes.
+2. **An idempotent patch cannot test "the new text is present" when the new
+   text CONTAINS the old.** The skip rule re-applied three edits whose
+   replacement began with their anchor, and duplicated them. A recursive copy
+   of one function was caught by a count. The skip has to test the old text's
+   count outside the new.
+3. **A watch entered before a load counts the load's own document again**,
+   unless the meter marks it as the load's. The first fix of round 1's
+   MAJOR-3 did exactly that, and check R3 caught it.
+4. **`no_wait_after` trades a click timeout for a pending navigation.** The
+   next page read blocks on the commit, then raises "execution context
+   destroyed", so an error path skipped the landing judge. The click must
+   wait for the navigation it counted. Measured by the warm re-check.
+5. **A label rule judged by words admits a toggle.** A switch labelled with
+   an allowed word was pressed, and its flip was invisible to a text digest.
+   A control's role and state must refuse before its words are read.
+6. **An order can name a source disk does not hold.** The identity key's
+   operator class holds no member id, so the order's source for rank 69
+   cannot be met as written.
 
