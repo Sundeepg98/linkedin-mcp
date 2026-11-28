@@ -174,6 +174,28 @@ runs the rest.
 
 ## 6. Certification
 
+**READY**, on the certified sha `87f9ea95`: branch `ci-checks28`, three commits on master
+`9ec91965`.
+
+| run | on | result |
+|---|---|---|
+| lane CI, 46145540707 | `87f9ea95`, ubuntu py3.13, 4 shards | success, 6m22s. One shard reads "skipped 15 (15 declared)": the guard's 15, tolerated by name. 0 failed and 0 errors in every shard |
+| the full matrix, 46146119772 | `87f9ea95`, 3 cells x 6 shards (`lane_ci.py wait <sha> --full`) | success, 11m38s, 18 of 18 shard jobs |
+| an earlier lane CI run, 46144818568 | `cab03baa` | failure: one test, the correction finder on a row of this record (section 8). That row was reworded in `87f9ea95` |
+
+**The Windows cell RAN the guard** (VERIFIED from the full run's log):
+
+- on windows-latest py3.13, `tests/test_start_chrome_guard_behaviour.py` is in shard 0;
+- shard 0's 2 declared skips belong to other files;
+- so all 15 guard tests executed there and passed;
+- each ubuntu cell printed the 15 by name as declared skips;
+- the chrome judge ran in the Windows cell's shard 1, and the page rules in its shard 4.
+
+This section is a record-only commit on top of `87f9ea95`. By the standing rules, it may be
+fast-forwarded on that certification, and master's own run then covers the record.
+
+**HOLD** for the orchestrator's merge.
+
 ## 7. What stayed local, and why
 
 | set | stays local | why |
