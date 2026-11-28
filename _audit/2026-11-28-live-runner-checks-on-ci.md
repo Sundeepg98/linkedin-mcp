@@ -248,6 +248,13 @@ entry refusals are local by design.
   the script a synthetic suite.** Two existing tests went red on (c)'s first cut, because their
   ubuntu cell "failed" to skip tests it never had. Scope a rule to the runs it can speak for (here,
   runs in which some cell reported its tests), and close the remaining gap where the tests live.
+- **The same miss again, one guard over.** Lane run 46150719805 failed
+  `tests/test_a_cited_sha_resolves.py`. Section 11 had put three hex tokens in commit slots: the
+  branch's own unmerged commit after "commit", and two sha256 prefixes after "at". The checker
+  resolves a slotted token as an ancestor of master, so none of the three could. My last audit
+  rerun had left out that test, because it is slow. The rule is now: after the last edit to a
+  record, run `scripts/check_cited_shas_resolve.py` too, or apply its `SLOTS` to the record
+  directly, which takes a second.
 
 ## 9. Questions for the orchestrator
 
@@ -350,7 +357,7 @@ were convicted, with no ERROR, and the control passed 23 of 23:
 **Gates** (local, under 2 minutes, no live flag): the new file with `tests/test_ci_shard.py`,
 `tests/test_ci_runner_facts.py`, `tests/test_lane_ci.py` and the import-safety sweep, 531 passed.
 Then the audit tests and the identity cases, 104 passed, and the sweeps over `scripts/` and
-`tests/`, 213 passed. (c) is commit `4e8a3c57`.
+`tests/`, 213 passed. (c) is one commit of its own on the branch, just before section 11's merge.
 
 ## 11. Integration with master `b7db2f7a` (hygiene28)
 
@@ -380,8 +387,8 @@ head fast-forwards master. hygiene28 and this lane met in three files, each appe
   it, also matches 13 of 13. The runner has the same bytes as `runner_s14c.py` (sha256 `04b30b3d`),
   and the teardown copy the same bytes as the pinned teardown (`83d17023`). So the runner 14c is to
   run still carries all 13 pieces unchanged.
-- **Pass 2's 15:31 summary** lists `tabs_checks_s14b.py` at `967cf23c`. The pins, written at 16:08,
-  list it at `8f5ffa6a`, which is the file on disk. So the pins agree with disk, and only that
+- **Pass 2's 15:31 summary** lists `tabs_checks_s14b.py` with sha256 `967cf23c`. The pins, written
+  at 16:08, list it with sha256 `8f5ffa6a`, the file on disk. So the pins agree with disk, and only that
   summary predates the 15:39 edit.
 
 **Gates on the merged tree** (local, under 2 minutes, no live flag):
