@@ -1,6 +1,6 @@
 row	slice	dir	class	next	basis	source
 J 2	J	R	-	CAPTURE:C-SRCH-3f	MEASURED	_audit/2026-11-26-live-session-12.md::REDIRECTED to the AI route ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
-J 3	J	R	-	CAPTURE:C-SRCH-2	MEASURED	_audit/2026-11-26-live-session-12.md::REDIRECTED to the AI route ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
+J 3	J	R	-	CAPTURE:C-SRCH-2b	MEASURED	_audit/2026-11-27-live-session-13.md::The AI job search ignores a text ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
 J 4	J	R	-	CAPTURE:C-SRCH-3a	MEASURED	_audit/2026-11-26-live-session-12.md::REDIRECTED to the AI route ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
 J 5	J	R	-	CAPTURE:C-SRCH-3a	MEASURED	_audit/2026-11-26-live-session-12.md::REDIRECTED to the AI route ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
 J 6	J	R	-	CAPTURE:C-SRCH-3a	MEASURED	_audit/2026-11-26-live-session-12.md::REDIRECTED to the AI route ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
@@ -14,7 +14,7 @@ J 13	J	R	-	CAPTURE:C-SRCH-3e	MEASURED	_audit/2026-11-26-live-session-12.md::REDI
 J 14	J	R	-	CAPTURE:C-SRCH-3e	MEASURED	_audit/2026-11-26-live-session-12.md::REDIRECTED to the AI route ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
 J 15	J	R	-	CAPTURE:C-SRCH-3a	MEASURED	_audit/2026-11-26-live-session-12.md::REDIRECTED to the AI route ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
 J 16	J	R	-	CAPTURE:admit-jobs-search-results-keywords	MEASURED	_audit/_census/jobs-directions.tsv::https://www.linkedin.com/jobs/search-results/?keywords=placeholder ; RULING:READ-PAST-AN-ACT-SUBSTRING
-J 17	J	R	-	CAPTURE:C-SRCH-2	MEASURED	_audit/2026-11-26-live-session-12.md::REDIRECTED to the AI route ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
+J 17	J	R	-	CAPTURE:C-SRCH-2b	MEASURED	_audit/2026-11-27-live-session-13.md::The AI job search ignores a text ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
 J 18	J	R	-	SIBLING:J 3	MEASURED	_audit/2026-11-26-live-session-12.md::REDIRECTED to the AI route ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
 J 19	J	W	-	TARGET:his order to clear his recent job searches, the press being the act	MEASURED	_audit/2026-11-25-build-jmn26.md::What the press opens -- a confirmation, or nothing ; RULING:J-19-BUILT-BEHIND-THE-GRANT
 J 28	J	W	-	TARGET:a job posting he names to report as closed	NAMED	_audit/2026-09-28-rulings-build-classes.md::a report is never fired for a proof unless he names a real item to report
@@ -63,7 +63,7 @@ J 99	J	W	-	SIBLING:P I12	NAMED	_audit/_census/jobs.md::Container: `P I12`
 J 100	J	W	-	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 J 107	J	R	-	CAPTURE:C-SRCH-5	MEASURED	_audit/2026-11-26-live-session-12.md::REDIRECTED to the AI route ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
 J 112	J	R	-	TARGET:a school Page he names	NAMED	_audit/_census/read-addresses.tsv::UNDER THE WHO/WHICH RULE, EXTENDED ; RULING:OPERATOR-NAMES-THE-TARGET
-J 151	J	R	-	CAPTURE:C-SRCH-2	MEASURED	_audit/2026-11-26-live-session-12.md::REDIRECTED to the AI route ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
+J 151	J	R	-	CAPTURE:C-SRCH-2b	MEASURED	_audit/2026-11-27-live-session-13.md::The AI job search ignores a text ; RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
 J 170	J	W	-	CAPTURE:C-J170-1	MEASURED	_audit/2026-11-27-jobs7.md::one alert row's control, attended ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE
 J 171	J	R	-	CAPTURE:C-LRN-1	MEASURED	_audit/2026-11-27-jobs7.md::LinkedIn's browsable index, the same for every member ; RULING:COMPOUND-ROW-SPLITS-ONLY-ON-STATE
 J 172	J	W	-	CAPTURE:C-LRN-2	MEASURED	_audit/2026-11-27-jobs7.md::seeing his goal is a read of his own page ; RULING:COMPOUND-ROW-SPLITS-ONLY-ON-STATE
@@ -151,7 +151,7 @@ M C57	M	W	R3	TARGET:the event he names to create (title and time)	INFERRED	RULIN
 M C58	M	W	R3	TARGET:an event he names	NAMED	_audit/_census/read-addresses.tsv::ADMITTED 2026-09-23 BY A REVIEW: COMMIT (lane L1): one event by its NUMERIC id ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
 M C61	M	W	R3	CAPTURE:C-B5-1	NAMED	_audit/2026-10-10-lane-b5-groups-build.md::| C-B5-1 | N 63, M C61 | ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
 M C62	M	W	R3	TARGET:a group he has a pending request to join	NAMED	_audit/_census/write-classes.tsv::queued:GROUP-REQUEST-PENDING ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
-M C65	M	W	R3	SIBLING:M C25	INFERRED	RULING:D6-CAPABILITY-OVER-AFFORDANCE ; M C25
+M C65	M	W	R3	CAPTURE:C-GROUP-POST-1	MEASURED	N 175 ; _audit/_census/network.md::A group feed's post permalinks do not wear that route ; _audit/2026-11-28-census-calls.md::M C65 AND M C91 NEED THE GROUP FEED'S OWN ROUTE
 M C66	M	W	R2	TARGET:a member he names to mention	INFERRED	RULING:MENTION-COMPOSITION-RULING ; RULING:OPERATOR-NAMES-THE-TARGET
 M C67	M	W	R3	TARGET:a group post or comment of his he names	INFERRED	RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS ; M C67
 M C68	M	W	R3	TARGET:a group he names that holds posts for admin approval	INFERRED	RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS ; M C68
@@ -172,7 +172,7 @@ M C87	M	W	R3	TARGET:a post he names where he is mentioned or tagged	INFERRED	RUL
 M C88	M	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 M C89	M	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 M C90	M	W	R3	CAPTURE:C-B3-2	INFERRED	_audit/2026-10-10-lane-b3-messaging-build.md::the first place to look, in the same capture ; RULING:CAPTURE-PRESS-UNDER-PROBE-RULE ; RULING:HIS-OWN-CURATION-NOT-OUTWARD
-M C91	M	W	R3	SIBLING:M C32	INFERRED	RULING:D6-CAPABILITY-OVER-AFFORDANCE ; M C32
+M C91	M	W	R3	CAPTURE:C-GROUP-POST-1	MEASURED	N 175 ; _audit/_census/network.md::A group feed's post permalinks do not wear that route ; _audit/2026-11-28-census-calls.md::M C65 AND M C91 NEED THE GROUP FEED'S OWN ROUTE
 M C92	M	W	R3	TARGET:an event he names	NAMED	_audit/_census/read-addresses.tsv::ADMITTED 2026-09-23 BY A REVIEW: COMMIT (lane L1): one event by its NUMERIC id ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
 M C94	M	W	R2	TARGET:a post and a connection he names	INFERRED	RULING:OPERATOR-NAMES-THE-TARGET ; M C94
 M C97	M	W	R3	CAPTURE:C-I3-1	MEASURED	_audit/2026-11-27-msg7.md::THE UNIQUENESS SESSION 12 DID NOT TAKE IN-PAGE IS ON ITS CAPTURE ; tests/fixtures/live12/notifications.html ; RULING:M-C97-LINK-KEYED-DELETE

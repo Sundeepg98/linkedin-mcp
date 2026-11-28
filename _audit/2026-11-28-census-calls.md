@@ -31,8 +31,8 @@ waits on that. N 61, N 50, rank 23's rows and the new capture steps wait on Q2 t
 | 5. the re-judges | M C11 | step re-pointed and cell noted, applied | section 6.1 |
 | 2. the code reads | M C65, M C91 | the cell notes, applied | section 3 |
 | 5. the re-judges | rank 23's 13 rows | all stepped PRECONDITION, with queue rank 23's line (Q4, answered); no state moves | section 6.2 |
-| 5. the re-judges | J 3, J 17, J 151 | a new place capture, `C-SRCH-2b` (Q5) | section 6.3 |
-| 5. the re-judges | M C65, M C91 | a group-feed capture (Q5) | section 6.4 |
+| 5. the re-judges | J 3, J 17, J 151 | stepped to a new place capture, `C-SRCH-2b` (Q5, answered) | section 6.3 |
+| 5. the re-judges | M C65, M C91 | stepped to a group-feed capture, `C-GROUP-POST-1` (Q5, answered) | section 6.4 |
 
 WHAT "HELD" MEANS HERE. The held edits exist as a tested ready patch in the lane's
 scratch directory (gitignored, so this record states what each edit is, and section 5.2
@@ -368,18 +368,36 @@ queue owner's design. The proposed `next-step.tsv` line for each of the three:
           _audit/2026-11-27-live-session-13.md::The AI job search ignores a text ;
           RULING:RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE
 
-Per the plan, the queue line itself is written after 14b's close-out; the three
-`next-step.tsv` lines go in with it, since a CAPTURE step must name a line that exists.
+The plan had the queue line written after 14b's close-out; the orchestrator's answer
+to Q5 gave it to this lane, and it is applied with the three `next-step.tsv` lines, in
+one commit (section 6.4).
 
-### 6.4 M C65 and M C91: the step the code reads point at
+### 6.4 M C65 AND M C91 NEED THE GROUP FEED'S OWN ROUTE
 
 Both stay GAP (section 3), and their ledger step, `SIBLING:M C25` / `SIBLING:M C32` on
 D6, is now answered. The next step is a capture on the feed of a group he belongs to,
 `https://www.linkedin.com/groups/1234567/` (admitted): the route a group post's
 permalink wears, and that post's comment and reaction controls, read with nothing
-pressed. That needs a queue line, which this lane does not write, so their
-`next-step.tsv` lines are left as they are, with this section as their re-judge.
-Question Q5.
+pressed. That needs a queue line (Q5).
+
+APPLIED on the orchestrator's answer to Q5 (19:04 IST: "YOU write them"), in one
+commit with the steps that cite them. Two lines were appended at the queue's end, at
+the next free ranks, and nothing was renumbered:
+
+- `C-SRCH-2b` for J 3, J 17 and J 151: 2 loads and 2 searches, derived as C-SRCH-2's
+  were (a load with the place, and the same session's control without it). The place
+  goes into the AI search's own words, and a `geoId` spelling is the fallback. The line
+  says it spends 2 of D1's 5 searches a session.
+- `C-GROUP-POST-1` for M C65 and M C91: 1 load and 0 searches of a group he belongs to,
+  nothing pressed. It reads the leading path segment of each post's own permalink
+  anchor, and each post's Comment and reaction controls, by counts. The same reading
+  answers `N 175`'s reopener.
+- Their five `next-step.tsv` lines step to those lines, basis MEASURED.
+- Rank 133, `C-SRCH-2`, leaves the queue in the same commit. Its three rows all moved to
+  `C-SRCH-2b`, its own capture is done (session 13, loads 1 and 2), and
+  `check_next_step.py` requires every member of a needs `-` line to step to that line.
+  That is the one queue edit beyond the two appends, and it is exactly what the checker
+  needs in this commit.
 
 ## 7. Pins re-derived
 
@@ -552,7 +570,7 @@ HEAD; `git status` showed only this record afterwards. On that trial tree:
 - **Q4, RANK 23 LEAVES THE QUEUE? -- ANSWERED: THIS LANE'S COMMIT (19:04 IST); APPLIED.** Ground, section 6.2: all 13 rows re-judged
   PRECONDITION, because session 14 read both views empty. The 13 `next-step.tsv` lines
   and the rank 23 line must move in one commit. Whose commit?
-- **Q5, TWO NEW QUEUE LINES.** Ground, sections 6.3 and 6.4: `C-SRCH-2b` for J 3, J 17
+- **Q5, TWO NEW QUEUE LINES -- ANSWERED: THIS LANE WRITES THEM (19:04 IST); APPLIED.** Ground, sections 6.3 and 6.4: `C-SRCH-2b` for J 3, J 17
   and J 151, after 14b's close-out as the plan says, and a group-feed capture for M C65
   and M C91. Each `next-step.tsv` line follows its queue line, so the queue's owner
   writes both, or this lane writes the step lines after the queue lines land.
