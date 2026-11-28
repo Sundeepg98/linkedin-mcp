@@ -525,8 +525,34 @@ written after the commit that adds this section):
 | the prepared items (gitignored) | `842bced39d3678bb` |
 | `os_check.ps1` | `455cc21796054c94` |
 
-The branch head is the commit that adds this section. Its sha is in the
+The branch head is the commit that amends this section with the AST-equality
+line below; the first READY's commit is its parent. Its sha is in the amended
 READY message and in `pins.json`.
+
+**THE AST-EQUALITY LINE** (`ast_delta_s14.py`, disposable, beside the runner;
+run 06:36 IST; VERIFIED by instrument):
+
+- **The measurement.** `runner_s14.py` (`8094c4a0`) against r4 (`1468b62b`),
+  with every docstring stripped (comments are not in the AST): AST-equal
+  outside exactly three top-level statements, `STOP_ALL_KINDS`, `his_root` and
+  `phase_root_settle`. No statement is in one file only.
+- **So the diff from r4 is NOT comment- and docstring-only.** Those three
+  statements carry the R3 ruling's other-member STOP-ALL
+  (`self_member_changed`), r5's one behavioural change (section 6). The
+  orchestrator's round-4 message was written about r4, before r5 existed.
+- **Nothing has to carry.** Round 5, the warm close-out, ran on `8094c4a0`
+  itself (`cmp`-identical to `runner_s14_r5.py`, hashed at its start and its
+  end). Its V1-V3 and V5 probe exactly those three statements. The final pass
+  ran on the same sha (section 7).
+- **The whole text diff, line by line:** 5 hunks, 6 lines removed and 21
+  added.
+  - 16 added and 4 removed lines are in the three statements.
+  - 5 added and 2 removed lines are the module docstring's S6 item, which now
+    says the inbox's two phases are not runnable under UNREAD-SKIPPED.
+  - 0 comment-only lines, 0 formatting lines in an AST-equal statement, 0
+    unclassified.
+- **The controls:** each file against itself is AST-equal with 0 hunks, and
+  one constant changed (`SESSION_CAP` 40 to 41) is caught.
 
 **THE SPLIT** (section 1):
 
@@ -661,4 +687,9 @@ and each step runs in the foreground.
 6. **An order can name a source disk does not hold.** The identity key's
    operator class holds no member id, so the order's source for rank 69
    cannot be met as written.
+7. **An equality proof carries a close-out only across prose.** The round-4
+   message asked for docstring-only equality from r4, but the R3 ruling had
+   added code after r4. The close-out had already run on the final sha, and
+   the AST delta names the three code statements. So the claim the message
+   asked for is replaced by a measured one.
 
