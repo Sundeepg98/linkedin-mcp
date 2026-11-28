@@ -13,16 +13,17 @@ Evidence classes: VERIFIED means read on disk in this lane, MEASURED means an
 instrument counted it on a tracked file in this lane, DERIVED means computed from
 what was read, UNVERIFIED means not checked. People by role only.
 
-STATUS: IN PROGRESS, AND HOLDING FOR THE MERGE ORDER. J 86's move at `118d4008` (on
-this lane's branch, `census-calls28`, and nowhere on `master` until the orchestrator's
-merge; its subject is "census: J 86 COVERED-UNFIRED by D6 on P I14's tool -- the lane-K
-ledger's call, made") was certified by lane CI run 46145558412 and full-matrix run
-46146396940, both success, read by sha. After hygiene28 reached master (`b7db2f7a`) the
-branch merged it, and every other item was applied, the last four on the
-orchestrator's answers to Q2 to Q5 (section 1). Nothing is held for a ruling. The
-orchestrator's merge order puts this lane after the live lane's r2, with master merged
-in again before the certifying run (lane CI, then the full matrix), so READY waits on
-that.
+STATUS: READY, HOLDING FOR THE ORCHESTRATOR'S MERGE. The certified head is `9828c8ff`
+(on this lane's branch, `census-calls28`, and nowhere on `master` until that merge; its
+subject is "merge master d87d97ec (session 14c r2) into census-calls28 before its
+certifying run"). It merges master `d87d97ec` (the live lane's r2, as the merge order
+asked), so it is a fast-forward of master. Lane CI run 46156712369 passed (7 jobs) and
+full-matrix run 46157727737 passed (3 cells x 6 shards), both read by sha. Only this
+record sits above it. Every item is applied, the last four on the orchestrator's answers
+to Q2 to Q5 (section 1), and nothing is held for a ruling. Earlier, J 86's move at
+`118d4008` (subject "census: J 86 COVERED-UNFIRED by D6 on P I14's tool -- the lane-K
+ledger's call, made", nowhere on `master` until the merge) was certified by runs
+46145558412 and 46146396940.
 
 ## 1. The order, and what holds what
 
@@ -547,6 +548,19 @@ sentence of this lane, and none says a record is untrue. So the three pairs are 
 that test's `NOT_A_CORRECTION` with those readings, which is the guard's own remedy
 for table-row proximity. Its 15 tests then passed locally in 24 s.
 
+### 8.1d The certifying runs, after master `d87d97ec`
+
+- The first push after the triage commit was REFUSED by the pre-push gate: "origin/master
+  d87d97ec7d0d is NOT an ancestor ... merge origin/master into the branch first". The
+  live lane's r2 had reached master. Nothing was published.
+- The branch merged master `d87d97ec` (a merge, not a rebase). It was clean: only
+  session 14's record changed, and its section 10.2, which the rank 23 cells cite, did
+  not move. On the merged tree, `census_completion --check`, the five table checkers,
+  the three derived views, the pointer guard and the row pin were all green.
+- Lane CI run 46156712369 on the merged head passed: 7 jobs, 11m16s.
+- Full-matrix run 46157727737 passed: 21 jobs, 9m37s, with ubuntu py3.10, ubuntu
+  py3.13 and windows py3.13 each 6 of 6 shards.
+
 ### 8.2 The held patch, tried on this tree and reverted
 
 The held patch was applied to this worktree at `118d4008` in steps `before`,
@@ -584,9 +598,8 @@ HEAD; `git status` showed only this record afterwards. On that trial tree:
 
 - **Q1, THE BASE -- ANSWERED.** hygiene28 reached master (`b7db2f7a`, the
   orchestrator's note of 18:57 IST), the branch merged it, and N 3 and the messaging
-  notes were applied. What remains of Q1 is the merge order the same note gives: this
-  lane merges after the live lane's r2, with master merged in again before the
-  certifying run.
+  notes were applied. As the same note's merge order asked, the branch then merged the
+  live lane's r2 (`d87d97ec`) before its certifying run (section 8.1d).
 - **Q2, N 50 SPLITS? -- ANSWERED: SPLIT, AS RECOMMENDED (19:04 IST); APPLIED.** Ground, section 4.2: the company half is delivered by D6 on a
   live-proven route (`linkedin_follow_company`, `N 46` and `J 103` banked PROVEN on
   its session-8 fire), and the school half by nothing (no write acts on `/school/`).
@@ -640,6 +653,10 @@ HEAD; `git status` showed only this record afterwards. On that trial tree:
   became pairs to triage. The scoped local gates skipped that corpus-wide guard as
   slow, and it takes 24 s. Run it locally whenever a census cell gains a record
   citation; lane CI caught it here.
+- Check a push's exit code before waiting on its run. A refused `lane_ci.py push`
+  printed its refusal as its last line, the wait took that line for a sha, and it
+  polled 25 minutes for a run that could never appear ("NO VERDICT ... This is not a
+  pass"). The step that followed tested `rc` first.
 - An answer can name a state the census does not have. "The 13 rows to PRECONDITION"
   could only mean their steps, because PRECONDITION is a next-step kind and the six
   states are GAP, the three COVERED ones, EXCLUDED-RULED and MEASURED-ABSENT. The
