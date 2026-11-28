@@ -235,7 +235,7 @@ N 41	N	W	R1	RULING:Q-NAME-BEARING-ADDRESS-REDACTION	INFERRED	_audit/_census/mess
 N 42	N	W	R1	RULING:Q-NAME-BEARING-ADDRESS-REDACTION	INFERRED	_audit/_census/messaging-and-content.md::`/pulse/` stays refused ; RULING:READ-PAST-AN-ACT-SUBSTRING
 N 43	N	W	R3	CAPTURE:feed-item-permalink-menu	MEASURED	_audit/2026-11-27-msg7.md::THE AUTHOR-DIRECTED ENTRY FITS A 14-CHARACTER PREFIX ; tests/fixtures/live12/permalink_member_post_menu-open.html ; RULING:HIS-OWN-CURATION-NOT-OUTWARD
 N 49	N	W	R1	TARGET:a skills Page he names	INFERRED	RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS ; N 49
-N 50	N	W	R1	SIBLING:N 47	NAMED	_audit/_census/network.md::Only the ROUTE is retired, not the outcome ; RULING:D6-CAPABILITY-OVER-AFFORDANCE
+N 50b	N	W	R1	TARGET:a school Page he names	NAMED	_audit/_census/network.md::no shipped write acts on a school ; RULING:OPERATOR-NAMES-THE-TARGET
 N 51	N	W	R3	CAPTURE:feed-item-permalink-menu	MEASURED	_audit/2026-11-27-msg7.md::class B are author-directed ; tests/fixtures/live12/permalink_page_post_menu-open.html ; RULING:HIS-OWN-CURATION-NOT-OUTWARD
 N 55	N	W	R3	CAPTURE:admit-newsletters-id	NAMED	_audit/_census/read-addresses.tsv::https://www.linkedin.com/newsletters/1234567890/ ; RULING:READ-PAST-AN-ACT-SUBSTRING
 N 56	N	W	R3	CAPTURE:admit-newsletters-id	INFERRED	_audit/2026-10-10-lane-b2-network-build.md::The list draws no control to press

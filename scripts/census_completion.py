@@ -1074,7 +1074,8 @@ PINNED = {
     #: 778 ON LANE SETTINGS7 (2026-11-27), MEASURED by --check: `P N22` split under COMPOUND-ROW-SPLITS-ONLY-ON-STATE (the orchestrator's answer to Q-P-N22-SPLITS, 12:55): the subscription half stayed `P N22`, COVERED-UNFIRED on `linkedin_my_premium_account`; the payments half entered as `P N32`, GAP, R (`_audit/2026-11-27-settings7.md`) (was 777).
     #: 783 AT INTEGRATION 7, MERGE 4 (lane settings7 onto prof7, jobs7 and msg7; 2026-11-27), MEASURED by --check on the merged tree, never summed: the lanes' moves above, in one tree (_audit/2026-11-27-integration-7.md).
     #: 784 AT INTEGRATION 7'S REGISTRATION (2026-11-27), MEASURED by --check, never summed: J111-SPLITS-PRODUCTS-FROM-SERVICES applied -- J 111 GAP -> COVERED-UNFIRED on its Products half (linkedin_company_page_tab, tab=products; bucket 1, no ruling), J 176 (the Services tab) entered at GAP (_audit/2026-11-27-integration-7.md section 4).
-    "stated_rows": 784,
+    #: 785 ON LANE CENSUS-CALLS28 (2026-11-28), MEASURED by --check, never summed: `N 50` split under COMPOUND-ROW-SPLITS-ONLY-ON-STATE on the orchestrator's answer to Q2 (19:04 IST), the `N 26` -> `N 26b` shape: `N 50`, the company half, GAP -> COVERED-PROVEN by D6-CAPABILITY-OVER-AFFORDANCE on `linkedin_follow_company`'s session-8 fire (the fire `N 46` and `J 103` rest on), and `N 50b`, the school half, entered at GAP (`_audit/2026-11-28-census-calls.md` section 4.2) (was 784).
+    "stated_rows": 785,
     #: 762 = 704 stated rows + 58 declared collapses, computed at HEAD. NOT the
     #: published 761 and NOT the counter docstring's 760: those two differ only
     #: by a `- 2 stateless` term whose two rows are already outside the 704.
@@ -1118,7 +1119,8 @@ PINNED = {
     #: 791 ON LANE SETTINGS7 (2026-11-27), MEASURED by --check: `P N32` entered, split from `P N22` (the orchestrator's answer to Q-P-N22-SPLITS) (was 790).
     #: 796 AT INTEGRATION 7, MERGE 4 (lane settings7 onto prof7, jobs7 and msg7; 2026-11-27), MEASURED by --check on the merged tree, never summed: the lanes' moves above, in one tree (_audit/2026-11-27-integration-7.md).
     #: 797 AT INTEGRATION 7'S REGISTRATION (2026-11-27), MEASURED by --check, never summed: J111-SPLITS-PRODUCTS-FROM-SERVICES applied -- J 111 GAP -> COVERED-UNFIRED on its Products half (linkedin_company_page_tab, tab=products; bucket 1, no ruling), J 176 (the Services tab) entered at GAP (_audit/2026-11-27-integration-7.md section 4).
-    "capabilities": 797,
+    #: 798 ON LANE CENSUS-CALLS28 (2026-11-28), MEASURED by --check, never summed: `N 50` split under COMPOUND-ROW-SPLITS-ONLY-ON-STATE on the orchestrator's answer to Q2 (19:04 IST), the `N 26` -> `N 26b` shape: `N 50`, the company half, GAP -> COVERED-PROVEN by D6-CAPABILITY-OVER-AFFORDANCE on `linkedin_follow_company`'s session-8 fire (the fire `N 46` and `J 103` rest on), and `N 50b`, the school half, entered at GAP (`_audit/2026-11-28-census-calls.md` section 4.2) (was 797).
+    "capabilities": 798,
     #: 741 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: the achievable
     #: move, with `O6-O20`'s 14 unchanged.
     #: 742 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: `N 2` left the exclusions.
@@ -1155,7 +1157,8 @@ PINNED = {
     #: 722 AT INTEGRATION 7, MERGE 5 (lane net7 onto the other four; 2026-11-27), MEASURED by --check on the merged tree, never summed: the lanes' moves above in one tree, with N 32's read-address line moved NEEDS-SESSION -> ADMITTED at settings7's admission (_audit/2026-11-27-integration-7.md).
     #: 723 AT INTEGRATION 7'S REGISTRATION (2026-11-27), MEASURED by --check, never summed: J111-SPLITS-PRODUCTS-FROM-SERVICES applied -- J 111 GAP -> COVERED-UNFIRED on its Products half (linkedin_company_page_tab, tab=products; bucket 1, no ruling), J 176 (the Services tab) entered at GAP (_audit/2026-11-27-integration-7.md section 4).
     #: 722 ON LANE CENSUS-CALLS28 (2026-11-28), MEASURED by --check, never summed: `N 61` GAP -> MEASURED-ABSENT on the orchestrator's N61-FOLLOWED-HASHTAGS-MEASURED-ABSENT (registration owed at the next integration), under MEASURED-ABSENT-OR-PRECONDITION: no followed-hashtags view on the network manager's nav and no follow control on a hashtag's results (`_audit/2026-11-28-census-calls.md` section 5); out of scope, off bucket 3, and queue rank 83 left with it (was 723).
-    "capabilities_achievable": 722,
+    #: 723 ON LANE CENSUS-CALLS28 (2026-11-28), MEASURED by --check, never summed: `N 50` split under COMPOUND-ROW-SPLITS-ONLY-ON-STATE on the orchestrator's answer to Q2 (19:04 IST), the `N 26` -> `N 26b` shape: `N 50`, the company half, GAP -> COVERED-PROVEN by D6-CAPABILITY-OVER-AFFORDANCE on `linkedin_follow_company`'s session-8 fire (the fire `N 46` and `J 103` rest on), and `N 50b`, the school half, entered at GAP (`_audit/2026-11-28-census-calls.md` section 4.2) (was 722).
+    "capabilities_achievable": 723,
     #: 43 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: 29 rows returned
     #: to GAP when OUTWARD-CLASSES-BUILT-BEHIND-GRANTS retired their key, and
     #: `P P2` at the merge (-30); `P N27` and `P P2` then EXCLUDED-RULED on
@@ -1224,7 +1227,8 @@ PINNED = {
     #: 709 AT INTEGRATION 7, MERGE 5 (lane net7 onto the other four; 2026-11-27), MEASURED by --check on the merged tree, never summed: the lanes' moves above in one tree, with N 32's read-address line moved NEEDS-SESSION -> ADMITTED at settings7's admission (_audit/2026-11-27-integration-7.md).
     #: 710 AT INTEGRATION 7'S REGISTRATION (2026-11-27), MEASURED by --check, never summed: J111-SPLITS-PRODUCTS-FROM-SERVICES applied -- J 111 GAP -> COVERED-UNFIRED on its Products half (linkedin_company_page_tab, tab=products; bucket 1, no ruling), J 176 (the Services tab) entered at GAP (_audit/2026-11-27-integration-7.md section 4).
     #: 709 ON LANE CENSUS-CALLS28 (2026-11-28), MEASURED by --check, never summed: `N 61` GAP -> MEASURED-ABSENT on the orchestrator's N61-FOLLOWED-HASHTAGS-MEASURED-ABSENT (registration owed at the next integration), under MEASURED-ABSENT-OR-PRECONDITION: no followed-hashtags view on the network manager's nav and no follow control on a hashtag's results (`_audit/2026-11-28-census-calls.md` section 5); out of scope, off bucket 3, and queue rank 83 left with it (was 710).
-    "achievable": 709,
+    #: 710 ON LANE CENSUS-CALLS28 (2026-11-28), MEASURED by --check, never summed: `N 50` split under COMPOUND-ROW-SPLITS-ONLY-ON-STATE on the orchestrator's answer to Q2 (19:04 IST), the `N 26` -> `N 26b` shape: `N 50`, the company half, GAP -> COVERED-PROVEN by D6-CAPABILITY-OVER-AFFORDANCE on `linkedin_follow_company`'s session-8 fire (the fire `N 46` and `J 103` rest on), and `N 50b`, the school half, entered at GAP (`_audit/2026-11-28-census-calls.md` section 4.2) (was 709).
+    "achievable": 710,
     #: 205 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
     #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
     #: 179 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: the 30 returned
@@ -1394,7 +1398,8 @@ PINNED = {
     #: 279 ON LANE CENSUS-CALLS28 (2026-11-28), MEASURED by --check, never summed: `J 86` GAP -> COVERED-UNFIRED by D6-CAPABILITY-OVER-AFFORDANCE, the lane-K ledger's call on `P I14` made: `linkedin_mark_company_interest` presses the very 'I'm interested' control that J 86's own Help article documents (`_audit/2026-11-28-census-calls.md` section 2); a W row entering bucket 1 held by OPERATOR-NAMES-THE-TARGET (was 278).
     #: 280 ON LANE CENSUS-CALLS28 (2026-11-28), MEASURED by --check, never summed: `N 3` GAP -> COVERED-UNFIRED by D6-CAPABILITY-OVER-AFFORDANCE, the lane-K ledger's call on `N 1` made: his own profile's People You May Know rail (`linkedin_send_invitation`) and `N 4`'s named-profile route (`_audit/2026-11-28-census-calls.md` section 4.1); a W row entering bucket 1 held by OPERATOR-NAMES-THE-TARGET (was 279).
     #: 281 ON LANE CENSUS-CALLS28 (2026-11-28), MEASURED by --check, never summed: `N 61` GAP -> MEASURED-ABSENT on the orchestrator's N61-FOLLOWED-HASHTAGS-MEASURED-ABSENT (registration owed at the next integration), under MEASURED-ABSENT-OR-PRECONDITION: no followed-hashtags view on the network manager's nav and no follow control on a hashtag's results (`_audit/2026-11-28-census-calls.md` section 5); out of scope, off bucket 3, and queue rank 83 left with it (was 280).
-    "adjudicated": 281,
+    #: 282 ON LANE CENSUS-CALLS28 (2026-11-28), MEASURED by --check, never summed: `N 50` split under COMPOUND-ROW-SPLITS-ONLY-ON-STATE on the orchestrator's answer to Q2 (19:04 IST), the `N 26` -> `N 26b` shape: `N 50`, the company half, GAP -> COVERED-PROVEN by D6-CAPABILITY-OVER-AFFORDANCE on `linkedin_follow_company`'s session-8 fire (the fire `N 46` and `J 103` rest on), and `N 50b`, the school half, entered at GAP (`_audit/2026-11-28-census-calls.md` section 4.2) (was 281).
+    "adjudicated": 282,
     #: THE LIVE LANE'S FOUR ROWS, RE-DERIVED AT EACH OF ITS MERGES OF MASTER
     #: (2026-09-24; last over lane S): four rows fired live and banked
     #: (`_audit/2026-09-23-live-lane-session-1.md`). `P G6` COVERED-UNFIRED ->
@@ -1550,7 +1555,8 @@ PINNED = {
     #: 187 AT INTEGRATION 7'S REGISTRATION (2026-11-27), MEASURED by --check, never summed: J111-SPLITS-PRODUCTS-FROM-SERVICES applied -- J 111 GAP -> COVERED-UNFIRED on its Products half (linkedin_company_page_tab, tab=products; bucket 1, no ruling), J 176 (the Services tab) entered at GAP (_audit/2026-11-27-integration-7.md section 4).
     #: 188 ON LANE CENSUS-CALLS28 (2026-11-28), MEASURED by --check, never summed: `J 86` GAP -> COVERED-UNFIRED by D6-CAPABILITY-OVER-AFFORDANCE, the lane-K ledger's call on `P I14` made: `linkedin_mark_company_interest` presses the very 'I'm interested' control that J 86's own Help article documents (`_audit/2026-11-28-census-calls.md` section 2); a W row entering bucket 1 held by OPERATOR-NAMES-THE-TARGET (was 187).
     #: 189 ON LANE CENSUS-CALLS28 (2026-11-28), MEASURED by --check, never summed: `N 3` GAP -> COVERED-UNFIRED by D6-CAPABILITY-OVER-AFFORDANCE, the lane-K ledger's call on `N 1` made: his own profile's People You May Know rail (`linkedin_send_invitation`) and `N 4`'s named-profile route (`_audit/2026-11-28-census-calls.md` section 4.1); a W row entering bucket 1 held by OPERATOR-NAMES-THE-TARGET (was 188).
-    "delivered_broad": 189,
+    #: 190 ON LANE CENSUS-CALLS28 (2026-11-28), MEASURED by --check, never summed: `N 50` split under COMPOUND-ROW-SPLITS-ONLY-ON-STATE on the orchestrator's answer to Q2 (19:04 IST), the `N 26` -> `N 26b` shape: `N 50`, the company half, GAP -> COVERED-PROVEN by D6-CAPABILITY-OVER-AFFORDANCE on `linkedin_follow_company`'s session-8 fire (the fire `N 46` and `J 103` rest on), and `N 50b`, the school half, entered at GAP (`_audit/2026-11-28-census-calls.md` section 4.2) (was 189).
+    "delivered_broad": 190,
     #: 79 since the live lane's merge (see `adjudicated`): P G6, N 134, P O3
     #: and M C72 COVERED-PROVEN.
     #: 75 and 21 since the bucket-1 merge: `M C41` fired live and moved from
@@ -1595,7 +1601,8 @@ PINNED = {
     #: 118 ON LANE READERS-NET26 (2026-11-26), MEASURED: `N 9`, `N 13`, `N 38`, `N 39` and `P P15` GAP -> COVERED-UNFIRED (readers built on live session 11's captures), `N 161` COVERED-UNFIRED -> COVERED-PROVEN (session 11's fire, banked; `_audit/2026-11-26-readers-net26.md`): `N 161` joined COVERED-PROVEN.
     #: 96 AT INTEGRATION 6'S REGISTRATION (2026-11-26), MEASURED by --check, never summed: RETIRED-ROUTE-ROWS-RETURN-ON-CAPTURE returned the 22 rows of search26's section 4.5 to GAP (21 COVERED-PROVEN, J 31 COVERED-UNFIRED), and FAILED-REPROOF-DEMOTES moved M C41 COVERED-PROVEN -> COVERED-UNFIRED.
     #: 95 ON LANE MSG7 (2026-11-27), MEASURED by --check, never summed: `M C75` COVERED-PROVEN -> COVERED-UNFIRED on the orchestrator's CAPTURE-SHOWS-READER-BLIND-DEMOTES (registration owed at integration 7): the shipped notifications harvest reads 0 records on live session 12's server-driven capture, and the server-driven read built over it is unfired (`_audit/2026-11-27-msg7.md` section 7.4) (was 96).
-    "delivered_strict": 95,
+    #: 96 ON LANE CENSUS-CALLS28 (2026-11-28), MEASURED by --check, never summed: `N 50` split under COMPOUND-ROW-SPLITS-ONLY-ON-STATE on the orchestrator's answer to Q2 (19:04 IST), the `N 26` -> `N 26b` shape: `N 50`, the company half, GAP -> COVERED-PROVEN by D6-CAPABILITY-OVER-AFFORDANCE on `linkedin_follow_company`'s session-8 fire (the fire `N 46` and `J 103` rest on), and `N 50b`, the school half, entered at GAP (`_audit/2026-11-28-census-calls.md` section 4.2) (was 95).
+    "delivered_strict": 96,
     #: The live lane's merge: N 134, P O3 and M C72 left GAP.
     #: Lane D's merge: N 132 left GAP, for COVERED-UNFIRED under D6.
     #: 544 AT THE ORCHESTRATOR'S MERGE OF LANE D (2026-09-27), MEASURED: lane D

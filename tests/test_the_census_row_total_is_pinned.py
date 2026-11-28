@@ -159,7 +159,12 @@ import pin_census_rows as P  # noqa: E402
 #: scripts/pin_census_rows.py --write: `J 176` entered, the Services half of
 #: `J 111`, split by the orchestrator's J111-SPLITS-PRODUCTS-FROM-SERVICES under
 #: COMPOUND-ROW-SPLITS-ONLY-ON-STATE (`_audit/2026-11-27-integration-7.md`).
-PINNED_ROW_TOTAL = 784
+#: 784 -> 785 ON LANE CENSUS-CALLS28 (2026-11-28), MEASURED by
+#: scripts/pin_census_rows.py --write: `N 50b` entered, the school half of
+#: `N 50`, split under COMPOUND-ROW-SPLITS-ONLY-ON-STATE on the orchestrator's
+#: answer to that lane's Q2 -- the company half went COVERED-PROVEN by D6 and
+#: no write acts on a school (`_audit/2026-11-28-census-calls.md`, section 4.2).
+PINNED_ROW_TOTAL = 785
 
 #: Per slice, because a delta of zero across four slices is reachable by two
 #: errors cancelling -- one row added to `jobs.md` and one dropped from
@@ -168,7 +173,7 @@ PINNED_SLICE_ROWS = {
     "J": 175,   # jobs.md                    (150 + 16 + 1 + 1 + 1 + 1 + 1 + 3 + 1, J 168, J 169, J 170, J 171, J 172, J 173-175, J 176)
     "P": 238,   # profile.md                 (203 + 10 + 22 + 1 + 1 + 1, P A23b, P O17, P N32)
     "M": 155,   # messaging-and-content.md   (142 + 11 + 1 + 1, M C35b, M M54)
-    "N": 216,   # network.md                 (209 + 6 + 1, N 26b)
+    "N": 217,   # network.md                 (209 + 6 + 1 + 1, N 26b, N 50b)
 }
 
 #: Every spelling `count_census_states` will honour. Two of these were taught

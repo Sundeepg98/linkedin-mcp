@@ -26,7 +26,7 @@ waits on that. N 61, N 50, rank 23's rows and the new capture steps wait on Q2 t
 | 1. J 86, the D6 call on P I14 | J 86 | GAP -> COVERED-UNFIRED, committed | section 2 |
 | 2. the code reads | M C65, M C91 | both stay GAP: neither tool reaches a group post | section 3 |
 | 3. D6 calls | N 3 | GAP -> COVERED-UNFIRED, applied after hygiene28's merge | section 4.1 |
-| 3. D6 calls | N 50 | stopped: the school half is delivered by nothing (Q2) | section 4.2 |
+| 3. D6 calls | N 50 | split (Q2, answered): N 50 GAP -> COVERED-PROVEN by D6; N 50b enters at GAP | section 4.2 |
 | 4. the orchestrator's ruling | N 61 | GAP -> MEASURED-ABSENT, applied with queue rank 83's line (Q3, answered) | section 5 |
 | 5. the re-judges | M C11 | step re-pointed and cell noted, applied | section 6.1 |
 | 2. the code reads | M C65, M C91 | the cell notes, applied | section 3 |
@@ -208,8 +208,31 @@ COVERED-UNFIRED, "D6 on `N 47`". Two facts on this tree say otherwise.
 So the two halves need different states, and COMPOUND-ROW-SPLITS-ONLY-ON-STATE splits
 such a row. Every recent split was the orchestrator's own per-row call (`N 26` to
 `N 26b` on the call of 17:46, 2026-09-28; `J-110-SPLITS-HOME-AND-POSTS`;
-`J-114-SPLITS`). N 50 is not moved, and nothing for it is in the held patch. Question
-Q2 (section 9).
+`J-114-SPLITS`), so the lane asked (Q2, section 9).
+
+APPLIED on the orchestrator's answer (19:04 IST), which accepted the recommendation, in
+the `N 26` -> `N 26b` shape:
+
+- `N 50`, renamed to its company half, "Follow a company via an off-site Follow
+  button": GAP -> COVERED-PROVEN by D6, resting on `linkedin_follow_company`'s
+  session-8 fire. Its write-class line stays R1 as `built:follow_company`, and its
+  next-step line leaves.
+- `N 50b`, "Follow a school via an off-site Follow button", enters at GAP. BLOCKER
+  SCHOOL-PAGE-SURFACE, as `J 112`, `N 99` and `N 100` carry. Its write-class line is
+  R1, `queued:SCHOOL-PAGE-SURFACE`. Its step is `TARGET:a school Page he names`, on
+  queue rank 13, `t-named-school`, whose rows went from 3 to 4 (rows per load 3.0 ->
+  4.0, its one load unchanged). That is the queue edit `check_next_step.py` needs in
+  the split's own commit. Whether that line's address, the school's `people/` tab,
+  draws the school's own Follow control is UNVERIFIED; the school root
+  `/school/<slug>/` is admitted too.
+- MEASURED: network.md stated rows 216 -> 217 and COVERED-PROVEN 29 -> 30, GAP 127
+  unchanged (`count_census_states.py`). The census row pin moved 784 -> 785, one row
+  added and none removed (`scripts/pin_census_rows.py --write`, and the two literals
+  in `test_the_census_row_total_is_pinned.py` and
+  `test_a_census_locator_names_its_row.py`). The write-class split moved to (17, 33,
+  316) on 366 lines, read from the table (`test_write_classes.py`'s literal).
+- THE DENOMINATORS: stated rows 784 -> 785, capabilities 797 -> 798, and the
+  achievable surface 709 -> 710 (section 7).
 
 ## 5. N 61 (held)
 
@@ -394,6 +417,17 @@ bucket-1 change:
     gap_read                   56 ->  55
     out_of_scope               74 ->  75
 
+After N 50's split, `--check` MEASURED seven moves, re-pinned the same way, with no
+bucket-1 change (N 50 is PROVEN, N 50b is GAP):
+
+    achievable                709 -> 710
+    adjudicated               281 -> 282
+    capabilities              797 -> 798
+    capabilities_achievable   722 -> 723
+    delivered_broad           189 -> 190
+    delivered_strict           95 ->  96
+    stated_rows               784 -> 785
+
 ## 8. Gates
 
 ### 8.1 J 86's commit
@@ -493,7 +527,7 @@ HEAD; `git status` showed only this record afterwards. On that trial tree:
   notes were applied. What remains of Q1 is the merge order the same note gives: this
   lane merges after the live lane's r2, with master merged in again before the
   certifying run.
-- **Q2, N 50 SPLITS?** Ground, section 4.2: the company half is delivered by D6 on a
+- **Q2, N 50 SPLITS? -- ANSWERED: SPLIT, AS RECOMMENDED (19:04 IST); APPLIED.** Ground, section 4.2: the company half is delivered by D6 on a
   live-proven route (`linkedin_follow_company`, `N 46` and `J 103` banked PROVEN on
   its session-8 fire), and the school half by nothing (no write acts on `/school/`).
   The halves need different states, and COMPOUND-ROW-SPLITS-ONLY-ON-STATE splits such
