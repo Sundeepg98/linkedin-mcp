@@ -27,7 +27,7 @@ waits on that. N 61, N 50, rank 23's rows and the new capture steps wait on Q2 t
 | 2. the code reads | M C65, M C91 | both stay GAP: neither tool reaches a group post | section 3 |
 | 3. D6 calls | N 3 | GAP -> COVERED-UNFIRED, applied after hygiene28's merge | section 4.1 |
 | 3. D6 calls | N 50 | stopped: the school half is delivered by nothing (Q2) | section 4.2 |
-| 4. the orchestrator's ruling | N 61 | MEASURED-ABSENT, written and held: it needs one queue line (Q3) | section 5 |
+| 4. the orchestrator's ruling | N 61 | GAP -> MEASURED-ABSENT, applied with queue rank 83's line (Q3, answered) | section 5 |
 | 5. the re-judges | M C11 | step re-pointed and cell noted, applied | section 6.1 |
 | 2. the code reads | M C65, M C91 | the cell notes, applied | section 3 |
 | 5. the re-judges | rank 23's 13 rows | all PRECONDITION; coupled to queue rank 23 (Q4) | section 6.2 |
@@ -238,7 +238,14 @@ the lane's brief gives the time), for the integrator to copy into the rulings re
      RESULTS DRAW NO FOLLOW CONTROL AND NO HASHTAG FEED" -- 0 of 92 links reach
      `/feed/hashtag/`, and 0 buttons are named exactly `Follow`.
 
-### 5.2 What the move touches, and the one piece this lane cannot do
+APPLIED after the orchestrator's answer to Q3 (19:04 IST): the queue rule is amended
+for this lane, for exactly what `check_next_step.py` needs in the same commit as the
+row's move, so rank 83's line leaves with N 61. Measured on the move: network.md
+MEASURED-ABSENT 5 -> 6 and GAP 128 -> 127 (its DELTA paragraph); the pointer guard 63
+of 63 after `--pin`; `check_next_step.py` GREEN at 503; `check_exclusion_basis.py` 75
+of 75.
+
+### 5.2 What the move touches, and the one piece this lane could not do alone
 
 Written as the held patch's `n61` step (section 1), each piece on its precedent (net7's
 N 93 and N 27, msg7's M C70):
@@ -376,6 +383,17 @@ moves, re-pinned the same way:
 row, held with no marker). The class split `test_write_classes.py` pins is unchanged,
 because N 3 keeps its R2 line as a `built:` line.
 
+After N 61's move, `--check` MEASURED seven moves, re-pinned the same way, with no
+bucket-1 change:
+
+    achievable                710 -> 709
+    adjudicated               280 -> 281
+    b3_needs_session            5 ->   4
+    capabilities_achievable   723 -> 722
+    gap                       504 -> 503
+    gap_read                   56 ->  55
+    out_of_scope               74 ->  75
+
 ## 8. Gates
 
 ### 8.1 J 86's commit
@@ -484,11 +502,11 @@ HEAD; `git status` showed only this record afterwards. On that trial tree:
   (`N 47`, UNFIRED) as its by-id route, and the school half enters as `N 50b` at GAP,
   its step the school's address from him (as `J 112`). If the by-id route should be
   the row's proof instead, the company half is COVERED-UNFIRED, as the plan had it.
-- **Q3, N 61 NEEDS ONE QUEUE EDIT.** Ground, section 5.2: queue rank 83 lists N 61
-  alone with needs `-`, its capture is done (session 13, load 3), and
-  `check_next_step.py` goes RED on that line the moment N 61 leaves GAP. May this lane
-  remove that one line in N 61's move commit, or does live14b's close-out remove it
-  first?
+- **Q3, N 61 NEEDS ONE QUEUE EDIT -- ANSWERED YES (19:04 IST).** Ground, section 5.2:
+  queue rank 83 lists N 61 alone with needs `-`, its capture is done (session 13, load
+  3), and `check_next_step.py` goes RED on that line the moment N 61 leaves GAP. The
+  orchestrator amended the queue rule for this lane, for exactly that, and the line
+  left in N 61's commit.
 - **Q4, RANK 23 LEAVES THE QUEUE?** Ground, section 6.2: all 13 rows re-judged
   PRECONDITION, because session 14 read both views empty. The 13 `next-step.tsv` lines
   and the rank 23 line must move in one commit. Whose commit?

@@ -242,7 +242,6 @@ N 56	N	W	R3	CAPTURE:admit-newsletters-id	INFERRED	_audit/2026-10-10-lane-b2-netw
 N 58	N	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 N 59	N	W	R1	ADMIT:https://www.linkedin.com/feed/hashtag/placeholder/	MEASURED	_audit/2026-11-27-msg7.md::A HASHTAG'S RESULTS DRAW NO FOLLOW CONTROL AND NO HASHTAG FEED ; tests/fixtures/live12/search_content.html ; RULING:READ-PAST-AN-ACT-SUBSTRING
 N 60	N	W	R1	ADMIT:https://www.linkedin.com/feed/hashtag/placeholder/	MEASURED	_audit/2026-11-27-msg7.md::A HASHTAG'S RESULTS DRAW NO FOLLOW CONTROL AND NO HASHTAG FEED ; N 59
-N 61	N	R	-	CAPTURE:admit-mynetwork-network-manager-people-follow-following	NAMED	_audit/_census/read-addresses.tsv::/feed/hashtag/ has no pattern ; RULING:READ-PAST-AN-ACT-SUBSTRING
 N 62	N	W	R1	CAPTURE:admit-mynetwork-discovery-see-all	NAMED	_audit/_census/completeness-annotations.tsv::My Network: full discovery lists ; tests/fixtures/live12/mynetwork.html
 N 63	N	W	R3	CAPTURE:C-B5-1	NAMED	_audit/2026-10-10-lane-b5-groups-build.md::| C-B5-1 | N 63, M C61 | ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
 N 65	N	R	-	SIBLING:lane-NP	NAMED	_audit/2026-10-10-rulings-ledger-questions.md::Already answered by NAMED-PROFILE-DETAIL-PAGES (lane NP)
