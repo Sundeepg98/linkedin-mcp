@@ -50,6 +50,7 @@ by a selector that carries no name and no position, pressed strictly.
 
 from __future__ import annotations
 
+import math
 import re
 import secrets
 import string
@@ -859,7 +860,9 @@ async def wait_for_send_enabled(
     exception's TYPE only."""
     bound = SEND_ENABLED_WAIT_MS if timeout_ms is None else int(timeout_ms)
     out: dict[str, Any] = {"enabled": False, "waited_ms": 0, "failure": None}
-    started = time.monotonic()
+    # On perf_counter, rounded up (dom.wait_for_tracker_list says why): a Send
+    # that never turned on is read as having spent its bound.
+    started = time.perf_counter()
     try:
         holding = page.locator(BUBBLE_SELECTOR).filter(has=page.locator(COMPOSER_EDITOR_SELECTOR))
         await holding.locator(_SEND_ENABLED_SELECTOR).first.wait_for(
@@ -868,7 +871,7 @@ async def wait_for_send_enabled(
         out["enabled"] = True
     except Exception as exc:  # noqa: BLE001 - a timeout is a reading, not a fault
         out["failure"] = type(exc).__name__
-    out["waited_ms"] = int((time.monotonic() - started) * 1000)
+    out["waited_ms"] = math.ceil((time.perf_counter() - started) * 1000)
     return out
 
 

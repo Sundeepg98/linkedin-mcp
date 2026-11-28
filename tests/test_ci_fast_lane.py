@@ -67,7 +67,7 @@ def _bash() -> str:
                 "speak without one, and a skip would read as a pass")
 
 
-def _run_plan(tmp_path: Path, event: str, ref: str) -> dict:
+def _run_plan(tmp_path: Path, event: str, ref: str, record: str = "") -> dict:
     step = _workflow()["jobs"]["plan"]["steps"][0]
     assert step.get("id") == "plan", step
 
@@ -87,6 +87,9 @@ def _run_plan(tmp_path: Path, event: str, ref: str) -> dict:
     env.update({
         "EVENT": event,
         "REF": ref,
+        # What ``${{ inputs.record_read_map }}`` renders: "true" or "false" on
+        # a dispatch, empty on every other event.
+        "RECORD": record,
         "GITHUB_OUTPUT": str(output).replace("\\", "/"),
         "PATH": str(shim_dir) + os.pathsep + env.get("PATH", ""),
     })
@@ -145,10 +148,12 @@ def test_the_matrix_and_the_totals_guard_read_the_same_plan():
 
 def test_the_plan_reads_the_event_and_ref_through_env_not_the_script_text():
     """A ref name is input. ``${{ github.ref }}`` written inside ``run:`` is
-    pasted into bash verbatim, so the plan reads both through ``env``."""
+    pasted into bash verbatim, so the plan reads both through ``env`` -- and
+    the read-map input the same way (2026-11-28)."""
     step = _workflow()["jobs"]["plan"]["steps"][0]
     assert step.get("env") == {"EVENT": "${{ github.event_name }}",
-                               "REF": "${{ github.ref }}"}, step.get("env")
+                               "REF": "${{ github.ref }}",
+                               "RECORD": "${{ inputs.record_read_map }}"}, step.get("env")
     assert "${{" not in step["run"], "an expression is spliced into the script"
 
 
@@ -240,4 +245,77 @@ def test_the_triggers_and_the_jobs_are_still_there():
     # PyYAML reads the bare key `on` as the boolean True (YAML 1.1).
     triggers = flow.get("on", flow.get(True))
     assert set(triggers) == {"push", "pull_request", "workflow_dispatch"}, triggers
-    assert set(flow["jobs"]) == {"plan", "test", "totals"}, list(flow["jobs"])
+    # read-map: the recording's merge, added 2026-11-28; it runs only on a
+    # dispatch with record_read_map (below).
+    assert set(flow["jobs"]) == {"plan", "test", "totals", "read-map"}, list(flow["jobs"])
+
+
+# ---------------------------------------------------------------------------
+# The read-map recording (2026-11-28, lane ci8)
+# ---------------------------------------------------------------------------
+
+RECORDING = {"count": "6", "shards": list(range(6)),
+             "cells": [{"os": "ubuntu-latest", "python-version": "3.13"}]}
+
+
+@pytest.mark.parametrize("ref", ["refs/heads/ci/lane", "refs/heads/master"])
+def test_a_read_map_recording_gets_one_ubuntu_cell_in_six_shards(tmp_path, ref):
+    assert _run_plan(tmp_path, "workflow_dispatch", ref, record="true") == RECORDING
+
+
+@pytest.mark.parametrize("event, ref, want", [
+    ("workflow_dispatch", "refs/heads/ci/lane", FULL),   # the input left false
+    ("push", "refs/heads/ci/lane", FAST),               # a push never reads it
+    ("push", "refs/heads/master", FULL),
+])
+def test_only_a_dispatch_that_sets_the_input_records(tmp_path, event, ref, want):
+    record = "false" if event == "workflow_dispatch" else "true"
+    assert _run_plan(tmp_path, event, ref, record=record) == want
+
+
+def _step(job: str, needle: str) -> dict:
+    found = [s for s in _workflow()["jobs"][job]["steps"] if needle in (s.get("run") or "")]
+    assert len(found) == 1, (job, needle, len(found))
+    return found[0]
+
+
+def test_the_recording_runs_the_same_suite_line_with_the_recorder():
+    """The recording is the shard's own run with one plugin more, not a
+    second suite: the two pytest lines differ by ``-p build_read_map`` only,
+    and the recordings go to $RUNNER_TEMP, outside the checkout."""
+    run = _step("test", "--junitxml=junit.xml")["run"]
+    lines = [line.strip() for line in run.splitlines()
+             if line.strip().startswith("python -m pytest ")]
+    assert len(lines) == 2, lines
+    recorded, plain = lines
+    assert recorded.replace(" -p build_read_map", "").replace(" || code=$?", "") == plain, lines
+    assert 'IMPACT_GATE_READ_MAP_DIR="$RUNNER_TEMP/' in run, run
+    assert 'exit "$code"' in run, "the recording must keep the run's own exit code"
+
+
+def test_the_merge_job_runs_only_on_a_complete_recording_and_uploads_the_map():
+    import sys
+
+    sys.path.insert(0, str(REPO / "scripts"))
+    import build_read_map as recipe
+
+    job = _workflow()["jobs"]["read-map"]
+    assert job["name"] == recipe.MERGE_JOB_NAME, job["name"]
+    assert "totals" in job["needs"], job["needs"]
+    assert "inputs.record_read_map" in job["if"], job["if"]
+    assert "needs.totals.result == 'success'" in job["if"], job["if"]
+    merge = _step("read-map", "scripts/build_read_map.py --merge")["run"]
+    assert '--run-id "$GITHUB_RUN_ID"' in merge, merge
+    uploads = [s for s in job["steps"] if (s.get("uses") or "").startswith("actions/upload-artifact@")]
+    assert [s["with"]["name"] for s in uploads] == [recipe.MAP_ARTIFACT], uploads
+
+
+def test_a_recording_has_a_concurrency_group_and_a_run_name_of_its_own():
+    import sys
+
+    sys.path.insert(0, str(REPO / "scripts"))
+    import build_read_map as recipe
+
+    flow = _workflow()
+    assert "inputs.record_read_map && '-read-map'" in flow["concurrency"]["group"], flow["concurrency"]
+    assert f"'{recipe.RECORDING_RUN_NAME}'" in flow["run-name"], flow["run-name"]

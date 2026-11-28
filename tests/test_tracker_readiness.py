@@ -426,6 +426,160 @@ async def test_the_empty_tab_rule_absorbs_load_and_still_catches_the_ceiling(mon
     assert not _paid_less_than_half(ceiling, 1_000), ceiling
 
 
+# ---------------------------------------------------------------------------
+# 2b. The reading of a wait the driver ended (lane ci8, 2026-11-27)
+# ---------------------------------------------------------------------------
+#
+# THE FLAKE. Lane CI run 45970717983, attempt 1 (ubuntu, py3.13): the test
+# above read ``waited_ms`` 999 on its 1000 ms bound, and its assertion
+# ``waited_ms >= 1_000`` failed. Lane net7 recorded it and re-ran the shard.
+#
+# TWO CLOCKS MEET IN THAT ASSERTION, and neither of them was the test's:
+#
+# * Playwright's DRIVER ends the wait. It sets a deadline when the call
+#   arrives and a timer for what is left of it, and Node's timers run on the
+#   loop's WHOLE-MILLISECOND clock, floored. The timer is due when that clock
+#   has moved on by the bound, which in real time can be up to one
+#   millisecond sooner -- anywhere in the bound's last millisecond.
+# * The PRODUCT reads the wait, around the whole round trip, on Python's
+#   clock -- and it truncated the reading: ``int(...)``. A wait that really
+#   lasted 999.6 ms read 999, and the note printed "999ms, the full bound".
+#
+# The bracket around the round trip always holds MORE than 999 ms of real
+# time on a 1000 ms bound, so a reading rounded UP to the whole millisecond
+# cannot fall short of the bound. The product rounds up now.
+#
+# THE SECOND CLOCK FAULT, LATENT, measured on this repository's development
+# box: under Python 3.10 on Windows, ``time.monotonic()`` is GetTickCount64
+# at 15.625 ms resolution (``time.get_clock_info``); from 3.13 it is
+# QueryPerformanceCounter, and ``time.perf_counter()`` is that clock on every
+# version. A reading taken on the 15.625 ms clock can fall short of the
+# interval by up to a whole tick. The product reads the wait on
+# ``perf_counter`` now, the clock Python documents for short durations. No
+# CI cell runs Windows with 3.10, so this one was never seen to fire; the
+# test below emulates it.
+#
+# Both are reproduced DETERMINISTICALLY: the product's ``time`` module is
+# replaced by a script of real instants, and the page's wait raises the
+# error the driver raises when its bound runs out. No browser, no sleep.
+
+
+class _ScriptedClock:
+    """Stands in for ``dom.time``: each reading takes the next real instant.
+
+    ``tick`` quantises ``monotonic()`` the way GetTickCount64 does, floored to
+    whole ticks; 0 leaves it fine. ``perf_counter()`` is always fine. Every
+    reading is recorded, so a test can show the product read the clock at
+    all -- a product that stopped reading it would pass for the wrong reason.
+    """
+
+    def __init__(self, instants, tick: float = 0.0):
+        self._instants = list(instants)
+        self._tick = tick
+        self.reads: list[str] = []
+
+    def _next(self, which: str) -> float:
+        self.reads.append(which)
+        return self._instants.pop(0)
+
+    def perf_counter(self) -> float:
+        return self._next("perf_counter")
+
+    def monotonic(self) -> float:
+        value = self._next("monotonic")
+        if self._tick:
+            value = (value // self._tick) * self._tick
+        return value
+
+    def __getattr__(self, name):
+        import time
+
+        return getattr(time, name)
+
+
+class _EndedByTheDriver:
+    """A page whose readiness wait the driver ends: its bound ran out.
+
+    Raises Playwright's own ``TimeoutError``, the class the product
+    classifies a finished-and-empty wait by, so the reading under test is the
+    one the product takes on its real timeout branch.
+    """
+
+    def locator(self, selector: str):
+        return self
+
+    @property
+    def first(self):
+        return self
+
+    async def wait_for(self, **kwargs):
+        from playwright.async_api import TimeoutError as DriverTimeout
+
+        raise DriverTimeout("Timeout %sms exceeded." % kwargs.get("timeout"))
+
+
+#: Where in the bound's last millisecond the driver's whole-millisecond timer
+#: can end a 1000 ms wait, in real time, read around the round trip. 999.6 ms
+#: is the shape CI measured (it printed 999); the other two are the edges.
+_IN_THE_LAST_MILLISECOND = [999.0001, 999.6, 999.9999]
+
+
+@pytest.mark.parametrize("real_ms", _IN_THE_LAST_MILLISECOND)
+async def test_a_wait_the_driver_ended_never_reads_short_of_its_bound(
+    monkeypatch, real_ms
+):
+    """The CI flake, reproduced on purpose and held.
+
+    SHOWN FAILING before the product rounded its reading up (``int(...)``):
+    each case read 999 on the 1000 ms bound, the reading CI printed::
+
+        AssertionError: {'attached': False, 'waited_ms': 999, ...}
+    """
+    clock = _ScriptedClock([500.0, 500.0 + real_ms / 1000])
+    monkeypatch.setattr(dom, "time", clock)
+    monkeypatch.setattr(dom, "TRACKER_LIST_TIMEOUT_MS", 1_000)
+    verdict = await dom.wait_for_tracker_list(_EndedByTheDriver())
+    assert len(clock.reads) == 2, clock.reads
+    assert verdict["attached"] is False and verdict["failure"] == "TimeoutError", verdict
+    assert verdict["waited_ms"] >= verdict["timeout_ms"] == 1_000, verdict
+
+
+async def test_the_wait_is_read_on_the_fine_clock_not_the_tick_clock(monkeypatch):
+    """The latent fault: a reading on the 15.625 ms clock falls a tick short.
+
+    The wait really lasts 300.8 ms, starting just after a tick, so the tick
+    clock reads it as 19 ticks, 296.875 ms. SHOWN FAILING while the product
+    read ``time.monotonic()``::
+
+        AssertionError: {'attached': False, 'waited_ms': 296, ...}
+    """
+    tick = 0.015625
+    start = 1_000 * tick + 0.0001
+    clock = _ScriptedClock([start, start + 0.3008], tick=tick)
+    monkeypatch.setattr(dom, "time", clock)
+    monkeypatch.setattr(dom, "TRACKER_LIST_TIMEOUT_MS", 300)
+    verdict = await dom.wait_for_tracker_list(_EndedByTheDriver())
+    assert len(clock.reads) == 2, clock.reads
+    assert verdict["attached"] is False, verdict
+    assert verdict["waited_ms"] >= 300, verdict
+
+
+async def test_the_note_prints_the_full_bound_beside_a_wait_that_spent_it(monkeypatch):
+    """What a reader is told. The note says "(Nms, the full bound)"; N must
+    be the bound or more, or the sentence contradicts its own number.
+
+    SHOWN FAILING before the fix::
+
+        AssertionError: '(999ms, the full bound)' not in the note
+    """
+    clock = _ScriptedClock([500.0, 500.9996])
+    monkeypatch.setattr(dom, "time", clock)
+    monkeypatch.setattr(dom, "TRACKER_LIST_TIMEOUT_MS", 1_000)
+    wait = await dom.wait_for_tracker_list(_EndedByTheDriver())
+    note = shape.tracker_read_note({}, wait, SETTLED_EARLY)
+    assert "(1000ms, the full bound)" in note, note
+
+
 async def test_the_empty_half_is_derived_from_shape_and_not_copied():
     """Every marker ``shape`` owns is waited on, without being written twice.
 

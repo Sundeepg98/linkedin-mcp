@@ -59,6 +59,30 @@ USAGE::
 
 Exit 0 when a map was written. Exit 1 when it was not -- and a map that was
 not written is never silently treated as an empty one.
+
+THE FULL RECORDING RUNS ON CI, ADDED 2026-11-28 (lane ci8). Run whole, the
+recipe is a full-suite run, and the full suite does not run on the shared
+box, so the map went two months stale (recorded 2026-09-22). Now a
+workflow_dispatch of ``.github/workflows/ci.yml`` with ``record_read_map``
+runs every shard of ONE cell under this recorder, and its merge job runs::
+
+    python scripts/build_read_map.py --merge <recordings> --out <map> \\
+        --run-id <run id> --head <short sha>
+
+``merge_shards`` and ``prune``, the same two functions a local run uses, over
+every shard's recordings, with each shard's own pytest exit code and seconds
+(``RUN_FILE``) held to the local rule: exit 0 or 1 is a run, anything else is
+not, and no map is written from one. The map is uploaded as the run's
+``MAP_ARTIFACT``, stamped with the run id and the head it recorded, and::
+
+    python scripts/build_read_map.py --fetch <run id> --sha <head sha>
+
+installs it only if the run is that sha's recording and the map's stamp is
+that run's (``scripts/lane_ci.py read-map <sha>`` dispatches, waits and
+fetches in one step). The installed map CARRIES the previous map's edges for
+test files and data files still on disk (``carry``), because a module-level
+read lands on whichever importer a process collects first, so a re-record
+attributes it differently; ``--replace`` installs the recording alone.
 """
 
 from __future__ import annotations
@@ -95,6 +119,25 @@ _IGNORED_PREFIXES = (
     "venv/", ".venv/", "__pycache__/", ".git/", ".pytest_cache/",
 )
 
+#: In a git WORKTREE, ``.git`` at the root is a FILE naming the real git
+#: directory, so the ``.git/`` prefix above never matches it and ``prune``'s
+#: is-a-file test keeps it. Lane ci8's scoped re-record of 2026-11-28 recorded
+#: it as a read. A diff can never name it, so it is never a read target.
+_IGNORED_NAMES = frozenset({".git"})
+
+#: One shard's own account of its run, written beside its recordings by the
+#: CI step that ran it: ``{"shard": k, "exit": n, "seconds": s}``.
+RUN_FILE = "pytest-run.json"
+
+#: The run name ci.yml gives a read-map recording. A recording and the full
+#: matrix are both workflow_dispatch runs of ci.yml on a sha; this is how the
+#: two are told apart, by the fetch here and by ``scripts/lane_ci.py``.
+RECORDING_RUN_NAME = "read-map recording"
+
+#: The recording's merge job, and the artifact it uploads.
+MERGE_JOB_NAME = "the read map, merged and pruned"
+MAP_ARTIFACT = "impact-gate-read-map"
+
 
 def _rel(path: str, repo: Path) -> str | None:
     """Repo-relative, forward slashes -- or None when it is outside the repo.
@@ -118,9 +161,16 @@ def _rel(path: str, repo: Path) -> str | None:
     # ``show`` as read targets from a ``git show`` argv. A recorded edge to a
     # path that does not exist is noise that would widen every plan touching
     # a file with that name.
-    if not resolved.exists():
+    # ``exists()`` CAN RAISE, and on Linux it does: a name past NAME_MAX gives
+    # ENAMETOOLONG rather than False. Tests that run ``python -c <code>`` hand
+    # the code over as an argv item, and the first CI recording (run
+    # 46065815443) failed three tests on it. Not a path is not a read.
+    try:
+        if not resolved.exists():
+            return None
+    except OSError:
         return None
-    if any(out.startswith(prefix) for prefix in _IGNORED_PREFIXES):
+    if out in _IGNORED_NAMES or any(out.startswith(prefix) for prefix in _IGNORED_PREFIXES):
         return None
     if "/__pycache__/" in out:
         return None
@@ -200,12 +250,16 @@ def _install(recorder: _Recorder) -> None:
     """
     real_open = builtins.open
 
+    # THE RECORDER NEVER BREAKS THE CALL IT OBSERVES (2026-11-28). An error in
+    # recording is a missed edge, which the map's additive law makes safe; an
+    # error escaping into the call is the observed test failing for the
+    # instrument's sake. So every record below is fenced, whatever it raises.
     def traced_open(file, mode="r", *args, **kwargs):  # noqa: ANN001
         if isinstance(file, (str, bytes, os.PathLike)) and "w" not in str(mode) \
                 and "a" not in str(mode) and "x" not in str(mode):
             try:
                 recorder.record(os.fspath(file))
-            except (TypeError, ValueError):
+            except Exception:  # noqa: BLE001 -- see the fence above
                 pass
         return real_open(file, mode, *args, **kwargs)
 
@@ -241,14 +295,20 @@ def _install(recorder: _Recorder) -> None:
                 if tail and not tail.startswith(("\\", "/")):
                     recorder.record(tail)
 
+    def _fenced_argv(argv) -> None:  # noqa: ANN001
+        try:
+            _record_argv(argv)
+        except Exception:  # noqa: BLE001 -- the fence above traced_open
+            pass
+
     def traced_run(*args, **kwargs):  # noqa: ANN002
         if args:
-            _record_argv(args[0])
+            _fenced_argv(args[0])
         return real_run(*args, **kwargs)
 
     def traced_popen(self, args=None, *rest, **kwargs):  # noqa: ANN001
         if args is not None:
-            _record_argv(args)
+            _fenced_argv(args)
         return real_popen(self, args, *rest, **kwargs)
 
     subprocess.run = traced_run
@@ -309,10 +369,14 @@ def _git(repo: Path, *args: str) -> str | None:
 
 
 def merge_shards(shard_dir: Path) -> tuple[dict[str, list[str]], list[str]]:
-    """Union every worker's recording. Returns ``(edges, unattributed)``."""
+    """Union every worker's recording. Returns ``(edges, unattributed)``.
+
+    It walks DOWN the directory: a CI download lays each shard job's
+    recordings in a directory of its own, and a flat glob found none of them.
+    """
     edges: dict[str, set[str]] = {}
     unattributed: set[str] = set()
-    for shard in sorted(shard_dir.glob("shard-*.json")):
+    for shard in sorted(shard_dir.rglob("shard-*.json")):
         try:
             payload = json.loads(shard.read_text(encoding="utf-8"))
         except (OSError, ValueError):
@@ -348,7 +412,8 @@ def prune(edges: dict[str, list[str]], repo: Path) -> dict[str, list[str]]:
         # ever be a changed path in a diff, so they are recorded noise -- and
         # noise in a cache is what somebody later mistakes for a finding.
         keep = sorted(p for p in paths
-                      if not p.endswith(".py") and (repo / p).is_file())
+                      if not p.endswith(".py") and p not in _IGNORED_NAMES
+                      and (repo / p).is_file())
         if keep:
             out[test_file] = keep
     return out
@@ -386,20 +451,211 @@ def build(repo: Path, targets: list[str], shard_dir: Path,
               "broken instrument, not a repository with no file reads; NOT "
               "writing a map.", file=sys.stderr)
         return 1
-    payload = {
-        "taken_at": time.strftime("%Y-%m-%d"),
-        "head": _git(repo, "rev-parse", "--short", "HEAD") or "unknown",
-        "seconds": round(elapsed, 1),
-        "scope": "full-suite" if not targets else "partial: " + " ".join(targets),
-        "pytest_exit": proc.returncode,
-        "test_files": len(edges),
-        "edges": edges,
-        "unattributed": unattributed,
-    }
+    payload = payload_for(
+        edges, unattributed,
+        head=_git(repo, "rev-parse", "--short", "HEAD") or "unknown",
+        seconds=round(elapsed, 1),
+        scope="full-suite" if not targets else "partial: " + " ".join(targets),
+        pytest_exit=proc.returncode,
+    )
     MAP_PATH.write_text(json.dumps(payload, indent=1) + "\n", encoding="utf-8")
     print(f"build_read_map: wrote {MAP_PATH.name} -- {len(edges)} test files, "
           f"{sum(len(v) for v in edges.values())} edges, "
           f"{len(unattributed)} unattributed reads.")
+    return 0
+
+
+def payload_for(edges: dict[str, list[str]], unattributed: list[str], *, head: str,
+                seconds, scope: str, pytest_exit, run_id: str | None = None) -> dict:
+    """The map, stamped. ONE shape for a local run and a CI merge alike; a CI
+    recording also carries the run id it came from."""
+    payload = {
+        "taken_at": time.strftime("%Y-%m-%d"),
+        "head": head,
+        "seconds": seconds,
+        "scope": scope,
+        "pytest_exit": pytest_exit,
+        "test_files": len(edges),
+        "edges": edges,
+        "unattributed": unattributed,
+    }
+    if run_id is not None:
+        payload["run_id"] = str(run_id)
+    return payload
+
+
+def merge_recordings(record_dir: Path, out: Path, *, run_id: str, head: str,
+                     repo: Path) -> int:
+    """The CI merge: every shard's recordings, merged and pruned by the recipe.
+
+    Refuses, writing nothing, when no shard reported its run, when any shard's
+    pytest could not run (an exit other than 0 or 1, the local rule), or when
+    the recordings hold no edge at all.
+    """
+    runs = []
+    for path in sorted(record_dir.rglob(RUN_FILE)):
+        try:
+            runs.append(json.loads(path.read_text(encoding="utf-8")))
+        except (OSError, ValueError):
+            print(f"build_read_map: {path} is not a run record", file=sys.stderr)
+            return 1
+    if not runs:
+        print(f"build_read_map: no shard under {record_dir} reported its run "
+              f"({RUN_FILE}), so NO MAP WAS WRITTEN.", file=sys.stderr)
+        return 1
+    bad = [r for r in runs if r.get("exit") not in (0, 1)]
+    if bad:
+        print(f"build_read_map: pytest could not run in shard(s) "
+              f"{sorted(r.get('shard') for r in bad)} (exits "
+              f"{sorted(r.get('exit') for r in bad)}), so NO MAP WAS WRITTEN.",
+              file=sys.stderr)
+        return 1
+    edges, unattributed = merge_shards(record_dir)
+    edges = prune(edges, repo)
+    if not edges:
+        print("build_read_map: the recordings hold ZERO edges. That is a broken "
+              "instrument, not a repository with no file reads; NOT writing a map.",
+              file=sys.stderr)
+        return 1
+    payload = payload_for(
+        edges, unattributed, head=head,
+        seconds=round(sum(float(r.get("seconds") or 0) for r in runs), 1),
+        scope=(f"full-suite (GitHub Actions, one cell in {len(runs)} shards, "
+               f"recorded by run {run_id})"),
+        pytest_exit=max(r["exit"] for r in runs),
+        run_id=run_id,
+    )
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(payload, indent=1) + "\n", encoding="utf-8")
+    print(f"build_read_map: merged {len(runs)} shard(s) into {out.name} -- "
+          f"{len(edges)} test files, {sum(len(v) for v in edges.values())} edges, "
+          f"{len(unattributed)} unattributed reads; run {run_id} at {head}.")
+    return 0
+
+
+def _gh_cli(*args: str) -> tuple[int, str, str]:
+    try:
+        proc = subprocess.run(["gh", *args], capture_output=True, text=True,
+                              encoding="utf-8", errors="replace")
+    except OSError as exc:
+        return 127, "", str(exc)
+    return proc.returncode, proc.stdout.strip(), proc.stderr.strip()
+
+
+#: Why a fetched recording carries the previous map's edges, said in the map.
+CARRY_WHY = (
+    "A re-record may add edges and never remove one, the map's own law. A "
+    "module-level read is attributed to whichever test file a process imports "
+    "first, so two recordings of one suite attribute it differently; these "
+    "edges are the previous map's, for test files and data files still on disk, "
+    "that this recording did not see.")
+
+
+def carry(payload: dict, previous: dict | None, repo: Path) -> dict:
+    """``payload``, plus every edge ``previous`` holds that it lacks, for a
+    test file still on disk and a data file ``prune`` still keeps. The
+    recording's own stamp is kept; ``carried`` says how many edges came over,
+    and from which map."""
+    if not previous or not isinstance(previous.get("edges"), dict):
+        return payload
+    edges = {test: set(paths) for test, paths in payload["edges"].items()}
+    added = 0
+    for test, paths in previous["edges"].items():
+        if not (repo / test).is_file():
+            continue
+        for path in prune({test: list(paths)}, repo).get(test, []):
+            if path not in edges.setdefault(test, set()):
+                edges[test].add(path)
+                added += 1
+    out = dict(payload)
+    out["edges"] = {test: sorted(paths) for test, paths in sorted(edges.items()) if paths}
+    out["test_files"] = len(out["edges"])
+    out["carried"] = {"edges": added, "from_head": previous.get("head"),
+                      "from_taken_at": previous.get("taken_at"), "why": CARRY_WHY}
+    return out
+
+
+def fetch(run_id: str, sha: str, *, slug: str | None = None, gh=None,
+          map_path: Path = MAP_PATH, repo: Path | None = None,
+          replace: bool = False) -> int:
+    """Install the map recorded by run ``run_id``, which must be ``sha``'s.
+
+    BY RUN ID AND HEAD SHA, never "the latest run": the run is read by its id,
+    and refused unless it is a completed read-map recording of exactly that
+    sha whose merge job succeeded; the map is then refused unless its own
+    stamp names that run and a head ``sha`` begins with. Exit 0 installed, 1
+    refused, 2 gh could not answer.
+    """
+    gh = gh or _gh_cli
+    if slug is None:
+        import lane_ci  # noqa: PLC0415 -- only the fetch needs the remote
+
+        rc, url, err = lane_ci._git("remote", "get-url", "origin")
+        if rc != 0:
+            print(f"build_read_map: no origin remote ({err})", file=sys.stderr)
+            return 2
+        slug = lane_ci.slug_from_url(url)
+    rc, out, err = gh("run", "view", str(run_id), "-R", slug, "--json",
+                      "databaseId,headSha,event,status,conclusion,displayTitle,jobs")
+    if rc != 0:
+        print(f"build_read_map: gh run view {run_id} failed ({err[:200]})", file=sys.stderr)
+        return 2
+    view = json.loads(out)
+    merge_job = [j for j in view.get("jobs") or [] if j.get("name") == MERGE_JOB_NAME]
+    problems = []
+    if view.get("headSha") != sha:
+        problems.append(f"run {run_id} recorded {str(view.get('headSha'))[:12]}, not {sha[:12]}")
+    if view.get("event") != "workflow_dispatch" or view.get("displayTitle") != RECORDING_RUN_NAME:
+        problems.append(f"run {run_id} is not a read-map recording "
+                        f"({view.get('event')}, {view.get('displayTitle')!r})")
+    if view.get("status") != "completed":
+        problems.append(f"run {run_id} is {view.get('status')}, not completed")
+    if [j.get("conclusion") for j in merge_job] != ["success"]:
+        problems.append(f"its job {MERGE_JOB_NAME!r} did not succeed "
+                        f"({[j.get('conclusion') for j in merge_job]})")
+    if problems:
+        print("build_read_map: REFUSED, nothing installed: " + "; ".join(problems),
+              file=sys.stderr)
+        return 1
+    with tempfile.TemporaryDirectory() as scratch:
+        rc, _out, err = gh("run", "download", str(run_id), "-R", slug, "-n", MAP_ARTIFACT,
+                           "-D", scratch)
+        if rc != 0:
+            print(f"build_read_map: gh run download {run_id} failed ({err[:200]})",
+                  file=sys.stderr)
+            return 2
+        downloaded = Path(scratch) / MAP_PATH.name
+        try:
+            payload = json.loads(downloaded.read_text(encoding="utf-8"))
+        except (OSError, ValueError) as exc:
+            print(f"build_read_map: the artifact holds no readable map ({exc})",
+                  file=sys.stderr)
+            return 1
+    head = str(payload.get("head") or "")
+    stamp_problems = []
+    if str(payload.get("run_id")) != str(run_id):
+        stamp_problems.append(f"the map names run {payload.get('run_id')}, not {run_id}")
+    if not head or not sha.startswith(head):
+        stamp_problems.append(f"the map names head {head!r}, not a prefix of {sha[:12]}")
+    if not str(payload.get("scope", "")).startswith("full-suite"):
+        stamp_problems.append(f"the map's scope is {payload.get('scope')!r}")
+    if not isinstance(payload.get("edges"), dict) or not payload["edges"]:
+        stamp_problems.append("the map holds no edges")
+    if stamp_problems:
+        print("build_read_map: REFUSED, nothing installed: " + "; ".join(stamp_problems),
+              file=sys.stderr)
+        return 1
+    if not replace:
+        try:
+            previous = json.loads(map_path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            previous = None
+        payload = carry(payload, previous, repo or _REPO_FALLBACK)
+    map_path.write_text(json.dumps(payload, indent=1) + "\n", encoding="utf-8")
+    carried = (payload.get("carried") or {}).get("edges", 0)
+    print(f"build_read_map: installed run {run_id}'s map at {head} -- "
+          f"{len(payload['edges'])} test files, {carried} edge(s) carried from the "
+          "previous map.")
     return 0
 
 
@@ -411,12 +667,33 @@ def main(argv: list[str] | None = None) -> int:
                         help="where worker recordings land (default: a temp dir)")
     parser.add_argument("--serial", action="store_true",
                         help="do not use xdist")
+    parser.add_argument("--merge", default=None, metavar="DIR",
+                        help="merge and prune a CI recording's shards; write --out")
+    parser.add_argument("--out", default=None, help="where --merge writes the map")
+    parser.add_argument("--run-id", default=None, help="the recording run, for its stamp")
+    parser.add_argument("--head", default=None, help="the head it recorded, for its stamp")
+    parser.add_argument("--repo-root", default=None,
+                        help="the checkout prune reads against (default: git's top level)")
+    parser.add_argument("--fetch", default=None, metavar="RUN_ID",
+                        help="install the map recorded by this CI run")
+    parser.add_argument("--sha", default=None, help="the head sha --fetch must find")
+    parser.add_argument("--replace", action="store_true",
+                        help="with --fetch: install the recording alone, carrying nothing")
     args = parser.parse_args(argv)
 
-    repo = Path(_git(Path.cwd(), "rev-parse", "--show-toplevel")
+    repo = Path(args.repo_root or _git(Path.cwd(), "rev-parse", "--show-toplevel")
                 or str(_REPO_FALLBACK)).resolve()
-    if not (repo / "tests").is_dir():
+    if args.repo_root is None and not (repo / "tests").is_dir():
         repo = _REPO_FALLBACK
+    if args.fetch is not None:
+        if not args.sha:
+            parser.error("--fetch needs --sha, the head the run must have recorded")
+        return fetch(args.fetch, args.sha, repo=repo, replace=args.replace)
+    if args.merge is not None:
+        if not (args.out and args.run_id and args.head):
+            parser.error("--merge needs --out, --run-id and --head")
+        return merge_recordings(Path(args.merge), Path(args.out), run_id=args.run_id,
+                                head=args.head, repo=repo)
     # THE SHARDS GO OUTSIDE THE TREE BY DEFAULT. A scratch directory inside
     # the repository would surface in every concurrent writer's ``git status``
     # and would need an ignore entry, which this repo asserts is declared --

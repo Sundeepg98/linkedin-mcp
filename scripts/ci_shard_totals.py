@@ -55,10 +55,18 @@ from the same workflow output the job matrix is built from, so the guard cannot
 expect a shape the matrix does not produce. A hard-coded list here would be a
 second source of truth, and the first thing it would do is go stale.
 
+THE RUNNER EACH SHARD RAN ON, ADDED 2026-11-27 (lane ci8). ``record --runner``
+takes the file ``scripts/ci_runner_facts.py`` wrote before the run -- the
+workers ``-n auto`` started, the CPUs, the free memory -- and carries it into
+the report as ``runner``; ``verify`` prints it for every shard. It is evidence
+for reading a slow shard, never a condition: a shard whose facts are missing
+reports ``runner: null`` and nothing here goes red over it.
+
 USAGE
     python scripts/ci_shard_totals.py record \\
         --plan shard-plan.json --junit junit.xml \\
         --cell '{"os":"ubuntu-latest","python-version":"3.13"}' \\
+        --runner runner-facts.json \\
         --out reports/ubuntu-latest-3.13-0.json
 
     python scripts/ci_shard_totals.py verify \\
@@ -78,6 +86,13 @@ from pathlib import Path
 # length: the only document parsed is the junit report pytest wrote seconds
 # earlier in this same job.
 import xml.etree.ElementTree as ET
+
+HERE = Path(__file__).resolve().parent
+if str(HERE) not in sys.path:
+    sys.path.insert(0, str(HERE))
+
+# ONE spelling of a runner's line, shared with the step that measured it.
+from ci_runner_facts import summary as runner_summary  # noqa: E402
 
 
 def cell_label(cell: dict) -> str:
@@ -152,9 +167,21 @@ def publish(line: str) -> None:
             handle.write(line + "\n")
 
 
+def runner_facts(path: str | None) -> dict | None:
+    """The facts ``ci_runner_facts.py`` wrote, or None when there are none.
+
+    Absent is a finding, not a failure: the report step runs ``if: always()``,
+    and a shard whose facts step never ran must still report its counts.
+    """
+    if not path or not Path(path).is_file():
+        return None
+    return json.loads(Path(path).read_text(encoding="utf-8"))
+
+
 def record(args) -> int:
     plan = json.loads(Path(args.plan).read_text(encoding="utf-8"))
     totals = junit_totals(args.junit)
+    runner = runner_facts(args.runner)
     report = {
         "cell": cell_label(json.loads(args.cell)),
         "index": plan["index"],
@@ -167,6 +194,7 @@ def record(args) -> int:
         "xfailed": totals["xfailed"],
         "failures": totals["failures"],
         "errors": totals["errors"],
+        "runner": runner,
     }
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -177,6 +205,7 @@ def record(args) -> int:
         f"skipped {report['skipped']}, xfailed {report['xfailed']}, "
         f"failed {report['failures']}, errors {report['errors']}"
     )
+    publish(runner_summary(runner))
     return 0
 
 
@@ -327,6 +356,11 @@ def verify(args) -> int:
                 f"  {label}: collected {collected} | executed {executed} | "
                 f"skipped {skipped} | shards {sorted(r['index'] for r in found)}"
             )
+            # Every shard's runner, side by side: a slow shard is read against
+            # its siblings' workers, CPUs and free memory, not in isolation.
+            for report in sorted(found, key=lambda r: r["index"]):
+                publish(f"    {label} shard {report['index']} "
+                        f"{runner_summary(report.get('runner'))}")
         else:
             publish(f"  {label}: NO REPORTS")
 
@@ -350,6 +384,7 @@ def main(argv: list[str]) -> int:
     writer.add_argument("--plan", required=True, help="ci_shard.py --json output")
     writer.add_argument("--junit", required=True, help="this shard's junit.xml")
     writer.add_argument("--cell", required=True, help="the matrix cell, as JSON")
+    writer.add_argument("--runner", help="ci_runner_facts.py's file; absent is recorded as null")
     writer.add_argument("--out", required=True, help="where to write the report")
     writer.set_defaults(run=record)
 

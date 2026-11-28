@@ -13094,6 +13094,15 @@ REPLY_ACTIONS: frozenset[str] = frozenset({"send_reply"})
 #: and the reply's draft rule and words check do not apply.
 ATTACHMENT_SEND_ACTIONS: frozenset[str] = frozenset({"send_attachment"})
 
+#: WHICH FIELD EACH WAIT FOR SEND RETURNS, read into the receipt's
+#: ``send_enabled_wait.enabled`` (2026-11-28, lane ci8). The first contact's and
+#: the reply's waits return ``enabled``. The attachment's,
+#: ``attachments.wait_for_attachment_drawn``, returns ``drawn``: the file's
+#: name drew in the form AND Send turned on. Reading ``enabled`` from it read a
+#: field it never returns, so every attachment send's receipt said Send had
+#: never turned on, a claim the tool had not derived.
+SEND_WAIT_FIELD: dict[str, str] = {action: "drawn" for action in ATTACHMENT_SEND_ACTIONS}
+
 
 #: ``ADDRESSED_TYPING_ACTIONS`` STOOD HERE until 2026-09-27: the actions that
 #: typed TWO things, a subject into one control and the content into another.
@@ -15386,14 +15395,17 @@ async def perform(
         # inside the bound, and the milliseconds waited. Null for every other
         # action and path.
         # HOW LONG A FIRST CONTACT'S, OR A REPLY'S, SEND TOOK TO TURN ON after
-        # his words were in the box (2026-09-28 17:37 and 21:08): whether it
-        # did inside the bound, and the milliseconds waited. Null for every
-        # other action and path.
+        # his words were in the box (2026-09-28 17:37 and 21:08), or an
+        # attachment's after its file was handed over: whether it did inside
+        # the bound, read from the field THAT wait returns (SEND_WAIT_FIELD),
+        # and the milliseconds waited. Null for every other action and path.
         "send_enabled_wait": (
             None
             if send_enabled_wait is None
             else {
-                "enabled": send_enabled_wait.get("enabled") is True,
+                "enabled": send_enabled_wait.get(
+                    SEND_WAIT_FIELD.get(spec.action, "enabled")
+                ) is True,
                 "waited_ms": coerce.as_count(send_enabled_wait.get("waited_ms")),
             }
         ),

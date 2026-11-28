@@ -13786,6 +13786,49 @@ page-clock probe. None was shown failing on a planted defect. The method is
 kept in the record's section 4.2: both attempts' shard reports, the same
 commit and plan, compared file by file.
 
+## 121. A LANE'S REF GETS THE FULL MATRIX READ BY SHA, EVERY SHARD SAYS WHAT RAN IT, AND A READING NEVER FALLS SHORT OF ITS BOUND (ci8, 2026-11-27)
+
+Lane ci8 was a hygiene lane in wave 8. It gave a lane's `ci/` ref the full
+matrix in one command, made every shard record its runner, moved the census
+prose guard from a character window to the row it checks, split
+`tests/test_writes.py` by concern, and repaired the tracker wait's "999 <
+1000" flake at its cause. The record is `_audit/2026-11-27-ci8.md`.
+
+    A GREEN RUN OF ONE CELL IS NOT THE FULL MATRIX, AND A RUN NOBODY RECORDED
+    THE RUNNER OF CANNOT BE READ. A GUARD OVER PROSE LOCATES ITS CLAIM BY
+    STRUCTURE, AND A WAIT'S READING IS ROUNDED UP ON THE FINE CLOCK.
+
+### 121.1 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `scripts/lane_ci.py` `wait <sha> --full`, with its 15 tests in `tests/test_lane_ci.py` (the push run finished first, the dispatch run found by sha, event and ref, a running dispatch resumed, a finished one read, every cell reported, a one-cell run refused as not the full matrix) | before the command existed, 15 of 15 failed; after, 73 passed. Mutants, each by FAILED: no wait for the push run (2), the cancelled run taken for the new one (1), no shape check (2), a running dispatch sent again (1), the ref check skipped (1) |
+| `scripts/ci_runner_facts.py`, the ci.yml step that runs it, and `ci_shard_totals.py record --runner`, with `tests/test_ci_runner_facts.py` (the three facts measured on the machine running the suite, the worker count xdist's own resolution, the step's place, the report and the totals job carrying them) | before, 10 of 10 failed; after, 10 passed. Mutants: the worker count from `os.cpu_count()` (1 failed), the report step without `--runner` (1 failed) |
+| `tests/test_ci_runner_facts.py::test_no_step_between_the_shard_count_and_the_run_writes_into_the_checkout`, with the facts path pinned to `$RUNNER_TEMP` (lane run 46052436870 went red when the file sat in the checkout: the tracked-file guards collected it, and two shards ran one test more than they counted) | against the step as it was, 2 failed; after the file moved to `$RUNNER_TEMP`, 11 passed |
+| `tests/test_the_read_map_follows_the_split.py` (four fixture-and-reader pairs from the test code, held against the impact gate's observed read map), with the six split files re-recorded into the map (2026-11-28) | against the map as it was, 4 of 4 failed; after the re-record, 4 passed. Through the shipped `impact_set`, a fixture edit's plan held 1 or 2 of the six files before, and every recorded reader after |
+| `tests/test_a_wait_never_reads_short_of_its_bound.py` (five sibling waits driven against a virtual clock: the driver's last millisecond, the 15.625 ms tick clock, and the attachment wait's budget), with `tests/test_job_description_readiness.py`'s re-anchored split (2026-11-28) | before the five read `perf_counter` rounded up, 11 of 11 failed (999, 296, 1000.4 of 1000); after, 11 passed on py3.13 and py3.10. The re-anchored split is failed by a mutant putting the start back on `monotonic` |
+| `tests/test_send_attachment.py::test_the_receipt_says_send_turned_on_when_the_form_drew_the_file`, with its control `..._send_never_turned_on_when_the_form_never_drew_the_file` (2026-11-28) | before the receipt read the wait's own field, the first failed (`enabled: False` on a send whose Send was on); its control read False before and after |
+| `tests/test_build_read_map.py` (the recorder's `.git` and NAME_MAX filters and its fences, the nested merge, `--merge`'s stamp and refusals, `--fetch` by run id and sha, and the carry), with the recording's pins in `tests/test_ci_fast_lane.py` and `read-map` in `tests/test_lane_ci.py` (2026-11-28) | before each part: 12 of 13, then 2, then 2 failed in the first file, 7 in the workflow's (against the committed workflow), and 7 in lane_ci's (`--full` waited on a running recording as its own dispatch); after, 17, 25 and 80 passed |
+| the `test_people_seam.py` pair in `tests/test_the_read_map_follows_the_split.py` (a reader the 2026-09-22 recording never saw) | against the old map, 1 failed and 4 passed; against the map recorded by CI run 46067022556, 5 passed |
+| `tests/test_people_search_sends_linkedins_facet_keys.py` (11 tests: `schoolFilter`, `industry` and `activelyHiring` read off `tests/fixtures/synthetic/net7_people_search_facet_links.html`, a skeleton of LinkedIn's own people-search links that `scripts/_build_net7_facet_link_skeleton.py` builds from the gitignored raw captures, and held against `people_search.compose` and `people_search.landing_verdict`) (2026-11-28) | each key renamed in `people_search`: this file failed 2 of 11 for each, by AssertionError, and net7's facet tests 4, 5 and 4. Each key renamed in the code and in net7's test together: net7's tests passed, 31 of 31, and this file still failed 2 of 11 |
+| `tests/test_the_census_prose_matches_the_boundary.py::test_the_reachable_surfaces_are_named_in_the_census` reading the reachable-surfaces row, with `test_a_cell_grown_past_the_old_window_cannot_hide_the_row` and `test_the_row_reader_can_fail` | the old guard over a census whose count cell grew 6000 characters: 1 failed, while the new one passed; a real mismatch (the row dropping saved posts), a reworded row, a missing section 4, and guards reading the left cell or the old window each failed by AssertionError, with no ERROR |
+| `tests/test_tracker_readiness.py` section 2b: `test_a_wait_the_driver_ended_never_reads_short_of_its_bound` (3 cases), `test_the_wait_is_read_on_the_fine_clock_not_the_tick_clock`, `test_the_note_prints_the_full_bound_beside_a_wait_that_spent_it` (a scripted clock, and a page whose wait raises the driver's TimeoutError) | before the reading was rounded up on `perf_counter`, 5 of 5 failed (999, 999, 999, 296, and the note's "(999ms, the full bound)"); mutants: truncating again killed 4, reading `monotonic` again killed 1 |
+
+### 121.2 DECLARED DISPOSABLE
+
+The lane's scratch tools (`_state/lane-scratch/ci8/`): the tick probe (the
+real wait's readings at its bound), the mutant runner, the prose scenario
+harness, the anatomy and the splitter for `tests/test_writes.py`, and the
+junit re-attributor for the timings table. Each ran once, for a measurement
+the record holds. The split's proof, the same 163 ids modulo the path, is in
+the record's section 4.2. On 2026-11-28, two more joined them: the gate-plan
+probe (the shipped `impact_set` per changed path) and the scoped re-recorder
+(the recorder's own plugin, merge and prune over the six files). Their
+before-and-after is in the record's section 11.1. F5 added three more: the
+survey of the raw captures' link shapes, the counting probe (each key's
+people-search URLs counted four ways, counts only) and the coordinated-rename
+runner. Their measurements are in the record's section 13.
+
 ## 122. AN EDITOR THAT WILL NOT CLOSE ENDS THE SESSION, AND A READY'S STOP LINES ARE THE RUNNER'S KINDS BY NAME (live-s13, 2026-11-28)
 
 The live lane's session-14 runner (`runner_s14.py`, sha256 `8094c4a0`, kept in

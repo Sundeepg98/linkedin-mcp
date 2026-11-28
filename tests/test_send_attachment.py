@@ -546,3 +546,46 @@ async def test_it_refuses_a_grant_for_another_conversation(writes_on, browser_pa
 async def test_the_tool_refuses_a_malformed_thread_id_before_anything(writes_on, root):
     out = await server.linkedin_send_attachment("not a thread id", "test-image.png")
     assert out.get("error") or out.get("refused"), out
+
+
+# ---------------------------------------------------------------------------
+# 5. The receipt's send_enabled_wait reads the attachment wait's own field
+# ---------------------------------------------------------------------------
+#
+# ADDED 2026-11-28 (lane ci8). ``perform`` fills the receipt's
+# ``send_enabled_wait`` from whichever wait ran for Send. The first contact's
+# and the reply's waits return ``enabled``; the attachment's,
+# ``attachments.wait_for_attachment_drawn``, returns ``drawn`` (its name drew
+# in the form and Send turned on) and no ``enabled`` at all. The receipt read
+# ``enabled``, so on every attachment send it reported Send as never turned on,
+# a claim the tool had not derived.
+
+
+async def test_the_receipt_says_send_turned_on_when_the_form_drew_the_file(
+    writes_on, browser_page, photo, root
+):
+    """SHOWN FAILING before the receipt read the wait's own field: Send was
+    pressed, so it had turned on, and the receipt read ``enabled: False``."""
+    grant, _block = await _confirmed(browser_page, None)
+    out = await writes.perform(_nav(ATTACHING, _after("test-image.png")), browser_page, grant)
+    assert out["send_gate"]["proceeded"] is True, out["send_gate"]
+    assert out["send_enabled_wait"]["enabled"] is True, out["send_enabled_wait"]
+
+
+async def test_the_receipt_says_send_never_turned_on_when_the_form_never_drew_the_file(
+    writes_on, browser_page, photo, monkeypatch
+):
+    """THE CONTROL ON THE OTHER SIDE: the form never draws the file, so the
+    wait runs out and the receipt must still say False. Without it, a receipt
+    that always said True would pass the test above."""
+    monkeypatch.setattr(attachments, "ATTACHMENT_DRAWN_WAIT_MS", 1_000)
+    grant, _block = await _confirmed(browser_page, None)
+    silent = _derive(
+        CAPTURED,
+        _FORM,
+        _FORM.replace('id="reply-form"', 'id="reply-form" data-sends-attachments="yes"'),
+    )
+    out = await writes.perform(_nav(silent, silent), browser_page, grant)
+    assert out["send_gate"]["proceeded"] is False, out["send_gate"]
+    assert out["send_enabled_wait"]["enabled"] is False, out["send_enabled_wait"]
+    assert out["send_enabled_wait"]["waited_ms"] >= 1_000, out["send_enabled_wait"]
