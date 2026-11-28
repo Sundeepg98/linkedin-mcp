@@ -3,9 +3,21 @@
 usage:
     python scripts/resolve_instruments_order.py [--file PATH] [--main-checkout]
 
-Takes the single conflict hunk, orders the two blocks by their first '## N.' / '### N.M' heading number,
-writes them back separated by one blank line, and refuses if there is not exactly one hunk or if a block
-has no numbered heading.
+Takes the single conflict hunk and cuts both sides into SECTIONS: a '## N.' heading starts one anywhere
+in a block, and a '### N.M' heading starts one only before the block's first '## N.' (a subsection the
+lane appended to the section above the hunk). Every other line stays with the section it follows, so a
+subsection stays under the section its author wrote it in, whatever its number says. The sections of
+both sides are written back in number order, one blank line apart. Text before a block's first numbered
+heading continues the section above the hunk, so it is written first.
+
+It refuses, and writes nothing, if there is not exactly one hunk, if a block has no numbered heading, or
+if a section number is claimed twice in the hunk or is already used outside it. That refusal names the
+next free section number: renumber the later section in the conflict and run again.
+
+SECTION ORDER (lane hygiene28, 2026-11-28). Until then the two BLOCKS were ordered by their first
+heading. One side holding 114 and 117 against the other's 116 was written 114, 117, 116, and integration
+7 split the sections by hand (merge notes, 2026-11-27 18:36). Two sides claiming one number were written
+side by side, and the duplicate was found later or not at all.
 
 WHICH FILE IT EDITS (lane hygiene28, 2026-11-28)
 * ``--file PATH`` edits exactly PATH.
@@ -58,7 +70,8 @@ _REDIRECTING = ("GIT_DIR", "GIT_WORK_TREE", "GIT_COMMON_DIR", "GIT_INDEX_FILE",
                 "GIT_DISCOVERY_ACROSS_FILESYSTEM")
 
 _HUNK = re.compile(r"^<<<<<<< [^\n]*\n(.*?)^=======\n(.*?)^>>>>>>> [^\n]*\n", flags=re.S | re.M)
-_HEADING = re.compile(r"^#{2,3} (\d+)(?:\.(\d+))?", flags=re.M)
+_SECTION = re.compile(r"^## (\d+)(?:\.(\d+))?", flags=re.M)
+_SUBSECTION = re.compile(r"^### (\d+)(?:\.(\d+))?", flags=re.M)
 
 
 class Refused(Exception):
@@ -119,11 +132,31 @@ def checkout_of(path: pathlib.Path) -> tuple[str, str]:
     return "linked", f"a linked worktree ({own})"
 
 
-def _key(block: str) -> tuple[int, int]:
-    found = _HEADING.search(block)
-    if not found:
+def _sections(block: str) -> tuple[str, list[tuple[str, tuple[int, int], str]]]:
+    """(the block's text before its first numbered heading, and its sections as
+    (level, (number, sub-number), text))."""
+    first = _SECTION.search(block)
+    cut = first.start() if first else len(block)
+    starts = sorted(list(_SUBSECTION.finditer(block, 0, cut)) + list(_SECTION.finditer(block)),
+                    key=lambda found: found.start())
+    if not starts:
         raise Refused("a block has no numbered heading; resolve by hand", 1)
-    return int(found.group(1)), int(found.group(2) or 0)
+    sections = []
+    for i, found in enumerate(starts):
+        end = starts[i + 1].start() if i + 1 < len(starts) else len(block)
+        level = "##" if found.re is _SECTION else "###"
+        key = (int(found.group(1)), int(found.group(2) or 0))
+        sections.append((level, key, block[found.start():end]))
+    return block[: starts[0].start()], sections
+
+
+def _name(level: str, key: tuple[int, int]) -> str:
+    return f"{key[0]}.{key[1]}" if level == "###" or key[1] else str(key[0])
+
+
+def _spaced(piece: str, last: bool) -> str:
+    """The piece ending in one newline if it is the hunk's last, else in one blank line."""
+    return piece.rstrip("\n") + ("\n" if last else "\n\n")
 
 
 def resolve(text: str) -> tuple[str, list[tuple[int, int]]]:
@@ -132,9 +165,36 @@ def resolve(text: str) -> tuple[str, list[tuple[int, int]]]:
     if len(hunks) != 1:
         raise Refused(f"expected exactly 1 conflict hunk, found {len(hunks)}", 1)
     hunk = hunks[0]
-    blocks = sorted([hunk.group(1), hunk.group(2)], key=_key)
-    merged = blocks[0].rstrip("\n") + "\n\n" + blocks[1]
-    return text[: hunk.start()] + merged + text[hunk.end():], [_key(b) for b in blocks]
+    prefixes, sections = [], []
+    for block in (hunk.group(1), hunk.group(2)):
+        prefix, found = _sections(block)
+        prefixes.append(prefix)
+        sections.extend(found)
+
+    outside = text[: hunk.start()] + text[hunk.end():]
+    used = {("##", (int(n), int(m or 0))) for n, m in _SECTION.findall(outside)}
+    used_numbers = {key[0] for _level, key in used}
+    used |= {("###", (int(n), int(m or 0))) for n, m in _SUBSECTION.findall(outside)}
+    claimed = [(level, key) for level, key, _text in sections]
+    twice = sorted({c for c in claimed if claimed.count(c) > 1}, key=lambda c: c[1])
+    taken = sorted({c for c in claimed if c in used or (c[0] == "##" and c[1][0] in used_numbers)},
+                   key=lambda c: c[1])
+    if twice or taken:
+        numbers = used_numbers | {key[0] for level, key in claimed if level == "##"}
+        said = []
+        if twice:
+            said.append("claimed twice in the hunk: " + ", ".join(_name(*c) for c in twice))
+        if taken:
+            said.append("already used outside the hunk: " + ", ".join(_name(*c) for c in taken))
+        raise Refused("section number " + "; ".join(said) + ". Renumber the later section in the "
+                      f"conflict and run again; the next free section number is "
+                      f"{max(numbers, default=0) + 1}.",
+                      1)
+
+    ordered = sorted(sections, key=lambda section: section[1])
+    pieces = [prefix for prefix in prefixes if prefix.strip()] + [s[2] for s in ordered]
+    merged = "".join(_spaced(piece, i == len(pieces) - 1) for i, piece in enumerate(pieces))
+    return text[: hunk.start()] + merged + text[hunk.end():], [s[1] for s in ordered]
 
 
 def main(argv: list[str] | None = None) -> int:

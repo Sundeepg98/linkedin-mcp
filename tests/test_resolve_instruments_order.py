@@ -21,13 +21,19 @@ calls it, and the worktree's ``scripts/``. Where the tool is stored must not
 change which file it edits. Before each test both INSTRUMENTS.md files are
 rewritten from scratch, holding the same conflict.
 
-SHOWN FAILING against the tool as it was: the record of lane hygiene28,
-section 2, has the counts.
+SECTION ORDER (section 4 below). The same lane also made the tool order the
+SECTIONS of both sides by number, where it had ordered the two blocks by their
+first heading, and refuse a section number claimed twice or already used.
+
+SHOWN FAILING: sections 1 to 3 against the tool as it was, section 4 against
+the tool before its section-order step, and every guard by its own mutant. The
+record of lane hygiene28, section 2, has the counts.
 """
 
 from __future__ import annotations
 
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -332,3 +338,93 @@ def test_a_crlf_checkout_is_resolved(tree):
     assert done.returncode == 0, done.stdout + done.stderr
     assert _read(tree.wt / INSTRUMENTS) == RESOLVED
     assert _read(tree.main / INSTRUMENTS) == conflict()
+
+
+# ---------------------------------------------------------------------------
+# 4. Section order across both blocks, and numbers claimed twice
+#
+# Integration 7 (2026-11-27 18:36) recorded the tool ordering BLOCKS by their
+# first heading: ours holding 114 and 117 against theirs holding 116 was
+# written 114, 117, 116, and the integrator split the sections by hand. A
+# block is now cut into its sections; a subsection stays with its section.
+
+
+def _section(number: str, words: str) -> str:
+    """A section in the register's own spellings: ``## 114. WORDS`` for a
+    section, ``### 114.1 Words`` for a subsection."""
+    heading = f"### {number} {words}" if "." in number else f"## {number}. {words}"
+    return f"{heading}\n\n{words} body\n"
+
+
+def _resolve_in_worktree(tree, ours: str, theirs: str):
+    _write(tree.wt / INSTRUMENTS, conflict(ours=ours, theirs=theirs))
+    return _run(tree.wt, tree.tools["worktree-scripts"])
+
+
+def _headings(text: str) -> list[str]:
+    """The numbered headings in the order written: ``114``, ``114.1``, ..."""
+    return re.findall(r"^#{2,3} (\d+(?:\.\d+)?)", text, flags=re.M)
+
+
+def test_sections_are_ordered_by_number_across_both_blocks(tree):
+    ours = _section("114", "A") + "\n" + _section("117", "C")
+    theirs = _section("116", "B")
+    done = _resolve_in_worktree(tree, ours, theirs)
+    assert done.returncode == 0, done.stdout + done.stderr
+    assert _headings(_read(tree.wt / INSTRUMENTS)) == ["1", "114", "116", "117"]
+
+
+def test_a_subsection_stays_with_its_section(tree):
+    ours = (_section("114", "A") + "\n" + _section("114.1", "A one") + "\n"
+            + _section("117", "C") + "\n" + _section("117.1", "C one"))
+    theirs = _section("116", "B") + "\n" + _section("116.1", "B one")
+    done = _resolve_in_worktree(tree, ours, theirs)
+    assert done.returncode == 0, done.stdout + done.stderr
+    assert _headings(_read(tree.wt / INSTRUMENTS)) == [
+        "1", "114", "114.1", "116", "116.1", "117", "117.1"]
+
+
+def test_a_subsection_stays_in_the_section_its_author_wrote_it_in(tree):
+    """A subsection AFTER a section is part of it, whatever its number says:
+    the tool orders sections and never moves text between them."""
+    ours = _section("3", "C") + "\n" + _section("2.9", "under C")
+    done = _resolve_in_worktree(tree, ours, _section("2", "B"))
+    assert done.returncode == 0, done.stdout + done.stderr
+    assert _headings(_read(tree.wt / INSTRUMENTS)) == ["1", "2", "3", "2.9"]
+
+
+def test_a_block_opening_on_a_subsection_is_ordered_by_it(tree):
+    """Kept: lane lci's conflict of 2026-10-10, 87.7 against 88."""
+    done = _resolve_in_worktree(tree, _section("87.7", "late"), _section("88", "next"))
+    assert done.returncode == 0, done.stdout + done.stderr
+    assert _headings(_read(tree.wt / INSTRUMENTS)) == ["1", "87.7", "88"]
+
+
+def test_text_before_a_blocks_first_heading_stays_in_front(tree):
+    """A paragraph appended to the section above the hunk belongs to that
+    section; ordering by the block's first heading carried it past another
+    lane's section."""
+    ours = "a paragraph that continues section 1\n\n" + _section("3", "C")
+    done = _resolve_in_worktree(tree, ours, _section("2", "B"))
+    assert done.returncode == 0, done.stdout + done.stderr
+    text = _read(tree.wt / INSTRUMENTS)
+    assert text.index("a paragraph that continues section 1") < text.index("## 2."), text
+    assert _headings(text) == ["1", "2", "3"]
+
+
+def test_a_number_both_sides_claim_is_refused_with_the_next_free_one(tree):
+    text = conflict(ours=_section("110", "A"), theirs=_section("110", "B"))
+    _write(tree.wt / INSTRUMENTS, text)
+    done = _run(tree.wt, tree.tools["worktree-scripts"])
+    assert done.returncode == 1, done.stdout + done.stderr
+    assert "110" in done.stderr and "111" in done.stderr, done.stderr
+    assert _read(tree.wt / INSTRUMENTS) == text
+
+
+def test_a_number_already_used_above_the_hunk_is_refused(tree):
+    text = conflict(theirs=_section("1", "AGAIN"))
+    _write(tree.wt / INSTRUMENTS, text)
+    done = _run(tree.wt, tree.tools["worktree-scripts"])
+    assert done.returncode == 1, done.stdout + done.stderr
+    assert "already" in done.stderr, done.stderr
+    assert _read(tree.wt / INSTRUMENTS) == text
