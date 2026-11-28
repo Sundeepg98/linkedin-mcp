@@ -1,0 +1,59 @@
+name: vendored copies current
+
+# Are linkedin_server/buildinfo.py and paths.py still what jobcore MASTER holds?
+#
+# THIS IS DELIBERATELY NOT ONE OF ci.yml's JOBS, AND NEVER RUNS ON A ci/ REF.
+# tests/test_vendored_buildinfo.py, which every branch runs, compares each copy
+# against the jobcore commit its own vendor header PINS -- a question about the
+# branch, whose answer cannot move unless the branch does. Whether that pin is
+# still CURRENT is a question about time: jobcore moving on upstream. Asked on
+# every branch, as it was until 2026-11-28, it turned every lane red on its next
+# run whenever jobcore master touched a vendored module (jobcore 50da018 did,
+# at 13:06:38Z that day, and a lane that had never seen it went red twice).
+# Asked here, its red is its own job's, on master and on a schedule, and the
+# test jobs in ci.yml stay green.
+#
+# THE SCHEDULE is the half that keeps it honest: a master that nobody pushes
+# would otherwise never ask, and a jobcore fix this repo's copy lacks (jobcore
+# 6acc7e6 was a path-scrubber fix) is what this alarm is for.
+#
+# Red means: re-vendor the named module (fixing anything wrong upstream first)
+# and move the commit line in its vendor header. scripts/check_vendored_current.py
+# prints which module and against which jobcore commit; its controls are in
+# tests/test_check_vendored_current.py, which every branch runs.
+
+on:
+  push:
+    branches: [master]
+  schedule:
+    - cron: "41 5 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  current:
+    name: vendored copies current
+    # Master only, however it was triggered: a dispatch on a ci/ ref is a no-op.
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      # The same sibling layout ci.yml clones for the drift guards
+      # (../jobcore/src/jobcore), with full history so a pin can be named in
+      # the output. Master is what is compared against.
+      - name: Check out jobcore as a sibling
+        run: |
+          git clone --quiet https://github.com/Sundeepg98/jobcore.git ../jobcore
+          echo "jobcore master at $(git -C ../jobcore rev-parse --short origin/master)"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      # Pure stdlib: nothing to install.
+      - name: Compare each vendored copy against jobcore master
+        run: python scripts/check_vendored_current.py --rev origin/master
