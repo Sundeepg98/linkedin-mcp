@@ -544,6 +544,12 @@ PROSE_SOURCES = (
     # Products tab -- its name, and the category LinkedIn files it under.
     "product_name",
     "product_category",
+    # 2026-11-28 (lane build28, census ``J 152`` and ``J 154``): one course's
+    # title on LinkedIn Learning -- its home's cards and his in-progress tab's.
+    # A course is LinkedIn Learning's own catalogue entry, so its title is
+    # that organisation's words, read under NAMES-AT-RUNTIME like a product's
+    # name: no member author, which is why it is not a post record.
+    "learning_course_title",
 )
 
 #: The cap on an organisation's prose, in characters after normalisation.
@@ -740,6 +746,11 @@ PEOPLE_TOOLS: frozenset[str] = frozenset(
         # 2026-11-27 (lane net7, census N 199): his Premium networking matches,
         # one page, each member a person record beside a job id.
         "linkedin_premium_matches",
+        # 2026-11-28 (lane build28, census J 152 and J 154): the courses the
+        # Learning home lists and those on his in-progress tab, one page each,
+        # each course's title an OrganisationProse record (NAMES-AT-RUNTIME).
+        "linkedin_learning_home",
+        "linkedin_learning_in_progress",
     }
 )
 

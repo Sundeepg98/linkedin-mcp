@@ -167,6 +167,12 @@ ADMITTED_OWN_TEXT: dict[str, tuple[str, str]] = {
         HIS_OWN_AUTHORED,
         "/feed/, its search box's recent-searches group: each recent search's keywords, which he typed",
     ),
+    # 2026-11-28 (lane build28, census J 156, the brief's HIS-OWN-TEXT-AT-RUNTIME):
+    # his career goal on LinkedIn Learning, which he set.
+    "linkedin_learning_career_goal": (
+        HIS_OWN_AUTHORED,
+        "/learning/career-journey/: the Career goal section's line and its bold run, the goal he set",
+    ),
 }
 
 

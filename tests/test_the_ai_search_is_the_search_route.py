@@ -109,7 +109,11 @@ BUILT_CAPTURES = sorted(spec[0] for spec in _builder().SPEC.values())
 #: here is SOME declared builder's". An undeclared words fixture still fails.
 #: Each builder's SPEC is read off its syntax tree, never imported: fixture stem
 #: -> its capture stem, the first element of each entry.
-OTHER_LIVE12_BUILDERS = (REPO / "scripts" / "_build_live12_settings_word_skeletons.py",)
+OTHER_LIVE12_BUILDERS = (
+    REPO / "scripts" / "_build_live12_settings_word_skeletons.py",
+    # 2026-11-28 (lane build28): the three Learning pages' words fixtures.
+    REPO / "scripts" / "_build_build28_word_skeletons.py",
+)
 
 
 def _spec_capture_stems(builder: Path) -> list[str]:

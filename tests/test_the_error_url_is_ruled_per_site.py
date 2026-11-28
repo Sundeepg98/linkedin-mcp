@@ -253,6 +253,15 @@ DECLARED: dict[tuple[str, str], tuple[str, int]] = {
     # 2026-11-27 (lane net7, census N 199): the matches page drew no card;
     # raised with its module's admitted constant, `premium_matches.MATCHES_URL`.
     ("premium_matches.py", "read_matches"): (ASKED_FOR, 1),
+    # 2026-11-28 (lane build28, census J 152, J 154, J 156): the three
+    # Learning readers, each raising with its module's admitted constant --
+    # the address its tool asked for (HOME_URL, IN_PROGRESS_URL, JOURNEY_URL)
+    # -- never the landing: no course on the home (1); the in-progress tab not
+    # marked current, or no course on it (2); no Career goal section, or not
+    # its heading and line (2).
+    ("learning.py", "read_learning_home"): (ASKED_FOR, 1),
+    ("learning.py", "read_in_progress"): (ASKED_FOR, 2),
+    ("learning.py", "read_career_goal"): (ASKED_FOR, 2),
     # 2026-11-26 (lane build-net2, census N 95): the recent-searches group
     # read wrong -- none or two of its structure, no link, a link that is no
     # search address -- each raised with the feed, the address the module
@@ -676,10 +685,13 @@ def test_the_twenty_are_still_twenty():
     # 45 on lane net7, one ASKED_FOR raise more.
     # FIFTY-TWO AT INTEGRATION 7, MERGE 5 (2026-11-27): every lane's DECLARED entries in one table,
     # MEASURED off it on the merged tree, not summed.
+    # FIFTY-SEVEN ON LANE BUILD28 (2026-11-28, census J 152, J 154, J 156):
+    # the three Learning readers' five raises, each with its module's admitted
+    # constant as `url`, so ASKED_FOR is 25 -> 30. MEASURED off this table.
     assert tally[WITHHELD] == 26, tally
-    assert tally[ASKED_FOR] == 25, tally
+    assert tally[ASKED_FOR] == 30, tally
     assert tally[PASSTHROUGH] == 1, tally
-    assert tally[WITHHELD] + tally[ASKED_FOR] + tally[PASSTHROUGH] == 52, tally
+    assert tally[WITHHELD] + tally[ASKED_FOR] + tally[PASSTHROUGH] == 57, tally
     assert tally[NO_ADDRESS_IN_SCOPE] == 10, tally
 
 
