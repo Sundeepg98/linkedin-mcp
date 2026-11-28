@@ -165,7 +165,7 @@ All were local, each step under 2 minutes, and no live-session flag stood at any
 | the red runs (section 3) | 17 plants convicted, the control 90 of 90 |
 | `scripts/check_cited_shas_resolve.py`, over the corpus | OK: every cited SHA resolves as an ancestor of master. The record's sha256 prefixes sit outside commit slots |
 | the audit-index and rulings-register tests, the register's unique numbers, the ignored-path and model-id guards, the prose guard | 99 passed |
-| the three derived views, before the record's commit | `_audit/INDEX.md` and `_audit/RULINGS.md` were stale once the record was staged: a new row, and one more document scanned, with 216 rulings and none moved. Both were written, and then all three `--check` were clean |
+| the three derived views, before the record's commit | Staging the record changed two of them: the audit index gained the record's row, and the rulings register counted one more document scanned, with 216 rulings and none moved. Both were regenerated with `--write`, and then all three `--check` were clean |
 | `scripts/census_completion.py` | "every headline figure matches its pin"; no census row or pin moves in this lane |
 
 **Two first attempts at a sweep gate were cut off at 115 s.** `tests/test_impact_gate_selects_data_dependencies.py`
@@ -214,6 +214,11 @@ entry refusals are local by design.
   my first sweep set was 198 s on CI alone, and it cost two 115 s cut-offs to find.
 - **The person-name guard reads constants by NAME** (`MEMBER`, `OTHER`, ...). A value its table
   already declares invented can be reused, and nothing else has to move.
+- **A row added to a record after its local audit run is an unchecked row.** I added the
+  derived-views row to section 5 after the audit tests had passed, and pushed. Lane run
+  46144818568 failed on it: `tests/test_a_correction_is_findable_from_the_claim.py` reads an
+  audit file name within two lines of its vocabulary ("stale") as an undeclared correction. Re-run
+  the audit-reading tests after the LAST edit to a record, not after the first.
 
 ## 9. Questions for the orchestrator
 
