@@ -1155,14 +1155,14 @@ In no mode, on either runner, was a row pressed.
 The order is section 1's, by `rows_per_load`, with:
 
 - 14a's done line and the Open-to-Work editor out;
-- the composer's Archived round trip LAST BUT ONE, not in the inbox's old slot,
-  for two reasons:
-  - its B2 rule makes any failure after Archived a STOP-ALL;
-  - on the composer, its menus' close by their own trigger is unmeasured. Each
-    captured row and folder trigger carries `aria-expanded` (VERIFIED, 4
-    skeletons), but no capture shows a re-press closing one.
-  - A stop there costs the fewest lines;
-- rank 151's read last.
+- the composer's Archived round trip (K9) and rank 151's read (K10) OUT, both
+  to 14c, by the orchestrator's 14b scope (11.6).
+
+  Before that ruling, K9 had been moved to last but one. Its B2 rule makes any
+  failure after Archived a STOP-ALL, and its close by its own trigger on the
+  composer is unmeasured. Each captured row and folder trigger carries
+  `aria-expanded` (VERIFIED, 4 skeletons), but no capture shows a re-press
+  closing one.
 
 The session directory is `live15`: 40 loads and 5 searches of its own, under
 the account's 40 in the trailing 12 h.
@@ -1195,12 +1195,10 @@ the account's 40 in the trailing 12 h.
 | 24 | `skill_insights` | 71 | 1 | 1 | 0 | `skill_index` (named off E5) | -- | -- |
 | 25-27 | `self_press` x3 (About, profile language, services) | 64, 67, 68 | 3 each | 1 each | 0 | -- | yes | yes |
 | 28 | `self_press_volunteering` | 69 | 3 | 1 | 0 | his profile id, ONLY if he volunteers it | yes | yes |
-| 29 | `messaging_archived_composer` | 6 | 3 | 1 | 0 | -- | -- | yes |
-| 30 | `saved_posts` (part 1) | 151 | 1 | 1 | 0 | -- | -- | -- |
 | -- | `root_settle`, only while a compare of his root is deferred | -- | 2 | 1 | 0 | -- | -- | -- |
 
-**The totals** (DERIVED from the table), without phases 21 and 28: 57 most
-loads, 31 expected, 3 searches.
+**The totals** (DERIVED from the table), without phases 21 and 28: 53 most
+loads, 29 expected, 3 searches.
 
 **How far 14b reaches** (DERIVED, by the GO's stop rule: stop when the next
 phase's most loads would pass what is free):
@@ -1213,6 +1211,655 @@ phase's most loads would pass what is free):
 **K6 asks one thing of him:** keep the dedicated Chrome in front while a "yes"
 phase in the last column runs. A refusal costs no load; the phase is simply
 run again.
+
+**K6's reach, by the module's own call graph** (VERIFIED,
+`which_phases_press.py` on r2b; on r3d, after K9 left, see 11.7):
+
+- 17 runnable phases reach a press.
+- K6 holds the 9 that press an editor, an overlay, a self-root link or the
+  composer's menus. Each of the 9 reaches a press, and each is runnable.
+- The other 8 press menus, pills, switches or disclosures, and are not held:
+  `article_drafts`, `c_srch_3a`, `connections_pills`, `creator_hub`,
+  `invitation_filter`, `newsletter_form`, `notifications_card` and
+  `permalink_menus`. Their close failures stay as they were in session 14,
+  each a phase stop or a STOP-ALL by its own rule.
+
+### 11.6 Round 3, the orchestrator's 14b scope, and r3
+
+**ROUND 3, on r2b (`1414e8d8`): a warm re-check, with no BLOCKER and no
+MAJOR.**
+
+- **Closed:** MINOR-A, MINOR-C, the NIT, E1, and MINOR-B's Escape and its end
+  check. Each was re-run on r2b and on r2, red on r2 and green on r2b. E1 was
+  run in process with seven cases.
+- **Not closed: MINOR-B2.** A folder press on the composer could still route
+  to a conversation and post a read receipt before the guard reads the
+  address. On a pessimistic model it opened the unread top row. The fix of
+  record is a write block for the length of the round trip.
+- The reviewer's three ways to close MINOR-B2: land the write block, accept it
+  by name, or run 14b without the composer.
+- **NIT-1:** a close by trigger left no step, so a failed re-press could not
+  say whether it was made.
+- **NIT-2:** the lane's preflight keep case had not been shown red.
+
+**THE ORCHESTRATOR'S 14b SCOPE** (`_TEAM_LEAD_14B_SCOPE.md`, 11:2x IST, deleted
+as the ack before r3 was built; a copy is in the lane's scratch):
+
+- **14b holds only built-and-reviewed phases, plus the close fix.**
+- **OUT to 14c, each with its own review and READY:**
+  - K9. MINOR-B2 is closed for 14b by the reviewer's third way. In 14c K9
+    comes back behind a network write block: non-GET requests aborted and
+    recorded, a block is STOP-ALL, the route removed on every exit, and the
+    route shown in the path;
+  - K10;
+  - ranks 2, 149 and 151's part 2;
+  - the Open-to-Work re-press.
+- **Rank 2 against C-SRCH-3a is answered:** C-SRCH-3a stays in 14b. Review
+  status outranks rows per load.
+- **ADDED to 14b, Chrome's teardown and start:**
+  - the operator saw a "Restore pages?" bubble after every session;
+  - a graceful close first;
+  - `--hide-crash-restore-bubble` with no session restore;
+  - the tabs at the first attach.
+
+**r3 (`947f8d73`) and r3b (`448f0f26`, `runner_s14b.py`):**
+
+- **S-1:** K9 and K10 are out of `PHASES`, and their code stays for 14c.
+- **S-2:** the observe-only readings and the 15 s watch run at ANY close stop,
+  not only a native dialog's. They read the document's focus and visibility,
+  whether a modal is open, the focused element's tag, and whether the trigger
+  is the element at its own centre.
+- **S-3: `tabs_check`.**
+  - It reads the DevTools port's `/json/list` by HTTP, with no CDP client.
+  - It keeps counts only.
+  - It passes only exactly one page, none of it on LinkedIn. Anything else is
+    a STOP before load 1, a dead port included.
+- **NIT-1 (r3b):** the trigger re-press, Cancel and the declared re-press are
+  close steps, each with what became of its press.
+
+**THE CHROME ITEMS** (as round 4 reviewed them; each was hardened after it,
+see 11.7):
+
+- **The teardown, `close_chrome_s14b.py`:**
+  - the PID is judged first: chrome.exe, this port, this profile;
+  - then CDP `Browser.close`, with the process handle waited on up to 10 s;
+  - only then the PID judged again and killed;
+  - never by image.
+- **`teardown_checks_s14b.py` (VERIFIED, 7 of 7)** runs throwaway Chromiums,
+  never 9224 or his profile:
+  - while running, a profile reads `exit_type` Crashed;
+  - the graceful close leaves Normal;
+  - a kill leaves Crashed. That is the red half: the state behind a "Restore
+    pages?" bubble;
+  - it refuses a PID that is not chrome.exe, and a chrome.exe on the right
+    port with another profile.
+- **`scripts/start_chrome.ps1` (TRACKED):**
+  - it passes `--hide-crash-restore-bubble`. The installed Chrome
+    158.0.8127.88's binary carries that switch: VERIFIED by reading
+    `chrome.dll`, with no Chrome started;
+  - ONLY while no Chrome has the profile open, it sets a profile left Crashed
+    back to Normal. It changes that one literal value, writes UTF-8 without a
+    BOM, and reports the value before and after.
+- **Its test, `tests/test_start_chrome_restore_guard.py`:** 4 of 4 on the
+  edited script, 4 failed on HEAD's.
+- **UNVERIFIED: which exit made the bubble he saw.** The dedicated profile reads
+  `exit_type` Normal now, after 14a's teardown by `taskkill /PID`.
+
+### 11.7 Round 4, the orchestrator's final rulings, and r3c and r3d
+
+**ROUND 4, on r3b (`448f0f26`): a warm close-out with 0 blockers, 0 majors,
+0 minors and 3 NITs.**
+
+- **Closed:** NIT-1, and NIT-2. The preflight keep case is red on r2 and
+  green on r3b.
+- **NIT-3:** `tabs_check` was a step in the run order, not a gate in code.
+- **NIT-4:** the teardown's judge did not tie the port to the PID, and
+  matched the profile by substring.
+- **NIT-5:** the starter's guard replaced every occurrence and wrote in
+  place, and the startup setting was not read.
+
+**THE ORCHESTRATOR'S FINAL RULINGS** (`_TEAM_LEAD_14B_FINAL.md`, 11:5x IST,
+deleted as the ack in this commit; a copy is in the lane's scratch):
+
+1. **Phases are ruled by CONTENT:**
+   - rank 31's add-a-position editor is IN;
+   - rank 69's volunteering press runs only if he volunteers his profile id
+     at the GO;
+   - any other self-press that was not in 14a's phases 4-29 is OUT, to 14c;
+   - READY states the final phase list by content.
+2. **His profile is the main checkout's `_state/chrome-profile`.**
+   - 14b starts Chrome with the MAIN checkout's `scripts/start_chrome.ps1`,
+     after the orchestrator fast-forwards master to this lane's certified
+     head.
+   - READY names a head that carries the script fix, has passed lane CI and
+     `--full` by sha, and descends from master `9aa4c94`.
+3. **The three NITs are REQUIRED:**
+   - **NIT-4:** the listener's owning PID equals the judged PID, and the
+     profile path matches EXACTLY; if either check fails, no close, no kill,
+     a report;
+   - **NIT-3:** the tabs check is enforced in code before load 1;
+   - **NIT-5:** the guard edits only the two keys, JSON-aware, through a temp
+     file and an atomic replace, only while Chrome is down; the startup
+     setting is read and recorded, never changed.
+
+**r3c (`90327396`): NIT-3, in code.**
+
+- The meter refuses load 1 of the session unless `tabs_check.json`:
+  - reads answered, exactly one page, and none on LinkedIn;
+  - is not older than the session's flag;
+  - was taken on the browser LAUNCH the port names now.
+- A launch is named by a 16-hex digest of the browser endpoint that
+  `/json/version` names. That is one value per launch, and the endpoint
+  itself is never kept or printed.
+- `tabs_check` keeps the digest, and STOPs when the port names none.
+- The launch condition goes past the ruling's words. It stops a reading
+  taken before a Chrome restart from letting load 1 through.
+- **Red first** (VERIFIED, `tabs_checks_s14b.py`; the runner's real meter
+  over a fake navigation, an in-memory ledger and a stubbed account meter):
+
+  | runner | its r3 class (T1-T5) | its r3c class (T6, G1-G4, G6, G8) | the control (G5) |
+  |---|---|---|---|
+  | r3c | 5 of 5 | 7 of 7 | 1 of 1 |
+  | r3b | 5 of 5 | 0 of 7 | 1 of 1 |
+  | r2b | 0 of 5 | 0 of 7 | 1 of 1 |
+
+- The gate and composer harnesses stub the gate (a named difference). Its
+  own checks are the ones above.
+
+**r3d (`4258cf65`, `runner_s14b.py`): the phases by content.**
+
+- Phase 1 is 14a's phase 1, which is not in 4-29. Besides rank 31's press it
+  carried three self-presses: the top card's opener, his photo, and Add
+  custom button.
+- In 14b each of the three is found and counted, and never pressed
+  (`PHASE1_OTHER_SELF_PRESSES = False`). Phase 1 presses rank 31's
+  add-a-position link only. Its most loads stay 3, an upper bound.
+- The rows those three presses serve go to 14c with them.
+- **Red first** (VERIFIED, gate check H2: a top card that draws all three,
+  each counting its clicks):
+  - on r3c, the opener, the photo and Add custom button were each pressed
+    once. FAIL, and the presses show the synthetic controls are found;
+  - on r3d, none of them was pressed, and rank 31's link was pressed once.
+    PASS;
+  - the gate's other 82 checks still pass on r3d: 83 of 83, and 0 of the 78
+    in the red class failed.
+- **K6's reach on r3d** (VERIFIED, `which_phases_press.py`):
+  - 16 runnable phases reach a press, and K6 holds 8 of them: `profile`,
+    `contact_info`, `learning_goal`, `alert_row`, and the four `self_press`
+    phases;
+  - the other 8 are the same as on r2b.
+
+**NIT-4: the teardown (`close_chrome_s14b.py`, `6102384c`).**
+
+- The profile is matched by the whole `--user-data-dir` value, normalised
+  and case-folded.
+- The port's set of listeners must EQUAL the judged PID. If another process
+  listens, or two do, or none does, nothing is closed and nothing is killed:
+  a report, exit 2.
+- **Red first** (VERIFIED, `teardown_checks_s14b.py`; throwaway headless
+  Chromiums on ports 9334-9340, never 9224 or his profile; a quiet box):
+
+  | tool | passed | red |
+  |---|---|---|
+  | `close_chrome_s14b.py` | 11 of 11 | -- |
+  | its r1b (the fix before the no-listener ruling, which fell back to the kill) | 10 of 11 | T8 |
+  | its r1 (round 4's object) | 7 of 11 | T5, T7, T6, T8 |
+
+- On r1, T5's `Browser.close` went to the port and reached the OTHER
+  browser. It closed it, and the judged browser was then killed. That is the
+  hazard NIT-4 named, measured.
+- **MEASURED:** one port number had two listeners because the second
+  Chromium's DevTools server fell back to `::1` when `127.0.0.1` was taken.
+  This held in 3 of 3 quiet runs. A note of mine had said that Windows lets
+  two listen on one address. That was wrong, and the tool's docstrings are
+  corrected.
+- **MEASURED: the graceful close is fast to answer and slow to exit.** The
+  reply comes in 0.02 to 0.04 s. The process then took from 3.37 s to past
+  10 s to exit, across the runs of T1 and T4b on throwaway Chromiums.
+  - One run went past 10 s twice, in T1 and T4b, and fell back to the kill.
+  - An earlier series did the same on r1 and r1b, while a tree walk of mine
+    loaded the disk.
+  - The cause of the slow exits was not measured.
+- **So the wait is 30 s, not the ruling's "about 10 s"** (r6). The graceful
+  path is what keeps the profile clean, and the kill stays the fallback.
+  This departs from the ruled number, on that measurement.
+
+**NIT-5: the starter (`scripts/start_chrome.ps1`, tracked).**
+
+- **JSON-aware:**
+  - the file is parsed, and only `profile.exit_type` (Crashed to Normal) and
+    `profile.exited_cleanly` (false to true) change;
+  - each changes by its one literal, which must occur exactly once;
+  - the result is parsed again and compared with the original, every other
+    key included, before anything is written;
+  - it is written beside the file without a BOM and swapped in by
+    `File.Replace`;
+  - all of this only while no Chrome has the profile.
+- **The startup setting is read and reported, never changed:**
+  `session.restore_on_startup` and the startup pages.
+  - "Continue where you left off", a LinkedIn startup page, or a Preferences
+    file that cannot be read are each a warning.
+  - Under `-RefuseSessionRestore`, each is a refusal (exit 5).
+  - The unreadable case goes past the ruling: what such a profile would
+    reopen cannot be ruled out.
+- **Red first** (VERIFIED, `guard_checks_s14b.py`: the guard cut out by its
+  own markers and run alone on synthetic profiles). The counts on the final
+  script, and on every earlier copy, are in r6 and the final pass, below.
+- **Its tracked test** was rewritten to read the script's code with its
+  comment lines stripped. Its counts are below too.
+- This is the version round 5 reviewed (`307aa411`). Round 5 found that its
+  startup read missed `Secure Preferences`.
+
+**ROUND 5, on r3d (`4258cf65`), the teardown (`6102384c`) and the start
+script (`307aa411`): a warm close-out with 0 blockers, 0 majors and
+0 minors.**
+
+- **Closed:** NIT-3 and NIT-4, as ruled. The reviewer's own probes covered
+  the gate case by case, through the meter and end to end, and swept all 29
+  phases with no reading: 28 stopped at the gate, and `root_settle` loaded
+  nothing. The teardown's judge was run in process, 10 of 10.
+- **Section 1:** r3d implements it, and no other path presses the three.
+- **NIT-5, NOT closed in one clause.** The startup setting was read from
+  `Preferences` only. On Windows Chrome keeps a tracked pref's value in
+  `Secure Preferences`. The reviewer read his profile for names and counts
+  only: all 12 tracked values that hold one hold it there. So the record
+  would read "absent" exactly when the setting is set.
+- **`found`** must be a STOP, read from the outcome field. Both outcomes
+  exit 0.
+- **NIT-6 (new):** a listener read that timed out escaped as a traceback,
+  with no report.
+- **NIT-7 (new):** nothing tied the port to the dedicated profile at the
+  attach.
+- **The close checks' crash in `final/`** was the lane's own doing. A chunk
+  on r3c was stopped mid-run when r3d superseded it, and its process tree
+  was killed by PID, so the harness's Chromium died under it. That run's
+  output was the one on disk. On r3d the same checks ran to completion at
+  13:11 (24 of 24, and 7 of 7), and no harness change was needed.
+
+**THE ORCHESTRATOR'S RULING ON ROUND 5** (`_TEAM_LEAD_14B_R5.md`, 12:5x IST,
+deleted as the ack in this commit; a copy is in the lane's scratch):
+
+1. NIT-5 finished: read both files, red first on the reviewer's two cases,
+   and measure on a THROWAWAY profile where Chrome 158 writes the setting.
+2. NIT-7 in CODE: at the attach the tabs check confirms that the port's
+   listener runs the dedicated profile, by NIT-4's exact match. A `found`
+   whose Chrome fails it is a STOP before load 1. READY's procedure also
+   reads the outcome field.
+3. NIT-6: a report and a non-zero exit, never a traceback.
+4. The final pass on the final sha, with the close checks completing.
+
+**MEASURED, where Chrome 158 writes the setting** (VERIFIED,
+`measure_restore_pref_s14b.py`):
+
+- The setup: the installed Chrome 158.0.8127.88, headless, on a THROWAWAY
+  profile and port 9346, every host mapped to NOTFOUND. Never his profile.
+- The control: never set, the setting is in neither file. `Secure
+  Preferences` already holds its MAC.
+- Then it was set to 1 the way the settings page sets it
+  (`chrome.settingsPrivate`, read back 1), and the browser closed gracefully.
+  The value is in `Secure Preferences` ONLY: `Preferences` has no such key.
+- So the reviewer's DERIVED is VERIFIED for this build. A read of
+  `Preferences` alone misses it every time.
+
+**r3e (`fd3bf239`, `runner_s14b.py`): NIT-7, in code.**
+
+- `tabs_check` judges the port's listener with the teardown's own judge,
+  loaded from `close_chrome_s14b.py` (pinned). It must be exactly one
+  listening PID on every address, chrome.exe, this port, and the whole
+  `--user-data-dir` equal to the main checkout's `_state/chrome-profile`.
+- Otherwise it is a STOP before load 1, and the reading keeps
+  `dedicated: false`. The meter's gate on load 1 requires `dedicated: true`.
+  So a `found` start whose Chrome is not the dedicated one is a STOP in code.
+- **Red first** (VERIFIED, `tabs_checks_s14b.py`; the judge's two OS reads
+  are replaced, so nothing of the machine is read):
+
+  | runner | r3 | r3c | r3e (N2-N6) | control |
+  |---|---|---|---|---|
+  | r3e | 5 of 5 | 7 of 7 | 5 of 5 | 1 of 1 |
+  | r3d | 5 of 5 | 7 of 7 | 0 of 5 | 1 of 1 |
+  | r3b | 5 of 5 | 0 of 7 | 0 of 5 | 1 of 1 |
+  | r2b | 0 of 5 | 0 of 7 | 0 of 5 | 1 of 1 |
+
+  N2-N6 are: another profile (his everyday Chrome, say), two listeners, a
+  listener that is not chrome.exe, a read that fails, and a profile that
+  only starts with the dedicated one. On r3d, load 1 was made in each.
+
+**The Chrome items, r6:**
+
+- **NIT-5's clause (`scripts/start_chrome.ps1`):** `session.restore_on_startup`
+  and `session.startup_urls` are read from BOTH files, and a value in either
+  counts. A `Secure Preferences` that does not parse is a refusal under the
+  switch. Neither file is written by the read, and the report says which file
+  the value came from.
+  - Red first (VERIFIED, `guard_checks_s14b.py`): the script 15 of 15;
+    `307aa411` 12 of 15, with G12, G13 and G14 red.
+  - Its tracked test: 8 of 8 on the script, 5 of 8 on `307aa411`, 0 of 8 on
+    HEAD's.
+- **NIT-6 (`close_chrome_s14b.py`):** a process read, a listener read or a
+  `taskkill` that fails is reported, never a traceback. A failed listener
+  read is `refused_listener_read_failed`, exit 2, with nothing closed.
+- **NIT-7, also in the preflight (`os_check.ps1`):** every phase's preflight
+  runs it, and STOP-ALLs `listener_not_the_dedicated_profile` on False.
+  - Its judge read the FIRST listener row and matched the profile by
+    SUBSTRING. Those are the two gaps NIT-4 closed in the teardown.
+  - It now asks for exactly one listening PID on every address, a browser
+    process naming this port, and the whole `--user-data-dir` equal to the
+    dedicated profile, normalised and case-folded.
+  - This covers every phase, not only load 1, so a browser swapped after
+    load 1 is caught at the next phase's preflight.
+- **Red first** (VERIFIED, `teardown_checks_s14b.py`: T9 in process, O1-O4
+  on throwaway Chromiums):
+  - the tool with the new `os_check.ps1`: 16 of 16. O1 reads True; O2, O3
+    and O4 read False;
+  - round 5's tool with the old judge: T9 red (the timeout escaped), and O2
+    red (a prefix profile judged True);
+  - also O4 red. A foreign browser held `127.0.0.1` and the judged one `::1`.
+    The old judge's first row was the judged browser, so it said True, while
+    the attach, which uses `127.0.0.1`, would drive the foreign one.
+
+**ROUND 6, on r3e (`fd3bf239`), the teardown (`83d17023`), `os_check.ps1`
+(`0134d152`) and the start script (`fe00bd14`): 0 blockers, 0 majors,
+0 minors, and 0 NITs open.**
+
+- **NIT-5's clause, NIT-6 and NIT-7 are CLOSED as the orchestrator worded
+  them** (VERIFIED by the reviewer's own probes):
+  - 21 synthetic profiles, `Secure Preferences` byte-identical after each,
+    and no false refusal on his profile's shape today;
+  - every failed read, and a failed kill, reported with a non-zero exit;
+  - the attach's judge right across ten cases, every one passing on r3d;
+  - `os_check`'s judge 10 of 10 on synthetic tables, against the old one's
+    6 of 10.
+- **No regression on r3e:** NIT-3's sweep of all 29 phases, the gate cases,
+  phase 1 by content, the entry order and the close steps.
+- **The named departure:** the 30 s wait. The reviewer saw no safety cost,
+  only time: "at most 20 s more at a teardown whose browser is slow to
+  exit".
+
+**THE FINAL PASS** (VERIFIED, `final_pass_s14b.sh` run from a frozen copy,
+serially, chunk by chunk, 13:34 to 14:48 IST). It ran on
+the final runner `fd3bf239` (r3e), the teardown `83d17023`, `os_check.ps1`
+`0134d152` and the start script `fe00bd14`. The outputs are beside the
+runner, in `final/`.
+
+| run | on | result |
+|---|---|---|
+| provenance | r3e | the harness, the package, the people gate and the slot reader from the worktree; the job pipeline from the installed skill |
+| the close checks | r3e | red class 24 of 24, controls 7 of 7: they ran to completion |
+| the table checks | r3e / r2b | 3 of 3 and the control, and K9's 14c code 6 of 6 / 1 of 3 (K8 and K10 red) |
+| the tabs checks | r3e | 18 of 18 |
+| the tabs checks, red sides | r3d / r3b / r2b | the r3e class 0 of 5 / the r3c class 0 of 7 and r3e 0 of 5 / 1 of 18; the control 1 of 1 on each |
+| the close checks, red sides | s14 / r1 / r2 / r2b / r3 | each snapshot's own class red: 0 of 11 / 0 of 8 / 0 of 2 / 0 of 1 / 0 of 2; the controls 7 of 7 on each |
+| the teardown checks | the tool, with `os_check.ps1` | 16 of 16; the graceful exits 1.73 s (T1) and 2.37 s (T4b) |
+| the teardown checks, red sides | r2 with the old judge / r1b / r1 | T9, O2 and O4 red / and T8 / and T5, T7, T6 and T8 |
+| the gate checks | r3e / r3c | 83 of 83, the red class 0 of 78 failed / 82 of 83, H2 red |
+| the Open-to-Work checks | r3e | 8 of 8 |
+| the composer checks (14c's kept code) | r3e | 3 of 3, the controls 2 of 2 |
+| the entry refusals | r3e / r2 | every refusal as named, before any browser contact / not (NIT-2's red) |
+| the start script's tracked test | the script / `307aa411` / json1 / nit5 / round 4's / HEAD's | 8 of 8 / 5 / 5 / 3 / 1 / 0 of 8 |
+| the restore guard | the script / `307aa411` / json1 / nit5 / round 4's | 15 of 15 / 12 / 11 / 9 / 6 of 15 |
+| the items | `live15` | every check passed: `842bced3`, identical to 14a's |
+
+T1 and T1b also failed on all three older tools, and that was not by
+design. Each of those runs followed another run's teardown. Its first
+graceful exit took longer than the old 10 s wait, so the tool fell back to
+the kill. The tool, which ran first, closed its browsers in 1.7 s and 2.4 s.
+Its 30 s wait is the margin.
+
+**THE WAITS** (the orchestrator's `_TEAM_LEAD_WAITS.md` and
+`_TEAM_LEAD_SPLIT.md`, 14:1x and 14:3x IST, deleted as the ack in this
+commit).
+
+- **The orchestrator's measurement.** The pass above took 74 minutes, and
+  the box was 86% idle through it. The waits were idle time, not work.
+- **The cause** (VERIFIED). The runner was written for live pages. It
+  settles after every load and press with 55 literal real-time sleeps, gives
+  a close 2.5 s in 0.25 s polls, watches a close stop for 15 s, and bounds
+  its condition loops in real time. On the checks' synthetic pages nothing
+  renders late unless a model says so, so almost all of that time was idle.
+  - The gate checks did NOT wait on the 20 s page pace: their meter already
+    runs on a fake clock.
+- **CHECK MODE** (`fastclock_s14b.py`): each in-process harness gives the
+  runner and the harness an `asyncio` whose `sleep` is scaled by 0.1.
+  Playwright, the pages' own timers and the runner's condition loops keep
+  real time. A loop that never meets its condition still runs its real
+  bound.
+- **The named real-time exceptions:**
+  - the Open-to-Work "race" model, a focus stolen 50 ms after the focus
+    move, against Playwright's real latency;
+  - gate check Q3, a document 0.4 s after its load, during the capture's
+    settle;
+  - the teardown's T1 and T4b, which time the graceful exit itself;
+  - the gate's slow-answer models (Q1, Q1b, Q2, Q9, Q10), where the
+    harness's own 3 s and 7 s route delays ARE the test.
+  - The "slow" and "slow6" close models keep their place differently: their
+    timers scale with the clock, as factor x 2.5 s and factor x 6 s.
+- **In parallel:**
+  - the gate runs in four slices;
+  - the teardown runs in three slices on its own ports;
+  - the tabs checks each take their own fake port;
+  - the entry refusals run their cases six at a time.
+- **Each step is now under 2 minutes, and every result matches the
+  real-clock pass, case for case** (VERIFIED, `final_pass2_s14b.sh`,
+  15:31 to 15:46 IST, `final2/`).
+
+| set | before: the real-clock pass, serially | after: check mode | the runner's own sleeps, as check mode's clock counted them |
+|---|---|---|---|
+| the close checks, r3e and 5 red sides | 400 s on r3e; 1824 s for the six | 106 s on r3e; 110 s for the six, together | 353 s requested on r3e, 64 s slept, 32 s of it the race on the real clock |
+| the gate checks, r3e and r3c | 786 s and 792 s | 95, 66, 49 and 106 s per slice; 110 s per sha, its slices together | 1353 s requested on r3e |
+| the teardown, the tool and 3 red sides | 92 to 121 s each; 422 s for the four | the close slice alone 53 s; the NIT and judge slices 71 to 105 s, together | none: real Chromium launches and exits |
+| the Open-to-Work and composer checks | 91 s each | 25 s and 48 s | 85 s and 78 s requested |
+| the entry refusals, r3e and r2 | 43 s each | 26 s and 21 s | none: a Python start per case |
+| tabs, table, guard, starter, pytest, items, provenance | 1 to 23 s each | 1 to 36 s each | none to speak of |
+| **the whole pass** | **74 min** | **about 9.5 min of steps, each under 2 min** | |
+
+- The gate's "requested" overcounts its real-clock sleeping. Condition
+  loops poll more often on a faster clock, and the real-clock gate took
+  786 s in all.
+- **The 5-minute target is NOT met.** Each step is as long as its slowest
+  run, about 100 to 110 s: the close checks on r3e and r3, and the gate's
+  main and r2 slices.
+  - Under 5 minutes would need the close and gate steps together, about 17
+    browsers at once. The real-clock cases would then run under that load,
+    so it was not tried.
+  - The rest of the floor is the named exceptions above.
+- **Two runs hit the 115 s bound under load, and were run again** with less
+  beside them:
+  - the teardown's NIT slice on r1 took 105 s on its second run;
+  - the entry refusals on r2 took 21 s once their cases ran six at a time.
+- **What runs in the pass is confirmed.** Every green-side run names r3e
+  (`runner_s14b`, `fd3bf239`). The r3c gate run at 14:33 was H2's RED
+  side, by design, after its green run on r3e from 14:17 to 14:30.
+
+**LIVE-RUNNER-CHECKS-ON-CI, a proposal (built nothing).** The check sets that
+need no gitignored item could move into the tracked repo as pytest modules,
+scrubbed of identity, so that free CI runs them in shards on every lane
+push:
+
+- The fully synthetic sets qualify as they stand: the tabs checks, the gate
+  checks (synthetic pages and the tracked AI-route fixture), the composer
+  checks, and the restore guard and start-script test.
+- The fixture sets qualify too: the close, table and Open-to-Work checks
+  read `tests/fixtures/live14`, which is tracked.
+- The guard and teardown checks need CI's Windows cell: PowerShell 5.1,
+  `Get-NetTCPConnection`, and a throwaway Chromium.
+- The obstacle is that every set imports the runner, and the runner lives
+  in the main checkout's gitignored `_state`. It carries absolute workspace
+  paths and the installed skill's path. So the first build step is the
+  runner's tracked, path-free form, with paths from configuration.
+- `prepare_items` (session 12's preserved readings), provenance (this
+  machine's paths) and the entry refusals' digest of the pinned store stay
+  local, or take synthetic stand-ins.
+
+### 11.8 READY for session 14b (2026-11-28, 14:5x IST)
+
+Session 14b's Phase A is done:
+
+- the close fix, the 14b table, and Chrome's start, tabs check and teardown
+  are built, and each is shown red first;
+- the review is closed on the final shas (round 6: 0 open at any severity);
+- the final pass ran on those shas twice, with the same results:
+  - on the real clock, 13:34 to 14:48 IST;
+  - in check mode, 15:31 to 15:46 IST, in steps each under 2 minutes (11.7,
+    "the waits").
+
+**NAMED DEPARTURES from the rulings' words:**
+
+- The teardown waits 30 s for a graceful exit, not about 10 s. Exits were
+  measured past 10 s, and the reviewer saw a cost in time only.
+- Two refusals go past the words:
+  - the tabs gate also asks for the same browser launch;
+  - the start script also refuses a preferences file it cannot read.
+
+HOLD: PHASE B starts only on a `_TEAM_LEAD_GO.md` that names these pins,
+with the operator at the console, after the orchestrator fast-forwards
+master to this head.
+
+**THE PINS** (full values in the session's gitignored `_state/live15/pins.json`,
+written after the commit that adds this section):
+
+| pin | sha256 (short) |
+|---|---|
+| `runner_s14b.py` (r3e) | `fd3bf239d6d514f9` |
+| `scripts/people_gate.py` | `6ff3afb732ed1546` (unchanged) |
+| the harness, `scripts/_probe_live_lane_session_2.py` | `a5c10ae992f691b8` (unchanged) |
+| `linkedin_server/volunteering_route.py` (the one matcher) | `5635e69f595bfa3c` (unchanged) |
+| `linkedin_server/self_profile.py` (the shipped wait) | `b39b615b2c476b94` (unchanged) |
+| `scripts/start_chrome.ps1` (tracked; at the GO the main checkout's copy must match it) | `fe00bd14416e64e8` |
+| `close_chrome_s14b.py` (the teardown, and the judge `tabs_check` loads) | `83d17023fc3a9da4` |
+| `os_check.ps1` (every phase's preflight) | `0134d152b71bd613` |
+| the prepared items (gitignored, `live15`) | `842bced39d3678bb` (identical to 14a's) |
+
+**THE HEAD** is the commit that adds this section.
+
+- It descends from master `9aa4c94` and carries the start script's fix.
+- Lane CI and `--full` certify it by sha. Their run ids are in the READY
+  message, and the head is in `pins.json`.
+
+**THE PHASES, BY CONTENT** (the orchestrator's 14b rulings, section 1;
+`PHASES` in r3e, unchanged since r3d, in 11.5's order):
+
+| # | phase | rank | what it does, and what it presses |
+|---|---|---|---|
+| 1 | `profile` | 3, 31 | E5: his root through the shipped loader, the top card read, one scroll pass, and the skill ids and insight indices that phases 7 and 24 name, kept in gitignored state. Then rank 31, ATTENDED: the Experience section's add-a-position link, matched exactly, pressed once, its editor read and closed. NOT pressed: the top card's opener, his photo and Add custom button (OUT, to 14c) |
+| 2 | `c_srch_3a` | 132 | TOGGLE-FIRST: one AI-route search. The Easy Apply toggle is pressed once and pressed back, each press a re-query recorded before it; then All filters is opened, read and closed. The session's 3 searches |
+| 3 | `newsletter_form` | 150 | Manage's Create newsletter pressed and its form read by closed words. Nothing typed; its submit drawn, never pressed; closed without submitting |
+| 4 | `discovery` | 161 | one load, read; the suggestion cards' controls never pressed |
+| 5 | `featured` | 34 | read only |
+| 6 | `manage_syncing` | 158 | read only |
+| 7 | `skill_form` | 40, 102 | his skill's edit form, by the id E5 drew; nothing typed, chosen or saved |
+| 8 | `intro_landing` | 103 | one load of the intro editor's address, and where it lands; nothing pressed |
+| 9 | `contact_info` | 30 | ATTENDED: the top card's Contact info link, then the overlay's Edit contact info, each matched exactly; the form closed, then the overlay |
+| 10 | `article_drafts` | 1 | Manage's Drafts pressed, the list read; nothing pressed in it |
+| 11 | `invitation_filter` | 26 | the invitation manager; the first filter pill's disclosure opened and closed by Escape; nothing chosen |
+| 12 | `permalink_menus` | 95 | one post of a member he follows and one of a Page (the prepared items), each post's control menu opened and closed; nothing in it pressed |
+| 13 | `key_skills` | 102 | ATTENDED: his skills details page, read; nothing pressed |
+| 14 | `connections_pills` | 109 | the Locations and Companies pills, each opened and closed by Escape; nothing chosen |
+| 15 | `creator_hub` | 111 | `/dashboard/` and where it lands; the hub's navigation read; one overflow control, if exactly one is drawn, opened, read and closed |
+| 16 | `notifications_card` | 115 | one card's More options opened, read and closed by Escape; nothing in it pressed |
+| 17 | `self_variant` | 117 | E18 and E19: his root's self variant, then the contact-info overlay by its own address; labels only, nothing pressed |
+| 18 | `learning_goal` | 144 | ATTENDED: the Career goal section's control pressed once; what opens read and closed; nothing typed or chosen |
+| 19 | `alert_row` | 145 | ATTENDED: one alert row's control, pressed only on an allowed label that is no toggle; read and closed; no change |
+| 20 | `learning_saved` | 147 | read only |
+| 21 | `post_analytics` | 154 | a post of his, read; ONLY if he names one at the GO |
+| 22 | `search_history` | 156 | read only |
+| 23 | `download_data` | 157 | read only |
+| 24 | `skill_insights` | 71 | one skill-insights page, by the index E5 drew; read |
+| 25-27 | `self_press_summary`, `self_press_secondary_language`, `self_press_services` | 64, 67, 68 | ATTENDED: his root, then ONE self-root press each (his About, his profile language, his services) through the one matcher; what opens read and closed; his root compared before and after |
+| 28 | `self_press_volunteering` | 69 | the same press, ONLY if he volunteers his profile id at the GO; otherwise it refuses before any browser contact |
+| -- | `root_settle` | -- | only while a compare of his root is deferred |
+
+**OUT of 14b, by name, to 14c:**
+
+- K9, the composer's Archived round trip;
+- K10, rank 151's read;
+- ranks 2, 149 and 151's part 2;
+- the Open-to-Work re-press;
+- phase 1's opener, photo and Add custom button presses.
+
+Rank 23, `recommendations`, ran in 14a.
+
+**THE PLAN AND THE SPLIT:** section 11.5.
+
+- The table holds 28 lines. Without phases 21 and 28 they come to 53 most
+  loads, 29 expected and 3 searches.
+- With 37 free (before 20:39 IST), 14b reaches phases 1-18 at most loads.
+  With 40 free, it reaches phases 1-19.
+- At the expected spending, it reaches every phase.
+
+**WHAT HE IS ASKED** (K6): keep the dedicated Chrome in front while
+`profile`, `contact_info`, `learning_goal`, `alert_row` or one of the four
+`self_press` phases runs. A refusal costs no load, and the phase is run again.
+
+**THE STOP LINES:**
+
+- section 3's 22 kinds. The 14b runner's `STOP_ALL_KINDS` holds the same 22,
+  read by AST on r3e;
+- `tabs_check`'s STOP before load 1: not exactly one page, a LinkedIn tab, no
+  browser endpoint, or a port whose one listener is not the dedicated
+  profile's browser;
+- the meter's refusal of load 1 without a passing tabs check taken on this
+  launch;
+- the start script's refusal (exit 5), and any `outcome` field but
+  `started`;
+- each phase's preflight STOP-ALL when the port's one listener is not the
+  dedicated profile's browser (`os_check.ps1`, hardened in r6);
+- the teardown's refusal: a report, with no close and no kill.
+
+A STOP-ALL ends the session. UNREAD-SKIPPED holds.
+
+**WHAT 14b MAY STILL HIT** (round 1's section 0): a live dialog may ignore a
+dispatched Dismiss, or close later than its grace and the 15 s watch. Then
+the session STOP-ALLs again. That fails closed, and every step and the
+observe-only readings are recorded.
+
+### 11.9 The commands for 14b's PHASE B, on GO
+
+Every runner call takes the same environment:
+`LINKEDIN_CDP_ATTACH=1 LINKEDIN_CDP_PORT=9224 LINKEDIN_MIN_INTERVAL_S=20 LIVE_LANE_SESSION_DIR=live15`.
+The runner and its tools are in the main checkout's
+`_state/live-runner/s14b/`, and each step runs in the foreground.
+
+1. **Before Chrome:**
+   - `verify_pins_s14b.py` must print ALL-MATCH against the GO's pins. It
+     counts the MAIN checkout's `scripts/start_chrome.ps1` too, which matches
+     only after the orchestrator's fast-forward.
+   - `os_check.ps1`: 9224 down, no flag, no lock, no Chrome on the profile.
+   - The pinned ledger's free count is read; it sets 14b's room.
+2. **Chrome, the flag, the tabs:**
+   - The dedicated Chrome is started with the MAIN checkout's
+     `scripts/start_chrome.ps1 -RefuseSessionRestore`.
+     - Its report's `outcome` field must read `started`. A `found` is a STOP:
+       a browser was already up, and the guard and the startup read did not
+       run. The exit code cannot tell them apart, since both exit 0. In code,
+       `tabs_check` also STOPs on a `found` whose Chrome is not the dedicated
+       one.
+     - `exit_type_after` must read Normal or absent.
+     - Its `pid` is the browser's, and it is kept for the close.
+   - `os_check.ps1` again.
+   - `runner_s14b.py flag_on`.
+   - `runner_s14b.py tabs_check`: exactly one page, none on LinkedIn, and the
+     port's one listener the dedicated profile's browser, or a STOP before
+     load 1. The meter refuses load 1 without this reading.
+   - The harness's `attach_check`, 0 loads.
+3. **The phases, in 11.8's order.** The preflight refuses a phase whose most
+   loads do not fit the room, and the next one is then tried.
+   - After `profile`, the caller names the items E5's reading drew
+     (`name_items_s14b.py skill`, then `name_items_s14b.py skill_index`).
+   - `c_srch_3a` and `permalink_menus` take
+     `--items _state/live15/items_prepared.json`.
+   - `post_analytics` takes the post he names. `self_press_volunteering`
+     takes his profile id, from a gitignored items file the runner deletes
+     once read. Without them, both refuse before any browser contact.
+4. **The end:**
+   - `root_settle`, if a compare of his root is pending;
+   - `close_chrome_s14b.py --port 9224 --pid <the browser's pid> --profile
+     <the main checkout's _state/chrome-profile>`, while the flag still
+     stands, so the box is quiet for it. It sends `Browser.close` first, and
+     kills by PID only as the fallback. The path it took is recorded. A
+     refusal closes and kills nothing, and is reported;
+   - `flag_off`, which refuses while a compare is pending;
+   - `os_check.ps1`: 9224 down, 0 clients, no Chrome on the profile, no
+     lock, no flag.
 
 ## Lessons (for the orchestrator to harvest)
 
@@ -1257,4 +1904,30 @@ run again.
 11. **A close rule first meets its control live.** The Open-to-Work close was
     built before anyone had pressed Edit, and the editor is a native
     `<dialog open>`. The STOP-ALL is what made that first meeting safe.
+12. **A ruling by content has to be read against the code, not the table.**
+    The 14b table named phase 1 by rank 31's press. Its function carried
+    three more self-presses, and the ruling's words put all three out. Only
+    reading `phase_profile_s14` against those words found them.
+13. **One port number can have two listeners on two addresses.** A second
+    Chromium whose `127.0.0.1` bind failed listened on `::1`. A judge that
+    reads only the first listener row, or connects to `127.0.0.1` alone,
+    sees one browser where there are two. Read the whole listener set.
+14. **Bash reads a running script from its byte offset, so an edit lands
+    mid-run.** The final pass's script was edited while its chunk 2 ran.
+    When chunk 2's last run returned, bash went on from its old offset into
+    the new text, and ran chunk 5's last four steps. They were all
+    read-only, and the one file they rewrote came out byte-identical, by
+    sha. Copy a script before editing it while it runs, or wait for it to
+    end.
+15. **A protected setting's value is not where its key is documented.** On
+    Windows, Chrome 158 wrote "continue where you left off" to `Secure
+    Preferences` only, measured on a throwaway profile. A guard that read
+    `Preferences` would have recorded "absent" exactly when the setting was
+    set.
+16. **A runner written for live pages makes its offline checks wait in real
+    time.** The runner's settles, close polls and late watches sat idle on
+    synthetic pages: 74 minutes of a pass, with the box 86% idle. A check
+    harness needs its own clock from the first day. It should name the few
+    checks that test a wait itself, and run its independent sets side by
+    side.
 

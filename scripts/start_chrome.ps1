@@ -35,10 +35,34 @@
     its own instance. A blank profile would also avoid the collision but would
     be signed into nothing, which is the opposite of the point.
 
-    THE FLAG LIST IS TWO ENTRIES and matches the server's posture: the debugging
-    port, and the profile to use. No automation flag is passed. Real Chrome
-    started this way does not set `navigator.webdriver` -- measured, not
-    assumed; see the cutover audit note.
+    THE FLAG LIST IS THREE ENTRIES and matches the server's posture: the
+    debugging port, the profile to use, and `--hide-crash-restore-bubble`. No
+    automation flag is passed. Real Chrome started this way does not set
+    `navigator.webdriver` -- measured, not assumed; see the cutover audit note.
+
+    NO "RESTORE PAGES?" BUBBLE (2026-11-28, the operator saw one after every
+    live session). Chrome marks a running profile `exit_type: Crashed` and
+    rewrites it `Normal` only on its own orderly shutdown, so a browser ended
+    any other way leaves the mark, and the next start offers to restore the
+    crashed session. Measured on a throwaway Chromium 2026-11-28: running, the
+    profile reads Crashed; after CDP `Browser.close`, Normal; after a kill,
+    Crashed. So, ONLY WHILE NO CHROME HAS THIS PROFILE OPEN, a profile left
+    unclean is set back. This is JSON-AWARE: only `profile.exit_type`
+    (Crashed to Normal) and `profile.exited_cleanly` (false to true) change.
+    Each changes by its one literal, which must occur exactly once, and the
+    result is parsed and compared with the original before anything is
+    written. It is written as UTF-8 without a BOM to a file beside it and
+    swapped in, so a kill mid-write never truncates it, and it is reported
+    before and after. `--hide-crash-restore-bubble` is passed; Chrome 158's
+    own binary carries that switch. The startup setting is READ, never edited
+    (it is protected), from BOTH `Preferences` and `Secure Preferences`, where
+    Windows Chrome keeps a protected value, and it is reported. "Continue where
+    you left off", a LinkedIn startup page, or a preferences file that cannot
+    be read to rule either out, is a warning, and a refusal under
+    `-RefuseSessionRestore`. The reported `pid` is the browser process (the
+    port's, no `--type=`), the one a graceful teardown is handed. A session's
+    tabs are therefore never offered back, and the live lane closes the
+    browser with `Browser.close` first.
 
 .PARAMETER Port
     DevTools port. Default 9224, which is what config.CDP_PORT resolves to.
@@ -52,6 +76,12 @@
 .PARAMETER TimeoutSec
     How long to wait for the DevTools port after launching. Default 30.
 
+.PARAMETER RefuseSessionRestore
+    Refuse to start (exit 5) when the profile is set to continue where it left off, or names a
+    LinkedIn page among its startup pages, or its Preferences cannot be read to rule both out:
+    any of these could open LinkedIn tabs that nothing counted. The live lane passes it. Without
+    it, the same finding is a warning and is reported.
+
 .EXAMPLE
     powershell -NoProfile -ExecutionPolicy Bypass -File scripts\start_chrome.ps1
 
@@ -64,7 +94,8 @@ param(
     [int]    $Port        = 9224,
     [string] $ProfileDir  = "",
     [string] $ChromeExe   = "C:\Program Files\Google\Chrome\Application\chrome.exe",
-    [int]    $TimeoutSec  = 30
+    [int]    $TimeoutSec  = 30,
+    [switch] $RefuseSessionRestore
 )
 
 $ErrorActionPreference = 'Stop'
@@ -92,11 +123,20 @@ function Get-ChromeOnProfile {
         Where-Object { $_.CommandLine -match $needle }
 }
 
+function Get-BrowserOnProfile {
+    # The BROWSER process on this profile and port -- never a helper (a helper's command line
+    # carries --type=). Its PID is the one a graceful teardown is handed.
+    param([string] $Dir, [int] $P)
+    Get-ChromeOnProfile -Dir $Dir |
+        Where-Object { $_.CommandLine -match "--remote-debugging-port=$P(\s|$)" -and $_.CommandLine -notmatch '--type=' } |
+        Select-Object -First 1
+}
+
 # --- 1. Already up? Then there is nothing to do. -----------------------------
 
 $existing = Read-DevToolsVersion -P $Port
 if ($existing) {
-    $owner = Get-ChromeOnProfile -Dir $ProfileDir | Select-Object -First 1
+    $owner = Get-BrowserOnProfile -Dir $ProfileDir -P $Port
     [pscustomobject]@{
         outcome     = 'found'
         port        = $Port
@@ -269,9 +309,138 @@ if (-not (Test-Path $ProfileDir)) {
     New-Item -ItemType Directory -Path $ProfileDir -Force | Out-Null
 }
 
+# --- 3c. A profile left Crashed is set back to Normal, ONLY while no Chrome has it. ----------
+#
+# JSON-AWARE, and the smallest change there is (the orchestrator's 14b rulings, NIT-5). The file
+# is PARSED, and only `profile.exit_type` (Crashed to Normal) and `profile.exited_cleanly` (false
+# to true) are touched. Each is changed by replacing its one literal, which must occur exactly
+# once, so no other byte moves. The result is PARSED AGAIN and compared with the original, every
+# other key included, before anything is written. It is written beside the file as UTF-8 WITHOUT a
+# BOM (Chrome's own encoding) and swapped in, so a kill mid-write never truncates it. Reported
+# before and after. `session.restore_on_startup` is READ and reported, never changed: it is a
+# protected pref, and editing it would trip Chrome's own integrity check.
+$prefsFile = Join-Path $ProfileDir "Default\Preferences"
+$securePrefsFile = Join-Path $ProfileDir "Default\Secure Preferences"
+$prefs = $null
+$exitBefore = $null
+$exitAfter = $null
+$cleanBefore = $null
+$restoreOnStartup = $null
+$restoreOnStartupIn = 'absent'
+$restoreAsks = $false
+$prefsUnreadable = $false
+$startupUrls = 0
+$startupUrlsOnLinkedin = 0
+function Get-LiteralCount { param([string] $Text, [string] $Needle) ([regex]::Matches($Text, [regex]::Escape($Needle))).Count }
+if (Test-Path $prefsFile) {
+    $prefsText = [System.IO.File]::ReadAllText($prefsFile)
+    $prefs = $null
+    try { $prefs = $prefsText | ConvertFrom-Json } catch { $prefs = $null }
+    if ($null -eq $prefs) {
+        $exitBefore = 'unparsable'
+        $exitAfter = 'left: unparsable'
+        $restoreOnStartup = 'unreadable'
+        $prefsUnreadable = $true
+    } else {
+        $exitBefore = if ($prefs.profile -and $null -ne $prefs.profile.exit_type) { [string]$prefs.profile.exit_type } else { 'absent' }
+        $cleanBefore = if ($prefs.profile -and $null -ne $prefs.profile.exited_cleanly) { [bool]$prefs.profile.exited_cleanly } else { $null }
+        $exitAfter = $exitBefore
+        $edits = @()
+        if ($exitBefore -eq 'Crashed') { $edits += ,@('"exit_type":"Crashed"', '"exit_type":"Normal"') }
+        if ($cleanBefore -eq $false) { $edits += ,@('"exited_cleanly":false', '"exited_cleanly":true') }
+        if ($edits.Count -gt 0) {
+            if (@(Get-ChromeOnProfile -Dir $ProfileDir).Count -gt 0) {
+                Write-Warning "the profile was left unclean, but a Chrome has it open: left as it is."
+                $exitAfter = 'left: a Chrome has the profile'
+            } else {
+                $fixed = $prefsText
+                $ok = $true
+                foreach ($e in $edits) {
+                    if ((Get-LiteralCount -Text $fixed -Needle $e[0]) -ne 1) { $ok = $false; break }
+                    $fixed = $fixed.Replace($e[0], $e[1])
+                }
+                if ($ok) {
+                    # Parsed again and compared with the original: only the two keys may have moved.
+                    $after = $fixed | ConvertFrom-Json
+                    $wantExit = if ($exitBefore -eq 'Crashed') { 'Normal' } else { $exitBefore }
+                    if ($exitBefore -ne 'absent' -and [string]$after.profile.exit_type -ne $wantExit) { $ok = $false }
+                    if ($cleanBefore -eq $false -and $after.profile.exited_cleanly -ne $true) { $ok = $false }
+                    $origCopy = $prefsText | ConvertFrom-Json
+                    foreach ($o in @($origCopy, $after)) {
+                        if ($o.profile) {
+                            $o.profile.PSObject.Properties.Remove('exit_type')
+                            $o.profile.PSObject.Properties.Remove('exited_cleanly')
+                        }
+                    }
+                    if (($origCopy | ConvertTo-Json -Depth 100 -Compress) -ne ($after | ConvertTo-Json -Depth 100 -Compress)) {
+                        $ok = $false
+                    }
+                }
+                if (-not $ok) {
+                    Write-Warning "the profile's Preferences did not take the two-key change cleanly: left as it is."
+                    $exitAfter = 'left: not one exact literal, or another key would move'
+                } else {
+                    $tmpFile = "$prefsFile.restore-guard.tmp"
+                    [System.IO.File]::WriteAllText($tmpFile, $fixed, (New-Object System.Text.UTF8Encoding($false)))
+                    # [NullString]::Value, not $null: PowerShell hands a .NET string parameter "" for $null,
+                    # and File.Replace refuses an empty backup name (measured 2026-11-28).
+                    [System.IO.File]::Replace($tmpFile, $prefsFile, [NullString]::Value)
+                    $written = [System.IO.File]::ReadAllText($prefsFile) | ConvertFrom-Json
+                    $exitAfter = if ($null -ne $written.profile.exit_type) { [string]$written.profile.exit_type } else { 'absent' }
+                }
+            }
+        }
+    }
+}
+# The startup setting, READ ONLY, from BOTH files (round 5): `session.restore_on_startup` and
+# `session.startup_urls` are tracked prefs, and on Windows Chrome keeps a tracked pref's value in
+# `Secure Preferences`, not `Preferences` (his profile, 2026-11-28: all 12 tracked values that hold
+# one hold it there). So both files are read and a value in either counts; 1 is "continue where you
+# left off", absent is Chrome's default. Neither file is written by this read.
+$sources = @()
+if ($null -ne $prefs) { $sources += ,@('preferences', $prefs) }
+if (Test-Path $securePrefsFile) {
+    $secure = $null
+    try { $secure = [System.IO.File]::ReadAllText($securePrefsFile) | ConvertFrom-Json } catch { $secure = $null }
+    if ($null -eq $secure) {
+        $prefsUnreadable = $true
+        $restoreOnStartupIn = 'secure preferences unparsable'
+    } else {
+        $sources += ,@('secure', $secure)
+    }
+}
+$urls = @()
+foreach ($src in $sources) {
+    $session = $src[1].session
+    if ($session -and $null -ne $session.restore_on_startup) {
+        $value = [int]$session.restore_on_startup
+        if ($value -eq 1) { $restoreAsks = $true }
+        if ($null -eq $restoreOnStartup -or $src[0] -eq 'secure') {
+            $restoreOnStartup = $value
+            $restoreOnStartupIn = $src[0]
+        }
+    }
+    if ($session -and $session.startup_urls) { $urls += @($session.startup_urls) }
+}
+$startupUrls = $urls.Count
+$startupUrlsOnLinkedin = @($urls | Where-Object { try { ([uri]$_).Host -like '*linkedin.com' } catch { $false } }).Count
+if ($prefsUnreadable -or $restoreAsks -or $startupUrlsOnLinkedin -gt 0) {
+    # Unreadable counts too: what it would reopen cannot be known, so it cannot be ruled out.
+    $why = "the profile would reopen pages at start, or cannot be read to rule it out (restore_on_startup " +
+           "$restoreOnStartup, read from $restoreOnStartupIn; $startupUrlsOnLinkedin LinkedIn startup page(s)): " +
+           "tabs that nothing counted."
+    if ($RefuseSessionRestore) {
+        # Not Write-Error: under this file's 'Stop' it would end the script as exit 1 before exit 5.
+        [Console]::Error.WriteLine("REFUSING: $why")
+        exit 5
+    }
+    Write-Warning $why
+}
+
 $arguments = @(
     "--remote-debugging-port=$Port"
     "--user-data-dir=`"$ProfileDir`""
+    "--hide-crash-restore-bubble"
 )
 $proc = Start-Process -FilePath $ChromeExe -ArgumentList $arguments -PassThru
 $launchedPid = $proc.Id
@@ -307,13 +476,19 @@ if (-not $version) {
     exit 4
 }
 
-$owner = Get-ChromeOnProfile -Dir $ProfileDir | Select-Object -First 1
+$owner = Get-BrowserOnProfile -Dir $ProfileDir -P $Port
 [pscustomobject]@{
-    outcome     = 'started'
-    port        = $Port
-    browser     = $version.Browser
-    profile_dir = $ProfileDir
-    pid         = $(if ($owner) { $owner.ProcessId } else { $launchedPid })
-    note        = 'started by this script; leave it running for the MCP server to attach to'
+    outcome            = 'started'
+    port               = $Port
+    browser            = $version.Browser
+    profile_dir        = $ProfileDir
+    pid                = $(if ($owner) { $owner.ProcessId } else { $launchedPid })
+    exit_type_before   = $exitBefore
+    exit_type_after    = $exitAfter
+    restore_on_startup = $restoreOnStartup
+    restore_on_startup_in = $restoreOnStartupIn
+    startup_urls       = $startupUrls
+    startup_urls_on_linkedin = $startupUrlsOnLinkedin
+    note               = 'started by this script; leave it running for the MCP server to attach to'
 } | ConvertTo-Json
 exit 0

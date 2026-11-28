@@ -1141,8 +1141,8 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 | signal NOT scanned | files | lines |
 |---|---|---|
-| a heading naming a ruling | 159 | 338 |
-| a bold line opening on RULING/RULED | 67 | 157 |
+| a heading naming a ruling | 159 | 339 |
+| a bold line opening on RULING/RULED | 67 | 159 |
 | the phrase THE RULING | 44 | 74 |
 | a named -RULING id | 45 | 115 |
 | the phrase standing ruling | 18 | 41 |
