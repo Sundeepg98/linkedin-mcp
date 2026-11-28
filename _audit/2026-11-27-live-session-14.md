@@ -2328,6 +2328,8 @@ throwaway profiles on ports 9351 and 9352 and every host mapped to NOTFOUND
   keeps an attached page live (DERIVED).
 - **The OS foreground:** `Page.bringToFront` did not take it.
   `Browser.setWindowBounds` "normal" on a minimised window did, twice.
+  **Corrected in 13.10:** that held only for a covered window with recent
+  input. Chromium's own path for bringToFront can take the foreground (R2-F1).
 - **What K6 checked:** the OS FOREGROUND. `front_chrome.ps1` required
   `GetForegroundWindow` to be the dedicated browser's window. It checked
   neither visibility nor focus.
@@ -2553,6 +2555,10 @@ The check sets and their builders are pinned beside them, `patch_s14c_r2.py`
 
 ### 13.9 r3, and READY for session 14c (2026-11-28, 20:0x IST)
 
+**Superseded by 13.10.** This r3 (`459d339d38ed99d6`, kept as
+`runner_s14c_r3_interim.py`) still sent Page.bringToFront, the r2 warm
+re-check's R2-F1. 13.10's r3 sends none, and 13.10 is the READY.
+
 **WHY r3.** The orchestrator's "build r2" message carried the review's five
 items, and it reached this lane only after 13.8's READY.
 
@@ -2623,6 +2629,120 @@ the commit that adds this section.
 **HOLD.** PHASE B starts only on a `_TEAM_LEAD_GO.md` that names r3's pins. It
 comes after the warm re-check of r1 to r2 and of r2 to r3, and the
 orchestrator's fast-forward of master. The session runs unattended.
+
+### 13.10 r3 with R2-F1, and READY for session 14c (2026-11-28, 20:1x IST)
+
+**THE ORDERS** (deleted as the ack at 20:00:06; copies in the lane's scratch):
+
+- `_TEAM_LEAD_R3.md` (19:45): no GO on `d87d97ec`. r3 is r2 plus the census
+  and NIT-8, built on top of `d87d97ec`, to which master was fast-forwarded.
+  - Rulings for the GO's words: at most 5 searches a session, with 3 or 4
+    expected, and an unexpected All filters re-query counts as one.
+  - `scroll_no_progress` and a K6 window skip are PHASE-level stops; the
+    session goes on.
+  - NIT-2's stricter restore check is not required for 14c. It is a known
+    gap, offered for 14d.
+  - Loads: at most the smaller of the ledger's free count at the preflight
+    and 40, at least 20 s apart.
+- `_TEAM_LEAD_R3_BRINGTOFRONT.md` (19:58): r3 also takes R2-F1, the NATURAL
+  finding of review14c28's r2 warm re-check.
+
+**R2-F1, AS THE REVIEW FOUND IT.**
+
+- `page.bring_to_front()` sends Page.bringToFront. Chromium implements it as
+  window activation. On a MINIMISED window that is `ShowWindow(SW_RESTORE)`,
+  the very restore the K6 ruling dropped. Then, for any window, it is
+  `SetWindowPos(HWND_TOP)` and `SetForegroundWindow`.
+- Windows grants that once its foreground lock times out: 200,000 ms on this
+  box, so an idle machine qualifies after 200 s without input.
+- The measurement in 13.7, that bringToFront did not take the foreground,
+  held for a covered window with recent input. It does not hold in general,
+  and the K6 ruling that rested on it is corrected.
+
+**r3** (`runner_s14c.py`, the same bytes as `runner_s14c_r3.py`, sha256
+`c0d61e0dd07b5ed7`, built from r2 by `patch_s14c_r3.py`) is r2 plus:
+
+- **R3-1, the census** (13.9);
+- **R3-2, R2-F1.** BOTH `page.bring_to_front()` calls are deleted: in
+  `capture()`, which ran on every load of every phase, and in
+  `window_gate_14c`. No step of the runner sends Page.bringToFront, calls
+  `front_window`, or sends `Browser.setWindowBounds`.
+  - The K6 gate is now focus emulation, then the tab must read visible AND
+    focused. One retry, then the phase is SKIPPED (exit 2, no load), with the
+    reason and `minimised_at_gate` in `window_gate_<phase>.json`.
+  - "### the window: ... no OS foreground taken" is now true for every phase.
+  - An attached page renders and reads visible while covered or minimised,
+    before any bring-to-front (13.7), so nothing depended on the call.
+- **NIT-8, in the harness** (13.9).
+- **THE REACH, by AST:** changed, the docstring, `capture`, `scroll_pass_14c`
+  and `window_gate_14c`; added, `SCROLL_CENSUS_JS`. 76 lines
+  (`delta_r2_to_s14c_r3.diff`, items 2, 5 and R2-F1 together).
+
+**RED FIRST** (VERIFIED):
+
+- **review14c28's own `r2_gate_stub.py`**, imported and run unchanged from its
+  folder. It drives each runner's real `main_async` and window gate with no
+  browser.
+  - On r2, its cases A, B and C send Page.bringToFront 2, 1 and 1 times.
+  - On r3, every case sends none.
+- **Slice c14, check mode.**
+  - W7 now counts bringToFront as well as `front_window`: r2 sent 8 in W1 to
+    W6, and r3 sent 0.
+  - W8 counts every bringToFront the runner sends across the whole slice,
+    every load's `capture()` and every gate attempt included. r1 sent 13, r2
+    sent 21, and r3 sent 0.
+  - r3 passes 30 of 30.
+  - r2 passes 26 of 30, red exactly on W7, W8, S10 and S11.
+  - r1 passes 18 of 30.
+
+**THE SETS ON r3.** `capture()` runs on every load, so every slice of the gate
+set reaches changed code:
+
+- main, 31 of 31;
+- phase, 20 of 20;
+- r1, 16 of 16;
+- r2, 16 of 16.
+
+Each exited 0 inside the bound, with the CPU at 54 to 90% from other lanes.
+`main_async` is unchanged from r2, so the close, entry, table and tabs sets are
+not re-run (13.7). The composer checks test 14d's phase, which 14c cannot run.
+
+**KNOWN, NOT FIXED IN 14c:**
+
+- **Q1** (R2-N6). The one failure of 13.7 looks like a real race in the press
+  path: a page's response arrives before its new document commits, and the
+  next read meets the navigation. That is a STOP-ALL `press_outcome_unread`.
+  - It fails safe: it would end the session, on rank 31's press or on phases
+    25 to 27.
+  - It is accepted for 14c (the orchestrator). The fix is for 14d: Q1 made
+    clock-independent, and a response-before-commit case added.
+- **NIT-2:** a known gap, for 14d.
+- **The re-check's other NITs:**
+  - R2-N2: the walk never tests the first section itself.
+  - R2-N3: the start is recomputed on every reading, which fails closed.
+  - R2-N4: the gate sits outside `main_async`'s try and finally, which fails
+    closed.
+  - R2-N5: the GO's words, now ruled.
+  - R2-N7: W7 and W4. W7 is now extended, and W8 added.
+  - R2-N8: the pins. They now name r3.
+
+**THE HEAD** is the commit that adds this section: the record alone, on top of
+`6fa93576`, `d87d97ec` (master) and the certified `16ed7817`. No tracked file
+but this record changes (the runner is gitignored). Lane CI and the full
+matrix on this exact head are run after this commit; their ids are in the
+READY message.
+
+**THE PINS** (`_state/live16/pins.json`, written after this commit):
+
+- `runner_s14c.py` (r3) is `c0d61e0dd07b5ed7`.
+- Every other pin is 13.8's.
+
+13.8's phases, budget, commands and stop lines stand, with the search cap at 5
+as ruled.
+
+**HOLD.** PHASE B starts only on a `_TEAM_LEAD_GO.md` that names these pins. It
+comes after review14c28's warm re-check of r2 to r3 reads GO, and master is
+fast-forwarded to this head. The session runs unattended.
 
 ## Lessons (for the orchestrator to harvest)
 
@@ -2731,4 +2851,9 @@ orchestrator's fast-forward of master. The session runs unattended.
     reached this lane after r2's READY. Two items were missing from the head
     (13.9). At every HOLD, check each order that has arrived against the head,
     and recall a READY that lacks one.
+25. **A negative measured under one condition is not a negative.** "Page.bringToFront
+    did not take the foreground" held for a covered window with recent input.
+    Chromium's source shows the call does take it once Windows' foreground lock
+    times out (13.10). Before ruling an act safe on a "did not happen", name
+    the conditions under which it would happen, and measure those.
 
